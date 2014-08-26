@@ -520,15 +520,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             case "removeEventListener":
 
-                return function( nodeID, eventName, eventHandler, when, callback ) {
+                return function( nodeID, eventName, eventListenerID, when, callback ) {
 
                     if ( this.state.enabled ) {
 
                         if ( when === undefined ) {
-                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventHandler );
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventListenerID );
                         } else {
                             this.kernel.plan( nodeID, kernelFunctionName, eventName,
-                                [ eventHandler ], when, callback /* result */ );
+                                [ eventListenerID ], when, callback /* result */ );
                         }
 
                     } else {

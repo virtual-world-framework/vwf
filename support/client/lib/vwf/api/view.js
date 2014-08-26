@@ -227,13 +227,14 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
         /// @param {Handler} eventHandler
         /// @param {ID} eventContextID
         /// @param {String[]} eventPhases
         /// 
         /// @returns {}
 
-        addedEventListener: [ /* nodeID, eventName, eventHandler, eventContextID, eventPhases */ ],
+        addedEventListener: [ /* nodeID, eventName, eventListenerID, eventHandler, eventContextID, eventPhases */ ],
 
         /// Description.
         /// 
@@ -241,11 +242,37 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
-        /// @param {Handler} eventHandler
+        /// @param {ListenerID} eventListenerID
         /// 
         /// @returns {}
 
-        removedEventListener: [ /* nodeID, eventName, eventHandler */ ],
+        removedEventListener: [ /* nodeID, eventName, eventListenerID */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// @param {Listener} eventListener
+        /// 
+        /// @returns {}
+
+        satEventListener: [ /* nodeID, eventName, eventListenerID, eventListener */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// @param {Listener} eventListener
+        /// 
+        /// @returns {}
+
+        gotEventListener: [ /* nodeID, eventName, eventListenerID, eventListener */ ],
 
         /// Description.
         /// 

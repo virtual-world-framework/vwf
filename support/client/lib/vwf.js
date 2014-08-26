@@ -1654,6 +1654,8 @@
             // createProperty(), createMethod(), or createEvent() to create the field. Each
             // delegates to the models and views as above.
 
+            // Properties.
+
             nodeComponent.properties && Object.keys( nodeComponent.properties ).forEach( function( propertyName ) {  // TODO: setProperties should be adapted like this to be used here
                 var propertyValue = nodeComponent.properties[ propertyName ];
 
@@ -1682,6 +1684,8 @@
 
             } );
 
+            // Methods.
+
             nodeComponent.methods && Object.keys( nodeComponent.methods ).forEach( function( methodName ) {
                 var methodHandler = nodeComponent.methods[ methodName ];
 
@@ -1697,7 +1701,23 @@
 
             } );
 
-            // TODO: events
+            // Events.
+
+            nodeComponent.events && Object.keys( nodeComponent.events ).forEach( function( eventName ) {
+                var eventDescriptor = nodeComponent.events[ eventName ];
+
+                var creating = ! node.events.has( eventName );  // not defined on node or prototype
+
+                // Create or initialize the event.
+
+                if ( creating ) {
+                    vwf.createEvent( nodeID, eventName, eventDescriptor.parameters );
+                    vwf.setEvent( nodeID, eventName, eventDescriptor );
+                } else {
+                    vwf.setEvent( nodeID, eventName, eventDescriptor );
+                }  // TODO: delete when eventDescriptor === null in patch
+
+            } );
 
             // Restore kernel reentry.
 
@@ -1870,7 +1890,7 @@
 
                 nodeComponent.properties = this.getProperties( nodeID );
 
-                for ( var propertyName in nodeComponent.properties ) {  // TODO: distinguish add, change, remove
+                for ( var propertyName in nodeComponent.properties ) {
                     var propertyValue = nodeComponent.properties[propertyName];
 
                     if ( propertyValue === undefined ) {
@@ -1882,58 +1902,71 @@
 
                 }
 
-                if ( Object.keys( nodeComponent.properties ).length == 0 ) { 
-                    delete nodeComponent.properties;
-                } else {
-                    patched = true;
-                }
-
-            } else if ( node.properties.changed ) {
+            } else if ( node.properties.changes ) {
 
                 // The node is patchable and properties have changed.
 
                 nodeComponent.properties = {};
 
-                Object.keys( node.properties.changed ).forEach( function( propertyName ) {
-                    var propertyValue = this.getProperty( nodeID, propertyName );
+                Object.keys( node.properties.changes ).forEach( function( propertyName ) {
 
-                    if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
-                        // Translate kernel node references into descriptor node references.
-                        nodeComponent.properties[propertyName] = { node: propertyValue.id };
-                    } else {
-                        nodeComponent.properties[propertyName] = propertyValue;
+                    if ( node.properties.changes[ propertyName ] !== "removed" ) {  // TODO: handle delete
+
+                        var propertyValue = this.getProperty( nodeID, propertyName );
+
+                        if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
+                            // Translate kernel node references into descriptor node references.
+                            nodeComponent.properties[propertyName] = { node: propertyValue.id };
+                        } else {
+                            nodeComponent.properties[propertyName] = propertyValue;
+                        }
+
                     }
 
                 }, this );
 
-                patched = true;
+            }
 
+            if ( Object.keys( nodeComponent.properties ).length == 0 ) {
+                delete nodeComponent.properties;
+            } else {
+                patched = true;
             }
 
             // Methods.
 
-            var methods = full || ! node.patchable ?
-                node.methods.existing : node.methods.changed;
+            if ( full || ! node.patchable ) {
 
-            if ( methods ) {
-                Object.keys( methods ).forEach( function( methodName ) {
+                Object.keys( node.methods.existing ).forEach( function( methodName ) {
                     nodeComponent.methods = nodeComponent.methods || {};
                     nodeComponent.methods[ methodName ] = this.getMethod( nodeID, methodName );
                     patched = true;
                 }, this );
+
+            } else if ( node.methods.changes ) {
+
+                Object.keys( node.methods.changes ).forEach( function( methodName ) {
+                    if ( node.methods.changes[ methodName ] !== "removed" ) {  // TODO: handle delete
+                        nodeComponent.methods = nodeComponent.methods || {};
+                        nodeComponent.methods[ methodName ] = this.getMethod( nodeID, methodName );
+                        patched = true;
+                    }
+                }, this );
+
             }
 
             // Events.
 
-            // nodeComponent.events = {};  // TODO
+            var events = full || ! node.patchable ?
+                node.events.existing : node.events.changes;
 
-            // for ( var eventName in nodeComponent.events ) {
-            //     nodeComponent.events[eventName] === undefined &&
-            //         delete nodeComponent.events[eventName];
-            // }
-
-            // Object.keys( nodeComponent.events ).length ||
-            //     delete nodeComponent.events;
+            if ( events ) {
+                Object.keys( events ).forEach( function( eventName ) {
+                    nodeComponent.events = nodeComponent.events || {};
+                    nodeComponent.events[ eventName ] = this.getEvent( nodeID, eventName );
+                    patched = true;
+                }, this );
+            }
 
             // Restore kernel reentry.
 
@@ -2241,17 +2274,16 @@ if ( ! childComponent.source ) {
 
                     // For the proto-prototype node `node.vwf`, register the meta events.
 
-                    if ( childID === vwf.kutility.nodeTypeURI ) {
-                        // TODO: uncomment when the node registry starts tracking events
-                        // child.events.create( namespaceEncodedName( [ "properties", "created" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "properties", "initialized" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "properties", "deleted" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "methods", "created" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "methods", "deleted" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "events", "created" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "events", "deleted" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "children", "added" ] ) );
-                        // child.events.create( namespaceEncodedName( [ "children", "removed" ] ) );
+                    if ( childID === vwf.kutility.protoNodeURI ) {
+                        child.events.create( namespaceEncodedName( [ "properties", "created" ] ) );
+                        child.events.create( namespaceEncodedName( [ "properties", "initialized" ] ) );
+                        child.events.create( namespaceEncodedName( [ "properties", "deleted" ] ) );
+                        child.events.create( namespaceEncodedName( [ "methods", "created" ] ) );
+                        child.events.create( namespaceEncodedName( [ "methods", "deleted" ] ) );
+                        child.events.create( namespaceEncodedName( [ "events", "created" ] ) );
+                        child.events.create( namespaceEncodedName( [ "events", "deleted" ] ) );
+                        child.events.create( namespaceEncodedName( [ "children", "added" ] ) );
+                        child.events.create( namespaceEncodedName( [ "children", "removed" ] ) );
                     }
 
                     // Re-register the node in vwf/model/object now that we have the prototypes and
@@ -2855,7 +2887,7 @@ if ( ! childComponent.source ) {
 
             // Register the property.
 
-            node.properties.create( propertyName );
+            node.properties.create( propertyName, node.initialized && node.patchable );
 
             // Call creatingProperty() on each model. The property is considered created after all
             // models have run.
@@ -2864,12 +2896,6 @@ if ( ! childComponent.source ) {
                 model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue,
                     propertyGet, propertySet );
             } );
-
-            // Record the change.
-
-            if ( node.initialized && node.patchable ) {
-                node.properties.change( propertyName );
-            }
 
             // Call createdProperty() on each view. The view is being notified that a property has
             // been created.
@@ -2921,12 +2947,12 @@ if ( ! childComponent.source ) {
                 reentry.creating = true;
                 var settingPropertyEtc = "creatingProperty";
                 var satPropertyEtc = "createdProperty";
-                node.properties.create( propertyName );
+                node.properties.create( propertyName, node.initialized && node.patchable );
             } else if ( ! node.properties.hasOwn( propertyName ) || entry.initializing ) {
                 reentry.initializing = true;
                 var settingPropertyEtc = "initializingProperty";
                 var satPropertyEtc = "initializedProperty";
-                node.properties.create( propertyName );
+                node.properties.create( propertyName, node.initialized && node.patchable );
             } else {
                 var settingPropertyEtc = "settingProperty";
                 var satPropertyEtc = "satProperty";
@@ -3257,7 +3283,7 @@ if ( ! childComponent.source ) {
 
             // Register the method.
 
-            node.methods.create( methodName );
+            node.methods.create( methodName, node.initialized && node.patchable );
 
             // Call `creatingMethod` on each model. The method is considered created after all
             // models have run.
@@ -3266,12 +3292,6 @@ if ( ! childComponent.source ) {
                 model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters,
                     methodBody );
             } );
-
-            // Record the change.
-
-            if ( node.initialized && node.patchable ) {
-                node.methods.change( methodName );
-            }
 
             // Call `createdMethod` on each view. The view is being notified that a method has been
             // created.
@@ -3444,18 +3464,24 @@ if ( ! childComponent.source ) {
 
             this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
 
+            var node = nodes.existing[nodeID];
+
             // Encode any namespacing into the name. (Namespaced names were added in 0.6.21.)
 
             var encodedEventName = namespaceEncodedName( eventName );
 
-            // Call creatingEvent() on each model. The event is considered created after all models
+            // Register the event.
+
+            node.events.create( encodedEventName, node.initialized && node.patchable, eventParameters );
+
+            // Call `creatingEvent` on each model. The event is considered created after all models
             // have run.
 
             this.models.forEach( function( model ) {
                 model.creatingEvent && model.creatingEvent( nodeID, encodedEventName, eventParameters );
             } );
 
-            // Call createdEvent() on each view. The view is being notified that a event has been
+            // Call `createdEvent` on each view. The view is being notified that a event has been
             // created.
 
             this.views.forEach( function( view ) {
@@ -3469,7 +3495,112 @@ if ( ! childComponent.source ) {
             this.logger.debugu();
         };
 
-        // -- addEventListener --------------------------------------------------------------------------
+        // -- setEvent -----------------------------------------------------------------------------
+
+        /// @name module:vwf.setEvent
+        /// 
+        /// @see {@link module:vwf/api/kernel.setEvent}
+
+        this.setEvent = function( nodeID, eventName, eventDescriptor ) {
+
+            this.logger.debuggx( "setEvent", function() {
+                return [ nodeID, eventName ];  // TODO: loggable eventDescriptor
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // eventDescriptor = normalizedHandler( eventDescriptor );  // TODO
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            if ( ! node.events.hasOwn( encodedEventName ) ) {
+
+                // If the event doesn't exist on this node, delegate to `kernel.createEvent` to
+                // create and assign the event.
+
+                this.createEvent( nodeID, eventName, eventDescriptor.parameters );  // TODO: result
+
+                ( eventDescriptor.listeners || [] ).forEach( function( listener ) {
+                    return this.addEventListener( nodeID, eventName, listener, listener.context, listener.phases );
+                }, this );
+
+            } else {
+
+                // Locate the event in the registry.
+
+                var event = node.events.existing[ encodedEventName ];
+
+                // xxx
+
+                eventDescriptor = {
+
+                    parameters: event.parameters ?
+                        event.parameters.slice() : [],  // TODO: note: we're ignoring eventDescriptor.parameters in the set
+
+                    listeners: ( eventDescriptor.listeners || [] ).map( function( listener ) {
+
+                        if ( event.listeners.hasOwn( listener.id ) ) {
+                            return this.setEventListener( nodeID, eventName, listener.id, listener );
+                        } else {
+                            return this.addEventListener( nodeID, eventName, listener, listener.context, listener.phases );
+                        }
+
+                    }, this ),
+
+                };
+
+            }
+
+            this.logger.debugu();
+
+            return eventDescriptor;
+        };
+
+        // -- getEvent -----------------------------------------------------------------------------
+
+        /// @name module:vwf.getEvent
+        /// 
+        /// @see {@link module:vwf/api/kernel.getEvent}
+
+        this.getEvent = function( nodeID, eventName ) {
+
+            this.logger.debuggx( "getEvent", function() {
+                return [ nodeID, eventName ];
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // xxx
+
+            var eventDescriptor = {
+
+                parameters: event.parameters ?
+                    event.parameters.slice() : [],
+
+                listeners: event.listeners.existing.map( function( eventListenerID ) {
+                    var listener = this.getEventListener( nodeID, eventName, eventListenerID );
+                    listener.id = eventListenerID;
+                    return listener;
+                }, this ),
+
+            }
+
+            this.logger.debugu();
+
+            return eventDescriptor;
+        };
+
+        // -- addEventListener ---------------------------------------------------------------------
 
         /// @name module:vwf.addEventListener
         /// 
@@ -3482,59 +3613,219 @@ if ( ! childComponent.source ) {
                     eventContextID, eventPhases ];
             } );
 
+            var node = nodes.existing[nodeID];
+
+            eventHandler = normalizedHandler( eventHandler );
+
             // Encode any namespacing into the name.
 
             var encodedEventName = namespaceEncodedName( eventName );
 
-            // Call addingEventListener() on each model.
+            // Register the event if this is the first listener added to an event on a prototype.
+
+            if ( ! node.events.hasOwn( encodedEventName ) ) {
+                node.events.create( encodedEventName, node.initialized && node.patchable );
+            }
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Register the listener.
+
+            var eventListenerID = this.sequence( nodeID );
+
+            event.listeners.create( eventListenerID, node.initialized && node.patchable );
+
+            // Call `addingEventListener` on each model.
 
             this.models.forEach( function( model ) {
-                model.addingEventListener && model.addingEventListener( nodeID, encodedEventName, eventHandler,
-                    eventContextID, eventPhases );
+                model.addingEventListener &&
+                    model.addingEventListener( nodeID, encodedEventName, eventListenerID,
+                        eventHandler, eventContextID, eventPhases );
             } );
 
-            // Call addedEventListener() on each view.
+            // Call `addedEventListener` on each view.
 
             this.views.forEach( function( view ) {
-                view.addedEventListener && view.addedEventListener( nodeID, encodedEventName, eventHandler,
-                    eventContextID, eventPhases );
+                view.addedEventListener &&
+                    view.addedEventListener( nodeID, encodedEventName, eventListenerID,
+                        eventHandler, eventContextID, eventPhases );
             } );
 
             this.logger.debugu();
+
+            return eventListenerID;
         };
 
-        // -- removeEventListener --------------------------------------------------------------------------
+        // -- removeEventListener ------------------------------------------------------------------
 
         /// @name module:vwf.removeEventListener
         /// 
         /// @see {@link module:vwf/api/kernel.removeEventListener}
 
-        this.removeEventListener = function( nodeID, eventName, eventHandler ) {
+        this.removeEventListener = function( nodeID, eventName, eventListenerID ) {
 
             this.logger.debuggx( "removeEventListener", function() {
-                return [ nodeID, eventName, loggableScript( eventHandler ) ];
+                return [ nodeID, eventName, loggableScript( eventListenerID ) ];
             } );
+
+            var node = nodes.existing[nodeID];
 
             // Encode any namespacing into the name.
 
             var encodedEventName = namespaceEncodedName( eventName );
 
-            // Call removingEventListener() on each model.
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Unregister the listener.
+
+            event.listeners.delete( eventListenerID, node.initialized && node.patchable );
+
+            // Call `removingEventListener` on each model.
 
             this.models.forEach( function( model ) {
-                model.removingEventListener && model.removingEventListener( nodeID, encodedEventName, eventHandler );
+                model.removingEventListener &&
+                    model.removingEventListener( nodeID, encodedEventName, eventListenerID );
             } );
 
-            // Call removedEventListener() on each view.
+            // Call `removedEventListener` on each view.
 
             this.views.forEach( function( view ) {
-                view.removedEventListener && view.removedEventListener( nodeID, encodedEventName, eventHandler );
+                view.removedEventListener &&
+                    view.removedEventListener( nodeID, encodedEventName, eventListenerID );
             } );
 
             this.logger.debugu();
+
+            return eventListenerID;
         };
 
-        // -- flushEventListeners --------------------------------------------------------------------------
+        // -- setEventListener ---------------------------------------------------------------------
+
+        /// @name module:vwf.setEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.setEventListener}
+
+        this.setEventListener = function( nodeID, eventName, eventListenerID, eventListener ) {
+
+            this.logger.debuggx( "setEventListener", function() {
+                return [ nodeID, eventName, eventListenerID ];  // TODO: loggable eventListener
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            eventListener = normalizedHandler( eventListener );
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Record the change.
+
+            if ( node.initialized && node.patchable ) {
+                event.listeners.change( eventListenerID );
+            }
+
+            // Call `settingEventListener` on each model. The first model to return a non-undefined
+            // value dictates the return value.
+
+            this.models.some( function( model ) {
+
+                // Call the driver.
+
+                var listener = model.settingEventListener &&
+                    model.settingEventListener( nodeID, eventName, eventListenerID, eventListener );
+
+                // Update the value to the value assigned if the driver handled it.
+
+                if ( listener !== undefined ) {
+                    eventListener = listener;
+                }
+
+                // Exit the iterator once a driver has handled the assignment.
+
+                return listener !== undefined;
+
+            } );
+
+            // Call `satEventListener` on each view.
+
+            this.views.forEach( function( view ) {
+                view.satEventListener &&
+                    view.satEventListener( nodeID, eventName, eventListenerID, eventListener );
+            } );
+
+            this.logger.debugu();
+
+            return eventListener;
+        };
+
+        // -- getEventListener ---------------------------------------------------------------------
+
+        /// @name module:vwf.getEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.getEventListener}
+
+        this.getEventListener = function( nodeID, eventName, eventListenerID ) {
+
+            this.logger.debuggx( "getEventListener", function() {
+                return [ nodeID, eventName, eventListenerID ];
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Call `gettingEventListener` on each model. The first model to return a non-undefined
+            // value dictates the return value.
+
+            var eventListener = {};
+
+            this.models.some( function( model ) {
+
+                // Call the driver.
+
+                var listener = model.gettingEventListener &&
+                    model.gettingEventListener( nodeID, eventName, eventListenerID );
+
+                // Update the value to the value assigned if the driver handled it.
+
+                if ( listener !== undefined ) {
+                    eventListener = listener;
+                }
+
+                // Exit the iterator once a driver has handled the assignment.
+
+                return listener !== undefined;
+
+            } );
+
+            // Call `gotEventListener` on each view.
+
+            this.views.forEach( function( view ) {
+                view.gotEventListener &&
+                    view.gotEventListener( nodeID, eventName, eventListenerID, eventListener );
+            } );
+
+            this.logger.debugu();
+
+            return eventListener;
+        };
+
+        // -- flushEventListeners ------------------------------------------------------------------
 
         /// @name module:vwf.flushEventListeners
         /// 
@@ -3548,16 +3839,18 @@ if ( ! childComponent.source ) {
 
             var encodedEventName = namespaceEncodedName( eventName );
 
-            // Call flushingEventListeners() on each model.
+            // Call `flushingEventListeners` on each model.
 
             this.models.forEach( function( model ) {
-                model.flushingEventListeners && model.flushingEventListeners( nodeID, encodedEventName, eventContextID );
+                model.flushingEventListeners &&
+                    model.flushingEventListeners( nodeID, encodedEventName, eventContextID );
             } );
 
-            // Call flushedEventListeners() on each view.
+            // Call `flushedEventListeners` on each view.
 
             this.views.forEach( function( view ) {
-                view.flushedEventListeners && view.flushedEventListeners( nodeID, encodedEventName, eventContextID );
+                view.flushedEventListeners &&
+                    view.flushedEventListeners( nodeID, encodedEventName, eventContextID );
             } );
 
             this.logger.debugu();
@@ -3579,13 +3872,13 @@ if ( ! childComponent.source ) {
 
             var encodedEventName = namespaceEncodedName( eventName );
 
-            // Call firingEvent() on each model.
+            // Call `firingEvent` on each model.
 
             var handled = this.models.reduce( function( handled, model ) {
                 return model.firingEvent && model.firingEvent( nodeID, encodedEventName, eventParameters ) || handled;
             }, false );
 
-            // Call firedEvent() on each view.
+            // Call `firedEvent` on each view.
 
             this.views.forEach( function( view ) {
                 view.firedEvent && view.firedEvent( nodeID, encodedEventName, eventParameters );
@@ -5362,124 +5655,189 @@ if ( ! childComponent.source ) {
             return prototypeDescriptor;
         };
 
+        /// Return an {@link external:Object.defineProperty} descriptor for a property that is to be
+        /// enumerable, but not writable or configurable. 
+        /// 
+        /// @param value
+        ///   A value to wrap in a descriptor.
+        /// 
+        /// @returns
+        ///   An {@link external:Object.defineProperty} descriptor.
+
+        var enumerable = function( value ) {
+            return {
+                value: value,
+                enumerable: true,
+                writable: false,
+                configurable: false,
+            };
+        };
+
+        /// Return an {@link external:Object.defineProperty} descriptor for a property that is to be
+        /// enumerable and writable, but not configurable. 
+        /// 
+        /// @param value
+        ///   A value to wrap in a descriptor.
+        /// 
+        /// @returns
+        ///   An {@link external:Object.defineProperty} descriptor.
+
+        var writable = function( value ) {
+            return {
+                value: value,
+                enumerable: true,
+                writable: true,
+                configurable: false,
+            };
+        };
+
+        /// Return an {@link external:Object.defineProperty} descriptor for a property that is to be
+        /// enumerable, writable, and configurable. 
+        /// 
+        /// @param value
+        ///   A value to wrap in a descriptor.
+        /// 
+        /// @returns
+        ///   An {@link external:Object.defineProperty} descriptor.
+
+        var configurable = function( value ) {
+            return {
+                value: value,
+                enumerable: true,
+                writable: true,
+                configurable: true,
+            };
+        };
+
         // == Private variables ====================================================================
 
-        // Prototype for the `properties`, `methods` and `events` collections in the `nodes`
-        // objects.
+        /// Prototype for name-based, unordered collections in the node registry, including
+        /// `node.properties`, `node.methods`, and `node.events`.
 
-        var nodeCollectionPrototype = {
+        var keyedCollectionPrototype = {
 
             /// Record that a property, method or event has been created.
             /// 
             /// @param {String} name
+            ///   The member name.
+            /// @param {Boolean} changes
+            ///   For patchable nodes, record changes so that `kernel.getNode` may create a patch
+            ///   when retrieving the node.
+            /// @param [value]
+            ///   An optional value to assign to the record. If `value` is omitted, the record will
+            ///   exist in the collection but have the value `undefined`.
             /// 
             /// @returns {Boolean}
             ///   `true` if the member was successfully added. `false` if a member by that name
             ///   already exists.
 
-            create: function( name ) {
+            create: function( name, changes, value ) {
 
                 if ( ! this.hasOwn( name ) ) {
 
-                    // Add the member. We just record its existence. Everything else is managed by
-                    // the drivers.
-                    // 
-                    // `Object.defineProperty` is used instead of `this.existing[name] = ...` since
-                    // the prototype may be a behavior proxy, and the accessor properties would
-                    // prevent normal assignment.
+                    this.haveOwn( "existing" );
 
-                    Object.defineProperty( this.existing, name, {
-                        value: undefined,
-                        configurable: true,
-                        enumerable: true,
-                        writable: true,
-                    } );
+                    // Add the member. `Object.defineProperty` is used instead of
+                    // `this.existing[name] = ...` since the prototype may be a behavior proxy, and
+                    // the accessor properties would prevent normal assignment.
+
+                    Object.defineProperty( this.existing, name,
+                        configurable( value ? value : undefined ) );
+
+                    if ( changes ) {
+
+                        this.haveOwn( "changes" );
+
+                        if ( this.changes[ name ] !== "removed" ) {
+                            this.changes[ name ] = "added";
+                        } else {
+                            this.changes[ name ] = "changed";  // previously removed, then added
+                        }
+
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
+
+                    }
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
-            /// Record that a member has been deleted. Remove it from any change lists that is in.
+            /// Record that a member has been deleted.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
             ///   `true` if the member was successfully removed. `false` if a member by that name
             ///   does not exist.
 
-            delete: function( name ) {
+            delete: function( name, changes ) {
 
                 if ( this.hasOwn( name ) ) {
 
-                    // Remove the member.
+                    delete this.existing[ name ];
 
-                    delete this.existing[name];
+                    if ( changes ) {
 
-                    // Remmove the member from any change lists it's in. Completely remove lists
-                    // that become empty.
+                        this.haveOwn( "changes" );
 
-                    if ( this.added ) {
-                        delete this.added[name];
-                        Object.keys( this.added ).length || delete this.added;
-                    }
+                        if ( this.changes[ name ] !== "added" ) {
+                            this.changes[ name ] = "removed";
+                        } else {
+                            delete this.changes[ name ];  // previously added, then removed
+                        }
 
-                    if ( this.removed ) {
-                        delete this.removed[name];
-                        Object.keys( this.removed ).length || delete this.removed;
-                    }
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
 
-                    if ( this.changed ) {
-                        delete this.changed[name];
-                        Object.keys( this.changed ).length || delete this.changed;
                     }
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
-            /// Record that a member has changed. Create the change list if it does not exist.
+            /// Record that a member has changed.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
             ///   `true` if the change was successfully recorded. `false` if a member by that name
             ///   does not exist.
 
-            change: function( name ) {
+            change: function( name, value ) {
 
                 if ( this.hasOwn( name ) ) {
 
-                    // Ensure that the change list exists and record the change.
+                    this.haveOwn( "changes" );
 
-                    this.changed = this.changed || {};
-                    this.changed[name] = undefined;
+                    if ( this.changes[ name ] !== "added" ) {
+                        this.changes[ name ] = value ?
+                            value : this.changes[ name ] || "changed";
+                    }
+
+                    if ( this.container && this.containerMember ) {
+                        this.container.change( this.containerMember );
+                    }
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
             /// Determine if a node has a member with the given name, either directly on the node or
             /// inherited from a prototype.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
 
@@ -5491,6 +5849,7 @@ if ( ! childComponent.source ) {
             /// considered.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
 
@@ -5506,7 +5865,348 @@ if ( ! childComponent.source ) {
                 return Object.prototype.hasOwnProperty.call( this.existing, name );
             },
 
+            /// Hoist a field from a prototype to the collection in preparation for making local
+            /// changes.
+            /// 
+            /// If the field in the prototype is an object, create a new object with that field as
+            /// its prototype. If the field in the prototype is an array, clone the field since
+            /// arrays can't readily serve as prototypes for other arrays. In other cases, copy the
+            /// field from the prototype. Only objects, arrays and primitive values are supported.
+            /// 
+            /// @param {String} fieldName
+            ///   The name of a field to hoist from the collection's prototype.
+
+            haveOwn: function( fieldName ) {
+
+                if ( ! this.hasOwnProperty( fieldName ) ) {
+
+                    if ( this[ fieldName ] instanceof Array ) {
+                        this[ fieldName ] = this[ fieldName ].slice();  // clone arrays
+                    } else if ( typeof this[ fieldName ] === "object" && this[ fieldName ] !== null ) {
+                        this[ fieldName ] = Object.create( this[ fieldName ] );  // inherit from objects
+                    } else {
+                        this[ fieldName ] = this[ fieldName ];  // copy primitives
+                    }
+
+                }
+
+            },
+
+            /// The property, method, or event members defined in this collection.
+            /// 
+            /// `existing` is an unordered collection of elements and optional values. The keys are
+            /// the primary data. Existence on the object is significant regardless of the value.
+            /// Some collections store data in the element when the kernel owns additional details
+            /// about the member. Values will be `undefined` in other collections.
+            /// 
+            /// For each collection, `existing` is the authoritative list of the node's members. Use
+            /// `collection.hasOwn( memberName )` to determine if the node defines a property,
+            /// method or event by that name.
+            /// 
+            /// The prototype of each `existing` object will be the `existing` object of the node's
+            /// prototype (or a proxy to the top behavior for nodes with behaviors). Use
+            /// `collection.has( memberName )` to determine if a property, method or event is
+            /// defined on the node or its prototypes.
+
+            existing: Object.create( null
+                // name: undefined,
+                // name: { ... } -- details
+                // ...
+            ),
+
+            /// The change list for members in this collection.
+            /// 
+            /// For patchable nodes, `changes` records the members that have been added, removed, or
+            /// changed since the node was first initialized. `changes` is not created in the
+            /// collection until the first change occurs. Only the change is recorded here. The
+            /// state behind the change is retrieved from the drivers when needed.
+
+            changes: {
+                // name: "added"
+                // name: "removed"
+                // name: "changed"
+                // name: { ... } -- changed, with details
+                // ...
+            },
+
+            /// The parent collection if this collection is a member of another. Changes applied to
+            /// members of this collection will call `container.change( containerMember )` to also
+            /// set the change flag for the containing member.
+            /// 
+            /// For example, members of the `node.events` collection contain listener collections at
+            /// `node.events.existing[name].listeners`. Each listener collection knows its event
+            /// name and points back to `node.events`. Changing a listener will call
+            /// `node.events.change( name )` to mark the event as changed.
+
+            container: undefined,
+
+            /// This collection's name in the parent if this collection is a member of another
+            /// collection. Changes to members of this collection will mark that member changed in
+            /// the containing collection.
+
+            containerMember: undefined,
+
         };
+
+        /// Prototype for index-based, ordered collections in the node registry, including
+        /// `event.listeners`.
+
+        var indexedCollectionPrototype = {
+
+            /// Record that a member has been created.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// @param {Boolean} changes
+            ///   For patchable nodes, record changes so that `kernel.getNode` may create a patch
+            ///   when retrieving the node.
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the member was successfully added. `false` if a member with that id
+            ///   already exists.
+
+            create: function( id, changes ) {
+
+                if ( ! this.hasOwn( id ) ) {
+
+                    this.haveOwn( "existing" );
+                    this.existing.push( id );
+
+                    if ( changes ) {
+
+                        this.haveOwn( "changes" );
+
+                        var removedIndex = this.changes.removed ?
+                            this.changes.removed.indexOf( id ) : -1;
+
+                        if ( removedIndex < 0 ) {
+                            this.changes.added = this.changes.added || [];
+                            this.changes.added.push( id );
+                        } else {
+                            this.changes.removed.splice( removedIndex, 1 );
+                            this.changes.changed = this.changes.changed || [];
+                            this.changes.changed.push( id );
+                        }
+
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
+
+                    }
+
+                    return true;
+                }
+
+                return false;
+            },
+
+            /// Record that a member has been deleted.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the member was successfully removed. `false` if a member with that id
+            ///   does not exist.
+
+            delete: function( id, changes ) {
+
+                if ( this.hasOwn( id ) ) {
+
+                    this.existing.splice( this.existing.indexOf( id ), 1 );
+
+                    if ( changes ) {
+
+                        this.haveOwn( "changes" );
+
+                        var addedIndex = this.changes.added ?
+                            this.changes.added.indexOf( id ) : -1;
+
+                        if ( addedIndex < 0 ) {
+                            this.changes.removed = this.changes.removed || [];
+                            this.changes.removed.push( id );
+                        } else {
+                            this.changes.added.splice( addedIndex, 1 );
+                        }
+
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
+
+                    }
+
+                    return true;
+                }
+
+                return false;
+            },
+
+            /// Record that a member has changed.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the change was successfully recorded. `false` if a member with that id
+            ///   does not exist.
+
+            change: function( id ) {
+
+                if ( this.hasOwn( id ) ) {
+
+                    this.haveOwn( "changes" );
+
+                    var addedIndex = this.changes.added ?
+                        this.changes.added.indexOf( id ) : -1;
+
+                    var changedIndex = this.changes.changed ?
+                        this.changes.changed.indexOf( id ) : -1;
+
+                    if ( addedIndex < 0 && changedIndex < 0 ) {
+                        this.changes.changed = this.changes.changed || [];
+                        this.changes.changed.push( id );
+                    }
+
+                    if ( this.container && this.containerMember ) {
+                        this.container.change( this.containerMember );
+                    }
+
+                    return true;
+                }
+
+                return false;
+            },
+
+            /// Determine if a node has a member with the given id.
+            /// 
+            /// `has` is the same as `hasOwn` for `indexedCollectionPrototype` since index-based
+            /// collections don't automatically inherit from their prototypes.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+
+            has: function( id ) {
+                return this.hasOwn( id );
+            },
+
+            /// Determine if a node has a member with the given id. The node's prototypes are not
+            /// considered.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+
+            hasOwn: function( id ) {
+                return this.existing ? this.existing.indexOf( id ) >= 0 : false;
+            },
+
+            /// Hoist a field from a prototype to the collection in preparation for making local
+            /// changes.
+            /// 
+            /// If the field in the prototype is an object, create a new object with that field as
+            /// its prototype. If the field in the prototype is an array, clone the field since
+            /// arrays can't readily serve as prototypes for other arrays. In other cases, copy the
+            /// field from the prototype. Only objects, arrays and primitive values are supported.
+            /// 
+            /// @param {String} fieldName
+            ///   The name of a field to hoist from the collection's prototype.
+
+            haveOwn: function( fieldName ) {
+
+                if ( ! this.hasOwnProperty( fieldName ) ) {
+
+                    if ( this[ fieldName ] instanceof Array ) {
+                        this[ fieldName ] = this[ fieldName ].slice();  // clone arrays
+                    } else if ( typeof this[ fieldName ] === "object" && this[ fieldName ] !== null ) {
+                        this[ fieldName ] = Object.create( this[ fieldName ] );  // inherit from objects
+                    } else {
+                        this[ fieldName ] = this[ fieldName ];  // copy primitives
+                    }
+
+                }
+
+            },
+
+            /// IDs of the members defined in this collection.
+            /// 
+            /// `existing` is an ordered list of IDs, which much be unique within the collection.
+            /// The IDs retain the order in which they were originally added.
+            /// 
+            /// For each collection, `existing` is the authoritative list of the node's members. Use
+            /// `collection.hasOwn( memberID )` to determine if the collection contains a member
+            /// with that id. Unlike `keyedCollectionPrototype` collections,
+            /// `indexedCollectionPrototype` collections aren't connected in parallel with their
+            /// containers' prototype chains.
+
+            existing: [
+                // id,
+                // id,
+                // ...
+            ],
+
+            /// The change list for members in this collection.
+            /// 
+            /// For patchable nodes, `changes` records the members that have been added, removed, or
+            /// changed since the node was first initialized. Changes are recorded in separate
+            /// `added`, `removed`, and `changed` arrays, respectively. The `added` array retains
+            /// the order in which the members were added. Although `removed` and `changed` are also
+            /// arrays, the order of removals and changes is not significant.
+            /// 
+            /// `changes` is not created in the collection until the first change occurs. Only the
+            /// change is recorded here. The state behind the change is retrieved from the drivers
+            /// when needed.
+
+            changes: {
+                // added: [ id, ... ],
+                // removed: [ id, ... ],
+                // changed: [ id, ... ],
+            },
+
+            /// The parent collection if this collection is a member of another. Changes applied to
+            /// members of this collection will call `container.change( containerMember )` to also
+            /// set the change flag for the containing member.
+            /// 
+            /// For example, members of the `node.events` collection contain listener collections at
+            /// `node.events.existing[name].listeners`. Each listener collection knows its event
+            /// name and points back to `node.events`. Changing a listener will call
+            /// `node.events.change( name )` to mark the event as changed.
+
+            container: undefined,
+
+            /// This collection's name in the parent if this collection is a member of another
+            /// collection. Changes to members of this collection will mark that member changed in
+            /// the containing collection.
+
+            containerMember: undefined,
+
+        };
+
+        // Prototype for the `events` collection in the `nodes` objects.
+
+        var eventCollectionPrototype = Object.create( keyedCollectionPrototype, {
+
+            create: {
+
+                value: function( name, changes, parameters ) {
+
+                    var value = parameters ? {
+                        parameters: parameters.slice(), // clone
+                    } : {};
+
+                    value.listeners = Object.create( indexedCollectionPrototype, {
+                        container: enumerable( this ),
+                        containerMember: enumerable( name ),
+                    } );
+
+                    return keyedCollectionPrototype.create.call( this, name, changes, value );
+                }
+
+            },
+
+        } );
 
         /// The application's nodes, indexed by ID.
         /// 
@@ -5606,98 +6306,21 @@ if ( ! childComponent.source ) {
                         // children: [],
 
                         // Property, Method and Event members defined on the node.
-                        // 
-                        // The `existing`, `added`, `removed` and `changed` objects are sets: the
-                        // keys are the data, and only existence on the object is significant. As an
-                        // exception, the last known value for a delegating property is stored on
-                        // its `existing` entry.
-                        // 
-                        // For each collection, `existing` is the authoritative list the node's
-                        // members. Use `existing.hasOwnProperty( memberName )` to determine if the
-                        // node defines a property, method or event by that name.
-                        // 
-                        // The prototype of each `existing` object is the `existing` object of the
-                        // node's prototype (or a proxy to the top behavior for nodes with
-                        // behaviors). Use `memberName in existing` to determine if a property,
-                        // method or event is defined on the node or its prototypes.
-                        // 
-                        // For patchable nodes, `added`, `removed`, and `changed` record changes
-                        // that occurred after the node was first initialized. They are omitted
-                        // until needed. Only the change is recorded here. Values are retrieved from
-                        // the drivers when needed.
 
-                        properties: Object.create( nodeCollectionPrototype, {
-
-                            existing: {
-                                value: Object.create( prototypeNode ?
-                                    prototypeNode.properties.existing : null ),
-                            },
-
-                            // Created when needed.
-
-                            // added: {
-                            //     name: undefined
-                            // },
-
-                            // removed: {
-                            //     name: undefined
-                            // },
-
-                            // changed: {
-                            //     name: undefined
-                            // },
-
+                        properties: Object.create( keyedCollectionPrototype, {
+                            existing: enumerable( Object.create( prototypeNode ?
+                                prototypeNode.properties.existing : null ) ),
                         } ),
 
-                        methods: Object.create( nodeCollectionPrototype, {
-
-                            existing: {
-                                value: Object.create( prototypeNode ?
-                                    prototypeNode.methods.existing : null ),
-                            },
-
-                            // Created when needed.
-
-                            // added: {
-                            //     name: undefined
-                            // },
-
-                            // removed: {
-                            //     name: undefined
-                            // },
-
-                            // changed: {
-                            //     name: undefined
-                            // },
-
+                        methods: Object.create( keyedCollectionPrototype, {
+                            existing: enumerable( Object.create( prototypeNode ?
+                                prototypeNode.methods.existing : null ) ),
                         } ),
 
-                        // TODO: Store nodes' events here in the kernel
-
-                        // events: Object.create( nodeCollectionPrototype, {
-
-                        //     existing: {
-                        //         value: Object.create( prototypeNode ?
-                        //             prototypeNode.events.existing : null ),
-                        //     },
-
-                        //     // Created when needed.
-
-                        //     // added: {
-                        //     //     name: undefined
-                        //     // },
-
-                        //     // removed: {
-                        //     //     name: undefined
-                        //     // },
-
-                        //     // changed: {
-                        //     //     name: undefined
-                        //     // },
-
-                        // } ),
-
-                        // END TODO
+                        events: Object.create( eventCollectionPrototype, {
+                            existing: enumerable( Object.create( prototypeNode ?
+                                prototypeNode.events.existing : null ) ),
+                        } ),
 
                         // Is this node patchable? Nodes are patchable if they were loaded from a
                         // component.
@@ -5730,13 +6353,9 @@ if ( ! childComponent.source ) {
                     this.existing[nodeID].initialized = true;
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
             /// Unregister a node as it is deleted.
@@ -5749,13 +6368,9 @@ if ( ! childComponent.source ) {
                     delete this.globals[nodeID];
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
             /// Create a proxy node in the form of the nodes created by `nodes.create` to represent
@@ -5782,12 +6397,12 @@ if ( ! childComponent.source ) {
                         ),
                     },
 
-                    // events: {
-                    //     existing: Object.create(
-                    //         prototypeNode ? prototypeNode.events.existing : null,
-                    //         propertyDescriptorsFor( behaviorNode.events.existing )
-                    //     ),
-                    // },
+                    events: {
+                        existing: Object.create(
+                            prototypeNode ? prototypeNode.events.existing : null,
+                            propertyDescriptorsFor( behaviorNode.events.existing )
+                        ),
+                    },
 
                 };
 
