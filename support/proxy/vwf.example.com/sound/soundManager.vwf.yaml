@@ -14,6 +14,7 @@ methods:
   getSubtitle:
   getDuration:
   stopSoundInstance:
+  stopSoundGroup:
   stopAllSoundInstances:
 events:
   soundFinished:
