@@ -3602,19 +3602,21 @@ if ( ! childComponent.source ) {
 
             var event = node.events.existing[ encodedEventName ];
 
-            // xxx
+            // Build the result descriptor. Omit the `parameters` and `listeners` fields when the
+            // parameters or listeners are missing or empty, respectively.
 
-            var eventDescriptor = {
+            var eventDescriptor = {};
 
-                parameters: event.parameters ?
-                    event.parameters.slice() : [],
+            if ( event.parameters ) {
+                eventDescriptor.parameters = event.parameters.slice();
+            }
 
-                listeners: event.listeners.existing.map( function( eventListenerID ) {
+            if ( event.listeners.existing.length ) {
+                eventDescriptor.listeners = event.listeners.existing.map( function( eventListenerID ) {
                     var listener = this.getEventListener( nodeID, eventName, eventListenerID );
                     listener.id = eventListenerID;
                     return listener;
-                }, this ),
-
+                }, this );
             }
 
             this.logger.debugu();
