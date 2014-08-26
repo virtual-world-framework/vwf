@@ -3875,6 +3875,10 @@ if ( ! childComponent.source ) {
                     view.flushedEventListeners( nodeID, encodedEventName, eventContextID );
             } );
 
+            // TODO: `flushEventListeners` can be interpreted by the kernel now and handled with a
+            // `removeEventListener` call instead of separate `flushingEventListeners` and
+            // `flushedEventListeners` calls to the drivers.
+
             this.logger.debugu();
         };
 
@@ -3907,6 +3911,9 @@ if ( ! childComponent.source ) {
             } );
 
             this.logger.debugu();
+
+            // TODO: `fireEvent` needs to tell the drivers to invoke each listener individually
+            // now that listeners can be spread across multiple drivers.
 
             return handled;
         };
