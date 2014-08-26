@@ -288,31 +288,54 @@
 
             createFixture( function( nodeID, cleanup ) {
 
-              vwf.execute( nodeID, "this.empty = this.events.add( this.result.listener1 = function() { this.result.count1 = ( this.result.count1 || 0 ) + 5 }, this )" );
-              vwf.execute( nodeID, "this.empty = this.events.add( this.result.listener2 = function() { this.result.count2 = ( this.result.count2 || 0 ) + 7 }, this )" );
+              // Create two functions on the `result` object to serve as listeners.
+
+              vwf.execute( nodeID, "this.result.listener1 = function() { this.result.count1 = ( this.result.count1 || 0 ) + 5 }" );
+              vwf.execute( nodeID, "this.result.listener2 = function() { this.result.count2 = ( this.result.count2 || 0 ) + 7 }" );
+
+              // Add the listeners to the `empty` event and save the listener IDs on the `result` object.
+
+              vwf.execute( nodeID, "this.empty = this.events.add( this.result.listener1, this, function( listenerID ) { this.result.listener1ID = listenerID } )" );
+              vwf.execute( nodeID, "this.empty = this.events.add( this.result.listener2, this, function( listenerID ) { this.result.listener2ID = listenerID } )" );
+
+              // Fire the event. Both listeners should execute.
+
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.result.count1" ), 5, "" );
               equal( vwf.execute( nodeID, "this.result.count2" ), 7, "" );
 
-              vwf.execute( nodeID, "this.empty = this.events.remove( this.result.listener1 )" );
+              // Remove the first listener by ID and fire the event. Only the second listener should
+              // execute. `result.listener1ID` is not valid after the listener has been removed.
+
+              vwf.execute( nodeID, "this.empty = this.events.remove( this.result.listener1ID )" );
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.result.count1" ), 5, "" );
               equal( vwf.execute( nodeID, "this.result.count2" ), 14, "" );
+
+              // Add the first listener back and fire the event. Both listeners should execute.
 
               vwf.execute( nodeID, "this.empty = this.events.add( this.result.listener1, this )" );
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.result.count1" ), 10, "" );
               equal( vwf.execute( nodeID, "this.result.count2" ), 21, "" );
 
-              vwf.execute( nodeID, "this.empty = this.events.remove( this.result.listener2 )" );
+              // Remove the second listener by ID and fire the event. Only the first listener should
+              // execute. `result.listener2ID` is not valid after the listener has been removed.
+
+              vwf.execute( nodeID, "this.empty = this.events.remove( this.result.listener2ID )" );
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.result.count1" ), 15, "" );
               equal( vwf.execute( nodeID, "this.result.count2" ), 21, "" );
+
+              // Remove the first listener by function reference and fire the event. Neither
+              // listener should execute.
 
               vwf.execute( nodeID, "this.empty = this.events.remove( this.result.listener1 )" );
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.result.count1" ), 15, "" );
               equal( vwf.execute( nodeID, "this.result.count2" ), 21, "" );
+
+              // Add both listeners back and fire the event. Both listeners should execute.
 
               vwf.execute( nodeID, "this.empty = this.events.add( this.result.listener1, this )" );
               vwf.execute( nodeID, "this.empty = this.events.add( this.result.listener2, this )" );
@@ -320,13 +343,19 @@
               equal( vwf.execute( nodeID, "this.result.count1" ), 20, "" );
               equal( vwf.execute( nodeID, "this.result.count2" ), 28, "" );
 
+              // Flush all listeners with the context of the target node and fire the event. Both
+              // listeners should be removed and neither should execute.
+
               vwf.execute( nodeID, "this.empty = this.events.flush( this )" );
               vwf.execute( nodeID, "this.empty()" );
               equal( vwf.execute( nodeID, "this.result.count1" ), 20, "" );
               equal( vwf.execute( nodeID, "this.result.count2" ), 28, "" );
 
-              vwf.execute( nodeID, "this.empty = function() {}" );  // TODO: should invoke with this as the global object, but how to test?
-              vwf.execute( nodeID, "this.empty()" );
+              // Add a listener with no context, which should execute in the context of the global
+              // node.
+
+              vwf.execute( nodeID, "this.empty = function() {}" );
+              vwf.execute( nodeID, "this.empty()" );  // TODO: how to test?
 
               cleanup();
               start();
