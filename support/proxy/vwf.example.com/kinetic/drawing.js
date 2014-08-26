@@ -361,11 +361,16 @@ this.update = function( eventData, nodeData, upEvent ) {
             case "freeDraw":
                 drawingObject.stroke = userState.drawing_color;
                 drawingObject.strokeWidth = userState.drawing_width;
-                if ( drawingObject.points === undefined || drawingObject.points.length === 0 ) {
-                    drawingObject.points = [ 0, 0, eventData.layer[ 0 ] - drawingObject.x, eventData.layer[ 1 ] - drawingObject.y ];
+
+                var isFirstStrokeOfNewLine = ( drawingObject.points === undefined || 
+                    drawingObject.points.length === 0 );
+                var posX = eventData.page[ 0 ] - drawingObject.x;
+                var posY = eventData.page[ 1 ] - drawingObject.y;
+                if ( isFirstStrokeOfNewLine ) {
+                    drawingObject.points = [ 0, 0, posX, posY ];
                 } else  {
-                    drawingObject.points.push( eventData.layer[ 0 ] - drawingObject.x );
-                    drawingObject.points.push( eventData.layer[ 1 ] - drawingObject.y );
+                    drawingObject.points.push( posX );
+                    drawingObject.points.push( posY );
                 }
                 break;
 
