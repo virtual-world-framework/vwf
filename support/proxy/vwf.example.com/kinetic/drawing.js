@@ -95,7 +95,30 @@ this.setClientUIState = function( stateObj ) {
 
 
 this.pointerDown = function( eventData, nodeData ) {
-    
+    this.down( eventData, nodeData, false );    
+};
+
+this.pointerMove = function( eventData, nodeData ) {
+    this.move( eventData, nodeData, false );
+};
+
+this.pointerUp = function( eventData, nodeData ) {
+    this.up( eventData, nodeData, false );
+}; 
+
+this.touchStart = function( eventData, nodeData ) {
+    this.down( eventData, nodeData, true );    
+};
+
+this.touchMove = function( eventData, nodeData ) {
+    this.move( eventData, nodeData, true );
+};
+
+this.touchEnd = function( eventData, nodeData ) {
+    this.up( eventData, nodeData, true );
+}; 
+
+this.down = function( eventData, nodeData, touch ) {
     if ( !this.isValid( this.drawing_clients ) || !this.isValid( this.drawing_clients[ this.client ] ) ) {
         this.clientJoin( this.client );
     } 
@@ -164,7 +187,7 @@ this.pointerDown = function( eventData, nodeData ) {
         var parents = this.find( userState.drawing_parentPath + section );
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var groupDef = {
-            "extends": compExtends,
+            "extends": groupExtends,
             "properties": {
                 "visible": false,
                 "position": eventData.layer                
@@ -177,12 +200,17 @@ this.pointerDown = function( eventData, nodeData ) {
                 "extends": compExtends[ def ],
                 "properties": {
                     "visible": 'inherit',
+                    "x": 0,
+                    "y": 0,
                     "position": [ 0, 0 ],
                     "fill": userState.drawing_color,
                     "opacity": userState.drawing_opacity
                 }
             }          
         }
+
+        //console.info( JSON.stringify( groupDef ) );
+
         var self = this;
         var selfMoniker = this.client;
         var name = drawingMode + userState.nameIndex;
@@ -216,11 +244,9 @@ this.pointerDown = function( eventData, nodeData ) {
         } );
 
     }
-
 };
 
-this.pointerMove = function( eventData, nodeData ) {
-
+this.move = function( eventData, nodeData, touch ) {
     if ( !this.isValid( this.drawing_clients ) || !this.isValid( this.drawing_clients[ this.client ] ) ) {
         this.clientJoin( this.client );
     } 
@@ -228,15 +254,13 @@ this.pointerMove = function( eventData, nodeData ) {
         this.setUpPrivate( this.client );
     }
 
-    this.update( eventData, nodeData );
-
+    this.update( eventData, nodeData, false );
 };
 
-this.pointerUp = function( eventData, nodeData ) {
-
+this.up = function( eventData, nodeData, touch ) {
     if ( this.drawing_private[ this.client ] !== undefined && this.drawing_private[ this.client ].drawingObject !== null  ) {
         var drawingObject = this.drawing_private[ this.client ].drawingObject;
-        this.update( eventData, nodeData );
+        this.update( eventData, nodeData, true );
         this.shapeCreated( drawingObject.id );
 
         if ( this.moniker === this.client ) {
@@ -252,13 +276,11 @@ this.pointerUp = function( eventData, nodeData ) {
             } 
         }
 
-
         this.drawing_private[ this.client ].drawingObject = null;
-    }
+    }    
+};
 
-}; 
-
-this.update = function( eventData, nodeData ) {
+this.update = function( eventData, nodeData, upEvent ) {
     
     if ( this.drawing_private === undefined || this.drawing_private[ this.client ] === undefined || !this.isValid( this.drawing_clients ) ) {
         return;
@@ -280,12 +302,15 @@ this.update = function( eventData, nodeData ) {
         var height = diffY;
         var dist = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
 
-        //console.info( "===========================" );
+        //console.info( "== "+userState.drawing_mode +" ==" );
         //console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
 
+        // this keeps the pos as the top left corner for the 
+        // rectangular objects
         switch ( userState.drawing_mode ) {
 
             case "line":
+            case "arrow":
             case "freeDraw":
                 break;
 
@@ -379,16 +404,27 @@ this.update = function( eventData, nodeData ) {
             case "arrow":
                 drawingObject.line.stroke = userState.drawing_color;
                 drawingObject.line.strokeWidth = userState.drawing_width;
+                drawingObject.line.position = [ 0, 0 ];
                 drawingObject.head.sides = 3;
 
                 var endPoint = goog.vec.Vec2.createFloat32FromValues( 0, 0 );
-                var dir = goog.vec.Vec2.createFloat32FromValues( eventData.layer[ 0 ] - drawingObject.x, eventData.layer[ 1 ] - drawingObject.y );
+                var xVec = goog.vec.Vec2.createFloat32FromValues( 1, 0 );
+                drawingObject.x = drawingObject.position[ 0 ];
+                drawingObject.y = drawingObject.position[ 1 ];
+
+                var relativeXDiff = eventData.layer[ 0 ] - drawingObject.x;
+                var relativeYDiff = eventData.layer[ 1 ] - drawingObject.y;
+                var headOffset = ( userState.drawing_width * 3 ) * Math.sin( Math.PI / 6 );
+                var dir = goog.vec.Vec2.createFloat32FromValues( relativeXDiff, relativeYDiff );
                 var len = goog.vec.Vec2.distance( goog.vec.Vec2.createFloat32FromValues( 0, 0 ), dir );
                 goog.vec.Vec2.normalize( dir, dir );
-                goog.vec.Vec2.scale( dir, len * 0.9, endPoint );
+                goog.vec.Vec2.scale( dir, len - headOffset, endPoint );
+                var angle = Math.atan2( dir[1], dir[0] ) * ( 180 / Math.PI ); 
 
-                drawingObject.head.radius = len * 0.1;
+                drawingObject.head.rotation = angle - 30;
+                drawingObject.head.radius = userState.drawing_width * 3;
                 drawingObject.head.position = [ endPoint[0], endPoint[1] ];
+                goog.vec.Vec2.scale( dir, len - ( ( userState.drawing_width * 3 ) + headOffset ), endPoint );
                 drawingObject.line.points = [ 0, 0, endPoint[0], endPoint[1] ];
                 break;
 
