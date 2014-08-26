@@ -2321,6 +2321,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
          
     };
 
+
+    // TODO: is this function needed?
+    // seems to be an exact copy of the ThreeJSPick
+    // should be tested and removed if this is not needed
     function ThreeJSTouchPick ( canvas, sceneNode, mousepos )
     {
         if(!this.lastEventData) return;
@@ -2344,15 +2348,22 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         pickDirectionVector = new THREE.Vector3();
         pickDirectionVector.set( x, y, 0.5 );
-        
-        this.projector.unprojectVector(pickDirectionVector, threeCam);
-        var pos = new THREE.Vector3();
-        pos.setFromMatrixPosition( threeCam.matrixWorld );
-        pickDirectionVector.sub(pos);
-        pickDirectionVector.normalize();
-                
-        this.raycaster.set(pos, pickDirectionVector);
-        var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
+
+        var intersects = undefined;
+
+        if ( threeCam instanceof THREE.OrthographicCamera ) {
+            var ray = this.projector.pickingRay( pickDirectionVector, threeCam );
+            intersects = ray.intersectObjects( sceneNode.threeScene.children, true );
+        } else {
+            this.projector.unprojectVector(pickDirectionVector, threeCam);
+            var pos = new THREE.Vector3();
+            pos.setFromMatrixPosition( threeCam.matrixWorld );
+            pickDirectionVector.sub(pos);
+            pickDirectionVector.normalize();
+                    
+            this.raycaster.set(pos, pickDirectionVector);
+            intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
+        }
         
         // intersections are, by default, ordered by distance,
         // so we only care for the first (visible) one. The intersection
@@ -2387,26 +2398,38 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         var SCREEN_HEIGHT = window.innerHeight;
         var SCREEN_WIDTH = window.innerWidth;
 
-        var mousepos = { x: this.lastEventData.eventData[0].position[0], y: this.lastEventData.eventData[0].position[1] }; // window coordinates
-        //mousepos = utility.coordinates.contentFromWindow( canvas, mousepos ); // canvas coordinates
+        var mousepos = { 
+            "x": this.lastEventData.eventData[0].position[0], 
+            "y": this.lastEventData.eventData[0].position[1] 
+        }; // window coordinates
 
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
         pickDirectionVector = new THREE.Vector3();
         
-        //console.info( "mousepos = " + x + ", " + y );
         pickDirectionVector.set( x, y, 0.5 );
-        
-        this.projector.unprojectVector( pickDirectionVector, threeCam);
-        var pos = new THREE.Vector3();
-        pos.setFromMatrixPosition( threeCam.matrixWorld );
-        pickDirectionVector.sub(pos);
-        pickDirectionVector.normalize();
-        
-        this.raycaster.set( pos, pickDirectionVector );
-        var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
+
+        var intersects = undefined;
         var target = undefined;
+
+
+        // TODO: The check for the camera type may not be needed
+        // the first option should work for the perspective camera as well
+        // we just need to make the switch and then test thoroughly 
+        if ( threeCam instanceof THREE.OrthographicCamera ) {
+            var ray = this.projector.pickingRay( pickDirectionVector, threeCam );
+            intersects = ray.intersectObjects( sceneNode.threeScene.children, true );
+        } else {
+            this.projector.unprojectVector( pickDirectionVector, threeCam );
+            var pos = new THREE.Vector3();
+            pos.setFromMatrixPosition( threeCam.matrixWorld );
+            pickDirectionVector.sub(pos);
+            pickDirectionVector.normalize();
+            
+            this.raycaster.set( pos, pickDirectionVector );
+            intersects = this.raycaster.intersectObjects( sceneNode.threeScene.children, true );
+        }
 
         // intersections are, by default, ordered by distance,
         // so we only care for the first (visible) one. The intersection
