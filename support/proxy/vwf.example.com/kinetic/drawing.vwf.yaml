@@ -12,9 +12,15 @@ methods:
   setClientUIState:
   isValid:
 events:
+  down:
+  move:
+  up:
   pointerDown:
   pointerMove:
   pointerUp:
+  touchStart:
+  touchMove:
+  touchEnd:
   shapeCreated:
   textCreated:
   imageCreated:

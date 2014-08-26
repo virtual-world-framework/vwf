@@ -38,10 +38,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 },
                 isKineticClass: function( prototypes, classIDArray ) {
                     if ( prototypes ) {
-                        var id1 = classIDArray.join( '.' );
-                        var id2 = classIDArray.join( '-' );
+                        var id1 = classIDArray.join( '.' ).toLowerCase();
+                        var id2 = classIDArray.join( '-' ).toLowerCase();
                         for ( var i = 0; i < prototypes.length; i++ ) {
-                            if ( prototypes[ i ].indexOf( id1 ) !== -1 || prototypes[ i ].indexOf( id2 ) !== -1 ) {
+                            if ( prototypes[ i ].toLowerCase().indexOf( id1 ) !== -1 || 
+                                 prototypes[ i ].toLowerCase().indexOf( id2 ) !== -1 ) {
+                                //console.info( "prototypes[ i ]: " + prototypes[ i ] );
                                 return true;
                             }
                         }
@@ -2093,6 +2095,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
 
         if ( kineticObj !== undefined ) {
+            //console.info( "Kinetic Object created: " + kineticObj.nodeType );
             kineticObj.setId( node.ID ); 
             kineticObj.name( node.name );   
         }
