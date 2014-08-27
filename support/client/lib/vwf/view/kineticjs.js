@@ -8,7 +8,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var stageWidth = 800;
     var stageHeight = 600;
 
-    var processEvent = function( e, isTouchEvent, propagate ) {
+    var processEvent = function( e, node, isTouchEvent, propagate ) {
         var returnData = { eventData: undefined, eventNodeData: undefined };
 
         if ( !propagate ) {
@@ -26,6 +26,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             "button": e.evt.button,
             "timeStamp": e.evt.timeStamp,
             "location": [ eventPosition.x, eventPosition.y ],
+            "stage": [ 0, 0 ],
             "client": [ eventPosition.clientX, eventPosition.clientY ],
             "screen": [ eventPosition.screenX, eventPosition.screenY ],
             "layer": [ eventPosition.layerX, eventPosition.layerY ],
@@ -37,6 +38,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             "altKey": e.evt.altKey, 
             "metaKey": e.evt.metaKey
         } ];
+
+        if ( node && node.stage ) {
+            returnData.eventData.stage = [ node.stage.x, node.stage.y ];    
+        }
 
         if ( propagate ) {
 
@@ -132,98 +137,98 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 var TOUCH_EVENT = true;
 
                 node.kineticObj.on( "mousemove", function( evt ) {
-                    var eData = processEvent( evt, !TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, 'pointerMove', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerMove', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseout", function( evt ) {
-                    var eData = processEvent( evt, !TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     self.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseenter", function( evt ) {
-                    var eData = processEvent( evt, !TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, 'pointerEnter', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseleave", function( evt ) {
-                    var eData = processEvent( evt, !TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     // self.kernel.dispatchEvent( node.ID, 'pointerLeave', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mousedown", function( evt ) {
-                    var eData = processEvent( evt, !TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     mouseDown = true;
                     //self.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseup", function( evt ) {
-                    var eData = processEvent( evt, !TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     mouseDown = false;
                     //self.kernel.dispatchEvent( node.ID, 'pointerUp', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
                 } );
 
                 node.kineticObj.on( "click", function( evt ) {
-                    var eData = processEvent( evt, !TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, 'pointerClick', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerClick', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dblclick", function( evt ) {
-                    var eData = processEvent( evt, !TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, 'pointerDoubleClick', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerDoubleClick', eData.eventData );
                 } );
 
                 node.kineticObj.on( "touchstart", function( evt ) {
-                    var eData = processEvent( evt, TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, "touchStart", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'touchStart', eData.eventData );
                 } );
 
                 node.kineticObj.on( "touchmove", function( evt ) {
-                    var eData = processEvent( evt, TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, "touchMove", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'touchMove', eData.eventData );
                 } );
 
                 node.kineticObj.on( "touchend", function( evt ) {
-                    var eData = processEvent( evt, TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, "touchEnd", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'touchEnd', eData.eventData );
                 } );
 
                 node.kineticObj.on( "tap", function( evt ) {
-                    var eData = processEvent( evt, TOUCH_EVENT, false );
+                    var eData = processEvent( evt, node, TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, "tap", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'tap', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dbltap", function( evt ) {
-                    var eData = processEvent( evt, TOUCH_EVENT, node );
+                    var eData = processEvent( evt, node, TOUCH_EVENT, node );
                     //self.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dragstart", function( evt ) {
-                    var eData = processEvent( evt, undefined, false );
+                    var eData = processEvent( evt, node, undefined, false );
                     //self.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dragmove", function( evt ) {
-                    var eData = processEvent( evt, undefined, false );
+                    var eData = processEvent( evt, node, undefined, false );
                     //self.kernel.dispatchEvent( node.ID, "dragMove", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dragend", function( evt ) {
-                    var eData = processEvent( evt, undefined, false );
+                    var eData = processEvent( evt, node, undefined, false );
                     //self.kernel.dispatchEvent( node.ID, "dragEnd", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
                 } );
@@ -272,6 +277,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
 
                         var stage = node.kineticObj;
+                        var TOUCH_EVENT = true;
 
                         // these are the events for the global space, ie the stage
                         // we did originally implement the mouse events this way
@@ -289,7 +295,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                                 mouseDownId = ( node !== undefined ) ? node.getId() : stage.getId();
                                 mouseDown = true;
                                 mouseDownTime = timer.getTime();
-                                var eData = processEvent( evt, true );  // false might be more corret here
+                                var eData = processEvent( evt, self.state.nodes[ mouseDownId ], !TOUCH_EVENT, true );  // false might be more corret here
 
                                 self.kernel.dispatchEvent( mouseDownId, 'pointerDown', eData.eventData, eData.eventNodeData );
                             });
@@ -297,7 +303,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                             stage.on( 'contentMousemove', function( evt ) {
                                 var node = evt.targetNode;
                                 
-                                var eData = processEvent( evt, true );  // false might be more corret here
+                                var eData = processEvent( evt, self.state.nodes[ mouseDownId ], !TOUCH_EVENT, true );  // false might be more corret here
 
                                 self.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerMove', eData.eventData, eData.eventNodeData ); 
                             });
@@ -306,7 +312,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                                 var node = evt.targetNode;
                                 mouseDown = false;
 
-                                var eData = processEvent( evt, true );  // false might be more corret here
+                                var eData = processEvent( evt, self.state.nodes[ mouseDownId ], !TOUCH_EVENT, true );  // false might be more corret here
                                 if ( timer.getTime() - mouseDownTime < 700.0 ) {
                                     self.kernel.dispatchEvent( mouseDownId, 'pointerClick', eData.eventData, eData.eventNodeData );
                                 }

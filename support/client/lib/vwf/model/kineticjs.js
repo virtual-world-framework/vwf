@@ -33,7 +33,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         "type": childType,
                         "name": childName,
                         "prototypes": undefined,
-                        "kineticObj": undefined
+                        "kineticObj": undefined,
+                        "stage": undefined
                     };
                 },
                 isKineticClass: function( prototypes, classIDArray ) {
@@ -137,16 +138,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 // kinetic container
                 // (if a kinteticObj is created asynchronously ... like an Image, it will be
                 // undefined here, but will be added to its parent in the appropriate callback)
-                if ( node.kineticObj ) {
-                    if ( this.state.nodes[ nodeID ] !== undefined ) {
-                        var parent = this.state.nodes[ nodeID ];
-                        if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
-                            
-                            //console.info( "Adding child: " + childID + " to " + nodeID );
-                            parent.kineticObj.add( node.kineticObj );    
-                        }
-                    }
-                }
+                addNodeToHeirarchy( node );
+
             }
            
         },
@@ -2039,10 +2032,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 node.kineticObj = new Kinetic.Image( {
                     image: imageObj,
                 } );
-                var parent = self.state.nodes[ node.parentID ];
-                if ( parent && parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
-                    parent.kineticObj.add( node.kineticObj );    
-                }
+                addNodeToHeirarchy( node );
             };
             imageObj.src = node.source;
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "layer", "vwf" ] ) ) {
@@ -2101,6 +2091,36 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         return kineticObj;
     }
+
+    function findStage( kineticObj ) {
+
+        var stage = undefined
+        var parent = kineticObj;
+        while ( parent !== undefined && stage === undefined ) {
+            if ( parent.nodeType === "Stage" ) {
+                stage = parent;
+            }
+            parent = parent.parent;
+        }
+        return stage;
+        
+    }
+
+    function addNodeToHeirarchy( node ) {
+        
+        if ( node.kineticObj ) {
+            if ( self.state.nodes[ node.parentID ] !== undefined ) {
+                var parent = self.state.nodes[ node.parentID ];
+                if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
+                    
+                    //console.info( "Adding child: " + childID + " to " + nodeID );
+                    parent.kineticObj.add( node.kineticObj );    
+                }
+            }
+            node.stage = findStage( node.kineticObj );
+        }
+
+    } 
 
     function isStageDefinition( prototypes ) {
         var found = false;
