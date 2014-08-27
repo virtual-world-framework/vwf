@@ -21,6 +21,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     var createBlocklyDivs = true;
     var blocksInWorkspace = {};
     var handleChangedEvents = true;
+    var blockIdIterator;
 
     return view.load( module, {
 
@@ -185,7 +186,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         // -- createdProperty --------------------------------------------------------------------------
 
         createdProperty: function (nodeID, propertyName, propertyValue) {
-			this.satProperty(nodeID, propertyName, propertyValue);
+            this.satProperty(nodeID, propertyName, propertyValue);
         },
 
         // -- initializedProperty ----------------------------------------------------------------------
@@ -433,11 +434,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     // domCopyToWorkspace copies the saved blocks to the workspace exactly
     // This preserves the stored block IDs
     function domCopyToWorkspace( workspace, xml ) {
-    var width = Blockly.svgSize().width;
+        var width = Blockly.svgSize().width;
         for (var x = 0, xmlChild; xmlChild = xml.childNodes[x]; x++) {
             if (xmlChild.nodeName.toLowerCase() == 'block') {
                 var block = Blockly.Xml.domToBlock( workspace, xmlChild );
-                setChildBlockIDs( block, xmlChild );
+                var xmlDescendants = xmlChild.getElementsByTagName( "block" );
+                blockIdIterator = 0;
+                setChildBlockIDs( block, xmlChild, xmlDescendants );
                 var blockX = parseInt(xmlChild.getAttribute('x'), 10);
                 var blockY = parseInt(xmlChild.getAttribute('y'), 10);
                 if (!isNaN(blockX) && !isNaN(blockY)) {
@@ -447,14 +450,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         }
     }
 
-    function setChildBlockIDs( block, xml ) {
+    function setChildBlockIDs( block, blockXml, xmlDescendants ) {
         var childBlock, childXml;
-        block.id = xml.id;
-        xml = xml.getElementsByTagName( "block" );
-        for ( var i = 0; i < block.childBlocks_.length; i++) {
+        block.id = blockXml.id;
+        for ( var i = 0; i < block.childBlocks_.length; i++ ) {
             childBlock = block.childBlocks_[ i ];
-            childXml = xml[ i ];
-            setChildBlockIDs( childBlock, childXml );
+            childXml = xmlDescendants[ blockIdIterator++ ];
+            setChildBlockIDs( childBlock, childXml, xmlDescendants );
         }
     }
 
