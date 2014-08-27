@@ -421,6 +421,44 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             // TODO: deleteMethod
 
+            case "setMethod":
+
+                return function( nodeID, methodName, methodHandler, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, methodName, methodHandler );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, methodName,
+                                [ methodHandler ], when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "getMethod":
+
+                return function( nodeID, methodName, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, methodName );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, methodName,
+                                undefined, when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
             case "callMethod":
 
                 return function( nodeID, methodName, methodParameters, when, callback ) {

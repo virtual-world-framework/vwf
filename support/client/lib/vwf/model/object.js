@@ -67,6 +67,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                     name: childName,
 
                     properties: {},
+                    methods: {},
 
                     parent: undefined,
                     children: [],
@@ -89,7 +90,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                     //     // descendant: true,       // node is a descendant still within the component -- moved to kernel's node registry
                     //     internals: true,           // random, seed, or sequence has changed
                     //     // properties: true,       // placeholder for a property change list -- moved to kernel's node registry
-                    //     methods: [],               // array of method names for methods that changed
+                    //     // methods: [],            // array of method names for methods that changed -- moved to kernel's node registry
                     // },
 
                     // END TODO
@@ -241,6 +242,25 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
             return this.objects[nodeID].properties[propertyName];
+        },
+
+        // -- creatingMethod -----------------------------------------------------------------------
+
+        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
+            return this.settingMethod( nodeID, methodName,
+                { parameters: methodParameters, body: methodBody } );
+        },
+
+        // -- settingMethod ------------------------------------------------------------------------
+
+        settingMethod: function( nodeID, methodName, methodHandler ) {
+            return this.objects[nodeID].methods[methodName] = methodHandler;
+        },
+
+        // -- gettingMethod ------------------------------------------------------------------------
+
+        gettingMethod: function( nodeID, methodName ) {
+            return this.objects[nodeID].methods[methodName];
         },
 
         // == Special Model API ====================================================================

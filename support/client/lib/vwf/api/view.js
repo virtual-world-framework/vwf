@@ -176,6 +176,30 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} methodName
+        /// @param {Handler} methodHandler
+        /// 
+        /// @returns {}
+
+        satMethod: [ /* nodeID, methodName, methodHandler */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
+        /// @param {Handler} methodHandler
+        /// 
+        /// @returns {}
+
+        gotMethod: [ /* nodeID, methodName, methodHandler */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
         /// @param {String[]} methodParameters
         /// @param {Value} methodValue
         /// 
@@ -203,7 +227,7 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
-        /// @param {Script} eventHandler
+        /// @param {Handler} eventHandler
         /// @param {ID} eventContextID
         /// @param {String[]} eventPhases
         /// 
@@ -217,7 +241,7 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
-        /// @param {Script} eventHandler
+        /// @param {Handler} eventHandler
         /// 
         /// @returns {}
 

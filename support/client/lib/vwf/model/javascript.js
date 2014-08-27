@@ -23,7 +23,7 @@
 
 define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function( module, model, kutility, utility ) {
 
-    return model.load( module, {
+    var exports = model.load( module, {
 
         // This is a placeholder for providing a natural integration between simulation and the
         // browser's JavaScript environment.
@@ -78,7 +78,7 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
                 prototype = proxiedBehavior.call( self, prototype, behavior );
             } );
 
-            // Create the node. It's prototype is the most recently-attached behavior, or the
+            // Create the node. Its prototype is the most recently-attached behavior, or the
             // specific prototype if no behaviors are attached.
 
             var node = this.nodes[childID] = Object.create( prototype );
@@ -132,6 +132,8 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
                 enumerable: true,
             } );
 
+            // Properties.
+
             node.properties = Object.create( prototype.properties || Object.prototype, {
                 node: { value: node } // for node.properties accessors (non-enumerable)  // TODO: hide this better
             } );
@@ -156,6 +158,8 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
                 prototype.private.setters : Object.prototype
             );
 
+            // Methods.
+
             node.methods = Object.create( prototype.methods || Object.prototype, {
                 node: { value: node } // for node.methods accessors (non-enumerable)  // TODO: hide this better
             } );
@@ -174,6 +178,8 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
             node.private.bodies = Object.create( prototype.private ?
                 prototype.private.bodies : Object.prototype
             );
+
+            // Events.
 
             node.events = Object.create( prototype.events || Object.prototype, {
                 node: { value: node }, // for node.events accessors (non-enumerable)  // TODO: hide this better
@@ -224,6 +230,8 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function
             } );
 
             node.private.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
+
+            // Children.
 
             node.children = [];  // TODO: connect children's prototype like properties, methods and events do? how, since it's an array? drop the ordered list support and just use an object?
 
@@ -514,7 +522,8 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
 
             if ( propertyGet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.private.getters[propertyName] = eval( getterScript( propertyGet ) );
+                    node.private.getters[propertyName] =
+                        functionFromHandler( { body: propertyGet } );
                 } catch ( e ) {
                     this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating getter:", utility.exceptionMessage( e ) );
@@ -525,7 +534,8 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
         
             if ( propertySet ) {  // TODO: assuming javascript here; how to specify script type?
                 try {
-                    node.private.setters[propertyName] = eval( setterScript( propertySet ) );
+                    node.private.setters[propertyName] =
+                        functionFromHandler( { parameters: [ "value" ], body: propertySet } );
                 } catch ( e ) {
                     this.logger.warnx( "creatingProperty", nodeID, propertyName, propertyValue,
                         "exception evaluating setter:", utility.exceptionMessage( e ) );
@@ -613,24 +623,60 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             createMethodAccessor.call( this, node, methodName );
 
-            try {
-                node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
-            } catch ( e ) {
-                this.logger.warnx( "creatingMethod", nodeID, methodName, methodParameters,
-                    "exception evaluating body:", utility.exceptionMessage( e ) );
-            }
-        
             // Invalidate the "future" cache.
 
             node.private.change++;
+
+            // Delegate to `settingMethod`.
+
+            return this.settingMethod( nodeID, methodName, {
+                parameters: methodParameters,
+                body: methodBody,
+                type: scriptMediaType,
+            } );
 
         },
 
         // TODO: deletingMethod
 
+        // -- settingMethod ------------------------------------------------------------------------
+
+        settingMethod: function( nodeID, methodName, methodHandler ) {
+
+            var node = this.nodes[nodeID];
+
+            if ( methodHandler.type === scriptMediaType ) {
+
+                try {
+                    var body = node.private.bodies[methodName] = functionFromHandler( methodHandler );
+                    return utility.merge( handlerFromFunction( body ), { type: scriptMediaType } );  // TODO: shortcut to avoid retrieving this?
+                } catch ( e ) {
+                    this.logger.warnx( "settingMethod", nodeID, methodName, methodHandler.parameters,
+                        "exception evaluating body:", utility.exceptionMessage( e ) );
+                }
+
+            }
+
+            return undefined;
+        },
+
+        // -- gettingMethod ------------------------------------------------------------------------
+
+        gettingMethod: function( nodeID, methodName ) {
+
+            var node = this.nodes[nodeID];
+            var body = node.private.bodies && node.private.bodies[methodName];
+
+            if ( body ) {
+                return utility.merge( handlerFromFunction( body ), { type: scriptMediaType } );
+            }
+
+            return undefined;
+        },
+
         // -- callingMethod ------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+        callingMethod: function( nodeID, methodName, methodParameters ) {
 
             var node = this.nodes[nodeID];
             var body = node.private.bodies && node.private.bodies[methodName];
@@ -641,7 +687,7 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                     var resultJS = body.apply( node, parametersJS );
                     return valueKernelFromJS.call( this, resultJS );
                 } catch ( e ) {
-                    this.logger.warnx( "callingMethod", nodeID, methodName, methodParameters, methodValue, // TODO: limit methodParameters for log
+                    this.logger.warnx( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                         "exception:", utility.exceptionMessage( e ) );
                 }
             }
@@ -763,7 +809,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             var node = this.nodes[nodeID];
 
-            if ( scriptType == "application/javascript" ) {
+            if ( scriptType == scriptMediaType ) {
                 try {
                     var resultJS = ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText || "" );
                     return valueKernelFromJS.call( this, resultJS );
@@ -1080,9 +1126,10 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
             set: unsettable ? undefined : function( value ) {  // `this` is the container
                 var node = this.node || this;  // the node via node.methods.node, or just node
-                node.methods.hasOwnProperty( methodName ) ||
-                    self.kernel.createMethod( node.id, methodName );
-                node.private.bodies[methodName] = value;
+                if ( typeof value === "function" || value instanceof Function ) {
+                    value = utility.merge( handlerFromFunction( value ), { type: scriptMediaType } );
+                }
+                self.kernel.setMethod( node.id, methodName, value );
             },
 
             enumerable: true,
@@ -1171,37 +1218,135 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     }
 
-    // -- getterScript -----------------------------------------------------------------------------
+    /// Convert a `Handler` to a JavaScript `function`.
+    /// 
+    /// @param {Handler} handler
+    /// 
+    /// @returns {function}
 
-    function getterScript( body ) {
-        return accessorScript( "( function() {", body, "} )" );
-    }
+    function functionFromHandler( handler ) {
 
-    // -- setterScript -----------------------------------------------------------------------------
+        var name = handler.name, parameters = handler.parameters, body = handler.body;
 
-    function setterScript( body ) {
-        return accessorScript( "( function( value ) {", body, "} )" );
-    }
+        var parameterString = parameters && parameters.length ?
+            " " + parameters.join( ", " ) + " " :
+            "";
 
-    // -- bodyScript -------------------------------------------------------------------------------
+        var prefix = "function(" + parameterString + ") {";
+        var suffix = "}";
 
-    function bodyScript( parameters, body ) {
-        var parameterString = ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  );
-        return accessorScript( "( function(" + parameterString + ") {", body, "} )" );
-        // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
-    }
+        var functionString, indentedBody;
 
-    // -- accessorScript ---------------------------------------------------------------------------
-
-    function accessorScript( prefix, body, suffix ) {  // TODO: sanitize script, limit access
-        if ( body.length && body.charAt( body.length-1 ) == "\n" ) {
-            var bodyString = body.replace( /^./gm, "  $&" );
-            return prefix + "\n" + bodyString + suffix + "\n";
+        if ( body && body.length ) {
+            if ( body.charAt( body.length-1 ) === "\n" ) {
+                indentedBody = body.match( /^[^\S\n]/ ) ? body : body.replace( /^./gm, "    $&" );
+                functionString = prefix + "\n" + indentedBody + suffix + "\n";
+            } else {
+                functionString = prefix + " " + body + " " + suffix;
+            }
         } else {
-            var bodyString = body.length ? " " + body + " " : "";
-            return prefix + bodyString + suffix;
+            functionString = prefix + suffix;
         }
+
+        return eval( "( " + functionString + ")" );
     }
+
+    /// Convert a JavaScript `function` to a `Handler`.
+    /// 
+    /// @param {function} funcshun
+    /// 
+    /// @returns {Handler}
+
+    function handlerFromFunction( funcshun ) {
+
+        var name, parameters, body;
+
+        var match, leadingMatch, trailingMatch, indention = "";
+
+        if ( match = /* assignment! */ functionRegex.exec( funcshun.toString() ) ) {
+
+            name = match[1];
+
+            // Trim the parameter string. Also remove the `/**/` that Chrome adds to the parameter
+            // list for functions created using `Function( parameter, ..., body )`. See
+            // `NewFunctionString` in http://code.google.com/p/v8/source/browse/trunk/src/v8natives.js.
+
+            var parameterString = match[2].replace( /\/\*.*\*\//, "" ).trim();
+
+            parameters = parameterString.length ? parameterString.split( "," ).map( function( parameter ) {
+                return parameter.trim();
+            } ) : undefined;
+
+            // Trim the body string. Recognize block vs. inline formatting where possible and retain
+            // the existing spacing.
+
+            body = match[3];
+
+            leadingMatch =  // leading spacing, if the leading brace is on its own line
+                body.match( /^([^\S\n]*\n)([^\S\n]*)/ );
+
+            trailingMatch = // trailing spacing, if the trailing brace is on own line
+                body.match( /\n([^\S\n]*)$/ );
+
+            // Trim the leading spaces. If the leading brace was on its own line, delete the empty
+            // first line and take the body indention to be the next line's spacing. Otherwise, just
+            // trim the beginning of the body.
+
+            if ( leadingMatch ) {
+                body = body.substr( leadingMatch[1].length );
+                indention = leadingMatch[2];
+            } else {
+                body = body.replace( /^\s*/, "" );
+            }
+
+            // Trim the trailing spaces. If the trailing brace was on its own line, delete its
+            // indention and take that as the body indention. The trailing brace indention takes
+            // priority over indention taken from the leading line. If the trailing brace was not on
+            // its own line, just trim the end of the body.
+
+            if ( trailingMatch ) {
+                body = body.substr( -trailingMatch[1] );
+                indention = trailingMatch[1];
+            } else {
+                body = body.replace( /\s*$/, "" );
+            }
+
+            // If we recognized the body as an block (not inline with the braces), unindent it and
+            // ensure that the last line ends with a newline.
+
+            if ( leadingMatch || trailingMatch ) {
+                body = body.replace( new RegExp( "^" + indention, "gm" ), "" );
+                body = body.replace( /\n?$/, "\n" );
+            }
+
+        }
+
+        return {
+            name: name,
+            parameters: parameters,
+            body: body
+        };
+    }
+
+    /// The `application/javascript` media type for scripts that this driver recognizes.
+    /// 
+    /// @field
+
+    var scriptMediaType = "application/javascript";
+
+    /// Regex to crack a `Function.toString()` result.
+    /// 
+    /// @field
+
+    var functionRegex = new RegExp(
+        "function" +                    // `function`
+        "\\s*" +
+        "([a-zA-Z_$][0-9a-zA-Z_$]*)?" + // optional name; capture #1
+        "\\s*" +
+        "\\(([^)]*)\\)" +               // `(...)`; capture #2 inside `()`
+        "\\s*" +
+        "\\{([^]*)\\}"                  // `{...}`; capture #3 inside `{}`
+    );
 
     // -- findListeners ----------------------------------------------------------------------------
 
@@ -1348,5 +1493,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
         }
 
     }
+
+    return exports;
 
 } );
