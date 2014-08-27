@@ -501,7 +501,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
                 var height = scene._canvas.height;
                 var width = scene._canvas.width;
                 var eventObj = self.state.mouse.scene.pick( pos );
-                var ellipsoid = node.globe._ellipsoid;
+                var ellipsoid = scene._globe._ellipsoid;
                 var globePoint = scene._camera.pickEllipsoid( pos, ellipsoid );
                 var camPos = scene._camera.position;
                 var eventID;
