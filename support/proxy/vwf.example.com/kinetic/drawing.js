@@ -93,6 +93,9 @@ this.setClientUIState = function( stateObj ) {
     }
 };
 
+this.getStageRelativePoint = function( e ) {
+    return [ e.page[ 0 ] - e.stage[ 0 ], e.page[ 1 ] - e.stage[ 1 ] ];
+}
 
 this.pointerDown = function( eventData, nodeData ) {
     this.down( eventData, nodeData, false );    
@@ -119,6 +122,7 @@ this.touchEnd = function( eventData, nodeData ) {
 }; 
 
 this.down = function( eventData, nodeData, touch ) {
+
     if ( !this.isValid( this.drawing_clients ) || !this.isValid( this.drawing_clients[ this.client ] ) ) {
         this.clientJoin( this.client );
     } 
@@ -161,13 +165,11 @@ this.down = function( eventData, nodeData, touch ) {
         case "arrow":
             groupExtends = "http://vwf.example.com/kinetic/group.vwf";
             compExtends = { "line": "http://vwf.example.com/kinetic/line.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
-            //compExtends = "http://vwf.example.com/kinetic/shape.vwf";
             break;
 
         case "thickArrow":
             groupExtends = "http://vwf.example.com/kinetic/group.vwf";
             compExtends = { "line": "http://vwf.example.com/kinetic/line.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
-            //compExtends = { "line": "http://vwf.example.com/kinetic/rect.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
             break;
 
         case "borderRect":
@@ -182,16 +184,37 @@ this.down = function( eventData, nodeData, touch ) {
 
     }
 
+    var defaultProperties = function( groupParent, eventPoint ) {
+        var retObj = {
+            "visible": 'inherit',
+            "fill": userState.drawing_color,
+            "opacity": userState.drawing_opacity
+        };
+
+        if ( groupParent ) {
+            retObj.x = 0;
+            retObj.y = 0;
+            retObj.position = [ 0, 0 ];
+        } else {
+            retObj.x = eventPoint[ 0 ];
+            retObj.y = eventPoint[ 1 ];
+            retObj.position = eventPoint;
+        }
+
+        return retObj; 
+    };
+
+    var eventPointDown = this.getStageRelativePoint( eventData );
     if ( groupExtends !== undefined ) {
 
-        privateState.initialDownPoint = eventData.layer;
+        privateState.initialDownPoint = eventPointDown;
         var parents = this.find( userState.drawing_parentPath + section );
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var groupDef = {
             "extends": groupExtends,
             "properties": {
                 "visible": false,
-                "position": eventData.layer                
+                "position": eventPointDown                
             },
             "children": {}
         };
@@ -199,48 +222,32 @@ this.down = function( eventData, nodeData, touch ) {
         for ( var def in compExtends ) {
             groupDef.children[ def ] = {
                 "extends": compExtends[ def ],
-                "properties": {
-                    "visible": 'inherit',
-                    "x": 0,
-                    "y": 0,
-                    "position": [ 0, 0 ],
-                    "fill": userState.drawing_color,
-                    "opacity": userState.drawing_opacity
-                }
+                "properties": defaultProperties( true, eventPointDown )
             }          
         }
-
-        //console.info( JSON.stringify( groupDef ) );
 
         var self = this;
         var selfMoniker = this.client;
         var name = drawingMode + userState.nameIndex;
         userState.nameIndex++;
         parent.children.create( name, groupDef, function( child ) {
-            //console.info( "Child created name: " + child.name + "    " + child.id );
             self.drawing_private[ selfMoniker ].drawingObject = child;
         } ); 
 
     } else if ( compExtends !== undefined ) {
 
-        privateState.initialDownPoint = eventData.layer;
+        privateState.initialDownPoint = eventPointDown;
         var parents = this.find( userState.drawing_parentPath + section );
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var shapeDef = {
             "extends": compExtends,
-            "properties": {
-                "visible": false,
-                "position": eventData.layer,
-                "fill": userState.drawing_color,
-                "opacity": userState.drawing_opacity
-            }
+            "properties": defaultProperties( false, eventPointDown )
         };
         var self = this;
         var selfMoniker = this.client;
         var name = drawingMode + userState.nameIndex;
         userState.nameIndex++;
         parent.children.create( name, shapeDef, function( child ) {
-            //console.info( "Child created name: " + child.name + "    " + child.id );
             self.drawing_private[ selfMoniker ].drawingObject = child;
         } );
 
@@ -248,6 +255,7 @@ this.down = function( eventData, nodeData, touch ) {
 };
 
 this.move = function( eventData, nodeData, touch ) {
+
     if ( !this.isValid( this.drawing_clients ) || !this.isValid( this.drawing_clients[ this.client ] ) ) {
         this.clientJoin( this.client );
     } 
@@ -259,6 +267,7 @@ this.move = function( eventData, nodeData, touch ) {
 };
 
 this.up = function( eventData, nodeData, touch ) {
+
     if ( this.drawing_private[ this.client ] !== undefined && this.drawing_private[ this.client ].drawingObject !== null  ) {
         var drawingObject = this.drawing_private[ this.client ].drawingObject;
         this.update( eventData, nodeData, true );
@@ -267,9 +276,11 @@ this.up = function( eventData, nodeData, touch ) {
         if ( this.moniker === this.client ) {
             var userState = this.drawing_clients[ this.client ]; 
             switch( userState.drawing_mode ) {
+                
                 case "text":
                     this.textCreated( drawingObject.id );
                     break;
+                
                 case "image":
                     this.imageCreated( drawingObject.id );
                     break;
@@ -289,6 +300,7 @@ this.update = function( eventData, nodeData, upEvent ) {
 
     if ( this.drawing_private[ this.client ].drawingObject !== null ) {
         
+        var eventPoint = this.getStageRelativePoint( eventData );
         var userState = this.drawing_clients[ this.client ];        
         var privateState = this.drawing_private[ this.client ];
         var drawingObject = privateState.drawingObject;
@@ -296,8 +308,8 @@ this.update = function( eventData, nodeData, upEvent ) {
         if ( drawingObject.visible !== userState.drawing_visible ) {
             drawingObject.visible = userState.drawing_visible;
         }
-        var diffX = eventData.layer[ 0 ] - privateState.initialDownPoint[ 0 ];
-        var diffY = eventData.layer[ 1 ] - privateState.initialDownPoint[ 1 ];
+        var diffX = eventPoint[ 0 ] - privateState.initialDownPoint[ 0 ];
+        var diffY = eventPoint[ 1 ] - privateState.initialDownPoint[ 1 ];
         var pos = [ privateState.initialDownPoint[ 0 ], privateState.initialDownPoint[ 1 ] ];
         var width = diffX;  
         var height = diffY;
@@ -343,7 +355,6 @@ this.update = function( eventData, nodeData, upEvent ) {
                 }
                 break;
 
-
             case "ellipse":         
                 drawingObject.radius = { "x": width * 0.5, "y": height * 0.5 };
                 break;
@@ -353,9 +364,10 @@ this.update = function( eventData, nodeData, upEvent ) {
                 break;
 
             case "line":
+                drawingObject.position = eventPoint;
                 drawingObject.stroke = userState.drawing_color;
                 drawingObject.strokeWidth = userState.drawing_width;
-                drawingObject.points = [ 0, 0, eventData.layer[ 0 ] - drawingObject.x, eventData.layer[ 1 ] - drawingObject.y ];
+                drawingObject.points = [ 0, 0, eventPoint[ 0 ] - drawingObject.x, eventPoint[ 1 ] - drawingObject.y ];
                 break;
 
             case "freeDraw":
@@ -364,8 +376,8 @@ this.update = function( eventData, nodeData, upEvent ) {
 
                 var isFirstStrokeOfNewLine = ( drawingObject.points === undefined || 
                     drawingObject.points.length === 0 );
-                var posX = eventData.page[ 0 ] - drawingObject.x;
-                var posY = eventData.page[ 1 ] - drawingObject.y;
+                var posX = eventPoint[ 0 ] - drawingObject.x;
+                var posY = eventPoint[ 1 ] - drawingObject.y;
                 if ( isFirstStrokeOfNewLine ) {
                     drawingObject.points = [ 0, 0, posX, posY ];
                 } else  {
@@ -420,8 +432,8 @@ this.update = function( eventData, nodeData, upEvent ) {
                 drawingObject.head.radius = userState.drawing_width * 3;
 
                 var endPoint = goog.vec.Vec2.createFloat32FromValues( 0, 0 );
-                var relativeXDiff = eventData.layer[ 0 ] - drawingObject.x;
-                var relativeYDiff = eventData.layer[ 1 ] - drawingObject.y;
+                var relativeXDiff = eventPoint[ 0 ] - drawingObject.x;
+                var relativeYDiff = eventPoint[ 1 ] - drawingObject.y;
                 var headOffset = ( userState.drawing_width * 3 ) * Math.sin( Math.PI / 6 );
                 var dir = goog.vec.Vec2.createFloat32FromValues( relativeXDiff, relativeYDiff );
                 var len = goog.vec.Vec2.distance( goog.vec.Vec2.createFloat32FromValues( 0, 0 ), dir );
@@ -446,8 +458,8 @@ this.update = function( eventData, nodeData, upEvent ) {
                 drawingObject.head.radius = userState.drawing_width * 8;
 
                 var endPoint = goog.vec.Vec2.createFloat32FromValues( 0, 0 );
-                var relativeXDiff = eventData.layer[ 0 ] - drawingObject.x;
-                var relativeYDiff = eventData.layer[ 1 ] - drawingObject.y;
+                var relativeXDiff = eventPoint[ 0 ] - drawingObject.x;
+                var relativeYDiff = eventPoint[ 1 ] - drawingObject.y;
                 var headOffset = ( userState.drawing_width * 8 ) * Math.sin( Math.PI / 6 );
                 var dir = goog.vec.Vec2.createFloat32FromValues( relativeXDiff, relativeYDiff );
                 var len = goog.vec.Vec2.distance( goog.vec.Vec2.createFloat32FromValues( 0, 0 ), dir );
@@ -467,7 +479,6 @@ this.update = function( eventData, nodeData, upEvent ) {
                 break;
 
         }
-
 
     }   
 }; //@ sourceURL=kinetic_drawing.js

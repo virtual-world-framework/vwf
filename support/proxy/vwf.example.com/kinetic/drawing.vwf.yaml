@@ -12,6 +12,7 @@ methods:
   setClientUIState:
   isValid:
 events:
+  getStageRelativePoint:
   down:
   move:
   up:
