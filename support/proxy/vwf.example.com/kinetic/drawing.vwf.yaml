@@ -22,7 +22,7 @@ events:
   touchStart:
   touchMove:
   touchEnd:
-  shapeCreated:
+  drawingObjectCreated:
   textCreated:
   imageCreated:
 scripts:

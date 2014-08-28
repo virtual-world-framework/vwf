@@ -28,8 +28,6 @@ this.isValid = function( obj ) {
 
 this.clientJoin = function( moniker ) {
 
-    console.info( "clientJoin( "+moniker+" ) =====================" )
-
     // mirrors the initial state of the toolbar
     if ( !this.isValid( this.drawing_clients ) ) {
         this.drawing_clients = {};
@@ -38,7 +36,7 @@ this.clientJoin = function( moniker ) {
         this.drawing_clients[ moniker ] = {  
             "drawing_mode": 'none',
             "drawing_visible": 'inherit',
-            "drawing_color": 'red',
+            "drawing_color": 'black',
             "drawing_width": 4,
             "drawing_parentPath": '//',
             "drawing_opacity": 0.4,
@@ -96,30 +94,6 @@ this.setClientUIState = function( stateObj ) {
 this.getStageRelativePoint = function( e ) {
     return [ e.page[ 0 ] - e.stage[ 0 ], e.page[ 1 ] - e.stage[ 1 ] ];
 }
-
-this.pointerDown = function( eventData, nodeData ) {
-    this.down( eventData, nodeData, false );    
-};
-
-this.pointerMove = function( eventData, nodeData ) {
-    this.move( eventData, nodeData, false );
-};
-
-this.pointerUp = function( eventData, nodeData ) {
-    this.up( eventData, nodeData, false );
-}; 
-
-this.touchStart = function( eventData, nodeData ) {
-    this.down( eventData, nodeData, true );    
-};
-
-this.touchMove = function( eventData, nodeData ) {
-    this.move( eventData, nodeData, true );
-};
-
-this.touchEnd = function( eventData, nodeData ) {
-    this.up( eventData, nodeData, true );
-}; 
 
 this.down = function( eventData, nodeData, touch ) {
 
@@ -188,7 +162,8 @@ this.down = function( eventData, nodeData, touch ) {
         var retObj = {
             "visible": 'inherit',
             "fill": userState.drawing_color,
-            "opacity": userState.drawing_opacity
+            "opacity": userState.drawing_opacity,
+            "z-index": 4
         };
 
         if ( groupParent ) {
@@ -223,7 +198,7 @@ this.down = function( eventData, nodeData, touch ) {
             groupDef.children[ def ] = {
                 "extends": compExtends[ def ],
                 "properties": defaultProperties( true, eventPointDown )
-            }          
+            } 
         }
 
         var self = this;
@@ -243,6 +218,7 @@ this.down = function( eventData, nodeData, touch ) {
             "extends": compExtends,
             "properties": defaultProperties( false, eventPointDown )
         };
+
         var self = this;
         var selfMoniker = this.client;
         var name = drawingMode + userState.nameIndex;
@@ -271,7 +247,8 @@ this.up = function( eventData, nodeData, touch ) {
     if ( this.drawing_private[ this.client ] !== undefined && this.drawing_private[ this.client ].drawingObject !== null  ) {
         var drawingObject = this.drawing_private[ this.client ].drawingObject;
         this.update( eventData, nodeData, true );
-        this.shapeCreated( drawingObject.id );
+        
+        this.drawingObjectCreated( drawingObject.id );
 
         if ( this.moniker === this.client ) {
             var userState = this.drawing_clients[ this.client ]; 
@@ -304,6 +281,7 @@ this.update = function( eventData, nodeData, upEvent ) {
         var userState = this.drawing_clients[ this.client ];        
         var privateState = this.drawing_private[ this.client ];
         var drawingObject = privateState.drawingObject;
+        var pointAccepted = true;
 
         if ( drawingObject.visible !== userState.drawing_visible ) {
             drawingObject.visible = userState.drawing_visible;
@@ -364,25 +342,38 @@ this.update = function( eventData, nodeData, upEvent ) {
                 break;
 
             case "line":
-                drawingObject.position = eventPoint;
+                //drawingObject.position = eventPoint;
                 drawingObject.stroke = userState.drawing_color;
                 drawingObject.strokeWidth = userState.drawing_width;
-                drawingObject.points = [ 0, 0, eventPoint[ 0 ] - drawingObject.x, eventPoint[ 1 ] - drawingObject.y ];
+                drawingObject.points = [ 0, 0, diffX, diffY ];
                 break;
 
             case "freeDraw":
                 drawingObject.stroke = userState.drawing_color;
                 drawingObject.strokeWidth = userState.drawing_width;
 
-                var isFirstStrokeOfNewLine = ( drawingObject.points === undefined || 
-                    drawingObject.points.length === 0 );
+                var isFirstStrokeOfNewLine = ( drawingObject.points.length === 0 );
                 var posX = eventPoint[ 0 ] - drawingObject.x;
                 var posY = eventPoint[ 1 ] - drawingObject.y;
+                
                 if ( isFirstStrokeOfNewLine ) {
-                    drawingObject.points = [ 0, 0, posX, posY ];
+                    if ( Math.abs( posX ) + Math.abs( posY ) > 0 ) {
+                        drawingObject.points = [ 0, 0, posX, posY ];
+                    } else {
+                        pointAccepted = false;   
+                    }
                 } else  {
-                    drawingObject.points.push( posX );
-                    drawingObject.points.push( posY );
+                    var dragDiff = [ 
+                        posX - privateState.previousPoint[ 0 ], 
+                        posY - privateState.previousPoint[ 1 ] 
+                    ];
+
+                    if ( Math.abs( dragDiff[0] ) + Math.abs( dragDiff[1] ) > 0 ) {
+                        drawingObject.points.push( posX );
+                        drawingObject.points.push( posY );                        
+                    } else {
+                        pointAccepted = false;    
+                    }
                 }
                 break;
 
@@ -399,7 +390,7 @@ this.update = function( eventData, nodeData, upEvent ) {
 
             case "star":
                 drawingObject.points = 5;
-                drawingObject.innerRadius = dist * 60;
+                drawingObject.innerRadius = dist * 80;
                 drawingObject.outerRadius = dist;
                 break;
 
@@ -480,5 +471,33 @@ this.update = function( eventData, nodeData, upEvent ) {
 
         }
 
+        if ( pointAccepted ) {
+            privateState.previousPoint = eventPoint;
+        }
+
     }   
+}; 
+
+this.pointerDown = function( eventData, nodeData ) {
+    this.down( eventData, nodeData, false );    
+};
+
+this.pointerMove = function( eventData, nodeData ) {
+    this.move( eventData, nodeData, false );
+};
+
+this.pointerUp = function( eventData, nodeData ) {
+    this.up( eventData, nodeData, false );
+}; 
+
+this.touchStart = function( eventData, nodeData ) {
+    this.down( eventData, nodeData, true );    
+};
+
+this.touchMove = function( eventData, nodeData ) {
+    this.move( eventData, nodeData, true );
+};
+
+this.touchEnd = function( eventData, nodeData ) {
+    this.up( eventData, nodeData, true );
 }; //@ sourceURL=kinetic_drawing.js
