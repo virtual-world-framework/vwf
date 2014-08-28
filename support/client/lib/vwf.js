@@ -276,6 +276,7 @@
             }
 
             var userLibraries = args.shift() || {};
+            var applicationConfig = {};
 
             var callback = args.shift();
 
@@ -446,6 +447,9 @@
 
             jQuery.getJSON("admin/config", function(configLibraries) {
                 if(configLibraries && typeof configLibraries == "object") {
+                    if (typeof configLibraries.configuration == "object") {
+                        applicationConfig = configLibraries.configuration;
+                    }
                     Object.keys(configLibraries).forEach(function(libraryType) {
                         if(libraryType == 'info' && configLibraries[libraryType]["title"])
                         {
@@ -524,6 +528,12 @@
                 require( requireConfig, getActiveLibraries(requireArray, false), function( ready ) {
 
                     ready( function() {
+
+                        // Merge any application configuration settings into the configuration
+                        // object.
+
+                        require( "vwf/configuration" ).instance = require( "vwf/utility" ).merge(
+                            {}, require( "vwf/configuration" ).instance, applicationConfig );
 
                         // With the scripts loaded, we must initialize the framework. vwf.initialize()
                         // accepts three parameters: a world specification, model configuration parameters,
@@ -1084,7 +1094,9 @@
 
             // Invoke the action.
 
-            if ( origin !== "reflector" || ! nodeID || nodes.existing[ nodeID ] ) {
+            if ( environment( actionName, parameters ) ) {
+                require( "vwf/configuration" ).environment = environment( actionName, parameters );
+            } else if ( origin !== "reflector" || ! nodeID || nodes.existing[ nodeID ] ) {
                 result = this[ actionName ] && this[ actionName ].apply( this, args );
             } else {
                 this.logger.debugx( "receive", "ignoring reflector action on non-existent node", nodeID );
@@ -1097,6 +1109,37 @@
 
             // origin == "reflector" ?
             //     this.logger.infou() : this.logger.debugu();
+
+
+            /// The reflector sends a `setState` action as part of the application launch to pass
+            /// the server's execution environment to the client. A `setState` action isn't really
+            /// appropriate though since `setState` should be the last part of the launch, whereas
+            /// the environment ought to be set much earlier--ideally before the kernel loads.
+            /// 
+            /// Executing the `setState` as received would overwrite any configuration settings
+            /// already applied by the application. So instead, we detect this particular message
+            /// and only use it to update the environment in the configuration object.
+            /// 
+            /// `environment` determines if a message is the reflector's special pre-launch
+            /// `setState` action, and if so, and if the application hasn't been created yet,
+            /// returns the execution environment property.
+
+            function environment( actionName, parameters ) {
+
+                if ( actionName === "setState" && ! vwf.application() ) {
+
+                    var applicationState = parameters && parameters[0];
+
+                    if ( applicationState && Object.keys( applicationState ).length === 1 &&
+                            applicationState.configuration && Object.keys( applicationState.configuration ).length === 1 ) {
+                        return applicationState.configuration.environment;
+                    }
+
+                }
+
+                return undefined;
+            }
+
         };
 
         // -- dispatch -----------------------------------------------------------------------------

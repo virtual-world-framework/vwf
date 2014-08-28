@@ -30,7 +30,7 @@ define( function() {
         /// "production", "development", and "testing". For example:
         ///
         ///   {
-        ///     default: { environment: "development", alpha: 1, beta: 2, gamma: 3 },
+        ///     default: { alpha: 1, beta: 2, gamma: 3 },
         ///     production: { alpha: 101 },
         ///     development: { beta: 222, gamma: 3000 },
         ///     testing: { },
@@ -87,10 +87,13 @@ define( function() {
         // -- environment --------------------------------------------------------------------------
 
         /// The name of the active envionment.
-        /// 
-        /// environment returns the same value as active.environment.
 
         environment: {
+
+            set: function( value ) {
+                environment = factory[value] ? value : "default";
+                update();
+            },
 
             get: function() {
                 return environment;
@@ -123,10 +126,6 @@ define( function() {
     /// Update the cascade.
 
     function update() {
-
-        // Determine the environment.
-
-        environment = instance.environment || factory.default.environment;
 
         // Clear active so that we may update it in place. This preserves any existing references.
 
@@ -170,7 +169,6 @@ define( function() {
         /// Default configuration for all environments.
 
         default: {
-            "environment": require.toUrl( "dummy" ).indexOf( "../lib/" ) == 0 ? "testing" : "development",
             "log-level": "warn",                  // logger threshold
             "random-seed": +new Date,             // pseudorandom number generator seed
             "randomize-ids": false,               // randomize IDs to discourage assumptions about ID allocation
@@ -194,7 +192,7 @@ define( function() {
         /// Changes for testing environments.
 
         testing: {
-            "random-seed": window.location.href, // make the random sequence repeatable
+            "random-seed": window.location.href,  // make the random sequence repeatable
         },
 
     };
@@ -213,9 +211,10 @@ define( function() {
 
     // -- environment ------------------------------------------------------------------------------
 
-    /// Name of the active environment. Equivalent to active.environment.
+    /// Name of the active environment.
 
-    var environment;
+    var environment = require.toUrl( "dummy" ).indexOf( "../lib/" ) === 0 ?
+        "testing" : "development";
 
     // -- callbacks --------------------------------------------------------------------------------
 
