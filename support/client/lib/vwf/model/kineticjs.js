@@ -2113,6 +2113,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 var parent = self.state.nodes[ node.parentID ];
                 if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
                     
+                    if ( parent.children === undefined ) {
+                        parent.children = [];    
+                    }
+                    parent.children.push( node.ID );
                     //console.info( "Adding child: " + childID + " to " + nodeID );
                     parent.kineticObj.add( node.kineticObj );    
                 }
