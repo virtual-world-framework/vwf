@@ -2038,7 +2038,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "layer", "vwf" ] ) ) {
             kineticObj = new Kinetic.Layer( config || {} );
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "line", "vwf" ] ) ) {
-            kineticObj = new Kinetic.Line( config || {} );
+            kineticObj = new Kinetic.Line( config || { "points": [] } );
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "path", "vwf" ] ) ) {
             kineticObj = new Kinetic.Path( config || {} );
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "rect", "vwf" ] ) ) {
