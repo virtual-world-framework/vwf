@@ -448,15 +448,39 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 }
             }
         }
+        //setAllBlockIDs( workspace, xml );
+
+    }
+
+    function setAllBlockIDs( workspace, xml ) {
+        var blocks = workspace.getAllBlocks();
+        xml = xml.getElementsByTagName( "block" );
+        if ( blocks.length !== xml.length ) {
+            self.logger.warnx( "Resetting blockly ids, the number of blocks " +
+                               "in the workspace versus the XML are not the same.")
+        }
+        for ( var i = 0; i < ( blocks.length && xml.length ); i++ ) {
+            blocks[ i ].id = xml[ i ].id;
+        }
     }
 
     function setChildBlockIDs( block, blockXml, xmlDescendants ) {
         var childBlock, childXml;
-        block.id = blockXml.id;
-        for ( var i = 0; i < block.childBlocks_.length; i++ ) {
-            childBlock = block.childBlocks_[ i ];
-            childXml = xmlDescendants[ blockIdIterator++ ];
-            setChildBlockIDs( childBlock, childXml, xmlDescendants );
+        if ( block && xml ) {
+            block.id = xml.id;
+            xml = xml.getElementsByTagName( "block" );
+            for ( var i = 0; i < block.childBlocks_.length; i++) {
+                childBlock = block.childBlocks_[ i ];
+                childXml = xml[ i ];
+                setChildBlockIDs( childBlock, childXml );
+            }
+            var currentBlock = block.getNextBlock();
+            while ( currentBlock && xml[ i ] ) {
+                childXml = xml[ i ];
+                setChildBlockIDs( currentBlock, childXml );
+                currentBlock = currentBlock.getNextBlock();
+                i++;
+            }
         }
     }
 
