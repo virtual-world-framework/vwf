@@ -11,6 +11,7 @@ methods:
   setUpPrivate:
   setClientUIState:
   isValid:
+  getStageRelativePoint:
 events:
   down:
   move:
@@ -21,7 +22,7 @@ events:
   touchStart:
   touchMove:
   touchEnd:
-  shapeCreated:
+  drawingObjectCreated:
   textCreated:
   imageCreated:
 scripts:
