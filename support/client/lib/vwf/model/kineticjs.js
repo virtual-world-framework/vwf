@@ -138,7 +138,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 // kinetic container
                 // (if a kinteticObj is created asynchronously ... like an Image, it will be
                 // undefined here, but will be added to its parent in the appropriate callback)
-                addNodeToHeirarchy( node );
+                addNodeToHierarchy( node );
 
             }
            
@@ -2032,7 +2032,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 node.kineticObj = new Kinetic.Image( {
                     image: imageObj,
                 } );
-                addNodeToHeirarchy( node );
+                addNodeToHierarchy( node );
             };
             imageObj.src = node.source;
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "layer", "vwf" ] ) ) {
@@ -2106,7 +2106,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         
     }
 
-    function addNodeToHeirarchy( node ) {
+    function addNodeToHierarchy( node ) {
         
         if ( node.kineticObj ) {
             if ( self.state.nodes[ node.parentID ] !== undefined ) {
