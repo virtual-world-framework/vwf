@@ -183,7 +183,11 @@ this.down = function( eventData, nodeData, touch ) {
     if ( groupExtends !== undefined ) {
 
         privateState.initialDownPoint = eventPointDown;
-        var parents = this.find( userState.drawing_parentPath + section );
+        var parentPath = userState.drawing_parentPath + section ;
+        var parents = this.find( parentPath );
+        if ( parents === undefined ) {
+            parents = [ this.findChild( this, parentPath.split( '//' ).reverse() ) ];
+        }
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var groupDef = {
             "extends": groupExtends,
@@ -212,7 +216,11 @@ this.down = function( eventData, nodeData, touch ) {
     } else if ( compExtends !== undefined ) {
 
         privateState.initialDownPoint = eventPointDown;
-        var parents = this.find( userState.drawing_parentPath + section );
+        var parentPath = userState.drawing_parentPath + section ;
+        var parents = this.find( parentPath );
+        if ( parents === undefined ) {
+            parents = [ this.findChild( this, parentPath.split( '//' ).reverse() ) ];
+        }
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var shapeDef = {
             "extends": compExtends,
@@ -499,4 +507,26 @@ this.touchMove = function( eventData, nodeData ) {
 
 this.touchEnd = function( eventData, nodeData ) {
     this.up( eventData, nodeData, true );
-}; //@ sourceURL=kinetic_drawing.js
+}; 
+
+this.findChild = function( parent, names ) {
+    if ( names.length > 0 ) {
+        var childName = names.pop();
+        while ( childName === "" ) {
+            childName = names.pop();            
+        }
+        if ( parent.children[ childName ] ) {
+            if ( names.length === 0 ) {
+                return parent.children[ childName ];
+            } else {
+                return this.findChild( parent.children[ childName ], names );                
+            }
+        }
+        else {
+            return undefined;
+        }
+    }
+    return undefined;
+}
+
+//@ sourceURL=kinetic_drawing.js
