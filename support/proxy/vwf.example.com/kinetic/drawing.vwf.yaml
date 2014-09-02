@@ -11,8 +11,8 @@ methods:
   setUpPrivate:
   setClientUIState:
   isValid:
-events:
   getStageRelativePoint:
+events:
   down:
   move:
   up:
