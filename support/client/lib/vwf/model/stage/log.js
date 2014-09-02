@@ -34,20 +34,27 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
             if ( this.model[modelFunctionName] ) {
 
-                var logees = Array.prototype.slice.call( arguments );
+                // This variable will hold the method arguments
+                // In cases where we need to alter an argument so it is printable,
+                // we copy the arguments to "logees".
+                // Otherwise, we use them directly to avoid allocating and throwing away memory.
+                var logees;
 
                 switch ( modelFunctionName ) {
 
                     case "creatingNode": // nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName, callback /* ( ready ) */
+                        logees = Array.prototype.slice.call( arguments );
                         logees[8] = undefined; // callback /* ( ready ) */
                         break;
 
                     case "creatingProperty":
+                        logees = Array.prototype.slice.call( arguments );
                         logees[3] && ( logees[3] = loggableScript( logees[3] ) ); // propertyGet
                         logees[4] && ( logees[4] = loggableScript( logees[4] ) ); // propertySet
                         break;
 
                     case "executing":
+                        logees = Array.prototype.slice.call( arguments );
                         logees[1] && ( logees[1] = loggableScript( logees[1] ) ); // scriptText
                         break;
 
@@ -55,13 +62,16 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
                         logees = undefined; // no logging for model.ticking()
                         break;
 
+                    default:
+                        logees = arguments;
+                        break;
                 }
 
                 if ( logees ) {
                     this.logger.tracex.apply( this.logger, [ modelFunctionName ].concat( logees ) );
                 }
 
-                return this.model[modelFunctionName].apply( this.model, arguments );
+                return this.model[ modelFunctionName ].apply( this.model, arguments );
             }
 
         };
