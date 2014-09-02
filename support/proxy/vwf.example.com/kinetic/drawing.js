@@ -158,7 +158,7 @@ this.down = function( eventData, nodeData, touch ) {
 
     }
 
-    var defaultProperties = function( groupParent, eventPoint ) {
+    var getDefaultProperties = function( groupParent, eventPoint ) {
         var retObj = {
             "visible": 'inherit',
             "fill": userState.drawing_color,
@@ -197,7 +197,7 @@ this.down = function( eventData, nodeData, touch ) {
         for ( var def in compExtends ) {
             groupDef.children[ def ] = {
                 "extends": compExtends[ def ],
-                "properties": defaultProperties( true, eventPointDown )
+                "properties": getDefaultProperties( true, eventPointDown )
             } 
         }
 
@@ -216,7 +216,7 @@ this.down = function( eventData, nodeData, touch ) {
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var shapeDef = {
             "extends": compExtends,
-            "properties": defaultProperties( false, eventPointDown )
+            "properties": getDefaultProperties( false, eventPointDown )
         };
 
         var self = this;
@@ -342,7 +342,6 @@ this.update = function( eventData, nodeData, upEvent ) {
                 break;
 
             case "line":
-                //drawingObject.position = eventPoint;
                 drawingObject.stroke = userState.drawing_color;
                 drawingObject.strokeWidth = userState.drawing_width;
                 drawingObject.points = [ 0, 0, diffX, diffY ];
