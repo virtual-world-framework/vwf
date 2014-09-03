@@ -185,9 +185,14 @@ this.down = function( eventData, nodeData, touch ) {
         privateState.initialDownPoint = eventPointDown;
         var parentPath = userState.drawing_parentPath + section ;
         var parents = this.find( parentPath );
+
+        // find was failing 9/2/14, and the code below 
+        // was a backup, going to leave this in until we feel good
+        // about the issues we saw are no longer a problem        
         if ( parents === undefined ) {
             parents = [ this.findChild( this, parentPath.split( '/' ) ) ];
         }
+
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var groupDef = {
             "extends": groupExtends,
@@ -218,9 +223,14 @@ this.down = function( eventData, nodeData, touch ) {
         privateState.initialDownPoint = eventPointDown;
         var parentPath = userState.drawing_parentPath + section;
         var parents = this.find( parentPath );
+
+        // find was failing 9/2/14, and the code below 
+        // was a backup, going to leave this in until we feel good
+        // about the issues we saw are no longer a problem
         if ( parents === undefined ) {
             parents = [ this.findChild( this, parentPath.split( '/' ) ) ];
         }
+        
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var shapeDef = {
             "extends": compExtends,
