@@ -38,7 +38,7 @@ this.clientJoin = function( moniker ) {
             "drawing_visible": 'inherit',
             "drawing_color": 'black',
             "drawing_width": 4,
-            "drawing_parentPath": '//',
+            "drawing_parentPath": '/',
             "drawing_opacity": 0.4,
             "nameIndex": 1,
             "fontSize": 16,
@@ -114,10 +114,10 @@ this.down = function( eventData, nodeData, touch ) {
 
     var compExtends = undefined;
     var groupExtends = undefined;
-    var section = "//shapes";
+    var section = "/shapes";
 
     if ( drawingMode === "freeDraw" ) {
-        section = "//lines";        
+        section = "/lines";        
     }
 
     switch ( drawingMode ) {
@@ -186,7 +186,7 @@ this.down = function( eventData, nodeData, touch ) {
         var parentPath = userState.drawing_parentPath + section ;
         var parents = this.find( parentPath );
         if ( parents === undefined ) {
-            parents = [ this.findChild( this, parentPath.split( '//' ).reverse() ) ];
+            parents = [ this.findChild( this, parentPath.split( '/' ) ) ];
         }
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var groupDef = {
@@ -216,10 +216,10 @@ this.down = function( eventData, nodeData, touch ) {
     } else if ( compExtends !== undefined ) {
 
         privateState.initialDownPoint = eventPointDown;
-        var parentPath = userState.drawing_parentPath + section ;
+        var parentPath = userState.drawing_parentPath + section;
         var parents = this.find( parentPath );
         if ( parents === undefined ) {
-            parents = [ this.findChild( this, parentPath.split( '//' ).reverse() ) ];
+            parents = [ this.findChild( this, parentPath.split( '/' ) ) ];
         }
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var shapeDef = {
@@ -511,9 +511,9 @@ this.touchEnd = function( eventData, nodeData ) {
 
 this.findChild = function( parent, names ) {
     if ( names.length > 0 ) {
-        var childName = names.pop();
+        var childName = names.shift();
         while ( childName === "" ) {
-            childName = names.pop();            
+            childName = names.shift();            
         }
         if ( parent.children[ childName ] ) {
             if ( names.length === 0 ) {
