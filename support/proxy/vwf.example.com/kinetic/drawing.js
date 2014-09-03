@@ -38,7 +38,7 @@ this.clientJoin = function( moniker ) {
             "drawing_visible": 'inherit',
             "drawing_color": 'black',
             "drawing_width": 4,
-            "drawing_parentPath": '//',
+            "drawing_parentPath": '/',
             "drawing_opacity": 0.4,
             "nameIndex": 1,
             "fontSize": 16,
@@ -114,10 +114,10 @@ this.down = function( eventData, nodeData, touch ) {
 
     var compExtends = undefined;
     var groupExtends = undefined;
-    var section = "//shapes";
+    var section = "/shapes";
 
     if ( drawingMode === "freeDraw" ) {
-        section = "//lines";        
+        section = "/lines";        
     }
 
     switch ( drawingMode ) {
@@ -183,7 +183,16 @@ this.down = function( eventData, nodeData, touch ) {
     if ( groupExtends !== undefined ) {
 
         privateState.initialDownPoint = eventPointDown;
-        var parents = this.find( userState.drawing_parentPath + section );
+        var parentPath = userState.drawing_parentPath + section ;
+        var parents = this.find( parentPath );
+
+        // find was failing 9/2/14, and the code below 
+        // was a backup, going to leave this in until we feel good
+        // about the issues we saw are no longer a problem        
+        if ( parents === undefined ) {
+            parents = [ this.findChild( this, parentPath.split( '/' ) ) ];
+        }
+
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var groupDef = {
             "extends": groupExtends,
@@ -212,7 +221,16 @@ this.down = function( eventData, nodeData, touch ) {
     } else if ( compExtends !== undefined ) {
 
         privateState.initialDownPoint = eventPointDown;
-        var parents = this.find( userState.drawing_parentPath + section );
+        var parentPath = userState.drawing_parentPath + section;
+        var parents = this.find( parentPath );
+
+        // find was failing 9/2/14, and the code below 
+        // was a backup, going to leave this in until we feel good
+        // about the issues we saw are no longer a problem
+        if ( parents === undefined ) {
+            parents = [ this.findChild( this, parentPath.split( '/' ) ) ];
+        }
+        
         var parent = parents.length > 0 ? parents[ 0 ] : this;
         var shapeDef = {
             "extends": compExtends,
@@ -499,4 +517,26 @@ this.touchMove = function( eventData, nodeData ) {
 
 this.touchEnd = function( eventData, nodeData ) {
     this.up( eventData, nodeData, true );
-}; //@ sourceURL=kinetic_drawing.js
+}; 
+
+this.findChild = function( parent, names ) {
+    if ( names.length > 0 ) {
+        var childName = names.shift();
+        while ( childName === "" ) {
+            childName = names.shift();            
+        }
+        if ( parent.children[ childName ] ) {
+            if ( names.length === 0 ) {
+                return parent.children[ childName ];
+            } else {
+                return this.findChild( parent.children[ childName ], names );                
+            }
+        }
+        else {
+            return undefined;
+        }
+    }
+    return undefined;
+}
+
+//@ sourceURL=kinetic_drawing.js

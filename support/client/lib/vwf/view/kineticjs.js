@@ -39,13 +39,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             "metaKey": e.evt.metaKey
         } ];
 
+        var stageId = undefined;
         if ( node && node.stage ) {
+            stageId = node.stage.getId();
             returnData.eventData.stage = [ node.stage.x, node.stage.y ];    
         }
 
         if ( propagate ) {
 
-            var pointerPickID = e.targetNode ? e.targetNode.getId() : stage.getId();
+            var pointerPickID = e.targetNode ? e.targetNode.getId() : stageId;
 
             returnData.eventNodeData = { "": [ {
                 pickID: pointerPickID,
