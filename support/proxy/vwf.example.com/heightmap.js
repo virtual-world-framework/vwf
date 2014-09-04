@@ -17,10 +17,10 @@ this.getHeight = function( x, y ) {
     var heightValue = this.getHeightmapValue( x1, y1 );
 
     // Convert that value into a height
-    // Height range is from 0 to ( 255 * 256 * 256 ) ... or 16711680
-    var heightFrom0to1 = heightValue / 16711680;
+    // Height range is from 0 to ( 256^3 - 1 ) ... or 16777215
+    var heightPercent = heightValue / 16777215;
     var zRange = this.maxWorldZ - this.minWorldZ;
-    return this.minWorldZ + heightFrom0to1 * zRange;
+    return this.minWorldZ + heightPercent * zRange;
 
     // Here starts the commented-out more accurate (though slower) trilinear interpolation version
 
@@ -66,9 +66,9 @@ this.getHeight = function( x, y ) {
 
     // // Convert that value into a height
     // // Height range is from 0 to ( 255 * 256 * 256 ) ... or 16711680
-    // var gFrom0to1 = g / 16711680;
+    // var gHeightPercent = g / 16711680;
     // var zRange = this.maxWorldZ - this.minWorldZ;
-    // return this.minWorldZ + gFrom0to1 * zRange;
+    // return this.minWorldZ + gHeightPercent * zRange;
 }
 
 this.getHeightmapValue = function( x, y ) {
