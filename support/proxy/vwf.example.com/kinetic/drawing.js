@@ -92,7 +92,7 @@ this.setClientUIState = function( stateObj ) {
 };
 
 this.getStageRelativePoint = function( e ) {
-    return [ e.page[ 0 ] - this.x, e.page[ 1 ] - this.y ];
+    return [ e.page[ 0 ] - e.stage[ 0 ], e.page[ 1 ] - e.stage[ 1 ] ];
 }
 
 this.down = function( eventData, nodeData, touch ) {

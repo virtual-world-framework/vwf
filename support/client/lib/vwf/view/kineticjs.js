@@ -27,6 +27,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             "timeStamp": e.evt.timeStamp,
             "location": [ eventPosition.x, eventPosition.y ],
             "stage": [ 0, 0 ],
+            "stageRelative": [ eventPosition.pageX, eventPosition.pageY ],
             "client": [ eventPosition.clientX, eventPosition.clientY ],
             "screen": [ eventPosition.screenX, eventPosition.screenY ],
             "layer": [ eventPosition.layerX, eventPosition.layerY ],
@@ -42,7 +43,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         var stageId = undefined;
         if ( node && node.stage ) {
             stageId = node.stage.getId();
-            returnData.eventData.stage = [ node.stage.x, node.stage.y ];    
+            returnData.eventData[ 0 ].stage = [ node.stage.x(), node.stage.y() ];
+            returnData.eventData[ 0 ].stageRelative = [ 
+                eventPosition.pageX - node.stage.x(),
+                eventPosition.pageY - node.stage.y()
+            ];    
         }
 
         if ( propagate ) {
