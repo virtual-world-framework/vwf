@@ -16,7 +16,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         },
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childIndex, childName ) {
+                                childSource, childType, childIndex, childName, callback ) {
 
             var protos = getPrototypes( this.kernel, childExtendsID );
 
@@ -26,6 +26,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                 // Create the local copy of the node properties
                 if ( this.nodes[ childID ] === undefined ){
+
+                    // Suspend the queue until the load is complete
+                    callback( false );
 
                     // Load the source file
                     var heightmapImage = new Image();
@@ -52,6 +55,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             width: heightmapImage.width,
                             height: heightmapImage.height,
                         }
+
+                        // Resume the queue now that the heightmap image has completely loaded
+                        callback( true );
                     }                  
                 }
             }
