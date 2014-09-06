@@ -279,11 +279,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "x":
-                            kineticObj.x( Number( propertyValue ) );
+                            kineticObj.modelX = Number( propertyValue );
+                            kineticObj.x( kineticObj.modelX );
                             break;
 
                         case "y":
-                            kineticObj.y( Number( propertyValue ) );
+                            kineticObj.modelY = Number( propertyValue );
+                            kineticObj.y( Number( kineticObj.modelY ) );
                             break;
 
                         case "width":
@@ -371,15 +373,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "position":
-                            if ( propertyValue instanceof Array ) { 
-                                kineticObj.setPosition( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
+                            if ( propertyValue instanceof Array ) {
+                                kineticObj.modelX = Number( propertyValue[ 0 ] );
+                                kineticObj.modelY = Number( propertyValue[ 1 ] ); 
                             } else {
-                                kineticObj.setPosition( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
-                            } 
-                            break;
-
-                        case "transform":
-                            kineticObj.setTransform( propertyValue );
+                                kineticObj.modelX = Number( propertyValue.x );
+                                kineticObj.modelY = Number( propertyValue.y );
+                            }
+                            kineticObj.setPosition( { 
+                                x: kineticObj.modelX, 
+                                y: kineticObj.modelY
+                            } );
                             break;
 
                         case "absolutePosition":
@@ -387,22 +391,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 kineticObj.setAbsolutePosition( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
                             } else {
                                 kineticObj.setAbsolutePosition( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
-                            } 
+                            }
+                            kineticObj.modelX = kineticObj.x();
+                            kineticObj.modelY = kineticObj.y();
                             break;
 
+                        case "transform":
                         case "absoluteTransform":
-                            kineticObj.getAbsoluteTransform( propertyValue );
-                            break;
-
                         case "absoluteOpacity":
-                            kineticObj.getAbsoluteOpacity( parseFloat( propertyValue ) );
-                            break;
-
                         case "absoluteZIndex":
-                            kineticObj.getAbsoluteZIndex( Number( propertyValue ) );
-                            break;
-
                         case "dragBoundFunc":
+                            this.logger.errorx( "settingProperty", "Cannot set property ", 
+                                propertyName );
+                            value = undefined;
                         default:
                             value = undefined;
                             break;
@@ -1255,11 +1256,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "x":
-                            value = kineticObj.x();
+                            value = kineticObj.modelX || 0;
                             break;
 
                         case "y":
-                            value = kineticObj.y();
+                            value = kineticObj.modelY || 0;
                             break;
 
                         case "width":
@@ -1345,19 +1346,34 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
                         
                         case "position":
-                            value = kineticObj.getPosition();
+                            value = {
+                                x: kineticObj.modelX || 0,
+                                y: kineticObj.modelY || 0
+                            };
                             break;
 
                         case "transform":
-                            value = kineticObj.getTransform();
+                            value = kineticObj.getTransform().m;
+                            value[ 4 ] = kineticObj.modelX || 0;
+                            value[ 5 ] = kineticObj.modelY || 0;
                             break;
 
                         case "absolutePosition":
-                            value = kineticObj.getAbsolutePosition();
+                            // TODO: Since we are allowing the view to drag objects independent of
+                            //       the model, we can't be sure that kinetic has the proper model
+                            //       value.  Therefore, we need to compute the math ourselves.
+                            // value = kineticObj.getAbsolutePosition();
+                            this.logger.errorx( "gettingProperty", "getter for absolutePosition",
+                                "is not implemented" );
                             break;
 
                         case "absoluteTransform":
-                            value = kineticObj.getAbsoluteTransform();
+                            // TODO: Since we are allowing the view to drag objects independent of
+                            //       the model, we can't be sure that kinetic has the proper model
+                            //       value.  Therefore, we need to compute the math ourselves.
+                            // value = kineticObj.getAbsoluteTransform();
+                            this.logger.errorx( "gettingProperty", "getter for absoluteTransform",
+                                "is not implemented" );
                             break;
 
                         case "absoluteOpacity":

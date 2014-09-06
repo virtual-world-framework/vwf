@@ -27,7 +27,11 @@ properties:
   zIndex:
   dragBoundFunc:
   absolutePosition:
-  absoluteTransform:
+  # TODO: Define in the kinetic model driver a setter for this property and a getter that does not 
+  #       directly call the kinetic getAbsoluteTransform since the value in kinetic might have 
+  #       view-specific values in it since we allow the views to have their stages dragged 
+  #       independently
+  # absoluteTransform:
   absoluteOpacity:
   absoluteZIndex:
 methods:
