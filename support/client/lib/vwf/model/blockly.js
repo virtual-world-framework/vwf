@@ -472,24 +472,21 @@ define( [ "module", "vwf/model", "vwf/utility",
 
         if ( node.interpreter !== undefined ) {
             var stepType = node.interpreter.step();
-
-            if ( stepType === "stepProgram" ) {
-                if ( node.interpreterStatus === "created" ) {
-                    self.kernel.fireEvent( node.ID, "blocklyStarted", [ true ] );
-                    node.interpreterStatus = "started";                        
+            while ( stepType && !self.state.executionHalted ) {
+                if ( stepType === "stepProgram" ) {
+                    if ( node.interpreterStatus === "created" ) {
+                        self.kernel.fireEvent( node.ID, "blocklyStarted", [ true ] );
+                        node.interpreterStatus = "started";                        
+                    }
                 }
-            } else if ( stepType === false ) {
+                stepType = node.interpreter.step();
+            }
+            if ( stepType === false ) {
                 if ( node.interpreterStatus === "started" ) {
                     self.kernel.setProperty( node.ID, "blockly_executing", false );
                     self.kernel.fireEvent( node.ID, "blocklyStopped", [ true ] );
                     node.interpreterStatus = "completed"; 
-                }               
-            }
-
-            if ( stepType && !self.state.executionHalted ) {
-                // I'm not sure I understand the use setTimeout here??
-                // anyone have an idea of why this would be better?
-                window.setTimeout( nextStep( node ), 0 );
+                }
             }
         }
     }
