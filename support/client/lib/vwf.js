@@ -322,6 +322,7 @@
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/model/kineticjs", linkedLibraries: [ "vwf/model/kinetic/kinetic.min" ],  active: false },
                 { library: "vwf/model/mil-sym", linkedLibraries: [ "vwf/model/mil-sym/sm-bc.min" ],  active: false },
+                { library: "vwf/model/heightmap", active: false },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
             	{ library: "vwf/view/editor", active: false },
@@ -362,6 +363,7 @@
                     { library: "vwf/model/sound", active: false },
                     { library: "vwf/model/kineticjs", active: false },
                     { library: "vwf/model/mil-sym", active: false },
+                    { library: "vwf/model/heightmap", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
