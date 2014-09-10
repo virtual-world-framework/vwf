@@ -51,7 +51,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                         // Store the heightmap on the node for future use
                         driver.nodes[ childID ] = {
-                            heightmap: heightmap,
+                            heightmap: heightmap.data,
                             width: heightmapImage.width,
                             height: heightmapImage.height,
                         }
