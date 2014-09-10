@@ -107,15 +107,19 @@ properties:
 
     get: |
       // Save copies to avoid repeated reads.
-      var duration = this.animationStopTime - this.animationStartTime,
-        rate = this.animationRate;
+      var startTime = this.animationStartTime;
+      var stopTime = this.animationStopTime;
+      var rate = this.animationRate;
+      var animationPause$ = this.animationPause$;
+      var animationStart$ = this.animationStart$;
+      var time = this.time;
       // Calculate the time from the start and current/pause times.
       var value = (
-        ( this.animationPause$ != null ? this.animationPause$ : this.time ) -
-        ( this.animationStart$ != null ? this.animationStart$ : this.time )
-      ) * rate + ( rate >= 0 ? this.animationStartTime : this.animationStopTime );
+        ( animationPause$ != null ? animationPause$ : time ) -
+        ( animationStart$ != null ? animationStart$ : time )
+      ) * rate + ( rate >= 0 ? startTime : stopTime );
       // Range limit the value.
-      value = Math.min( Math.max( this.animationStartTime, value ), this.animationStopTime );
+      value = Math.min( Math.max( startTime, value ), stopTime );
       // If changed since last seen, update and fire the changed event.
       if ( value !== this.animationTimeUpdated ) {
         this.animationTimeUpdated = value;

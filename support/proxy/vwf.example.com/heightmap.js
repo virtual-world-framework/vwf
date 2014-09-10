@@ -4,9 +4,11 @@ this.getHeight = function( x, y ) {
     // interpolation between the nearest four points to find the height
 
     // Convert world (x,y) into fractional array indices
-    var fractX = ( x - this.minWorldX ) / ( this.maxWorldX - this.minWorldX ) * 
+    var minWorldX = this.minWorldX;
+    var fractX = ( x - minWorldX ) / ( this.maxWorldX - minWorldX ) * 
         this.heightmapWidth;
-    var fractY = ( 1 - ( y - this.minWorldY ) / ( this.maxWorldY - this.minWorldY ) ) * 
+    var minWorldY = this.minWorldY;
+    var fractY = ( 1 - ( y - minWorldY ) / ( this.maxWorldY - minWorldY ) ) * 
         this.heightmapHeight;
 
     // Find the (x,y)
@@ -19,8 +21,9 @@ this.getHeight = function( x, y ) {
     // Convert that value into a height
     // Height range is from 0 to ( 256^3 - 1 ) ... or 16777215
     var heightPercent = heightValue / 16777215;
-    var zRange = this.maxWorldZ - this.minWorldZ;
-    return this.minWorldZ + heightPercent * zRange;
+    var minWorldZ = this.minWorldZ;
+    var zRange = this.maxWorldZ - minWorldZ;
+    return minWorldZ + heightPercent * zRange;
 
     // Here starts the commented-out more accurate (though slower) trilinear interpolation version
 
@@ -79,9 +82,10 @@ this.getHeightmapValue = function( x, y ) {
     var rIndex = 4 * ( this.heightmapWidth * y + x );
     var gIndex = rIndex + 1;
     var bIndex = gIndex + 1;
-    var rValue = this.heightmap.data[ rIndex ];
-    var gValue = this.heightmap.data[ gIndex ];
-    var bValue = this.heightmap.data[ bIndex ];
+    var heightmapData = this.heightmap;
+    var rValue = heightmapData[ rIndex ];
+    var gValue = heightmapData[ gIndex ];
+    var bValue = heightmapData[ bIndex ];
     return rValue + gValue * 256 + bValue * 65280;
 }
 
