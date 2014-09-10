@@ -212,8 +212,8 @@ this.down = function( eventData, nodeData, touch ) {
 
         var self = this;
         var selfMoniker = this.client;
-        var name = drawingMode + userState.nameIndex;
-        userState.nameIndex++;
+        var name = drawingMode + this.drawing_index;
+        this.drawing_index = this.drawing_index + 1;
         parent.children.create( name, groupDef, function( child ) {
             self.drawing_private[ selfMoniker ].drawingObject = child;
         } ); 
@@ -239,8 +239,8 @@ this.down = function( eventData, nodeData, touch ) {
 
         var self = this;
         var selfMoniker = this.client;
-        var name = drawingMode + userState.nameIndex;
-        userState.nameIndex++;
+        var name = drawingMode + this.drawing_index;
+        this.drawing_index = this.drawing_index + 1;
         parent.children.create( name, shapeDef, function( child ) {
             self.drawing_private[ selfMoniker ].drawingObject = child;
         } );
