@@ -332,6 +332,7 @@
                 { library: "vwf/configuration", active: true },
                 { library: "vwf/kernel/model", active: true },
                 { library: "vwf/model/javascript", active: true },
+<<<<<<< HEAD
                 { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], disabledBy: [ "vwf/adl/model/ammojs" ], active: false },
                 { library: "vwf/adl/model/ammojs", linkedLibraries: ["vwf/adl/model/ammo.js/ammo"], disabledBy: [ "vwf/model/jiglib" ], active: false },
                 { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs", "vwf/adl/model/threejs", "vwf/adl/view/threejs"], active: false },
@@ -344,6 +345,12 @@
                     "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"
                 ], disabledBy: ["vwf/model/glge", "vwf/view/glge","vwf/adl/model/threejs", "vwf/adl/view/threejs"], active: false },
                 { library: "vwf/adl/model/threejs", linkedLibraries: ["vwf/adl/model/threejs/three", "vwf/adl/model/threejs/ColladaLoader"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs", "vwf/model/glge", "vwf/view/glge"], active: false },
+=======
+                { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
+                { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs", "vwf/adl/model/threejs", "vwf/adl/view/threejs"], active: false },
+                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge","vwf/adl/model/threejs", "vwf/adl/view/threejs"], active: false },
+                { library: "vwf/adl/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/ColladaLoader"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs", "vwf/model/glge", "vwf/view/glge"], active: false },
+>>>>>>> Starts off the adl editor project
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
                 { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
