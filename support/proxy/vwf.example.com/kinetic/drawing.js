@@ -91,10 +91,6 @@ this.setClientUIState = function( stateObj ) {
     }
 };
 
-this.getStageRelativePoint = function( e ) {
-    return [ e.page[ 0 ] - e.stage[ 0 ], e.page[ 1 ] - e.stage[ 1 ] ];
-}
-
 this.down = function( eventData, nodeData, touch ) {
 
     if ( !this.isValid( this.drawing_clients ) || !this.isValid( this.drawing_clients[ this.client ] ) ) {
@@ -179,7 +175,7 @@ this.down = function( eventData, nodeData, touch ) {
         return retObj; 
     };
 
-    var eventPointDown = this.getStageRelativePoint( eventData );
+    var eventPointDown = eventData.stageRelative;
     if ( groupExtends !== undefined ) {
 
         privateState.initialDownPoint = eventPointDown;
@@ -295,7 +291,7 @@ this.update = function( eventData, nodeData, upEvent ) {
 
     if ( this.drawing_private[ this.client ].drawingObject !== null ) {
         
-        var eventPoint = this.getStageRelativePoint( eventData );
+        var eventPoint = eventData.stageRelative;
         var userState = this.drawing_clients[ this.client ];        
         var privateState = this.drawing_private[ this.client ];
         var drawingObject = privateState.drawingObject;

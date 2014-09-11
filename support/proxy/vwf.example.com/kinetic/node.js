@@ -27,9 +27,7 @@ this.toggleVisibilty = function() {
 
 this.update = function( eventData, nodeData ) {
     if ( this.draggable && ( this.pointerIsDown || this.touching ) ) {
-        if ( this.client === this.moniker ) {
-            vwf_view.kernel.setProperty( this.id, "position", [ this.x, this.y ] );
-        }
+        this.position = eventData.stageRelative;
     }
 }
 
