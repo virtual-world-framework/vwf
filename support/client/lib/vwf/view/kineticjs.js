@@ -45,8 +45,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             stageId = node.stage.getId();
             returnData.eventData[ 0 ].stage = [ node.stage.x(), node.stage.y() ];
             returnData.eventData[ 0 ].stageRelative = [ 
-                eventPosition.pageX - node.stage.x(),
-                eventPosition.pageY - node.stage.y()
+                ( eventPosition.pageX - node.stage.x() ) / node.stage.scaleX(),
+                ( eventPosition.pageY - node.stage.y() ) / node.stage.scaleY()
             ];    
         }
 
