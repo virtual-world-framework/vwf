@@ -1,0 +1,1035 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+
+extends: asset.vwf
+properties:
+  translation:
+  rotZ: 0
+  oldRotZ: 0         
+  test:  
+  motionStack: []
+  activeCycle: []
+  standingOnID: 
+  standingOnOffset: 
+  ___physics_activation_state: 4
+  ___physics_deactivation_time: 0
+  ___physics_velocity_linear: [ 0, 0, 0 ]
+  ___physics_velocity_angular: [ 0, 0, 0 ]
+  ___physics_factor_linear: [ 0, 0, 0 ]
+  ___physics_factor_angular: [ 0, 0, 0 ]
+  ___physics_enabled: true
+  ___physics_mass: 158.5
+methods:
+  update:
+  tick:
+  attached:
+  satProperty:
+  deletingNode:
+  setPosition:  
+  keyUp:
+  keyDown:
+  ready:  
+events:
+  pointerOver:
+  pointerOut:
+scripts:
+- |
+    this.attached = function()
+    {
+        //called when added to the scene, after initialize is called and parent is set.
+        //this.parent.avatarCreated(this.PlayerNumber);
+    }
+    this.ready = function()
+    {
+        var self = this;
+        this.kd = function(e,d){ return self.keyDown(e,d)};
+        this.ku = function(e,d){ return self.keyUp(e,d)};
+        this.Scene.bind('keyDown', this.kd);
+        this.Scene.bind('keyUp' , this.ku);
+        this.Scene.avatarCreated(this);
+    }
+    this.initialize = function(){
+
+        
+        if(this.id == 'character-vwf') return;
+      
+         this.DownKeys= [];
+        // this.motionStack= [];
+         this.jumpcounter = 0;
+        
+       
+       
+        
+       
+        
+        if(this.hasOwnProperty('PlayerNumber') == false) return;
+        var PlayerNumber = vwf.getProperty(this.id,'PlayerNumber');
+        
+        
+        if(!document[PlayerNumber + 'link'])
+        {
+            //this.parent.players.push(PlayerNumber); 
+            document[PlayerNumber +'link'] = this;
+            _UserManager.PlayerCreated(PlayerNumber,this.id);
+        }
+        
+       
+        
+        
+        this.originalvelocity = [0,0,0];
+        this.updateCallbacks = [];
+         if(document.PlayerNumber == PlayerNumber)
+          {
+            
+            
+            //findVWFscene().followObject(this);
+            
+          }
+         
+        
+          this.prerendercallback = this.placeNameTag.bind(this);
+          _dView.bind('postprerender',this.prerendercallback);
+          this.updatecounter = 0;
+          this.mesh = findChildViewNode(findscene(),this.id);
+          //debugger;
+          //this.mesh.sceneManagerIgnore();
+         // if(!this.mesh)
+           
+        //  this.mesh.children[0].children[0].children[0].position.z = -.85
+        //  this.mesh.children[0].children[0].children[0].updateMatrixWorld(true);
+          
+          var findSkin = function(root)
+          {
+              if(root instanceof THREE.SkinnedMesh) return root;
+              var found = null;
+              for(var i =0; i < root.children.length; i++)
+              {
+                found = findSkin(root.children[i]);
+                if(found) return found;
+              }
+
+          }
+
+          //this is a bad idea. The character controller should make no assumptions about the 
+          //structure of the asset that is loaded.
+          this.skin = findSkin(this.mesh);
+          if(this.skin)
+          {
+
+            if(this.skin.material.ambient)
+            {
+               this.skin.material.ambient.r = 1;
+               this.skin.material.ambient.g = 1;
+               this.skin.material.ambient.b = 1;
+            }
+          this.skin.isAvatar = true;
+          }
+          this.jumpcounter = 0.0;
+          //this.stand();
+         
+          this.createNameTag(PlayerNumber);
+          this.followOffset = [0,0,1.733];
+         
+          this.initCycles();
+        //  this.activeCycle = this.cycles.stand;
+          this.updateLoopStarted = false;
+          var now = performance.now();
+          this.lastUpdate = now;
+          //window.setTimeout(function(){document[PlayerNumber +'link'].startloop();},500);
+
+
+          this.pickoptions = {
+            filter:function(o){
+                if(o instanceof THREE.Line) return false;
+                return !(o.isAvatar === true || o.passable===true)
+              },maxDist: 2,
+              ignore:[this.mesh,_Editor.GetMoveGizmo()]
+            }
+    }
+    this.pointerOver = function(e)
+    {
+        
+    }
+    this.pointerOut = function(e)
+    {
+        
+    }
+    this.increment = function(cycle,steps)
+    {
+      cycle.current+=cycle.speed * steps;
+      if(cycle.current >= cycle.length && cycle.loop == true)
+          cycle.current = 0;
+      if(cycle.current < 0 && cycle.loop == true)
+          cycle.current = cycle.length;    
+      if(cycle.current >= cycle.length && cycle.loop == false)
+          cycle.current = cycle.length-1;
+       
+      return cycle.current + cycle.start;
+    }
+    this.initCycles = function()
+    {
+        
+        this.cycleInit = true;
+    }
+    this.createNameTag = function(PlayerNumber)
+    {
+      
+      $(document.body).append('<div class="nametag" id="'+"Player_" + ToSafeID(PlayerNumber) + 'label'+'"><div class="nametagname ignoreMouseLeave">'+PlayerNumber+'</div></div>')
+      var newdiv = $("#Player_" + ToSafeID(PlayerNumber) + 'label')[0];
+      var self = this;
+      $("#Player_" + PlayerNumber + 'label').click(function(){
+        setupPmWindow(self.PlayerNumber);
+      })
+      
+      newdiv.style.left = '0px';
+      //newdiv.style.top = '0px';
+      
+    
+      newdiv._offsetWidth = newdiv.offsetWidth;
+      $(newdiv).disableSelection();
+      this.nametag = newdiv;
+                 
+    }
+    this.deinitialize = function()
+    {
+       //findVWFscene().removeUpdateCallback(this.callbacknum);
+       _dView.unbind('postprerender',this.prerendercallback);
+        _UserManager.PlayerDeleted(this.PlayerNumber);
+       //this.deleteMe = true;            
+       $(this.nametag).remove();
+       this.Scene.unbind('keyDown', this.kd);
+       this.Scene.unbind('keyUp' , this.ku);
+       
+    }
+    this.placeNameTag = function(e,viewprojection,wh, ww)
+    {
+        
+      if(!this.ownerClientID)  
+        return;
+    
+      
+      var div = this.nametag;
+      var pos = this.transformAPI.getPosition();;
+      if(!pos) return;
+      pos = [pos[0],pos[1],pos[2]+1.75,1];
+         
+      var screen = MATH.mulMat4Vec4(viewprojection,pos);
+      screen[0] /= screen[3];
+      screen[1] /= screen[3];
+     
+      screen[0] /= 2;
+      screen[1] /= 2;
+      screen[2] /= 2;
+      screen[0] += .5;
+      screen[1] += .5;
+      
+  
+      screen[0] *= ww;
+      screen[1] *= wh;
+      
+      screen[1] = wh - screen[1];
+
+      div.style.top = (screen[1]  +   $("#index-vwf").offset().top) + 'px' ;
+      div.style.left = (parseInt($('#index-vwf').css('left')) || 0) + (screen[0] - div._offsetWidth/2)  +'px';
+     
+      
+      if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))
+      {
+            if(div.style.display != 'none')
+                div.style.display = 'none';
+      }
+      else
+      {
+          if((screen[2] > 10 || screen[2] < 0) && div.style.display != 'none')
+             div.style.display = 'none';
+          if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')
+             div.style.display = 'block';
+      }
+         
+         
+    }
+    this.startloop = function()
+    {
+        if(this.updateLoopStarted == false)
+        {
+            this.update(this.moniker);
+            this.updateLoopStarted = true;
+        }
+    }
+    this.filterContactsByNormal = function(contacts)
+    {
+       
+        var passed = []
+        var keys = [];
+        for(var i = 0; i < contacts.length; i++)
+        {
+            var c = contacts[i];
+            var id = c.norm.join(',');
+            if(keys.indexOf(id) == -1)
+            {   
+                keys.push(id);
+                passed.push(c);
+            }
+        }
+        return passed;
+        
+    }
+
+    //recurse a few times and try to distribute the total offset.
+    //if can't distribute enough offset, stop
+    //This algorithm deals the with following example. What if, in sliding along the wall, the sliding motion
+    //pushes you through another wall, Imagine walking into an inside corner, sliding along one wall until you hit the 
+    //corner. You need a recursive function to check that the slide along the wall vec did not need it's own slide along wall 
+    //test. At 5 steps, we sort of say, "Ok, you have well and truely hit a corner that you cant slide out of."
+    this.testRay =function(avatarPos,trans,depth,opts)
+    {
+        
+          //really no point going much deeper
+          if(depth == 3) return false;
+
+            var intersectfront = _SceneManager.CPUPick([avatarPos[0],avatarPos[1],avatarPos[2]],trans,opts);
+          var avatarPosChanged = true;
+          if(intersectfront)
+          {
+            //block when something is in front
+            if(intersectfront.distance < .5)
+            {
+              //Build a space tangent to the collision normal
+              var n = intersectfront.norm;
+              var u = [0,0,1];
+              var s = MATH.toUnitVec3(MATH.crossVec3(n,u));
+              var mat = 
+              [n[0]   ,s[0]   ,u[0]   ,0   ,
+               n[1]   ,s[1]   ,u[1]   ,0   ,
+               n[2]   ,s[2]   ,u[2]   ,0   ,
+               0   ,0   ,0   ,1   ];
+               //project the offset vec into a space tanget to the surface normal.
+               var matI = MATH.inverseMat4(mat);
+               var tOffset = MATH.mulMat4Vec3(mat,trans);
+               tOffset[0] = 0;
+               //flatten against X in tanget space, then transform back
+               //this basically 0's out motion along the collision normal
+               var newoffset = MATH.mulMat4Vec3(matI,tOffset);
+               //now, we recurse, tracing from the original position to the 
+               //position given by adding this modified vector to the original position 
+               var newpos = MATH.addVec3(avatarPos, newoffset);
+               var newoff = MATH.subVec3(newpos,avatarPos);
+               var temppos = [avatarPos[0],avatarPos[1],avatarPos[2]];
+               var subtrace = this.testRay(temppos,newoff,depth+1,opts);
+               //if subtrace returns true, the that new ray did not hit anything, or that new ray could be modified
+               //in the same manor to produce a proper offset that did not hit anything. So, temppos is best answer to 
+               //trying to move the given offset while sliding along walls
+               //if subtrace is false, then we couldn't find an answer that distributed the whole motion
+               //in less than 5 steps, so we'll use current newpos (which is not quite the requested distance from the start)
+               if(subtrace)
+               {
+                avatarPos[0] = temppos[0];
+                avatarPos[1] = temppos[1];
+                avatarPos[2] = temppos[2];
+               }else
+               {
+                avatarPos[0] = newpos[0];
+                avatarPos[1] = newpos[1];
+                avatarPos[2] = newpos[2];
+               }
+            }else
+            {
+              //no collision, you are free to move this distance with no slide along walls
+              avatarPos[0] += trans[0];
+              avatarPos[1] += trans[1];
+              avatarPos[2] += trans[2];
+            }
+          }else
+            {
+              //no collision, you are free to move this distance with no slide along walls
+              avatarPos[0] += trans[0];
+              avatarPos[1] += trans[1];
+              avatarPos[2] += trans[2];
+            }
+          return avatarPosChanged;
+    }
+    this.setPosition = function(trans)
+    {
+       if(!trans) return;
+       this.standinOnOffset = null;
+       this.standingOnID = null;
+       this.originalvelocity[2] = 0;
+       if(trans.length == 3)
+       {
+           this.transform[12] = trans[0];
+           this.transform[13] = trans[1];
+           this.transform[14] = trans[2];
+       }
+       if(trans.length == 16)
+       {
+           this.transform = trans;
+       }
+        
+    }
+    this.deletingNode = function(nodeID)
+    {
+        if(nodeID == this.standingOnID )
+        { 
+            this.standingOnOffset = null;
+            this.standingOnID = null;
+            this.originalvelocity[2] = -.01;
+        }
+    }
+    this.satProperty =function(nodeID,prop,val)
+    {
+
+        if(nodeID == this.standingOnID && prop == 'transform' && this.standingOnOffset)
+        { 
+            this.standingUpdate();
+        }
+
+    }
+
+    this.recordStandingOn = function(intersect)
+    {
+       
+       
+       this.standingOnID = null;
+       this.standingOnOffset = null
+       if(!intersect) return;
+       //should eventuall get to scene at worst;
+       var object = intersect.object;
+       if( intersect.object)
+       {
+         while(object && !object.vwfID)
+          object = object.parent;
+          //already standing on it, dont update offset vec, it's been done already
+          if(object)
+          {
+            if(this.standingOnID == object.vwfID) return;
+            this.standingOnID = object.vwfID;
+            this.updateStandingOn(this.transformAPI.getPosition());
+            }
+            else
+            {
+              this.standingOnID = null;
+            }
+       }else
+       {
+        this.standingOnID = null;
+       }
+    }
+    this.standingUpdate = function(newpos)
+    {
+       if(this.standingOnID)
+       {
+            var world = vwf.getProperty(this.standingOnID,'worldTransform');
+            //world = MATH.addVec3([world[12],world[13],world[14]],this.standingOnOffset.internal_val);
+            //this.transformAPI.setPosition([world[0],world[1],world[2]]);
+            var offset = Mat4.multMat(world,this.standingOnOffset.internal_val,[]);
+            this.transform = offset;
+            //this.originalvelocity = [0,0,0];
+       }
+    }
+    this.updateStandingOn = function(newpos)
+    {
+       if(this.standingOnID)
+       {
+         var world = vwf.getProperty(this.standingOnID,'worldTransform');
+         var iWorld = [];
+         Mat4.invert(world,iWorld);
+         var offset = Mat4.multMat(iWorld,this.transform.internal_val,[]);
+         this.standingOnOffset = offset; 
+       }
+    }
+    this.update = function(moniker)
+    {
+       
+       
+        if(!this.cycleInit)
+          this.initCycles();
+        this.updatecounter++;
+        var updateFreqDivisor = 1;
+        
+        if(this.id == 'character-vwf') return;
+       
+       this.standingUpdate();
+      
+        
+        
+          var backupr = this.rotation;
+          backupr = [0,0,1,this.rotZ/0.0174532925];
+        
+      
+        var standing = this.standing;
+        if(this.activeCycle[this.activeCycle.length-1])
+        {
+
+
+            var newframe = this.increment(this.cycles[this.activeCycle[this.activeCycle.length-1]],updateFreqDivisor);
+            newframe = Math.max(newframe,0);
+           
+            if(this.currentframe != newframe)
+            {
+                
+               
+               
+               //for(var i = 0; i < this.skin.morphTargetInfluences.length; i++)
+               //     this.skin.morphTargetInfluences[i] = 0;
+               
+               //this.skin.morphTargetInfluences[parseInt(newframe)] = 1;     
+               this.animationFrame = newframe;
+              
+            }
+            this.prevframe = this.currentframe;
+            this.currentframe = newframe;
+        }else
+        {
+        
+        
+        }
+        
+        
+        var backupt = this.transformAPI.getPosition();
+        var finalt = backupt.slice(0);
+        var originalpos = backupt.slice(0);
+        var originalpos2 = backupt.slice(0);
+       
+        if(this.motionStack.length == 0)
+            this.stand();
+        
+        var motionvec;
+        
+
+        
+        for(var i=0; i < this.motionStack.length; i++)
+        {
+            this.cycleName =  this.motionStack[i];
+            if(this.cycleName == 'turnright')
+            {
+                this.rotZ += -.07*updateFreqDivisor;
+               // this.mesh.setRotZ(this.rotZ);
+               backupr = [0,0,1,this.rotZ/0.0174532925];
+            }
+            if(this.cycleName == 'turnleft')
+            {
+                this.rotZ += .07*updateFreqDivisor;
+               // this.mesh.setRotZ(this.rotZ);
+               backupr = [0,0,1,this.rotZ/0.0174532925];
+            }
+             if(this.cycleName == 'straferight')
+            {
+                 motionvec = this.transformAPI.localToGlobalRotation([-.03*updateFreqDivisor,0,0]);
+            }
+            if(this.cycleName == 'strafeleft')
+            {
+                 
+                 motionvec = this.transformAPI.localToGlobalRotation([.03*updateFreqDivisor,0,0]);
+            }
+            if(this.cycleName == 'walk')
+            {
+                   
+                    motionvec = this.transformAPI.localToGlobalRotation([0,-.09*updateFreqDivisor,0]);
+            }
+            if(this.cycleName == 'walkback')
+            {
+                    motionvec = this.transformAPI.localToGlobalRotation([0,.09*updateFreqDivisor,0]);
+                   
+            }
+            if(this.cycleName == 'run')
+            {
+                    motionvec = this.transformAPI.localToGlobalRotation([0,-.18*updateFreqDivisor,0]);
+                    
+            }
+            
+            var jumpstart = 7;
+            
+            if(this.cycleName == 'jump')
+            {  
+                
+                if(Math.floor(this.jumpcounter) == jumpstart)
+                {
+                   this.originalvelocity[2] += .30;
+                }
+                
+                
+                if(this.jumpcounter > 30)
+                {
+                    this.removeMotion('jump');
+                    this.removeCycle('jump');
+                    this.jumpcounter  = 0;
+                  
+                }
+               
+                this.jumpcounter += 1;
+            }
+            
+        }
+        
+       // if(motionvec)
+        //    finalt = MATH.addVec3(motionvec,finalt);
+        
+        
+        
+            //if the character is not completely still, and they're not jumpping, then check their motion vector 
+            //for intersetions, and prevent penetration through objects
+            if((MATH.lengthVec3(this.originalvelocity) > .001 || motionvec || this.jumpcounter > jumpstart || this.inMotion('turnleft') || this.inMotion('turnright')))
+            {
+                //this is again, a bad idea. If we need to do this, pick priority should be part of the VWF infrastructure
+                if(this.skin)
+                {
+                  this.skin.PickPriority = -1;
+                }
+                
+                motionvec = motionvec ? motionvec : [0,0,0];
+                var testpos = MATH.subVec3(finalt,MATH.scaleVec3(motionvec,-.15));
+                
+                
+                var tracefrompoint = MATH.addVec3(finalt,[0,0,1]);
+
+                var changed = this.testRay(tracefrompoint,motionvec,0,this.pickoptions);
+                if(changed)
+                {
+                  finalt[0] = tracefrompoint[0];
+                  finalt[1] = tracefrompoint[1];
+                  finalt[2] = tracefrompoint[2] - 1;
+                  this.updateStandingOn(finalt);
+                }
+
+                
+
+                var falldist = 1000;
+               
+                
+                {
+                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,1.7]),[0,0,-1],this.pickoptions);
+                
+                
+               
+                falldist = intersect?intersect.distance:falldist;
+               
+                if(falldist && intersect)
+                {
+                   var object = intersect.object;
+               while(object && !object.vwfID)
+                object = object.parent;
+                //already standing on it, dont update offset vec, it's been done already
+                if(!object || this.standingOnID != object.vwfID) 
+                  this.recordStandingOn(null);
+
+
+                    
+                    var zdiff = (1.7 + standing) - falldist;
+                    
+                    if( this.originalvelocity[2] <= 0)
+                    {
+                      var zmove = zdiff;
+                      if(zdiff < -.03 )
+                      {
+                         zmove = this.originalvelocity[2] - 1.0/24; 
+                         
+                         finalt = MATH.addVec3(finalt, [0,0,zmove]);
+
+                         if(finalt[2] < intersect.point[2])
+                         {
+                           finalt[2] = intersect.point[2];
+                           this.originalvelocity[2] = 0;
+                           originalpos[2] = finalt[2];
+                           this.recordStandingOn(intersect);
+                           
+                         }
+                        
+                      }   
+                      else if(zdiff > .33 )
+                      {   
+                         
+                         finalt = [originalpos2[0],originalpos2[1],originalpos2[2]];
+                         this.originalvelocity[2] = 0;
+                         originalpos[2] = finalt[2];
+                         this.recordStandingOn(intersect);
+                          
+                      }
+                      else
+                      {
+
+                          //the 1.0 here is a fudge factor that allows for animated transitions between clamped heights.
+                          finalt = MATH.addVec3(finalt, [0,0,zmove/1.0]);
+                          this.originalvelocity[2] = 0;
+                          originalpos[2] = finalt[2];
+                          this.recordStandingOn(intersect);
+                          
+                      }
+                      }else
+                      {
+                        finalt = MATH.addVec3(finalt, [0,0,this.originalvelocity[2]- 1.0/24]);
+                        this.recordStandingOn(null);
+                      }
+                    
+                }else
+                {
+                  this.recordStandingOn(intersect);
+                }
+                _DEALLOC(intersect);
+              }
+              if(this.skin)
+                {
+                  this.skin.PickPriority = 1;
+                }  
+                 
+            }
+           
+            
+        //permenantly clamp to z=0 plane
+        if(finalt[2] < 0)
+            finalt = [finalt[0],finalt[1],0];
+        
+        // keep track of how fast they were moving at this frame, so we can accelerate properly
+        this.originalvelocity = MATH.subVec3(finalt,originalpos);
+    //      if(this.originalvelocity[2] < -.00001)
+    //         this.recordStandingOn(null);
+
+        //every 2 seconds, update the position and rotation that tend to run out of sync
+        //note that we could change the update mechanism to avoid getting out of sync
+        if(this.updatecounter > 180 && document["PlayerNumber"] == this.PlayerNumber)
+          {
+            
+            //if the system works properly, this is really a no-no
+            //vwf_view.kernel.setProperty(this.id,'transform',this.transform.internal_val,0,null);
+            //vwf_view.kernel.setProperty(this.id,'rotZ',this.rotZ,0,null);
+             this.updatecounter = 0;
+          }
+          
+        if(this.skin)
+                {
+        this.skin.PickPriority = 1;
+      }
+        this.tbak = finalt;
+        
+        this.transformAPI.setPosition(finalt);
+      
+          
+         var turn = (this.oldRotZ||0)-this.rotZ;
+
+           if(turn)
+            this.transformAPI.rotate(0,0,((this.oldRotZ||0)-this.rotZ)*-57.2957795,this.transformAPI.COORDINATES.PARENT);
+           this.oldRotZ = this.rotZ;
+
+        this.updateStandingOn(this.transformAPI.getPosition());
+
+         for(var i = 0; i < this.updateCallbacks.length; i++)
+        {
+        
+            this.updateCallbacks[i](this);
+        }
+
+    }
+    this.collisionOffset = function(offset,opos,depth)
+    {
+            
+            //if the character intersected something (as defined by the sphere)
+            var newpos = MATH.addVec3(opos,offset);
+            depth++;
+            if(depth > 10)
+                return opos;
+            if(MATH.lengthVec3(offset) < .01)
+                return opos;
+            
+            var spc = _SceneManager.SphereCast(newpos,.3,{ignore:[this.skin,_Editor.GetMoveGizmo(),_dGround,_dSky],filter:function(n){if(n.passable) return false;if(n.isAvatar) return false; return true;}});
+           
+             
+            if(spc.length > 0)
+            {
+                var uoffset = MATH.toUnitVec3(offset);
+                
+                
+                spc.sort(function(a,b){
+                
+                    return a.distance - b.distance});
+                    
+                    var hit = spc[0];
+                
+                    
+                    var normal = [hit.norm[0],hit.norm[1],hit.norm[2]];
+                    normal[2] = 0;
+                   
+                    normal = MATH.toUnitVec3(normal);
+                    
+                    //if moving into the contact
+                    if(MATH.dotVec3(normal,offset) > 0)
+                    {
+                        
+                        var up = [0,0,1];
+                        var side = MATH.crossVec3(normal,up);
+                        up = MATH.crossVec3(normal,side);
+                        //build a coord system with the normal as the x
+                        var collisioncoord = [
+                        normal[0],normal[1],normal[2], 0,
+                        side[0],side[1],side[2], 0,
+                        up[0],up[1],up[2], 0,
+                        0,0,0,1
+                        ];
+                        
+                        //put motion vector into this system
+                        var cc_offset = MATH.mulMat4Vec3(collisioncoord,offset);
+                        
+                        //remove motion relative to normal of contact
+                        cc_offset[0] = 0;
+                        
+                        //move back to world space
+                        offset = MATH.mulMat4Vec3(MATH.transposeMat4(collisioncoord),cc_offset);
+                        //finalt = MATH.addVec3(offset,MATH.scaleVec3(normal,-.001));
+                    
+               
+                        // offset = MATH.subVec3(opos,newpos);
+                        return this.collisionOffset(offset,opos,depth);  
+                    }                    
+            }
+                
+            
+           
+    
+        return newpos;
+    }
+    window.collide = this.collisionOffset;
+    this.tick = function()
+    {
+        
+      if(this.id == 'character-vwf') return;
+      try{
+        this.update();
+        }catch(e){}
+     
+        
+        
+    }
+     function findChildViewNode(node, name)
+     {
+        if(node == null)
+            return null;
+        if(node.vwfID == name)
+            return node;
+        
+        else if(node && node.children){
+            for(var i = 0; i < node.children.length; i++) {
+                var child = findChildViewNode(node.children[i],name);
+                if(child) return child;
+            }
+        }
+        return null;
+     }
+     function findVWFscene()
+     {
+         
+          return   vwf.models[0].model.nodes["index-vwf"];
+         
+         return null;
+     }
+     function findscene()
+     {
+             return vwf.views[0].state.scenes["index-vwf"].threeScene;
+     }
+     
+    this.markKeyDown =function(m)
+    {
+        if(this.DownKeys.indexOf(m) != -1) return;
+        this.DownKeys.push(m);
+    }
+    this.KeyIsDown=function(m)
+    {
+        return (this.DownKeys.indexOf(m) != -1);
+    }
+    this.markKeyUp=function(m)
+    {
+        if(this.DownKeys.indexOf(m) == -1) return;
+               this.DownKeys.splice(this.DownKeys.indexOf(m),1);
+    }
+    
+    this.addMotion =function(m)
+    {
+        if(this.motionStack.indexOf(m) != -1) return;
+        this.motionStack.push(m);
+    }
+    this.inMotion=function(m)
+    {
+        return (this.motionStack.indexOf(m) != -1);
+    }
+    this.removeMotion=function(m)
+    {
+       
+        if(this.motionStack.indexOf(m) == -1) return;
+               this.motionStack.splice(this.motionStack.indexOf(m),1);
+    }
+    this.addCycle =function(m)
+    {
+        if(this.activeCycle.indexOf(m) != -1) return;
+        this.activeCycle.push(m);
+    }
+    this.inCycle=function(m)
+    {
+        return (this.activeCycle.indexOf(m) != -1);
+    }
+    this.removeCycle=function(m)
+    {
+        if(this.activeCycle.indexOf(m) == -1) return;
+               this.activeCycle.splice(this.activeCycle.indexOf(m),1);
+    }
+    this.exclusiveMotion=function(m)
+    {
+        this.motionStack = [m];
+    }     
+    this.walk = function()
+    {
+        if(this.inMotion('walk'))return;
+        if(this.inMotion('jump'))return;
+        this.addMotion('walk');
+        this.removeCycle('walk');
+        this.addCycle('walk');
+
+    }
+    this.walkback = function()
+    {
+        if(this.inMotion('walkback'))return;
+        if(this.inMotion('jump'))return;
+        this.addMotion('walkback');
+        this.removeCycle('walkback');
+        this.addCycle('walkback');
+    }
+    this.run = function()
+    {
+        if(this.inMotion('run'))return;
+        if(this.inMotion('jump'))return;
+        this.addMotion('run');
+        this.removeCycle('run');
+        this.addCycle('run');
+    }
+    this.cancelRun = function()
+    {
+        if(!this.inMotion('run'))return;
+        this.removeMotion('run');
+        this.removeCycle('run');
+        if(this.inMotion('walk'))
+        { 
+            this.removeMotion('walk');
+            this.walk();
+        }
+    }
+    this.stand = function()
+    {
+        this.motionStack = [];
+        this.removeCycle('stand');
+        this.addCycle('stand');
+    }
+    this.resetCycle = function(cycle)
+    {
+      cycle.current = 0;
+    }
+    this.jump = function()
+    {
+        if(this.inMotion('walkback'))return;
+        if(this.inMotion('jump'))return;
+        this.addMotion('jump');
+        this.jumpcounter = 0;
+        this.resetCycle(this.cycles.jump);
+        this.removeCycle('jump');
+        this.addCycle('jump');
+        this.jumpstart = this.transformAPI.getPosition()[2];
+       
+    }   
+    this.runningjump = function()
+    {
+       
+        if(this.inMotion('jump'))return;
+        this.addMotion('jump');
+        this.jumpcounter = 0;
+        this.resetCycle(this.cycles.runningjump);
+        this.removeCycle('runningjump');
+        this.addCycle('runningjump');
+       
+    }      
+
+    this.keyUp = function(e)
+         {          
+          
+             if(this.id == 'character-vwf') return  false;
+            if(vwf.client() != this.ownerClientID) return  false;
+            if(!e.keysDown.W && !e.keysDown.uparrow)
+             {   this.removeMotion('walk'); this.removeCycle('walk');}
+            if(!e.keysDown.S && !e.keysDown.downarrow)
+                {   this.removeMotion('walkback'); this.removeCycle('walkback');} 
+            if(!e.keysDown.D)
+                {this.removeMotion('straferight'); this.removeMotion('strafeleft'); this.removeCycle('straferight'); this.removeCycle('strafeleft');}
+            if(!e.keysDown.C && !e.keysDown.rightarrow)
+                {this.removeMotion('turnright'); this.removeMotion('turnleft'); this.removeCycle('turnright'); this.removeCycle('turnleft');}    
+            if(!e.keysDown.A  )
+                {this.removeMotion('strafeleft');this.removeMotion('straferight'); this.removeCycle('strafeleft');this.removeCycle('straferight');}
+            if(!e.keysDown.Z && !e.keysDown.leftarrow)
+                {this.removeMotion('turnleft'); this.removeMotion('turnright'); this.removeCycle('turnleft'); this.removeCycle('turnright');}        
+            if(!e.keysDown.W  && !e.keysDown.uparrow && this.inMotion('run'))
+                this.cancelRun(); 
+
+                
+            this.pauseSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3');
+
+
+            return false;          
+            
+         }
+    this.keyDown = function(e)
+         {
+           
+           //dont allow ctrl keys - any time the ctrl is down, it's stuff for the editor
+           if(e.mods.ctrl) return false;    
+
+            if(this.id == 'character-vwf') return  false;
+           if(vwf.client() != this.ownerClientID) return  false;
+            
+            if(e.keysDown.W || e.keysDown.uparrow)
+            {
+                
+                this.walk();
+
+            }
+            if(e.keysDown.S || e.keysDown.downarrow)
+                this.walkback();
+            if(e.keysDown.space && !e.mods.shift)
+            {
+                if(!this.inMotion('run'))
+                    this.jump();
+                else
+                    this.runningjump();
+            }
+           // if(e.keysDown.T  )
+           //    { this.originalvelocity = [0,0,.25]; }
+
+            if(e.keysDown.D  && !this.inMotion('walkback'))
+               { this.addMotion('straferight');  this.addCycle ('straferight');  }
+            if(e.keysDown.D && this.inMotion('walkback'))
+               { this.addMotion('strafeleft');  this.addCycle ('strafeleft');  }
+            if(e.keysDown.A && !this.inMotion('walkback'))
+               { this.addMotion('strafeleft');    this.addCycle ( 'strafeleft');   }
+            if(e.keysDown.A && this.inMotion('walkback'))
+               { this.addMotion('straferight');   this.addCycle ( 'straferight');   }
+               
+             if((e.keysDown.C || e.keysDown.rightarrow) && !this.inMotion('walkback'))
+               { this.addMotion('turnright');   }
+            if((e.keysDown.C || e.keysDown.rightarrow) && this.inMotion('walkback'))
+               { this.addMotion('turnleft');    }
+            if((e.keysDown.Z || e.keysDown.leftarrow) && !this.inMotion('walkback'))
+               { this.addMotion('turnleft');      }
+            if((e.keysDown.Z || e.keysDown.leftarrow )&& this.inMotion('walkback'))
+               { this.addMotion('turnright');    }
+            if(e.mods.shift && e.keysDown.W)
+                this.run();  
+
+          
+            this.playSound('./vwfDataManager.svc/datafile/sounds/footsteps.mp3',true,5);
+            
+            return false;
+         }
+    

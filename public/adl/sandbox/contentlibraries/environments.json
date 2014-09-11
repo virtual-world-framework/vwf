@@ -1,0 +1,22 @@
+{
+	"Grassy Plain":{
+		"url":"./contentlibraries/environments/vwf/grassyplain.vwf.json",
+		"preview":"./contentlibraries/environments/thumbs/grassyplain.png",
+		"type":"environment"
+	},
+	"Desert Sunset":{
+		"url":"./contentlibraries/environments/vwf/desertsunset.vwf.json",
+		"preview":"./contentlibraries/environments/thumbs/desertsunset.png",
+		"type":"environment"
+	},
+	"Space":{
+		"url":"./contentlibraries/environments/vwf/space.vwf.json",
+		"preview":"./contentlibraries/environments/thumbs/space.png",
+		"type":"environment"
+	},
+	"Night":{
+		"url":"./contentlibraries/environments/vwf/night.vwf.json",
+		"preview":"./contentlibraries/environments/thumbs/night.png",
+		"type":"environment"
+	}
+}

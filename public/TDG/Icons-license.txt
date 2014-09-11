@@ -1,0 +1,44 @@
+draw-eraser-2.png was created by: Oxygen Icons 4.3.1 (KDE) (oxygen),  http://www.oxygen-icons.org/
+And downloaded from: http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/draw-eraser-2.png
+
+License: http://commons.wikimedia.org/wiki/Commons:GNU_Free_Documentation_License_1.2
+License: http://creativecommons.org/licenses/by-sa/3.0/deed.en
+
+================================================================================================================
+
+transform-move.png was created by: Oxygen Icons 4.3.1 (KDE) (oxygen),  http://www.oxygen-icons.org/
+And downloaded from: http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/transform-move.png
+
+License: http://commons.wikimedia.org/wiki/Commons:GNU_Free_Documentation_License_1.2
+License: http://creativecommons.org/licenses/by-sa/3.0/deed.en
+
+================================================================================================================
+
+map-add-icon-21423.png was created by: FatCow,  http://www.fatcow.com/
+And downloaded from: http://www.iconspedia.com/icon/map-add-icon-21423.html
+
+License: http://commons.wikimedia.org/wiki/Commons:GNU_Free_Documentation_License_1.2
+License: http://creativecommons.org/licenses/by-sa/3.0/deed.en
+
+================================================================================================================
+
+The following are under Public Domain license:
+
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/devices/media-floppy-3.png
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/document-open-5.png
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/document-save-as-3.png
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/edit-delete-3.png
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/edit-undo-4.png
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/list-add-3.png
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/list-remove-3.png
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/mimetypes/image-x-generic.png
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/places/tango-style/folder.png
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/document-new-4.png
+
+================================================================================================================
+
+The following are under unknown license:
+http://openiconlibrary.sourceforge.net/gallery2/?./Icons/actions/edit-delete-4.png
+
+
+

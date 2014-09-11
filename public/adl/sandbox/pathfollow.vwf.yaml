@@ -1,0 +1,77 @@
+extends: 'http://vwf.example.com/behavior.vwf'
+properties:
+  Active: true
+  type: behavior
+  Axis: Z
+  NotProto: null
+  DisplayName: PathFollow
+  EditorData:
+    Active:
+      property: Active
+      displayname: Active
+      type: check
+    Speed:
+      property: Speed
+      displayname: Speed
+      type: slider
+      min: -20
+      max: 20
+      step: 1
+    Path:
+      property: Path
+      displayname: Path
+      type: nodeid
+    follow:  
+      property: follow
+      displayname: follow
+      type: check
+    followaxis:
+      displayname: follow axis
+      property: lookatVec
+      type: choice
+      labels: 
+        - X
+        - Y
+        - Z
+      values:
+        - X
+        - Y
+        - Z   
+    followup:
+      displayname: follow axis
+      property: lookatUp
+      type: choice
+      labels: 
+        - X
+        - Y
+        - Z
+      values:
+        - X
+        - Y
+        - Z         
+  Speed: 0.1
+  Path: line ID
+  counter: 0
+  lookatVec: 'Y'
+  lookatUp: 'Z'
+  follow: false
+methods:
+  initialize: "              this.findviewnode = function(id)\n    {\n        for (var i = 0; i < vwf.views.length; i++)\n        {\n            if (vwf.views[i] && vwf.views[i].state && vwf.views[i].state.nodes && vwf.views[i].state.nodes[id] && vwf.views[i].state.nodes[id].glgeObject) return vwf.views[i].state.nodes[id].glgeObject;\n            if (vwf.views[i] && vwf.views[i].state && vwf.views[i].state.scenes && vwf.views[i].state.scenes[id] && vwf.views[i].state.scenes[id].glgeScene) return vwf.views[i].state.scenes[id].glgeScene;\n\n\n        }\n        return null;\n    };\n\n    "
+  tick: |
+    if(!this.owner) return;       
+    if (this.Active)    {
+        if (!this.counter)
+            this.counter = 0;
+        this.counter++;
+        var length = vwf.callMethod(this.Path, 'getLength');
+        var seconds = this.counter * 3 / 10;
+        var dist = (seconds * this.Speed);
+        var percent = dist / length;
+        if (percent > 1)
+            percent = percent - Math.floor(percent);
+        var point = vwf.callMethod(this.Path, 'pathPercent', [percent]);
+        var point2 = vwf.callMethod(this.Path, 'pathPercent', [percent+.001]);
+        this.parent.transformAPI.setPosition(point);
+        if(this.follow)
+        this.parent.transformAPI.lookat(point2,'',this.lookatVec,this.lookatUp);
+    }

@@ -1,0 +1,31 @@
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+  quickUnits: [] 
+  favoriteUnits: [] 
+  recentUnits: [] 
+methods:
+  addQuickUnit: 
+  deleteQuickUnit: 
+events: 
+  quickUnitAdded: 
+  quickUnitDeleted: 
+  favoriteUnitAdded: 
+  favoriteUnitDeleted: 
+  recentUnitAdded: 
+  recentUnitDeleted: 
+scripts: 
+- |
+  this.addQuickUnit = function( unitID, unitObject, unitModifiers ) {
+     this.quickUnits[ unitID ] = unitObject;
+     this.quickUnits = this.quickUnits;
+  }
+  
+  this.deleteQuickUnit = function( unitID ) {
+    if ( this.quickUnits[unitID] ) {
+      delete this.quickUnits[unitID];
+    }
+  }
+
+  this.initialize = function() {
+  } //@ sourceURL=toolbar.vwf

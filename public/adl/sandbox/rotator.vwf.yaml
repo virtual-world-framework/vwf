@@ -1,0 +1,40 @@
+extends: 'http://vwf.example.com/behavior.vwf'
+properties:
+  Active: true
+  Axis: Z
+  NotProto: null
+  Amount: -4
+  EditorData:
+    Active:
+      property: Active
+      displayname: Active
+      type: check
+    Amount:
+      property: Amount
+      displayname: Amount
+      type: slider
+      min: -20
+      max: 20
+      step: 1
+    Axis:
+      property: Axis
+      displayname: Axis
+      type: choice
+      labels:
+        - X
+        - Y
+        - Z
+      values:
+        - X
+        - Y
+        - Z
+    Local:
+      property: Local
+      displayname: 'Local Coordinates'
+      type: check
+  DisplayName: Rotator
+  type: behavior
+  Local: false
+methods:
+  initialize: "   this.findviewnode = function(id)\n    {\n    \tfor(var i =0; i<vwf.views.length;i++)\n    \t{\n    \t\tif(vwf.views[i] && vwf.views[i].state && vwf.views[i].state.nodes && vwf.views[i].state.nodes[id] && vwf.views[i].state.nodes[id].glgeObject ) return vwf.views[i].state.nodes[id].glgeObject ;\n    \t\tif(vwf.views[i] && vwf.views[i].state && vwf.views[i].state.scenes && vwf.views[i].state.scenes[id] && vwf.views[i].state.scenes[id].glgeScene ) return vwf.views[i].state.scenes[id].glgeScene ;\n    \t\t\n    \t\t\n    \t}\n    \treturn null;\n    };    \n    \n "
+  tick: "if(!this.owner) return; if (this.Active)\n    {\n        var axis;\n        if (this.Axis == 'X')\n            axis = [1, 0, 0];\n        if (this.Axis == 'Y')\n            axis = [0, 1, 0];\n        if (this.Axis == 'Z')\n            axis = [0, 0, 1];\n\n        if (this.Local === false)\n        {\n\n            var worldmat = _Editor.findviewnode(this.parent.id).matrix.clone().elements;\n            worldmat[3] = worldmat[7] = worldmat[11] = 0;\n            worldmat = MATH.inverseMat4(worldmat);\n            axis = MATH.mulMat4Vec3(worldmat, axis);\n\n        }\n        var q = MATH.quatFromAxisAngle(axis, this.Amount / 100);\n        var mat = MATH.mat4FromQuat(q);\n        this.parent.transform = MATH.mulMat4(mat, this.parent.transform);\n    }"

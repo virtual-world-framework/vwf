@@ -1,0 +1,192 @@
+<div class="row">
+	<div class="col-md-3">
+		<h3 data-bind="text:currentAdminItem() == false?'Users':currentAdminItem().Username"></h3>
+	</div>
+</div>
+<div class="row" data-bind="visible:currentAdminItem() == false">
+	<div class="col-md-4">
+		<a data-bind="click:deleteSelected" href="">Delete Selected</a><br/><br/>
+		<a href="{{root}}/admin/worlds">Worlds List</a><br/>
+		<a href="{{root}}/admin">Admin Page</a>
+	</div>
+	<div class="adminDisplayList col-md-4">
+		<table class="table table-striped" style="border: 1px solid #ddd;">
+			<tr>
+				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" class="checkAllBox" data-bind="click:handleSelectAll" /></th>
+				<th style="border:none; background:#FFF">Name</th>
+			</tr>
+			<tbody data-bind="foreach:adminDisplayList" style="border:none">
+				<td><input type="checkbox" class="checkboxes" /></td>
+				<td><a data-bind="text:$data.Username, attr:{href:'#'+$data.Username}" href=""></a></td>
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="row" data-bind="visible:currentAdminItem() != false">
+	<div class="col-md-4">
+		<a href="#">View full list of users</a><br/><br/>
+		<a href="#" data-bind="click:deleteSelectedWorlds">Delete Selected</a>
+	</div>
+	<div class="adminDisplayList col-md-4">
+		<form> 
+			<div>
+				<span>Change password:</span>
+				<input type="text" style="float:right;width:60%;" class="form-control" placeholder="In progress" /><br/><br/>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="row" style="margin-top:20px;" data-bind="visible:currentAdminItem() != false">
+	<div class="col-md-offset-4 col-md-4" style="border-top:1px #eee solid;padding-top:20px;">
+		<table class="table table-striped" style="border: 1px solid #ddd;padding-top:20px;">
+			<tr>
+				<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllWorldBox" class="checkAllBox" data-bind="click:handleSelectAll" /></th>
+				<th style="border:none; background:#FFF">World Title</th>
+			</tr>
+			<tbody data-bind="foreach:userWorlds" style="border:none">
+				<td><input type="checkbox" class="worldCheckboxes" /></td>
+				<td><a data-bind="text:$data.title, attr:{href:'{{root}}/admin/worlds#'+$data.id}" href=""></a></td>
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="row"  data-bind="visible:currentAdminItem() != false">
+	<div class="col-md-offset-4 col-md-4" style="border-top:1px solid #eee;padding-top:20px;">
+		<table class="table table-striped" style="border: 1px solid #ddd;padding-top:20px;">
+			<tr>
+				<th style="border:none; background:#FFF">Item Title</th>
+				<th style="border:none; background:#FFF">Key</th>
+			</tr>
+			<tbody data-bind="foreach:inventoryItems" style="border:none">
+				<td><a data-bind="text:$data.title" href=""></a></td>
+				<td><span data-bind="text:$data.key"></span></td>
+			</tbody>
+		</table>
+	</div>
+</div>
+<script>
+	vwfPortalModel.userWorlds = ko.observableArray([]);
+	vwfPortalModel.inventoryItems = ko.observableArray([]);
+	
+	var getCurrentUserInfo = function(){
+	
+		if(vwfPortalModel.currentAdminItem().Username){
+			$.post(root + '/data/get_user_info', JSON.stringify(vwfPortalModel.currentAdminItem()), function(data){
+				
+				var tempArr = [];
+				data = JSON.parse(data);
+				
+				for(var key in data[0]){
+					
+					data[0][key].id = key.substr(13,16);
+					tempArr.push(data[0][key]);				
+				}
+				
+				vwfPortalModel.userWorlds(tempArr);
+				vwfPortalModel.inventoryItems(data[1]);
+				console.log(tempArr);
+			});
+		}
+	};
+	
+	$.post(root + '/data/get_users', function(o){
+		o = JSON.parse(o);
+		var newObject = [];
+		
+		for(var i = 0; i < o.length; i++){
+			if(o[i]){
+				newObject.push(o[i]);
+			}
+		}
+
+		vwfPortalModel.adminDisplayList(newObject);
+		handleHash("Username");
+		getCurrentUserInfo();
+	}); 
+	
+
+	
+	vwfPortalModel.deleteSelected = function(data){
+		
+		var tempUserArr = [], tempArr = [], cacheQuery = $('input:checked').filter('.checkboxes');
+		for(var i = 0; i < cacheQuery.length; i++){
+			tempUserArr.push(ko.dataFor(cacheQuery[i]));
+			tempArr[i] = tempUserArr[i].Username ? tempUserArr[i].Username : tempUserArr[i];
+		}
+		
+		//Make the request to the server to delete these users
+		/* $.post(root + '/data/delete_users', JSON.stringify(tempArr), function(o){
+			
+			for(var i in tempUserArr){
+				vwfPortalModel.adminDisplayList.remove(tempUserArr[i]);
+			}
+		});
+		*/
+		$.ajax ({
+   			url: root + '/data/delete_users',
+    		type: "POST",
+    		data: JSON.stringify(tempArr),
+    		dataType: "json",
+    		contentType: "application/json; charset=utf-8",
+    		complete: function(o){
+			
+			for(var i in tempUserArr){
+				vwfPortalModel.adminDisplayList.remove(tempUserArr[i]);
+			}
+	}
+
+});
+
+
+		console.log("Delete users ", tempUserArr);
+		$('input').prop("checked", false);
+		vwfPortalModel.setSelectAll(false);
+	}; 	
+	
+	vwfPortalModel.updateUser = function(e){
+		//Make the request to the server to update these users
+		$.post(root + '/data/update_user', JSON.stringify(vwfPortalModel.currentAdminItem()), function(o){
+			console.log("done");
+		});
+	}; 
+	
+	vwfPortalModel.deleteSelectedWorlds = function(data){
+			
+		var tempWorldArr = [], dataSendArr = [], tempStr = '', cacheQuery = $('input:checked').filter('.worldCheckboxes');
+		for(var i = 0; i < cacheQuery.length; i++){
+			tempStr = ko.dataFor(cacheQuery[i]).id;
+			
+			if(tempStr){
+				tempWorldArr.push(tempStr);
+				dataSendArr.push('_adl_sandbox_' + tempStr + '_');
+			}
+		}
+		
+		console.log("Delete worlds ", tempWorldArr, dataSendArr);
+
+		//Make the request to the server to delete these worlds
+		$.post(root + '/data/delete_worlds', JSON.stringify(dataSendArr), function(o){
+			
+			for(var i in tempWorldArr){
+				for(var g in vwfPortalModel.userWorlds()){
+					if(vwfPortalModel.userWorlds()[g].id == tempWorldArr[i]){
+						vwfPortalModel.userWorlds.splice(g, 1);
+					}
+				}
+			}
+		});
+		
+		$('input').prop("checked", false);
+		vwfPortalModel.setSelectAll(false);
+	}; 
+	
+	window.onhashchange = function(){
+		handleHash("Username");
+		getCurrentUserInfo();
+	};
+	
+	$(document).ready(function(){	
+		ko.applyBindings(vwfPortalModel);
+		getLoginInfo();
+	});
+</script>

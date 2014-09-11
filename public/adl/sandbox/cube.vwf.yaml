@@ -1,0 +1,177 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+
+extends: http://vwf.example.com/node3.vwf
+properties:
+methods:
+events:
+  pointerOver:
+  pointerOut:
+  pointerUp:
+  pointerDown:
+  pointerMove:
+  pointerClick:
+scripts:
+- |
+    this.initialize = function(){
+        
+        
+        if(this.uri == "cube.vwf")
+            return;
+        
+        var size = vwf.getProperty(this.id,'size');
+         
+        var hx = size[0]/2;
+        var hy = size[1]/2;
+        var hz = size[2]/2;
+        
+        var planemesh = new MATH.Mesh();
+        var planeobj = new MATH.Object();
+        planeobj.setMesh(planemesh);
+        
+        var positions = [
+        hx,hy,hz, 
+        hx,hy,-hz, 
+        hx,-hy,hz, 
+        hx,-hy,-hz,
+        -hx,hy,hz,
+        -hx,hy,-hz, 
+        -hx,-hy,hz, 
+        -hx,-hy,-hz];
+        var facenormals = [
+        0,0,1, 
+        0,0,-1,
+        1,0,0,      
+        -1,0,0,
+        0,1,0,
+        0,-1,0];
+        var colors = [];
+        for(var i = 0; i < positions.length; i++)
+            colors.push((positions[i]+500)/1000);
+        var uvs = [0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,1];
+        var indexes = [0,2,6,6,4,0,
+                      1,3,7,7,5,1,
+                      0,1,3,3,2,0,
+                      4,5,7,7,6,4,
+                      0,1,5,5,4,0,
+                      2,3,7,7,6,2];
+                  
+              
+        planemesh.setPositions(DeindexPadArray(positions,indexes,3,0,0));
+        planemesh.setVertexColors(DeindexPadArray(colors,indexes,3,1,1));
+        planemesh.setFaces(GenerateCountingBuffer(0,indexes.length));
+        planemesh.setUV(DeindexPadArray(uvs,indexes,2,0,0));
+        planemesh.setNormals(DefaceNormals(facenormals));
+        
+        
+        
+        //planeobj.vwfID = this.id;
+        var scene = findscene();
+        vwf.views[0].state.nodes[this.id].MATHObject.addChild(planeobj);
+        //findscene().addChild(vwf.views[0].state.nodes[this.id].MATHObject);
+        
+        
+        
+    }
+    this.pointerOver = function(e)
+    {
+        
+        
+        //console.log(this.id + 'this.pointerOver from ' + vwf.client() );
+    }
+    this.pointerOut = function(e)
+    {
+        //console.log(this.id + 'this.pointerOut from ' + vwf.client() );
+    }
+    this.pointerMove = function(e)
+    {
+        //console.log(this.id + 'this.pointerMove from ' + vwf.client() );
+    }
+    this.pointerClick = function(e)
+    {
+        //if(vwf.client() == vwf.moniker())
+        //    SelectObject(this);
+        //console.log(this.id + 'this.pointerClick from ' + vwf.client() );
+        
+    }
+    this.pointerDown = function(e)
+    {
+        //console.log(this.id + 'this.pointerDown from ' + vwf.client() );
+    }
+    this.pointerUp = function(e)
+    {
+        //console.log(this.id + 'this.pointerUp from ' + vwf.client() );
+    }
+    
+    function DeindexPadArray(array,indexes,size,padding,pad)
+    {
+        
+        var result = [];
+        for(var i = 0; i < indexes.length; i++)
+        {
+            for(var j = 0; j < size; j++)
+            result.push(array[(indexes[i]*size)+ j]);
+            
+            for(var j = 0; j < padding; j++)
+            result.push(pad);
+        }
+        return result;
+    }
+    function DefaceNormals(normals)
+    {
+        
+        var result = [];
+        for(var i = 0; i < 6; i++)
+        {
+            for(var k = 0; k < 6; k++)
+            {
+                for(var j = 0; j < 3; j++)
+                    result.push(normals[(i*3)+ j]);
+            } 
+        }
+        return result;
+    }
+    function GenerateCountingBuffer(start,count)
+    {
+        var result = [];
+        for(var i = 0; i < count; i++)
+        {
+            result.push(i);
+        }
+        return result;
+    }
+    function findChildViewNode(node, name)
+    {
+        if(node.vwfID == name)
+            return node;
+        else if(node.children){
+            for(var i = 0; i < node.children.length; i++) {
+                var child = findChildViewNode(node.children[i],name);
+                if(child) return child;
+            }
+        }
+        return null;
+    }
+    function findVWFscene()
+    {
+         return  vwf.models[0].model.nodes["index-vwf"];
+    }
+    function findscene()
+     {
+         for(var i =0; i<vwf.views.length;i++)
+         {
+             if(vwf.views[i].module.id = 'vwf/view/MATH') return vwf.views[i].state.scenes["index-vwf"].MATHScene;
+         }
+         return null;
+    }

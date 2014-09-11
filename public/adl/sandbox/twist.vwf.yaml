@@ -1,0 +1,189 @@
+extends: http://vwf.example.com/node3.vwf
+properties:
+  amount:
+    set: |
+            this.amount = value;
+            this.dirtyStack();
+    get: |
+            return this.amount;
+  translation:
+    set:|
+            this.translation = value;
+            this.dirtyStack();
+  rotation:
+    set:|
+            this.translation = value;
+            this.dirtyStack();
+  scale:
+    set:|
+            this.translation = value;
+            this.dirtyStack();            
+  minAmount:
+  maxAmount:
+  isModifier: true
+  type:
+  EditorData:
+    amount:
+      displayname: twist amount
+      property: amount
+      type: slider
+      min: -1
+      max: 1
+      step: .01
+methods:
+  GetBounds:
+  updateStack:
+  updateSelf:
+  dirtyStack:
+  GetMesh:
+  taper:
+  uvmap:
+  bend:
+  twist:
+events:
+  childAdded:
+scripts:
+- |
+    this.updateSelf = function()
+    {
+        this.twist();
+    }
+    var Matrix = function()
+    {
+        var mat = [];
+        for(var i=0; i < 16; i++)
+        {
+            mat.push(0);
+        }
+        return mat;
+    }
+    //quick function to initialize a blank vector array
+    var Vec3 = function()
+    {
+        var vec = [];
+        for(var i=0; i < 3; i++)
+        {
+            vec.push(0);
+        }
+        return vec;
+    }
+    var Quat = function()
+    {
+        var quat = [];
+        for(var i=0; i < 4; i++)
+        {
+            quat.push(0);
+        }
+        return quat;
+    };
+    var RotateVecAroundAxis = function(Vector, Axis, Radians)
+    {
+        //Get a quaternion for the input matrix
+        var RotationQuat = goog.vec.Quaternion.fromAngleAxis(Radians, Axis, Quat());
+        var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
+        return MATH.mulMat4Vec3(NewMatrix,Vector);
+    }
+    this.twist = function()
+    {   
+         
+         if(this.amount == undefined) return;
+         
+         var mesh = this.GetMesh();
+         var m = mesh.geometry;
+         var positions = [];
+         
+         for(var i=0;i<m.vertices.length; i++)
+         {
+            positions.push([m.vertices[i].x,m.vertices[i].y,m.vertices[i].z]);
+         }
+         
+         var bounds = m.boundingBox;
+         if(!bounds)
+            m.computeBoundingBox();
+         bounds = m.boundingBox;
+         
+         var height = bounds.max.z - bounds.min.z;
+         var length = bounds.max.x - bounds.min.x;
+         var width = bounds.max.y - bounds.min.y;
+         var amt = this.amount*6.28318530718;
+         for(var i=0;i<positions.length; i+=1)
+         {
+            var factor = positions[i][2]/height;
+            var newpos = RotateVecAroundAxis(positions[i],[0,0,1],amt*factor);
+            positions[i][0] = newpos[0];
+            positions[i][1] = newpos[1];
+            positions[i][2] = newpos[2];
+         }
+         
+         for(var i=0;i<positions.length; i+=1)
+         {
+            m.vertices[i].x = (positions[i][0]);
+            m.vertices[i].y = (positions[i][1]);
+            m.vertices[i].z = (positions[i][2]);
+         }
+         
+         m.verticesNeedUpdate = true;
+         
+         var normals = [];
+         for(var i=0;i<m.faces.length; i++)
+         {
+            normals.push([m.faces[i].normal.x,m.faces[i].normal.y,m.faces[i].normal.z]);
+         }
+         
+        
+         for(var i=0;i<normals.length; i+=1)
+         {
+            var factor = positions[i][2]/height;
+            var newpos = RotateVecAroundAxis(normals[i],[0,0,1],amt*factor);
+            normals[i][0] = newpos[0];
+            normals[i][1] = newpos[1];
+            normals[i][2] = newpos[2];
+         }
+         for(var i=0;i<normals.length; i+=1)
+         {
+            m.faces[i].normal.x = (normals[i][0]);
+            m.faces[i].normal.y = (normals[i][1]);
+            m.faces[i].normal.z = (normals[i][2]);
+            for(var j = 0; j < m.faces[i].vertexNormals.length; j++)
+            {
+                m.faces[i].vertexNormals[j].x = (normals[i][0]);
+                m.faces[i].vertexNormals[j].y = (normals[i][1]);
+                m.faces[i].vertexNormals[j].z = (normals[i][2]);
+         }
+         }
+         m.computeFaceNormals();
+         m.computeVertexNormals();
+         m.normalsNeedUpdate = true;
+         m.dirtyMesh = true;
+         mesh.sceneManagerUpdate();
+    }
+    this.updateStack = function()
+    {
+        
+        if(this.amount == undefined) return;
+        this.updateSelf();
+        for(var i in this.children)
+        {
+            return vwf.callMethod(this.children[i].id,'updateStack');
+        }
+    }
+    this.initialize = function()
+    {
+         
+    }
+    this.GetMesh = function()
+    {
+        if(this.amount == undefined) return;
+        return vwf.callMethod(vwf.parent(this.id),'GetMesh');
+    }
+    this.GetBounds = function()
+    {
+        if(this.amount == undefined) return;
+        return vwf.callMethod(vwf.parent(this.id),'GetBounds');
+    }
+    this.dirtyStack = function()
+    {
+        if(this.amount == undefined) return;
+        
+        return vwf.callMethod(vwf.parent(this.id),'dirtyStack');
+    }

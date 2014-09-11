@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="user-scalable=no,width=device-width" />
+    <link rel="stylesheet" type="text/css" href="bootstrap.TDG.css" />
+    <link rel="stylesheet" type="text/css" href="TDG.css" />
+    <link rel="stylesheet" href="renderer.css" type="text/css" charset="utf-8" />
+    <script type="text/javascript" src="jquery-ui-1.10.4.custom.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap-colorpalette.js"></script>
+    <script type="text/javascript" src="index-view.js"></script>
+  </head>
+  <body>
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <!--button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#scenarioDescription">TDG</button-->
+            <!--span class="sr-only">Toggle navigation</span>
+            <a class="btn btn-link active" href="#">TDG</a-->
+          <!--/button-->
+          <!--a class="navbar-brand" href="#">TDG</a-->
+        </div>
+        <div class="collapse navbar-collapse">
+          <div class="row"> <!-- Main toolbar row -->
+            <ul class="nav navbar-nav">
+              <li>
+                <button class="btn btn-default" href="#" id="scenario_description" onclick="toggleCollapse('#scenarioDescription')" >TDG</button>
+              </li>
+              <li class="divider-vertical"></li>
+              <li>
+                <button class="btn btn-xs btn-default" href="#" id="new_scenario" onclick="openMapRequestor(); collapseAllToolbars()" >
+                  <img src="images/icons/New.png" />
+                </button>
+              </li>
+              <li>
+                <button class="btn btn-xs btn-default" href="#" id="open_scenario" onclick="openLoadScenarioRequestor(); collapseAllToolbars()" >
+                  <img src="images/icons/Open.png" />
+                </button>
+              </li>
+              <li>
+                <button class="btn btn-xs btn-default" href="#" id="save_scenario" onclick="openSaveScenarioRequestor(); collapseAllToolbars()" >
+                  <img src="images/icons/Save.png" />
+                </button>
+              </li>
+              <li class="divider-vertical"></li>
+              <li>
+                <button class="btn btn-xs btn-default" href="#" id="add_unit" onclick="setMode( 'add_unit' ); collapseAllToolbars(); toggleCollapse('#unitQuicklinksToolbar'); toggleCollapse('#unitToolbar')" >
+                  <img id="add_unit_icon" src="images/UnitIcon_32x32.png" />
+                </button>
+              </li>
+              <li>
+                <button class="btn btn-xs btn-default" href="#" id="delete_unit" onclick="setMode('delete_unit'); collapseAllToolbars()" >
+                  <img src="images/icons/DeleteUnit.png" />
+                </button>
+              </li>
+              <li class="divider-vertical"></li>
+              <li class="disabled">
+                <button class="btn btn-xs btn-default" href="#" id="add_image" onclick="collapseAllToolbars()" >
+                  <img src="images/icons/Multimedia.png" />
+                </button>
+              </li>
+              <li class="divider-vertical"></li>
+              <li>
+                <button class="btn btn-xs btn-default" href="#" id="move" onclick="setMode('move'); collapseAllToolbars()">
+                  <img src="images/icons/Pan.png" />
+                </button>
+              </li>
+              <li class="divider-vertical"></li>            
+              <li>
+                <button class="btn btn-xs btn-default" href="#" id="draw" onclick="setMode('draw'); collapseAllToolbars(); toggleCollapse('#drawingToolbar')" >
+                  <img src="images/icons/Pencil.png" />
+                </button>
+              <li>
+                <div class="btn-group">
+                  <button class="btn btn-xs btn-default" href="#" id="erase" onclick="setMode('erase'); collapseAllToolbars()" >
+                   <img src="images/icons/Eraser.png" />
+                  </button >
+                  <a href="#" class="btn btn-xs btn-default dropdown-toggle" id="toggleDrawOptions" data-toggle="dropdown">
+                    <span class="caret"></span>
+                  </a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><img id="05eraser" src="images/05x05pxl_32x32.png" style="border:3px solid black" onclick="setEraserWidth('5')"/>5 Pt</li>
+                    <li><img id="10eraser" src="images/10x10pxl_32x32.png" style="border:3px solid black" onclick="setEraserWidth('10')"/>10 Pt</li>
+                    <li><img id="12eraser" src="images/12x12pxl_32x32.png" style="border:3px solid black" onclick="setEraserWidth('12')"/>12 Pt</li>
+                    <li><img id="20eraser" src="images/20x20pxl_32x32.png" style="border:3px solid black" onclick="setEraserWidth('20')"/>20 Pt</li>
+                    <li><img id="24eraser" src="images/24x24pxl_32x32.png" style="border:3px solid black" onclick="setEraserWidth('24')"/>24 Pt</li>
+                  </ul>
+                </div>
+              </li>
+              <li class="divider-vertical"></li>
+              <li>
+                <div class="btn-group">
+                  <button href="#" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" id="layers" >
+                      <img src="images/icons/Layer.png" /><span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu" id="layer-drop-down" >
+                    <li>
+                      <a href="#" id="layer-createNewLayer" onclick="showNewLayerDialog()">
+                        Create New Layer
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="divider-vertical"></li>
+              <li class="disabled">
+                <button class="btn btn-xs btn-default" href="#" id="undo" onclick="" >
+                  <img src="images/icons/Undo.png" />
+                </button>
+              </li>
+              <li class="disabled">
+                <button class="btn btn-xs btn-default" href="#" id="redo" onclick="" >
+                  <img src="images/icons/Redo.png" />
+                </button>
+              </li>
+              <li class="divider-vertical"></li>
+              <li>
+                <div class="btn-group">
+                  <button class="btn btn-xs btn-default" href="#" id="clear" onclick="userClearLines()" >
+                    <span>
+                      <img src="images/icons/Clear.png" />
+                    </span>
+                  </button>
+                  <button href="#" class="btn btn-xs btn-default dropdown-toggle" id="toggleClearOptions" data-toggle="dropdown">
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
+                    <li class="clear-option" ><a href="#" onclick="userClearLines()" >Clear Drawings</a></li>
+                    <li class="clear-option" ><a href="#" onclick="clearUnits()" >Clear Units</a></li>
+                    <li class="clear-option" ><a href="#" onclick="clearAll()" >Clear All</a></li>
+                  </ul>
+                </div>
+              </li>
+              <li>
+                <button class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#" ><img src="images/icons/Options.png" /></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="#">Action</a></li>
+                  <li><a href="#">Another action</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li class="divider"></li>
+                  <li><a href="#">Separated link</a></li>
+                  <li class="divider"></li>
+                  <li><a href="#">One more separated link</a></li>
+                </ul>
+              </li>        
+            </ul>
+          </div> <!-- Main toolbar row -->
+          <div class="row"> <!-- Scenario Description row -->
+            <div id="scenarioDescription" class="panel-collapse collapse">
+              <div class="panel-group" id="accordion">
+               <div class="panel panel-default">
+                 <div class="panel-heading">
+                   <h4 class="panel-title">
+                     <a onclick=toggleCollapse("#descGeneralSituation") >
+                        General Situation
+                     </a>
+                   </h4>
+                 </div>
+                 <div id="descGeneralSituation" class="panel-collapse collapse">
+                   <div class="panel-body">
+                     <textarea class="text" rows="4" id="textGeneralSituation" />                      
+                     <button class="btn btn-default" href="#" id="updateGeneralSituation" onclick="updateScenarioDescription('general')" >Update</button>
+                   </div>
+                 </div>
+               </div>
+               <div class="panel panel-default">
+                 <div class="panel-heading">
+                   <h4 class="panel-title">
+                     <a onclick=toggleCollapse("#descEnemySituation") >
+                       Enemy Situation
+                     </a>
+                   </h4>
+                 </div>
+                 <div id="descEnemySituation" class="panel-collapse collapse">
+                   <div class="panel-body">
+                     <textarea class="text" rows="4" id="textEnemySituation" /> 
+                     <button class="btn btn-default" href="#" id="updateEnemySituation" onclick="updateScenarioDescription('enemy')" >Update</button>
+                   </div>
+                 </div>
+               </div>
+               <div class="panel panel-default">
+                 <div class="panel-heading">
+                   <h4 class="panel-title">
+                     <a onclick=toggleCollapse("#descFriendlySituation") >
+                       Friendly Situation
+                     </a>
+                  </h4>
+                 </div>
+                 <div id="descFriendlySituation" class="panel-collapse collapse">
+                   <div class="panel-body">
+                     <textarea class="text" rows="4" id="textFriendlySituation" />
+                     <button class="btn btn-default" href="#" id="updateFriendlySituation" onclick="updateScenarioDescription('friendly')" >Update</button>
+                   </div>
+                 </div>
+               </div>
+             </div>
+            </div>
+          </div><!-- Scenario Description Row -->
+          <div class="row"> <!-- Drawing Tools row  -->
+            <div id="drawingToolbar" class="panel-collapse collapse">
+              <ul class="nav navbar-nav">
+                <li><label>Draw</label></li>
+                <li class="divider-vertical"></li>
+                <li>
+                  <div class="btn-group">
+                    <button id="drawingToolSelection" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#" >Tool<span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
+                      <li><img id="drawFree" src="images/draw_32x32.png" style="border:3px solid black" onclick="setDrawingShape('freeDraw')"/>Free Draw</li>
+                      <li><img id="drawArc" src="images/arc.png" style="border:3px solid black" onclick="setDrawingShape('arc')"/>Arc</li>
+                      <li><img id="drawCircle" src="images/circle.png" style="border:3px solid black" onclick="setDrawingShape('circle')"/>Circle</li>
+                      <li><img id="drawEllipse" src="images/ellipse.png" style="border:3px solid black" onclick="setDrawingShape('ellipse')"/>Ellipse</li>
+                      <li><img id="drawImage" src="images/image.png" style="border:3px solid black" onclick="setDrawingShape('image')"/>Image</li>
+                      <li><img id="drawLine" src="images/line.png" style="border:3px solid black" onclick="setDrawingShape('line')"/>Line</li>
+                      <!-- li><img id="drawPolygon" src="images/polygon.png" style="border:3px solid black" onclick="setDrawingShape('regularPolygon')"/>Polygon</li -->
+                      <li><img id="drawRectOutline" src="images/rectOutline.png" style="border:3px solid black" onclick="setDrawingShape('borderRect')"/>Border</li>
+                      <li><img id="drawRect" src="images/rect.png" style="border:3px solid black" onclick="setDrawingShape('rect')"/>Rect</li>
+                      <li><img id="drawRing" src="images/ring.png" style="border:3px solid black" onclick="setDrawingShape('ring')"/>Ring</li>
+                      <!-- li><img id="drawSprite" src="images/sprite.png" style="border:3px solid black" onclick="setDrawingShape('sprite')"/>Sprite</li -->
+                      <li><img id="drawStar" src="images/star.png" style="border:3px solid black" onclick="setDrawingShape('star')"/>Star</li>
+                      <li><img id="drawText" src="images/text.png" style="border:3px solid black" onclick="setDrawingShape('text')"/>Text</li>
+                      <li><img id="drawWedge" src="images/wedge.png" style="border:3px solid black" onclick="setDrawingShape('wedge')"/>Wedge</li>
+                      <li><img id="drawArrow" src="images/arrowLine.png" style="border:3px solid black" onclick="setDrawingShape('arrow')"/>Arrow</li>
+                      <li><img id="drawWideArrow" src="images/arrowWide.png" style="border:3px solid black" onclick="setDrawingShape('thickArrow')"/>Wide Arrow</li>
+                    </ul>
+                  </div>
+                </li>
+                <li class="divider-vertical"></li>
+                <li>
+                  <div class="btn-group">
+                    <button href="#" type="button" class="selected-color" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown"><i>Color</i></button>
+                    <ul class="dropdown-menu" role="menu">
+                      <li style="display:inline-block;">
+                        <div>&nbsp;Pen Color</div>
+                        <div class="colorpalette"></div>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+                <li class="divider-vertical"></li>
+                <li>
+                  <div class="btn-group">
+                    <button id="penWidthSelection" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#" >Pen Width<span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
+                      <li><img id="01pixel" src="images/01pxl_32x32.png" style="border:3px solid black" onclick="setPenWidth('1')"/>1 Pt</li>
+                      <li><img id="02pixel" src="images/02pxl_32x32.png" style="border:3px solid black" onclick="setPenWidth('2')"/>2 Pt</li>
+                      <li><img id="04pixel" src="images/04pxl_32x32.png" style="border:3px solid black" onclick="setPenWidth('4')"/>4 Pt</li>
+                      <li><img id="08pixel" src="images/08pxl_32x32.png" style="border:3px solid black" onclick="setPenWidth('8')"/>8 Pt</li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div> <!-- Drawing Tools row  -->
+          <div class="row"> <!-- Unit Quick Link Toolbar row  -->
+            <div id="unitQuicklinksToolbar" class="panel-collapse collapse">
+              <ul class="nav navbar-nav">
+                <li class="divider-vertical"></li>
+                <li>
+                  <div><h6><b>Selected Unit</b></h6></div>
+                  <div>
+                    <img id="selectedUnitIcon" src="images/UnitIcon_32x32.png" /></div>
+                    <div><button class="btn btn-xs btn-default" href="#" id="addSelectedUnit" onClick="addSelectedUnitToToolbar()" >Add</button>
+                  </div>
+                </li>
+                <li class="divider-vertical"></li>
+                <li>
+                  <div><h6><b>Unit Quicklinks</b></h6></div>
+                  <div class="btn-group" id="unitQuicklinks" >
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div> <!-- Unit Quick Link Toolbar row  -->
+          <div class="row"> <!-- Unit Toolbar row -->
+           <div id="unitToolbar" class="panel-collapse collapse">
+             <ul class="nav navbar-nav">
+              <li><label>All Units</label></li>
+              <li class="divider-vertical"></li>
+              <li>
+                <div class="btn-group"> <!-- Set Unit Type -->
+                  <button id="unitTypeFilter" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#" >Unit Types <span class="caret"></span></button>
+                  <ul id="unit-filter-drop-down" class="dropdown-menu multi-level" role="menu">
+                    <li class="disabled"><a>Favorites</a></li>
+                    <li role="presentation" class="divider"></li>
+                    <li class="disabled"><a>Recently Used</a></li>
+                    <li role="presentation" class="divider"></li>
+                    <li role="presentation" class="dropdown-header">All Unit Types</li>
+                    <li class="dropdown-submenu">
+                      <a tabindex="-1" href="#">Air</a>
+                      <ul class="dropdown-menu">
+                        <li class="dropdown-submenu">
+                          <a tabindex="-1" href="#">Military Fixed Wing</a>
+                          <ul class="dropdown-menu">
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.BMB' )" >Bomber</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.FTR' )" >Fighter</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.TNE' )" > Trainer</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.ATK' )" > Attack</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.VSTOL' )" > VSTOL</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.TNK' )" > Tanker</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.CGOALT' )" > Transport</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.ECM' )" > ECM</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.MEDV' )" > Medevac</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.RECON' )" > Recon</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.PAT' )" > Patrol</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.UTY' )" > Utility</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.COMM' )" > Communications</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.CSAR' )" > CSAR</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.ABNCP' )" > Airborne Command Post</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.DRN' )" > RPV/UAV</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.ASBWCB' )" > ASW</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.FIXD.SOF' )" > SOF</a></li>
+                          </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                          <a tabindex="-1" href="#">Military Rotary Wing</a>
+                          <ul class="dropdown-menu">
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.ATK' )" >Attack</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.ASBW' )" >ASW</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.UTY' )" >Utility</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.MNECM' )" >MCM</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.CSAR' )" >CSAR</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.RECON' )" >Recon</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.DRN' )" >RPV/UAV</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.CGOALT' )" >Transport</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.TNE' )" >Trainer</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.MEDV' )" >Medevac</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.SOF' )" >SOF</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.ABNCP' )" >Airborne Command Post</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.TNK' )" >Tanker</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.ROT.ECM' )" >ECM</a></li>
+                          </ul>
+                        </li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'MIL.LTA' )" >Military Lighter Than Air</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'WPN' )" >Weapon</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'air', 'CVL' )" >Civilian</a></li>
+                      </ul>
+                    </li>
+                    <li class="dropdown-submenu">
+                      <a tabindex="-1" href="#">Ground</a>
+                      <ul class="dropdown-menu">
+                        <li class="dropdown-submenu">
+                          <a tabindex="-1" href="#">Unit</a>
+                          <ul class="dropdown-menu">
+                            <li class="dropdown-submenu">
+                              <a tabindex="-1" href="#">Combat</a>
+                              <ul class="dropdown-menu">
+                                <li><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.ADF' )" >Air Defense</a></li>
+                                <li class="dropdown-submenu">
+                                  <a tabindex="-1" href="#">Armor</a>
+                                  <ul class="dropdown-menu">
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.ARM.TRK' )" >Tracked</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.ARM.WHD' )" >Wheeled</a></li>
+                                  </ul>
+                                </li>
+                                <li><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.AARM' )" >Anti-Armor</a></li>
+                                <li class="dropdown-submenu">
+                                  <a tabindex="-1" href="#">Aviation</a>
+                                  <ul class="dropdown-menu">
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.AVN.FIXD' )" >Fixed Wing</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.AVN.ROT' )" >Rotary Wing</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.AVN.SAR' )" >SAR</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.AVN.CMPS' )" >Composite</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.AVN.VSTOL' )" >VSTOL</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.AVN.UAV' )" >UAV</a></li>
+                                  </ul>
+                                </li>
+                                <li><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.INF' )" >Infantry</a></li>
+                                <li class="dropdown-submenu">
+                                  <a tabindex="-1" href="#">Engineering</a>
+                                  <ul class="dropdown-menu">
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.ENG.CBT' )" >Combat</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.ENG.CSN' )" >Construction</a></li>
+                                  </ul>
+                                </li>
+                                <li class="dropdown-submenu">
+                                  <a tabindex="-1" href="#">Field Arty</a>
+                                  <ul class="dropdown-menu">
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.FLDART.HOW' )" >Howitzer</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.FLDART.ROC' )" >Rocket</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.FLDART.TGTAQ' )" >Target Acq</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.FLDART.MORT' )" >Mortar</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.FLDART.ARTSVY' )" >Arty Survey</a></li>
+                                    <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.FLDART.METO' )" >Meteorological</a></li>
+                                  </ul>
+                                </li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.MSL' )" >Missile</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.RECON' )" >Recon</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CBT.ISF' )" >Internal Security Forces</a></li>
+                              </ul>
+                            </li>
+                            <li class="dropdown-submenu">
+                              <a tabindex="-1" href="#">Combat Support</a>
+                              <ul class="dropdown-menu">
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CS.NBC' )" >NBC</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CS.MILINT' )" >Mil Intel</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CS.LAWENU' )" >Law Enf</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CS.SIGUNT' )" >Signals</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CS.IWU' )" >IWU</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CS.LNDSUP' )" >Landing Suppt</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CS.EOD' )" >Explosive Ord Disposal</a></li>
+                              </ul>
+                            </li>                    
+                            <li class="dropdown-submenu">
+                              <a tabindex="-1" href="#">Combat Service Support</a>
+                              <ul class="dropdown-menu">
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CSS.ADMIN' )" >Admin</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CSS.MED' )" >Medical</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CSS.SLP' )" >Supply</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CSS.TPT' )" >Transport</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.CSS.MAINT' )" >Maintenance</a></li>
+                              </ul>
+                            </li>                    
+                            <li><a href="#" onclick="filterUnitTypes( 'ground', 'UNT.C2HQ' )" >Special C2 HQ</a></li>
+                          </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                          <a tabindex="-1" href="#">Equip</a>
+                          <ul class="dropdown-menu">
+                            <li class="dropdown-submenu">
+                              <a tabindex="-1" href="#">Weapon</a>
+                              <ul class="dropdown-menu">
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.MSLL' )" >Missile Launcher</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.SRL' )" >Single Rocket Launcher</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.MRL' )" >Multi Rocket Launcher</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.ATRL' )" >Anti-Tank Rocket Launcher</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.RIFWPN' )" >Rifle</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.GREL' )" >Grenade Launcher</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.MORT' )" >Mortar</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.HOW' )" >Howitzer</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.ATG' )" >Anti-Tank Gun</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.DFG' )" >Direct-Fire Gun</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.WPN.ADFG' )" >Air-Defense Gun</a></li>
+                              </ul>
+                            </li>
+                            <li class="dropdown-submenu">
+                              <a tabindex="-1" href="#">Ground Vehicle</a>
+                              <ul class="dropdown-menu">
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.GRDVEH.ARMD' )" >Armored</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.GRDVEH.UTYVEH' )" >Utility</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.GRDVEH.ENGVEH' )" >Engineering</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.GRDVEH.TRNLCO' )" >Train Locomotive</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.GRDVEH.CVLVEH' )" >Civilian Veh</a></li>
+                                <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.GRDVEH.PKAN' )" >Pack Animal</a></li>
+                              </ul>
+                            </li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.SNS' )" >Sensor</a></li>
+                            <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'EQT.SPL' )" >Special</a></li>
+                          </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                          <a tabindex="-1" href="#">Installation</a>
+                            <ul class="dropdown-menu">
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'INS.RMP' )" >Raw Material Production/Storage</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'INS.PF' )" >Production Facility</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'INS.EQTMNF' )" >Equipment Manufacture</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'INS.SRUF' )" >Service, Research, Utility Facility</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'INS.MMF' )" >Military Materiel Facility</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'INS.GOVLDR' )" >Government Leadership</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'INS.MILBF' )" >Military Base/Facility</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'INS.TSPF' )" >Transport Facility</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'ground', 'INS.MEDF' )" >Medical Facility</a></li>
+                          </ul>
+                        </li>                          
+                      </ul>
+                    </li>
+                    <li class="dropdown-submenu">
+                      <a tabindex="-1" href="#">Sea Surface</a>
+                      <ul class="dropdown-menu">
+                        <li class="dropdown-submenu">
+                          <a tabindex="-1" href="#">Combat</a>
+                            <ul class="dropdown-menu">
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sea', 'CBTT.LNE' )" >Ships of the Line</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sea', 'CBTT.MNEWV' )" >Mine Warfare</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sea', 'CBTT.PAT' )" >Patrol</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sea', 'CBTT.STN' )" >Station</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sea', 'CBTT.NAVGRP' )" >Naval Group</a></li>
+                              <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sea', 'CBTT.HOV' )" >Hovercraft</a></li>
+                            </ul>
+                        </li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sea', 'NCBTT' )" >Noncombat</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sea', 'NMIL' )" >Non-Military</a></li>
+                      </ul>
+                    </li>
+                    <li class="dropdown-submenu">
+                      <a tabindex="-1" href="#">Subsurface</a>
+                      <ul class="dropdown-menu">
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'subsurface', 'SUB' )" >Submarine</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'subsurface', 'UH2WPN' )" >Underwater Weapon</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'subsurface', 'UH2DCY' )" >Underwater Decoy</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'subsurface', 'NSUB' )" >Non-submarine</a></li>
+                      </ul>
+                    </li>
+                    <li class="dropdown-submenu">
+                      <a tabindex="-1" href="#">SOF</a>
+                      <ul class="dropdown-menu">
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sof', 'FIXD' )" >SOF FWA</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sof', 'VSTOL' )" >SOF VSTOL</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sof', 'ROT' )" >SOF RWA</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sof', 'NAV' )" >SOF Naval</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sof', 'GRD' )" >SOF Ground</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'sof', 'SUP' )" >SOF Support</a></li>                      
+                      </ul>
+                    </li>
+                    <li class="dropdown-submenu">
+                      <a tabindex="-1" href="#">Space</a>
+                      <ul class="dropdown-menu">
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'space', 'SAT' )" >Satellite</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'space', 'CSV' )" >Crewed Veh</a></li>
+                        <li class="submenu-item" ><a href="#" onclick="filterUnitTypes( 'space', 'SST' )" >Space Station</a></li>                       
+                      </ul>
+                    </li>
+                  </ul>
+                </div> <!-- Set Unit Type -->
+              </li>
+              <li>
+                <div class="btn-group">
+                  <button class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#" id="activeUnitType" >
+                    <img id="active_unit_type_icon" src="images/UnitIcon_32x32.png" />
+                      <span class="caret"></span>
+                  </button>
+                  <ul id="unit-drop-down" class="dropdown-menu" role="menu">
+                  </ul>
+                </div>
+              </li>
+              <li>
+                <form role="form">
+                  <div class="form-group">
+                    <div class="btn-group"> <!-- Set Unit Affiliation -->
+                      <button id="affiliation" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#" >Affiliation <span class="caret"></span></button>
+                      <ul class="dropdown-menu" role="menu">
+                        <li onclick="setUnitAffiliation( 'unknown' )" href="#" ><img id="affiliation-unknown" src="images/unknown.png" /> Unknown</li>
+                        <li class="divider"></li>
+                        <li onclick="setUnitAffiliation( 'neutral' )" href="#" ><img id="affiliation-neutral" src="images/neutral.png" /> Neutral</li>
+                        <li class="divider"></li>
+                        <li onclick="setUnitAffiliation( 'friendly' )" href="#" ><img id="affiliation-friendly" src="images/friendly.png" /> Friendly</li>
+                        <li class="divider"></li>
+                        <li onclick="setUnitAffiliation( 'hostile' )" href="#" ><img id="affiliation-hostile" src="images/hostile.png" /> Hostile</li>
+                      </ul>
+                    </div> <!-- Set Unit Affiliation -->
+                    <p class="help-block" id="selectedAffiliation">unknown</p>
+                  </div>
+                </form>
+              </li>
+              <li> <!-- Set Echelon -->
+                <form role="form">
+                  <div class="form-group">
+                    <div class="btn-group">
+                      <button id="Echelon" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#" >Echelon <span class="caret"></span></button>
+                      <ul class="dropdown-menu" role="menu">
+                        <li><a onclick="setEchelon('none')" href="#">None/Unknown</a></li>
+                        <li><a onclick="setEchelon('team')" href="#">Team</a></li>
+                        <li><a onclick="setEchelon('squad')" href="#">Squad</a></li>
+                        <li><a onclick="setEchelon('section')" href="#">Section</a></li>
+                        <li><a onclick="setEchelon('platoon')" href="#">Platoon</a></li>
+                        <li><a onclick="setEchelon('company')" href="#">Company</a></li>
+                        <li><a onclick="setEchelon('battalion')" href="#">Battalion</a></li>
+                        <li><a onclick="setEchelon('regiment')" href="#">Regiment</a></li>
+                        <li><a onclick="setEchelon('brigade')" href="#">Brigade</a></li>
+                        <li><a onclick="setEchelon('division')" href="#">Division</a></li>
+                        <li><a onclick="setEchelon('mef')" href="#">Corps/MEF</a></li>
+                        <li><a onclick="setEchelon('army')" href="#">Army</a></li>
+                        <li><a onclick="setEchelon('army group')" href="#">Army Group</a></li>
+                        <li><a onclick="setEchelon('region')" href="#">Region</a></li>
+                      </ul>
+                    </div> 
+                    <p class="help-block" id="selectedEchelon">None/Unknown</p>
+                  </div>
+                </form>
+              </li> <!-- Set Echelon -->
+              <li class="divider-vertical"></li>
+              <li>
+                <form role="form">
+                  <div class="form-group">
+                    <div class="btn-group">
+                      <button id="reinforcedUnit" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" href="#" >Reinforced/Reduced<span class="caret"></span></button>
+                      <ul class="dropdown-menu" role="menu">
+                        <li><a href="#" onclick="setReinforce('none')" >none</a></li>
+                        <li><a href="#" onclick="setReinforce('reinforced')" >reinforced</a></li>
+                        <li><a href="#" onclick="setReinforce('reduced')" >reduced</a></li>
+                        <li><a href="#" onclick="setReinforce('both')" >reinforced and reduced</a></li>
+                      </ul>
+                    </div> 
+                    <p class="help-block" id="selectedReinforced">none</p>
+                  </div>
+                </form>
+              </li>
+              <li>
+                <div class="btn-group">
+                  <button id="SomeMenu" class="btn btn-xs btn-default dropdown-toggle" visibility="hidden" data-toggle="dropdown" href="#" >o<span class="caret"></span></button>
+                  <ul class="dropdown-menu" visibility="hidden" role="menu">
+                    <li><a href="#"></a></li>
+                  </ul>
+                </div>
+              </li>
+              <li class="divider-vertical"></li>
+              <li class="divider-vertical"></li>
+              <li>
+                <form class="form-horizontal" role="form"> <!-- Set Modifiers -->
+                  <div class="form-group">
+                    <h6>Unique Identifier</h6>
+                    <div>
+                        <input type="text" class="inp" data-ref="_selectedUnit.modifiers.uniqueDesignation1" id="uniqueIdentifier" style="min-width: 100px; width: 100px;"/>
+                    </div>
+                  </div>
+                </form>
+              </li>
+              <li class="divider-vertical"></li>              
+              <li class="divider-vertical"></li>              
+              <li class="divider-vertical"></li>              
+              <li>
+                <form class="form-horizontal" role="form">
+                  <div class="form-group">
+                    <h6>Higher Unit</h6>
+                    <div>
+                        <input type="text" class="form-control" id="higherUnit" style="min-width: 100px; width: 100px;"/>                        
+                    </div>
+                  </div>
+                </form> <!-- Set Modifiers -->
+              </li>
+             </ul>
+           </div>
+          </div><!-- Unit Toolbar Row -->
+        </div>
+      </div>
+    </div>
+    <div class="modal">
+      <div class="modal-dialog" id="MapLoadDialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="closeDialog('#MapLoadDialog')">&times;</button>
+            <h4 class="modal-title">Load Map</h4>
+          </div>
+          <div class="modal-body">
+            <select id="mapSelection" size="9" name="MapList">
+              <option value="maps/BlankCanvas.png">Blank Canvas</option>
+              <option value="maps/FineGrid.png">Blank Fine Grid</option>
+              <option value="maps/Quantico1.png">Quantico1</option>
+              <option value="maps/Quantico_Range1.png">Quantico_Range1</option>
+              <option value="maps/Quantico_Range2.png">Quantico_Range2</option>
+              <option value="maps/Plt_D_TDG_Graphics_20140127.png">Platoon D TDG</option>
+              <option value="maps/29Palms_DeltaT_Map_Tac_Planning_TDG_2014.png">29Palms DeltaT Map Tac Planning TDG 2014</option>
+              <option value="maps/20111206_O_REIN_STEX_map.png">20111206 O Rein STEX map</option>
+              <option value="maps/20111206_O_REIN_STEX_map_AI_Version.png">20111206 O Rein STEX map AI Version</option>
+              <option value="maps/HueCityLarge.png">Hue City Large</option>
+            </select>    
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" name="loadMap" onclick="setMapFromDialog()">Load</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" name="cancelLoadMap" onclick="closeDialog('#MapLoadDialog')">Cancel</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->            
+    <div class="modal">
+      <div class="modal-dialog" id="ScenarioLoadDialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="closeDialog('#ScenarioLoadDialog')">
+              &times;
+            </button>
+            <h4 class="modal-title">Load Scenario</h4>
+          </div>
+          <div class="modal-body">
+            <select id="scenarioSelection" size="9" width="200" name="ScenarioList"></select>    
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" name="loadScenario" onclick="loadScenario()">
+              Load
+            </button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" name="cancelLoadScenario" onclick="closeDialog('#ScenarioLoadDialog')">
+              Cancel
+            </button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->            
+    <div class="modal">
+      <div class="modal-dialog" id="ScenarioSaveDialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="closeDialog('#ScenarioSaveDialog')">
+              &times;
+            </button>
+            <h4 class="modal-title">Save Scenario</h4>
+          </div>
+          <div class="modal-body">
+            <label for="saveScenarioName">Scenario Name</label>
+            <input type="text" class="form-control" placeholder="ScenarioName" id="saveScenarioName">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="saveScenario" onclick="saveScenarioFromRequestor()">
+              Save
+            </button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" name="cancelSaveScenario" onclick="closeDialog('#ScenarioSaveDialog')">
+              Cancel
+            </button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div class="modal">
+      <div class="modal-dialog" id="SaveOnMapLoadDialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                &times;
+            </button>
+            <h4 class="modal-title">
+              Would you like to save your changes before loading a new map?
+            </h4>
+          </div>
+          <div class="modal-body">
+            <label for="scenarioName">Scenario Name</label>
+            <input type="text" class="form-control" placeholder="ScenarioName" id="scenarioName">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="saveBeforeLoad">Save</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="noThanks">
+                No thanks
+            </button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="cancelSaveAndLoad">
+                Cancel
+            </button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <div class="modal">
+      <div class="modal-dialog" id="CreateNewLayer">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="closeDialog('#CreateNewLayer')">
+              &times;
+            </button>
+            <h4 class="modal-title">Create New Layer</h4>
+          </div>
+          <div class="modal-body">
+            <label for="layerName">Layer Name</label>
+            <input type="text" class="form-control" placeholder="Layer" id="newLayerName">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="createNewLayer" onclick="createNewLayerFromRequestor()">
+              Create
+            </button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" name="cancelCreateNewLayer" onclick="closeDialog('#CreateNewLayer')">
+              Cancel
+            </button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal --> 
+    <div class="modal">
+      <div class="modal-dialog" id="EnterText">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="closeAddText()">&times;</button>
+            <h4 class="modal-title">Add Text</h4>
+          </div>
+          <div class="modal-body">
+            <label for="textObject">Text</label>
+            <input type="text" class="form-control" placeholder="text" id="addTextControl">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="textEditComplete" onclick="addTextComplete()">OK</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal --> 
+    <div class="modal">
+      <div class="modal-dialog" id="OpenFileBrowser">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="closeFileBrowser()">&times;</button>
+            <h4 class="modal-title">Open File</h4>
+          </div>
+          <div class="modal-body">
+            <label for="fileOpen">File Open</label>
+            <input type="file" class="form-control" placeholder="file" id="openFileUrl">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="openSelectedFile" onclick="openFileSelected()">OK</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" name="cancelOpenFile" onclick="closeFileBrowser()">Cancel</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal --> 
+  </body>
+</html>

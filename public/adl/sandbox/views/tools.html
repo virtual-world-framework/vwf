@@ -1,0 +1,51 @@
+<script type="text/javascript" src='jquery-ui-1.10.3.custom.min.js'></script>
+<link rel="stylesheet" href="jquery-ui-1.10.3.custom.css">
+
+<div id="content" class="row" style="margin:10px auto;float:none;text-align:center;">
+	<div class="col-md-5" style="margin:10px auto;float:none;text-align:center;">
+		<form data-bind="submit:handleLoginButton" >
+			<fieldset>
+				<legend style="padding-bottom:5px;">{{#translate}}Tools{{/translate}}</legend>
+				<div class="col-md-10" style="margin:0 auto;float:none;">			
+				<a href="settings">Player Settings</a>	<br/>
+				<a href="test">Compatibility Test</a><br/>
+				<a href="performancetest">Performance Test</a><br/>
+				<a href="stats">System Status</a><br/>
+				<a href="admin">Administrators</a><br/>
+				</div>
+				<legend style="padding-bottom:5px;"></legend>
+			</fieldset>
+			<fieldset>
+				<legend style="padding-bottom:5px;">{{#translate}}Worlds{{/translate}}</legend>
+				<div class="col-md-10" style="margin:0 auto;float:none;">			
+				{{#sessionData}}
+				<a href="createNew/0">Create</a>	<br/>
+				{{/sessionData}}
+				<a href="search">Search </a><br/>
+				<a href="featuredWorlds/0">Featured</a><br/>
+				{{#sessionData}}
+				<a href="myWorlds/0">Owned By You</a><br/>
+				{{/sessionData}}
+				<a href="newWorlds">Newest</a><br/>
+				<a href="allWorlds/0">All</a><br/>
+				<a href="activeWorlds/0">Active</a><br/>
+				<a href="examples">Examples</a><br/>
+				</div>
+				<legend style="padding-bottom:5px;"></legend>
+			</fieldset>
+			{{#sessionData}}
+			<fieldset>
+				<legend style="padding-bottom:5px;">{{#translate}}Account{{/translate}}</legend>
+				<div class="col-md-10" style="margin:0 auto;float:none;">			
+				<a href="editProfile">Edit Profile</a>	<br/>
+				<a href="updatePassword">Reset Password</a><br/>
+				<a href="avatar">Choose Avatar</a><br/>
+				</div>
+				<legend style="padding-bottom:5px;"></legend>
+			</fieldset>
+			{{/sessionData}}
+		</form>
+		   
+		
+	</div>
+</div>

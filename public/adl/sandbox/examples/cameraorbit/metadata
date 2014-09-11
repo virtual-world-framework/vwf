@@ -1,0 +1,12 @@
+{
+	"title":"Example Scene",
+	"description":"testing the ability to serve the examples",
+	"publishSettings":{
+		"allowAnonymous":true,
+		"published":true,
+		"createAvatar":false,
+		"singlePlayer":true,
+		"allowTools":false,
+		"camera" : "SandboxCamera-vwf-7c51b2b3-7d7c-21cf-5b6c-a159eb364672"
+	}
+}

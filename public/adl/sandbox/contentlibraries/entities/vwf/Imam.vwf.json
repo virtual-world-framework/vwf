@@ -1,0 +1,88 @@
+{
+  "id": "asset-vwf-contentlibraries-entities-assets-Imam_Static_Model-json1",
+  "extends": "asset.vwf",
+  "source": "./contentlibraries/entities/assets/Imam_Static_Model.json",
+  "type": "subDriver/threejs/asset/vnd.osgjs+json+compressed",
+  "sequence": 0,
+  "random": {
+    "s0": 0.7245525827165693,
+    "s1": 0.5527064062189311,
+    "s2": 0.8353381436318159,
+    "c": 1
+  },
+  "properties": {
+    "___physics_activation_state": 1,
+    "___physics_deactivation_time": 0,
+    "___physics_velocity_linear": [
+      0,
+      0,
+      0
+    ],
+    "___physics_velocity_angular": [
+      0,
+      0,
+      0
+    ],
+    "owner": "Anonymous0",
+    "transform": [
+      0.4337219297885895,
+      0,
+      0,
+      0,
+      0,
+      0.4337219297885895,
+      0,
+      0,
+      0,
+      0,
+      0.4337219297885895,
+      0,
+      0.0005894900532439351,
+      -0.07409434765577316,
+      0.009999999776482582,
+      1
+    ],
+    "materialDef": {
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      },
+      "ambient": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      },
+      "emit": {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      "specularColor": {
+        "r": 0,
+        "g": 0,
+        "b": 0
+      },
+      "specularLevel": 1,
+      "alpha": 1,
+      "shininess": 0.16,
+      "side": 0,
+      "reflect": 0,
+      "layers": [
+        {
+          "mapTo": 1,
+          "scalex": 1,
+          "scaley": 1,
+          "offsetx": 0,
+          "offsety": 0,
+          "alpha": 1,
+          "src": "./contentlibraries/entities/assets/usmale3.jpg",
+          "mapInput": 0
+        }
+      ],
+      "type": "phong",
+      "morphTargets": false,
+      "skinning": false
+    }
+  }
+}

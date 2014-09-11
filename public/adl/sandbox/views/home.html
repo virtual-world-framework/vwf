@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="{{root}}/vwf/view/editorview/css/colorpicker.css" /> 
+    <link rel="stylesheet" media="screen" type="text/css" href="{{root}}/vwf/view/editorview/css/bootstrap.min.css" />
+	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/vwf/view/editorview/css/style.css" />
+	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/vwf/view/editorview/css/alertify.core.css" />
+	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/vwf/view/editorview/css/alertify.default.css" />
+	<script type="text/javascript" src="{{root}}/js/jquery-1.10.2.min.js"></script>
+	<style>
+		body{
+
+			overflow: hidden;
+			background-image: url(./img/background.png);
+			background-size: 2220px;
+			background-position-x: 0px;
+			opacity: 0;
+		}
+		
+		@media (max-width: 1920px){
+			
+			.bodypanel
+			{
+				width:800px;
+			}
+			.buttonContainer
+			{
+				width:33%;
+			}
+		}
+		@media (max-width: 800px){
+			
+			.bodypanel
+			{
+				width:100%;
+
+			}
+			.ActionButtonlabel
+			{
+				
+			}
+			.buttonContainer
+			{
+				width:100%;
+			}
+			#logo
+			{
+				zoom:.75;
+				
+			}
+		}
+		@media (max-width: 400px){
+			#logo
+			{
+				zoom:.5;
+				
+			}
+		}
+		@media (max-width: 270px){
+			#logo
+			{
+				zoom:.35;
+				
+			}
+		}
+		@media (max-width: 200px){
+			#logo
+			{
+				zoom:.35;
+				
+			}
+		}
+		.bodypanel
+		{
+			margin:auto;
+			
+		}
+		.buttonContainer
+		{
+			margin: 0px;
+			padding: 0px;
+			
+			display: inline-block;
+		}
+		.thinheaderlink
+		{
+			text-align: center;
+			margin: 1em 1em;
+			font-weight: bold;
+			color: #FFF;
+			text-shadow: 1px 1px 5px black;
+			
+		}
+		.ActionButton
+		{
+			float:left;
+			width:95%;
+		}
+		.thinheader
+		{
+			text-align: center;
+			
+		}
+
+	</style>
+	<script type="text/javascript">
+	
+
+function center()
+	{
+		var height = $('#content').height();
+				var wheight  = $(window).height();
+				$('#content').css('top',Math.max((wheight/2) - (height/2) ,0));
+				$('#content').css('position','relative');
+				
+				
+
+				$(window).resize(function(){
+
+				var height = $('#content').height();
+				var wheight  = $(window).height();
+				$('#content').css('top',Math.max((wheight/2) - (height/2) ,0));
+				$('#content').css('position','relative');
+
+				
+
+				});
+				$(window).resize();
+	}
+
+	$(document).ready(function(){
+
+		center();
+		$(document.body).css('opacity','1');
+		$(document.body).css('background-position-x','-300px');
+		$(document.body).css('transition','opacity 1.5s ease-in, background-position-x 30s');
+
+
+	})
+
+	</script>
+	<!--[if !IE 7]>
+	<style type="text/css">
+		#wrapper {display:table;height:100%}
+	</style>
+	<![endif]-->
+    <title>Virtual World Sandbox - Virtual Worlds in your browser</title>
+
+	
+	
+
+
+</head>
+<body style="overflow:hidden">
+
+<div id='content' class='bodypanel'>
+<div id="logo">
+						<a href="/adl/sandbox">
+							<div style=" float:left;">
+								<img src="/adl/sandbox/img/VWS_Logo.png">
+							</div>
+							<div style=" margin-left:10px;margin-top:50px;float:left;">
+								<img src="/adl/sandbox/img/VW_text.png">
+								<img src="/adl/sandbox/img/Sandbox_text.png">
+							</div>
+						</a>
+					</div>
+
+		<div>			
+		<div class="" style="">
+		
+		{{#sessionData}}
+		<div class="buttonContainer">
+		<a class="ActionButton" style="" href="./createNew/0"><div class="ActionButtonlabel">Create</div><div class="ActionButtonsmalllabel">Build a world</div></a>
+		</div>
+		{{/sessionData}}
+		{{^sessionData}}
+		<div class="buttonContainer">
+		<a class="ActionButton" style="" href="./createNotLoggedIn"><div class="ActionButtonlabel">Create</div><div class="ActionButtonsmalllabel">Build a world</div></a>
+		</div>
+		{{/sessionData}}
+		<div class="buttonContainer">
+		<a class="ActionButton" style="" href="./featuredWorlds/0"><div class="ActionButtonlabel">Explore</div><div class="ActionButtonsmalllabel">Browse all public worlds</div></a>
+		</div>
+		<div class="buttonContainer">
+		<a class="ActionButton" style="" href="https://github.com/adlnet/Sandbox"><div class="ActionButtonlabel">Contribute</div><div class="ActionButtonsmalllabel">Edit the code or report a bug</div></a>
+		</div>
+	</div>
+	</div>
+
+	<div class='thinheader'>
+		
+		
+		<a class='thinheaderlink' href='http://vwf.adlnet.gov/r/documentation/'>
+			{{#translate}}Docs{{/translate}}
+		</a>
+		<a class='thinheaderlink' href='http://vwf.adlnet.gov/r/blog/'>
+			{{#translate}}Blog{{/translate}}
+		</a>
+
+		<a class='thinheaderlink' href='{{root}}/search'>
+			{{#translate}}Worlds{{/translate}}
+		</a>
+		
+		{{^sessionData}}
+		<a class='thinheaderlink' href='{{root}}/signup'>
+			{{#translate}}Sign up{{/translate}}
+		</a>
+		{{/sessionData}}
+		<a class='thinheaderlink' href='{{root}}/welcome'>
+			{{#translate}}About{{/translate}}
+		</a>
+	<!--	<a class='thinheaderlink' href='{{root}}/featuredWorlds/0'>
+			{{#translate}}Worlds{{/translate}}
+		</a> -->
+		<a class='thinheaderlink' href='{{root}}/examples'>
+			{{#translate}}Examples{{/translate}}
+		</a> 
+		{{^sessionData}}
+		<a id='logina' class='thinheaderlink' href='{{root}}/login'>
+			{{#translate}}Log in{{/translate}}
+		</a>
+		{{/sessionData}}
+		{{#sessionData}}
+		<a id='logout' class='thinheaderlink' href='{{root}}/logout'>
+			{{#translate}}Log out{{/translate}}
+		</a>
+		{{/sessionData}}
+		{{#sessionData}}
+		<a class='thinheaderlink' href='{{root}}/user'>
+			{{sessionData.Username}}
+		</a>
+		{{/sessionData}}
+	</div>				
+
+	<div style='text-align:center;font-size:.75em;color:#999;margin-top:1em'>
+	An open source project from <a href='http://www.adlnet.gov'>ADL</a>
+	</div>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+	"Simulation Entities": {
+		"url":"./contentlibraries/entities.json"
+	},
+	"Materials": {
+		"url":"./contentlibraries/materials.json"
+	},
+	"Behaviors": {
+		"url":"./contentlibraries/behaviors.json"
+	},
+	"Environments": {
+		"url":"./contentlibraries/environments.json"
+	}
+}

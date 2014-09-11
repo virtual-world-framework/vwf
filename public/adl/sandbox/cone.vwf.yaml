@@ -1,0 +1,162 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+
+extends: prim.vwf
+properties:    
+  _initialized: false
+  radius:
+    set: |
+            
+            this.radius = value;
+            this.radius = Math.max(this.radius,.001);
+            if(this._initialized == true)
+            this.dirtyStack(true);
+  height:
+    set: |
+            this.height = value;
+            this.height = Math.max(this.height,.001);
+            if(this._initialized == true)
+            this.dirtyStack(true);
+  heightsegments:
+    set: |
+            this.heightsegments = value;
+            this.heightsegments = Math.max(this.heightsegments,3);
+            this.heightsegments = Math.min(this.heightsegments,12);
+            this.heightsegments = Math.floor(this.heightsegments);
+            this.heightsegments = this.heightsegments==11?12:this.heightsegments;
+            this.heightsegments = this.heightsegments==9?10:this.heightsegments;
+            if(this._initialized == true)
+            this.dirtyStack(true);
+  radialsegments:
+    set: |
+            this.radialsegments = value;
+            
+            this.radialsegments = Math.max(this.radialsegments,5);
+            this.radialsegments = Math.min(this.radialsegments,16);
+            this.radialsegments = Math.floor(this.radialsegments);
+            this.radialsegments = this.radialsegments==15?16:this.radialsegments;
+            if(this._initialized == true)
+            this.dirtyStack(true);
+  base2pivot:
+    set: |
+            this.base2pivot = value;
+            if(this._initialized == true)
+            this.dirtyStack(true);            
+  EditorData:
+    radius:
+      displayname: radius
+      property: radius
+      type: slider
+      min: 0
+      max: 20
+      step: .1
+    rsegments:
+      displayname: radial segments
+      property: radialsegments
+      type: slider
+      min: 5
+      max: 16
+      step: 2
+    height:
+      displayname: height
+      property: height
+      type: slider
+      min: 0
+      max: 20
+      step: .01
+    hsegments:
+      displayname: height segments
+      property: heightsegments
+      type: slider
+      min: 3
+      max: 12
+      step: 1
+    base2pivot:
+      displayname: create from bottom
+      property: base2pivot
+      type: check             
+events:
+  pointerOver:
+  pointerOut:
+  pointerUp:
+  pointerDown:
+  pointerMove:
+  pointerClick:
+scripts:
+- |
+    this.initialize = function(){
+        
+        
+        if(this.id == "cone-vwf")
+            return;
+
+       
+       
+       this.mesh = new THREE.Mesh(undefined,new THREE.MeshPhongMaterial());
+       if(vwf.getProperty(this.id,'radius') == undefined) vwf.setProperty(this.id,'radius',1);
+       if(vwf.getProperty(this.id,'height') == undefined) vwf.setProperty(this.id,'height',1);
+       if(vwf.getProperty(this.id,'heightsegments') == undefined) vwf.setProperty(this.id,'heightsegments',3);
+       if(vwf.getProperty(this.id,'radialsegments') == undefined) vwf.setProperty(this.id,'radialsegments',12);
+       if(vwf.getProperty(this.id,'base2pivot') == undefined) vwf.setProperty(this.id,'base2pivot',false);
+       
+      
+       vwf.views[0].state.nodes[this.id].threeObject.add(this.mesh);
+       this.mesh.rotation.x = -Math.PI/2;
+       
+       this._initialized = true;
+       this.dirtyStack(true);
+        if(this.materialDef)
+       this.setupMaterial(this.materialDef);       
+    }
+    this.Build = function()
+    {
+        var radius = vwf.getProperty(this.id,'radius');
+        var height = vwf.getProperty(this.id,'height');
+        var heightsegments = vwf.getProperty(this.id,'heightsegments');
+        var radialsegments = vwf.getProperty(this.id,'radialsegments');
+        var base2pivot= vwf.getProperty(this.id,'base2pivot');
+        return this.BuildCone(height,radius,heightsegments,radialsegments,base2pivot)
+    }
+
+    this.BuildCone = function(height,radius,heightsteps,rsteps,base2pivot)
+    {
+        return new THREE.CylinderGeometry(radius,0,height,rsteps,heightsteps);
+    }
+  
+  
+    function findChildViewNode(node, name)
+    {
+        if(node.vwfID == name)
+            return node;
+        else if(node.children){
+            for(var i = 0; i < node.children.length; i++) {
+                var child = findChildViewNode(node.children[i],name);
+                if(child) return child;
+            }
+        }
+        return null;
+    }
+    function findVWFscene()
+    {
+         return  vwf.models[0].model.nodes["index-vwf"];
+    }
+    function findscene()
+    {
+         for(var i =0; i<vwf.views.length;i++)
+         {
+             if(vwf.views[i].module.id = 'vwf/view/MATH') return vwf.views[i].state.scenes["index-vwf"].MATHScene;
+         }
+         return null;
+    }
+    

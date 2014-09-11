@@ -1,0 +1,122 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+
+extends: prim.vwf
+properties:
+  _initialized: false
+  radius:
+    set: |
+            
+            this.radius = value;
+            this.radius = Math.max(this.radius,.001);
+            if(this._initialized == true)
+            this.dirtyStack(true);
+  segments:
+    set: |
+            
+            this.segments = value;
+            this.segments = this.segments == 7?8:this.segments;
+            this.segments = this.segments == 11?12:this.segments;
+            this.segments = this.segments == 13?15:this.segments;
+            this.segments = this.segments == 14?15:this.segments;
+            this.segments = Math.max(this.segments,4);
+            this.segments = Math.min(this.segments,20);
+            this.segments = Math.floor(this.segments);
+            if(this._initialized == true)
+            this.dirtyStack(true);          
+  EditorData:
+    radius:
+      displayname: radius
+      property: radius
+      type: slider
+      min: 0
+      max: 20
+      step: .1
+    segments:
+      displayname: segments
+      property: segments
+      type: slider
+      min: 4
+      max: 20
+      step: 1      
+events:
+  pointerOver:
+  pointerOut:
+  pointerUp:
+  pointerDown:
+  pointerMove:
+  pointerClick:
+scripts:
+- |
+    this.initialize = function(){
+        
+        
+        if(this.id == "sphere-vwf")
+            return;
+
+       
+       
+       this.mesh = new THREE.Mesh(undefined,new THREE.MeshPhongMaterial());
+       
+       if(vwf.getProperty(this.id,'radius') == undefined)  vwf.setProperty(this.id,'radius',1);
+       if(vwf.getProperty(this.id,'segments') == undefined)  vwf.setProperty(this.id,'segments',6);
+       
+       vwf.views[0].state.nodes[this.id].threeObject.add(this.mesh);
+       this.mesh.rotation.x = Math.PI/2;
+      
+       
+       this._initialized = true;
+       this.dirtyStack(true);
+       
+       if(this.materialDef)
+       this.setupMaterial(this.materialDef);       
+    }
+    this.Build = function()
+    {
+        var radius = vwf.getProperty(this.id,'radius');
+        var segs = vwf.getProperty(this.id,'segments');
+        return this.BuildSphere(radius,segs);   
+    }
+
+    this.BuildSphere = function(width,segs)
+    {
+        var geo = new THREE.SphereGeometry(width,segs*2,segs*2);
+        
+        return geo;
+    }
+     
+    function findChildViewNode(node, name)
+    {
+        if(node.vwfID == name)
+            return node;
+        else if(node.children){
+            for(var i = 0; i < node.children.length; i++) {
+                var child = findChildViewNode(node.children[i],name);
+                if(child) return child;
+            }
+        }
+        return null;
+    }
+    function findVWFscene()
+    {
+         return  vwf.models[0].model.nodes["index-vwf"];
+    }
+    function findscene()
+    {
+         for(var i =0; i<vwf.views.length;i++)
+         {
+             if(vwf.views[i].module.id = 'vwf/view/MATH') return vwf.views[i].state.scenes["index-vwf"].MATHScene;
+         }
+         return null;
+    }

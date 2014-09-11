@@ -1,0 +1,54 @@
+{
+    "properties": {
+        "sunColor": [
+            0.8588235294117647,
+            0.8941176470588236,
+            1
+        ],
+        "sunDirection": [
+            0.85,
+            0.4,
+            1
+        ],
+        "sunIntensity": 0.6,
+        "shadowDarkness": 1.8,
+        "ambientColor": [
+            0,
+            0,
+            0
+        ],
+        "fogColor": [
+            0,
+            0,
+            0
+        ],
+        "fogNear": 0,
+        "fogFar": 50,
+        "fogType": "exp",
+        "fogDensity": 0.01,
+        "fogVFalloff": 0.539,
+        "fogVFalloffStart": 22.6,
+        "skyColorBlend": 1,
+        "skyFogBlend": 0.16,
+        "skyApexColor": [
+            0.2235294117647059,
+            0.22745098039215686,
+            0.30980392156862746
+        ],
+        "skyHorizonColor": [
+            0.07058823529411765,
+            0.0784313725490196,
+            0.10196078431372549
+        ],
+        "___physics_gravity": [
+            0,
+            0, -9.8
+        ],
+        "___physics_accuracy": 10,
+        "___physics_active": true,
+        "vAtmosphereDensity": 0.0005,
+        "skyTexture": "night2",
+        "skyAtmosphereDensity": 5,
+        "shadowDarkness": 1
+    }
+}

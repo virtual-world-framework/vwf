@@ -1,0 +1,396 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+
+extends: prim.vwf
+properties:        
+  _initialized: false
+  _length:
+    set: |
+            
+            this._length = value;
+            this._length = Math.max(this._length,.001);
+            if(this._initialized == true)
+            this.dirtyStack();
+  _width:
+    set: |
+            this._width = value;
+            this._width = Math.max(this._width,.001);
+            if(this._initialized == true)
+            this.dirtyStack();
+  _height:
+    set: |
+            this._height = value;
+            this._height = Math.max(this._height,.001);
+            if(this._initialized == true)
+            this.dirtyStack();
+  _heightSegs:
+    set: |
+            this._heightSegs = value;
+            this._heightSegs = Math.max(this._heightSegs,1);
+            this._heightSegs = Math.min(this._heightSegs,10);
+            this._heightSegs = Math.floor(this._heightSegs);
+            if(this._initialized == true)
+            this.dirtyStack();
+  _widthSegs:
+    set: |
+            this._widthSegs = value;
+            this._widthSegs = Math.max(this._widthSegs,1);
+            this._widthSegs = Math.min(this._widthSegs,10);
+            this._widthSegs = Math.floor(this._widthSegs);
+            if(this._initialized == true)
+            this.dirtyStack();
+  _lengthSegs:
+    set: |
+            this._lengthSegs = value;
+            this._lengthSegs = Math.max(this._lengthSegs,1);
+            this._lengthSegs = Math.min(this._lengthSegs,10);
+            this._lengthSegs = Math.floor(this._lengthSegs);
+            if(this._initialized == true)
+            this.dirtyStack();
+  base2pivot:
+    set: |
+            this.base2pivot = value;
+            if(this._initialized == true)
+            this.dirtyStack();              
+  EditorData:
+    _length:
+      displayname: length
+      property: _length
+      type: slider
+      min: 0
+      max: 20
+      step: .01
+    _lengthsegs:
+      displayname: length segments
+      property: _lengthSegs
+      type: slider
+      min: 1
+      max: 10
+      step: 1
+    _widthsegs:
+      displayname: width segments
+      property: _widthSegs
+      type: slider
+      min: 1
+      max: 10
+      step: 1      
+    _width:
+      displayname: width
+      property: _width
+      type: slider
+      min: 0
+      max: 20
+      step: .01
+    _heightSegs:
+      displayname: height segments
+      property: _heightSegs
+      type: slider
+      min: 1
+      max: 10
+      step: 1      
+    _height:
+      displayname: height
+      property: _height
+      type: slider
+      min: 0
+      max: 20
+      step: .01
+    base2pivot:
+      displayname: pivot from base
+      property: base2pivot
+      type: check    
+
+events:
+  pointerOver:
+  pointerOut:
+  pointerUp:
+  pointerDown:
+  pointerMove:
+  pointerClick:
+scripts:
+- |
+    this.initialize = function(){
+        
+        
+        if(this.uri == "pyramid.vwf")
+            return;
+
+       var primobj = new MATH.Object();
+       
+       this.mesh = primobj;
+       if(vwf.getProperty(this.id,'_length') == undefined) vwf.setProperty(this.id,'_length',1);
+       if(vwf.getProperty(this.id,'_width') == undefined) vwf.setProperty(this.id,'_width',1);
+       if(vwf.getProperty(this.id,'_height') == undefined) vwf.setProperty(this.id,'_height',1);
+       if(vwf.getProperty(this.id,'_lengthSegs') == undefined) vwf.setProperty(this.id,'_lengthSegs',1);
+       if(vwf.getProperty(this.id,'_widthSegs') == undefined) vwf.setProperty(this.id,'_widthSegs',1);
+       if(vwf.getProperty(this.id,'_heightSegs') == undefined) vwf.setProperty(this.id,'_heightSegs',1);
+       if(vwf.getProperty(this.id,'base2pivot') == undefined) vwf.setProperty(this.id,'base2pivot',false);
+       vwf.views[0].state.nodes[this.id].MATHObject.addChild(this.mesh);
+       
+      
+       this._initialized = true;
+       this.dirtyStack();
+       this.setupMaterial();       
+    }
+    this.Build = function()
+    {
+        
+        var length = vwf.getProperty(this.id,'_length');
+        var width = vwf.getProperty(this.id,'_width');
+        var height= vwf.getProperty(this.id,'_height');
+        var _lengthSegs = vwf.getProperty(this.id,'_lengthSegs');
+        var _widthSegs = vwf.getProperty(this.id,'_widthSegs');
+        var _heightSegs= vwf.getProperty(this.id,'_heightSegs');
+        var base2pivot= vwf.getProperty(this.id,'base2pivot');
+        return this.BuildCube(length,width,height,_lengthSegs+1,_widthSegs+1,_heightSegs+1,base2pivot);
+            
+    }
+
+    this.BuildCube = function(length,width,height,lengthsegs,widthsegs,heightsegs,basetopivot)
+    {
+        var positions = [];
+        var faces = [];
+        var uvs = []
+        var normals = [];
+        var faces = [];
+        
+        var b2p = -(height/2);
+        var b2pt = .5;
+        if(basetopivot == true)
+        {
+            b2p = 0;
+            b2pt = 1.0;
+        }
+        var faceDownpos = positions.length/3;
+        for(var i = 0; i < widthsegs; i++)
+        {
+            for(var j = 0; j<lengthsegs;j++)
+            {
+                var h = b2p;
+                positions.push((((i/(widthsegs-1)) * width)-width/2)*(b2pt-(h/height)));
+                positions.push((((j/(lengthsegs-1)) * length)-length/2)*(b2pt-(h/height)));
+                positions.push(h);
+                uvs.push(i/(widthsegs-1));
+                uvs.push(j/(lengthsegs-1));
+                normals.push(0);
+                normals.push(0);
+                normals.push(-1);
+            }
+        }
+        var faceFrontpos = positions.length/3;
+        for(var i = 0; i < widthsegs; i++)
+        {
+            for(var j = 0; j<heightsegs;j++)
+            {
+                var h = ((j/(heightsegs-1)) * height)+b2p;
+                positions.push((((i/(widthsegs-1)) * width)-width/2)*(b2pt-(h/height)));
+                positions.push((-length/2)*(b2pt-(h/height)));
+                positions.push(h);
+                uvs.push(i/(widthsegs-1));
+                uvs.push(j/(heightsegs-1));
+                normals.push(0);
+                normals.push(-1);
+                normals.push(0);
+            }
+        }
+        var faceBackpos = positions.length/3;
+        for(var i = 0; i < widthsegs; i++)
+        {
+            for(var j = 0; j<heightsegs;j++)
+            {
+                var h = ((j/(heightsegs-1)) * height)+b2p;
+                positions.push((((i/(widthsegs-1)) * width)-width/2)*(b2pt-(h/height)));
+                positions.push((length/2)*(b2pt-(h/height)));
+                positions.push(h);
+                uvs.push(i/(widthsegs-1));
+                uvs.push(j/(heightsegs-1));
+                normals.push(0);
+                normals.push(1);
+                normals.push(0);
+            }
+        }
+      
+        var faceLeftpos = positions.length/3;
+        for(var i = 0; i < lengthsegs; i++)
+        {
+            for(var j = 0; j<heightsegs;j++)
+            {
+                var h = ((j/(heightsegs-1)) * height)+b2p;
+                positions.push((width/2)*(b2pt-(h/height)));
+                positions.push((((i/(lengthsegs-1)) * length)-length/2)*(b2pt-(h/height)));
+                positions.push(h);
+                uvs.push(i/(lengthsegs-1));
+                uvs.push(j/(heightsegs-1));
+                normals.push(1);
+                normals.push(0);
+                normals.push(0);
+            }
+        }
+        var faceRightpos = positions.length/3;
+        for(var i = 0; i < lengthsegs; i++)
+        {
+            for(var j = 0; j<heightsegs;j++)
+            {
+                var h = ((j/(heightsegs-1)) * height)+b2p;
+                positions.push((-width/2)*(b2pt-(h/height)));
+                positions.push((((i/(lengthsegs-1)) * length)-length/2)*(b2pt-(h/height)));
+                positions.push(h);
+                uvs.push(i/(lengthsegs-1));
+                uvs.push(j/(heightsegs-1));
+                normals.push(-1);
+                normals.push(0);
+                normals.push(0);
+            }
+        }
+
+        for(var i = 0; i < widthsegs-1; i++)
+        {
+            for(var j = 0; j<lengthsegs-1;j++)
+            {
+                var thisi = lengthsegs * i + j;
+                var thisj = lengthsegs * i + (j+1);
+                var thisi1 = lengthsegs * (i+1) + j;
+                var thisi1j1 = lengthsegs * (i+1) + (j+1);
+               
+               faces.push(thisi + faceDownpos);
+                faces.push(thisj + faceDownpos);
+                faces.push(thisi1 + faceDownpos);
+                
+                faces.push(thisi1 + faceDownpos);
+                
+                faces.push(thisj + faceDownpos);
+                faces.push(thisi1j1 + faceDownpos);
+            }
+        }
+        
+        for(var i = 0; i < widthsegs-1; i++)
+        {
+            for(var j = 0; j<heightsegs-1;j++)
+            {
+                var thisi = heightsegs * i + j;
+                var thisj = heightsegs * i + (j+1);
+                var thisi1 = heightsegs * (i+1) + j;
+                var thisi1j1 = heightsegs * (i+1) + (j+1);
+                
+                faces.push(thisj + faceFrontpos);
+                faces.push(thisi + faceFrontpos);
+                faces.push(thisi1 + faceFrontpos);
+                faces.push(thisi1 + faceFrontpos);
+                faces.push(thisi1j1 + faceFrontpos);
+                faces.push(thisj + faceFrontpos);
+            }
+        }
+        
+        for(var i = 0; i < widthsegs-1; i++)
+        {
+            for(var j = 0; j<heightsegs-1;j++)
+            {
+                var thisi = heightsegs * i + j;
+                var thisj = heightsegs * i + (j+1);
+                var thisi1 = heightsegs * (i+1) + j;
+                var thisi1j1 = heightsegs * (i+1) + (j+1);
+                faces.push(thisi + faceBackpos);
+                faces.push(thisj + faceBackpos);
+                faces.push(thisi1 + faceBackpos);
+                faces.push(thisi1 + faceBackpos);
+                
+                faces.push(thisj + faceBackpos);
+                faces.push(thisi1j1 + faceBackpos);
+            }
+        }
+        
+        for(var i = 0; i < lengthsegs-1; i++)
+        {
+            for(var j = 0; j<heightsegs-1;j++)
+            {
+                var thisi = heightsegs * i + j;
+                var thisj = heightsegs * i + (j+1);
+                var thisi1 = heightsegs * (i+1) + j;
+                var thisi1j1 = heightsegs * (i+1) + (j+1);
+                faces.push(thisi + faceLeftpos);
+                 faces.push(thisi1 + faceLeftpos);
+                faces.push(thisj + faceLeftpos);
+               
+                faces.push(thisi1 + faceLeftpos);
+                faces.push(thisi1j1 + faceLeftpos);
+                faces.push(thisj + faceLeftpos);
+            }
+        }
+        
+        for(var i = 0; i < lengthsegs-1; i++)
+        {
+            for(var j = 0; j<heightsegs-1;j++)
+            {
+                var thisi = heightsegs * i + j;
+                var thisj = heightsegs * i + (j+1);
+                var thisi1 = heightsegs * (i+1) + j;
+                var thisi1j1 = heightsegs * (i+1) + (j+1);
+                faces.push(thisi + faceRightpos);
+                faces.push(thisj + faceRightpos);
+                faces.push(thisi1 + faceRightpos);
+                faces.push(thisi1 + faceRightpos);
+              
+                faces.push(thisj + faceRightpos);  
+                faces.push(thisi1j1 + faceRightpos);
+            }
+        }
+       
+        var planemesh = new MATH.Mesh();
+          
+        planemesh.setPositions(positions);
+        planemesh.setFaces(faces);
+        planemesh.setNormals(normals);
+        planemesh.setUV(uvs);
+        
+        return planemesh;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    function findChildViewNode(node, name)
+    {
+        if(node.vwfID == name)
+            return node;
+        else if(node.children){
+            for(var i = 0; i < node.children.length; i++) {
+                var child = findChildViewNode(node.children[i],name);
+                if(child) return child;
+            }
+        }
+        return null;
+    }
+    function findVWFscene()
+    {
+         return  vwf.models[0].model.nodes["index-vwf"];
+    }
+    function findscene()
+     {
+         for(var i =0; i<vwf.views.length;i++)
+         {
+             if(vwf.views[i].module.id = 'vwf/view/MATH') return vwf.views[i].state.scenes["index-vwf"].MATHScene;
+         }
+         return null;
+    }

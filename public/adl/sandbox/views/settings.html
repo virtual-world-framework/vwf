@@ -1,0 +1,100 @@
+<script type="text/javascript" src='./vwf/view/editorview/lib/jquery-ui-1.10.3.custom.min.js'></script>
+<link rel="stylesheet" href="./vwf/view/editorview/css/jquery-ui-1.10.3.custom.css">
+<script type="text/javascript">
+
+	
+	
+	$(document).ready(function()
+	{
+		window.settings = JSON.parse(window.localStorage['sandboxPreferences'] || null) || {};
+
+		window.defaults = {
+            shadows:true,
+            useSimpleMaterials:false,
+            resolutionScale: 1,
+            filtering:true,
+            stereoOffset:.3
+        }
+        for(var i in defaults)
+        	if(settings[i] === undefined)
+        	{
+        		settings[i] = defaults[i];
+        	}
+        $('#resolution').slider({min:.25,max:1.0,step:.125});
+        $('#stereoOffset').slider({min:0,max:100,step:1});
+		
+		window.onbeforeunload = function()
+		{
+			
+			settings.shadows = $('#shadows:checked').val()?true:false;
+			settings.useSimpleMaterials = $('#simple:checked').val()?true:false;
+			settings.filtering = $('#filtering:checked').val()?true:false;
+			settings.resolutionScale = 1.0/$('#resolution').slider('value');
+			settings.stereoOffset = $('#stereoOffset').slider('value')/200.0;
+			window.localStorage['sandboxPreferences'] = JSON.stringify(settings);
+		}
+
+		$('#resolution').slider('value',1.0/settings.resolutionScale || defaults.resolutionScale);
+		$('#stereoOffset').slider('value',(settings.stereoOffset  || defaults.stereoOffset) * 200);
+		
+		if(settings.shadows)
+			$('#shadows').attr('checked', 'checked');
+		else
+			$('#shadows').removeAttr('checked');
+
+		if(settings.filtering)
+			$('#filtering').attr('checked', 'checked');
+		else
+			$('#filtering').removeAttr('checked');
+
+		if(settings.useSimpleMaterials)
+			$('#simple').attr('checked', 'checked');
+		else
+			$('#simple').removeAttr('checked');
+
+		window.setInterval(function()
+		{
+			settings.shadows = $('#shadows:checked').val()?true:false;
+			settings.useSimpleMaterials = $('#simple:checked').val()?true:false;
+			settings.filtering = $('#filtering:checked').val()?true:false;
+			settings.resolutionScale = 1.0/$('#resolution').slider('value');
+			settings.stereoOffset = $('#stereoOffset').slider('value')/200.0;
+			window.localStorage['sandboxPreferences'] = JSON.stringify(settings);
+		},1000);
+		
+	});	
+	
+
+</script>
+<div id="content" class="row" style="margin:10px auto;float:none;text-align:center;height:260px;">
+	<div class="col-md-5" style="margin:10px auto;float:none;text-align:center;height:260px;">
+		<form data-bind="submit:handleLoginButton" >
+			<fieldset>
+				<legend style="padding-bottom:5px;">{{#translate}}Player Settings{{/translate}}</legend>
+				<div class="col-md-10" style="margin:0 auto;float:none;">
+					
+					<input id="shadows" checked='checked' type='checkbox' style='margin-right:.5em' name='shadows'></input><label for='shadows'>Enable Shadows</label><br/>
+					<input id="filtering" checked='checked' type='checkbox' style='margin-right:.5em' name='filtering'></input><label for='filtering'>Enable Anisotropic Filtering</label><br/>
+					<input id="simple"  type='checkbox' style='margin-right:.5em' name='simple'></input><label for='filtering'>Use Simple Materials</label><br/>
+					
+					<br/><label for=''>Resolution</label><br/>
+					<div id='resolution' style = "width:100%"></div>
+
+
+					
+					<div style="text-align:left"><span id=''>Low</span><span style = 'float:right'>High</span></div>
+					<br/><label for=''>Stereo Overlap</label><br/>
+					<div id='stereoOffset' style = "width:100%"></div>
+
+
+					
+					<div style="text-align:left"><span id=''>0%</span><span style = 'float:right'>100%</span></div>
+
+				</div>
+				<legend style="padding-bottom:5px;"></legend>
+			</fieldset>
+		</form>
+		   
+		
+	</div>
+</div>

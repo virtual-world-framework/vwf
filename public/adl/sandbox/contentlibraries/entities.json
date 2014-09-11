@@ -1,0 +1,76 @@
+{
+    "Default Tree": {
+        "url": "./contentlibraries/entities/vwf/defaulttree.vwf.json",
+        "preview": "./contentlibraries/entities/thumbs/defaulttree.png",
+        "dropPreview": {
+            "url": "./contentlibraries/entities/assets/defaulttree.json",
+            "type": "subDriver/threejs/asset/vnd.osgjs+json+compressed",
+            "transform": [
+                1,
+                0,
+                0,
+                0,
+                0, -2.2112923048211997E-8,
+                1,
+                0,
+                0, -1, -2.2112923048211997E-8,
+                0,
+                0,
+                0,
+                0,
+                1
+            ]
+        },
+        "type": "asset"
+    },
+    "T90 Tank": {
+        "url": "./contentlibraries/entities/vwf/t90.vwf.json",
+        "preview": "./contentlibraries/entities/thumbs/t90.png",
+        "dropPreview": {
+            "url": "./contentlibraries/entities/assets/t90/t90.json",
+            "type": "subDriver/threejs/asset/vnd.osgjs+json+compressed"
+        },
+        "type": "asset"
+    },
+    "Barrel": {
+        "url": "./contentlibraries/entities/vwf/barrel.vwf.json",
+        "preview": "./contentlibraries/entities/thumbs/barrel.jpg",
+        "dropPreview": {
+            "url": "./contentlibraries/entities/assets/barrel.json",
+            "type": "subDriver/threejs/asset/vnd.osgjs+json+compressed"
+        },
+        "type": "asset"
+    },
+    "Fire": {
+        "url": "./contentlibraries/entities/vwf/fire.vwf.json",
+        "preview": "./contentlibraries/entities/thumbs/fire.jpg",
+        "type": "asset"
+    },
+    "Imam": {
+        "url": "./contentlibraries/entities/vwf/Imam.vwf.json",
+        "preview": "./contentlibraries/entities/thumbs/Imam.jpg",
+        "dropPreview": {
+            "url": "./contentlibraries/entities/assets/Imam_Static_Model.json",
+            "type": "subDriver/threejs/asset/vnd.osgjs+json+compressed",
+            "transform": [
+                0.43,
+                0,
+                0,
+                0,
+                0, 
+                0.43,
+                0,
+                0,
+                0, 
+                0, 
+                0.43,
+                0,
+                0,
+                0,
+                0,
+                1
+            ]
+        },
+        "type": "asset"
+    }
+}

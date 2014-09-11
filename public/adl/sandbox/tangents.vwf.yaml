@@ -1,0 +1,70 @@
+extends: http://vwf.example.com/node3.vwf
+properties:
+  active:
+    value: true
+    set: |
+            this.active = value;
+            this.dirtyStack();
+  isModifier: true
+  type:
+  EditorData:
+    active:
+      displayname: enabled
+      property: active
+      type: check
+methods:
+  GetBounds:
+  updateStack:
+  updateSelf:
+  dirtyStack:
+  GetMesh:
+  tangent:
+events:
+  childAdded:
+scripts:
+- |
+    this.updateSelf = function()
+    {
+        if(this.active)
+        {
+            this.tangent();
+        }
+    }
+    
+    this.tangent = function()
+    {   
+         
+         
+         var mesh = this.GetMesh();
+         var m = mesh.getMesh();
+         m.calcTangents();
+    }
+    this.updateStack = function()
+    {
+       
+        this.updateSelf();
+        for(var i in this.children)
+        {
+            return vwf.callMethod(this.children[i].id,'updateStack');
+        }
+    }
+    this.initialize = function()
+    {
+         
+    }
+    this.GetMesh = function()
+    {
+        
+        return vwf.callMethod(vwf.parent(this.id),'GetMesh');
+    }
+    this.GetBounds = function()
+    {
+        
+        return vwf.callMethod(vwf.parent(this.id),'GetBounds');
+    }
+    this.dirtyStack = function()
+    {
+       
+        
+        return vwf.callMethod(vwf.parent(this.id),'dirtyStack');
+    }

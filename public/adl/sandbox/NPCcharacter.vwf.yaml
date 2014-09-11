@@ -1,0 +1,664 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+
+extends: http://vwf.example.com/node3.vwf
+properties:
+  translation:
+  rotZ: 0       
+  test:  
+  motionStack: []
+  activeCycle: 'stand'
+methods:
+  update:
+  tick:
+events:
+  pointerOver:
+  pointerOut:
+  keyUp:
+  keyDown:
+scripts:
+- |
+
+    this.initialize = function(){
+        
+        if(this.id == 'NPCcharacter.vwf') return;
+       
+         this.DownKeys= [];
+        // this.motionStack= [];
+         this.jumpcounter = 0;
+        
+       
+       
+        
+       
+        
+        if(this.hasOwnProperty('PlayerNumber') == false) return;
+        var PlayerNumber = vwf.getProperty(this.id,'PlayerNumber');
+        
+        
+        if(!document[PlayerNumber + 'link'])
+        {
+            //this.parent.players.push(PlayerNumber); 
+            document[PlayerNumber +'link'] = this;
+            _UserManager.PlayerCreated(PlayerNumber,this.id);
+           
+        }
+        
+       
+        
+        
+        this.originalvelocity = [0,0,0];
+        this.updateCallbacks = [];
+         if(document.PlayerNumber == PlayerNumber)
+          {
+            
+            
+            //findVWFscene().followObject(this);
+            
+          }
+         
+         this.cycles = 
+            {
+                stand:{start:0,length:0,speed:1.25,current:0,loop:false},
+                walk:{start:0,length:30,speed:1.25,current:0,loop:true},
+                straferight:{start:31,length:29,speed:1.5,current:0,loop:true},
+                strafeleft:{start:31,length:29,speed:-1.5,current:0,loop:true},
+                walkback:{start:0,length:30,speed:-1.25,current:0,loop:true},
+                run:{start:60,length:30,speed:1.25,current:0,loop:true},
+                jump:{start:90,length:48,speed:1.25,current:0,loop:false},
+                runningjump:{start:109,length:48,speed:1.25,current:0,loop:false}
+            };
+          this.prerendercallback = this.placeNameTag.bind(this);
+          $(document).bind('prerender',this.prerendercallback);
+          //this.callbacknum = findVWFscene().addUpdateCallback(this.placeNameTag.bind(this));
+          this.updatecounter = 0;
+          this.mesh = findChildViewNode(findscene(),this.id);
+          //debugger;
+          //this.mesh.sceneManagerIgnore();
+         // if(!this.mesh)
+           
+          this.mesh.children[0].children[0].position.z = -.85
+          this.skin = this.mesh.children[0].children[0].children[1];
+          this.skin.isAvatar = true;
+          this.jumpcounter = 0.0;
+          //this.stand();
+         
+          this.createNameTag(PlayerNumber);
+          this.followOffset = [0,0,1.733];
+          this.initCycles();
+        //  this.activeCycle = this.cycles.stand;
+          this.updateLoopStarted = false;
+          var now = performance.now();
+          this.lastUpdate = now;
+          //window.setTimeout(function(){document[PlayerNumber +'link'].startloop();},500);
+    }
+    this.pointerOver = function(e)
+    {
+        
+    }
+    this.pointerOut = function(e)
+    {
+        
+    }
+    this.initCycles = function()
+    {
+        for(var i in this.cycles)
+        {
+            this.cycles[i].getFrame = function() { 
+                    return this.current + this.start;
+                }.bind(this.cycles[i]);
+            this.cycles[i].increment = function(steps) { 
+                    this.current+=this.speed * steps;
+                    if(this.current >= this.length && this.loop == true)
+                        this.current = 0;
+                    if(this.current < 0 && this.loop == true)
+                        this.current = this.length;    
+                    if(this.current >= this.length && this.loop == false)
+                        this.current = this.length-1;
+                    return this.getFrame();
+                }.bind(this.cycles[i]);
+            this.cycles[i].reset = function() {
+                    this.current=0;
+            }.bind(this.cycles[i]);
+        }
+    }
+    this.createNameTag = function(PlayerNumber)
+    {
+    
+      var newdiv = document.createElement('div');
+      $(newdiv).attr('style',"font-weight: bold; position: fixed; left: 612.7792636991876px; top: 350.056008871367px; color: gray;  ");
+      newdiv.style.position = 'absolute';
+      newdiv.id = "Player " + PlayerNumber + 'label';
+      newdiv.innerHTML = "" + PlayerNumber;
+      newdiv.style.left = '0px';
+      newdiv.style.top = '0px';
+      
+      $(document.body).append(newdiv);
+      $(newdiv).disableSelection();
+      this.nametag = newdiv;
+                 
+    }
+    this.deinitialize = function()
+    {
+       //findVWFscene().removeUpdateCallback(this.callbacknum);
+       $(document).unbind('prerender',this.prerendercallback);
+        _UserManager.PlayerDeleted(this.PlayerNumber);
+       //this.deleteMe = true;            
+       $(this.nametag).remove()
+       
+    }
+    this.placeNameTag = function(e,viewprojection,wh, ww)
+    {
+        
+      if(!this.ownerClientID)  
+        return;
+    
+      
+      var div = this.nametag;
+      var pos = this.tbak;
+      pos = [pos[0],pos[1],pos[2]+1.620,1];
+         
+      var screen = MATH.mulMat4Vec4(viewprojection,pos);
+      screen[0] /= screen[3];
+      screen[1] /= screen[3];
+     
+      screen[0] /= 2;
+      screen[1] /= 2;
+      screen[2] /= 2;
+      screen[0] += .5;
+      screen[1] += .5;
+      
+  
+      screen[0] *= ww;
+      screen[1] *= wh;
+      
+      screen[1] = wh - screen[1];
+
+      div.style.top = (screen[1])  +  'px';
+      div.style.left = (screen[0] - 20/2)  +'px';
+     
+      
+      if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))
+      {
+            if(div.style.display != 'none')
+                div.style.display = 'none';
+      }
+      else
+      {
+          if((screen[2] > 10 || screen[2] < 0) && div.style.display != 'none')
+             div.style.display = 'none';
+          if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')
+             div.style.display = 'block';
+      }
+         
+         
+    }
+    this.startloop = function()
+    {
+        if(this.updateLoopStarted == false)
+        {
+            this.update(this.moniker);
+            this.updateLoopStarted = true;
+        }
+    }
+    this.update = function(moniker)
+    {
+       
+      
+        this.updatecounter++;
+        var updateFreqDivisor = 1;
+        
+        if(this.id == 'NPCcharacter-vwf') return;
+       
+        
+      
+        
+          var backupr = this.rotation;
+          backupr = [0,0,1,this.rotZ/0.0174532925];
+        
+      
+        var standing = 1.703559666;
+        if(this.activeCycle)
+        {
+            
+            var newframe = this.cycles[this.activeCycle].increment(updateFreqDivisor);
+            newframe = Math.max(newframe,0);
+            if(this.currentframe != newframe)
+            {
+                
+               
+               
+               for(var i = 0; i < this.skin.morphTargetInfluences.length; i++)
+                    this.skin.morphTargetInfluences[i] = 0;
+               
+               this.skin.morphTargetInfluences[parseInt(newframe)] = 1;     
+            }
+            this.prevframe = this.currentframe;
+            this.currentframe = newframe;
+        }
+        
+        
+        var backupt = [this.translation[0],this.translation[1],this.translation[2]];
+        var finalt = backupt.slice(0);
+        var originalpos = backupt.slice(0);
+        var originalpos2 = backupt.slice(0);
+       
+        if(this.motionStack.length == 0)
+            this.stand();
+        
+        var motionvec = null;
+        for(var i=0; i < this.motionStack.length; i++)
+        {
+            this.cycleName =  this.motionStack[i];
+            if(this.cycleName == 'turnright')
+            {
+                this.rotZ += -.07*updateFreqDivisor;
+               // this.mesh.setRotZ(this.rotZ);
+               backupr = [0,0,1,this.rotZ/0.0174532925];
+            }
+            if(this.cycleName == 'turnleft')
+            {
+                this.rotZ += +.07*updateFreqDivisor;
+               // this.mesh.setRotZ(this.rotZ);
+               backupr = [0,0,1,this.rotZ/0.0174532925];
+            }
+             if(this.cycleName == 'straferight')
+            {
+                 motionvec = MATH.mulMat4Vec3(MATH.angleAxis(backupr[3]*0.0174532925,[backupr[0],backupr[1],backupr[2]]),[-.03*updateFreqDivisor,0,0]);
+                 finalt = MATH.addVec3(motionvec,finalt);
+            }
+            if(this.cycleName == 'strafeleft')
+            {
+                 motionvec = MATH.mulMat4Vec3(MATH.angleAxis(backupr[3]*0.0174532925,[backupr[0],backupr[1],backupr[2]]),[.03*updateFreqDivisor,0,0]);
+                 finalt = MATH.addVec3(motionvec,finalt);
+            }
+            if(this.cycleName == 'walk')
+            {
+                    motionvec = MATH.mulMat4Vec3(MATH.angleAxis(backupr[3]*0.0174532925,[backupr[0],backupr[1],backupr[2]]),[0,-.06*updateFreqDivisor,0]);
+                    finalt = MATH.addVec3(motionvec,finalt);
+            }
+            if(this.cycleName == 'walkback')
+            {
+                    motionvec = MATH.mulMat4Vec3(MATH.angleAxis(backupr[3]*0.0174532925,[backupr[0],backupr[1],backupr[2]]),[0,+.06*updateFreqDivisor,0]);
+                    finalt = MATH.addVec3(motionvec,finalt);
+            }
+            if(this.cycleName == 'run')
+            {
+                    motionvec = MATH.mulMat4Vec3(MATH.angleAxis(backupr[3]*0.0174532925,[backupr[0],backupr[1],backupr[2]]),[0,-.140*updateFreqDivisor,0]);
+                    finalt = MATH.addVec3(motionvec,finalt);
+            }
+            if(this.cycleName == 'jump')
+            {  
+                var preptime = 5.5;
+                var height = 36;
+                var heighttimeoffset = Math.sqrt(height);
+                var hangtime = 17;
+                if(this.jumpcounter >= (hangtime+preptime+preptime))
+                {
+                
+                    this.removeMotion('jump');
+                    if(this.inMotion('walk'))
+                    {
+                        this.removeMotion('walk');
+                        this.walk();
+                    }
+                    if(this.inMotion('run'))
+                    {
+                        this.removeMotion('run');
+                        this.run();
+                    }
+                    this.jumpcounter  = 0;
+                }
+                
+                var jumpamt = 0;
+                if(this.jumpcounter < preptime)
+                    jumpamt = -(this.jumpcounter * 0);
+                else if(this.jumpcounter > hangtime+preptime)
+                    jumpamt = -((hangtime+preptime+preptime)-this.jumpcounter) * 0;
+                else    
+                {
+                    var x = this.jumpcounter - preptime;
+                    jumpamt = .080*((-((x/1.4)-heighttimeoffset)*((x/1.4)-heighttimeoffset))+height) -(preptime * 0) ;
+                }
+                
+                finalt = [finalt[0],finalt[1],this.jumpstart + jumpamt];
+                this.jumpcounter += ((hangtime+preptime+preptime)/39.0) *updateFreqDivisor;
+            }
+            
+        }
+        
+        
+            //if the character is not completely still, and they're not jumpping, then check their motion vector 
+            //for intersetions, and prevent penetration through objects
+            if((MATH.lengthVec3(this.originalvelocity) > .001 || motionvec) && !this.inMotion('jump') && this.activeCycle != 'stand')
+            {
+                this.skin.PickPriority = -1;
+                
+                
+                motionvec = MATH.toUnitVec3(motionvec);
+                var testpos = MATH.subVec3(finalt,MATH.scaleVec3(motionvec,-.15));
+                
+                var intersectfront = _SceneManager.CPUPick(MATH.addVec3(testpos,[0,0,1]),motionvec,{filter:function(o){return o.isAvatar != true;},maxDist: 2,ignore:[this.skin,_Editor.GetMoveGizmo()]});
+                if(intersectfront)
+                {
+                    if(intersectfront.distance < .3)
+                    {
+                        
+                        var offset = MATH.subVec3(originalpos,finalt);
+                        var len = MATH.lengthVec3(offset);
+                        offset = MATH.scaleVec3(offset,1/MATH.lengthVec3(offset));
+                        var norm = [intersectfront.norm[0],intersectfront.norm[1],intersectfront.norm[2]];
+                        
+                        if(Math.abs(norm[0]) < .05) norm[0] = 0;
+                        if(Math.abs(norm[1]) < .05) norm[1] = 0;
+                        if(Math.abs(norm[2]) < .05) norm[2] = 0;
+                        
+                        var R = MATH.scaleVec3(norm,.3 - intersectfront.distance); 
+                        
+                        finalt = MATH.addVec3(finalt,R);
+                    }
+                }
+                var falldist = 1000;
+               
+                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,1.7]),[0,0,-1],{filter:function(o){ return o.isAvatar != true;},maxDist: 2,ignore:[this.skin,_Editor.GetMoveGizmo()]});
+              
+               
+                falldist = intersect?intersect.distance:falldist;
+                if( falldist)
+                {
+                   
+                    var zdiff = standing - falldist;
+                    
+                    var zmove = zdiff;
+                    if(zdiff < -.03 )
+                    {
+                       zmove = this.originalvelocity[2] - 1.0/24; 
+                       
+                       finalt = MATH.addVec3(finalt, [0,0,zmove]);
+                    }   
+                    else if(zdiff > .33 )
+                    {   
+                      
+                       finalt = [originalpos2[0],originalpos2[1],originalpos2[2]];
+                       
+                    }
+                    else
+                    {
+                        finalt = MATH.addVec3(finalt, [0,0,zmove/3]);
+                    }
+                }
+                this.skin.PickPriority = 1;
+                
+            }
+            //if they are jumpping, and have been for more than a 10th of a second, start checking below them for intersections.
+            //10th of second is where they start falling?
+            if(this.inMotion('jump') && this.jumpcounter > 10)
+            {
+                this.skin.PickPriority = -1;
+                var intersect = _SceneManager.CPUPick(MATH.addVec3(finalt,[0,0,2]),[0,0,-1],{filter:function(o){return o.isAvatar != true;},maxDist: 2,ignore:[this.skin,_Editor.GetMoveGizmo()]});
+                if(intersect)
+                {
+                    
+                    var zdiff = standing - intersect.distance;
+                   
+                    //in this case, they've jumpped onto something
+                    if(zdiff > 0.17 )
+                    {
+                        
+                        var zdiff = standing - intersect.distance;
+                        
+                        var zmove = zdiff;
+                        finalt = MATH.addVec3(finalt, [0,0,zmove]);
+                        this.removeMotion('jump');
+                        this.jumpcounter  = 0;
+                    }
+                }
+                this.skin.PickPriority = 1;
+            }
+            
+        
+        this.originalvelocity[2] = 0;
+        // keep track of how fast they were moving at this frame, so we can accelerate properly
+        this.originalvelocity = MATH.subVec3(finalt,originalpos);
+        //permenantly clamp to z=0 plane
+        if(finalt[2] < 0)
+            finalt = [finalt,finalt,0];
+        //every 2 seconds, update the position and rotation that tend to run out of sync
+        //note that we could change the update mechanism to avoid getting out of sync
+        
+        if(this.updatecounter > Math.random() * 180)
+          {
+           
+            //vwf_view.kernel.setProperty(this.id,'transform',this.transform,0,null);
+             this.updatecounter = 0;
+               
+             var rnd = Math.floor(Math.random() * 5);
+             if(rnd == 0)
+                this.stand();
+             if(rnd == 1)
+                this.walk();
+          //   if(rnd == 2)
+          //      this.jump();
+             if(rnd == 3)
+             {
+                
+                this.removeMotion('turnleft');
+                this.removeMotion('turnright');
+                this.addMotion('turnright');
+             }
+             if(rnd == 4)
+             {
+                this.removeMotion('turnright');
+                this.removeMotion('turnleft');
+                this.addMotion('turnleft');				
+             }
+               
+          }
+          
+        for(var i = 0; i < this.updateCallbacks.length; i++)
+        {
+        
+            this.updateCallbacks[i](this);
+        }
+      
+        this.skin.PickPriority = 1;
+        this.tbak = finalt;
+        this.translation = finalt;
+        this.rotation = backupr;
+    }
+    this.tick = function()
+    {
+        
+      if(this.id == 'NPCcharacter-vwf') return;
+      try{
+        this.update();
+        }catch(e){}
+     
+        
+        
+    }
+     function findChildViewNode(node, name)
+     {
+        if(node == null)
+            return null;
+        if(node.vwfID == name)
+            return node;
+        
+        else if(node && node.children){
+            for(var i = 0; i < node.children.length; i++) {
+                var child = findChildViewNode(node.children[i],name);
+                if(child) return child;
+            }
+        }
+        return null;
+     }
+     function findVWFscene()
+     {
+         
+          return   vwf.models[0].model.nodes["index-vwf"];
+         
+         return null;
+     }
+     function findscene()
+     {
+             return vwf.views[0].state.scenes["index-vwf"].threeScene;
+     }
+     
+    this.markKeyDown =function(m)
+    {
+        if(this.DownKeys.indexOf(m) != -1) return;
+        this.DownKeys.push(m);
+    }
+    this.KeyIsDown=function(m)
+    {
+        return (this.DownKeys.indexOf(m) != -1);
+    }
+    this.markKeyUp=function(m)
+    {
+        if(this.DownKeys.indexOf(m) == -1) return;
+               this.DownKeys.splice(this.DownKeys.indexOf(m),1);
+    }
+    
+    this.addMotion =function(m)
+    {
+        if(this.motionStack.indexOf(m) != -1) return;
+        this.motionStack.push(m);
+    }
+    this.inMotion=function(m)
+    {
+        return (this.motionStack.indexOf(m) != -1);
+    }
+    this.removeMotion=function(m)
+    {
+        if(this.motionStack.indexOf(m) == -1) return;
+               this.motionStack.splice(this.motionStack.indexOf(m),1);
+    }
+    this.exclusiveMotion=function(m)
+    {
+        this.motionStack = [m];
+    }     
+    this.walk = function()
+    {
+        if(this.inMotion('walk'))return;
+        if(this.inMotion('jump'))return;
+        this.addMotion('walk');
+        this.activeCycle = 'walk';
+    }
+    this.walkback = function()
+    {
+        if(this.inMotion('walkback'))return;
+        if(this.inMotion('jump'))return;
+        this.addMotion('walkback');
+        this.activeCycle = 'walkback';
+    }
+    this.run = function()
+    {
+        if(this.inMotion('run'))return;
+        if(this.inMotion('jump'))return;
+        this.addMotion('run');
+        this.activeCycle = 'run';
+    }
+    this.cancelRun = function()
+    {
+        if(!this.inMotion('run'))return;
+        this.removeMotion('run');
+        if(this.inMotion('walk'))
+        { 
+            this.removeMotion('walk');
+            this.walk();
+        }
+    }
+    this.stand = function()
+    {
+        this.motionStack = [];
+        this.activeCycle = 'stand';
+    }
+    this.jump = function()
+    {
+        if(this.inMotion('walkback'))return;
+        if(this.inMotion('jump'))return;
+        this.addMotion('jump');
+        this.jumpcounter = 0;
+        this.cycles.jump.reset();
+        this.activeCycle = 'jump';
+        this.jumpstart = this.translation[2];
+       
+    }   
+    this.runningjump = function()
+    {
+       
+        if(this.inMotion('jump'))return;
+        this.addMotion('jump');
+        this.jumpcounter = 0;
+        this.cycles.runningjump.reset();
+        this.activeCycle = 'runningjump';
+       
+    }      
+
+    this.keyUp = function(e)
+         {          
+             if(this.id == 'NPCcharacter-vwf') return;
+            if(vwf.client() != this.ownerClientID) return;
+            if(!e.keysDown.W)
+                this.removeMotion('walk');
+            if(!e.keysDown.S)
+                this.removeMotion('walkback');    
+            if(!e.keysDown.D)
+                {this.removeMotion('straferight'); this.removeMotion('strafeleft');}
+            if(!e.keysDown.C)
+                {this.removeMotion('turnright'); this.removeMotion('turnleft');}    
+            if(!e.keysDown.A)
+                {this.removeMotion('strafeleft');this.removeMotion('straferight');}
+            if(!e.keysDown.Z)
+                {this.removeMotion('turnleft'); this.removeMotion('turnright');}        
+            if(!e.keysDown.W && this.inMotion('run'))
+                this.cancelRun();       
+            
+         }
+    this.keyDown = function(e)
+         {
+            if(this.id == 'NPCcharacter-vwf') return;
+           if(vwf.client() != this.ownerClientID) return;
+            if(e.keysDown.W)
+                this.walk();
+            if(e.keysDown.S)
+                this.walkback();
+            if(e.keysDown.space && !e.mods.shift)
+            {
+                if(!this.inMotion('run'))
+                    this.jump();
+                else
+                    this.runningjump();
+            }
+            if(e.keysDown.D && !this.inMotion('walkback'))
+               { this.addMotion('straferight');  this.activeCycle = 'straferight';  }
+            if(e.keysDown.D && this.inMotion('walkback'))
+               { this.addMotion('strafeleft');  this.activeCycle = 'strafeleft';  }
+            if(e.keysDown.A && !this.inMotion('walkback'))
+               { this.addMotion('strafeleft');    this.activeCycle = 'strafeleft';   }
+            if(e.keysDown.A && this.inMotion('walkback'))
+               { this.addMotion('straferight');   this.activeCycle = 'straferight';   }
+               
+             if(e.keysDown.C && !this.inMotion('walkback'))
+               { this.addMotion('turnright');   }
+            if(e.keysDown.C && this.inMotion('walkback'))
+               { this.addMotion('turnleft');    }
+            if(e.keysDown.Z && !this.inMotion('walkback'))
+               { this.addMotion('turnleft');      }
+            if(e.keysDown.Z && this.inMotion('walkback'))
+               { this.addMotion('turnright');    }
+            if(e.mods.shift && e.keysDown.W)
+                this.run();    
+         }
+    

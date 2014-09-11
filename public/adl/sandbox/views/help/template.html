@@ -1,0 +1,36 @@
+<h3 data-bind="text:help.title"></h3>
+<div data-bind="foreach:help.entries" style="width: 85%; margin: 20px auto;">
+	<div style="margin-top:20px;">
+		<!-- ko if:icon --><div style="float:left;"><img data-bind="attr:{src:'{{root}}/images/icons/' + icon}" /></div><!-- /ko -->
+		<div data-bind="style:{margin:icon?'0 0 0 60px':0}">
+			<span class="h4" data-bind="html:title"></span>
+			<p data-bind="html:body"></p>
+		</div>
+	</div>
+</div>
+
+<script>
+	$(document).ready(function(){
+			
+		getLoginInfo();
+		$.ajax({
+			type: 'GET',
+			url: root + "/views/help/{{script}}",
+			dataType: "json",
+			success: function(json) {
+				vwfPortalModel.help = json;
+				ko.applyBindings(vwfPortalModel);
+			},
+			error: function(x,y,z) {
+				
+				console.log(x.responseText.replace(/\n/g,"").replace(/\r/g,"").replace(/\t/g,""));
+				var test = JSON.parse( x.responseText.replace(/\n/g,"").replace(/\r/g,"") );
+				
+			}
+		/*$.getJSON(root + "/views/help/{{script}}", function(data){
+			vwfPortalModel.help = data;
+			ko.applyBindings(vwfPortalModel);
+		});*/
+		});
+	});
+</script>

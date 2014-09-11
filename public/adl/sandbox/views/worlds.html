@@ -1,0 +1,170 @@
+	<div class="row" style="margin-bottom: 15px">
+		<div class="col-md-12" style="margin:0 auto;float:none;height:auto;">
+			The VW Sandbox contains many worlds. Here, you can search for worlds, and see information about them. Worlds that currently have users in them will show a small green 'Active' button, while worlds that are currently unoccupied will not. When you place your mouse over the world's thumbnail, you'll see several icons. These will let you copy the world, or view its history. If you are logged in as the world's owner, you may edit or publish the world. To enter the world, click the title.
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-4" style="text-align:left;">
+					<div class="row"> 
+						<div style="float: left;padding-left:15px;" data-bind="visible:user().isLoggedIn">
+						<!-- Split button -->
+							<div class="btn-group">
+							  <button type="button" class="btn btn-default" data-toggle="dropdown" data-bind="text:dropDownMap[currentDropDown()]">All worlds</button>
+							  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+								<span class="caret"></span>
+								<span class="sr-only">Toggle Dropdown</span>
+							  </button>
+							  <ul class="dropdown-menu" role="menu" data-bind="foreach:Object.keys(dropDownMap)">
+								<li><a data-bind="text:$root.dropDownMap[$data], click: $root.toggleNameFilter, css:$data==$root.currentDropDown()?'dropdown-selected':''" href="">All worlds</a></li>
+							  </ul>
+							</div>
+						</div>
+						<div style="float:left;margin-left:10px;">
+							<a href="{{root}}/create" id="newinstancebutton" data-bind="visible:user().isLoggedIn">
+								<span class="btn btn-default" style="width:100%;">Create World</span>
+							</a>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-md-offset-3 worldSmallSearch" data-bind="visible:!initialSearchDisplay()">
+					<input class="form-control filter" type="text" placeholder="Search Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'"/>
+					<div class="glyphicon glyphicon-remove" data-bind="click:function(){filterVal('');}"></div>
+				</div>
+			</div>
+			<div class="row" style="margin-top:45px;margin-bottom:70px;" data-bind="visible:(displayWorldObjects().length==0) || initialSearchDisplay()">	
+				<div class="col-md-4 col-md-offset-4" style="text-align:center;">
+					<p style="font-weight:bold;" data-bind="visible:filter().length > 0">No worlds found, please try again</p>
+					<div style="font-weight:bold;" data-bind="visible:initialSearchDisplay">
+						<p data-bind="visible:filter().length==0">Enter a search term</p>
+						<input class="form-control filter" type="text" placeholder="Search Worlds" data-bind="value:filterVal, valueUpdate:'afterkeydown'" />
+					</div>		
+					<p style="font-weight:bold;" data-bind="visible:filter().length == 0 && displayWorldObjects().length==0 && !initialSearchDisplay()">There are no featured worlds to display, please try searching.</p>
+				</div>
+			</div>
+			<div class="row" id="activeRow" data-bind="foreach:displayWorldObjects">				
+				<div data-bind="visible:isVisible" class="col-md-3 worldHeightPadding">
+					<div data-bind="event: {mouseover:$root.handleEditDisplay, mouseout:$root.handleEditDisplay}, css: $data.featured?'featuredInstance':'worldBox'">
+						
+						<div class="boxContentWrapper">
+							<div style="margin-bottom: 10px;">
+								<a data-bind="attr:{href:'{{root}}/world/'+id}, text:$root.getShorterStr(title, 20)" href="">Title</a>
+								<span class="owner" data-bind="text:' - ' + owner"></span>
+							</div>
+							<a data-bind="attr:{href:'{{root}}/world/'+id}" href="">
+								<img data-bind="attr:{src:'{{root}}/vwfDataManager.svc/thumbnail?SID=' + id + ''}" class="worldImage" onerror="this.src = './img/thumbnotfound.png';"/>
+							</a>
+							<div class="worldInfo">
+								<a data-bind="attr:{href:'{{root}}/'+id}" style="text-decoration:none;">
+									<span class="description" data-bind="text:description?$root.getShorterStr(description, 75):'No description'"></span>
+									
+									<div style="margin-top: 5px;" data-bind="visible:false&&!$data.featured">
+										<span class="objects" data-bind="text: objects + (objects == 1 ? ' object ' : ' objects ')"></span>
+										&nbsp;<span class="lastModified stateid" data-bind="text:' (' + lastUpdate + ')' "></span>
+									</div>
+								</a>
+							</div>
+						</div>
+						<div data-bind="css:$data.featured?'editstate' : 'editstateGuest'">
+							<!--<span class="glyphicon glyphicon-star" data-bind="attr:{href:'{{root}}/'+id}, visible:$data.featured && !hotState"></span>-->
+							<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/world/'+id}, visible:hotState">Active</a>
+							<div data-bind="visible:editVisible">
+								<a title="Launch World" class="editstatecopy glyphicon glyphicon-globe" data-bind="attr:{href:'{{root}}/'+id}" style="margin-right:18px;"></a>
+								<a title="View Info" class="editstatecopy glyphicon glyphicon-list-alt" data-bind="attr:{href:'{{root}}/'+'world/'+id}" style="margin-right:10px;"></a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row" style="margin-bottom:45px;">
+				<div class="col-md-1 col-md-offset-4" style="text-align:right;">
+					<a class="btn btn-default" data-bind="click:getPreviousPage, css:previousDisabled()?'disabled btn btn-default':'btn btn-default'">
+						<i class="glyphicon glyphicon-chevron-left"></i>
+					</a>
+				</div>				
+				<div class="col-md-1 col-md-offset-2">
+					<a class="btn btn-default" data-bind="click:getNextPage, css:nextDisabled()?'disabled btn btn-default':'btn btn-default'">
+						<i class="glyphicon glyphicon-chevron-right"></i>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		$(document).ready(function(){	
+			
+			vwfPortalModel.cloneWorld = function(world){
+				alertify.confirm("Copy this world?", function(e){
+					if(e){
+						
+						$.get(root + '/vwfDataManager.svc/copyinstance?SID=' + world.id, function(o){
+			
+							if(o){
+								window.location = root + '/edit?id=' + o.substr(13,16);
+							}
+
+							else{
+								alertify.error("World was not successfully copied.");
+							}
+						})
+						.error(function(){
+							alertify.error("World was not successfully copied.");
+						});
+					}
+				});	
+			};
+			
+			ko.applyBindings(vwfPortalModel);
+			getLoginInfo(function(){
+				
+				if(localStorage){
+					var hashArr = localStorage.getItem("searchQuery");
+					if(hashArr){
+						hashArr = hashArr.split('--');
+						hashArr[0] = hashArr[0].replace(/[^a-zA-Z0-9 ]/g, '');
+						hashArr[1] = !!hashArr[1] ? hashArr[1].replace(/[^a-zA-Z0-9 ]/g, '') : '';
+						
+						if(!!hashArr[0] || hashArr[1] != 'featured'){
+							$('.filter').val(hashArr[0]);
+							vwfPortalModel.filterVal(hashArr[0]);
+							
+							if(hashArr[1] && vwfPortalModel.user().isLoggedIn && vwfPortalModel.dropDownMap[hashArr[1]]){
+								filter = hashArr[0];
+								vwfPortalModel.toggleNameFilter(hashArr[1]);
+							}
+							
+							vwfPortalModel.initialSearchDisplay(false);
+						}
+						
+						vwfPortalModel.dropDownMap.featured = hashArr[0] ? "All worlds" : "Featured worlds";
+						vwfPortalModel.currentDropDown.valueHasMutated();
+					}
+				}
+				
+				showStates();
+
+				window.setInterval(function(){
+					showStates();
+				},15000);
+			});
+		});
+	</script>
+	    <div id="disqus_thread"></div>
+	    <script type="text/javascript">
+		/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+		var disqus_shortname = 'vwfsandbox'; // required: replace example with your forum shortname
+
+		/* * * DON'T EDIT BELOW THIS LINE * * */
+		(function() {
+		    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+		    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+		})();
+	    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+	
+	
+	

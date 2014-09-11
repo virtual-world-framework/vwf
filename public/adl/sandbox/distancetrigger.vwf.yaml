@@ -1,0 +1,65 @@
+extends: 'http://vwf.example.com/behavior.vwf'
+properties:
+  type: behavior
+  EditorData_temp:
+    methodenter:
+      displayname: Method to trigger on enter
+      property: methodenter
+      type: choice
+    methodleave:
+      displayname: Method to trigger on leave
+      property: methodleave
+      type: choice  
+    NodeID:
+      displayname: "Choose Node"
+      property: NodeID
+      type: nodeid
+    distance:
+      displayname: "Distance (m)"
+      property: distance
+      type: slider 
+      min: 0
+      max: 100
+      step: .1
+  EditorData:
+    value:
+    get: |
+       
+       var keys = Object.keys(this.parent.methods);
+       this.EditorData_temp.methodenter.labels = keys;
+       this.EditorData_temp.methodenter.values = keys;
+       this.EditorData_temp.methodleave.labels = keys;
+       this.EditorData_temp.methodleave.values = keys; 
+       return this.EditorData_temp;   
+  DisplayName: DistanceTrigger
+  NodeID: null
+  methodenter: null
+  methodleave: null
+  distance: 1
+  inRange: false
+methods:
+  satProperty:
+    parameters:
+      - id
+      - property
+      - value
+    body: |
+     
+      if(property == 'transform' && id == this.NodeID)
+      {
+          var worldtrans = vwf.getProperty(id,'worldTransform');
+          var worldpos = [worldtrans[12],worldtrans[13],worldtrans[14]];
+          var dist = Vec3.distance(worldpos,this.transformAPI.getPosition());
+          if(dist < this.distance && this.inRange == false)
+          {
+              this.inRange = true;
+              if( this.parent[this.methodenter])
+                this.parent[this.methodenter]();
+          }
+          if(dist > this.distance && this.inRange == true)
+          {
+              this.inRange = false;
+              if( this.parent[this.methodleave])
+                this.parent[this.methodleave]();
+          }
+      }

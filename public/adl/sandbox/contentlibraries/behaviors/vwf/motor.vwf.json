@@ -1,0 +1,24 @@
+{
+	"extends": "http://vwf.example.com/behavior.vwf",
+	"properties": {
+		"DisplayName": "motor",
+		"localForce" : [0,1000,0],
+		"isActive" : true,
+		"EditorData":{
+			"MotorForceVector" :{
+				"displayname" :"Motor Force Vector",
+				"property":"localForce",
+				"type":"vector"
+			},
+			"Active" :{
+				"displayname" :"Motor On",
+				"property":"isActive",
+				"type":"check"
+			}
+		},
+		"type":"behavior"
+	},
+	"methods":{
+		"tick":"  if(this.isActive) this.physicsAPI.addForceAtCenter(this.transformAPI.localToGlobal(this.localForce)); "
+	}
+}

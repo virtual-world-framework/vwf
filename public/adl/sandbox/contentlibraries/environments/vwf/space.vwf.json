@@ -1,0 +1,69 @@
+{
+    "properties": {
+
+        "sunColor": [0.9882352941176471, 1, 0.8196078431372549],
+        "sunDirection": [1.55, -0.2, 1],
+        "sunIntensity": 2.2,
+        "ambientColor": [0, 0, 0],
+        "fogColor": [0.011764705882352941, 0.011764705882352941, 0.011764705882352941],
+        "fogNear": 0,
+        "fogFar": 50,
+        "fogType": "exp",
+        "fogDensity": 0.004,
+        "fogVFalloff": 0.539,
+        "fogVFalloffStart": 22.6,
+        "skyColorBlend": 0.98,
+        "skyFogBlend": 0.29,
+        "skyApexColor": [0, 0, 0],
+        "skyHorizonColor": [0.058823529411764705, 0.058823529411764705, 0.058823529411764705],
+        "vAtmosphereDensity": 0.0005,
+        "shadowDarkness": 1,
+        "skyTexture": "night2",
+
+
+        "materialDef": {
+            "shininess": 4,
+            "alpha": 1,
+            "ambient": {
+                "r": 0.8,
+                "g": 0.8,
+                "b": 0.8
+            },
+            "color": {
+                "r": 1,
+                "g": 1,
+                "b": 1,
+                "a": 1
+            },
+            "emit": {
+                "r": 0,
+                "g": 0,
+                "b": 0
+            },
+            "reflect": 0,
+            "shadeless": false,
+            "shadow": true,
+            "specularColor": {
+                "r": 1,
+                "g": 0.6509803921568628,
+                "b": 0
+            },
+            "specularLevel": 3.05,
+            "layers": [{
+                "alpha": 0,
+                "blendMode": 0,
+                "mapInput": 0,
+                "mapTo": 1,
+                "offsetx": 0.11,
+                "offsety": 0.11,
+                "rot": 0,
+                "scalex": "10",
+                "scaley": "10",
+                "src": "/adl/sandbox/example_blank//vwfDataManager.svc/texture?UID=concrete.jpg"
+            }],
+            "type": "phong",
+            "side": 2
+        },
+        "skyAtmosphereDensity": 0.02
+    }
+}

@@ -1,0 +1,338 @@
+{
+  "children": {
+    "e4e3a340-90dc-ef2b-80c0-792f98ba8a28": {
+      "children": {
+        "a6567818-3cea-a23c-9bb6-d4f840f324b": {
+          "children": {
+            "18e8ee34-3d9a-ead9-24d8-208b70ff0c9": {
+              "extends": "sphere2.vwf",
+              "properties": {
+                "DisplayName": "sphere1",
+                "___physics_activation_state": 1,
+                "___physics_deactivation_time": 0,
+                "___physics_enabled": true,
+                "___physics_velocity_angular": [0, 0, 0],
+                "___physics_velocity_linear": [0, 0, 0],
+                "isSelectable": false,
+                "materialDef": {
+                  "alpha": 1,
+                  "ambient": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                  },
+                  "color": {
+                    "a": 1,
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                  },
+                  "emit": {
+                    "b": 0,
+                    "g": 0,
+                    "r": 0
+                  },
+                  "layers": [{
+                    "alpha": 1,
+                    "blendMode": 0,
+                    "mapInput": 0,
+                    "mapTo": 1,
+                    "offsetx": 0,
+                    "offsety": 0,
+                    "rot": 0,
+                    "scalex": 1,
+                    "scaley": 1,
+                    "src": "checker.jpg"
+                  }],
+                  "morphTargets": false,
+                  "reflect": 0.8,
+                  "shadeless": false,
+                  "shadow": true,
+                  "shininess": 15,
+                  "skinning": false,
+                  "specularColor": {
+                    "b": 0.577350269189626,
+                    "g": 0.577350269189626,
+                    "r": 0.577350269189626
+                  },
+                  "specularLevel": 1,
+                  "type": "phong"
+                },
+                "owner": "Rob",
+                "radius": 1.68,
+                "size": [0.5, 1, 1],
+                "tempid": "",
+                "texture": "checker.jpg",
+                "transform": [1, 0, 0, 0, 0, -2.2112923048211997e-8, -1, 0, 0, 1, -2.2112923048211997e-8, 0, 0.18658185005187988, 3.9780423641204834, -0.2431548535823822, 1],
+                "type": "Primitive",
+                "visible": false
+              },
+              "random": {
+                "c": 1,
+                "s0": 0.624685552204028,
+                "s1": 0.0413063049782068,
+                "s2": 0.847095585661009
+              },
+              "sequence": 0,
+              "source": "vwf/model/threejs/sphere.js",
+              "type": "subDriver/threejs"
+            },
+            "b782ce23-9d25-8b9a-9e3c-e162a183c3d8": {
+              "extends": "cylinder2.vwf",
+              "properties": {
+                "DisplayName": "cylinder1",
+                "___physics_activation_state": 1,
+                "___physics_deactivation_time": 0,
+                "___physics_enabled": true,
+                "___physics_velocity_angular": [0, 0, 0],
+                "___physics_velocity_linear": [0, 0, 0],
+                "height": 2.89,
+                "isSelectable": false,
+                "materialDef": {
+                  "alpha": 1,
+                  "ambient": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                  },
+                  "color": {
+                    "a": 1,
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                  },
+                  "emit": {
+                    "b": 0,
+                    "g": 0,
+                    "r": 0
+                  },
+                  "layers": [{
+                    "alpha": 1,
+                    "blendMode": 0,
+                    "mapInput": 0,
+                    "mapTo": 1,
+                    "offsetx": 0,
+                    "offsety": 0,
+                    "rot": 0,
+                    "scalex": 1,
+                    "scaley": 1,
+                    "src": "checker.jpg"
+                  }],
+                  "morphTargets": false,
+                  "reflect": 0.8,
+                  "shadeless": false,
+                  "shadow": true,
+                  "shininess": 15,
+                  "skinning": false,
+                  "specularColor": {
+                    "b": 0.577350269189626,
+                    "g": 0.577350269189626,
+                    "r": 0.577350269189626
+                  },
+                  "specularLevel": 1,
+                  "type": "phong"
+                },
+                "owner": "Rob",
+                "radius": 0.23,
+                "rsegs": 4,
+                "size": [1, 0.5, 0.5],
+                "tempid": "",
+                "texture": "checker.jpg",
+                "transform": [1, 0, 0, 0, 0, -2.2112923048211997e-8, -1, 0, 0, 1, -2.2112923048211997e-8, 0, 0.0025818347930908203, 1.269041895866394, 0.015846582129597664, 1],
+                "type": "Primitive",
+                "visible": false
+              },
+              "random": {
+                "c": 1,
+                "s0": 0.767284829169512,
+                "s1": 0.235269201919436,
+                "s2": 0.440739227226004
+              },
+              "sequence": 0,
+              "source": "vwf/model/threejs/cylinder.js",
+              "type": "subDriver/threejs"
+            }
+          },
+          "extends": "asset.vwf",
+          "properties": {
+            "DisplayName": "Trunk-mesh_material",
+            "___physics_activation_state": 1,
+            "___physics_deactivation_time": 0,
+            "___physics_enabled": true,
+            "___physics_velocity_angular": [0, 0, 0],
+            "___physics_velocity_linear": [0, 0, 0],
+            "materialDef": {
+              "alpha": 1,
+              "ambient": {
+                "b": 1,
+                "g": 1,
+                "r": 1
+              },
+              "color": {
+                "b": 1,
+                "g": 1,
+                "r": 1
+              },
+              "emit": {
+                "b": 0.294117647058824,
+                "g": 0.294117647058824,
+                "r": 0.301960784313725
+              },
+              "layers": [{
+                "alpha": 1,
+                "mapInput": 0,
+                "mapTo": 1,
+                "offsetx": 0,
+                "offsety": 0,
+                "scalex": 1,
+                "scaley": 1,
+                "src": "./contentlibraries/entities/assets/oakbark.jpg"
+              }],
+              "morphTargets": false,
+              "reflect": 0,
+              "shininess": 0,
+              "side": 0,
+              "skinning": false,
+              "specularColor": {
+                "b": 0,
+                "g": 0,
+                "r": 0
+              },
+              "specularLevel": 1,
+              "type": "phong"
+            },
+            "owner": "Anonymous0",
+            "transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            "translation": [0, 0, 0],
+            "type": "3DR Object"
+          },
+          "random": {
+            "c": 1,
+            "s0": 0.448077041655779,
+            "s1": 0.0976196546107531,
+            "s2": 0.438918341649696
+          },
+          "sequence": 0,
+          "source": "Trunk-mesh_material",
+          "type": "link_existing/threejs"
+        },
+        "b48a9de-def-69a1-af24-1d1c134fcb2d": {
+          "extends": "asset.vwf",
+          "methods": {
+            "initialize": {
+              "body": "   vwf.getProperty(this.id,'transform');  ",
+              "parameters": []
+            }
+          },
+          "properties": {
+            "DisplayName": "Twig-mesh_material",
+            "___physics_activation_state": 1,
+            "___physics_deactivation_time": 0,
+            "___physics_velocity_angular": [0, 0, 0],
+            "___physics_velocity_linear": [0, 0, 0],
+            "castShadows": true,
+            "materialDef": {
+              "alpha": 1,
+              "ambient": {
+                "b": 0.8,
+                "g": 0.8,
+                "r": 0.8
+              },
+              "color": {
+                "b": 0.8,
+                "g": 0.8,
+                "r": 0.8
+              },
+              "emit": {
+                "b": 0,
+                "g": 0,
+                "r": 0
+              },
+              "layers": [{
+                "alpha": 0.91,
+                "mapInput": 0,
+                "mapTo": 1,
+                "offsetx": 0,
+                "offsety": 0,
+                "scalex": 1,
+                "scaley": 1,
+                "src": "./contentlibraries/entities/assets/branch.png"
+              }],
+              "morphTargets": false,
+              "reflect": 0,
+              "shininess": 0,
+              "side": 0,
+              "skinning": false,
+              "specularColor": {
+                "b": 0,
+                "g": 0,
+                "r": 0
+              },
+              "specularLevel": 1,
+              "type": "phong"
+            },
+            "owner": "Anonymous0",
+            "receiveShadows": false,
+            "transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            "translation": [0, 0, 0],
+            "type": "3DR Object"
+          },
+          "random": {
+            "c": 1,
+            "s0": 0.839104376733303,
+            "s1": 0.708427720936015,
+            "s2": 0.240246643777937
+          },
+          "sequence": 0,
+          "source": "Twig-mesh_material",
+          "type": "link_existing/threejs"
+        }
+      },
+      "extends": "asset.vwf",
+      "properties": {
+        "DisplayName": "Tree1",
+        "___physics_activation_state": 1,
+        "___physics_deactivation_time": 0,
+        "___physics_enabled": true,
+        "___physics_velocity_angular": [0, 0, 0],
+        "___physics_velocity_linear": [0, 0, 0],
+        "owner": "Anonymous0",
+        "transform": [1, 0, 0, 0, 0, -2.2112923048211997e-8, 1, 0, 0, -1, -2.2112923048211997e-8, 0, 0, 0, 0, 1],
+        "translation": [0, 0, 0],
+        "type": "3DR Object"
+      },
+      "random": {
+        "c": 1,
+        "s0": 0.708081600954756,
+        "s1": 0.563793678069487,
+        "s2": 0.107376585481688
+      },
+      "sequence": 0,
+      "source": "./contentlibraries/entities/assets/defaulttree.json",
+      "type": "subDriver/threejs/asset/vnd.osgjs+json+compressed"
+    }
+  },
+  "extends": "sandboxGroup.vwf",
+  "properties": {
+    "___physics_activation_state": 5,
+    "___physics_angular_velocity": [0, 0, 0],
+    "___physics_deactivation_time": 0,
+    "___physics_enabled": true,
+    "___physics_linear_velocity": [0, 0, 0],
+    "___physics_mass": 0,
+    "___physics_velocity_angular": [0, 0, 0],
+    "___physics_velocity_linear": [0, 0, 0],
+    "open": false,
+    "owner": "Rob",
+    "transform": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -3.5865821838378906, 1.3568453788757324, 0.022958025336265564, 1],
+    "translation": [-3.58658222531083, 1.35684541378881, 0.0229580259323119],
+    "type": "Group"
+  },
+  "random": {
+    "c": 1,
+    "s0": 0.162749223643914,
+    "s1": 0.887165644671768,
+    "s2": 0.788178560556844
+  },
+  "sequence": 0
+}

@@ -1,0 +1,13 @@
+--- 
+extends: http://vwf.example.com/kinetic/layer.vwf
+properties: 
+  visibleName: 
+  instructor: false
+methods:
+  login:
+  initBaseLayer:
+events:
+  participantAdded:
+  layerAdded:
+scripts:
+- source: "participant.js"

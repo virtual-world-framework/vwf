@@ -1,0 +1,33 @@
+{
+	"shininess": 15,
+	"alpha": 1,
+	"ambient": {
+		"r": 0.7019607843137254,
+		"g": 0.6941176470588235,
+		"b": 0.6941176470588235
+	},
+	"color": {
+		"r": 0.7019607843137254,
+		"g": 0.6941176470588235,
+		"b": 0.6941176470588235,
+		"a": 1
+	},
+	"emit": {
+		"r": 0,
+		"g": 0,
+		"b": 0
+	},
+	"reflect": 0.8,
+	"shadeless": false,
+	"shadow": true,
+	"specularColor": {
+		"r": 0.5773502691896258,
+		"g": 0.5773502691896258,
+		"b": 0.5773502691896258
+	},
+	"specularLevel": 0,
+	"layers": [],
+	"morphTargets": false,
+	"skinning": false,
+	"type": "phong"
+}

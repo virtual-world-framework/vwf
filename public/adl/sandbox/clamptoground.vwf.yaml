@@ -1,0 +1,26 @@
+extends: 'http://vwf.example.com/behavior.vwf'
+properties:
+  NotProto: 
+  type: behavior
+  DisplayName: ClampToGround
+  FromHeight: 0
+  Offset: 0
+  EditorData:
+    offset:
+      displayname: Offset
+      property: Offset
+      type: slider
+      max: 100
+      min: 0
+      step: 0.1
+    from:
+      displayname: 'Trace from Height'
+      property: FromHeight
+      type: slider
+      max: 50
+      min: 0
+      step: 0.1
+methods:
+  initialize: " "
+  tick: "if(!this.owner) return; var trans = this.parent.transformAPI.getPosition();\n //console.log(trans);\ntrans[2] += this.FromHeight;\n\n var hit = _SceneManager.CPUPick(trans,[0,0,-1],{ignore:[_Editor.findviewnode(this.parent.id),_Editor.GetMoveGizmo(),_dSky]});\n if(hit)\n {\n    var bounds = _Editor.findviewnode(this.parent.id).getBoundingBox(true);\n    trans[2] -= hit.distance;\n    trans[2] -= bounds.min[2];\n    trans[2] += this.Offset;\n    \n    this.parent.transformAPI.setPosition(trans);\n \n }"
+Author: Rob

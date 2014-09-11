@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<!-- Copyright 2012 United States Government, as represented by the Secretary of Defense, Under  -->
+<!-- Secretary of Defense (Personnel & Readiness).                                               -->
+<!--                                                                                             -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file   -->
+<!-- except in compliance with the License. You may obtain a copy of the License at              -->
+<!--                                                                                             -->
+<!--   http://www.apache.org/licenses/LICENSE-2.0                                                -->
+<!--                                                                                             -->
+<!-- Unless required by applicable law or agreed to in writing, software distributed under the   -->
+<!-- License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,   -->
+<!-- either express or implied. See the License for the specific language governing permissions  -->
+<!-- and limitations under the License.                                                          -->
+
+<html>
+  <head>
+	<style type="text/css">
+	.background
+	{
+		background: -webkit-gradient(linear, left top, right top, from(rgb(30, 63, 104)), color-stop(0.2, rgb(255, 255, 255)), color-stop(0.5, rgb(255, 255, 255)), color-stop(0.8, rgb(255, 255, 255)), to(rgb(30, 63, 104)));
+	}
+	.center
+	{
+		width: 66%;
+		margin-left: auto;
+		margin-right: auto;
+		background: white;
+		border: 2px solid black;
+		padding: 18px;
+		box-shadow: 10px 10px 10px black, 10px 10px 50px gray inset;
+	}
+	.h1
+	{
+		font-size: 2.6em;
+		font-family: sans-serif;
+		font-weight: bold;
+		margin-bottom: 1em;
+		border-bottom: 1px solid black;
+	}
+	.h2
+	{
+		font-size: 1.6em;
+		font-family: sans-serif;
+		font-weight: bold;
+		display: inline;
+	}
+	.icon
+	{
+		height: 1.6em;
+	}
+	.text
+	{
+		font-size: 1.2em;
+		margin-top: 1em;
+		margin-bottom: 1em;
+	}
+
+	</style>
+
+  </head>
+  <body class='background'>
+	<div class="center">
+    <div class="h1">Primitive Objects</div>
+	<div class="text">The VWF Sandbox allows you to create some simple shapes natively, without loading a model file. We call these objects ‘Primitives’, and each one has a set of properties that you can modify. Usually, these settings are the number of polygons used to build each object, and the dimensions of the object. The number of segments can be important when applying modifiers to the object. Modifiers can apply effects to the geometry, but must have polygons to work on. For instance, you cannot bend a box with only 8 vertices, because the edge between the vertices will always be a straight line. More polygons will make the bend effect smoother.</div>	
+	
+	<img class="icon" src="../images/icons/sphere.png" /><div class="h2">Create Sphere (Create-Primitives->Sphere)</div>
+	<div class="text">A Sphere shape. You may edit the radius, and the number of segments. More segments means more polygons.</div>	
+	
+	<img class="icon" src="../images/icons/cube.png" /><div class="h2">Create Box (Create-Primitives->Box)</div>
+	<div class="text">A cube shape. The height, width, and length are editable, and you may specify the number of segments in each direction. When selecting ‘Pivot from Base’, the cube will move up, such that its center is at the negative extent, rather than the geometric middle.</div>	
+	
+	<img class="icon" src="../images/icons/cylinder.png" /><div class="h2">Create Cylinder (Create-Primitives->Cylinder)</div>
+	<div class="text">The cylinder shape has 4 setting. You can set the radius, which makes the cylinder thicker or thinner, and the radial segments, which make the edge smoother. The height is the length of the cylinder, and the height segments affect the number of polygons in this direction. The cylinder also has a ‘Base to pivot’ setting, like the box.</div>	
+	
+	<img class="icon" src="../images/icons/cone.png" /><div class="h2">Create Cone (Create-Primitives->Cone)</div>
+	<div class="text">The cone shape has 4 setting. You can set the radius, which makes the cone thicker or thinner, and the radial segments, which make the edge smoother. The height is the distance from the base to the point, and the height segments affect the number of polygons in this direction. The cone also has a ‘Base to pivot’ setting, like the box.</div>	
+	
+	<img class="icon" src="../images/icons/pyramid.png" /><div class="h2">Create Pyramid (Create-Primitives-> Pyramid)</div>
+	<div class="text">The pyramid shape has a height, width, and length, and segments in each direction. It also has a ‘Base to pivot’ setting, like the box.</div>	
+	
+	<img class="icon" src="../images/icons/plane.png" /><div class="h2">Create Plane (Create-Primitives-> Plane)</div>
+	<div class="text">The plane is a 2 dimensional grid of polygons. The shape is always created such that it’s local Z is the normal of the plane. You may specify the number of polygons in each direction of the plane, and its extent in the local X and Y.</div>	
+	
+	</div>
+	</body>
+</html>

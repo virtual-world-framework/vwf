@@ -1,0 +1,17 @@
+--- 
+extends: http://vwf.example.com/kinetic/group.vwf
+properties: 
+  threatShape: 
+    set: |
+      if ( this.threatShape !== value ) {
+        this.threatShape = value;
+        this.updateThreatShape$();  
+      }
+    value: "circle"
+methods:
+  updateThreatShape$:
+  setupListeners:
+events:
+  threatShapeChanged:
+scripts:
+- source: "unitGroup.js"

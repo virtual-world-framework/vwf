@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="{{root}}/css/colorpicker.css" /> 
+    <link rel="stylesheet" media="screen" type="text/css" href="{{root}}/vwf/view/editorview/css/bootstrap.min.css" />
+	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/vwf/view/editorview/css/style.css" />
+	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/vwf/view/editorview/css/alertify.core.css" />
+	<link rel="stylesheet" media="screen" type="text/css" href="{{root}}/vwf/view/editorview/css/alertify.default.css" />
+	<style>
+		@media (max-width: 1420px){
+			#gitBanner{
+				display: none;
+			}
+		}			
+		@media (max-width: 1220px){
+			#logo{
+				left: 0;
+			}
+		}		
+		@media (max-width: 990px){
+			.linkMenu{
+				left: 546px;
+			}
+		}			
+		.lang li
+		{
+			float:left;	
+		}
+
+	</style>
+	<!--[if !IE 7]>
+	<style type="text/css">
+		#wrapper {display:table;height:100%}
+	</style>
+	<![endif]-->
+    <title>Virtual World Sandbox - Virtual Worlds in your browser</title>
+
+	<script type="text/javascript" src="{{root}}/js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="{{root}}/js/knockout-2.3.0.js"></script>
+	<script type="text/javascript" src="{{root}}/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="{{root}}/vwf/view/editorview/sha256.js"></script>
+	<script type="text/javascript" src="{{root}}/js/moment.min.js"></script>
+	<script type="text/javascript">var root = '{{root}}';</script>
+    <script type="text/javascript" src="{{root}}/js/model.js"></script>
+    {{#home}}
+	<script type="text/javascript" src="{{root}}/js/swfobject.js"></script>
+	<script type="text/javascript" src="{{root}}/js/spin.min.js"></script>
+	<script type="text/javascript">
+		var opts = {
+		  lines: 7, // The number of lines to draw
+		  length: 2, // The length of each line
+		  width: 5, // The line thickness
+		  radius: 15, // The radius of the inner circle
+		  corners: 1, // Corner roundness (0..1)
+		  rotate: 0, // The rotation offset
+		  direction: 1, // 1: clockwise, -1: counterclockwise
+		  color: '#000', // #rgb or #rrggbb or array of colors
+		  speed: 0.8, // Rounds per second
+		  trail: 60, // Afterglow percentage
+		  shadow: false, // Whether to render a shadow
+		  hwaccel: false, // Whether to use hardware acceleration
+		  className: 'spinner', // The CSS class to assign to the spinner
+		  zIndex: 2e9, // The z-index (defaults to 2000000000)
+		  top: 'auto', // Top position relative to parent in px
+		  left: 'auto' // Left position relative to parent in px
+		};
+		window.onscroll = function () { window.scrollTo(0, 0); };
+		$(document).ready(function(){
+			$("body").addClass("bodyLoad");
+		});
+		
+		$(window).load(function(){
+			//$("body").animate({opacity:1}, 500);
+			$("#loadOverlay").animate({opacity:0}, 500, 'swing', function(){
+				spinner.stop();
+				$("#loadOverlay").remove();
+			});
+			$("body").removeClass("bodyLoad");
+			window.onscroll = function(){};
+		});
+	</script>
+	{{/home}}
+	{{#avatar}}
+	<script type="text/javascript" src="{{root}}/js/spin.min.js"></script>
+	<script type="text/javascript">
+		var opts = {
+		  lines: 7, // The number of lines to draw
+		  length: 2, // The length of each line
+		  width: 5, // The line thickness
+		  radius: 15, // The radius of the inner circle
+		  corners: 1, // Corner roundness (0..1)
+		  rotate: 0, // The rotation offset
+		  direction: 1, // 1: clockwise, -1: counterclockwise
+		  color: '#000', // #rgb or #rrggbb or array of colors
+		  speed: 0.8, // Rounds per second
+		  trail: 60, // Afterglow percentage
+		  shadow: false, // Whether to render a shadow
+		  hwaccel: false, // Whether to use hardware acceleration
+		  className: 'spinner', // The CSS class to assign to the spinner
+		  zIndex: 2e9, // The z-index (defaults to 2000000000)
+		  top: 'auto', // Top position relative to parent in px
+		  left: 'auto' // Left position relative to parent in px
+		};
+		window.onscroll = function () { window.scrollTo(0, 0); };
+		$(document).ready(function(){
+			$("body").addClass("bodyLoad");
+		});
+		
+		$(window).load(function(){
+			//$("body").animate({opacity:1}, 500);
+			$("#loadOverlay").animate({opacity:0}, 500, 'swing', function(){
+				spinner.stop();
+				$("#loadOverlay").remove();
+			});
+			$("body").removeClass("bodyLoad");
+			window.onscroll = function(){};
+		});
+		var spinner = new Spinner(opts);
+	</script>	
+	{{/avatar}}
+	<script type="text/javascript" src="{{root}}/vwfDataManager.svc/getanalytics.js"></script>
+	<script type="text/javascript" src="{{root}}/js/cookies.js"></script>
+</head>
+<body style="min-width:990px;">
+	{{#home}}
+	<div id="loadOverlay">
+		<div id="overlayInner" style="position:absolute;top:50%;left:50%;"></div>
+	</div>
+		<script type="text/javascript">
+			var target = document.getElementById('overlayInner');
+			var spinner = new Spinner(opts).spin(target);
+		</script>
+	{{/home}}
+	<div id="wrapper">
+		<div id="header" style="text-align: center">
+			<div class="headerMenu container">
+				<div id="username" data-bind="visible:user().isLoggedIn">
+					<span class="headerSpan" data-bind="text:'Logged in as: '"></span>
+					<a class="headerA" href="{{root}}/user" id="userOptions" data-bind="text: user().username"></a>
+				</div>
+
+		<!--localization start-->
+		<span class="dropdown headerA"> 
+          <a href="#" class="dropdown-toggle thinheaderlink" data-toggle="dropdown">{{#translate}}Language{{/translate}}<b class="caret"></b></a>
+          <ul class="dropdown-menu lang" role="menu">
+            <li class="langLi" lang="en"><a href="#">English</a></li>
+            <li class="langLi" lang="ru"><a href="#">Русский</a></li>
+            <li class="langLi" lang="es_ES"><a href="#">Español (España)</a></li>
+          </ul>
+      	</span>
+
+	<script type="text/javascript">
+
+	$(".langLi").click(function(){
+		var lang = $(this).attr('lang');
+    	//$.post(root + '/data/set_lang', JSON.stringify(lang), function(o){});
+    	//document.cookie = 'i18next='+lang;
+    	docCookies.setItem('i18next',lang, null, '/', null, null);
+		window.location.reload();
+		});
+	</script>
+		<!--localization end-->	
+
+				<div id="login">
+					
+
+		<a class='headerA' href='{{root}}/search'>
+			{{#translate}}Worlds{{/translate}}
+		</a>
+		
+		{{^sessionData}}
+		<a class='headerA' href='{{root}}/signup'>
+			{{#translate}}Sign up{{/translate}}
+		</a>
+		{{/sessionData}}
+		
+	<!--	<a class='thinheaderlink' href='{{root}}/featuredWorlds/0'>
+			{{#translate}}Worlds{{/translate}}
+		</a> -->
+		<a class='headerA' href='{{root}}/tools'>
+			{{#translate}}Tools{{/translate}}
+		</a> 
+		{{^sessionData}}
+		<a id='login' class='headerA' href='{{root}}/login'>
+			{{#translate}}Log in{{/translate}}
+		</a>
+		{{/sessionData}}
+		{{#sessionData}}
+		<a id='logout' class='headerA' href='{{root}}/logout'>
+			{{#translate}}Log out{{/translate}}
+		</a>
+		{{/sessionData}}
+		
+				</div>
+			</div>
+		</div>		
+		<div class="container" style="box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.25);padding:0;">
+			<div class="content container" style="border:none;padding:0;">
+				<div id="pageLogo">
+					<div id="logo">
+						<a href="{{root}}">
+							<div style=" float:left;">
+								<img src="{{root}}/img/VWS_Logo.png" />
+							</div>
+							<div style=" margin-left:10px;margin-top:50px;float:left;">
+								<img src="{{root}}/img/VW_text.png" />
+								<img src="{{root}}/img/Sandbox_text.png" />
+							</div>
+						</a>
+					</div>
+					<div class="linkMenu">
+						<a href="{{root}}">{{#translate}}Home{{/translate}}</a> 
+						<a href="{{root}}/featuredWorlds/0">{{#translate}}Worlds{{/translate}}</a> 
+						{{#blog}}
+							<a href="{{blog}}">{{#translate}}Blog{{/translate}}</a> 
+						{{/blog}}
+						{{#doc}}
+							<a href="{{doc}}">{{#translate}}Docs{{/translate}}</a>
+						{{/doc}}
+						{{^blog}}
+							<a href="http://www.youtube.com/watch?list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2&v=aWRQJJnBi5c">{{#translate}}Videos{{/translate}}</a> 			
+						{{/blog}}
+						{{^doc}}
+							<a href="{{root}}/help">{{#translate}}Help{{/translate}}</a>
+						{{/doc}}
+					</div>
+				</div>
+			</div>	
+			
+			{{#home}}
+			<div class="container sliderContainer">
+				<div class="sliderWrapper">
+					<div style="background-image:url('{{root}}/img/huge_terrain.jpg');" class="slide-item slide-item0">
+						<div class="pContainer">
+							<p>{{#translate}}No extra plugins needed - just click and go{{/translate}}</p>	
+						</div>
+					</div>
+					<div style="background-image:url('{{root}}/img/huge_town.jpg');" class="slide-item slide-item1">
+						<div class="pContainer">
+							<p>{{#translate}}Advanced scripting controls every aspect of your scenario{{/translate}}</p>
+						</div>	
+					</div>
+					<div style="background-image:url('{{root}}/img/huge_office.jpg');" class="slide-item slide-item2">
+						<div class="pContainer">
+							<p>{{#translate}}Web RTC enables a higher level of collaboration{{/translate}}</p>
+						</div>	
+					</div>
+					<div style="background-image:url('{{root}}/img/huge_editor.jpg');" class="slide-item slide-item3">
+						<div class="pContainer">
+							<p>{{#translate}}A full featured set of tools makes building worlds easy{{/translate}}</p>
+						</div>	
+					</div>
+				</div>
+			</div>
+			{{/home}}
+				
+			<div class="content container">	
+				<h3>{{title}}</h3>
+				{{{yield}}}
+				
+
+			</div>
+			<div id="footer" class="container">
+				<br/><p>The views expressed on this website in the form of documentation, blog articles, or tutorials do not necessarily represent the views or policies of ADL or the U.S. Government.</p>
+
+				<p>Sponsored by the Office of the Under Secretary of Defense for Personnel and Readiness (OUSD P&amp;R).
+				This is an official website of the U.S. Government (c)2014 Advanced Distributed Learning (ADL).</p>
+				<a href="{{root}}/test">{{#translate}}Test Browser Support{{/translate}}</a> 
+			</div>
+
+		</div>
+	</div>
+	<a href="https://github.com/adlnet/Sandbox" id="gitBanner"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+	<script type="text/javascript" src="{{root}}/vwf/view/editorview/lib/alertify.min.js"></script>
+</body>
+</html>

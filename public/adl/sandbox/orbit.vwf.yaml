@@ -1,0 +1,43 @@
+extends: 'http://vwf.example.com/behavior.vwf'
+properties:
+  type: behavior
+  axis:
+    - 0
+    - 0
+    - 1
+  counter: 0
+  radialspeed: 0.0017
+  DisplayName: Orbit
+  EditorData:
+    Aradius:
+      displayname: Radius
+      property: radius
+      type: slider
+      min: 0
+      max: 100
+      step: 0.1
+    Bspeed:
+      displayname: Speed
+      property: radialspeed
+      type: slider
+      min: 0
+      max: 10
+      step: 0.01
+    Ccenter:
+      displayname: Center
+      property: center
+      type: vector
+      step: 0.1
+    Daxis:
+      displayname: Axis
+      property: axis
+      type: vector
+      step: 0.1
+  radius: 6
+  center:
+    - 0
+    - 0
+    - 0
+methods:
+  initialize: ""
+  tick: " if(!this.owner) return; var axis = MATH.toUnitVec3(this.axis);\n\n    \n         \n    this.counter += this.radialspeed;\n     var q = MATH.quatFromAxisAngle(axis,this.counter);\n     var mat = MATH.mat4FromQuat(q);\n     var offset = MATH.mulMat4Vec3(mat,[this.radius ,0,0]);\n     this.parent.transformAPI.setPosition(MATH.addVec3(this.center ,offset));"

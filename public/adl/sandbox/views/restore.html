@@ -1,0 +1,147 @@
+<script type="text/javascript">
+	var sid = '{{sid}}'; 
+	$(document).ready(function()
+	{
+		
+		vwfPortalModel.restoreList = ko.observableArray();
+		vwfPortalModel.restoreState = function(obj, e){
+		
+			alertify.confirm("Are you sure you want to restore this state?", function(e){
+				if(e){
+					$.get(root + '/vwfDataManager.svc/restorebackup?SID=' + sid + '&statename=' + obj.file, function(data){
+						getBackupList(function(){
+							alertify.success("State successfully restored");
+							redirect();
+						});
+					}).error(function(){
+						alertify.error("Error: State not restored");
+					});
+				}
+			});
+			
+			e.preventDefault();
+			e.stopPropagation();
+			return false;
+		};
+		
+		function getBackupList(cb){
+			$.get(root + '/vwfDataManager.svc/stateslist?SID=' + sid, function(data){
+				
+				var tempData = JSON.parse(data);
+				for(var i = tempData.length - 1; i >= 0; i--){
+					if(tempData[i].file.indexOf('statebackup') > -1)
+					{
+						tempData[i].unix = moment(tempData[i].time).unix();
+						tempData[i].time = moment(tempData[i].time).format('MMM Do YYYY, h:mm a');
+					}
+					
+					else{
+						tempData.splice(i, 1);
+					}
+				}
+				
+				tempData.sort(function(a, b){
+					return b.unix - a.unix;
+				});
+				
+				vwfPortalModel.restoreList(tempData);
+				
+				if(cb){
+					cb();
+				}
+			});
+		}
+		
+		getBackupList();
+		
+		$.ajax(root + '/vwfDataManager.svc/statedata?SID=' + sid,
+		{
+			cache:false,
+			success:function(data,status,xhr)
+			{
+				var data = JSON.parse(xhr.responseText);
+				$('#txtTitle').text(data.title)
+				$('#txtInstanceName').val(data.title);
+				$('#txtInstanceDescription').val(data.description);
+			},
+			error:function(xhr,status,err)
+			{
+				$('#error').text("Error: " + xhr.responseText);
+			}
+		});
+		
+		ko.applyBindings(vwfPortalModel);
+	});	
+	function redirect()
+	{
+		window.location = root + '/world/' + sid.substr(13, 16);
+	}
+	vwfPortalModel.handleEditButton = function(o, e){
+
+		var name = $('#txtInstanceName').val();
+		var des = $('#txtInstanceDescription').val();
+		
+		var statedata = {};
+		statedata.title = name;
+		statedata.description = des;
+		
+		jQuery.ajax(
+		{
+			type: 'POST',
+			url: root + '/vwfDataManager.svc/statedata?SID='+sid,
+			data: JSON.stringify(statedata),
+			contentType: "application/json; charset=utf-8",
+			success:function(data,status,xhr)
+			{
+				
+				redirect();
+			},
+			error:function(xhr,status,err)
+			{
+				$('#error').text("Error: " + xhr.responseText);
+			},
+			dataType: "text"
+		});	
+	};
+</script>
+<div class="row" style="margin-bottom: 15px">
+	
+</div>
+<div id="content" class="row" style="margin:10px auto;float:none;text-align:center;">
+	<div class="col-md-5" style="margin:10px auto;float:none;text-align:center;">
+		
+		<div id='txtTitle' style="font-size: 2em;font-weight: bold;"></div>
+		<legend></legend>
+		<div class='searchresult'>
+			
+			
+			<div> <img style="width:100%;width: 100%;border-radius: 5px;box-shadow: 3px 3px 3px #444;" src="./vwfdatamanager.svc/thumbnail?SID={{sid}}" onload='center()' onerror = "this.src = '/adl/sandbox/img/thumbnotfound.png'"></img> </div>
+			
+		</div>
+
+
+		
+	</div>
+	
+
+
+
+
+
+
+
+	<div class="col-md-5 col-md-offset-1" style="margin:10px auto;float:none;text-align:center;max-height: 200px;overflow: auto;" >
+		<legend style="">Restore Backup</legend>
+		<p style="text-align:center;margin-top:60px;" data-bind="visible:restoreList().length==0">No backups found</p>
+		<table data-bind="submit:handleEditButton" class="table table-striped" style="border-top:none;">
+			<tbody data-bind="foreach:restoreList">
+				<tr>
+					<td><a href="#" data-bind="text:time, click:$root.restoreState"></a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="row">	
+	<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
+</div>

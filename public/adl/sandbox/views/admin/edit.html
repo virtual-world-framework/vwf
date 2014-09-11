@@ -1,0 +1,95 @@
+<div class="row">
+	<div class="span3">
+		Choose a page to edit
+	</div>
+</div>
+<div class="row">
+	<div class="span3" style="margin-bottom:40px;">
+		<div data-bind="foreach:fileList">
+			<a href="" data-bind="text:$data, click:$root.loadScript"></a><br/>
+		</div>
+		<br/><a href="{{root}}/admin">Admin Page</a>
+	</div>
+	<form action="" class="span9" method="post" data-bind="with: entries, submit: $root.handleSubmission">
+		
+		<div class="row" style="margin-bottom: 50px;">
+			<div class="span1">
+				<p>Title:</p>
+			</div>
+			<div class="span6">
+				<input type="text" data-bind="value:$root.entries().title" class="span6" id="pageTitle" /><br/>
+			</div>
+		</div>
+		<div data-bind="foreach:$data.entries" >
+			<div data-bind="with:$data" style="margin-bottom:20px;" class="row">
+				<div class="span1">
+					<p>Subtitle:</p>   
+					<p>Body:</p>
+				</div>
+				<div class="span6 adminInput">
+					<input type="text" data-bind="value:title" class="span6"/><br/>
+					<textarea data-bind="text:body" style="height:130px;" class="span6"></textarea>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="span2 offset3">
+				<input type="submit" class="btn" data-bind="visible: $data.entries && $data.entries.length>0" value="Submit" />
+			</div>
+		</div>
+	</form>
+</div>
+<script>
+	var fileList =  "{{fileList}}".split(',');
+	vwfPortalModel.entries = ko.observable({});
+	var jsonToServer = {title:'', entries:[]};
+	var currentHelpPage = "";
+	vwfPortalModel.handleSubmission = function(test){
+		
+		jsonToServer.title = $("#pageTitle").val();
+		
+		$(".adminInput").each(function(i, element){
+			jsonToServer.entries[i] = {
+				title: $(element).children('input').val(),
+				body: $(element).children('textarea').val()
+			};
+		});
+		
+		$.ajax({
+			url: root + '/admin/' + currentHelpPage, 
+			data: JSON.stringify(jsonToServer),
+			success: function(){
+				console.log("done");
+			},
+			dataType: "json",
+			type: "POST"
+		});
+		
+		console.log(jsonToServer, JSON.stringify(jsonToServer));
+		
+		
+		return false;
+	};
+	
+	$(document).ready(function(){
+		getLoginInfo();
+		ko.applyBindings(vwfPortalModel);
+	});
+	
+	vwfPortalModel.loadScript = function(e){
+		
+		$.ajax({
+			type: 'GET',
+			url: root + "/views/help/" + e + ".js",
+			dataType: "json",
+			success: function(json) {
+				
+				currentHelpPage = e;
+				vwfPortalModel.entries(json);	
+			},
+			error: function(x,y,z) {
+				console.log("ERROR: ", x);
+			}
+		});
+	};
+</script>

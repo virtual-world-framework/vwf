@@ -1,0 +1,42 @@
+    <script type="text/javascript">
+		$(document).ready(function()
+		{
+			ko.applyBindings(vwfPortalModel); 
+			function redirect()
+			{
+				var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
+				window.location = ret.charAt(0) == '/' ? root + ret : root + '/' + ret;
+			}
+			window.setTimeout(function(){
+			$.ajax(root + '/vwfDataManager.svc/sitelogout',
+				{
+					
+					async:false,
+					success:function(data,status,xhr)
+					{
+						
+						//already logged in, need to redirect back to target!
+						redirect();
+					},
+					error:function(xhr,status,err)
+					{
+						
+						redirect();
+					}
+				});
+			},1500);
+		});	
+		
+	</script>
+
+	<div id="content" class="row" style="margin-top: 421px;position: absolute;width: 100%;opacity:1 !important">
+	<div class="col-md-5" style="margin:10px auto;float:none;text-align:center;height:260px;">
+	<div  >
+		<form >
+			<fieldset>
+		<legend style="padding-bottom:5px;">Logging out...</legend>
+	</fieldset>
+</form>
+		
+    </div></div></div>
+

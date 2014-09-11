@@ -1,0 +1,64 @@
+--- 
+extends: http://vwf.example.com/kinetic/stage.vwf
+implements:
+- http://vwf.example.com/kinetic/drawing.vwf
+properties:
+  userActionStack: []
+  userActionIndex: -1
+  lastSaveIndex: -1
+  unitSize: 32
+  drawing_clients:
+methods:
+  addStudent:
+  clientsChanged:
+  createUnit:
+  deleteUnit:
+  createLayer:
+  deleteLayer:
+  recordUserAction:
+  recordSave:
+  clearObjects:
+  clearUserActions:
+  insertUnits:
+  getUnitSymbol:
+events:
+  insertableUnitAdded:
+  unitLoadingComplete:
+  selectedUnitSymbolRendered:
+children:
+  background:
+    extends: http://vwf.example.com/kinetic/layer.vwf
+    properties:
+      visible: true
+    children:
+      map:
+        extends: http://vwf.example.com/kinetic/image.vwf
+        source: "maps/BlankCanvas.png"
+        properties:
+          image:
+  instructor:
+    extends: http://vwf.example.com/kinetic/layer.vwf
+    children:
+      baseLayer:
+        extends: tdgLayer.vwf
+        properties:
+          visible: 'inherit'
+        children:
+          units: 
+            extends: http://vwf.example.com/kinetic/group.vwf
+            properties:
+              visible: 'inherit'
+          shapes: 
+            extends: http://vwf.example.com/kinetic/group.vwf
+            properties:
+              visible: 'inherit'
+          lines:
+            extends: http://vwf.example.com/kinetic/group.vwf
+            properties:
+              visible: 'inherit'
+  scenarioDescription:
+    extends: scenarioDescription.vwf
+  toolbar:
+    extends: toolbar.vwf
+scripts:
+- source: "index-model.js"

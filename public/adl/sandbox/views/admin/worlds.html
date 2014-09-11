@@ -1,0 +1,180 @@
+	<div class="row">
+		<div class="col-md-3">
+			<h3 data-bind="text:currentAdminItem() == false?'Worlds':currentAdminItem().title"></h3>
+		</div>
+	</div>
+	<div class="row" data-bind="visible:currentAdminItem() == false">
+		<div class="col-md-3">
+			<a href="{{root}}/create">Create World</a><br/>
+			<a data-bind="click:deleteSelected" href="">Delete Selected</a><br/><br/>
+			<a href="{{root}}/admin/users">Users List</a><br/>
+			<a href="{{root}}/admin">Admin Page</a>
+		</div>
+		<div class="col-md-9">
+			<div class="row">
+				<div class="usersList col-md-6">
+					<table class="table table-striped" style="border: 1px solid #ddd;">
+						<tr>
+							<th style="border:none; background:#FFF"><input type="checkbox" id="selectAllBox" class="checkAllBox" data-bind="click:handleSelectAll" /></th>
+							<th style="border:none; background:#FFF">Name</th>
+							<th style="border:none; background:#FFF">Owner</th>
+							<th style="border:none; background:#FFF">Objects</th>
+							<th style="border:none; background:#FFF">Featured</th>
+							<th style="border:none; background:#FFF"></th>
+						</tr>
+						<tbody data-bind="foreach:adminDisplayList, style:{border:'none'}">
+							
+							<td><input type="checkbox" class="checkboxes" /></td>
+							<td><a data-bind="text:title, attr:{href:'#'+id}" href=""></a></td>
+							<td><a data-bind="text:owner, attr:{href:'{{root}}/admin/users#'+owner}" href=""></a></td>
+							
+							<td><span data-bind="text:objects"></span></td>
+							<td><span data-bind="text:$data.featured?'Yes':'No'" href=""></span></td>
+							<td>
+								<div class="editstateGuest">
+									<a class="loadWorld activeWorld" data-bind="attr:{href:'{{root}}/'+id}, visible:hotState">Active</a>
+									
+									<!-- ko if: $root.user().isLoggedIn && ($root.user().username == $data.owner || $root.user().isAdmin) && editVisible -->
+										<a class="editstatedelete icon-remove" data-bind="attr:{href:'{{root}}/'+'remove?id='+id}"></a>
+										<a class="editstatedata icon-pencil" data-bind="attr:{href:'{{root}}/'+'edit?id='+id}"></a>	
+									<!-- /ko -->
+								</div>
+							</td>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+<div class="row" data-bind="visible:currentAdminItem() != false">
+	<div class="col-md-4">
+		<a href="#">View full list of worlds</a>
+	</div>
+	<div class="adminDisplayList col-md-4">
+		<div class="row">
+			<form data-bind="with:currentAdminItem"> 
+				
+				<div style="height:50px;">
+					<span>Edit title:</span>
+					<input type="text" style="float:right; width:60%;" data-bind="value:title" class="form-control" />			
+				</div>
+				<div style="height:70px;">
+					<span>Change description:</span>
+					<textarea style="float:right;width:60%;" data-bind="value:description" class="form-control"></textarea><br/>
+				</div>
+				<div>
+					<span>Feature this?</span>
+					<input style="float:right;" type="checkbox" id="featuredCheckBox" data-bind="click:$root.handleFeatureClick, checked:$root.isCurrentChecked" /><br/>
+					<div style="float:left;font-size:12px;" data-bind="visible:$root.isCurrentChecked">
+						<p><span style="background:#eee;padding:2px;" data-bind='text:"adl/sandbox/img/" + id + "_small.png"'></span>
+						<br/>Preview image should be 140x110 pixels.</p>
+						
+						<img style="width:140px;height:110px;" data-bind="attr:{src:'{{root}}/img/'+id+'_small.png'}" />
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="row" style="margin:15px auto;">
+			<p class="col-md-2 col-md-offset-5" style="padding-top:5px;font-weight:bold;" data-bind="text:updateSuccess"></p>
+			<button class="btn btn-default" style="margin: 0 auto;float:right;" data-bind="click:updateWorld">Submit</button>
+		</div>
+	</div>
+</div>
+	<script>
+		vwfPortalModel.updateSuccess = ko.observable('');
+		vwfPortalModel.handleFeatureClick = function(d){
+			d.featured = $('#featuredCheckBox').prop('checked');			
+			return true;
+		};
+		vwfPortalModel.isCurrentChecked = ko.observable(false);
+		vwfPortalModel.deleteSelected = function(data){
+			
+			var tempWorldArr = [], dataSendArr = [], tempStr = '', cacheQuery = $('input:checked').not('#selectAllBox');
+			for(var i = 0; i < cacheQuery.length; i++){
+				tempStr = ko.dataFor(cacheQuery[i]).id;
+				
+				if(tempStr){
+					tempWorldArr.push(tempStr);
+					dataSendArr.push('_adl_sandbox_' + tempStr + '_');
+				}
+			}
+			
+			//Make the request to the server to delete these users
+			console.log("Delete worlds ", tempWorldArr, dataSendArr);
+		
+			/*
+			$.post(root + '/data/delete_worlds', JSON.stringify(dataSendArr), function(o){
+				
+				for(var i in tempWorldArr){
+					for(var g in vwfPortalModel.adminDisplayList()){
+						if(vwfPortalModel.adminDisplayList()[g]().id == tempWorldArr[i]){
+							vwfPortalModel.adminDisplayList.splice(g, 1);
+						}
+					}
+				}
+			});
+
+			*/
+
+			//Make the request to the server to delete these users
+			$.ajax ({
+    			url: root + '/data/delete_worlds',
+    			type: "POST",
+   				data: JSON.stringify(dataSendArr),
+    			dataType: "json",
+    			contentType: "application/json; charset=utf-8",
+    			complete: function(o){
+				for(var i in tempWorldArr){
+					for(var g in vwfPortalModel.adminDisplayList()){
+						if(vwfPortalModel.adminDisplayList()[g]().id == tempWorldArr[i]){
+							vwfPortalModel.adminDisplayList.splice(g, 1);
+						}
+					}
+				}
+			}
+});
+
+
+
+			
+			
+			$('input').prop("checked", false);
+			vwfPortalModel.setSelectAll(false);
+		}; 
+		
+		vwfPortalModel.updateWorld = function(e){
+
+			//Make the request to the server to delete these users
+			$.post(root + '/data/update_world', ko.toJS(vwfPortalModel.currentAdminItem), function(o){
+				
+				vwfPortalModel.updateSuccess(o == "done" ? "Success" : "Error");
+				window.setTimeout(function(){
+					vwfPortalModel.updateSuccess('');
+				}, 3000);
+				console.log("done");
+			});
+		}; 
+		
+		window.onhashchange = function(){
+			handleHash("id");
+			vwfPortalModel.isCurrentChecked(vwfPortalModel.currentAdminItem().featured);
+		};
+		
+		$(document).ready(function(){	
+			
+			vwfPortalModel.adminDisplayList = vwfPortalModel.worldObjects;
+			ko.applyBindings(vwfPortalModel);
+			
+			getLoginInfo(showStates(
+				function(){
+					handleHash("id");
+					vwfPortalModel.isCurrentChecked(vwfPortalModel.currentAdminItem().featured);
+					vwfPortalModel.adminDisplayList.valueHasMutated();
+				}
+			));
+			
+			window.setInterval(function(){
+				showStates();
+			},5000);
+		});
+	</script>

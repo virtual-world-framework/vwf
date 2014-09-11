@@ -1,0 +1,142 @@
+<script type="text/javascript">
+	
+	$(document).ready(function()
+	{	
+		ko.applyBindings(vwfPortalModel);
+		$('#form').submit( function(o, e){
+		
+			var terms =  $('#txtTerms').val();
+			window.location = '{{root}}/searchResults/' + terms +'/0'; 
+			o.preventDefault();
+		});
+	});	
+	
+</script>
+<style>
+
+.searchresult{
+display: inline-block;
+width: 200px;
+height: 150px;
+opacity:0;
+}
+.searchresult img{
+width: 180px;
+height: 93px;
+border-radius: 5px;
+box-shadow: 0px 0px 5px #DDD;
+background: white;
+
+}	
+.worldtitle{
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+}
+.count{
+	font-size: 10px;
+font-weight: bold;
+color: lightgray;
+}
+
+
+#results
+			{
+				margin-left: -200px;
+				margin-right: -200px;
+			}
+@media (max-width: 1420px){
+			#gitBanner{
+				display: none;
+			}
+			#results
+			{
+				margin-left: -200px;
+				margin-right: -200px;
+			}
+		}	
+		@media (max-width: 1522px){
+			
+			#results
+			{
+				margin-left: -300px;
+				margin-right: -300px;
+			}
+		}			
+		@media (max-width: 1220px){
+			#logo{
+				left: 0;
+			}
+			
+		}		
+		@media (max-width: 990px){
+			.linkMenu{
+				left: 546px;
+			}
+			#results
+			{
+				margin-left: 0px;
+				margin-right: 0px;
+			}
+		}	
+		@media (max-width: 607px){
+			.searchresult{
+			height: 120px;
+			
+			}
+		}	
+		@media (max-width: 407px){
+			.searchresult{
+			height: 100px;
+			width: 150px;
+			
+			}
+			.searchresult img{
+			width: 140px;
+			height: 73px;
+
+}	
+		}	
+
+</style>
+<script type="text/javascript">
+
+$(document).ready(function()
+{
+	$('#txtTerms').focus();
+	var i =0;
+	$('.searchresult').each(function(v,obj)
+	{
+
+		window.setTimeout(function(){
+
+			$(obj).css('opacity',1);
+				$(obj).css('transition','opacity .25s ease-in');
+
+		},i*100);
+		i++;
+
+	})
+	$('#dontsee').click(function(){
+
+		alertify.alert('You can make a copy of any world, and start building from there. Find the world you want, and use the "clone" option. That will create a new world with the world you selected as a template. The worlds below are listed simply as a suggestion');
+
+	})
+
+});
+
+</script>
+<div id='content' class="row">
+	<div class="col-md-5" style="margin:10px auto;float:none;text-align:center;">
+		
+		<legend style="padding-bottom:5px;">{{#translate}}You're not signed in!{{/translate}}</legend>
+		
+	
+		
+
+		<div style='color: lightgray;' >{{#translate}}You can create a world, but it won't be saved! Are you sure you would'nt like to create an account?{{/translate}}.</div><br/>
+		<a href='{{root}}/example_blank' class='' style=""  value="" >{{#translate}}Nope, I just want to try it{{/translate}}</a><span style="margin-left:2em" />
+		<a href='{{root}}/login' class='' style=""  value="" >{{#translate}}I guess I should log in{{/translate}}</a><span style="margin-left:0em" />
+		   
+	</div>
+</div>

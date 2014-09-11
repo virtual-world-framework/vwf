@@ -1,0 +1,142 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+extends: http://vwf.example.com/node3.vwf
+methods:
+  ___physics_addForceOffset:
+  ___physics_addForce:
+  ___physics_addTorque:
+  ___physics_addForceImpulse:
+  ___physics_addTorqueImpulse:
+events:
+  pointerOver:  
+  pointerOut:
+  pointerClick:  
+properties:
+  materialDef:
+  isSelectable: true
+  ___physics_enabled: false
+  ___physics_mass: 1
+  ___physics_restitution: 0
+  ___physics_friction: 1.0
+  ___physics_damping: 0.0
+  ___physics_velocity_linear: [ 0, 0, 0]
+  ___physics_velocity_angular: [ 0, 0, 0]
+  ___physics_force_linear: [ 0, 0, 0]
+  ___physics_force_angular: [ 0, 0, 0]
+  ___physics_deactivation_time: 0
+  ___physics_activation_state: 1
+  ___physics_factor_angular: [ 1, 1, 1]
+  ___physics_factor_linear: [ 1, 1, 1]
+  physicsAPI:
+    get: |
+        if(!this.___physicsAPI)
+        {
+            this.___physicsAPI = {};
+            this.___physicsAPI.addForceAtCenter = function(x,y,z,coords)
+            {
+               if(!coords)
+                  coords = 0;
+               if(x.length)
+               {
+                  y = x[1];
+                  z = x[2];
+                  x = x[0];
+               }
+               var force = [x,y,z];
+               this.___physics_addForce(force);
+            }.bind(this);
+            this.___physicsAPI.addForceImpulse = function(x,y,z,coords)
+            {
+               if(!coords)
+                  coords = 0;
+               if(x.length)
+               {
+                  y = x[1];
+                  z = x[2];
+                  x = x[0];
+               }
+               var force = [x,y,z];
+               this.___physics_addForceImpulse(force);
+            }.bind(this);
+            this.___physicsAPI.addTorqueImpulse = function(x,y,z,coords)
+            {
+               if(!coords)
+                  coords = 0;
+               if(x.length)
+               {
+                  y = x[1];
+                  z = x[2];
+                  x = x[0];
+               }
+               var force = [x,y,z];
+               this.___physics_addTorqueImpulse(force);
+            }.bind(this);
+            this.___physicsAPI.addForceOffset = function(x,y,z,x1,y1,z1,coords)
+            {
+               if(!coords)
+                  coords = 0;
+               if(x.length)
+               {
+                  y = x[1];
+                  z = x[2];
+                  x = x[0];
+               }
+               if(x1.length)
+               {
+                  y1 = x1[1];
+                  z1 = x1[2];
+                  x1 = x1[0];
+               }
+               var force = [x,y,z];
+               var pos = [x1,y1,z1];
+               this.___physics_addForceOffset(force,pos);
+            }.bind(this);
+            this.___physicsAPI.setLinearVelocity = function(x,y,z,coords)
+            {
+               if(!coords)
+                  coords = 0;
+               if(x.length)
+               {
+                  y = x[1];
+                  z = x[2];
+                  x = x[0];
+               }
+               var force = [x,y,z];
+               
+               this.___physics_velocity_linear = force;
+            }.bind(this);
+            this.___physicsAPI.setAngularVelocity = function(x,y,z,coords)
+            {
+               if(!coords)
+                  coords = 0;
+               if(x.length)
+               {
+                  y = x[1];
+                  z = x[2];
+                  x = x[0];
+               }
+               var force = [x,y,z];
+               
+               this.___physics_velocity_angular = force;
+            }.bind(this);
+            this.___physicsAPI.getLinearVelocity = function()
+            {
+               return this.___physics_velocity_linear.internal_val;
+            }.bind(this);
+            this.___physicsAPI.getAngularVelocity = function()
+            {
+               return this.___physics_velocity_angular.internal_val;
+            }.bind(this);
+        }
+        return this.___physicsAPI;

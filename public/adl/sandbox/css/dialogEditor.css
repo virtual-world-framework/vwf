@@ -1,0 +1,160 @@
+.dialogEditor
+{
+position: absolute;
+left: 5%;
+top: 5%;
+height: 90%;
+width: 90%;
+background: white;
+opacity: 1;
+z-index: 333334;
+box-shadow: 0px 0px 30px gray inset;
+}
+.dialogEditConfirm
+{
+font-family: sans-serif;
+font-size: 20px;
+text-transform: uppercase;
+padding: 6px;
+background: #999999;
+display: inline-block;
+border-radius: 6px;
+box-shadow: 2px 2px 5px;
+bottom: 1%;
+position: absolute;
+left: 96%;
+cursor:pointer;
+}
+.dialogEditCreate:hover
+{
+background: #9999FF;
+}
+
+.dialogEditCreate
+{
+font-family: sans-serif;
+font-size: 20px;
+text-transform: uppercase;
+padding: 6px;
+background: #999999;
+display: inline-block;
+border-radius: 6px;
+box-shadow: 2px 2px 5px;
+bottom: 1%;
+position: absolute;
+left: 91%;
+cursor:pointer;
+}
+.dialogEditConfirm:hover
+{
+background: #9999FF;
+}
+
+.dialogModal
+{
+width: 100%;
+height: 100%;
+z-index: 333333;
+background: black;
+position: absolute;
+margin: 0px;
+padding: 0px;
+top: 0px;
+left: 0px;
+opacity: .7;
+display:block;
+}
+.dialogEditorRoot
+{
+width: 100%;
+height: 100%;
+z-index: 333333;
+background: none;
+position: absolute;
+margin: 0px;
+padding: 0px;
+top: 0px;
+left: 0px;
+display:block;
+}
+.dialogNodeRoot
+{
+width: 300px;
+
+display: block;
+position: absolute;
+border: 1px solid black;
+border-radius: 7px;
+box-shadow: 0px 0px 10px gray inset;
+cursor:pointer
+}
+.dialogNodeTable
+{
+
+}
+.dialogNodeID
+{
+font-size: 10px;
+font-family: sans-serif;
+vertical-align: middle;
+text-align: center;
+background: #BBBBBB;
+border-radius: 5px;
+}
+.dialogNodeTableAdd
+{
+	font-size: 20px;
+	top: -1%;
+	position: absolute;
+	left: 0%;
+	cursor:pointer;
+}
+.tablerow
+{
+padding: 0px;
+border: 0px;
+border-bottom: 1px solid black;
+background: linear-gradient(#FFFFFF,#EEEEEE);
+}
+.tableright
+{
+padding: 0px;
+border: 0px;
+background: none;
+border-right: 1px solid black;
+width: 90%;
+margin-left: 3px;
+}
+.tableleft
+{
+display: inline;
+background: rgb(195, 195, 233);
+width: 20px;
+height: 20px;
+position: absolute;
+border-radius: 10px;
+margin: 3px;
+overflow: hidden;
+}
+.dialogEditorLine
+{
+
+}
+.dialogEditorSVG
+{
+
+}
+.dialogNodePrompt
+{
+
+}
+.dialogNodePromptText
+{
+width: 98%;
+margin: 0px;
+padding: 0px;
+left: 0px;
+border-radius: 5px;
+max-width: 297px;
+min-width: 297px;
+}

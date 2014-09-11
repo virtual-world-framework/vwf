@@ -1,0 +1,10 @@
+--- 
+extends: http://vwf.example.com/kinetic/rect.vwf
+properties:
+  fillPatternImage:
+  width: 32
+  height: 32
+methods:
+  setupListeners:
+scripts:
+- source: "unitIcon.js"

@@ -1,0 +1,33 @@
+<script type="text/javascript">
+	
+	$(document).ready(function()
+	{
+		
+		
+	});	
+	
+	function redirect()
+	{
+		//window.location = vwfPortalModel.returnVal;
+		window.location = "/";
+	}
+	
+	
+</script>
+<div id='content' class="row">
+	<div class="col-md-5" style="margin:10px auto;float:none;text-align:center;height:260px;">
+		
+		<div>
+		<div>Name: {{user.Username}}</div>
+		<div>User ID: {{user.id}}</div>
+		<div>Email: {{user.Email}}</div>
+		</div>
+		<legend style="padding-bottom:5px;"></legend>
+
+		<a href='{{root}}/updatePassword' class='' style=""  value="" >{{#translate}}Update Password{{/translate}}</a><span style="margin-left:2em" ></span>
+		<a href='{{root}}/avatar' class='' style=""  value="" >{{#translate}}Choose Avatar{{/translate}}</a><span style="margin-left:2em" ></span>
+		<a href='{{root}}/myWorlds/0' class='' style=""  value="" >{{#translate}}My Worlds{{/translate}}</a><span style="margin-left:2em" ></span>
+		<a href='{{root}}/editProfile' class='' style=""  value="" >{{#translate}}Edit Profile{{/translate}}</a><span style="margin-left:2em" ></span>
+		<legend style="padding-bottom:5px;"></legend>
+	</div>
+</div>

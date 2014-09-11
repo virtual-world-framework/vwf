@@ -1,0 +1,570 @@
+{
+  "extends": "asset.vwf",
+  "source": "./contentlibraries/entities/assets/t90/t90.json",
+  "type": "subDriver/threejs/asset/vnd.osgjs+json+compressed",
+  "properties": {
+    "___physics_activation_state": 1,
+    "___physics_deactivation_time": 0,
+    "___physics_velocity_linear": [
+      0,
+      0,
+      0
+    ],
+    "___physics_velocity_angular": [
+      0,
+      0,
+      0
+    ],
+    "DisplayName": "T-1",
+    "isSelectable": true,
+    "owner": "Anonymous0",
+    "rotation": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "tranform": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "transform": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      6.307502746582031,
+      -15.208721160888672,
+      2.4836175441741943,
+      1
+    ],
+    "type": "3DR Object",
+    "___physics_enabled": true,
+    "___physics_mass": 1126.2,
+    "___physics_linear_velocity": [
+      0,
+      0,
+      0
+    ],
+    "___physics_angular_velocity": [
+      0,
+      0,
+      0
+    ]
+  },
+  "children": {
+    "d62618fd-b282-6070-eaae-be166f5891bd": {
+      "extends": "box2.vwf",
+      "source": "vwf/model/threejs/box.js",
+      "type": "subDriver/threejs",
+      "properties": {
+        "___physics_activation_state": 1,
+        "___physics_deactivation_time": 0,
+        "___physics_velocity_linear": [
+          0,
+          0,
+          0
+        ],
+        "___physics_velocity_angular": [
+          0,
+          0,
+          0
+        ],
+        "DisplayName": "box1",
+        "_length": 3.38,
+        "height": 1.8,
+        "materialDef": {
+          "alpha": 1,
+          "ambient": {
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "color": {
+            "a": 1,
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "emit": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "layers": [
+            {
+              "alpha": 1,
+              "blendMode": 0,
+              "mapInput": 0,
+              "mapTo": 1,
+              "offsetx": 0,
+              "offsety": 0,
+              "rot": 0,
+              "scalex": 1,
+              "scaley": 1,
+              "src": "checker.jpg"
+            }
+          ],
+          "morphTargets": false,
+          "reflect": 0.8,
+          "shadeless": false,
+          "shadow": true,
+          "shininess": 15,
+          "skinning": false,
+          "specularColor": {
+            "b": 0.577350269189626,
+            "g": 0.577350269189626,
+            "r": 0.577350269189626
+          },
+          "specularLevel": 1,
+          "type": "phong"
+        },
+        "owner": "Anonymous0",
+        "size": [
+          1,
+          1,
+          1
+        ],
+        "tempid": "",
+        "texture": "checker.jpg",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0.019496440887451172,
+          -0.1752758026123047,
+          0.7963823080062866,
+          1
+        ],
+        "type": "Primitive",
+        "width": 5.87,
+        "visible": false,
+        "___physics_enabled": true
+      }
+    },
+    "bca389a5-7bb9-b298-a24c-e33831a5a57f": {
+      "extends": "box2.vwf",
+      "source": "vwf/model/threejs/box.js",
+      "type": "subDriver/threejs",
+      "properties": {
+        "___physics_activation_state": 1,
+        "___physics_deactivation_time": 0,
+        "___physics_velocity_linear": [
+          0,
+          0,
+          0
+        ],
+        "___physics_velocity_angular": [
+          0,
+          0,
+          0
+        ],
+        "DisplayName": "box2",
+        "_length": 3.38,
+        "height": 1.8,
+        "materialDef": {
+          "alpha": 1,
+          "ambient": {
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "color": {
+            "a": 1,
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "emit": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "layers": [
+            {
+              "alpha": 1,
+              "blendMode": 0,
+              "mapInput": 0,
+              "mapTo": 1,
+              "offsetx": 0,
+              "offsety": 0,
+              "rot": 0,
+              "scalex": 1,
+              "scaley": 1,
+              "src": "checker.jpg"
+            }
+          ],
+          "morphTargets": false,
+          "reflect": 0.8,
+          "shadeless": false,
+          "shadow": true,
+          "shininess": 15,
+          "skinning": false,
+          "specularColor": {
+            "b": 0.577350269189626,
+            "g": 0.577350269189626,
+            "r": 0.577350269189626
+          },
+          "specularLevel": 1,
+          "type": "phong"
+        },
+        "owner": "Anonymous0",
+        "size": [
+          1,
+          1,
+          1
+        ],
+        "tempid": "",
+        "texture": "checker.jpg",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0.8550929427146912,
+          0.518474817276001,
+          0,
+          0,
+          -0.518474817276001,
+          0.8550929427146912,
+          0,
+          0.019496440887451172,
+          3.091724395751953,
+          1.0943822860717773,
+          1
+        ],
+        "type": "Primitive",
+        "width": 1.88,
+        "___physics_enabled": true,
+        "isSelectable": false,
+        "visible": false
+      }
+    },
+    "d79a26fe-e476-25d1-a53-98b51dbbe07": {
+      "extends": "cylinder2.vwf",
+      "source": "vwf/model/threejs/cylinder.js",
+      "type": "subDriver/threejs",
+      "properties": {
+        "___physics_activation_state": 1,
+        "___physics_deactivation_time": 0,
+        "___physics_velocity_linear": [
+          0,
+          0,
+          0
+        ],
+        "___physics_velocity_angular": [
+          0,
+          0,
+          0
+        ],
+        "DisplayName": "cylinder1",
+        "height": 6.39,
+        "materialDef": {
+          "alpha": 1,
+          "ambient": {
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "color": {
+            "a": 1,
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "emit": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "layers": [
+            {
+              "alpha": 1,
+              "blendMode": 0,
+              "mapInput": 0,
+              "mapTo": 1,
+              "offsetx": 0,
+              "offsety": 0,
+              "rot": 0,
+              "scalex": 1,
+              "scaley": 1,
+              "src": "checker.jpg"
+            }
+          ],
+          "morphTargets": false,
+          "reflect": 0.8,
+          "shadeless": false,
+          "shadow": true,
+          "shininess": 15,
+          "skinning": false,
+          "specularColor": {
+            "b": 0.577350269189626,
+            "g": 0.577350269189626,
+            "r": 0.577350269189626
+          },
+          "specularLevel": 1,
+          "type": "phong"
+        },
+        "owner": "Anonymous0",
+        "radius": 0.44,
+        "rsegs": 4,
+        "size": [
+          1,
+          0.5,
+          0.5
+        ],
+        "tempid": "",
+        "texture": "checker.jpg",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0.04135247692465782,
+          0.9991446733474731,
+          0,
+          0,
+          -0.9991446733474731,
+          0.04135247692465782,
+          0,
+          0.006497383117675781,
+          3.279719352722168,
+          1.500382423400879,
+          1
+        ],
+        "type": "Primitive",
+        "___physics_enabled": true,
+        "isSelectable": false,
+        "visible": false
+      }
+    },
+    "f84ec9b3-853b-8026-49ed-91a6246c47d1": {
+      "extends": "cylinder2.vwf",
+      "source": "vwf/model/threejs/cylinder.js",
+      "type": "subDriver/threejs",
+      "properties": {
+        "___physics_activation_state": 1,
+        "___physics_deactivation_time": 0,
+        "___physics_velocity_linear": [
+          0,
+          0,
+          0
+        ],
+        "___physics_velocity_angular": [
+          0,
+          0,
+          0
+        ],
+        "DisplayName": "cylinder2",
+        "materialDef": {
+          "alpha": 1,
+          "ambient": {
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "color": {
+            "a": 1,
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "emit": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "layers": [
+            {
+              "alpha": 1,
+              "blendMode": 0,
+              "mapInput": 0,
+              "mapTo": 1,
+              "offsetx": 0,
+              "offsety": 0,
+              "rot": 0,
+              "scalex": 1,
+              "scaley": 1,
+              "src": "checker.jpg"
+            }
+          ],
+          "morphTargets": false,
+          "reflect": 0.8,
+          "shadeless": false,
+          "shadow": true,
+          "shininess": 15,
+          "skinning": false,
+          "specularColor": {
+            "b": 0.577350269189626,
+            "g": 0.577350269189626,
+            "r": 0.577350269189626
+          },
+          "specularLevel": 1
+        },
+        "owner": "Anonymous0",
+        "radius": 1.66,
+        "size": [
+          1,
+          0.5,
+          0.5
+        ],
+        "tempid": "",
+        "texture": "checker.jpg",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0.11949682235717773,
+          -0.18827152252197266,
+          2.175382375717163,
+          1
+        ],
+        "type": "Primitive",
+        "___physics_enabled": true,
+        "isSelectable": false,
+        "visible": false
+      }
+    },
+    "9d7423f8-df47-bbc6-5d44-143d18d86f37": {
+      "extends": "box2.vwf",
+      "source": "vwf/model/threejs/box.js",
+      "type": "subDriver/threejs",
+      "properties": {
+        "___physics_activation_state": 1,
+        "___physics_deactivation_time": 0,
+        "___physics_velocity_linear": [
+          0,
+          0,
+          0
+        ],
+        "___physics_velocity_angular": [
+          0,
+          0,
+          0
+        ],
+        "DisplayName": "box3",
+        "_length": 3.38,
+        "height": 1.8,
+        "materialDef": {
+          "alpha": 1,
+          "ambient": {
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "color": {
+            "a": 1,
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "emit": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "layers": [
+            {
+              "alpha": 1,
+              "blendMode": 0,
+              "mapInput": 0,
+              "mapTo": 1,
+              "offsetx": 0,
+              "offsety": 0,
+              "rot": 0,
+              "scalex": 1,
+              "scaley": 1,
+              "src": "checker.jpg"
+            }
+          ],
+          "morphTargets": false,
+          "reflect": 0.8,
+          "shadeless": false,
+          "shadow": true,
+          "shininess": 15,
+          "skinning": false,
+          "specularColor": {
+            "b": 0.577350269189626,
+            "g": 0.577350269189626,
+            "r": 0.577350269189626
+          },
+          "specularLevel": 1,
+          "type": "phong"
+        },
+        "owner": "Anonymous0",
+        "size": [
+          1,
+          1,
+          1
+        ],
+        "tempid": "",
+        "texture": "checker.jpg",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0.8842551708221436,
+          -0.4670041501522064,
+          0,
+          0,
+          0.4670041501522064,
+          0.8842551708221436,
+          0,
+          0.019496440887451172,
+          -3.494272232055664,
+          1.078382134437561,
+          1
+        ],
+        "type": "Primitive",
+        "width": 1.88,
+        "___physics_enabled": true,
+        "visible": false,
+        "isSelectable": false
+      }
+    }
+  }
+}

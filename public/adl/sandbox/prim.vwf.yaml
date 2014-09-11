@@ -1,0 +1,202 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+extends: http://vwf.example.com/node3.vwf
+methods:
+  GetMesh:
+  updateStack:
+  updateSelf:
+  dirtyStack:
+  GetBounds:
+  getTexture:
+  setupMaterial:
+  setTransparent:
+properties:
+  isSelectable: true
+  isStatic:
+  materialDef:
+    get: |
+            return this.getTexture();
+    set: |
+             
+             this.materialDef = value;
+             this.setupMaterial(value);
+  transparent:           
+    set: |
+             this.setTransparent(value); 
+scripts:
+- |  
+    this.getTexture = function()
+    {
+        if(this.GetMesh().lastMatDef)
+            return this.GetMesh().lastMatDef;
+        else
+        {
+            if(this.materialDef) return this.materialDef;    
+    
+                return {
+                    shininess:15,
+                    alpha:1,
+                    ambient:{r:1,g:1,b:1},
+                    color:{r:1,g:1,b:1,a:1},
+                    emit:{r:0,g:0,b:0},
+                    reflect:0.8,
+                    shadeless:false,
+                    shadow:true,
+                    specularColor:{r:0.5773502691896258,g:0.5773502691896258,b:0.5773502691896258},
+                    specularLevel:1,
+                    layers:[
+                      {  alpha: 1,
+                        blendMode: 0,
+                        mapInput: 0,
+                        mapTo: 1,
+                        offsetx: 0,
+                        offsety: 0,
+                        rot: 0,
+                        scalex: 1,
+                        scaley: 1,
+                        src: "checker.jpg"}
+                    ]
+    }
+        
+    }
+             
+    }
+    this.setupMaterial = function(value)
+    {
+        
+        if(!this.GetMesh())
+            return;
+        this.GetMesh().lastMatDef = value;
+        var currentmat = this.GetMesh().material;
+        _Editor.setMaterialByDef(currentmat,value);
+          
+    }
+    this.setTransparent = function(v)
+    {
+        
+    }
+    this.GetMesh = function()
+    {
+        return this.mesh;
+    }
+    this.backupMesh = function()
+    {
+        
+        if(!this.GetMesh())
+            return;
+        var geometry = this.GetMesh().geometry;
+        if(geometry.vertices)
+            geometry.originalPositions = this.copyArray([],geometry.vertices);
+        if(geometry.faces)
+            geometry.originalFaces = this.copyArray([],geometry.faces);
+        if(geometry.normals)
+            geometry.originalNormals = this.copyArray([],geometry.normals);
+       
+    }
+    this.copyArray = function(arrNew, arrOld)
+    {
+        if(!arrNew)
+            arrNew = [];
+        arrNew.length = 0;
+        for(var i =0; i< arrOld.length; i++)
+            arrNew.push(arrOld[i].clone());
+        return arrNew;
+    }
+    this.restoreMesh = function()
+    {
+        
+      if(!this.GetMesh())
+            return;
+        var geometry = this.GetMesh().geometry;
+        if(!geometry)
+            return;
+        if(geometry.originalPositions)
+             this.copyArray(geometry.vertices,geometry.originalPositions);
+        if(geometry.originalNormals)    
+             this.copyArray(geometry.normals,geometry.originalNormals);
+        if(geometry.originalFaces)
+             this.copyArray(geometry.faces,geometry.originalFaces);
+        
+        geometry.verticesNeedUpdate = true;
+        geometry.normalsNeedUpdate = true;
+        geometry.facesNeedUpdate = true;
+        
+    }
+    this.updateSelf = function(rebuild)
+    {
+        
+        if(!this.mesh || rebuild)
+        {
+          
+           var lastmat;
+           var parent;
+           var rotation = new THREE.Vector3();
+           if(this.mesh && this.mesh.material)
+           {
+                lastmat = this.mesh.material
+                parent = this.mesh.parent;
+                if(!parent)
+                    return;
+                parent.remove(this.mesh);
+                rotation = this.mesh.rotation;
+           }
+           else
+           {
+                return;
+                lastmat = _Editor.getDefaultMaterial();  
+                parent = _Editor.findviewnode(this.id);
+           }                
+           this.mesh = new THREE.Mesh(this.Build(),lastmat);
+           this.mesh.rotation = rotation;
+           this.mesh.castShadow = true;
+           this.mesh.receiveShadow = true;
+           parent.add(this.mesh);
+           this.backupMesh();
+        }
+        else
+        {
+            this.restoreMesh();   
+        }
+        this.mesh.geometry.dirtyMesh = true;
+    //    var lastmatdef = this.mesh.lastMatDef || this.materialDef;
+    //    var lastmat = this.mesh.material;
+    //    var parent = this.mesh.parent;
+    //    var rotation = this.mesh.rotation;
+    //    parent.remove(this.mesh);
+    //    this.mesh = new THREE.Mesh(this.Build(),lastmat);
+    //    this.mesh.castShadow = true;
+    //    this.mesh.receiveShadow = true;
+    //    this.mesh.rotation = rotation;
+    //    this.mesh.lastMatDef = lastmatdef;
+       
+    //    parent.add(this.mesh);
+    }
+    this.dirtyStack = function(rebuild)
+    {
+        this.updateStack(rebuild);
+    }
+    this.updateStack = function(rebuild)
+    {
+        
+        this.updateSelf(rebuild);
+        for(var i in this.children)
+        {
+            return vwf.callMethod(this.children[i].id,'updateStack');
+        }
+    }
+    this.GetBounds = function()
+    {
+        return this.boundingbox;
+    }
+   

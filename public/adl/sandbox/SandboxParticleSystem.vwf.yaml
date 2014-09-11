@@ -1,0 +1,322 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+---
+extends: http://vwf.example.com/particlesystem.vwf
+methods:
+properties:
+  type: "ParticleSystem"
+  startColor_noAplha:
+    value: [1 ,1 ,1]
+    set: |
+            this.startColor = [value[0],value[1],value[2],this.startAlpha]
+    get: |
+            return [this.startColor[0],this.startColor[1],this.startColor[2]]
+  colorRange_noAplha:
+    value: [1 ,1 ,1]
+    set: |
+            this.colorRange = [value[0],value[1],value[2],this.alphaRange]
+    get: |
+            return [this.colorRange[0],this.colorRange[1],this.colorRange[2]]          
+  endColor_noAplha:
+    value: [1 ,1 ,1]
+    set: |
+            if(!this.endColor) this.endColor = [0,0,0,0];
+            this.endColor = [value[0],value[1],value[2],this.endAlpha]
+    get: |
+            if(!this.endColor) this.endColor = [0,0,0,0];
+            return [this.endColor[0],this.endColor[1],this.endColor[2]]
+  endAlpha:
+    value: 1
+    set: |
+            this.endColor = [this.endColor[0],this.endColor[1],this.endColor[2],value]
+    get: |
+            return this.endColor[3];   
+  startAlpha:
+    value: 1
+    set: |
+            if(!this.startColor) this.startColor = [0,0,0,0];
+            this.startColor = [this.startColor[0],this.startColor[1],this.startColor[2],value]
+    get: |
+            if(!this.startColor) this.startColor = [0,0,0,0];
+            return this.startColor[3];
+  alphaRange:
+    value: 1
+    set: |
+            if(!this.colorRange) this.colorRange = [0,0,0,0];
+            this.colorRange = [this.colorRange[0],this.colorRange[1],this.colorRange[2],value]
+    get: |
+            if(!this.colorRange) this.colorRange = [0,0,0,0];
+            return this.colorRange[3];                       
+  EditorData:
+    ABstartAlpha:
+      displayname: "Alpha: start"
+      property: startAlpha
+      type: slider
+      min: 0
+      max: 1
+      step: .01
+    ABstartAlphaEnd:
+      displayname: "Alpha:  end"
+      property:  endAlpha
+      type: slider
+      min: 0
+      max: 1
+      step: .01
+    ABstartAlphaEndRange:
+      displayname: "Alpha:  range"
+      property:  alphaRange
+      type: slider
+      min: 0
+      max: 1
+      step: .01  
+    AALifeTime:
+      displayname: "Lifetime: (min - max)"
+      property: [minLifeTime, minLifeTime, maxLifeTime]
+      type: rangeslider
+      min: 1
+      max: 1000
+      step: 1
+    AABBBTextureTiles:
+      displayname: "Texture Tiles"
+      property: textureTiles
+      type: slider
+      min: 1
+      max: 4
+      step: 1
+    AABBBGravity:
+      displayname: "Gravity (Euler)"
+      property: gravity
+      type: slider
+      min: 0
+      max: 4
+      step: .01 
+    AABBBDamping:
+      displayname: "Damping (Euler)"
+      property: damping
+      type: slider
+      min: 0
+      max: 1
+      step: .01     
+    AAOrientation:
+      displayname: "Orientation: (min - max)"
+      property: [minOrientation, minOrientation, maxOrientation]
+      type: rangeslider
+      min: -30
+      max: 30
+      step: .1
+    AASpin:
+      displayname: "Spin: (min - max)"
+      property: [minSpin, minSpin, mamSpin]
+      type: rangeslider
+      min: -20
+      max: 20
+      step: .1       
+    AStartSize:
+      displayname: "Size: start"
+      property: startSize
+      type: slider
+      min: 0
+      max: 1
+      step: .01
+    AStartSizeEnd:
+      displayname: "Size: end"
+      property: endSize
+      type: slider
+      min: 0
+      max: 1
+      step: .01
+    AStartSizeEndR:
+      displayname: "Size: range"
+      property: sizeRange
+      type: slider
+      min: 0
+      max: 1
+      step: .01  
+    ABCMatx:
+      displayname: "Max Rate "
+      property: maxRate
+      type: slider
+      min: 0
+      max: 1
+      step: .001
+    ABCAlphaTest:
+      displayname: "Alpha Test (greater)"
+      property: alphaTest
+      type: slider
+      min: 0
+      max: 1
+      step: .001        
+    CStartVelocity:
+      displayname: Velocity
+      property: [minVelocity, maxVelocity]
+      type: rangevector
+      step: .001
+    CStartAcceleration:
+      displayname: Acceleration
+      property: [minAcceleration, maxAcceleration]
+      type: rangevector
+      step: .001
+    CGravityPoint:
+      displayname: "Gravity Center"
+      property: gravityCenter
+      type: vector  
+    ZZImage:
+      displayname: "Choose Image"
+      property: image
+      type: map
+    YStartColor:
+      displayname: Start Color
+      property: startColor_noAplha
+      type: color
+    YEndColor:
+      displayname: End Color
+      property: endColor_noAplha
+      type: color
+    YVariationColor:
+      displayname: Color Variation
+      property: colorRange_noAplha
+      type: color  
+    solver:
+      displayname: "Simulation Solver"
+      property: solver
+      type: choice
+      labels: 
+        - Euler
+        - Analytic
+        - AnalyticShader
+      values:
+        - Euler
+        - Analytic
+        - AnalyticShader
+    emitterType:
+      displayname: "Emitter Type"
+      property: emitterType
+      type: choice
+      labels: 
+        - Box
+        - Sphere
+        - Point
+      values:
+        - box
+        - sphere
+        - point
+    emitterSize:
+      displayname: Emitter Size
+      property: emitterSize
+      type: vector
+    velocityMode:
+      displayname: "Velocity Mode"
+      property: velocityMode
+      type: choice
+      labels: 
+        - Cartesian
+        - Spherical
+      values:
+        - cartesian
+        - spherical       
+    DetphTest:
+      displayname: "Depth Test"
+      property: depthTest
+      type: check
+    Additive:
+      displayname: "Additive Blending"
+      property: additive
+      type: check        
+scripts:
+-  |
+    this.initialize = function()
+    {
+        
+          if(this.id == 'SandboxParticleSystem-vwf') return;
+          this.prerendercallback = this.placeNameTag.bind(this);
+          _dView.bind('glyphRender',this.prerendercallback);
+          this.createNameTag();
+          if(this.endColor === undefined)
+             this.endColor = [0,0,0];
+          if(this.startColor === undefined)
+             this.startColor = [0,0,0];
+        
+    }
+    this.createNameTag = function()
+    {
+    
+      var newdiv = document.createElement('img');
+      
+      $(newdiv).addClass('glyph');
+      newdiv.style.position = 'absolute';
+      newdiv.id = "Player " + this.name + 'icon';
+      //newdiv.innerHTML = "" + this.name;
+      $(newdiv).attr('src','../vwf/view/editorview/images/icons/ParticleIcon.png');
+      newdiv.style.left = '0px';
+      newdiv.style.top = '0px';
+      
+      $('#glyphOverlay').append(newdiv);
+      $(newdiv).disableSelection();
+           $(newdiv).mousedown(function(e){$('#index-vwf').focus(); if(_Editor.GetSelectMode() == "None" || e.which != 1) $('#index-vwf').trigger(e)});
+      $(newdiv).mouseup(function(e){$('#index-vwf').focus();$('#index-vwf').trigger(e)});
+      $(newdiv).mousemove(function(e){$('#index-vwf').trigger(e)});
+      $(newdiv).click(function(e){$('#index-vwf').focus(); if(_Editor.GetSelectMode() != "None") _Editor.SelectObjectPublic(this.id)}.bind(this));
+      this.nametag = newdiv;
+                 
+    }
+    this.deinitialize = function()
+    {
+       _dView.unbind('glyphRender',this.prerendercallback);
+       $(this.nametag).remove();
+    }
+    this.placeNameTag = function(e,viewprojection, wh, ww)
+    {
+      
+    
+      var div = this.nametag;
+      var trans = (new THREE.Vector3()).setFromMatrixPosition(_Editor.findviewnode(this.id).matrixWorld);
+      var pos = [trans.x,trans.y,trans.z];
+      pos = [pos[0],pos[1],pos[2],1];
+         
+      
+      
+      var screen = MATH.mulMat4Vec4(viewprojection,pos);
+      screen[0] /= screen[3];
+      screen[1] /= screen[3];
+     
+      screen[0] /= 2;
+      screen[1] /= 2;
+      screen[2] /= 2;
+      screen[0] += .5;
+      screen[1] += .5;
+      
+      screen[0] *= ww;
+      screen[1] *= wh;
+      
+     
+      screen[1] = wh - screen[1];
+      div.style.top = (screen[1])  +  'px';
+      div.style.left = (screen[0]  - 20/2)  +'px';
+     
+     
+      if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))
+      {
+            if(div.style.display != 'none')
+                div.style.display = 'none';
+      }
+      else
+      {
+          if((screen[2] > 10 || screen[2] < 0) && div.style.display != 'none')
+             div.style.display = 'none';
+          if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')
+             div.style.display = 'block';
+      }
+         
+      
+         
+    }   

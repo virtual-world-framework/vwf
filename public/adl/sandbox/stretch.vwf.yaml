@@ -1,0 +1,157 @@
+extends: http://vwf.example.com/node3.vwf
+properties:
+  amount:
+    set: |
+            this.amount = value;
+            this.dirtyStack();
+    get: |
+            return this.amount;
+  effectaxis:
+    value: 0
+    set: |
+            this.effectaxis = value;
+            this.dirtyStack();
+  stretch:
+    value: 0
+    set: |
+            this.stretch = value;
+            this.dirtyStack();
+  bulge:
+    value: 0
+    set: |
+            this.bulge = value;
+            this.dirtyStack();
+  translation:
+    set:|
+            this.translation = value;
+            this.dirtyStack();
+  rotation:
+    set:|
+            this.translation = value;
+            this.dirtyStack();
+  scale:
+    set:|
+            this.translation = value;
+            this.dirtyStack();            
+  minAmount:
+  maxAmount:
+  isModifier: true
+  type:
+  EditorData:
+    stretch:
+      displayname: offset x
+      property: stretch
+      type: slider
+      min: -10
+      max: 10
+      step: .01
+    bulge:
+      displayname: offset y
+      property: bulge
+      type: slider
+      min: -10
+      max: 10
+      step: .01
+    zeffectaxis:
+      displayname: effect axis
+      property: effectaxis
+      type: choice
+      labels: 
+        - X
+        - Y
+        - Z
+      values:
+        - 0
+        - 1
+        - 2    
+methods:
+  GetBounds:
+  updateStack:
+  updateSelf:
+  dirtyStack:
+  GetMesh:
+  dostretch:
+events:
+  childAdded:
+scripts:
+- |
+    this.updateSelf = function()
+    {   
+        var x = vwf.getProperty(this.id,'stretch');
+        var y = vwf.getProperty(this.id,'bulge');
+        var z = vwf.getProperty(this.id,'effectaxis');
+        this.dostretch(x,y,z);
+    }
+    this.dostretch = function(stretch,bulge,axis)
+    {
+         
+         var mesh = this.GetMesh();
+         var m = mesh.geometry;
+         var positions = [];
+         
+         for(var i=0;i<m.vertices.length; i++)
+         {
+            positions.push([m.vertices[i].x,m.vertices[i].y,m.vertices[i].z]);
+         }
+         
+        var bounds = m.boundingBox;
+         if(!bounds)
+            m.computeBoundingBox();
+         bounds = m.boundingBox;
+         
+         var height = bounds.max.z - bounds.min.z;
+         var length = bounds.max.x - bounds.min.x;
+         var width = bounds.max.y - bounds.min.y;
+         bounds = [length,width,height];
+         
+         for(var i=0;i<positions.length; i+=1)
+         {
+            var factor = positions[i][axis]/bounds[axis];
+            for(var j=0; j<3;j++)
+            {
+                    if(j==axis)
+                        positions[i][j] += positions[i][j] *stretch;
+                    else
+                        positions[i][j] -= positions[i][j] * (.5-Math.abs(factor*factor))*stretch*bulge;
+            }
+         }
+         for(var i=0;i<positions.length; i+=1)
+         {
+            m.vertices[i].x = (positions[i][0]);
+            m.vertices[i].y = (positions[i][1]);
+            m.vertices[i].z = (positions[i][2]);
+         }
+         
+         m.verticesNeedUpdate = true;
+         m.dirtyMesh = true;
+         mesh.sceneManagerUpdate();
+    }
+    this.updateStack = function()
+    {
+        
+        this.updateSelf();
+        for(var i in this.children)
+        {
+            return vwf.callMethod(this.children[i].id,'updateStack');
+        }
+    }
+    this.initialize = function()
+    {
+         
+    }
+    this.GetMesh = function()
+    {
+       
+        return vwf.callMethod(vwf.parent(this.id),'GetMesh');
+    }
+    this.GetBounds = function()
+    {
+        
+        return vwf.callMethod(vwf.parent(this.id),'GetBounds');
+    }
+    this.dirtyStack = function()
+    {
+        
+        
+        return vwf.callMethod(vwf.parent(this.id),'dirtyStack');
+    }

@@ -1,0 +1,45 @@
+--- 
+extends: http://vwf.example.com/kinetic/stage.vwf
+implements:
+- http://vwf.example.com/kinetic/drawing.vwf
+properties:
+  userActionStack: []
+  userActionIndex: -1
+  lastSaveIndex: -1
+  unitSize: 32
+  drawing_clients:
+methods:
+  createParticipant:
+  clientsChanged:
+  createUnit:
+  deleteUnit:
+  createLayer:
+  deleteLayer:
+  recordUserAction:
+  recordSave:
+  clearObjects:
+  clearUserActions:
+  insertUnits:
+  getUnitSymbol:
+events:
+  participantAdded:
+  insertableUnitAdded:
+  unitLoadingComplete:
+  selectedUnitSymbolRendered:
+children:
+  background:
+    extends: http://vwf.example.com/kinetic/layer.vwf
+    properties:
+      visible: true
+    children:
+      map:
+        extends: http://vwf.example.com/kinetic/image.vwf
+        source: "maps/BlankCanvas.png"
+        properties:
+          image:
+  scenarioDescription:
+    extends: scenarioDescription.vwf
+  toolbar:
+    extends: toolbar.vwf
+scripts:
+- source: "index-model.js"

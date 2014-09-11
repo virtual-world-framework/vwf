@@ -1,0 +1,114 @@
+    <script type="text/javascript">
+	
+		
+		
+		$(document).ready(function()
+		{
+			ko.applyBindings(vwfPortalModel);
+			{{#message}}
+				alertify.alert('{{message}}');
+			{{/message}}
+
+		});	
+		
+		function redirect()
+		{
+			var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
+			window.location = ret.charAt(0) == '/' ? root + ret : root + '/' + ret;
+		}
+
+		function validateEmail(email) { 
+		    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+		    return re.test(email);
+		} 
+		vwfPortalModel.handleAccountButton = function(o, e){
+		
+			
+			var email = $('#txtemail').val();
+			var location = $('#location').val();
+			var name = $('#name').val();
+			var homepage = $('#homepage').val();
+			var organization = $('#organization').val();
+			var twitter = $('#twitter').val();
+			var skype = $('#skype').val();
+
+			if(!validateEmail(email))
+			{
+				vwfPortalModel.errorText("Invalid Email");	
+				return;
+			}
+
+			var profile = {};
+			profile.Email = email;
+			profile.Location = location;
+			profile.Homepage = homepage;
+			profile.Organization = organization;
+			profile.Twitter = twitter;
+			profile.Skype = skype;
+			profile.Name = name;
+
+			
+			$.ajax(root + "/VWFDataManager.svc/profile",
+			{
+				cache:false,
+				data:JSON.stringify(profile),
+				type:'POST',
+				contentType: "application/json; charset=utf-8",
+				success:function(data,status,xhr)
+				{
+
+					$('#txtusername').val('');
+					$('#txtpassword').val('');
+					
+					window.location = '{{root}}/';
+			
+				},
+				error:function(xhr,status,err)
+				{
+					vwfPortalModel.errorText("Error: Please ensure that all required account information is entered correctly: " + xhr.responseText);
+					window.setTimeout(function(){
+						vwfPortalModel.errorText("");				
+					}, 6000);
+				},
+				dataType:'text'
+			});
+		}
+	</script>
+{{#user}}
+<div id='content' class="row" >
+	<div class="col-md-5 accountCreation" style="margin: 0 auto; float:none;">
+		<form data-bind="submit:handleAccountButton" >
+			<fieldset>
+				<legend>{{#translate}}Required account information{{/translate}}</legend>
+				<div class='row' style="margin:10px auto;float:none;text-align:center;">
+					<div class="col-md-10" style="margin:0 auto;float:none;">
+						<input type='text' id='txtusername' class="form-control" disabled='disabled' value='{{Username}}' placeholder='{{#translate}}Username{{/translate}}'/>
+						<input type='text' id='txtemail' class="form-control" value='{{Email}}' placeholder='{{#translate}}Email{{/translate}}'/>
+						<input type="submit" class='btn btn-default' style="float:right;"  value="{{#translate}}Update Account{{/translate}}"/><br/>
+						<p class="help-block" style="width:100%;margin-top:20px;" data-bind="visible:errorText,text:errorText"></p>
+					</div>
+				</div>
+				<br/><br/>
+				<legend>{{#translate}}Optional information{{/translate}}</legend>
+				<div class='row' style="margin:10px auto;float:none;text-align:center;">
+					<div class='col-md-10' style="margin:0 auto;float:none;">
+						<input type='text' id='name' class='input form-control' value='{{Name}}' placeholder='{{#translate}}Full Name{{/translate}}'/>
+						<input type='text' id='location' class='input form-control' value='{{Location}}' placeholder='{{#translate}}Location{{/translate}}'/>
+						<input type='text' id='homepage' class='input form-control' value='{{Homepage}}' placeholder='{{#translate}}Homepage{{/translate}}'/>
+						<input type='text' id='organization' class='input form-control' value='{{Organization}}' placeholder='{{#translate}}Organization{{/translate}}'/>
+						<input type='text' id='twitter' class='input form-control' value='{{Twitter}}' placeholder='{{#translate}}Twitter Handle{{/translate}}'/>
+						<input type='text' id='skype' class='input form-control' value='{{Skype}}' placeholder='{{#translate}}Skype Name{{/translate}}'/>
+					</div>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+</div>
+{{/user}}
+<div class="row">	
+	<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
+</div>
+
+
+
+		

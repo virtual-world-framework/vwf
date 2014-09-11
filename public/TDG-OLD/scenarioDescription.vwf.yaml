@@ -1,0 +1,9 @@
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+  scenarioGeneralDescription: 
+  scenarioEnemyDescription: 
+  scenarioFriendlyDescription: 
+methods: 
+scripts: 
+ //@ sourceURL=scenarioDescription.vwf

@@ -1,0 +1,139 @@
+extends: http://vwf.example.com/node3.vwf
+properties:
+  amount:
+    set: |
+            this.amount = value;
+            this.dirtyStack();
+    get: |
+            return this.amount;
+  xamount:
+    value: 0
+    set: |
+            this.xamount = value;
+            this.dirtyStack();
+  yamount:
+    value: 0
+    set: |
+            this.yamount = value;
+            this.dirtyStack();
+  zamount:
+    value: 0
+    set: |
+            this.zamount = value;
+            this.dirtyStack();
+  translation:
+    set:|
+            this.translation = value;
+            this.dirtyStack();
+  rotation:
+    set:|
+            this.translation = value;
+            this.dirtyStack();
+  scale:
+    set:|
+            this.translation = value;
+            this.dirtyStack();            
+  minAmount:
+  maxAmount:
+  isModifier: true
+  type:
+  EditorData:
+    xamount:
+      displayname: offset x
+      property: xamount
+      type: slider
+      min: -10
+      max: 10
+      step: .01
+    yamount:
+      displayname: offset y
+      property: yamount
+      type: slider
+      min: -10
+      max: 10
+      step: .01
+    zamount:
+      displayname: offset z
+      property: zamount
+      type: slider
+      min: -10
+      max: 10
+      step: .01      
+methods:
+  GetBounds:
+  updateStack:
+  updateSelf:
+  dirtyStack:
+  GetMesh:
+  offset:
+events:
+  childAdded:
+scripts:
+- |
+    this.updateSelf = function()
+    {   
+        var x = vwf.getProperty(this.id,'xamount');
+        var y = vwf.getProperty(this.id,'yamount');
+        var z = vwf.getProperty(this.id,'zamount');
+        this.offset(x,y,z);
+    }
+    this.offset = function(x,y,z)
+    {
+         
+         var mesh = this.GetMesh();
+         var m = mesh.geometry;
+         var positions = [];
+         
+         for(var i=0;i<m.vertices.length; i++)
+         {
+            positions.push([m.vertices[i].x,m.vertices[i].y,m.vertices[i].z]);
+         }
+         
+
+         for(var i=0;i<positions.length; i+=1)
+         {
+            positions[i][0] += this.xamount;
+            positions[i][1] += this.yamount;
+            positions[i][2] += this.zamount;
+         }
+         
+         for(var i=0;i<positions.length; i+=1)
+         {
+            m.vertices[i].x = (positions[i][0]);
+            m.vertices[i].y = (positions[i][1]);
+            m.vertices[i].z = (positions[i][2]);
+         }
+         
+         m.verticesNeedUpdate = true;
+         m.dirtyMesh = true;
+         mesh.sceneManagerUpdate();
+    }
+    this.updateStack = function()
+    {
+        
+        this.updateSelf();
+        for(var i in this.children)
+        {
+            return vwf.callMethod(this.children[i].id,'updateStack');
+        }
+    }
+    this.initialize = function()
+    {
+         
+    }
+    this.GetMesh = function()
+    {
+       
+        return vwf.callMethod(vwf.parent(this.id),'GetMesh');
+    }
+    this.GetBounds = function()
+    {
+        
+        return vwf.callMethod(vwf.parent(this.id),'GetBounds');
+    }
+    this.dirtyStack = function()
+    {
+        
+        
+        return vwf.callMethod(vwf.parent(this.id),'dirtyStack');
+    }

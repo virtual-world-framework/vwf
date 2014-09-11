@@ -1,0 +1,46 @@
+extends: 'http://vwf.example.com/behavior.vwf'
+properties:
+  type: behavior
+  EditorData_temp:
+    method:
+      displayname: Method to trigger on change
+      property: method
+      type: choice  
+    NodeID:
+      displayname: "Choose Node"
+      property: NodeID
+      type: nodeid
+    prop:
+      displayname: Property to watch
+      property: property
+      type: choice
+  EditorData:
+    value:
+    get: |       
+       var keys = Object.keys(this.parent.methods);
+       this.EditorData_temp.method.labels = keys;
+       this.EditorData_temp.method.values = keys;
+       var node = vwf.getNode(this.NodeID);
+       if(node)
+       {
+       keys = Object.keys(node.properties);
+       this.EditorData_temp.prop.labels = keys;
+       this.EditorData_temp.prop.values = keys;
+        }
+       return this.EditorData_temp;
+  DisplayName: DistanceTrigger
+  NodeID: null
+  method: null
+  property: null
+methods:
+  satProperty:
+    parameters:
+      - id
+      - property
+      - value
+    body: |     
+      if(property == this.property && id == this.NodeID)
+      {
+              if( this.parent[this.method])
+                this.parent[this.method](property,value);
+      }

@@ -1,0 +1,314 @@
+[
+  {
+    "id": "terrain2-vwf-fbafffac-da58-6aa1-4ae2-2b5d4e1ef775",
+    "extends": {
+      "patches": "terrain2.vwf",
+      "id": "terrain2-vwf",
+      "methods": {
+        "getPoint": {
+          "body": "",
+          "parameters": []
+        },
+        "setPoint": {
+          "body": "",
+          "parameters": []
+        },
+        "getPointCount": {
+          "body": "",
+          "parameters": []
+        }
+      }
+    },
+    "name": "fbafffac-da58-6aa1-4ae2-2b5d4e1ef775",
+    "source": "vwf/model/threejs/terrain.js",
+    "type": "subDriver/threejs",
+    "properties": {
+      "materialDef": {
+        "shininess": 15,
+        "alpha": 1,
+        "ambient": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+        },
+        "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1,
+          "a": 1
+        },
+        "emit": {
+          "r": 0,
+          "g": 0,
+          "b": 0
+        },
+        "reflect": 0.8,
+        "shadeless": false,
+        "shadow": true,
+        "specularColor": {
+          "r": 0.5773502691896258,
+          "g": 0.5773502691896258,
+          "b": 0.5773502691896258
+        },
+        "specularLevel": 1,
+        "layers": [
+          {
+            "alpha": 1,
+            "blendMode": 0,
+            "mapInput": 0,
+            "mapTo": 1,
+            "offsetx": 0,
+            "offsety": 0,
+            "rot": 0,
+            "scalex": 1,
+            "scaley": 1,
+            "src": "checker.jpg"
+          }
+        ]
+      },
+      "size": [
+        1,
+        1,
+        1
+      ],
+      "translation": [
+        0,
+        0,
+        0.0010000000474974513
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "owner": "Rob",
+      "texture": "checker.jpg",
+      "type": "Terrain",
+      "tempid": "",
+      "DisplayName": "terrain1",
+      "transform": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0.0010000000474974513,
+        1
+      ],
+      "quaternion": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "terrainType": "heightmapTerrainAlgorithm",
+      "terrainParams": {
+        "url": "./terrain/mars.jpg",
+        "diffuseUrl": "terrain/River.jpg",
+        "mixUrl": "./terrain/marsmix.jpg",
+        "baseUrl": "./terrain/dirt.JPG",
+        "rUrl": "/adl/sandbox/5ADBhd3M8K9Sak2o//vwfDataManager.svc/texture?UID=dirt.jpg",
+        "gUrl": "./terrain/venus.png",
+        "bUrl": "./terrain/cliff.jpg",
+        "baseUrlNorm": "./terrain/3091-normal.jpg",
+        "rUrlNorm": "./terrain/3091-normal.jpg",
+        "gUrlNorm": "./terrain/cratornorm.png",
+        "bUrlNorm": "./terrain/4979-normal.jpg",
+        "worldWidth": 2048,
+        "worldLength": 2048,
+        "cubic": true,
+        "gamma": false,
+        "addNoise": true,
+        "heightScale": ".2"
+      },
+      "url": "./terrain/mars.jpg",
+      "worldLength": 2048,
+      "worldWidth": 2048,
+      "heightScale": ".2",
+      "mixUrl": "./terrain/marsmix.jpg",
+      "bUrl": "./terrain/cliff.jpg",
+      "bUrlNorm": "./terrain/4979-normal.jpg",
+      "gUrl": "./terrain/venus.png",
+      "rUrl": "/adl/sandbox/5ADBhd3M8K9Sak2o//vwfDataManager.svc/texture?UID=dirt.jpg",
+      "rUrlNorm": "./terrain/3091-normal.jpg",
+      "gUrlNorm": "./terrain/cratornorm.png",
+      "baseUrl": "./terrain/dirt.JPG",
+      "baseUrlNorm": "./terrain/3091-normal.jpg",
+      "tileRes": 16
+    }
+  },
+  {
+    "extends": "sphere2.vwf",
+    "name": "beea48d9-fe74-aa43-5f55-e1aedf82fd2e",
+    "source": "vwf/model/threejs/sphere.js",
+    "type": "subDriver/threejs",
+    "properties": {
+      "materialDef": {
+        "shininess": 15,
+        "alpha": 1,
+        "ambient": {
+          "r": 1,
+          "g": 1,
+          "b": 1
+        },
+        "color": {
+          "r": 1,
+          "g": 1,
+          "b": 1,
+          "a": 1
+        },
+        "emit": {
+          "r": 0,
+          "g": 0,
+          "b": 0
+        },
+        "reflect": 0.8,
+        "shadeless": false,
+        "shadow": true,
+        "specularColor": {
+          "r": 0.5773502691896258,
+          "g": 0.5773502691896258,
+          "b": 0.5773502691896258
+        },
+        "specularLevel": 1,
+        "layers": [
+          {
+            "alpha": 1,
+            "blendMode": 0,
+            "mapInput": 0,
+            "mapTo": 1,
+            "offsetx": 0,
+            "offsety": 0,
+            "rot": 0,
+            "scalex": 1,
+            "scaley": 1,
+            "src": "checker.jpg"
+          }
+        ],
+        "morphTargets": false,
+        "skinning": false,
+        "type": "phong"
+      },
+      "size": [
+        0.5,
+        1,
+        1
+      ],
+      "translation": [
+        207.1999969482422,
+        17.600000381469727,
+        4.801000118255615
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "rotation": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "owner": "Rob",
+      "texture": "checker.jpg",
+      "type": "Primitive",
+      "tempid": "",
+      "DisplayName": "sphere1",
+      "transform": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        207.1999969482422,
+        17.600000381469727,
+        4.801000118255615,
+        1
+      ],
+      "quaternion": [
+        0,
+        0,
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "DisplayName": null,
+    "placemarks": {
+      "Origin": [
+        318.8,
+        851,
+        38.5
+      ]
+    },
+    "navmode": "none",
+    "sunColor": [
+      0.9803921568627451,
+      0.5215686274509804,
+      0.44313725490196076
+    ],
+    "sunDirection": [
+      1.35,
+      0.5,
+      1
+    ],
+    "sunIntensity": 1,
+    "ambientColor": [
+      0.0392156862745098,
+      0.0392156862745098,
+      0.0392156862745098
+    ],
+    "fogColor": [
+      0.6,
+      0.34509803921568627,
+      0.1843137254901961
+    ],
+    "fogNear": 100,
+    "fogFar": 1000,
+    "fogType": "exp",
+    "fogDensity": 0.032,
+    "fogVFalloff": 1.3,
+    "fogVFalloffStart": -0.7,
+    "skyColorBlend": 0.91,
+    "skyFogBlend": 0.48,
+    "skyApexColor": [
+      0.9803921568627451,
+      0.6039215686274509,
+      0
+    ],
+    "skyHorizonColor": [
+      0.6588235294117647,
+      0.3568627450980392,
+      0.1843137254901961
+    ],
+    "vAtmosphereDensity": 0.0005,
+    "skyTexture": "stormy",
+    "owner": "Rob",
+    "type": "scene",
+    "skyAtmosphereDensity": 1
+  }
+]

@@ -1,0 +1,6 @@
+{
+	"extends": "rotator.vwf",
+	"properties": {
+		"DisplayName": "rotator"
+	}
+}

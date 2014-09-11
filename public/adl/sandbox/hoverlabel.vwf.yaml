@@ -1,0 +1,59 @@
+extends: 'http://vwf.example.com/behavior.vwf'
+properties:
+  type: behavior
+  textsize: 21
+  offset3D:
+    - 0
+    - 0
+    - 0
+  NotProto: null
+  leftoffset: 3
+  topoffset: 37
+  text: text
+  EditorData:
+    Text:
+      displayname: Text
+      property: text
+      type: text
+    Yoff:
+      displayname: 'Y Offset'
+      property: topoffset
+      type: slider
+      min: -100
+      max: 100
+      step: 1
+    Xoff:
+      displayname: 'X Offset'
+      property: leftoffset
+      type: slider
+      min: -100
+      max: 100
+      step: 1
+    Zoff3D:
+      displayname: '3D Offset'
+      property: offset3D
+      type: vector
+      step: '.05'
+    Size:
+      displayname: 'Text Size'
+      property: textsize
+      type: slider
+      min: 1
+      max: 100
+      step: 1
+    Color:
+      displayname: Color
+      property: color
+      type: color
+  DisplayName: HoverLabel
+  o:
+    - 0
+    - 0
+    - 1
+  color:
+    - 0.47058823529411764
+    - 0.4666666666666667
+    - 0.4666666666666667
+methods:
+  deinitialize: "   \n\"use strict\";\n           $(this.nametag).remove();\n _dView.unbind('postprerender',this.placeNameTag);"
+  initialize: "   \n\"use strict\";\n if(this.id == \"hoverlabel-vwf\") return;    \n if(this.nametag)\n     this.deinitialize();\n this.placeNameTag = function(e,viewprojection, wh, ww)\n    {   \n        \n      var div = this.nametag;\n      var trans = _Editor.findviewnode(this.parent.id).matrix.elements;\n      var pos = [trans[12],trans[13],trans[14]];\n      pos = MATH.addVec3(pos,this.offset3D) ; \n      pos = [pos[0],pos[1],pos[2],1];\n         \n      var screen = MATH.mulMat4Vec4(viewprojection,pos);\n      screen[0] /= screen[3];\n      screen[1] /= screen[3];\n     \n      screen[0] /= 2;\n      screen[1] /= 2;\n      screen[2] /= 2;\n      screen[0] += 0.5;\n      screen[1] += 0.5;\n      screen[0] *= ww;\n      screen[1] *= wh;\n      screen[1] = wh - screen[1];\n\n      div.style.top = (screen[1]+this.topoffset)  +  'px';\n      div.style.left = ((screen[0]  - div.offsetWidth/2)+this.leftoffset)  +'px';\n\n      if((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh))\n      {\n            if(div.style.display != 'none')\n                div.style.display = 'none';\n      }\n      else\n      {\n          if((screen[2] > 10 || screen[2] < 0) && div.style.display != 'none')\n             div.style.display = 'none';\n          if(screen[2] < 10 && screen[2] > 0 && div.style.display == 'none')\n             div.style.display = 'block';\n      }\n      $(div).css('font-size',this.textsize + 'px');\n      $(div).html(this.text);\n      $(div).css('color','rgb('+parseInt(this.color[0]*255)+','+parseInt(this.color[1]*255)+','+parseInt(this.color[2]*255)+')');\n    }.bind(this);\n    \n      var newdiv = document.createElement('div');\n      \n      newdiv.style.position = 'fixed';\n      newdiv.id = this.id+'label';\n      newdiv.innerHTML = \"test\";\n      $(newdiv).css('z-index','100');\n      $(newdiv).css('font-size','15px');\n      $(newdiv).css('font-weight','bold');\n      newdiv.style.left = '0px';\n      newdiv.style.top = '0px';\n      \n      $('#vwf-root').append(newdiv);\n      $(newdiv).disableSelection();\n      $(newdiv).mousedown(function(e){$('#index-vwf').focus(); $('#index-vwf').trigger(e)});\n      $(newdiv).mouseup(function(e){$('#index-vwf').focus();$('#index-vwf').trigger(e)});\n      $(newdiv).mousemove(function(e){$('#index-vwf').trigger(e)});\n      $(newdiv).click(function(e){$('#index-vwf').focus();});\n      //$(newdiv).addClass('glyph');\n      this.nametag = newdiv;\n      \n      _dView.bind('postprerender',this.placeNameTag);"

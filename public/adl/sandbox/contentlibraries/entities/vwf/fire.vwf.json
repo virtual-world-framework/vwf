@@ -1,0 +1,207 @@
+{
+  "id": "sandboxGroup-vwf-8ec5782a-2cf7-11ab-68c4-1c42b53482b",
+  "extends": "sandboxGroup.vwf",
+  "sequence": 0,
+  "random": {
+    "s0": 0.6944517069496214,
+    "s1": 0.7038751870859414,
+    "s2": 0.3407065796200186,
+    "c": 1
+  },
+  "properties": {
+    "___physics_activation_state": 1,
+    "___physics_deactivation_time": 0,
+    "___physics_velocity_linear": [
+      0,
+      0,
+      0
+    ],
+    "___physics_velocity_angular": [
+      0,
+      0,
+      0
+    ],
+    "type": "Group",
+    "owner": "Anonymous0",
+    "transform": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      -4.521066665649414,
+      -6.322606563568115,
+      0.06907986849546432,
+      1
+    ],
+    "translation": [
+      -4.52106679090036,
+      -6.32260640539605,
+      0.06907986640930286
+    ],
+    "open": false
+  },
+  "children": {
+    "2bb4e174-ba62-4f0a-98e9-4abe211dc931": {
+      "id": "SandboxParticleSystem-vwf-2bb4e174-ba62-4f0a-98e9-4abe211dc931",
+      "extends": "SandboxParticleSystem.vwf",
+      "sequence": 0,
+      "random": {
+        "s0": 0.170319751370698,
+        "s1": 0.00496083241887391,
+        "s2": 0.0390903151128441,
+        "c": 1
+      },
+      "properties": {
+        "DisplayName": "ParticleSystem2",
+        "additive": false,
+        "alphaTest": 0,
+        "depthTest": false,
+        "emitterSize": [
+          1,
+          1,
+          1.5
+        ],
+        "emitterType": "sphere",
+        "endColor": [
+          0.050980392156862744,
+          0.050980392156862744,
+          0.050980392156862744,
+          0
+        ],
+        "image": "/adl/sandbox/example_blank//vwfDataManager.svc/texture?UID=\\Particles\\smoke.png",
+        "mamSpin": 4.1,
+        "maxAcceleration": [
+          0,
+          0,
+          0.002
+        ],
+        "maxLifeTime": 65,
+        "maxOrientation": 6.5,
+        "maxVelocity": [
+          0,
+          0,
+          0.044
+        ],
+        "minAcceleration": [
+          0,
+          0,
+          0.002
+        ],
+        "minLifeTime": 65,
+        "minOrientation": -14.9,
+        "minSpin": -6.3,
+        "minVelocity": [
+          0,
+          0,
+          0.003
+        ],
+        "owner": "Anonymous0",
+        "startColor": [
+          0.23921568627450981,
+          0.18823529411764706,
+          0.18823529411764706,
+          0.74
+        ],
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          -8.940696716308594E-8,
+          4.6566128730773926E-9,
+          -0.30000007152557373,
+          1
+        ],
+        "type": "ParticleSystem"
+      }
+    },
+    "4acdc44e-a6fb-6a99-b6e0-dd31759bc96f": {
+      "id": "SandboxParticleSystem-vwf-4acdc44e-a6fb-6a99-b6e0-dd31759bc96f",
+      "extends": "SandboxParticleSystem.vwf",
+      "sequence": 0,
+      "random": {
+        "s0": 0.170319751370698,
+        "s1": 0.00496083241887391,
+        "s2": 0.0390903151128441,
+        "c": 1
+      },
+      "properties": {
+        "DisplayName": "ParticleSystem1",
+        "additive": true,
+        "alphaTest": 0,
+        "depthTest": false,
+        "emitterSize": [
+          1,
+          1,
+          1.5
+        ],
+        "emitterType": "sphere",
+        "endColor": [
+          1,
+          0.3803921568627451,
+          0.3803921568627451,
+          0
+        ],
+        "image": "/adl/sandbox/example_particlefire//vwfDataManager.svc/texture?UID=fire.png",
+        "mamSpin": 4.1,
+        "maxAcceleration": [
+          0,
+          0,
+          0.002
+        ],
+        "maxLifeTime": 65,
+        "maxOrientation": 6.5,
+        "minAcceleration": [
+          0,
+          0,
+          0.002
+        ],
+        "minLifeTime": 65,
+        "minOrientation": -14.9,
+        "minSpin": -6.3,
+        "owner": "Anonymous0",
+        "startColor": [
+          1,
+          1,
+          1,
+          0.13
+        ],
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          8.940696716308594E-8,
+          -4.6566128730773926E-9,
+          0.30000007152557373,
+          1
+        ],
+        "type": "ParticleSystem"
+      }
+    }
+  }
+}

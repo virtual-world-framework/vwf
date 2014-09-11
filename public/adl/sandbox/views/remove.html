@@ -1,0 +1,94 @@
+<script type="text/javascript">
+	var sid = '{{sid}}';
+	$(document).ready(function()
+	{
+	
+		ko.applyBindings(vwfPortalModel); 
+			
+		$.ajax(root + '/vwfDataManager.svc/statedata?SID=' + sid,
+		{
+			cache:false,
+			success:function(data,status,xhr)
+			{
+				setup();
+				var data = JSON.parse(xhr.responseText);
+				$('#txtInstanceName').val(data.title);
+				$('#txtInstanceDescription').val(data.description);
+			},
+			error:function(xhr,status,err)
+			{
+				vwfPortalModel.errorText("Error: " + xhr.responseText);
+				
+				window.setTimeout(function(){
+					vwfPortalModel.errorText("");				
+				}, 6000);
+				
+			}
+		});
+			
+	});	
+	function redirect()
+	{
+		window.location = root + '/featuredWorlds/0';
+	}
+	vwfPortalModel.handleDeleteButton = function(o, e){
+		
+			
+	/*	var confirm = $('#confirm').val();
+		var pass = $('#txtpassword').val();
+		if(confirm != 'Yes' || !pass)
+		{
+			vwfPortalModel.errorText("Please make sure both input fields are properly filled.");
+				
+				window.setTimeout(function(){
+					vwfPortalModel.errorText("");				
+				}, 6000);
+			return;
+		}	
+	*/	
+		jQuery.ajax(
+		{
+			type: 'DELETE',
+			url: root + '/vwfDataManager.svc/state?SID='+sid,
+			success:function(data,status,xhr)
+			{
+				redirect();
+			},
+			error:function(xhr,status,err)
+			{
+				vwfPortalModel.errorText("Error: " + xhr.responseText);
+				
+				window.setTimeout(function(){
+					vwfPortalModel.errorText("");				
+				}, 6000);
+			},
+			dataType: "text"
+		});
+	};	
+</script>
+<div id="content">
+<div class="col-md-5" style="margin:10px auto;float:none;height:260px;">
+<div class="row" style="margin-bottom: 15px">
+	
+</div>
+<div class="row">
+
+	
+		<form data-bind="submit:handleDeleteButton" >
+			<fieldset>
+				<legend style="text-align:center">Are you really sure? This action cannot be undone!</legend>
+				<input type="submit" class='btn btn-default' style="float:right;margin-top:7px;"  value="Delete"/>
+				<p class="help-block" style="width:100%;margin-top:20px;" data-bind="visible:errorText,text:errorText"></p>
+			</fieldset>
+		</form>
+		<div style="color:lightgray"><br/>
+		Are you absolutly sure you want to delete this world? The delete operation will remove the world, all database backups, and the thumbnail.
+	</div>
+		
+</div>
+
+<div class="row">	
+	<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
+</div>
+</div>
+</div>

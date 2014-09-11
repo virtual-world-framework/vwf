@@ -1,0 +1,78 @@
+{
+    "properties": {
+
+        "sunColor": [1, 0.9450980392156862, 0.6],
+        "sunDirection": [1.55, -0.2, 1],
+        "sunIntensity": 1.3,
+        "ambientColor": [0.35, 0.35, 0.35],
+        "fogColor": [0.9803921568627451, 0.803921568627451, 0.5882352941176471],
+        "fogNear": 0,
+        "fogFar": 50,
+        "fogType": "exp",
+        "fogDensity": 0.003,
+        "fogVFalloff": 0.539,
+        "fogVFalloffStart": 22.6,
+        "skyColorBlend": 0.5,
+        "skyFogBlend": 0.16,
+        "skyApexColor": [0.305882352941176, 0.603921568627451, 0.949019607843137],
+        "skyHorizonColor": [1, 0.9215686274509803, 0.7490196078431373],
+        "vAtmosphereDensity": 0.0005,
+        "skyTexture": "cloudy_noon",
+        "materialDef": {
+            "shininess": 4,
+            "alpha": 1,
+            "ambient": {
+                "r": 0.8,
+                "g": 0.8,
+                "b": 0.8
+            },
+            "color": {
+                "r": 1,
+                "g": 1,
+                "b": 1,
+                "a": 1
+            },
+            "emit": {
+                "r": 0,
+                "g": 0,
+                "b": 0
+            },
+            "reflect": 0,
+            "shadeless": false,
+            "shadow": true,
+            "specularColor": {
+                "r": 1,
+                "g": 0.6509803921568628,
+                "b": 0
+            },
+            "specularLevel": 3.05,
+            "layers": [{
+                "alpha": 1,
+                "blendMode": 0,
+                "mapInput": 0,
+                "mapTo": 1,
+                "offsetx": 0.11,
+                "offsety": 0.11,
+                "rot": 0,
+                "scalex": "10",
+                "scaley": "10",
+                "src": "/adl/sandbox/example_blank//vwfDataManager.svc/texture?UID=dirt.jpg"
+            }, {
+                "offsetx": 0,
+                "offsety": 0,
+                "scalex": 1,
+                "scaley": 1,
+                "rot": 0,
+                "blendMode": 0,
+                "mapTo": "4",
+                "mapInput": 0,
+                "alpha": 0.27,
+                "src": "/adl/sandbox/example_blank//vwfDataManager.svc/texture?UID=waternormal.jpg"
+            }],
+            "type": "phong",
+            "side": 2
+        },
+        "skyAtmosphereDensity": 1,
+        "shadowDarkness": 0.65
+    }
+}

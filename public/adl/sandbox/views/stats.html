@@ -1,0 +1,39 @@
+<style type="text/css">
+	
+	.statnumber{
+		font-size: 10em;
+color: green
+	}
+	.statname
+	{
+font-family: sans-serif;
+text-decoration: underline;
+text-underline-mode: skip-white-space;
+text-shadow: 1px 1px 2px #888;
+margin-right: 5em;
+white-space: nowrap;
+	}
+	.bigstat
+	{
+display:inline;
+white-space: nowrap;
+	}
+
+</style>
+
+<div id='content' class="row">
+	<div class="col-md-5" style="margin:10px auto;float:none;text-align:center;">
+		<div class='bigstat'><span class='statnumber'>{{sessions.length}}</span><span class='statname'>Active Users</span></div>
+		<div class='bigstat'><span class='statnumber'>{{instanceCount.length}}</span><span class='statname'>Active Worlds</span></div>
+		<div class='bigstat'><span class='statnumber'>{{allConnections}}</span><span class='statname'>WebSockets</span></div>
+		<div class='bigstat'><span class='statnumber'>{{states.length}}</span><span class='statname'>Total Worlds</span></div>
+		<div class='bigstat'><span class='statnumber'>{{users.length}}</span><span class='statname'>Total Users</span></div>
+	
+	<div>Active Worlds:</div>
+	<ul>
+		{{#instanceCount}}
+			<li>{{instanceCount}}</li>
+		{{/instanceCount}}
+	</ul>
+	</div>
+</div>

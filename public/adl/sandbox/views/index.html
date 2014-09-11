@@ -1,0 +1,249 @@
+	
+	
+	<div class="row" style="margin-top:15px;">
+	<div class="col-md-12" style = "height: 82px;">
+		{{^sessionData}}<a class="col-md-3 ActionButton" href="./signup?return=./"><div class="ActionButtonlabel">{{#translate}}Sign Up{{/translate}}</div> <div class="ActionButtonsmalllabel">{{#translate}}Create a new user account{{/translate}}</div></a>{{/sessionData}}
+		<a class="col-md-3 ActionButton" {{#sessionData}} style="width:31%" href="./createNew/0" {{/sessionData}} {{^sessionData}} href="./signup?return=createNew/0" {{/sessionData}} ><div class="ActionButtonlabel">{{#translate}}Create{{/translate}}</div><div class="ActionButtonsmalllabel">{{#translate}}Build a world, or copy an existing one{{/translate}}</div></a>
+		<a class="col-md-3 ActionButton" {{#sessionData}} style="width:31%" {{/sessionData}} href="./featuredWorlds/0"><div class="ActionButtonlabel">{{#translate}}Explore{{/translate}}</div><div class="ActionButtonsmalllabel">{{#translate}}Browse all public worlds{{/translate}}</div></a>
+		<a class="col-md-3 ActionButton" {{#sessionData}} style="width:31%" {{/sessionData}} href="https://github.com/adlnet/Sandbox"><div class="ActionButtonlabel">{{#translate}}Contribute{{/translate}}</div><div class="ActionButtonsmalllabel">{{#translate}}Edit the code or report a bugate{{/translate}}</div></a>
+	</div>
+		<div class="col-md-12">
+			<div class="row"> 
+				<div class="col-md-3 pointList" style="margin-left:45px;">
+					<div>
+						<span class="lead glyphicon glyphicon-cloud" style="color: #90DBFF;"></span><span class="lead">&nbsp;{{#translate}}Persistent Worlds{{/translate}}</span><br/><br/>
+						<ul>
+							<li>{{#translate}}Make worlds that evolve over time{{/translate}}.</li>
+							<li>{{#translate}}Share your creativity{{/translate}}!</li>
+							<li>{{#translate}}Make as many different worlds as you like{{/translate}}.</li>
+						</ul>
+					</div>
+
+				</div>
+				<div class="col-md-3 pointList">
+					<div>
+						<span class="lead glyphicon glyphicon-pencil" style="color: #E2E215;-webkit-transform: rotate(0.8turn);"></span><span class="lead">&nbsp;{{#translate}}In Browser Editing{{/translate}}</span><br/><br/>
+					</div>
+					<ul>
+					
+						<li>{{#translate}}Create a world right in your web browser{{/translate}}.</li>
+						<li>{{#translate}}Add scripts, 3D models, sounds and behaviors{{/translate}}.</li>
+						<li>{{#translate}}Works in Chrome, Opera, Firefox and Safari{{/translate}}</li>
+						
+					</ul>
+				</div>
+				<div class="col-md-5" style="margin-top:45px">
+					<img src="{{root}}/img/screenshot2.jpg" style="margin:0 auto;display:block;" />
+				</div>
+			</div>
+			<div class="row" style="margin-top:65px;">
+				<div class="col-md-5">
+					<img src="{{root}}/img/screenshot.jpg" style="margin:0 auto;display:block;" />
+				</div>
+				<div class="col-md-3 col-md-offset-1 pointList" style="margin-left:4.3333%">
+					<div>
+						<span class="lead glyphicon glyphicon-retweet" style="color: #FAB400;"></span><span class="lead">&nbsp;{{#translate}}Collaborative{{/translate}}</span><br/><br/>
+					</div>
+					<ul>
+					
+						<li>{{#translate}}Video chat with other users with WebRTC{{/translate}}.</li>
+						<li>{{#translate}}Share your world and allow other users to help build{{/translate}}.</li>
+						<li>{{#translate}}You can even have many authors working at once{{/translate}}!</li>
+						
+					</ul>
+				</div>
+				<div class="col-md-3 pointList">
+					<div>
+						<span class="lead glyphicon glyphicon-picture" style="color: #CF4242;"></span><span class="lead" style="padding-top:1px">&nbsp;{{#translate}}Creative{{/translate}}</span><br/><br/>
+					</div>
+					<ul>
+					
+						<li>{{#translate}}You can create some basic worlds with the built in tools{{/translate}}.</li>
+						<li>{{#translate}}Create materials, 3D models, and scripts{{/translate}}.</li>
+						<li>{{#translate}}You can even import 3D models, or publish objects for other users to use{{/translate}}!</li>
+						
+					</ul>
+				</div>
+			</div>
+			<div class="row" style="margin-top:65px;">
+				
+				<div class="col-md-3 pointList" style="margin-left:45px;">
+					<div>
+						<span class="lead glyphicon glyphicon-globe" style="color: #35C235;"></span><span class="lead">&nbsp;{{#translate}}Open{{/translate}}</span><br/><br/>
+					</div>
+					<ul>
+					
+						<li>{{#translate}}Based on open source technologies{{/translate}}.</li>
+						<li>{{#translate}}Sources available on Github{{/translate}}.</li>
+						<li>{{#translate}}We welcome patches and pull requests{{/translate}}!</li>
+						
+					</ul>
+				</div>
+				<div class="col-md-3 pointList">
+					<div>
+						<span class="lead glyphicon glyphicon-usd" style="color: #979797;"></span><span class="lead" style="padding-top:1px">&nbsp;{{#translate}}Low Cost{{/translate}}</span><br/><br/>
+					</div>
+					<ul>
+					
+						<li>{{#translate}}Our demonstration server is free to use{{/translate}}.</li>
+						<li>{{#translate}}Setting up your own server is free and easy{{/translate}}.</li>
+						<li>{{#translate}}Please note{{/translate}}: {{#translate}}our demo server gets updates frequently{{/translate}}. {{#translate}}Things can and do break{{/translate}}!</li>
+						
+					</ul>
+				</div>
+				<div class="col-md-5">
+					<img src="{{root}}/img/screenshot3.jpg" style="margin:0 auto;display:block;" />
+				</div>
+			</div>
+			<div class="row" style="margin-top:35px;">
+				<div class="col-md-3" style="margin:0 auto; float:none;text-align:center;">
+					<a href="{{root}}/signup" class="btn btn-info">{{#translate}}Create account{{/translate}}</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row" style="margin-top:45px;">
+		<div class="col-md-12"><h1 class="featurette-heading" style="border-top:1px solid #eee;padding-top:20px;width:95%;margin:0 auto;">{{#translate}}Learn{{/translate}}</h1></div>
+	</div>
+	<div class="row" style="margin:30px 0;" >
+		<div class="col-md-11" style="float:none; margin:0 auto;">
+			<div class="row">
+				<div class="col-md-4 videoList" style="padding-right:0;">
+					<table class="table table-striped" style="border: 1px solid #ebebeb">
+						<tbody data-bind="foreach:youtubeList.slice(0, 8)">
+							<tr><td>
+								<a href="" data-bind="text:$data, click: $root.playVideoInList"></a>
+							</td></tr>
+						</tbody>
+					</table>
+					<a href="http://www.youtube.com/watch?v=aWRQJJnBi5c&list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2" class="btn btn-default">More videos</a>
+				</div>
+				<div class="col-md-8">
+					<div id="ytapiplayer">
+						You need Flash player 8+ and JavaScript enabled to view this video.
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-2" style="margin: 15px auto 0px auto;float:none;text-align:center;">
+			<a href="{{root}}/help" class="btn btn-info">{{#translate}}View Help Pages{{/translate}}</a>
+		</div>
+	</div>
+	<div class="row" style="margin-top:60px;">
+		<div class="col-md-12"><h1 class="featurette-heading" style="border-top:1px solid #eee;padding-top:20px;width:95%;margin:0 auto;">{{#translate}}Explore{{/translate}}</h1></div>
+
+	</div>
+	<div class="row" style="margin-bottom:50px;" data-bind="foreach:displayWorldObjects">
+		<!-- ko if: $data.featured == true && $index() < 6 -->
+		<div class="col-md-4" style="text-align:center;margin-top:45px;">
+			<div>
+				<h4 style="margin-top:0;" class="lead"><a style="color:inherit;" data-bind="text:title, attr:{href:'{{root}}/'+id}"></a></h4>
+			</div>
+			<a data-bind="attr:{href:'{{root}}/'+id}" >
+				<img data-bind="attr:{src: '{{root}}/vwfDataManager.svc/thumbnail?SID=' + id}" style="width:190px;height:130px;margin-top:4px;border: 1px solid #ddd;padding:1px;"/>
+			</a>
+
+		</div>
+		<!-- /ko -->
+	</div>
+	<div class="row">
+	
+		<div class="col-md-2" style="margin:-25px auto 25px auto;float:none;text-align:center;">
+			<a href="{{root}}/worlds" class="btn btn-info">{{#translate}}View All Worlds{{/translate}}</a>
+		</div>
+	</div>
+	<script>
+		var slideInterval = 0, params = { allowScriptAccess: "always" }, atts = { id: "ytplayer" }, player, isAnimating = false;
+		vwfPortalModel.youtubeList = [  "Tutorial 1: Camera Motion",
+										"Tutorial 2: Selection Tools",
+										"Tutorial 3: Transform Tools",
+										"Tutorial 4: Copy and Paste",
+										"Tutorial 5: Groups And Links",
+										"Tutorial 6: Primitive and Object Properties",
+										"Tutorial 7: Geometry Modifiers",
+										"Tutorial 8: Noise Terrain with Modifiers",
+										"Tutorial 9: Materials and Textures",
+										"Tutorial 10: Scene Properties",
+										"Tutorial 11: Importing 3D Models",
+										"Tutorial 12: Inventory and Public Assets",
+										"Tutorial 13: Particle Systems",
+										"Tutorial 14: Scripting",
+										"Tutorial 15: Behaviors"
+									];
+		swfobject.embedSWF("http://www.youtube.com/v/aWRQJJnBi5c?enablejsapi=1&playerapiid=ytplayer&version=3&list=PLbhwHX3OvksljQcxLkRT3YvyjgQaIY8m2&listType=playlist", "ytapiplayer", "680", "360", "8", null, null, params, atts);
+		
+		vwfPortalModel.playVideoInList = function(a, b){
+			console.log(a, b, vwfPortalModel.youtubeList.indexOf(a));
+			player.playVideo();
+			
+			window.setTimeout(function(){
+				player.pauseVideo();
+				player.playVideoAt(vwfPortalModel.youtubeList.indexOf(a));
+			}, 1000);
+		};		
+		
+		function onYouTubePlayerReady(id){
+			player = document.getElementById(id); 
+		}
+		$(document).ready(function(){
+			var totalSlides = 4, tempSlides = 0, transitionSpeed = 1500;
+			var currentSlideState = Math.floor(Math.random() * totalSlides);
+			
+			$(".slide-item").not(".slide-item" + currentSlideState).css("left", "1200px");
+			$(".slide-item" + currentSlideState + " .pContainer").css({'margin-top':getBottom()});
+			$(".slide-item" + currentSlideState).css({left:"0"});
+			$(".linkMenu").css("margin-bottom", "0");
+			
+			$('.slide-item').mousedown(function(e){
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
+			});
+			
+			ko.applyBindings(vwfPortalModel);
+			getLoginInfo();
+			showStates();
+			
+			
+			var incrementCurrentSlideState = function(){
+				tempSlides++;
+				if(tempSlides == 2){
+					tempSlides = 0;
+					currentSlideState = (currentSlideState + 1)%totalSlides;
+				}
+			};
+			
+			var animateSlides = function(){
+				isAnimating = true;
+				$(".slide-item" + currentSlideState + " .pContainer").animate({'margin-top':getBottom(true)});				
+				
+				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).css({"z-index":1});
+				$(".slide-item" + currentSlideState).css({"z-index": 0});
+				
+				$(".slide-item" + ((currentSlideState + 1)%totalSlides)).animate({left:"0px"}, transitionSpeed, "swing", function(){
+					$(".slide-item" + currentSlideState).css("left", "1200px");
+					incrementCurrentSlideState();
+					$(this).children(".pContainer").animate({'margin-top':getBottom()});
+					isAnimating = false;
+				});
+			};
+			
+
+			
+			slideInterval = window.setInterval(animateSlides, 10000);
+			
+			$(window).resize(function(){
+			
+				if(!isAnimating){
+					$(".slide-item" + currentSlideState + " .pContainer").css("margin-top", getBottom());
+				}
+			});
+		});
+		
+		function getBottom(offScreen){
+			return offScreen ? ($(".sliderWrapper").height() + 12)*100 / $('.sliderWrapper').width() + "%" : ($(".sliderWrapper").height()-$(".pContainer").height() + 12)*100/ $('.sliderWrapper').width() + "%";
+		};
+	</script>
+	

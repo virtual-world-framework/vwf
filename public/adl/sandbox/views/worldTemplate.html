@@ -1,0 +1,64 @@
+<script type="text/javascript">
+	
+
+
+
+
+	$(document).ready(function()
+	{	
+		$('#worldLoad')[0].href += '/'  + window.location.search+ window.location.hash;
+		ko.applyBindings(vwfPortalModel);
+		$('#form').submit( function(o, e){
+		
+			var terms =  $('#txtTerms').val();
+			window.location.href = '{{root}}/searchResults/' + terms + '/0'; 
+			o.preventDefault();	
+		});
+	});	
+
+	
+	
+</script>
+
+<div id='content' class="row">
+	<div class="col-md-5" style="margin:10px auto;float:none;text-align:center;">
+		
+		<div class='' style=''>
+		
+			<div style='font-size: 2em;font-weight: bold;'> {{worldData.title}} </div>
+			<div style='font-size: .75em;color: lightgray;'> {{#translate}}Created By{{/translate}} {{worldData.owner}} {{worldData.prettyDate}}. {{#translate}}Updated{{/translate}} {{worldData.updates}} {{#translate}}times, most recently{{/translate}} {{worldData.prettyUpdated}}. {{#translate}}Contains{{/translate}} {{worldData.objects}} {{#translate}}objects{{/translate}}. </div>
+			<div style='font-size: .75em;'>  </div>
+		<form id='form'>
+			<fieldset>	
+			<legend style="padding-bottom:5px;"></legend>
+			<div> <a id='worldLoad' href='{{root}}/{{worldid}}'> <img style="background: white;width:100%;width: 100%;border-radius: 5px;box-shadow: 3px 3px 3px #444;" src="./vwfdatamanager.svc/thumbnail?SID={{worldid}}" onerror = "this.src = '/adl/sandbox/img/thumbnotfound.png';center(); " onload='center()'><img> </div>
+			</a>
+			{{#totalusers}}
+			<div style='font-size: .75em;color: lightgray;'> {{#users.length}}{{#users}}{{.}}, {{/users}} {{#translate}}and{{/translate}} {{/users.length}} {{anonymous.length}} {{#translate}}anonymous users are in this world{{/translate}}.</div>
+			{{/totalusers}}
+
+			</div>
+
+		
+				
+				<legend style="padding-bottom:5px;"></legend>
+				<div class='worldtitle'> {{#worldData.description}}{{worldData.description}}{{/worldData.description}} </div>
+				<legend style="padding-bottom:5px;"></legend>
+			</fieldset>
+			
+		</form>
+		{{#owner}}
+		<a href='{{root}}/publish?id={{worldid}}' class='' style=""  value="" >{{#translate}}Settings{{/translate}}</a><span style="margin-left:2em" />
+		<a href='{{root}}/edit?id={{worldid}}' class='' style=""  value="" >{{#translate}}Change Title{{/translate}}</a><span style="margin-left:2em" />
+		<a href='{{root}}/restore?id={{worldid}}' class='' style=""  value="" >{{#translate}}Restore Backup{{/translate}}</a><span style="margin-left:2em" />
+		<a href='{{root}}/remove?id={{worldid}}' class='' style=""  value="" >{{#translate}}Delete{{/translate}}</a><span style="margin-left:2em" />
+		<br/>
+		<br/>
+		{{/owner}}
+		<a href='{{root}}/{{worldid}}' class='' style=""  value="" >{{#translate}}Launch{{/translate}}</a><span style="margin-left:2em" />
+		<a href='{{root}}/history?id={{worldid}}' style=""  value="" >{{#translate}}View History{{/translate}}</a><span style="margin-left:2em" />
+
+		{{#sessionData}}<a href='{{root}}/createNew2/{{worldid}}' class='' style=""  value="" >{{#translate}}Duplicate{{/translate}}</a><span style="margin-left:2em" />{{/sessionData}}
+		
+	</div>
+</div>

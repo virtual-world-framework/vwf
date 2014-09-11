@@ -1,0 +1,320 @@
+{
+  "id": "sandboxGroup-vwf-e96cfb3b-6e8b-c483-816e-93d93b2ab3bf",
+  "extends": "sandboxGroup.vwf",
+  "sequence": 0,
+  "random": {
+    "s0": 0.9268900894094259,
+    "s1": 0.7987038407009095,
+    "s2": 0.324509943369776,
+    "c": 1
+  },
+  "properties": {
+    "___physics_activation_state": 1,
+    "___physics_deactivation_time": 0,
+    "___physics_velocity_linear": [
+      3.5733110840282835E-43,
+      0,
+      0
+    ],
+    "___physics_velocity_angular": [
+      0,
+      0,
+      0
+    ],
+    "type": "Group",
+    "owner": "Anonymous0",
+    "transform": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      3.9190995693206787,
+      1.5516124963760376,
+      0.9340240359306335,
+      1
+    ],
+    "___physics_enabled": true,
+    "___physics_mass": 193.8,
+    "open": false,
+    "___physics_linear_velocity": [
+      0,
+      0,
+      0
+    ],
+    "___physics_angular_velocity": [
+      0,
+      0,
+      0
+    ]
+  },
+  "children": {
+    "33c160c3-9d7c-c637-84e8-53df4849706": {
+      "id": "asset-vwf-33c160c3-9d7c-c637-84e8-53df4849706",
+      "extends": "asset.vwf",
+      "source": "./contentlibraries/entities/assets/barrel.json",
+      "type": "subDriver/threejs/asset/vnd.osgjs+json+compressed",
+      "sequence": 0,
+      "random": {
+        "s0": 0.946439299499616,
+        "s1": 0.977844949811697,
+        "s2": 0.461497479118407,
+        "c": 1
+      },
+      "properties": {
+        "___physics_activation_state": 2,
+        "___physics_deactivation_time": 0,
+        "___physics_velocity_linear": [
+          3.57331108402828E-43,
+          0,
+          0
+        ],
+        "___physics_velocity_angular": [
+          0,
+          0,
+          0
+        ],
+        "___physics_angular_velocity": [
+          0,
+          0,
+          0
+        ],
+        "___physics_collision_height": 1.5,
+        "___physics_collision_radius": 0.4,
+        "___physics_collision_type": "0",
+        "___physics_enabled": true,
+        "___physics_linear_velocity": [
+          0,
+          0,
+          0
+        ],
+        "___physics_mass": 122.6,
+        "materialDef": {
+          "alpha": 1,
+          "ambient": {
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "color": {
+            "b": 1,
+            "g": 1,
+            "r": 1
+          },
+          "emit": {
+            "b": 0.341176470588235,
+            "g": 0.341176470588235,
+            "r": 0.341176470588235
+          },
+          "layers": [
+            {
+              "alpha": 1,
+              "mapInput": 0,
+              "mapTo": 1,
+              "offsetx": 0,
+              "offsety": 0,
+              "scalex": 1,
+              "scaley": 1,
+              "src": "./contentlibraries/entities/assets/barreldiff.jpg"
+            }
+          ],
+          "morphTargets": false,
+          "reflect": 0,
+          "shininess": 0.2,
+          "side": 0,
+          "skinning": false,
+          "specularColor": {
+            "b": 0.9,
+            "g": 0.9,
+            "r": 0.9
+          },
+          "specularLevel": 1,
+          "type": "phong"
+        },
+        "owner": "Anonymous0",
+        "transform": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "children": {
+        "113a6e3f-8ae1-4b5a-2b24-7eb9330b9648": {
+          "id": "asset-vwf-113a6e3f-8ae1-4b5a-2b24-7eb9330b9648",
+          "extends": "asset.vwf",
+          "source": "geom-wood_barrel_big_material",
+          "type": "link_existing/threejs",
+          "sequence": 0,
+          "random": {
+            "s0": 0.238311998778954,
+            "s1": 0.447324903216213,
+            "s2": 0.172323199920356,
+            "c": 1
+          },
+          "properties": {
+            "___physics_activation_state": 1,
+            "___physics_deactivation_time": 0,
+            "___physics_velocity_linear": [
+              0,
+              0,
+              0
+            ],
+            "___physics_velocity_angular": [
+              0,
+              0,
+              0
+            ],
+            "DisplayName": "geom-wood_barrel_big_material",
+            "owner": "Anonymous0",
+            "transform": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              80,
+              1
+            ],
+            "type": "3DR Object"
+          }
+        },
+        "ba0de96f-28cf-a855-77d2-53a019686bf5": {
+          "id": "cylinder2-vwf-ba0de96f-28cf-a855-77d2-53a019686bf5",
+          "extends": "cylinder2.vwf",
+          "source": "vwf/model/threejs/cylinder.js",
+          "type": "subDriver/threejs",
+          "sequence": 0,
+          "random": {
+            "s0": 0.653149196878076,
+            "s1": 0.748269136529416,
+            "s2": 0.418641880853102,
+            "c": 1
+          },
+          "properties": {
+            "___physics_activation_state": 1,
+            "___physics_deactivation_time": 0,
+            "___physics_velocity_linear": [
+              0,
+              0,
+              0
+            ],
+            "___physics_velocity_angular": [
+              0,
+              0,
+              0
+            ],
+            "DisplayName": "cylinder1",
+            "___physics_enabled": true,
+            "height": 1.55,
+            "isSelectable": false,
+            "materialDef": {
+              "alpha": 1,
+              "ambient": {
+                "b": 1,
+                "g": 1,
+                "r": 1
+              },
+              "color": {
+                "a": 1,
+                "b": 1,
+                "g": 1,
+                "r": 1
+              },
+              "emit": {
+                "b": 0,
+                "g": 0,
+                "r": 0
+              },
+              "layers": [
+                {
+                  "alpha": 1,
+                  "blendMode": 0,
+                  "mapInput": 0,
+                  "mapTo": 1,
+                  "offsetx": 0,
+                  "offsety": 0,
+                  "rot": 0,
+                  "scalex": 1,
+                  "scaley": 1,
+                  "src": "checker.jpg"
+                }
+              ],
+              "morphTargets": false,
+              "reflect": 0.8,
+              "shadeless": false,
+              "shadow": true,
+              "shininess": 15,
+              "skinning": false,
+              "specularColor": {
+                "b": 0.577350269189626,
+                "g": 0.577350269189626,
+                "r": 0.577350269189626
+              },
+              "specularLevel": 1,
+              "type": "phong"
+            },
+            "owner": "Anonymous0",
+            "radius": 0.73,
+            "rsegs": 5,
+            "size": [
+              1,
+              0.5,
+              0.5
+            ],
+            "tempid": "",
+            "texture": "checker.jpg",
+            "transform": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              -0.011999997310340405,
+              0.006999995559453964,
+              0.8280001282691956,
+              1
+            ],
+            "type": "Primitive",
+            "visible": false
+          }
+        }
+      }
+    }
+  }
+}

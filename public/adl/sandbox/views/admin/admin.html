@@ -1,0 +1,25 @@
+<div class="row">
+	<div class="col-md-3">
+		Choose a page to edit
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 adminLinks">
+		<div class="col-md-2" style="float:none;margin:0 auto;">
+			<h3><a href="{{root}}/admin/worlds">Worlds</a></h3>
+			<h3><a href="{{root}}/admin/users">Users</a></h3>
+			<h3><a href="{{root}}/admin/edit">Pages</a></h3>
+		</div>
+	</div>
+</div>
+<script>
+	var fileList =  "{{fileList}}".split(',');
+	vwfPortalModel.entries = ko.observable({});
+	var jsonToServer = {title:'', entries:[]};
+	var currentHelpPage = "";
+	
+	$(document).ready(function(){
+		getLoginInfo();
+		ko.applyBindings(vwfPortalModel);
+	});
+</script>

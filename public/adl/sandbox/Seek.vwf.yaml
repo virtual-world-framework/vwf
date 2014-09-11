@@ -1,0 +1,51 @@
+extends: 'http://vwf.example.com/behavior.vwf'
+properties:
+  Active: true
+  type: behavior
+  Axis: Z
+  NotProto: null
+  DisplayName: LookAt
+  EditorData:
+    Active:
+      property: Active
+      displayname: Active
+      type: check
+    Path:
+      property: Target
+      displayname: Target
+      type: nodeid
+    Offset:
+      property: Offset
+      displayname: offset
+      type: vector
+    strength:
+      property: strength
+      displayname: Strength
+      type: slider
+      min: 0
+      max: 1      
+  Target: line ID
+  lookatVec: 'Y'
+  lookatUp: 'Z'
+  strength: .01
+methods:
+  tick: |
+    if(!this.owner) return;       
+    if (this.Active && this.Target)    {
+        
+        
+        
+        var _offset = this.Offset.internal_val;
+        var targetTransform = vwf.getProperty(this.Target,'worldTransform');
+        var targetTrandformI =[];
+       
+        _offset = Mat4.multVec3(targetTransform,_offset,[]);
+        var worldpos = this.transformAPI.getWorldPosition();
+        _offset = Vec3.subtract(_offset,worldpos,[]);
+        _offset = Vec3.scale(_offset,this.strength,[]);
+        _offset = Vec3.add(worldpos,_offset,[]);
+        this.transformAPI.setPosition(_offset);
+        
+        
+        
+    }

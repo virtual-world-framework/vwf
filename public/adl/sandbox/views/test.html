@@ -1,0 +1,523 @@
+<script type="text/javascript">
+
+var getCapabilities = function(){
+    var gl, webgl={supported:false}, data={webgl:webgl};
+    var canvas = $('<canvas></canvas>')[0];
+
+    var getWebgl = function(name){
+        try{
+            gl = canvas.getContext(name);
+            if(gl){
+                data.webgl.name = name;
+                data.webgl.supported = true;
+            }
+        }
+        catch(error){
+            data.webgl.error = error;
+        }
+    }
+    if(canvas && canvas.getContext){
+        getWebgl('webgl');
+        if(!gl) getWebgl('experimental-webgl');
+    }
+
+    var checkFBO = function(){
+        var result = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        switch(result){
+            case gl.FRAMEBUFFER_UNSUPPORTED:
+            case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+            case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                return false;
+        }
+        return true;
+    }
+
+    var fboResult = function(result, name){
+        if(checkFBO()){
+            result[name] = true;
+            return true;
+        }
+        else{
+            result[name] = false;
+            return false;
+        }
+    }
+
+    var setupRenderbuffer = function(renderbuffer, format){
+        gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+        gl.renderbufferStorage(gl.RENDERBUFFER, format, 64, 64);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    }
+
+    var testFloatFBO = function(result){
+        result.color = false;
+        result.color_depth = false;
+        result.color_stencil = false;
+        result.color_depthstencil = false;
+        result.color_depth_stencil = false;
+
+        var buffer = gl.createFramebuffer();
+        var texture = gl.createTexture();
+
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 64, 64, 0, gl.RGBA, gl.FLOAT, null);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, buffer);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+        if(fboResult(result, 'color')){
+            var renderbuffer = gl.createRenderbuffer();
+            var renderbuffer2 = gl.createRenderbuffer();
+
+            gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+
+            setupRenderbuffer(renderbuffer, gl.DEPTH_COMPONENT16);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+            fboResult(result, 'color_depth');
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, null);
+            
+            setupRenderbuffer(renderbuffer, gl.STENCIL_INDEX8);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+            fboResult(result, 'color_stencil');
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, null);
+            
+            setupRenderbuffer(renderbuffer, gl.DEPTH_COMPONENT16);
+            setupRenderbuffer(renderbuffer2, gl.STENCIL_INDEX8);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, renderbuffer2);
+            fboResult(result, 'color_depth_stencil');
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, null);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, null);
+            
+            setupRenderbuffer(renderbuffer, gl.DEPTH_STENCIL);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+            fboResult(result, 'color_depthstencil');
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, null);
+
+            gl.deleteRenderbuffer(renderbuffer);
+            gl.deleteRenderbuffer(renderbuffer2);
+        }
+        gl.deleteTexture(texture);
+        gl.deleteFramebuffer(buffer);
+    }
+
+    if(gl){
+        webgl.extensions = {
+            supported: gl.getSupportedExtensions(),
+            capabilities: {},
+        };
+
+        webgl.params = {};
+
+        gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE);
+        gl.enable(gl.SAMPLE_COVERAGE);
+        for(var name in gl){
+            if(name.match(/BITS|ALIASED|COMPRESSED|MAX|^SAMPLE(_BUF|_COVERAGE_|S)|VERSION$|VENDOR|RENDERER/)){
+                var param = gl.getParameter(gl[name]);
+                if(param instanceof Float32Array || param instanceof Int32Array){
+                    var value = [];
+                    for(var i=0; i<param.length; i++){
+                        value.push(param[i]);
+                    }
+                }
+                else{
+                    var value = param;
+                }
+                webgl.params[name] = value;
+            }
+        }
+
+
+
+        for(var i=0; i<webgl.extensions.supported.length; i++){
+            var extname = webgl.extensions.supported[i];
+            if(extname.match('texture_filter_anisotropic')){
+                var ext = gl.getExtension(extname);
+                webgl.extensions.capabilities[extname] = {MAX_TEXTURE_MAX_ANISOTROPY_EXT: gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT)};
+            }
+            if(extname.match('texture_float')){
+                var result = webgl.extensions.capabilities[extname] = {}
+                gl.getExtension(extname);
+                testFloatFBO(result);
+            }
+        }
+    }
+
+    var vendors = [null, 'webkit', 'moz', 'ms', 'o'];
+    var vendorName = function(name, vendor){
+        if(vendor && vendor.length > 0){
+            return vendor + name[0].toUpperCase() + name.substr(1);
+        }
+        else{
+            return name;
+        }
+    }
+    var getAttrib = function(obj, name){
+        if(obj){
+            for(var i=0; i<vendors.length; i++){
+                var vendor = vendors[i];
+                var prop = vendorName(name, vendor)
+                if(obj[prop] !== undefined){
+                    return obj[prop];
+                }
+            }
+        }
+        return null;
+    }
+
+    isPresent = function(obj, name){
+        return getAttrib(obj, name) != null;
+    }
+
+    data.requestAnimationFrame = isPresent(window, 'requestAnimationFrame');
+    data.fullscreen = isPresent(document, 'cancelFullScreen');
+    data.pointerlock = isPresent(document.body, 'requestPointerLock');
+    data.gamepads = isPresent(navigator, 'gamepads');
+
+    return data;
+}
+
+	
+	function updateColors()
+	{
+
+		$(".col-md-4").css('font-weight','bold');
+		$(".col-md-4:contains(true)").css('color','#0F0');
+		$(".col-md-4:contains(Successful)").css('color','#0F0');
+		$(".col-md-4:contains(false)").css('color','#F00');
+		$(".col-md-4:contains(Failed)").css('color','#F00');
+		$(".col-md-4:contains(Not Detected)").css('color','#F00');
+		$('.col-md-4').filter(function() {
+		   return ( parseInt($(this).text()) > 0 );
+		}).css('color','#0F0');
+		$('.col-md-4').filter(function() {
+		   return ( parseInt($(this).text()) === 0 );
+		}).css('color','#F00');
+		if($('.col-md-4').filter(function() {
+		   return ( $(this).css('color') != 'rgb(0, 255, 0)' );
+		}).length === 0){
+			$('#goodtogo').show();
+			settings.compatability.satisfied = true;
+			alertify.alert('{{#translate}}Great! It looks like this browser is supported{{/translate}}. {{#translate}}Click OK to return to the loading page{{/translate}}.',function()
+			{
+				window.history.back();	
+			})
+			
+		}else
+			$('#goodtogo').hide();
+
+	}
+	window.onbeforeunload = function()
+	{
+
+		window.localStorage['sandboxPreferences'] = JSON.stringify(settings);
+	}
+	$(document).ready(function()
+	{
+		
+		document.body.oncontextmenu=function(){return false;}
+		window.settings = JSON.parse(window.localStorage['sandboxPreferences'] || null) || {};
+
+
+		ko.applyBindings(vwfPortalModel);
+		var data = getCapabilities();
+		settings.compatability = {};
+		settings.compatability.caps = data;
+		settings.compatability.satisfied = false;
+		console.log(data);
+		var webgl = data.webgl.supported;
+		var floats = webgl && data.webgl.extensions.supported.indexOf("OES_texture_float")>-1?true:false;
+		var ddx = webgl && data.webgl.extensions.supported.indexOf("OES_standard_derivatives")>-1?true:false;
+		var maxTextureSize = webgl && data.webgl.params.MAX_TEXTURE_SIZE;
+		var maxNumTextures = webgl && data.webgl.params.MAX_TEXTURE_IMAGE_UNITS;
+		var maxBones = webgl && Math.floor((data.webgl.params.MAX_VERTEX_UNIFORM_VECTORS - 20)/4);
+		if (webgl)
+			var ani_ext = data.webgl.extensions.capabilities["EXT_texture_filter_anisotropic"]
+        		|| data.webgl.extensions.capabilities["WEBKIT_EXT_texture_filter_anisotropic"]
+        		|| data.webgl.extensions.capabilities["MOZ_EXT_texture_filter_anisotropic"];
+		var anisotropic = (ani_ext != undefined)?ani_ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT : 0;
+		
+		var vertexTexures = webgl && data.webgl.params.MAX_VERTEX_TEXTURE_IMAGE_UNITS;
+		$('#webgl').text(webgl);
+		$('#vertexTextures').text(vertexTexures);
+		$('#floats').text(floats);
+		$('#ddx').text(ddx);
+		$('#maxTextureSize').text(maxTextureSize);
+		$('#maxNumTextures').text(maxNumTextures);
+		$('#maxBones').text(maxBones);
+		
+
+		alertify.set({ labels: {
+   			 ok     : "Ok",
+   			 cancel : "{{#translate}}Cancel{{/translate}}"
+			} });
+
+		if(!webgl || !floats ||!ddx ||!vertexTexures)
+		{
+			alertify.alert('{{#translate}}Shoot! Some of the graphics requirements are unsupported on this GPU! You might try upgrading your GPU, drivers, or browser{{/translate}}.',function(){
+				window.location = '/';
+			})
+			return;
+
+		}
+
+		var websocket = window.WebSocket?true:false;
+		$('#websocket').text(websocket);
+
+		var mouseDetected = false;
+		function onMouseMove(e) {
+		  window.removeEventListener('mousemove', onMouseMove, false);
+		  mouseDetected = true;
+		  $('#mouseDetected').text(mouseDetected);
+		  updateColors();
+		}
+
+		var mouseLeft = false;
+		var mouseRight = false;
+		var mouseMiddle = false;
+		var stage = 0;
+		function onMouseClick(e) {
+			e.preventDefault();
+
+			if(e.button == 0 && stage == 0)
+			{
+				$('#alertify-ok')[0].click();
+				window.setTimeout(function(){
+
+					stage++;
+				
+		  		mouseLeft = true;
+		  		$('#mouseLeft').text(mouseLeft);
+		  		
+		  		alertify.confirm('{{#translate}}Click the middle mouse button{{/translate}}',function(ok){if(!ok){alertify.alert('{{#translate}}Shoot! You need a three button mouse to use the Sandbox{{/translate}}.',function(){window.location = '/';})}});
+		  		$('#alertify-ok')[0].style.display = 'none'
+				},1000)
+				
+		  	}
+		  	if(e.button == 1 && stage == 1)
+			{
+				$('#alertify-ok')[0].click();
+				window.setTimeout(function(){
+
+				stage++;
+				
+		  		mouseMiddle = true;
+		  		$('#mouseMiddle').text(mouseMiddle);
+		  		
+		  		alertify.confirm('{{#translate}}Click the right mouse button{{/translate}}',function(ok){if(!ok){alertify.alert('{{#translate}}Shoot! You need a three button mouse to use the Sandbox{{/translate}}.',function(){window.location = '/';})}});
+		  		$('#alertify-ok')[0].style.display = 'none'
+		  		},1000)
+		  	}
+		  	if(e.button == 2 && stage == 2)
+			{
+				$('#alertify-ok')[0].click();
+				window.setTimeout(function(){
+
+				stage++;
+				
+		  		mouseRight = true;
+		  		$('#mouseRight').text(mouseRight);
+		  		
+		  		window.addEventListener('DOMMouseScroll', onMouseWheel, false);
+		  		window.addEventListener('mousewheel', onMouseWheel, false);
+		  		alertify.confirm('{{#translate}}Roll the mouse wheel{{/translate}}',function(ok){if(!ok){alertify.alert('{{#translate}}Shoot! You need a three button mouse to use the Sandbox{{/translate}}.',function(){window.location = '/';})}});
+		  		$('#alertify-ok')[0].style.display = 'none'
+		  		},1000)
+		  	}
+		 updateColors();
+		}
+		var mouseWheel = false;
+		function onMouseWheel(e) {
+			mouseWheel = true;
+			$('#mouseWheel').text(mouseWheel);
+			$('#alertify-ok')[0].click();
+			window.setTimeout(function(){
+
+				
+				updateColors();
+			},1000)
+			
+		}
+
+		alertify.confirm('{{#translate}}Click the left mouse button{{/translate}}',function(ok){if(!ok){alertify.alert('{{#translate}}Shoot! You need a three button mouse to use the Sandbox{{/translate}}.',function(){window.location = '/';})}});
+		$('#alertify-ok')[0].style.display = 'none'
+
+		
+		window.addEventListener('mousemove', onMouseMove, false);
+		window.addEventListener('mousedown', onMouseClick, false);
+
+		
+		var socket = io.connect( window.location.protocol + "//"+window.location.host);
+		socket.on( "connect", function() {
+                  $('#socketconnection').text("Successful");
+                  updateColors();
+        } );
+
+		socket.on( "error", function(e) { 			
+			$('#socketconnection').text("Failed");
+			updateColors();
+
+			alertify.confirm('{{#translate}}Shoot! Your browser is unable to connect via a WebSocket to our server! This might be a firewall issue{{/translate}}. {{#translate}}Check that WebSockets are allowed on port 80{{/translate}}.',function(){window.location = '/';});
+
+	    } );
+
+	    
+
+		updateColors();
+		});	
+	
+</script>
+
+
+
+<div id='content' class="row">
+	<div class="col-md-8" style="margin:10px auto;float:none;">
+
+	
+	<legend >{{#translate}}Compatability Test{{/translate}}</legend>
+
+<div class="col-md-10" style="margin:0 auto;float:none;height:auto;">
+		{{#translate}}The VW Sandbox application has several requriements{{/translate}}. {{#translate}}This page will test for support of both optional and required features{{/translate}}. {{#translate}}Some of the tests can be done automatically, but please click each button on your mouse in turn, and roll the mouse wheel{{/translate}}.</br></br>
+</div>
+<div class="col-md-10" style="margin:0 auto;float:none;height:auto;">
+<div class="row">
+	<div class="col-md-3 ">
+		Webgl:
+	</div>
+	<div id = 'webgl' class="col-md-4 ">
+		Untested
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		Floating Point Textures:
+	</div>
+	<div id = 'floats' class="col-md-4 ">
+		Untested
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		Standard Derivatives:
+	</div>
+	<div id = 'ddx' class="col-md-4 ">
+		Untested
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		Vertex Textures:
+	</div>
+	<div id = 'vertexTextures' class="col-md-4 ">
+		Untested
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		Max Texture Size:
+	</div>
+	<div id = 'maxTextureSize' class="col-md-4 ">
+		Untested
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		Max Texture Count:
+	</div>
+	<div id = 'maxNumTextures' class="col-md-4 ">
+		Untested
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		Max Hardware Bones:
+	</div>
+	<div id = 'maxBones' class="col-md-4 ">
+		Untested
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		WebSockets:
+	</div>
+	<div id = 'websocket' class="col-md-4 ">
+		Untested
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		Mouse Detected:
+	</div>
+	<div id = 'mouseDetected' class="col-md-4 ">
+		Not Detected
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		Mouse Left Button:
+	</div>
+	<div id = 'mouseLeft' class="col-md-4 ">
+		Not Detected
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		Mouse Middle Button:
+	</div>
+	<div id = 'mouseMiddle' class="col-md-4 ">
+		Not Detected
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-3 ">
+		Mouse Right Button:
+	</div>
+	<div id = 'mouseRight' class="col-md-4 ">
+		Not Detected
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-3 ">
+		Mouse Wheel:
+	</div>
+	<div id = 'mouseWheel' class="col-md-4 ">
+		Not Detected
+	</div>
+</div>
+
+
+<div class="row">
+	<div class="col-md-3 ">
+		Socket Connection:
+	</div>
+	<div id = 'socketconnection' class="col-md-4 ">
+		Untested
+	</div>
+</div>
+
+<!-- <div class="row">
+	<div class="col-md-3 ">
+		Secure Socket Connection:
+	</div>
+	<div id = 'ssocketconnection' class="col-md-4 ">
+		Untested
+	</div>
+</div> -->
+
+
+</div>
+
+<div class="col-md-10" id='goodtogo' style="margin:0 auto;float:none;height:auto;">
+		<br/>{{#translate}}Great, it looks like you should be able to use the Virtual World Sandbox successfully{{/translate}}!
+</div>
+
+<div class="row">	
+	<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
+</div>
+<legend></legend>
+<script type="text/javascript" src="./socket.io/socket.io.js"></script>
+
+</div>
+</div>

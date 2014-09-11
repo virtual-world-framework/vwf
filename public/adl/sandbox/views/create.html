@@ -1,0 +1,150 @@
+    <script type="text/javascript">
+		vwfPortalModel.handleCreateButton = function(o, e){
+
+			var name = $('#txtInstanceName').val(); 
+			var des = $('#txtInstanceDescription').val();
+			
+			var state = window.location.search.substr(window.location.search.indexOf('=')+1);
+			var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/')+1);
+			
+			var sid = path+state+'/';
+			
+			var statedata = {};
+			statedata.title = name;
+			statedata.description = des;
+			
+			if(window.selectedTemplate.title == 'an empty world')
+			{
+				jQuery.ajax(
+				{
+					type: 'POST',
+					url: root + '/vwfDataManager.svc/createstate',
+					data: JSON.stringify(statedata),
+					contentType: "application/json; charset=utf-8",
+					success:function(data,status,xhr)
+					{
+						var newLocation = data.replace("Created state _adl_sandbox_", "").replace("_", "");
+						window.location = root + "/" + newLocation;
+					},
+					error:function(xhr,status,err)
+					{
+						vwfPortalModel.errorText("Error: " + xhr.responseText);
+						
+						window.setTimeout(function(){
+							vwfPortalModel.errorText("");				
+						}, 6000);
+					},
+					dataType: "text"
+				});
+			} else
+			{
+
+				$.get(root + '/vwfDataManager.svc/copyinstance?SID=' + window.selectedTemplate.id, function(o){
+			
+							if(o){
+								var newID = o.substr(13,16);
+
+
+								var name = $('#txtInstanceName').val();
+								var des = $('#txtInstanceDescription').val();
+								
+								var statedata = {};
+								statedata.title = name;
+								statedata.description = des;
+								
+								jQuery.ajax(
+								{
+									type: 'POST',
+									url: root + '/vwfDataManager.svc/statedata?SID='+o,
+									data: JSON.stringify(statedata),
+									contentType: "application/json; charset=utf-8",
+									success:function(data,status,xhr)
+									{
+										
+										window.location = "./" + newID;
+									},
+									error:function(xhr,status,err)
+									{
+										alertify.error("World was not successfully edited.");
+									},
+									dataType: "text"
+								});	
+
+
+							}
+							else{
+								alertify.error("World was not successfully copied.");
+							}
+						})
+
+			}
+
+		};
+		
+		function redirect()
+		{
+			window.location.pathname = '';
+		}
+		
+		function setupModelChoices()
+		{
+				$.getJSON("./vwfDataManager.svc/states",function(data)
+				{
+					window.data = data;
+					data['blank'] = {title:"an empty world",featured:true};
+					for(var i in data)
+					{
+						var state = data[i];
+						if(!state) continue;
+						data[i].id = i;
+						if(state.featured)
+						{
+
+							var src = "http://localhost:3000/47/adl/sandbox/vwfDataManager.svc/thumbnail?SID=" + i;
+							$("#WorldChoice").append("<div  id='"+i+"' class='WorldChoice' />")
+							$("#" + i).append("<img src='"+src+"'  onerror=\"this.src = './img/thumbnotfound.png';\"/>" );
+							$("#" + i).append("<div  class='title'>" + state.title + "</div>" );
+							$("#" + i).attr('world',i);
+							$("#" + i).click(function(){
+
+								$(".WorldChoice img").css('opacity', "" );
+								$(this).find("img").css('opacity', 1.0);
+								$('legend').text("Create a world based on " + window.data[$(this).attr('world')].title);
+								window.selectedTemplate = window.data[$(this).attr('world')];
+							})
+						}
+
+					}
+					$("#" + "blank").click();
+
+				})
+
+		}
+
+		$(document).ready(function()
+		{
+			
+			ko.applyBindings(vwfPortalModel);
+			setupModelChoices();
+		});	
+	</script>
+	<div class="row">
+		
+
+		<div id="WorldChoice" class="col-md-10" style="margin:0 auto;float:none;height:auto;overflow-y:hidden;overflow-x:scroll;white-space:nowrap">
+			
+		</div>
+
+	</div>
+    <div class="row">
+		<div class="col-md-5" style="margin:0 auto;float:none;height:260px;">
+			<form data-bind="submit:handleCreateButton">
+				<fieldset>
+					<legend>Create a world</legend>
+					<input type='text' id='txtInstanceName' placeholder='World Name' class="form-control" /><br/>
+					<textarea id='txtInstanceDescription' placeholder='Description' class="form-control"></textarea><br/>
+					<input type="submit" class='btn btn-default' style="float:right;" value="Create"/>
+				</fieldset>
+			</form>
+		</div>
+	</div>

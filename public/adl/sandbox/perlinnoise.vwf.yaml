@@ -1,0 +1,554 @@
+extends: http://vwf.example.com/node3.vwf
+properties:
+  
+  amount:
+    value: 0
+    set: |
+            this.amount = value;
+            this.dirtyStack();
+  octaves:
+    value: 256
+    set: |
+            this.octaves = value;
+            this.dirtyStack();          
+  noisescale:
+    value: 1
+    set: |
+            this.noisescale = value;
+            this.dirtyStack();
+  iterations:
+    value: 2
+    set: |
+            this.iterations = value;
+            this.dirtyStack();
+  phase:
+    value: 0
+    set: |
+            this.phase = value;
+            this.dirtyStack();          
+  seed:
+    value: 1
+    set: |
+            this.seed = value;
+            
+            this.random = this.Random(this.seed);
+         
+             this.permutation = [];
+             for(var i =0; i < 512; i++)
+             {
+                this.permutation.push(Math.floor(this.random.getRandomNumber()*256));
+             }         
+             this.Perlin = new this.PerlinNoise(this.permutation);
+            
+            this.dirtyStack(); 
+  effectX:
+    set: |
+            this.effectX = value;
+            this.dirtyStack();
+  ComputeNormals:
+    set: |
+            this.ComputeNormals = value;
+            this.dirtyStack();             
+  effectY:
+    set: |
+            this.effectY = value;
+            this.dirtyStack(); 
+  effectZ:
+    set: |
+            this.effectZ = value;
+            this.dirtyStack();             
+  translation:
+    set: |
+            this.translation = value;
+  rotation:
+    set: |
+            this.rotation = value;
+  scale:
+    set: |
+            this.scale = value;
+  WorldSpace:
+    value: 0
+    set: |
+            this.WorldSpace = value;
+            this.dirtyStack();              
+  minAmount:
+  maxAmount:
+  isModifier: true
+  type:
+  EditorData:
+    amount:
+      displayname: noise amount
+      property: amount
+      type: slider
+      min: 0
+      max: 5
+      step: .01
+    noisescale:
+      displayname: noise scale
+      property: noisescale
+      type: slider
+      min: 0
+      max: 1
+      step: .01
+    iterations:
+      displayname: iterations
+      property: iterations
+      type: slider
+      min: 2
+      max: 5
+      step: 1	
+    octaves:
+      displayname: Octaves
+      property: octaves
+      type: slider
+      min: 8
+      max: 256
+      step: 1	  
+    seed:
+      displayname: random seed
+      property: seed
+      type: slider
+      min: 1
+      max: 512
+      step: 1
+    phase:
+      displayname: phase
+      property: phase
+      type: slider
+      min: 0
+      max: 1
+      step: .001  
+    effectX:
+      displayname: Effect X
+      property: effectX
+      type: check
+    effectY:
+      displayname: Effect Y
+      property: effectY
+      type: check 
+    effectZ:
+      displayname: Effect Z
+      property: effectZ
+      type: check
+    ComputeNormals:
+      displayname: Compute Normals
+      property: ComputeNormals
+      type: check  
+    WorldSpace:
+      displayname: Use World Positions
+      property: WorldSpace
+      type: check      
+methods:
+  GetBounds:
+  updateStack:
+  updateSelf:
+  dirtyStack:
+  GetMesh:
+  noise:
+events:
+  childAdded:
+scripts:
+- |
+    this.updateSelf = function()
+    {
+        
+        if(this.id == 'noise-vwf')
+            return;
+        var scale = vwf.getProperty(this.id,'noisescale');
+        var iterations = vwf.getProperty(this.id,'iterations');
+        var seed = vwf.getProperty(this.id,'seed');
+        
+        
+        if(!this.random)
+        {
+            
+            this.random = this.Random(seed);
+         
+             this.permutation = [];
+             for(var i =0; i < 512; i++)
+             {
+                this.permutation.push(Math.floor(this.random.getRandomNumber()*256));
+             }         
+             this.Perlin = new this.PerlinNoise(this.permutation);
+        
+        
+        }
+        
+        
+        var x = vwf.getProperty(this.id,'effectX');
+        var y = vwf.getProperty(this.id,'effectY');
+        var z = vwf.getProperty(this.id,'effectZ');
+        var world = vwf.getProperty(this.id,'WorldSpace');
+        var phase = vwf.getProperty(this.id,'phase');
+        
+        this.noise(scale,iterations,seed,x,y,z,world,phase);
+    }
+    var RotateVecAroundAxis = function(Vector, Axis, Radians)
+    {
+        //Get a quaternion for the input matrix
+        var RotationQuat = goog.vec.Quaternion.fromAngleAxis(Radians, Axis, Quat());
+        var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
+        return MATH.mulMat4Vec3(NewMatrix,Vector);
+    }
+    
+    this.PerlinNoise = function(permutation) {
+
+        this.noise = function(x, y, z,o) {
+
+           if(!o)
+            o = 256
+           var p = new Array(512)
+          
+           for (var i=0; i < o ; i++) 
+         p[o+i] = p[i] = permutation[i]; 
+
+              var X = Math.floor(x) & 255,                  // FIND UNIT CUBE THAT
+                  Y = Math.floor(y) & 255,                  // CONTAINS POINT.
+                  Z = Math.floor(z) & 255;
+              x -= Math.floor(x);                                // FIND RELATIVE X,Y,Z
+              y -= Math.floor(y);                                // OF POINT IN CUBE.
+              z -= Math.floor(z);
+              var    u = fade(x),                                // COMPUTE FADE CURVES
+                     v = fade(y),                                // FOR EACH OF X,Y,Z.
+                     w = fade(z);
+              var A = p[X  ]+Y, AA = p[A]+Z, AB = p[A+1]+Z,      // HASH COORDINATES OF
+                  B = p[X+1]+Y, BA = p[B]+Z, BB = p[B+1]+Z;      // THE 8 CUBE CORNERS,
+
+              return scale(lerp(w, lerp(v, lerp(u, grad(p[AA  ], x  , y  , z   ),  // AND ADD
+                                             grad(p[BA  ], x-1, y  , z   )), // BLENDED
+                                     lerp(u, grad(p[AB  ], x  , y-1, z   ),  // RESULTS
+                                             grad(p[BB  ], x-1, y-1, z   ))),// FROM  8
+                             lerp(v, lerp(u, grad(p[AA+1], x  , y  , z-1 ),  // CORNERS
+                                             grad(p[BA+1], x-1, y  , z-1 )), // OF CUBE
+                                     lerp(u, grad(p[AB+1], x  , y-1, z-1 ),
+                                             grad(p[BB+1], x-1, y-1, z-1 )))));
+           }
+           function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+           function lerp( t, a, b) { return a + t * (b - a); }
+           function grad(hash, x, y, z) {
+              var h = hash & 15;                      // CONVERT LO 4 BITS OF HASH CODE
+              var u = h<8 ? x : y,                 // INTO 12 GRADIENT DIRECTIONS.
+                     v = h<4 ? y : h==12||h==14 ? x : z;
+              return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
+           } 
+           function scale(n) { return (1 + n)/2; }
+    }
+    
+    this.Random = function(seed)
+    {
+        function Rc4Random(seed)
+        {
+            var keySchedule = [];
+            var keySchedule_i = 0;
+            var keySchedule_j = 0;
+            
+            function init(seed) {
+                for (var i = 0; i < 256; i++)
+                    keySchedule[i] = i;
+                
+                var j = 0;
+                for (var i = 0; i < 256; i++)
+                {
+                    j = (j + keySchedule[i] + seed.charCodeAt(i % seed.length)) % 256;
+                    
+                    var t = keySchedule[i];
+                    keySchedule[i] = keySchedule[j];
+                    keySchedule[j] = t;
+                }
+            }
+            init(seed);
+            
+            function getRandomByte() {
+                keySchedule_i = (keySchedule_i + 1) % 256;
+                keySchedule_j = (keySchedule_j + keySchedule[keySchedule_i]) % 256;
+                
+                var t = keySchedule[keySchedule_i];
+                keySchedule[keySchedule_i] = keySchedule[keySchedule_j];
+                keySchedule[keySchedule_j] = t;
+                
+                return keySchedule[(keySchedule[keySchedule_i] + keySchedule[keySchedule_j]) % 256];
+            }
+            
+            this.getRandomNumber = function() {
+                var number = 0;
+                var multiplier = 1;
+                for (var i = 0; i < 8; i++) {
+                    number += getRandomByte() * multiplier;
+                    multiplier *= 256;
+                }
+                return number / 18446744073709551616;
+            }
+        }
+        return new Rc4Random(seed +"");
+    }
+    this.getNoise= function(randarray,x,y,z,scale,iterations,phase)
+    {
+            
+            var z =0;
+           // return 10-MATH.lengthVec3([x,y,z]);
+            for(var j = 1; j < iterations; j++)
+            {
+              
+              var z1 = this.Perlin.noise((randarray[j-1]+(x+ phase))*scale*j ,
+                                    (randarray[j-1]+(y+ phase))*scale*j ,
+                                    (randarray[j-1]+(z+ phase))*scale*j,this.octaves );
+              z1 -= .5;
+              z1 /= (j);
+              z += z1;
+            }
+            return z;
+    }
+    this.noise = function(scale,iterations,seed,effectX,effectY,effectZ,useWorldSpace,phase)
+    {   
+        
+         
+         
+         if(this.amount == undefined) return;
+         var mesh = this.GetMesh();
+         if(!mesh)
+            return;
+         var m = mesh.geometry;
+         if(!m) return;
+         var positions = [];
+         
+         for(var i=0;i<m.vertices.length; i++)
+         {
+            positions.push([m.vertices[i].x,m.vertices[i].y,m.vertices[i].z]);
+         }
+         
+         var normals = [];
+         for(var i=0;i<m.faces.length; i++)
+         {
+            normals.push([m.faces[i].normal.x,m.faces[i].normal.y,m.faces[i].normal.z]);
+         }
+         
+         var bounds = m.boundingBox;
+         if(!bounds)
+            m.computeBoundingBox();
+         bounds = m.boundingBox;
+         
+         var height = bounds.max.z - bounds.min.z;
+         var length = bounds.max.x - bounds.min.x;
+         var width = bounds.max.y - bounds.min.y;
+         
+         //if(height == 0)
+            height = 1;
+         //if(width == 0)
+            width = 1;
+         //if(length == 0)
+            length = 1;
+         var amt = this.amount*6.28318530718;
+         var randZ = [];
+         var randY = [];
+         var randX = [];
+         for(var j = 1; j < iterations; j++)
+         {
+            randZ.push(this.permutation[0]);
+            randY.push(this.permutation[1]);   
+            randX.push(this.permutation[2]);               
+         }
+         for(var i=0;i<positions.length; i+=1)
+         {
+             var totalnorm = normals[i] || [0,0,0];
+             var thispos = positions[i];
+             if(useWorldSpace == true)
+             {
+                thispos = MATH.mulMat4Vec3(mesh.getModelMatrix(),thispos);
+             }
+             if(effectZ)
+             {
+                
+                var z = this.getNoise(randZ,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
+               // var zx1 = this.getNoise(randZ,(thispos[0] +.1)/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
+               // var zy1 = this.getNoise(randZ,thispos[0]/length,(thispos[1]+.1)/width,thispos[2]/height,scale,iterations,phase);
+               // var x1 = [positions[i][0]+.1,positions[i][1],positions[i][2]+ zx1*amt];
+               // var y1 = [positions[i][0],positions[i][1]+.1,positions[i][2]+ zy1*amt];
+                positions[i][2] += z * amt;
+                
+            /*    var dx = MATH.subVec3(x1,positions[i]);
+                dx = MATH.scaleVec3(dx,1/MATH.lengthVec3(dx));
+                var dy = MATH.subVec3(y1,positions[i]);
+                dy = MATH.scaleVec3(dy,1/MATH.lengthVec3(dy));
+                var norm = MATH.crossVec3(dx,dy);
+                
+                norm = MATH.scaleVec3(norm,1/MATH.lengthVec3(norm));
+                
+                var a = MATH.crossVec3(norm,[0,0,1]);
+                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + MATH.dotVec3(norm,[0,0,1]) );  
+                var  tofront_norm = [];
+                
+                goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
+                var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix()); */
+            //    if(i < normals.length)
+            //    normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
+                //normals[i][1] *= -1;
+                 //normals[i][0] *= -1;
+             }
+             if(effectX)
+             {
+                var x = this.getNoise(randX,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
+             //   var xy1 = this.getNoise(randX,(thispos[0])/length,(thispos[1]+.1)/width,thispos[2]/height,scale,iterations,phase);
+             //   var xz1 = this.getNoise(randX,thispos[0]/length,(thispos[1])/width,(thispos[2]+.1)/height,scale,iterations,phase);
+             //   var y1 = [positions[i][0]+ xy1*amt,positions[i][1]+.1,positions[i][2]];
+             //   var z1 = [positions[i][0]+ xz1*amt,positions[i][1],positions[i][2]+.1];
+                positions[i][0] += x * amt;
+                
+             /*   var dy = MATH.subVec3(y1,positions[i]);
+                dy = MATH.scaleVec3(dy,1/MATH.lengthVec3(dy));
+                var dz = MATH.subVec3(z1,positions[i]);
+                dz = MATH.scaleVec3(dz,1/MATH.lengthVec3(dz));
+                var norm = MATH.crossVec3(dy,dz);
+                
+                norm = MATH.scaleVec3(norm,1/MATH.lengthVec3(norm));
+                
+                var a = MATH.crossVec3(norm,[1,0,0]);
+                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + MATH.dotVec3(norm,[1,0,0]) );  
+                var  tofront_norm = [];
+                
+                goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
+                var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix()); */
+            //    if(i < normals.length)
+            //    normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]);
+             }
+             if(effectY)
+             {
+                var y = this.getNoise(randY,thispos[0]/length,thispos[1]/width,thispos[2]/height,scale,iterations,phase);
+             //   var yx1 = this.getNoise(randY,(thispos[0]+.1)/length,(thispos[1])/width,thispos[2]/height,scale,iterations,phase);
+             //   var yz1 = this.getNoise(randY,thispos[0]/length,(thispos[1])/width,(thispos[2]+.1)/height,scale,iterations,phase);
+             //   var x1 = [positions[i][0]+.1,positions[i][1]+ yx1*amt,positions[i][2]];
+             //   var z1 = [positions[i][0],positions[i][1]+ yz1*amt,positions[i][2]+.1];
+                positions[i][1] += y * amt;
+                
+             /*   var dx = MATH.subVec3(x1,positions[i]);
+                dx = MATH.scaleVec3(dx,1/MATH.lengthVec3(dx));
+                var dz = MATH.subVec3(z1,positions[i]);
+                dz = MATH.scaleVec3(dz,1/MATH.lengthVec3(dz));
+                var norm = MATH.crossVec3(dz,dx);
+                norm = MATH.scaleVec3(norm,1/MATH.lengthVec3(norm));
+                
+                var a = MATH.crossVec3(norm,[0,1,0]);
+                var tofront = goog.vec.Quaternion.createFromValues( a[0], a[1], a[2], 1 + MATH.dotVec3(norm,[0,1,0]) );  
+                var  tofront_norm = [];
+                
+                goog.vec.Quaternion.normalize(tofront,tofront_norm);                    
+                var rotmat = goog.vec.Quaternion.toRotationMatrix4 (tofront_norm,Matrix());
+                if(i < normals.length)
+                normals[i] = MATH.mulMat4Vec3(rotmat,normals[i]); */
+              }
+            //  if(i < normals.length)
+            //  normals[i] = MATH.scaleVec3(normals[i],1/MATH.lengthVec3(normals[i]));
+         }
+         
+         for(var i=0;i<positions.length; i+=1)
+         {
+            m.vertices[i].x = (positions[i][0]);
+            m.vertices[i].y = (positions[i][1]);
+            m.vertices[i].z = (positions[i][2]);
+         }
+         
+         m.verticesNeedUpdate = true;
+         
+
+         
+        /* for(var i=0;i<normals.length; i+=1)
+         {
+            m.faces[i].normal.x = (normals[i][0]);
+            m.faces[i].normal.y = (normals[i][1]);
+            m.faces[i].normal.z = (normals[i][2]);
+            for(var j = 0; j < m.faces[i].vertexNormals.length; j++)
+            {
+                m.faces[i].vertexNormals[j].x = (normals[i][0]);
+                m.faces[i].vertexNormals[j].y = (normals[i][1]);
+                m.faces[i].vertexNormals[j].z = (normals[i][2]);
+         }
+         }
+         */
+         if(this.ComputeNormals)
+         {
+            m.computeFaceNormals();
+            m.computeVertexNormals();
+            m.normalsNeedUpdate = true;
+         }
+         m.dirtyMesh = true;
+         mesh.sceneManagerUpdate();
+    }
+    this.updateStack = function()
+    {
+        if(this.amount == undefined) return;
+       
+        this.updateSelf();
+        for(var i in this.children)
+        {
+            return vwf.callMethod(this.children[i].id,'updateStack');
+        }
+    }
+    this.initialize = function()
+    {
+         
+    }
+    this.GetMesh = function()
+    {
+        if(this.amount == undefined) return;
+        return vwf.callMethod(vwf.parent(this.id),'GetMesh');
+    }
+    this.GetBounds = function()
+    {
+        if(this.amount == undefined) return;
+        return vwf.callMethod(vwf.parent(this.id),'GetBounds');
+    }
+    this.dirtyStack = function()
+    {
+        if(this.amount == undefined) return;
+        
+        return vwf.callMethod(vwf.parent(this.id),'dirtyStack');
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    var Matrix = function()
+    {
+        var mat = [];
+        for(var i=0; i < 16; i++)
+        {
+            mat.push(0);
+        }
+        return mat;
+    }
+    //quick function to initialize a blank vector array
+    var Vec3 = function()
+    {
+        var vec = [];
+        for(var i=0; i < 3; i++)
+        {
+            vec.push(0);
+        }
+        return vec;
+    }
+    var Quat = function()
+    {
+        var quat = [];
+        for(var i=0; i < 4; i++)
+        {
+            quat.push(0);
+        }
+        return quat;
+    };
+    var RotateVecAroundAxis = function(Vector, Axis, Radians)
+    {
+        //Get a quaternion for the input matrix
+        var RotationQuat = goog.vec.Quaternion.fromAngleAxis(Radians, Axis, Quat());
+        var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
+        return MATH.mulMat4Vec3(NewMatrix,Vector);
+    }
+    

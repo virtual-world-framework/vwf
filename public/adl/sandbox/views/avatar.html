@@ -1,0 +1,235 @@
+<script type="text/javascript">
+var buf = new Uint32Array(1);
+        Math.SecureRandom = function() {
+            if (window.crypto)
+                window.crypto.getRandomValues(buf);
+            else if (window.msCrypto)
+                window.msCrypto.getRandomValues(buf);
+            else
+                buf[0] = Math.random() * 4294967296;
+            return (buf[0]) / 4294967296;
+        }
+ </script>   
+<div class="row">
+	<div class="col-md-7" data-bind="foreach:avatarInfo">
+		<!-- ko foreach: $root.makeAvatarArr($data) -->
+			<div class="col-md-3">
+				<div class="avatarchoice" data-bind="click:function(data, e){$root.handleAvatarClick({data:data, parent:$parent}, e)}, attr:{id:$parent.model+'_' + $data.join('-')}">
+					<img data-bind="attr:{src:'./avatars/' + $parent.texture + $data[0] +'-'+ $data[1] +'.png'}" class="avatarPortrait">
+				</div>
+			</div>
+		<!-- /ko -->
+	</div>
+	<div class="col-md-5">
+	
+		<div style="margin: 0;">
+			<!--<img data-bind="attr:{src:currentAvatar()?'./avatars/' + currentAvatar().parent.texture + currentAvatar().data[0] +'-'+ currentAvatar().data[1] +'.png':''}"></img>-->
+			<div id="previewRender" data-bind="style: {'visibility':!spinnerVisible()?'visible':'invisibile'}"></div>
+			<div id="avatarSpinner" data-bind="visible:spinnerVisible"></div>
+			<div style="width:40%; margin:0 auto;">
+				<button class="btn btn-primary" style="margin: 15px 0 15px 52px;" data-bind="click:saveAvatar">Save</button>
+				<span data-bind="text:saveStatus" style="margin-left: 20px;color:#468847;"></span>				
+			</div>
+		</div>
+	</div>
+	
+
+</div>
+    
+<script type="text/javascript" src="{{root}}/vwf/model/threejs/three.js"></script>
+<script type="text/javascript" src="{{root}}/vwf/model/threejs/ColladaLoader.js"></script>
+<script type="text/javascript" src="{{root}}/async.js"></script>
+<script type="text/javascript" src="{{root}}/js/avatarPreview.js"></script>
+<script type="text/javascript">
+	//model and texture are self explanatory, but the format of texturesArr is as follows:
+	//The length of texturesArr should be equal to the number of DAE files given a base model name 
+	//Each element in texturesArr should be the number of textures that correspond to a base model
+	//For example: There exist VWS_Business_Female1.DAE and VWS_Business_Female2.DAE (so the length of texturesArr is 2)
+	//VWS_Business_Female1.DAE has 3 different textures (texturesArr[0]) while VWS_Business_Female2.DAE only has 1 (texturesArr[1])
+	
+	   
+
+	init();
+	spinner.spin($("#avatarSpinner")[0]);
+	vwfPortalModel.usersPage = true;
+	vwfPortalModel.saveStatus = ko.observable("");
+	vwfPortalModel.spinnerVisible = ko.observable(true);
+	vwfPortalModel.avatarInfo = [
+		{model: "AA_Soldier_Male", texture: 'AA_Soldier_Male', texturesArr: [1]},
+		{model: "VWS_Business_Female", texture: 'VWS_B_Female', texturesArr: [3, 1]},
+		{model: "VWS_Business_Male", texture: 'VWS_B_Male', texturesArr: [2, 4, 4]},
+		{model: "VWS_AA_Female", texture: 'Business_AAFemale', texturesArr: [3, 3]}
+	];
+	
+	vwfPortalModel.currentAvatar = ko.observable(false);
+	vwfPortalModel.saveAvatar = function(){
+		vwfPortalModel.saveStatus("Saving...");
+		$.ajax({
+			type: 'POST',
+			url:  root + '/vwfDataManager.svc/Profile',
+			data: JSON.stringify(vwfPortalModel.profile),
+			contentType: "application/json; charset=utf-8",
+			success: function(){
+				$(".avatarchoice").css('border-color', "#ccc");	
+				$("#"+vwfPortalModel.currentAvatar().parent.model+'_'+vwfPortalModel.currentAvatar().data.join('-')).css('border-color', "blue");	
+				vwfPortalModel.saveStatus("Saved!");
+				window.setTimeout(function(){vwfPortalModel.saveStatus(" ");},6000);
+				console.log("Success");
+			},
+			async: false,
+			dataType: "text"
+		}).fail(function(){
+			vwfPortalModel.saveStatus("Error");
+			window.setTimeout(function(){vwfPortalModel.saveStatus(" ");},6000);
+		});
+	};
+	
+	vwfPortalModel.profile = {};
+	vwfPortalModel.makeAvatarArr = function(obj){
+		var arr = [], rollingSum = 0, g = 0,
+		sum = obj.texturesArr.reduce(function(prev, curr){
+			return prev + curr;
+		});
+		
+		for(var i = 0; i < sum; i++){
+			if(i >= rollingSum + obj.texturesArr[g]){
+				rollingSum += obj.texturesArr[g++];
+			}
+			
+			arr.push([g + 1, i - rollingSum + 1]);
+		}
+
+		return arr;
+	};
+	
+	vwfPortalModel.handleAvatarClick = function(obj, event){
+		var tempModel = './avatars/' + obj.parent.model + obj.data[0] + '.DAE',
+		tempTexture = './avatars/' + obj.parent.texture + obj.data[0] + '-' + obj.data[1] + '.jpg';
+		
+		if(geometry){
+			//If new model and old model are the same, load texture
+			if(obj.parent.model + obj.data[0] == vwfPortalModel.currentAvatar().parent.model + vwfPortalModel.currentAvatar().data[0]){
+				replaceChildrenMaterial(geometry.scene.children, tempTexture);
+			}
+			
+			//Else, load new model
+			else{
+				scene.remove(geometry.scene);
+				vwfPortalModel.spinnerVisible(true);
+				loader.load(tempModel, function(geo){
+					geometry = geo;			
+					scene.add( geometry.scene );
+					camera.lookAt( new THREE.Vector3(0,0,.9));
+					skin = geometry.skins;
+					replaceChildrenMaterial(geometry.scene.children, tempTexture);
+				});
+			}
+		}
+		
+		vwfPortalModel.profile.avatarModel = tempModel;
+		vwfPortalModel.profile.avatarTexture = tempTexture;
+		
+		vwfPortalModel.currentAvatar(obj);
+	};
+	
+	function replaceChildrenMaterial(arr, textureUrl){
+		vwfPortalModel.spinnerVisible(true);
+		THREE.ImageUtils.loadTexture(textureUrl, undefined, function(texture){
+			replaceChildrenMaterialCb(arr, texture);
+		});
+	}
+	
+	function replaceChildrenMaterialCb(arr, texture){
+			for(var i = 0; i < arr.length; i++){
+		
+			if(arr[i].children){
+				replaceChildrenMaterialCb(arr[i].children, texture);
+			}
+			
+			if(arr[i].material){
+				vwfPortalModel.spinnerVisible(false);
+				arr[i].material.map = texture;
+			}
+		}
+	}
+	
+	var EncryptPassword = function (password, username,salt)
+	{
+		var unencrpytedpassword = password + username + salt;
+		for (var i = 0; i < 1000; i++)
+		{
+			unencrpytedpassword = CryptoJS.SHA256(unencrpytedpassword) + '';
+		}
+		return unencrpytedpassword;
+	};
+	
+	var UID = '';
+	
+	$(document).ready(function()
+	{
+		getLoginInfo(function(){
+		
+			UID = vwfPortalModel.user().username;
+
+			var data = jQuery.ajax(
+				{
+					type: 'GET',
+					url:  root + '/vwfDataManager.svc/Profile',
+					data: null,
+					success: null,
+					async: false,
+					dataType: "json"
+				});
+				if (data.status == 200)
+				{
+					try
+					{
+						data = JSON.parse(data.responseText);
+						data = data.avatarModel ? data : {avatarModel:'./avatars/VWS_Business_Female1.DAE', avatarTexture:'./avatars/VWS_B_Female1-1.jpg'};
+						vwfPortalModel.profile = data;
+						vwfPortalModel.currentAvatar({data:[], parent:{model:'', texture:''}});
+						var tempArr;
+						
+						for(var i = 0; i < vwfPortalModel.avatarInfo.length; i++){
+							if(data.avatarModel.indexOf(vwfPortalModel.avatarInfo[i].model) > -1){
+								vwfPortalModel.currentAvatar().parent.model = vwfPortalModel.avatarInfo[i].model;
+								vwfPortalModel.currentAvatar().parent.texture = vwfPortalModel.avatarInfo[i].texture;
+								
+								tempArr = vwfPortalModel.profile.avatarTexture.split('-')
+								vwfPortalModel.currentAvatar().data[0] = tempArr[0].charAt(tempArr[0].length -1);
+								vwfPortalModel.currentAvatar().data[1] = tempArr[1].charAt(0);
+								break;
+							}
+						}
+						
+						loader.load(vwfPortalModel.profile.avatarModel, function(geo){
+							geometry = geo;		
+							scene.add( geometry.scene );
+							camera.lookAt( new THREE.Vector3(0,0,.9));
+							skin = geometry.skins;
+							replaceChildrenMaterial(geometry.scene.children, vwfPortalModel.profile.avatarTexture);
+							loopStart();
+						});
+						
+						ko.applyBindings(vwfPortalModel);
+						$("#"+vwfPortalModel.currentAvatar().parent.model+'_'+vwfPortalModel.currentAvatar().data.join('-')).css('border-color', "blue");	
+					}
+					catch (e)
+					{
+						return data.responseText;
+					}
+				}
+				else
+				{
+					return data.responseText;
+				}
+
+		}, redirect);
+	});	
+	
+	function redirect()
+	{
+		var ret = window.location.search.substr(window.location.search.indexOf('=')+1);
+		window.location = ret.charAt(0) == '/' ? root + ret : root + '/' + ret;
+	}
+</script>		

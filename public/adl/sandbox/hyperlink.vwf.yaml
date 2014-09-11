@@ -1,0 +1,34 @@
+extends: 'http://vwf.example.com/behavior.vwf'
+properties:
+  type: behavior
+  NotProto: null
+  EditorData:
+    URL:
+      displayname: URL
+      property: url
+      type: text
+    Pop:
+      displayname: Popup
+      property: popup
+      type: check
+  DisplayName: HyperLink
+  url: 'http://www.google.com'
+  popup: true
+methods:
+  initialize: "   "
+events:
+  pointerOver:
+    parameters:
+      - '    eventData'
+      - '    nodeData    '
+    body: "   if(this.client == this.moniker)\n {\n     $('#index-vwf').css('cursor','pointer');\n }"
+  pointerOut:
+    parameters:
+      - '    eventData'
+      - '    nodeData    '
+    body: "    if(this.client == this.moniker)\n {\n     $('#index-vwf').css('cursor','default');\n }"
+  pointerClick:
+    parameters:
+      - '  eventData'
+      - '  nodeData  '
+    body: "  if(this.client == this.moniker)\n {\n    if(this.popup === true) \n        window.open(this.url,'_blank');\n    else\n        window.open(this.url,'_self');\n    \n }"

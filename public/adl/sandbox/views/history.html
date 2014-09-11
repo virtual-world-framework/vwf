@@ -1,0 +1,64 @@
+<script type="text/javascript">
+	var sid = '{{sid}}'; 
+	$(document).ready(function()
+	{
+		
+		
+		$.ajax(root + '/vwfDataManager.svc/statedata?SID=' + sid,
+		{
+			cache:false,
+			success:function(data,status,xhr)
+			{
+				var statedata = JSON.parse(xhr.responseText);
+				//$('#data').text(xhr.responseText);
+				
+				
+				$('#data').append('<a style="display:block" href="{{root}}/world/'+location.search.substr(4)+'" class="historythisstate">'+statedata.title+'</a>');
+				
+				
+				$.ajax(root + '/vwfDataManager.svc/statehistory?SID=' + sid,
+				{
+					cache:false,
+					success:function(data,status,xhr)
+					{
+						var history = JSON.parse(xhr.responseText);
+						//$('#data').text(xhr.responseText);
+						
+						for(var i=0; i < history.parents.length; i++)
+						{
+							var world = history.parents[i].world;
+							world = world.substr(13,16);
+							
+							$('#data').prepend('<div class="glyphicon glyphicon-eject" style="width: 100%;text-align: center;" />');
+							$('#data').prepend('<a class="historyparentstate" href="./history?id='+world+'">'+history.parents[i].title+'</a>');
+						}
+						for(var i=0; i < history.children.length; i++)
+						{
+							var world = history.children[i].world;
+							world = world.substr(13,16);
+							$('#data').append('<div style="display:inline-block"><div class="glyphicon glyphicon-eject" style="width:100%;text-align: center;-webkit-transform: rotate(180deg);-moz-transform: rotate(180deg);" /><br/><a class="historychildstate" href="./history?id='+world+'">'+history.children[i].title+'</a><div>');
+						}
+						
+					},
+					error:function(xhr,status,err)
+					{
+						$('#error').text("Error: " + xhr.responseText);
+					}
+				});
+			},
+			error:function(xhr,status,err)
+			{
+				$('#error').text("Error: " + xhr.responseText);
+			}
+		});
+		
+	});	
+</script>
+
+<div id = 'content' class="row">
+	<div id = 'data' class="col-md-8 col-md-offset-2">
+	</div>
+</div>
+<div class="row">	
+	<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
+</div>

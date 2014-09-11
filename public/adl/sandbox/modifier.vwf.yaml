@@ -1,0 +1,214 @@
+extends: http://vwf.example.com/node3.vwf
+properties:
+  amount:
+    set: |
+            this.amount = value;
+            this.dirtyStack();
+    get: |
+            return this.amount;
+  translation:
+    set:|
+            this.translation = value;
+            this.dirtyStack();
+  rotation:
+    set:|
+            this.translation = value;
+            this.dirtyStack();
+  scale:
+    set:|
+            this.translation = value;
+            this.dirtyStack();            
+  minAmount:
+  maxAmount:
+  type:
+  EditorData:
+    amount:
+      displayname: amount
+      property: amount
+      type: slider
+      min: 0
+      max: 1
+      step: .01
+methods:
+  GetBounds:
+  updateStack:
+  updateSelf:
+  dirtyStack:
+  GetMesh:
+  taper:
+  uvmap:
+  bend:
+  twist:
+events:
+  childAdded:
+scripts:
+- |
+    this.updateSelf = function()
+    {
+        
+        if(vwf.getProperty(this.id,'type') == 'taper')
+            this.taper();
+        if(vwf.getProperty(this.id,'type') == 'bend')
+            this.bend();
+        if(vwf.getProperty(this.id,'type') == 'twist')
+            this.twist();
+        if(vwf.getProperty(this.id,'type') == 'uvmap')
+            this.uvmap();            
+         
+    }
+    this.taper = function()
+    {
+         if(this.amount == undefined) return;
+         var mesh = this.GetMesh();
+         var m = mesh.getMesh();
+         var positions = [];
+         for(var i=0;i<m.positions.length-2; i+=3)
+         {
+            positions.push([m.positions[i],m.positions[i+1],m.positions[i+2]]);
+         }
+         
+         var bounds = this.GetBounds();
+         var height = bounds.max[2] - bounds.min[2];
+         var length = bounds.max[0] - bounds.min[0];
+         var width = bounds.max[1] - bounds.min[1];
+         var amt = this.amount*2;
+         for(var i=0;i<positions.length; i+=1)
+         {
+            var factor = positions[i][2]/height;
+            positions[i][0] *= 1+(amt*factor) ;
+            positions[i][1] *= 1+(amt*factor) ;
+         }
+         var newpositions = []
+         for(var i=0;i<positions.length; i+=1)
+         {
+            newpositions.push(positions[i][0]);
+            newpositions.push(positions[i][1]);
+            newpositions.push(positions[i][2]);
+         }
+         
+         m.setPositions(newpositions);
+    }
+    var Matrix = function()
+    {
+        var mat = [];
+        for(var i=0; i < 16; i++)
+        {
+            mat.push(0);
+        }
+        return mat;
+    }
+    //quick function to initialize a blank vector array
+    var Vec3 = function()
+    {
+        var vec = [];
+        for(var i=0; i < 3; i++)
+        {
+            vec.push(0);
+        }
+        return vec;
+    }
+    var Quat = function()
+    {
+        var quat = [];
+        for(var i=0; i < 4; i++)
+        {
+            quat.push(0);
+        }
+        return quat;
+    };
+    var RotateVecAroundAxis = function(Vector, Axis, Radians)
+    {
+        //Get a quaternion for the input matrix
+        var RotationQuat = goog.vec.Quaternion.fromAngleAxis(Radians, Axis, Quat());
+        var NewMatrix = goog.vec.Quaternion.toRotationMatrix4(RotationQuat, Matrix());
+        return MATH.mulMat4Vec3(NewMatrix,Vector);
+    }
+    this.twist = function()
+    {   
+         
+         if(this.amount == undefined) return;
+         var mesh = this.GetMesh();
+         var m = mesh.getMesh();
+         var positions = [];
+         for(var i=0;i<m.positions.length-2; i+=3)
+         {
+            positions.push([m.positions[i],m.positions[i+1],m.positions[i+2]]);
+         }
+         
+         var bounds = this.GetBounds();
+         var height = bounds.max[2] - bounds.min[2];
+         var length = bounds.max[0] - bounds.min[0];
+         var width = bounds.max[1] - bounds.min[1];
+         var amt = this.amount*6.28318530718;
+         for(var i=0;i<positions.length; i+=1)
+         {
+            var factor = positions[i][2]/height;
+            var newpos = RotateVecAroundAxis(positions[i],[0,0,1],amt*factor);
+            positions[i][0] = newpos[0];
+            positions[i][1] = newpos[1];
+            positions[i][2] = newpos[2];
+         }
+         var newpositions = []
+         for(var i=0;i<positions.length; i+=1)
+         {
+            newpositions.push(positions[i][0]);
+            newpositions.push(positions[i][1]);
+            newpositions.push(positions[i][2]);
+         }
+         
+         m.setPositions(newpositions);
+         
+         var normals = [];
+         for(var i=0;i<m.normals.length-2; i+=3)
+         {
+            normals.push([m.normals[i],m.normals[i+1],m.normals[i+2]]);
+         }
+         
+        
+         for(var i=0;i<normals.length; i+=1)
+         {
+            var factor = positions[i][2]/height;
+            var newpos = RotateVecAroundAxis(normals[i],[0,0,1],amt*factor);
+            normals[i][0] = newpos[0];
+            normals[i][1] = newpos[1];
+            normals[i][2] = newpos[2];
+         }
+         var newnormals = []
+         for(var i=0;i<normals.length; i+=1)
+         {
+            newnormals.push(normals[i][0]);
+            newnormals.push(normals[i][1]);
+            newnormals.push(normals[i][2]);
+         }
+         
+         m.setNormals(newnormals);
+    }
+    this.updateStack = function()
+    {
+        if(this.amount == undefined) return;
+        this.updateSelf();
+        for(var i in this.children)
+        {
+            return vwf.callMethod(this.children[i].id,'updateStack');
+        }
+    }
+    this.initialize = function()
+    {
+         
+    }
+    this.GetMesh = function()
+    {
+        if(this.amount == undefined) return;
+        return vwf.callMethod(vwf.parent(this.id),'GetMesh');
+    }
+    this.GetBounds = function()
+    {
+        if(this.amount == undefined) return;
+        return vwf.callMethod(vwf.parent(this.id),'GetBounds');
+    }
+    this.dirtyStack = function()
+    {
+        if(this.amount == undefined) return;
+        
+        return vwf.callMethod(vwf.parent(this.id),'dirtyStack');
+    }

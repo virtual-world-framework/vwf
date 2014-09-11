@@ -1,0 +1,143 @@
+
+<script src="./octane/jquery.js"></script>
+<script src="./octane/bootstrap-transition.js"></script>
+<script src="./octane/bootstrap-collapse.js"></script>
+<!-- Octane benchmark code -->
+<script type="text/javascript" src="./octane/base.js"></script>
+<script type="text/javascript" src="./octane/richards.js"></script>
+<script type="text/javascript" src="./octane/deltablue.js"></script>
+<script type="text/javascript" src="./octane/crypto.js"></script>
+<script type="text/javascript" src="./octane/raytrace.js"></script>
+<script type="text/javascript" src="./octane/earley-boyer.js"></script>
+<script type="text/javascript" src="./octane/regexp.js"></script>
+<script type="text/javascript" src="./octane/splay.js"></script>
+<script type="text/javascript" src="./octane/navier-stokes.js"></script>
+<script type="text/javascript" src="./octane/pdfjs.js"></script>
+<script type="text/javascript" src="./octane/mandreel.js"></script>
+<script type="text/javascript" src="./octane/gbemu-part1.js"></script>
+<script type="text/javascript" src="./octane/gbemu-part2.js"></script>
+<script type="text/javascript" src="./octane/code-load.js"></script>
+<script type="text/javascript" src="./octane/box2d.js"></script>
+<script type="text/javascript" src="./octane/zlib.js"></script>
+<script type="text/javascript" src="./octane/zlib-data.js"></script>
+<script type="text/javascript" src="./octane/typescript.js"></script>
+<script type="text/javascript" src="./octane/typescript-input.js"></script>
+<script type="text/javascript" src="./octane/typescript-compiler.js"></script>
+
+<script type="text/javascript">
+  var completed = 0;
+  var benchmarks = BenchmarkSuite.CountBenchmarks();
+  var success = true;
+  var latencyBenchmarks = ["Splay", "Mandreel"];
+  var skipBenchmarks =
+          typeof skipBenchmarks === "undefined" ? [] : skipBenchmarks;
+
+  function ShowBox(name) {
+    console.log(name)
+     $('#currenttest').text("Testing:" +name);
+
+  }
+
+  function AddResult(name, result) {
+   console.log(name,result);
+   completed++;
+   $('#progress').css('width',((completed/benchmarks) * 100) + '%');
+  }
+
+  function AddError(name, error) {
+    console.log(name,error);
+  }
+
+  function AddScore(score) {
+    console.log(score);
+    $('#test').fadeOut();
+    $('#results').fadeIn();
+    $('#score').text(score)
+    center();
+    if(score > 5000)
+    	$('#resultGood').show();
+    if(score < 5000)
+    	$('#resultBad').show();
+    window.setTimeout(function(){center()},300);
+     window.setTimeout(function(){center()},600);
+      window.setTimeout(function(){center()},900);
+  }
+
+  function Run() {
+    
+    BenchmarkSuite.RunSuites({
+      NotifyStart : ShowBox,
+      NotifyError : AddError,
+      NotifyResult : AddResult,
+      NotifyScore : AddScore
+    },
+    skipBenchmarks);
+  }
+
+  function CheckCompatibility() {
+    // If no Typed Arrays support, show warning label.
+    var hasTypedArrays = typeof Uint8Array != "undefined"
+        && typeof Float64Array != "undefined"
+        && typeof (new Uint8Array(0)).subarray != "undefined";
+
+    if (!hasTypedArrays) {
+      console.log("Typed Arrays not supported");
+    }
+   // if (window.document.URL.indexOf('skip_zlib=1') >= 0)
+      skipBenchmarks.push("zlib");
+    
+      Run();
+  }
+
+  function Load() {
+    setTimeout(CheckCompatibility, 200);
+  }
+  $(document).ready(function(){
+
+  	Load();
+
+  });
+</script>
+
+
+
+
+<div id='content' class="row">
+<div id = "results" style='display:none;width: 100%;
+text-align: center;'>
+<div>Your score is</div>
+<div id="score" style="font-size: 20em;">Your score is</div>
+<div id='resultGood' class="row" style='display:none'>	
+	Great! This browser and hardware should be fast enough to run the Sandbox.
+</div>
+<div id='resultBad' class="row" style='display:none'>	
+	It looks like this computer or browser has poor Javascript performance. We recommend updating your browser or hardware to acheive a score greater than 5000.
+</div>
+</div>
+
+<div id = "test">
+	<div class="col-md-8" style="margin:10px auto;float:none;">
+
+	
+<legend >Performance Test</legend>
+</div>
+<div class="col-md-8" style="margin:0 auto;float:none;height:auto;">
+		<div style="width: 100%;border: 1px solid gray;height: 3em;border-radius: 17px;background: #DDE;overflow: hidden;clip: auto;">
+			<div id = 'progress' style="position: absolute;width: 0%;height: 3em;background: #55C;border-radius: 17px;margin: 0px;padding: 0px;left: 0px;top: 0px;background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255,0.15)75%, transparent 75%, transparent);-webkit-background-size: 40px 40px;-moz-background-size: 40px 40px;-o-background-size: 40px 40px;background-size: 40px 40px;border: 1px solid gray;"></div>
+		</div>
+		<div id = 'currenttest' style='position: absolute;top: 0px;left: 0px;width: 100%;height: 100%;vertical-align: middle;text-align: center;font-size: 2em;text-shadow: 3px 3px 3px white;'> TEST </div>
+</div>
+<div class="col-md-8" style="margin:0 auto;float:none;height:auto;">
+
+<div class="row">	
+	Benchmarks provided by <a href='https://developers.google.com/octane/'>Octane 2.0</a> For more accurate results, start the browser anew before running the test.
+</div>
+
+<div class="row">	
+	<div id='error' style="margin-top: 20px;margin-bottom:20px;font-size: 3EM;color: red;" class="span12"></div>
+</div>
+<legend></legend>
+<script type="text/javascript" src="./socket.io/socket.io.js"></script>
+
+</div>
+</div>
