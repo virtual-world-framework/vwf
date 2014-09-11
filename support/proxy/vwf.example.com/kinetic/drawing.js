@@ -133,12 +133,12 @@ this.down = function( eventData, nodeData, touch ) {
             break;
 
         case "arrow":
-            groupExtends = "http://vwf.example.com/kinetic/group.vwf";
+            groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
             compExtends = { "line": "http://vwf.example.com/kinetic/line.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
             break;
 
         case "thickArrow":
-            groupExtends = "http://vwf.example.com/kinetic/group.vwf";
+            groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
             compExtends = { "line": "http://vwf.example.com/kinetic/line.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
             break;
 
