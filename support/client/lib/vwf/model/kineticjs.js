@@ -34,7 +34,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         "name": childName,
                         "prototypes": undefined,
                         "kineticObj": undefined,
-                        "stage": undefined
+                        "stage": undefined,
+                        "uniqueInView": false
                     };
                 },
                 isKineticClass: function( prototypes, classIDArray ) {
@@ -279,13 +280,22 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "x":
-                            kineticObj.modelX = Number( propertyValue );
-                            kineticObj.x( kineticObj.modelX );
+                            if ( node.uniqueInView ) {
+                                kineticObj.modelX = Number( propertyValue );
+                                kineticObj.x( kineticObj.modelX );                                
+                            } else {
+                                kineticObj.x( Number( propertyValue ) );     
+                            }
+
                             break;
 
                         case "y":
-                            kineticObj.modelY = Number( propertyValue );
-                            kineticObj.y( Number( kineticObj.modelY ) );
+                            if ( node.uniqueInView ) {
+                                kineticObj.modelY = Number( propertyValue );
+                                kineticObj.y( Number( kineticObj.modelY ) );
+                            } else {
+                                kineticObj.x( Number( propertyValue ) );     
+                            }                            
                             break;
 
                         case "width":
@@ -373,27 +383,52 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "position":
-                            if ( propertyValue instanceof Array ) {
-                                kineticObj.modelX = Number( propertyValue[ 0 ] );
-                                kineticObj.modelY = Number( propertyValue[ 1 ] ); 
+                            if ( node.uniqueInView ) {
+                                if ( propertyValue instanceof Array ) {
+                                    kineticObj.modelX = Number( propertyValue[ 0 ] );
+                                    kineticObj.modelY = Number( propertyValue[ 1 ] ); 
+                                } else {
+                                    kineticObj.modelX = Number( propertyValue.x );
+                                    kineticObj.modelY = Number( propertyValue.y );
+                                }
+                                kineticObj.setPosition( { 
+                                    x: kineticObj.modelX, 
+                                    y: kineticObj.modelY
+                                } );
                             } else {
-                                kineticObj.modelX = Number( propertyValue.x );
-                                kineticObj.modelY = Number( propertyValue.y );
+                                if ( propertyValue instanceof Array ) { 
+                                    kineticObj.setPosition( { 
+                                        "x": Number( propertyValue[ 0 ] ), 
+                                        "y": Number( propertyValue[ 1 ] )
+                                    });
+                                } else {
+                                    kineticObj.setPosition( { 
+                                        "x": Number( propertyValue.x ), 
+                                        "y":  Number( propertyValue.y ) 
+                                    });                                    
+                                }
                             }
-                            kineticObj.setPosition( { 
-                                x: kineticObj.modelX, 
-                                y: kineticObj.modelY
-                            } );
                             break;
-
                         case "absolutePosition":
                             if ( propertyValue instanceof Array ) { 
-                                kineticObj.setAbsolutePosition( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
+                                kineticObj.setAbsolutePosition( { 
+                                    "x": Number( propertyValue[ 0 ] ), 
+                                    "y": Number( propertyValue[ 1 ] ) 
+                                });
                             } else {
-                                kineticObj.setAbsolutePosition( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
+                                kineticObj.setAbsolutePosition( { 
+                                    "x": Number( propertyValue.x ), 
+                                    "y":  Number( propertyValue.y ) 
+                                });
                             }
-                            kineticObj.modelX = kineticObj.x();
-                            kineticObj.modelY = kineticObj.y();
+                            if ( node.uniqueInView ) {
+                                kineticObj.modelX = kineticObj.x();
+                                kineticObj.modelY = kineticObj.y();
+                            }
+                            break;
+
+                        case "uniqueInView":
+                            node.uniqueInView = Boolean( propertyValue );
                             break;
 
                         case "transform":
@@ -1256,11 +1291,19 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "x":
-                            value = kineticObj.modelX || 0;
+                            if ( node.uniqueInView ) {
+                                value = kineticObj.modelX || 0;
+                            } else {
+                                value = kineticObj.x();
+                            }
                             break;
 
                         case "y":
-                            value = kineticObj.modelY || 0;
+                            if ( node.uniqueInView ) {
+                                value = kineticObj.modelY || 0;
+                            } else {
+                                value = kineticObj.y();
+                            }
                             break;
 
                         case "width":
@@ -1346,34 +1389,50 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
                         
                         case "position":
-                            value = {
-                                x: kineticObj.modelX || 0,
-                                y: kineticObj.modelY || 0
-                            };
+                            if ( node.uniqueInView ) {
+                                value = {
+                                    x: kineticObj.modelX || 0,
+                                    y: kineticObj.modelY || 0
+                                };
+                            } else {
+                                value = kineticObj.getPosition();
+                            }
                             break;
 
                         case "transform":
-                            value = kineticObj.getTransform().m;
-                            value[ 4 ] = kineticObj.modelX || 0;
-                            value[ 5 ] = kineticObj.modelY || 0;
+                            if ( node.uniqueInView ) {
+                                value = kineticObj.getTransform().m;
+                                value[ 4 ] = kineticObj.modelX || 0;
+                                value[ 5 ] = kineticObj.modelY || 0;
+                            } else {
+                                value = kineticObj.getTransform();    
+                            }
                             break;
 
                         case "absolutePosition":
-                            // TODO: Since we are allowing the view to drag objects independent of
-                            //       the model, we can't be sure that kinetic has the proper model
-                            //       value.  Therefore, we need to compute the math ourselves.
-                            // value = kineticObj.getAbsolutePosition();
-                            this.logger.errorx( "gettingProperty", "getter for absolutePosition",
-                                "is not implemented" );
+                            if ( !node.uniqueInView ) {
+                                value = kineticObj.getAbsolutePosition();
+                            } else {
+                                // TODO: Since we are allowing the view to drag objects independent of
+                                //       the model, we can't be sure that kinetic has the proper model
+                                //       value.  Therefore, we need to compute the math ourselves.
+                                // value = kineticObj.getAbsolutePosition();
+                                this.logger.errorx( "gettingProperty", "getter for absolutePosition",
+                                    "is not implemented" );
+                            }
                             break;
 
                         case "absoluteTransform":
-                            // TODO: Since we are allowing the view to drag objects independent of
-                            //       the model, we can't be sure that kinetic has the proper model
-                            //       value.  Therefore, we need to compute the math ourselves.
-                            // value = kineticObj.getAbsoluteTransform();
-                            this.logger.errorx( "gettingProperty", "getter for absoluteTransform",
-                                "is not implemented" );
+                            if ( !node.uniqueInView ) {
+                                value = kineticObj.getAbsoluteTransform();
+                            } else {
+                                // TODO: Since we are allowing the view to drag objects independent of
+                                //       the model, we can't be sure that kinetic has the proper model
+                                //       value.  Therefore, we need to compute the math ourselves.
+                                // value = kineticObj.getAbsoluteTransform();
+                                this.logger.errorx( "gettingProperty", "getter for absoluteTransform",
+                                    "is not implemented" );
+                            }
                             break;
 
                         case "absoluteOpacity":
@@ -1382,6 +1441,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "absoluteZIndex":
                             value = kineticObj.getAbsoluteZIndex();
+                            break;
+
+                        case "uniqueInView":
+                            value = node.uniqueInView;
                             break;
 
                     }
