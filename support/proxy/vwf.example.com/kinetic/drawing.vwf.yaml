@@ -6,6 +6,9 @@ properties:
   drawing_index: 1
 methods:
   update:
+  down:
+  move:
+  up:  
   clientWatch:
   clientJoin:
   clientLeave:
@@ -14,9 +17,6 @@ methods:
   isValid:
   getStageRelativePoint:
 events:
-  down:
-  move:
-  up:
   pointerDown:
   pointerMove:
   pointerUp:
