@@ -294,7 +294,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 kineticObj.modelY = Number( propertyValue );
                                 kineticObj.y( Number( kineticObj.modelY ) );
                             } else {
-                                kineticObj.x( Number( propertyValue ) );     
+                                kineticObj.y( Number( propertyValue ) );     
                             }                            
                             break;
 
