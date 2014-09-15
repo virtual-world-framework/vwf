@@ -40,10 +40,10 @@ define( [   "module",
             this.options = options || {};
 
             this.state = {
-                nodes: {},
-                stages: {},
-                prototypes: {},
-                createLocalNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+                "nodes": {},
+                "stages": {},
+                "prototypes": {},
+                "createLocalNode": function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
                     return {
                         "parentID": nodeID,
@@ -274,7 +274,6 @@ define( [   "module",
                             } );  
 
                         }                    
-
                         break;
 
                     case "play":
@@ -316,7 +315,6 @@ define( [   "module",
                             }
                         }
                         break;
-
 
                     case "volume":
                         if ( node.soundObj !== undefined ) {
