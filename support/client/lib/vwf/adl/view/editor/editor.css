@@ -1,0 +1,218 @@
+.relClass {
+	position:relative;
+}
+
+.uiContainer {
+	text-align:right;
+	position:absolute;
+	right:0px;
+	pointer-events:none;
+}
+
+.vwf-tree {
+	width:260px;
+	text-align:left;
+	font:10pt Arial;
+	border:1px solid #888;
+	background-color:#1F497D;
+	color:white;
+	/*opacity:1.0;*/
+	overflow-y:auto;
+	pointer-events:all;
+}
+
+.editor-tabs {
+	width:22px;
+	position:relative;
+	right:3px;
+	pointer-events:all;
+	overflow-y:hidden;
+}
+
+hr 
+{
+	background-color:#153255;
+	border:0;
+	height:1px;
+}
+
+td
+{
+	font:10pt Arial;
+	width:105px;
+	max-width:105px;
+	padding:0px;
+	overflow:hidden;
+}
+
+.input_text
+{
+	height:11px;
+	width:90px;
+	font:9pt Arial;
+	padding:3px;
+	color:#153255;
+	/*background-color:#153255;*/
+	border:1px;
+}
+
+.input_button
+{
+	width:50px;
+	font:8pt Arial;
+	padding:0px;
+}
+
+.input_button_call
+{
+	width:30px;
+	font:8pt Arial;
+	padding:0px;
+}
+
+form
+{
+	margin:0px;
+}
+
+textarea:focus, input:focus{
+    outline: none;
+}
+
+.header 
+{
+	font:16pt Arial;
+	font-weight:bold;
+	padding-left:10px;
+	padding-right:10px;
+	padding-top:5px;
+	padding-bottom:10px;
+	margin-bottom:5px;
+	background:#153255;
+	overflow:hidden;
+}
+
+.propEntry 
+{
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.childContainer {
+	background-image:url('images/toggle-expand-light.png');
+	background-repeat:no-repeat;
+}
+
+.childEntry {
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.methodEntry 
+{
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.methodEntry td
+{
+	font:10pt Arial;
+	width:130px;
+	padding:0px;
+	overflow:hidden;
+}
+
+.clientEntry
+{
+	font:10pt Arial;
+	font-weight:bold;
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.scriptEntry 
+{
+	padding-left:10px;
+	padding-right:10px;
+	height:85%;
+}
+
+.scriptCode
+{
+	height:100%;
+}
+
+.scriptEdit
+{
+	width:99%;
+	height:99%;
+	color:white;
+	background-color:#1F497D;
+	border: 1px solid #153255;
+}
+
+.scriptCode textarea:focus
+{
+	border: 1px solid #153255;
+}
+
+.scriptEdit::-webkit-scrollbar {
+    height:12px;
+	width:12px;
+	background:#1B456F;
+}
+.scriptEdit::-webkit-scrollbar-thumb {
+    background:#153255;
+    -webkit-border-radius: 0.8ex;
+}
+.scriptEdit::-webkit-scrollbar-corner {
+    background: #153255;
+}
+
+.update_button
+{
+	width:100%;
+	font:10pt Arial;
+	padding:2px;
+	color:white;
+	background:#153255;
+}
+
+/* TIMELINE */
+.rate.slider {
+	display: inline-block;
+	width: 10em;
+}
+
+.about {
+	padding-left:10px;
+}
+
+.about a:link {
+	color:white;
+}
+
+.about a:visited {
+	color:white;
+}
+
+.modelEntry {
+	font:10pt Arial;
+	font-weight:bold;
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.drag {
+	padding-top:5px;
+	padding-bottom:5px;
+	border-style:solid;
+	border-width:medium;
+	border-color: #153255;
+	text-align: center;
+}
+
+.drag:hover {
+	cursor: move;
+	background-color: #4C6D97;
+}
