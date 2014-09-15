@@ -72,7 +72,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
     //note: the 3D driver must keep track of this
     SoundSource.prototype.updateSourcePosition = function() {
         
-        this.position = vwf.getProperty( this.id,'worldPosition' );
+        this.position = vwf.getProperty( this.id, 'worldPosition' );
     }
 
     //use inverse falloff, adjust the range parameters of the falloff curve by the "volume"
@@ -149,7 +149,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
                         url = params[0];
                         loop = params[1] || false;
                         vol =  params[2] || 1;
-                        soundID = id+url;
+                        soundID = id + url;
                         soundSrc = this.soundSources[ soundID ];
                         //cache the sound - can only be played simultainously by different nodes
                         if ( !soundSrc ) {
@@ -187,7 +187,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 
                     case 'pauseSound':
                         url = params[ 0 ];
-                        soundID = id+url;
+                        soundID = id + url;
                         soundSrc = this.soundSources[ soundID ];
                         if ( soundSrc ) {
                             soundSrc.pause();
@@ -196,7 +196,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 
                     case 'stopSound':
                         url = params[0];
-                        soundID = id+url;
+                        soundID = id + url;
                         soundSrc = this.soundSources[ soundID ];
                         if ( soundSrc ) {
                             soundSrc.stop();
@@ -205,7 +205,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
 
                     case 'deleteSound':
                         url = params[0];
-                        soundID = id+url;
+                        soundID = id + url;
                         soundSrc = this.soundSources[ soundID ];
                         if ( soundSrc ) {
                             soundSrc.stop();
