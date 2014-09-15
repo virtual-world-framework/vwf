@@ -116,7 +116,7 @@ function TerrainTool() {
     });
 
     $('#TerrainToolGUItitle').append('<a id="TerrainToolclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
-    $('#TerrainToolGUItitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/inventory.png" />');
+    $('#TerrainToolGUItitle').prepend('<img class="headericon" src="../vwf/adl/view/editorview/images/icons/inventory.png" />');
     $('#TerrainToolGUI').css('border-bottom', '5px solid #444444')
     $('#TerrainToolGUI').css('border-left', '2px solid #444444')
     $('#TerrainToolclose').click(function() {

@@ -20,7 +20,7 @@ function PainterTool()
 	$('#PainterToolGUIDelete').button({label:'Delete'});
 	
 	$('#PainterToolGUItitle').append('<a id="paintertoolclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
-	$('#PainterToolGUItitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/inventory.png" />');	
+	$('#PainterToolGUItitle').prepend('<img class="headericon" src="../vwf/adl/view/editorview/images/icons/inventory.png" />');	
 	$('#PainterToolGUI').css('border-bottom','5px solid #444444')
 	$('#PainterToolGUI').css('border-left','2px solid #444444')
 	$('#PainterToolGUITexture').attr('src','./vwfDataManager.svc/texture?UID=checker.jpg');

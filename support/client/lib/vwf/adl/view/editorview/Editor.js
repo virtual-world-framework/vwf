@@ -25,7 +25,7 @@ function sign(x) {
 
 
 
-define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(Log, ProgressBar) {
+define(["vwf/adl/view/editorview/log", "vwf/adl/view/editorview/progressbar"], function(Log, ProgressBar) {
     var originalGizmoPos;
     var Editor = {};
     var isInitialized = false;

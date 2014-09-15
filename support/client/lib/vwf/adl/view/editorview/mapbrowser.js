@@ -121,7 +121,7 @@ define(function ()
 			if (_MapBrowser.filter.length > 0)
 			{
 				$('#MapBrowser').append('<img id="UpButton" class="textureChoice" />');
-				$('#UpButton').attr('src', '../vwf/view/editorview/images/icons/up_folder.gif');
+				$('#UpButton').attr('src', '../vwf/adl/view/editorview/images/icons/up_folder.gif');
 				$('#UpButton').click(this.dirup);
 			}
 			var self = this;
@@ -176,12 +176,12 @@ define(function ()
 					var name = getProperties(_TextureList[i])[0];
 					name = name.substr(name.lastIndexOf('\\') + 1);
 					$('#MapBrowser').append('<div id="MapChoice' + i + '" class="textureChoice" >' + name + '</div>');
-					$('#MapChoice' + i).css('background-image', 'url(../vwf/view/editorview/images/icons/folder.jpg)');
+					$('#MapChoice' + i).css('background-image', 'url(../vwf/adl/view/editorview/images/icons/folder.jpg)');
 					$('#MapChoice' + i).attr('dir', i);
 					$('#MapChoice' + i).click(this.dirpicked);
 				}
 			}
-			$('#MapBrowser').append('<img id="MapChoiceadd" class="textureChoice" src="./vwf/view/editorview/images/plus.png" />');
+			$('#MapBrowser').append('<img id="MapChoiceadd" class="textureChoice" src="./vwf/adl/view/editorview/images/plus.png" />');
 			$('#MapChoiceadd').css('background','white');
 			$('#MapChoiceadd').click(self.manualEntry);
 		}

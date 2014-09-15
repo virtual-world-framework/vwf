@@ -85,7 +85,7 @@ define(function() {
 
 
                                     var dragIcon = document.createElement('img');
-                                    dragIcon.src = '../vwf/view/editorview/images/icons/paste.png';
+                                    dragIcon.src = '../vwf/adl/view/editorview/images/icons/paste.png';
                                     dragIcon.width = 100;
                                     evt.originalEvent.dataTransfer.setDragImage(dragIcon, 10, 10);
 

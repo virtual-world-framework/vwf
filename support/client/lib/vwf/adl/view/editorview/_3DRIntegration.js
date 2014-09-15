@@ -120,7 +120,7 @@ Base64DecodeEnumerator.prototype = {
         }
     }
 };
-define(["vwf/view/editorview/Editor"], function(Editor) {
+define(["vwf/adl/view/editorview/Editor"], function(Editor) {
     var __3DRIntegration = {};
 
     var isInitialized = false;
@@ -141,7 +141,7 @@ define(["vwf/view/editorview/Editor"], function(Editor) {
         $(document.body).append("<div id='ModelDetails'></div>");
 
         $('#ModelUploadDialog').hide();
-        $('#ModelUploadDialog').load('vwf/view/editorview/uploadModel.html', function() {
+        $('#ModelUploadDialog').load('vwf/adl/view/editorview/uploadModel.html', function() {
 
             __3DRIntegration.hookupUploadDialog();
 

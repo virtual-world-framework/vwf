@@ -139,7 +139,7 @@ define(function ()
 			$('.ace_scroller').css('left',40);
 			$('.ace_gutter-layer').css('width',40);
 		}
-		$(document.body).append('<script src="../vwf/view/editorview/lib/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>');
+		$(document.body).append('<script src="../vwf/adl/view/editorview/lib/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>');
 		$(document.body).append("<div id='ScriptEditorAbandonChanges'>You have are about to load a different script,but you have unsaved changes to this script. Do you want to continue and abandon the changes? This action cannot be undone.</div>");
 		$(document.body).append("<div id='ScriptEditorCreateMethod'><input id='newMethodName' type='text' /></div>");
 		$(document.body).append("<div id='ScriptEditorCreateEvent'><input id='newEventName' type='text' /></div>");
@@ -1054,7 +1054,7 @@ define(function ()
 			}
 			
 			//$('#methodtextback').text(_ScriptEditor.formatScript(indentedtext));
-			$('#methodtext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
+			$('#methodtext').find(".ace_content").css('background', 'url(vwf/adl/view/editorview/images/stripe.png) 100% 100% repeat');
 			$('#methodtext').removeAttr('disabled');
 		}
 		this.setSelectedMethod = function (name, text)
@@ -1107,7 +1107,7 @@ define(function ()
 			}
 			
 			//$('#methodtextback').text(_ScriptEditor.formatScript(indentedtext));
-			$('#propertytext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
+			$('#propertytext').find(".ace_content").css('background', 'url(vwf/adl/view/editorview/images/stripe.png) 100% 100% repeat');
 			$('#propertytext').removeAttr('disabled');
 			}catch(e)
 			{
@@ -1140,7 +1140,7 @@ define(function ()
 			}
 			
 			//$('#eventtextback').text(_ScriptEditor.formatScript(text));
-			$('#eventtext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/stripe.png) 100% 100% repeat');
+			$('#eventtext').find(".ace_content").css('background', 'url(vwf/adl/view/editorview/images/stripe.png) 100% 100% repeat');
 			$('#eventtext').removeAttr('disabled');
 		}
 		this.setSelectedEvent = function (name, text)
@@ -1181,9 +1181,9 @@ define(function ()
 				$('#methodtext').attr('disabled', 'disabled');
 				$('#propertytext').attr('disabled', 'disabled');
 				$('#eventtext').attr('disabled', 'disabled');
-				$('#eventtext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
-				$('#methodtext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
-				$('#propertytext').find(".ace_content").css('background', 'url(vwf/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
+				$('#eventtext').find(".ace_content").css('background', 'url(vwf/adl/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
+				$('#methodtext').find(".ace_content").css('background', 'url(vwf/adl/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
+				$('#propertytext').find(".ace_content").css('background', 'url(vwf/adl/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat');
 				_ScriptEditor.eventEditor.setValue('');
 				_ScriptEditor.methodEditor.setValue('');
 				_ScriptEditor.propertyEditor.setValue('');

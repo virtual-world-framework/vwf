@@ -36,7 +36,7 @@ scripts:
       newdiv.style.position = 'absolute';
       newdiv.id = "Player " + this.name + 'icon';
       //newdiv.innerHTML = "" + this.name;
-      $(newdiv).attr('src','../vwf/view/editorview/images/icons/inventory.png');
+      $(newdiv).attr('src','../vwf/adl/view/editorview/images/icons/inventory.png');
       newdiv.style.left = '0px';
       newdiv.style.top = '0px';
       

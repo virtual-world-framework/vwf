@@ -35,7 +35,7 @@ define(function ()
 	{
 		var self = this;
 		this.callbacks = {};
-		this.worker = new Worker('./vwf/model/threejs/loaderThread.js');
+		this.worker = new Worker('./vwf/adl/model/threejs/loaderThread.js');
 		this.worker.onmessage = function(event) {
 			self.onmessage(event.data);
 		}

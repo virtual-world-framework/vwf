@@ -42,7 +42,7 @@ var ddsmoothmenu = {
 ///////////////////////// Global Configuration Options: /////////////////////////
 
 //Specify full URL to down and right arrow images (23 is padding-right for top level LIs with drop downs, 6 is for vertical top level items with fly outs):
-arrowimages: {down:['downarrowclass', '../vwf/view/editorview/images/down.gif', 23], right:['rightarrowclass', '../vwf/view/editorview/images/right.gif', 6]},
+arrowimages: {down:['downarrowclass', '../vwf/adl/view/editorview/images/down.gif', 23], right:['rightarrowclass', '../vwf/adl/view/editorview/images/right.gif', 6]},
 transition: {overtime:100, outtime:100}, //duration of slide in/ out animation, in milliseconds
 shadow: false, //enable shadow? (offsets now set in ddsmoothmenu.css stylesheet)
 showhidedelay: {showdelay: 100, hidedelay: 100}, //set delay in milliseconds before sub menus appear and disappear, respectively

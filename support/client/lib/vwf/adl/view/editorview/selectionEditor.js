@@ -1,4 +1,4 @@
-define(["../../../jstree.min"],function (jstree)
+define(["../../../../jstree.min"],function (jstree)
 {
 	var SelectionEditor = {};
 	var isInitialized = false;
@@ -19,7 +19,7 @@ define(["../../../jstree.min"],function (jstree)
 		$(document.body).append("<div id='selectionEditor'><div id='selectionEditorTree'></div></div>");
 
 		
-		$(document.head).append('<link rel="stylesheet" href="../vwf/view/editorview/css/jstreestyle.min.css"></link>');
+		$(document.head).append('<link rel="stylesheet" href="../vwf/adl/view/editorview/css/jstreestyle.min.css"></link>');
 		
 		var self = this;
 		//$('#selectionEditorTree').jstree();
@@ -48,7 +48,7 @@ define(["../../../jstree.min"],function (jstree)
 		$('#selectionEditor').css('padding','0%');
 		$('#selectionEditor').before("<div id='selectionEditorMenu' style='background-color:#444; padding-bottom:2px'></div>");
 		$('#selectionEditorMenu').append('<div id="selectionEditorSelectNone" class="icon selectnone"></div>');
-		$('#selectionEditorMenu').append('<div id="selectionEditorfilterLights" filter="filterLights" style="background-image:url(../vwf/view/editorview/images/icons/light_icon.png)" class="icon light "></div>');
+		$('#selectionEditorMenu').append('<div id="selectionEditorfilterLights" filter="filterLights" style="background-image:url(../vwf/adl/view/editorview/images/icons/light_icon.png)" class="icon light "></div>');
 		$('#selectionEditorMenu').append('<div id="selectionEditorfilter3Dmodels" filter="filterModels" class="icon models "></div>');
 		$('#selectionEditorMenu').append('<div id="selectionEditorfilterBehaviors" filter="filterBehaviors" class="icon script "></div>');
 		$('#selectionEditorMenu').append('<div id="selectionEditorfilterPrimitives" filter="filterPrimitives" class="icon cube "></div>');

@@ -786,7 +786,7 @@ define(function() {
                     this.addPropertyEditorDialog(node.id, editordata[i].property, $('#' + nodeid + i), 'text');
                 }
                 if (editordata[i].type == 'color') {
-                    var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;border-radius: 3px;display: inline-block;margin-left: 20px;vertical-align: middle;box-shadow: 2px 2px 5px,1px 1px 3px gray inset;background-image: url(vwf/view/editorview/images/select3.png);background-position: center;";
+                    var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;border-radius: 3px;display: inline-block;margin-left: 20px;vertical-align: middle;box-shadow: 2px 2px 5px,1px 1px 3px gray inset;background-image: url(vwf/adl/view/editorview/images/select3.png);background-position: center;";
                     $('#basicSettings' + nodeid).append('<div style="margin-bottom:10px" id="' + nodeid + i + '" />');
                     $('#' + nodeid + i + '').append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 15px;"  class="editorSliderLabel">' + editordata[i].displayname + ': </div>');
                     $('#' + nodeid + i + '').append('<div id="' + nodeid + i + 'ColorPicker" style="' + colorswatchstyle + '"></div>')
@@ -995,9 +995,13 @@ define(function() {
                     $('#RotationZ').val(Math.round(angles[2] * 57.2957795));
 
                     //$('#RotationW').val(rot[3]);
-                    $('#ScaleX').val(Math.floor(scl[0] * 1000) / 1000);
-                    $('#ScaleY').val(Math.floor(scl[1] * 1000) / 1000);
-                    $('#ScaleZ').val(Math.floor(scl[2] * 1000) / 1000);
+                    //well, this is embarassing. Old code from years ago, reflecting incorrect idea about how 
+                    //transform matrix works
+              
+                    $('#ScaleX').val((Math.floor(MATH.lengthVec3([mat[0],mat[1],mat[2]]) * 1000)) / 1000);
+                    $('#ScaleY').val((Math.floor(MATH.lengthVec3([mat[4],mat[5],mat[6]]) * 1000)) / 1000);
+                    $('#ScaleZ').val((Math.floor(MATH.lengthVec3([mat[8],mat[9],mat[10]]) * 1000)) / 1000);
+
                 }
             } catch (e) {
                 //console.log(e);

@@ -1,4 +1,4 @@
-define(["vwf/view/editorview/mapbrowser"], function ()
+define(["vwf/adl/view/editorview/mapbrowser"], function ()
 {
 	var MaterialEditor = {};
 	var isInitialized = false;
@@ -16,12 +16,12 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 
 	function initialize()
 	{
-		window._MapBrowser = require("vwf/view/editorview/mapbrowser").getSingleton();
+		window._MapBrowser = require("vwf/adl/view/editorview/mapbrowser").getSingleton();
 		$('#sidepanel').append("<div id='materialeditor'>" + "<div id='materialeditortitle' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >Material Editor</div>" + "</div>");
 		//$('#materialeditor').dialog({title:'Material Editor',autoOpen:false});
 		$('#materialeditor').css('border-bottom', '5px solid #444444')
 		$('#materialeditor').css('border-left', '2px solid #444444')
-		$(document.head).append('<link rel="stylesheet" media="screen" type="text/css" href="../vwf/view/editorview/css/colorpicker.css" />');
+		$(document.head).append('<link rel="stylesheet" media="screen" type="text/css" href="../vwf/adl/view/editorview/css/colorpicker.css" />');
 		$(document.head).append('<script type="text/javascript" src="js/colorpicker.js"></script>');
 		this.show = function ()
 		{
@@ -369,7 +369,7 @@ define(["vwf/view/editorview/mapbrowser"], function ()
 			$('#MaterialBasicSettings').append('<div style="clear:both" />');
 		
 			
-			var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;border-radius: 3px;display: inline-block;margin-left: 20px;vertical-align: middle;box-shadow: 2px 2px 5px,1px 1px 3px gray inset;background-image: url(vwf/view/editorview/images/select3.png);background-position: center;";
+			var colorswatchstyle = "margin: 5px;float:right;clear:right;background-color: #FF19E9;width: 25px;height: 25px;border: 2px solid lightgray;border-radius: 3px;display: inline-block;margin-left: 20px;vertical-align: middle;box-shadow: 2px 2px 5px,1px 1px 3px gray inset;background-image: url(vwf/adl/view/editorview/images/select3.png);background-position: center;";
 			$('#MaterialBasicSettings').append('<div style="clear:both" />');
 			$('#MaterialBasicSettings').append('<div style="margin-bottom:10px" id="colordiv" />');
 			$('#colordiv').append('<div style="display:inline-block;margin-bottom: 3px;margin-top: 15px;">Diffuse Color: </div>');
