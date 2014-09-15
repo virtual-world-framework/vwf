@@ -3,9 +3,10 @@
  * Maps simple 1:1 signal model to a broadcast model using target and sender ids
  */
 
-define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, view ) {
+define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, view, buzz ) {
 
-        
+
+    var self = this;        
     
     //a simple structure to hold the BUZZ sound reference and position data
     function SoundSource() {
@@ -93,9 +94,9 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
     //the driver
     return view.load( module, {
 
-        initialize: function() {
+        initialize: function( options ) {
 
-            this.buzz = require("buzz");
+            this.buzz = require( "buzz" );
             window._buzz = this.buzz;
             
             this.sounds = {};
@@ -105,10 +106,19 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
             
         },
 
+        createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childIndex, childName, callback /* ( ready ) */) {
+
+            if ( isSoundComponent(  ) ) {
+
+            }
+
+        },
+
         //simple function for gui elements to play sounds
         playSound: function( url, volume ) {
 
-            this.calledMethod( this.kernel.application(), 'playSound', [ url, false, volume ]);
+            this.calledMethod( this.kernel.application(), 'playSound', [ url, false, volume ] );
         },
 
         calledMethod : function( nodeID, methodName, methodParameters ) {
@@ -139,6 +149,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
                     this.sounds[ url ] = mySound;
                     mySound.play();
                 }
+            
             } else {
 
                 var url, loop, vol, soundID, soundSrc;
@@ -154,7 +165,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, vie
                         //cache the sound - can only be played simultainously by different nodes
                         if ( !soundSrc ) {
                             
-                            soundSrc = this.soundSources[ soundID ] = new SoundSource()
+                            soundSrc = this.soundSources[ soundID ] = new SoundSource();
                             soundSrc.id = id;
                             soundSrc.url = url;
                             
