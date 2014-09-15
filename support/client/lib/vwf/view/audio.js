@@ -3,10 +3,16 @@
  * Maps simple 1:1 signal model to a broadcast model using target and sender ids
  */
 
+<<<<<<< HEAD
 define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, view, buzz ) {
 
 
     var self = this;        
+=======
+define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min"], function( module, view ) {
+
+        
+>>>>>>> Updates the driver to VWF coding standards
     
     //a simple structure to hold the BUZZ sound reference and position data
     function SoundSource() {
@@ -73,7 +79,11 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, vi
     //note: the 3D driver must keep track of this
     SoundSource.prototype.updateSourcePosition = function() {
         
+<<<<<<< HEAD
         this.position = vwf.getProperty( this.id, 'worldPosition' );
+=======
+        this.position = vwf.getProperty( this.id,'worldPosition' );
+>>>>>>> Updates the driver to VWF coding standards
     }
 
     //use inverse falloff, adjust the range parameters of the falloff curve by the "volume"
@@ -94,9 +104,15 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, vi
     //the driver
     return view.load( module, {
 
+<<<<<<< HEAD
         initialize: function( options ) {
 
             this.buzz = require( "buzz" );
+=======
+        initialize: function() {
+
+            this.buzz = require("buzz");
+>>>>>>> Updates the driver to VWF coding standards
             window._buzz = this.buzz;
             
             this.sounds = {};
@@ -106,6 +122,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, vi
             
         },
 
+<<<<<<< HEAD
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName, callback /* ( ready ) */) {
 
@@ -119,6 +136,12 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, vi
         playSound: function( url, volume ) {
 
             this.calledMethod( this.kernel.application(), 'playSound', [ url, false, volume ] );
+=======
+        //simple function for gui elements to play sounds
+        playSound: function( url, volume ) {
+
+            this.calledMethod( this.kernel.application(), 'playSound', [ url, false, volume ]);
+>>>>>>> Updates the driver to VWF coding standards
         },
 
         calledMethod : function( nodeID, methodName, methodParameters ) {
@@ -149,7 +172,6 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, vi
                     this.sounds[ url ] = mySound;
                     mySound.play();
                 }
-            
             } else {
 
                 var url, loop, vol, soundID, soundSrc;
@@ -164,7 +186,6 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, vi
                         soundSrc = this.soundSources[ soundID ];
                         //cache the sound - can only be played simultainously by different nodes
                         if ( !soundSrc ) {
-                            
                             soundSrc = this.soundSources[ soundID ] = new SoundSource();
                             soundSrc.id = id;
                             soundSrc.url = url;
@@ -260,4 +281,3 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, vi
         }
     } )
 } );
-
