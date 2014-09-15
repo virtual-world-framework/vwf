@@ -146,8 +146,37 @@ define(function() {
                     }.bind(this)
                 });
             } else {
-                //this is a published world, and you do not need to hit the login server
-                this.Login('Anonymous' + _UserManager.getPlayers().length, 'Anonymous' + _UserManager.getPlayers().length);
+                //this is a published world, and you do not need to be logged in
+                 $.ajax('/vwfDataManager.svc/logindata', {
+                    cache: false,
+                    async: false,
+                    success: function(data, status, xhr) {
+                        //however, if you are logged in, this manager needs to know your name
+                        //since the server knows your name via the session cookie, it will fire
+                        //a login event with the users name. 
+                        var logindata = JSON.parse(xhr.responseText);
+                        var username = logindata.username || logindata.user_uid || logindata.UID;
+                        var userID = logindata.user_uid || logindata.UID;
+
+
+                        //only the first client from a given login should create the avatart
+                        if (vwf.models[0].model.nodes['character-vwf-' + userID.replace(/ /g, '-')] == undefined)
+                            this.Login(username, userID);
+                        else {
+                            this.Login('Anonymous' + _UserManager.getPlayers().length, 'Anonymous' + _UserManager.getPlayers().length);
+                        }
+
+
+                    }.bind(this),
+                    error: function(xhr, status, err) {
+                        //in this case, the world allows anonymous users, and you really are anonymous, so log in as
+                        //anonymous;
+                        this.Login('Anonymous' + _UserManager.getPlayers().length, 'Anonymous' + _UserManager.getPlayers().length);
+                    }.bind(this)
+                });
+
+
+
             }
 
 
@@ -654,12 +683,12 @@ define(function() {
         //$('#Players').dialog({ position:['left','bottom'],width:300,height:200,title: "Players",autoOpen:false});
 
 
+        //these three functions should be deprecated and replaced by the ClientAPI on the Scene object for access
+        //from within the model.
         this.GetPlayernameForClientID = function(id) {
-            for (var i in vwf.models[0].model.nodes) {
-                var node = vwf.models[0].model.nodes[i];
-                if (node.ownerClientID == id)
-                    return node.name;
-            }
+            var clients = vwf.getProperty(vwf.application(),'clients')
+            if(clients && clients[id])
+                return clients[id].UID;
         }
         this.GetAvatarForClientID = function(id) {
             for (var i in vwf.models[0].model.nodes) {
@@ -669,10 +698,10 @@ define(function() {
             }
         }
         this.GetClientIDForPlayername = function(id) {
-            for (var i in vwf.models[0].model.nodes) {
-                var node = vwf.models[0].model.nodes[i];
-                if (node.PlayerNumber == id)
-                    return node.ownerClientID;
+            var clients = vwf.getProperty(vwf.application(),'clients')
+            for(var i in clients)
+            {
+                if(clients[i].UID == id) return clietns[i].cid;
             }
         }
 

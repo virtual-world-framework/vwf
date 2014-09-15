@@ -40,7 +40,19 @@ function matComploose(m1, m2) {
     return true;
 }
 
-define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/threejs/backgroundLoader", "vwf/model/threejs/glTFCloner", "vwf/model/threejs/glTFLoaderUtils", "vwf/model/threejs/glTFLoader", "vwf/model/threejs/glTFAnimation","vwf/model/threejs/glTFAnimation", "vwf/model/threejs/webgl-tf-deprecated"], function(module, model, utility, Color, backgroundLoader) {
+define( [
+        "module", 
+        "vwf/model", 
+        "vwf/utility", 
+        "vwf/utility/color", 
+        "vwf/adl/model/threejs/backgroundLoader", 
+        "vwf/adl/model/threejs/glTFCloner", 
+        "vwf/adl/model/threejs/glTFLoaderUtils", 
+        "vwf/adl/model/threejs/glTFLoader", 
+        "vwf/adl/model/threejs/glTFAnimation",
+        "vwf/adl/model/threejs/glTFAnimation", 
+        "vwf/adl/model/threejs/webgl-tf-deprecated"
+    ], function(module, model, utility, Color, backgroundLoader) {
 
 
 
@@ -625,7 +637,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                         }
 
                         if (!matComploose(transform, threeObject.matrix.elements)) {
-                            if (threeObject instanceof THREE.ParticleSystem) {
+                            if (threeObject instanceof THREE.PointCloud) {
                                 threeObject.updateTransform(transform);
                             }
 
@@ -753,7 +765,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                         }
                     }
                 }
-                if (threeObject instanceof THREE.ParticleSystem) {
+                if (threeObject instanceof THREE.PointCloud) {
                     var ps = threeObject;
                     var particles = ps.geometry;
                     if (propertyName == 'quaternion') return;
@@ -1285,7 +1297,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                     }
 
                 }
-                if (threeObject instanceof THREE.ParticleSystem) {
+                if (threeObject instanceof THREE.PointCloud) {
                     var ps = threeObject;
 
                     if (ps.hasOwnProperty(propertyName))
@@ -2319,7 +2331,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
             shaderMaterial_default.fog = true;
 
             // create the particle system
-            var particleSystem = new THREE.ParticleSystem(particles, shaderMaterial_default);
+            var particleSystem = new THREE.PointCloud(particles, shaderMaterial_default);
 
             //keep track of the shaders
             particleSystem.shaderMaterial_analytic = shaderMaterial_analytic;

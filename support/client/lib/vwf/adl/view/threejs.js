@@ -814,7 +814,7 @@ define(["module", "vwf/view"], function(module, view) {
         function GetParticleSystems(node, list) {
 
             for (var i = 0; i < node.children.length; i++) {
-                if (node.children[i] instanceof THREE.ParticleSystem) {
+                if (node.children[i] instanceof THREE.PointCloud) {
                     if (!list)
                         list = [];
                     list.push(node.children[i]);
@@ -856,7 +856,7 @@ define(["module", "vwf/view"], function(module, view) {
         function renderScene(time) {
 
 
-
+            
             requestAnimFrame(renderScene);
 
             //so, here's what we'll do. Since the sim state cannot advance until tick, we will update on tick. 

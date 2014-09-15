@@ -506,7 +506,7 @@ THREE.ColladaLoader = function() {
         //createBones( geometry.bones, skin, hierarchy, skeleton, null, -1 );
         //createWeights( skin, geometry.bones, geometry.skinIndices, geometry.skinWeights );
 
-        /*
+        
 		geometry.animation = {
 			name: 'take_001',
 			fps: 30,
@@ -514,7 +514,7 @@ THREE.ColladaLoader = function() {
 			JIT: true,
 			hierarchy: hierarchy
 		};
-		*/
+		
 
         if (applyBindShape) {
 
@@ -806,7 +806,7 @@ THREE.ColladaLoader = function() {
                 return b.weight - a.weight;
 
             })
-            if (vertweights.length == 0) debugger;
+            
             var indicies = new THREE.Vector4(vertweights[0] ? vertweights[0].joint : 0, vertweights[1] ? vertweights[1].joint : 0, vertweights[2] ? vertweights[2].joint : 0, vertweights[3] ? vertweights[3].joint : 0);
             var weight = new THREE.Vector4(vertweights[0] ? vertweights[0].weight : 0,
                 vertweights[1] ? vertweights[1].weight : 0,
@@ -840,7 +840,7 @@ THREE.ColladaLoader = function() {
             "length": animationBounds.frames / 30,
             "hierarchy": []
         };
-
+      
         for (var j = 0; j < sortedbones.length; j++) {
             animationdata.hierarchy.push({
                 parent: sortedbones[j].parent,
@@ -1150,8 +1150,7 @@ THREE.ColladaLoader = function() {
                     if (geom.animation) {
                         var animation = new THREE.Animation(
                             mesh,
-                            mesh.geometry.animation.name,
-                            THREE.AnimationHandler.LINEAR
+                           geom.animation
                         );
                         mesh.animationHandle = animation;
                         window._dAnimation = animation;

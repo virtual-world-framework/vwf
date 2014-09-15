@@ -411,7 +411,11 @@ SceneManager.prototype.loadTexture = function(url, mapping, onLoad, onError) {
         };
 
         //create the new texture, and decompress. Copy over with the onload callback above
-        texture = THREE.ImageUtils.loadCompressedTexture(url, mapping, load, error);
+        //texture = THREE.ImageUtils.loadCompressedTexture(url, mapping, load, error);
+
+var loader = new THREE.DDSLoader();
+        texture = loader.load( url, load, error );
+
         if (_SettingsManager.settings.filtering) {
             texture.minFilter = THREE.LinearMipMapLinearFilter;
             texture.magFilter = THREE.LinearFilter;

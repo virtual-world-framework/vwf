@@ -38,7 +38,7 @@
             }
 
             if (!matComploose(transform, threeObject.matrix.elements)) {
-                if (threeObject instanceof THREE.ParticleSystem) {
+                if (threeObject instanceof THREE.PointCloud) {
                     threeObject.updateTransform(transform);
                 }
 
