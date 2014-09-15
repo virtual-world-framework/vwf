@@ -369,7 +369,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 case "worldTransformTo":
                     // If the duration of the transform is 0, set the transforms to their final value so it doesn't interpolate
                     if(methodParameters.length < 2 || methodParameters[1] == 0) {
-                        this.nodes[nodeID].lastTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
+                        this.nodes[nodeID].lastTickTransform = getTransform(nodeID);
                         this.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(this.nodes[nodeID].lastTickTransform);
                     }
                     break;
@@ -941,11 +941,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         for ( var nodeID in self.nodes ) {
             if ( self.state.nodes[nodeID] ) {       
                 self.nodes[nodeID].lastTickTransform = self.nodes[nodeID].selfTickTransform;
-                self.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
-                
-                if ( self.nodes[nodeID].selfTickTransform ) {
-                    self.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(self.nodes[nodeID].selfTickTransform);
-                }
+                self.nodes[nodeID].selfTickTransform = getTransform(nodeID);
             }
         }
     }
