@@ -302,7 +302,13 @@
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTFAnimation": {
                         deps: [ "vwf/model/threejs/three" ],
-                       
+                    },
+                    "vwf/adl/model/threejs/three": {
+                        exports: "THREE",
+                    },
+                    "vwf/adl/model/threejs/ColladaLoader": {
+                        deps: [ "vwf/adl/model/threejs/three" ],
+                        exports: "THREE.ColladaLoader",
                     },
                     "vwf/model/blockly/blockly_compressed": {
                         exports: "Blockly"
@@ -326,7 +332,8 @@
                 { library: "vwf/configuration", active: true },
                 { library: "vwf/kernel/model", active: true },
                 { library: "vwf/model/javascript", active: true },
-                { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
+                { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], disabledBy: [ "vwf/adl/model/ammojs" ], active: false },
+                { library: "vwf/adl/model/ammojs", linkedLibraries: ["vwf/adl/model/ammo.js/ammo"], disabledBy: [ "vwf/model/jiglib" ], active: false },
                 { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs", "vwf/adl/model/threejs", "vwf/adl/view/threejs"], active: false },
                 { library: "vwf/model/threejs", linkedLibraries: [
                     "vwf/model/threejs/three",
@@ -336,7 +343,7 @@
                     "vwf/model/threejs/js/loaders/gltf/glTFAnimation",
                     "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"
                 ], disabledBy: ["vwf/model/glge", "vwf/view/glge","vwf/adl/model/threejs", "vwf/adl/view/threejs"], active: false },
-                { library: "vwf/adl/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/ColladaLoader"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs", "vwf/model/glge", "vwf/view/glge"], active: false },
+                { library: "vwf/adl/model/threejs", linkedLibraries: ["vwf/adl/model/threejs/three", "vwf/adl/model/threejs/ColladaLoader"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs", "vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
                 { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
@@ -382,13 +389,26 @@
                 { library: "vwf/model/mil-sym/sm-bc.min", active: false }, 
                 { library: "vwf/model/buzz/buzz.min", active: false }, 
                 { library: "vwf/model/jPlayer.2.7.0/jquery.jplayer.min", active: false },
-                { library: "vwf/admin", active: true }
+                { library: "vwf/admin", active: true },
+
+                // adl sandbox specific
+                { library: "vwf/adl/model/threejs/three", active: false },
+                { library: "vwf/adl/model/threejs/ColladaLoader", active: false },
+                { library: "vwf/adl/model/ammo.js/ammo", active: true },
+                { library: "vwf/adl/view/editorview/ObjectPools", active: true },
+                { library: "vwf/adl/socket.io/socket.io.js", active: true },
+                { library: "vwf/adl/view/EditorView", active: true },
+                { library: "vwf/adl/view/WebRTC", active: true },
+                { library: "vwf/adl/view/audio", active: true },
+                { library: "vwf/adl/messageCompress", active: true },
+                { library: "vwf/adl/view/xapi", active: true }
             ];
 
             var initializers = {
                 model: [
                     { library: "vwf/model/javascript", active: true },
                     { library: "vwf/model/jiglib", active: false },
+                    { library: "vwf/adl/model/ammojs", active: true },
                     { library: "vwf/model/glge", active: false },
                     { library: "vwf/model/threejs", active: false },
                     { library: "vwf/adl/model/threejs", active: false },
@@ -401,6 +421,8 @@
                     { library: "vwf/model/heightmap", active: false },
                     { library: "vwf/model/buzz", active: false },
                     { library: "vwf/model/jPlayer", active: false },
+                    { library: "vwf/adl/model/wires", active: true },
+                    { library: "vwf/adl/model/jqueryui", active: true },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
@@ -418,7 +440,12 @@
                     { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/mil-sym", active: false },
                     { library: "vwf/view/audio", active: false },
-                    { library: "vwf/view/webrtc", active: false}
+                    { library: "vwf/view/webrtc", active: false },
+                    { library: "vwf/adl/view/EditorView", active: true },
+                    { library: "vwf/adl/view/WebRTC", active: true },
+                    { library: "vwf/adl/view/audio", active: true },
+                    { library: "vwf/adl/view/xapi", active: true },
+                    { library: "vwf/adl/view/jqueryui", active: true }
                 ]
             };
             mapLibraryName(requireArray);
@@ -502,7 +529,9 @@
                                     }
                                 }
                                 if(requireArray[libraryName].linkedLibraries) {
+console.info( "libraryName = " + libraryName );
                                     for(var i=0; i<requireArray[libraryName].linkedLibraries.length; i++) {
+console.info( "         linked libraryName = " + requireArray[libraryName].linkedLibraries[i] );
                                         requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
                                     }
                                 }
@@ -540,6 +569,35 @@
                 } );
             });
         }
+
+        // adl sandbox
+        // -- ready --------------------------------------------------------------------------------
+        this.generateTick = function() {
+
+            var fields = {
+                time: queue.time + .05,
+                action: "tick"
+                // callback: callback,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
+            };
+            queue.insert( fields, true);
+
+        };
+        this.goOffline = function(){
+
+            socket.removeListener( "disconnect", vwf.disconnected);
+            socket.disconnect();
+            socket = null;
+            window.setInterval(this.generateTick.bind(this),50);
+        };
+        this.close = function(){
+            if(socket) {
+                socket.removeListener( "disconnect", vwf.disconnected);
+                socket.disconnect();
+                socket = null;
+            }
+        };
+        // adl sandbox
+
 
         // -- initialize ---------------------------------------------------------------------------
 
