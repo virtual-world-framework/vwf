@@ -117,8 +117,7 @@ define( [   "module",
                     implementsID: childImplementsIDs,
                     source: childSource, 
                     type: childType,
-                    uri: childURI,
-                    name: childName,
+                    name: childName
                 };
                 return;                
             }
@@ -219,7 +218,7 @@ define( [   "module",
             if( node === undefined ) return;
 
 
-            if ( propertyName !== url && node.soundObj === undefined ) {
+            if ( propertyName !== "url" && node.soundObj === undefined ) {
 
                 if ( node.delayedProperties === undefined ) {
                     node.delayedProperties = {};    
@@ -254,21 +253,24 @@ define( [   "module",
                             }
                             node.isPlaying = soundProps[ 'autoplay' ] ? true : false;
                             node.delayedProperties = undefined;
-                            node.soundObj = new this.buzz.sound( propertyValue, soundProps ); 
+                            var buzz = require( "vwf/model/buzz/buzz.min" );
+                            node.soundObj = new buzz.sound( propertyValue, soundProps ); 
+
+                            self = this;
 
                             // http://buzz.jaysalvat.com/documentation/events/
                             node.soundObj.bind( "ended", function( e ) {
                                 node.isPlaying = false;
-                                this.kernel.fireEvent( node.ID, "soundEnded", [ true ] );
+                                self.kernel.fireEvent( node.ID, "soundEnded", [ true ] );
                             } );      
 
                             node.soundObj.bind( "playing", function( e ) {
                                 node.isPlaying = true;
-                                this.kernel.fireEvent( node.ID, "soundPlaying", [ true ] );
+                                self.kernel.fireEvent( node.ID, "soundPlaying", [ true ] );
                             } );  
 
                             node.soundObj.bind( "canplay", function( e ) {
-                                this.kernel.fireEvent( node.ID, "soundReady", [ true ] );
+                                self.kernel.fireEvent( node.ID, "soundReady", [ true ] );
                             } );  
 
                         }                    
