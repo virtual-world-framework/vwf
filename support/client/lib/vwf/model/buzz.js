@@ -253,7 +253,6 @@ define( [   "module",
                                 };                                 
                             }
 
-                            for ( var prop in node.delayedProperties ) {
                                 switch ( prop ) {
 
                                     case "play":

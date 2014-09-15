@@ -148,6 +148,7 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, vi
                     this.sounds[ url ] = mySound;
                     mySound.play();
                 }
+            
             } else {
 
                 var url, loop, vol, soundID, soundSrc;
