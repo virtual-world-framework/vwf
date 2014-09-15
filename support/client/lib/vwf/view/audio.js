@@ -260,3 +260,4 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, vi
         }
     } )
 } );
+
