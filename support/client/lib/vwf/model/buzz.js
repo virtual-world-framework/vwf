@@ -234,10 +234,19 @@ define( [   "module",
                             node.soundObj.set( "src", propertyValue );
                         } else {
                              
-                            var soundProps = { 
-                                "preload": "metadata",
-                                "formats": [ "ogg", "mp3", "aac", "wav" ]
-                            };
+                            var soundProps;
+
+                            if ( propertyValue.indexOf( 'data:audio' ) === 0 ) {
+                                soundProps = { 
+                                    "preload": "metadata"
+                                };
+                            } else {
+                                soundProps= { 
+                                    "preload": "metadata",
+                                    "formats": [ "ogg", "mp3", "aac", "wav" ]
+                                };                                 
+                            }
+
                             for ( var prop in node.delayedProperties ) {
                                 switch ( prop ) {
 
