@@ -2107,13 +2107,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             kineticObj = new Kinetic.Group( config || {} );
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "image", "vwf" ] ) ) {
             var imageObj = new Image();
-            imageObj.onload = function() {
-                node.kineticObj = new Kinetic.Image( {
-                    image: imageObj,
-                } );
-                addNodeToHierarchy( node );
-            };
-            imageObj.src = node.source;
+            kineticObj = new Kinetic.Image( {
+                image: imageObj
+            } );
+            if ( node.source !== undefined ) {
+                imageObj.src = node.source;    
+            }
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "layer", "vwf" ] ) ) {
             kineticObj = new Kinetic.Layer( config || {} );
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "line", "vwf" ] ) ) {
@@ -2163,11 +2162,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             kineticObj = new Kinetic.Node( config || {} );
         }
 
-        if ( kineticObj !== undefined ) {
-            //console.info( "Kinetic Object created: " + kineticObj.nodeType );
-            kineticObj.setId( node.ID ); 
-            kineticObj.name( node.name );   
-        }
         return kineticObj;
     }
 
@@ -2200,6 +2194,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     parent.kineticObj.add( node.kineticObj );    
                 }
             }
+            node.kineticObj.setId( node.ID ); 
+            node.kineticObj.name( node.name ); 
+
             node.stage = findStage( node.kineticObj );
         }
 
