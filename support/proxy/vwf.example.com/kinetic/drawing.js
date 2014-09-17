@@ -288,11 +288,13 @@ this.up = function( eventData, nodeData, touch ) {
             switch( userState.drawing_mode ) {
                 
                 case "text":
+                    drawingObject.border.visible = false;
                     this.textCreated( drawingObject.content.id );
                     break;
                 
                 case "sprite":
                 case "image":
+                    drawingObject.border.visible = false;
                     this.imageCreated( drawingObject.content.id );
                     break;
 
