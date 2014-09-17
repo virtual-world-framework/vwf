@@ -84,6 +84,10 @@ this.touchStart = function( eventData, nodeData ) {
 
     this.downPoint = eventData.stageRelative;
     this.lastPoint = eventData.stageRelative;
+
+    if ( this.client === this.moniker ) {
+        this.nodePoint = this[ this.dragProperty ];
+    }
 }
 
 this.touchMove = function( eventData, nodeData ) {
@@ -100,4 +104,5 @@ this.touchEnd = function( eventData, nodeData ) {
 
     this.downPoint = undefined;
     this.lastPoint = undefined;
+    this.nodePoint = undefined;
 }  //@ sourceURL=kinetic_node.js
