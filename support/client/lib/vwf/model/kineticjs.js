@@ -2048,19 +2048,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                 this.logger.infox( "   M === callingMethod ", nodeID, eventName );
             }
 
-            var node = this.state.nodes[nodeID];
-            var value = undefined;
-            if ( node ) {
-                switch( eventName ) {
-                    case "userEventComplete":
-                        node.isDragging = false;
-                        if ( !node.uniqueInView && node.kineticObj ) {
-                            node.kineticObj.modelX = undefined;
-                            node.kineticObj.modelY = undefined;
-                        }
-                        break;
-                }
-            }
+
         },
 
         // -- executing ------------------------------------------------------------------------------

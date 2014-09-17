@@ -198,11 +198,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 } );
 
                 node.kineticObj.on( "touchstart", function( evt ) {
-                    node.isDragging = node.kineticObj.draggable();
-                    if ( node.isDragging && !node.uniqueInView ) {
-                        node.kineticObj.modelX = node.kineticObj.x();
-                        node.kineticObj.modelY = node.kineticObj.y();
-                    }                    
                     var eData = processEvent( evt, node, TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, "touchStart", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'touchStart', eData.eventData );
@@ -391,6 +386,35 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         // gotProperty: function( nodeID, propertyName, propertyValue ) { 
         // },
+
+        firedEvent: function( nodeID, eventName, eventParameters ) {
+            
+            var node = this.state.nodes[nodeID];
+            var value = undefined;
+            if ( node ) {
+                switch( eventName ) {
+
+                    case "userDragStart":
+                        node.isDragging = node.kineticObj.draggable();
+                        if ( node.isDragging && !node.uniqueInView ) {
+                            node.kineticObj.modelX = node.kineticObj.x();
+                            node.kineticObj.modelY = node.kineticObj.y();
+                        } 
+                        break;
+
+                    case "userDragEnd":
+                        if ( this.kernel.client() === this.kernel.moniker() ) {
+                            node.isDragging = false;
+                            if ( !node.uniqueInView && node.kineticObj ) {
+                                node.kineticObj.modelX = undefined;
+                                node.kineticObj.modelY = undefined;
+                            }
+                        }
+                        break;
+                }
+            } 
+
+        },
 
         ticked: function( vwfTime ) {
             for ( var id in self.state.stages ){

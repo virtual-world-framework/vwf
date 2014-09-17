@@ -55,6 +55,8 @@ this.update = function( eventData, nodeData ) {
 this.pointerDown = function( eventData, nodeData ) {
     this.pointerIsDown = true;
 
+    this.draggable && this.userDragStart();
+
     this.downPoint = eventData.stageRelative;
     this.lastPoint = eventData.stageRelative;
 }
@@ -74,11 +76,13 @@ this.pointerUp = function( eventData, nodeData ) {
     this.lastPoint = undefined;
     this.nodePoint = undefined;
 
-    this.userEventComplete();
+    this.draggable && this.userDragEnd();
 }  
 
 this.touchStart = function( eventData, nodeData ) {
     this.touching = true;
+
+    this.draggable && this.userDragStart();
 
     this.downPoint = eventData.stageRelative;
     this.lastPoint = eventData.stageRelative;
@@ -100,5 +104,5 @@ this.touchEnd = function( eventData, nodeData ) {
     this.lastPoint = undefined;
     this.nodePoint = undefined;
 
-    this.userEventComplete();
+    this.draggable && this.userDragEnd();
 }  //@ sourceURL=kinetic_node.js
