@@ -503,7 +503,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     if ( child.material.map ) {
                         child.material.map.dispose();
                     }
-                    child.material.dispose();W
+                    child.material.dispose();
                 }
             }
         }
