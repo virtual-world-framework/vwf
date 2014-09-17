@@ -3533,14 +3533,19 @@ THREE.ColladaLoader = function () {
 
 								if (image) {
 
-									var texture = THREE.ImageUtils.loadTexture(baseUrl + image.init_from);
+									var texture;
+									if(image.init_from.indexOf('.dds') == image.init_from.length - 4)
+									{	
+										texture = THREE.ImageUtils.loadCompressedTexture(baseUrl + image.init_from); 
+									}else
+										texture = THREE.ImageUtils.loadTexture(baseUrl + image.init_from);
 									texture.texcoord = cot.texcoord;
 									texture.wrapS = cot.texOpts.wrapU ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 									texture.wrapT = cot.texOpts.wrapV ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 									texture.offset.x = cot.texOpts.offsetU;
 									texture.offset.y = cot.texOpts.offsetV;
 									texture.repeat.x = cot.texOpts.repeatU;
-									texture.repeat.y = cot.texOpts.repeatV;
+									texture.repeat.y = -cot.texOpts.repeatV;
 									props[keys[prop]] = texture;
 
 									// Texture with baked lighting?
