@@ -129,7 +129,7 @@ this.down = function( eventData, nodeData, touch ) {
         case "ring":
         case "star":
         case "wedge":
-            compExtends = "http://vwf.example.com/kinetic/"+drawingMode+".vwf"; 
+            compExtends = [ "http://vwf.example.com/kinetic/", drawingMode, ".vwf" ].join(''); 
             break;
 
         case "sprite":            
@@ -138,7 +138,7 @@ this.down = function( eventData, nodeData, touch ) {
             groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
             compExtends = { 
                 "border": "http://vwf.example.com/kinetic/line.vwf", 
-                "content": "http://vwf.example.com/kinetic/"+drawingMode+".vwf" 
+                "content": [ "http://vwf.example.com/kinetic/", drawingMode, ".vwf" ].join('') 
             };
             break;
 
