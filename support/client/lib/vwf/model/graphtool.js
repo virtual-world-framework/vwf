@@ -499,11 +499,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 if ( child.geometry ) {
                     child.geometry.dispose();
                 }
-                if ( child.material.map ) {
-                    child.material.map.dispose();
-                }
                 if ( child.material ) {
-                    child.material.dispose();
+                    if ( child.material.map ) {
+                        child.material.map.dispose();
+                    }
+                    child.material.dispose();W
                 }
             }
         }
