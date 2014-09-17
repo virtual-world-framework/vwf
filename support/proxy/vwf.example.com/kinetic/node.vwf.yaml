@@ -51,6 +51,7 @@ events:
   dragStart:
   dragMove:
   dragEnd:
+  userEventComplete:
 scripts:
 - source: "http://vwf.example.com/kinetic/node.js"
 

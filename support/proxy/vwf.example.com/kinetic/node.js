@@ -32,7 +32,7 @@ this.toggleVisibilty = function() {
 
 this.update = function( eventData, nodeData ) {
     if ( this.draggable && ( this.pointerIsDown || this.touching ) ) {
-        var point = this.nodePoint || this[ this.dragProperty ];
+        var point = this[ this.dragProperty ];
         var diff = [
             eventData.stageRelative[ 0 ] - this.lastPoint[ 0 ],
             eventData.stageRelative[ 1 ] - this.lastPoint[ 1 ]
@@ -57,10 +57,6 @@ this.pointerDown = function( eventData, nodeData ) {
 
     this.downPoint = eventData.stageRelative;
     this.lastPoint = eventData.stageRelative;
-
-    if ( this.client === this.moniker ) {
-        this.nodePoint = this[ this.dragProperty ];
-    }
 }
 
 this.pointerMove = function( eventData, nodeData ) {
@@ -77,6 +73,8 @@ this.pointerUp = function( eventData, nodeData ) {
     this.downPoint = undefined;
     this.lastPoint = undefined;
     this.nodePoint = undefined;
+
+    this.userEventComplete();
 }  
 
 this.touchStart = function( eventData, nodeData ) {
@@ -84,10 +82,6 @@ this.touchStart = function( eventData, nodeData ) {
 
     this.downPoint = eventData.stageRelative;
     this.lastPoint = eventData.stageRelative;
-
-    if ( this.client === this.moniker ) {
-        this.nodePoint = this[ this.dragProperty ];
-    }
 }
 
 this.touchMove = function( eventData, nodeData ) {
@@ -105,4 +99,6 @@ this.touchEnd = function( eventData, nodeData ) {
     this.downPoint = undefined;
     this.lastPoint = undefined;
     this.nodePoint = undefined;
+
+    this.userEventComplete();
 }  //@ sourceURL=kinetic_node.js

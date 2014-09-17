@@ -167,6 +167,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 } );
 
                 node.kineticObj.on( "mousedown", function( evt ) {
+                    node.isDragging = node.kineticObj.draggable();
+                    if ( node.isDragging && !node.uniqueInView ) {
+                        node.kineticObj.modelX = node.kineticObj.x();
+                        node.kineticObj.modelY = node.kineticObj.y();
+                    }  
                     var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     mouseDown = true;
                     //self.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
@@ -193,6 +198,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 } );
 
                 node.kineticObj.on( "touchstart", function( evt ) {
+                    node.isDragging = node.kineticObj.draggable();
+                    if ( node.isDragging && !node.uniqueInView ) {
+                        node.kineticObj.modelX = node.kineticObj.x();
+                        node.kineticObj.modelY = node.kineticObj.y();
+                    }                    
                     var eData = processEvent( evt, node, TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, "touchStart", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'touchStart', eData.eventData );
