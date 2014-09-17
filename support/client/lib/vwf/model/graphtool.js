@@ -466,7 +466,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var oldObj = graph.threeObject.getObjectByName( "graph" );
         graph.threeObject.remove( oldObj );
         if ( oldObj.children.length > 0 ) {
-            disposeGeometries( oldObj );
+            disposeObject( oldObj );
         }
         createGraph( graph );
     }
@@ -484,17 +484,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var oldObj = obj.threeObject.children[ 0 ];
         obj.threeObject.remove( oldObj );
         if ( oldObj.children.length > 0 ) {
-            disposeGeometries( oldObj );
+            disposeObject( oldObj );
         }
         createObject( obj );
     }
 
-    function disposeGeometries( obj ) {
+    function disposeObject( obj ) {
         var child, i;
         for ( i = 0; i < obj.children.length; i++ ) {
             child = obj.children[ i ];
             if ( child.children.length > 0 ) {
-                disposeGeometries( child );
+                disposeObject( child );
             } else if ( child instanceof THREE.Mesh ) {
                 if ( child.geometry ) {
                     child.geometry.dispose();
