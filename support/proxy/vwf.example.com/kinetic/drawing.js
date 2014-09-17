@@ -283,8 +283,9 @@ this.up = function( eventData, nodeData, touch ) {
         
         this.drawingObjectCreated( drawingObject.id );
 
+        var userState = this.drawing_clients[ this.client ];
         if ( this.moniker === this.client ) {
-            var userState = this.drawing_clients[ this.client ]; 
+             
             switch( userState.drawing_mode ) {
                 
                 case "text":
