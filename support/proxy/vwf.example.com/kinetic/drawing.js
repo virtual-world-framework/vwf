@@ -331,8 +331,8 @@ this.update = function( eventData, nodeData, upEvent ) {
         var height = diffY;
         var dist = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
 
-        console.info( "== "+userState.drawing_mode +" ==" );
-        console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
+        //console.info( "== "+userState.drawing_mode +" ==" );
+        //console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
 
         // this keeps the pos as the top left corner for the 
         // rectangular objects
@@ -359,7 +359,7 @@ this.update = function( eventData, nodeData, upEvent ) {
                 break;          
         }
 
-        console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
+        //console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
 
         switch ( userState.drawing_mode ) {
             
