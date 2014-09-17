@@ -240,6 +240,12 @@ define( [   "module",
                                 soundProps = { 
                                     "preload": "metadata"
                                 };
+                            } else if ( require( "vwf/utility" ).hasFileType( propertyValue ) ) {
+                                var fType = require( "vwf/utility" ).fileType( propertyValue );
+                                soundProps= { 
+                                    "preload": "metadata",
+                                    "formats": [ fType ]
+                                };                                 
                             } else {
                                 soundProps= { 
                                     "preload": "metadata",

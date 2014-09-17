@@ -276,6 +276,23 @@ define( [ "module",
         validObject: function( obj ) {
             var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
             return ( objType != 'null' && objType != 'undefined' );
+        },
+
+        hasFileType: function( value ) {
+            return ( this.fileType( value ) !== undefined )
+        },
+
+        fileType: function( value ) {
+            var fileFormat = undefined;
+
+            var temp = filename.split('.');
+            if ( temp.length > 1 ) {
+                fileFormat = temp.pop();
+                if ( fileFormat.length > 5 ) {
+                    fileFormat = undefined;
+                }
+            }
+            return fileFormat;
         },        
 
         // -- xpath --------------------------------------------------------------------------------
