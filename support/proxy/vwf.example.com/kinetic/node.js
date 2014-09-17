@@ -37,8 +37,6 @@ this.update = function( eventData, nodeData ) {
             eventData.stageRelative[ 0 ] - this.lastPoint[ 0 ],
             eventData.stageRelative[ 1 ] - this.lastPoint[ 1 ]
         ];
-        console.info( "point = [ " + point[0]+ "," +point[1]+ " ]" )
-        console.info( "diff = [ " + diff[0]+ "," +diff[1]+ " ]" );
 
         if ( point instanceof Array ) {
             point[ 0 ] += diff[ 0 ];
