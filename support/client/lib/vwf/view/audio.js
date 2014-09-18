@@ -105,15 +105,6 @@ define( [ "module", "vwf/view", "vwf/view/buzz/buzz.min" ], function( module, vi
             
         },
 
-        createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childIndex, childName, callback /* ( ready ) */) {
-
-            if ( isSoundComponent(  ) ) {
-
-            }
-
-        },
-
         //simple function for gui elements to play sounds
         playSound: function( url, volume ) {
 
