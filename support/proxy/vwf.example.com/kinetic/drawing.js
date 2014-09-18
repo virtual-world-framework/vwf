@@ -79,7 +79,8 @@ this.setClientUIState = function( stateObj ) {
 
     //console.info( "setClientUIState " + JSON.stringify( stateObj ) );
     if ( stateObj !== undefined ) {
-        if ( !this.isValid( this.drawing_clients ) || !this.isValid( this.drawing_clients[ this.client ] ) ) {
+        if ( !this.isValid( this.drawing_clients ) || 
+             !this.isValid( this.drawing_clients[ this.client ] ) ) {
             this.clientJoin( this.client );
         } 
         var clients = this.drawing_clients;
@@ -93,10 +94,12 @@ this.setClientUIState = function( stateObj ) {
 
 this.down = function( eventData, nodeData, touch ) {
 
-    if ( !this.isValid( this.drawing_clients ) || !this.isValid( this.drawing_clients[ this.client ] ) ) {
+    if ( !this.isValid( this.drawing_clients ) || 
+         !this.isValid( this.drawing_clients[ this.client ] ) ) {
         this.clientJoin( this.client );
     } 
-    if ( !this.isValid( this.drawing_private ) || !this.isValid( this.drawing_private[ this.client ] ) ) {
+    if ( !this.isValid( this.drawing_private ) || 
+         !this.isValid( this.drawing_private[ this.client ] ) ) {
         this.setUpPrivate( this.client );
     }
 
@@ -121,25 +124,38 @@ this.down = function( eventData, nodeData, touch ) {
         case "arc":
         case "circle":
         case "ellipse":
-        case "image":
         case "regularPolygon":
         case "rect":
         case "ring":
-        case "sprite":
         case "star":
-        case "text":
         case "wedge":
-            compExtends = "http://vwf.example.com/kinetic/"+drawingMode+".vwf"; 
+            compExtends = [ "http://vwf.example.com/kinetic/", drawingMode, ".vwf" ].join(''); 
+            break;
+
+        case "sprite":            
+        case "text":
+        case "image":
+            groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
+            compExtends = { 
+                "border": "http://vwf.example.com/kinetic/line.vwf", 
+                "content": [ "http://vwf.example.com/kinetic/", drawingMode, ".vwf" ].join('') 
+            };
             break;
 
         case "arrow":
             groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
-            compExtends = { "line": "http://vwf.example.com/kinetic/line.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
+            compExtends = { 
+                "line": "http://vwf.example.com/kinetic/line.vwf", 
+                "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" 
+            };
             break;
 
         case "thickArrow":
             groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
-            compExtends = { "line": "http://vwf.example.com/kinetic/line.vwf", "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" };
+            compExtends = { 
+                "line": "http://vwf.example.com/kinetic/line.vwf", 
+                "head": "http://vwf.example.com/kinetic/regularPolygon.vwf"
+            };
             break;
 
         case "borderRect":
@@ -246,10 +262,12 @@ this.down = function( eventData, nodeData, touch ) {
 
 this.move = function( eventData, nodeData, touch ) {
 
-    if ( !this.isValid( this.drawing_clients ) || !this.isValid( this.drawing_clients[ this.client ] ) ) {
+    if ( !this.isValid( this.drawing_clients ) || 
+         !this.isValid( this.drawing_clients[ this.client ] ) ) {
         this.clientJoin( this.client );
     } 
-    if ( this.drawing_private === undefined || this.drawing_private[ this.client ] === undefined ) {
+    if ( this.drawing_private === undefined || 
+         this.drawing_private[ this.client ] === undefined ) {
         this.setUpPrivate( this.client );
     }
 
@@ -258,26 +276,39 @@ this.move = function( eventData, nodeData, touch ) {
 
 this.up = function( eventData, nodeData, touch ) {
 
-    if ( this.drawing_private[ this.client ] !== undefined && this.drawing_private[ this.client ].drawingObject !== null  ) {
+    if ( this.drawing_private[ this.client ] !== undefined && 
+         this.drawing_private[ this.client ].drawingObject !== null  ) {
         var drawingObject = this.drawing_private[ this.client ].drawingObject;
         this.update( eventData, nodeData, true );
         
         this.drawingObjectCreated( drawingObject.id );
 
+        var userState = this.drawing_clients[ this.client ];
         if ( this.moniker === this.client ) {
-            var userState = this.drawing_clients[ this.client ]; 
+             
             switch( userState.drawing_mode ) {
                 
                 case "text":
-                    this.textCreated( drawingObject.id );
+                    this.textCreated( drawingObject.content.id );
                     break;
                 
+                case "sprite":
                 case "image":
-                    this.imageCreated( drawingObject.id );
+                    this.imageCreated( drawingObject.content.id );
                     break;
 
             } 
         }
+
+        switch( userState.drawing_mode ) {
+            
+            case "text":
+            case "sprite":
+            case "image":
+                drawingObject.border.visible = false;
+                break;
+
+        } 
 
         this.drawing_private[ this.client ].drawingObject = null;
     }    
@@ -285,7 +316,9 @@ this.up = function( eventData, nodeData, touch ) {
 
 this.update = function( eventData, nodeData, upEvent ) {
     
-    if ( this.drawing_private === undefined || this.drawing_private[ this.client ] === undefined || !this.isValid( this.drawing_clients ) ) {
+    if ( this.drawing_private === undefined || 
+         this.drawing_private[ this.client ] === undefined || 
+         !this.isValid( this.drawing_clients ) ) {
         return;
     }
 
@@ -414,10 +447,6 @@ this.update = function( eventData, nodeData, upEvent ) {
                 drawingObject.clockwise = false;
                 break;
 
-            case "text":
-                drawingObject.fontSize = userState.fontSize ? userState.fontSize : 16;
-                break;
-
             case "borderRect":
                 drawingObject.stroke = userState.drawing_color;
                 drawingObject.strokeWidth = userState.drawing_width;
@@ -478,6 +507,18 @@ this.update = function( eventData, nodeData, upEvent ) {
 
             case "sprite":
             case "image":
+                drawingObject.border.stroke = userState.drawing_color;
+                drawingObject.border.strokeWidth = 4;
+                drawingObject.border.points = [ 0, 0, width, 0, width, height, 0, height, 0, 0 ];
+                break;
+
+            case "text":
+                drawingObject.border.stroke = userState.drawing_color;
+                drawingObject.border.strokeWidth = 4;
+                drawingObject.border.points = [ 0, 0, width, 0, width, height, 0, height, 0, 0 ];
+                drawingObject.content.fontSize = userState.fontSize ? userState.fontSize : 16;
+                break;
+
             case "rect":
             default:
                 break;

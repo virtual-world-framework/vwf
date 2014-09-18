@@ -35,6 +35,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         "prototypes": undefined,
                         "kineticObj": undefined,
                         "stage": undefined,
+                        "isDragging": false,
                         "uniqueInView": false
                     };
                 },
@@ -1291,7 +1292,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "x":
-                            if ( node.uniqueInView ) {
+                            if ( node.uniqueInView || node.isDragging ) {
                                 value = kineticObj.modelX || 0;
                             } else {
                                 value = kineticObj.x();
@@ -1299,7 +1300,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "y":
-                            if ( node.uniqueInView ) {
+                            if ( node.uniqueInView || node.isDragging ) {
                                 value = kineticObj.modelY || 0;
                             } else {
                                 value = kineticObj.y();
@@ -1389,7 +1390,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
                         
                         case "position":
-                            if ( node.uniqueInView ) {
+                            if ( node.uniqueInView || node.isDragging ) {
                                 value = {
                                     x: kineticObj.modelX || 0,
                                     y: kineticObj.modelY || 0
@@ -1400,7 +1401,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "transform":
-                            if ( node.uniqueInView ) {
+                            if ( node.uniqueInView || node.isDragging ) {
                                 value = kineticObj.getTransform().m;
                                 value[ 4 ] = kineticObj.modelX || 0;
                                 value[ 5 ] = kineticObj.modelY || 0;
@@ -2046,6 +2047,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             if ( this.debug.events ) {
                 this.logger.infox( "   M === callingMethod ", nodeID, eventName );
             }
+
+
         },
 
         // -- executing ------------------------------------------------------------------------------
@@ -2107,13 +2110,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             kineticObj = new Kinetic.Group( config || {} );
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "image", "vwf" ] ) ) {
             var imageObj = new Image();
-            imageObj.onload = function() {
-                node.kineticObj = new Kinetic.Image( {
-                    image: imageObj,
-                } );
-                addNodeToHierarchy( node );
-            };
-            imageObj.src = node.source;
+            kineticObj = new Kinetic.Image( {
+                image: imageObj
+            } );
+            if ( node.source !== undefined ) {
+                imageObj.src = node.source;    
+            }
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "layer", "vwf" ] ) ) {
             kineticObj = new Kinetic.Layer( config || {} );
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "line", "vwf" ] ) ) {
@@ -2163,11 +2165,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             kineticObj = new Kinetic.Node( config || {} );
         }
 
-        if ( kineticObj !== undefined ) {
-            //console.info( "Kinetic Object created: " + kineticObj.nodeType );
-            kineticObj.setId( node.ID ); 
-            kineticObj.name( node.name );   
-        }
         return kineticObj;
     }
 
@@ -2188,6 +2185,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     function addNodeToHierarchy( node ) {
         
         if ( node.kineticObj ) {
+
+            node.kineticObj.modelX = undefined;
+            node.kineticObj.modelY = undefined;
+
             if ( self.state.nodes[ node.parentID ] !== undefined ) {
                 var parent = self.state.nodes[ node.parentID ];
                 if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
@@ -2200,6 +2201,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     parent.kineticObj.add( node.kineticObj );    
                 }
             }
+            node.kineticObj.setId( node.ID ); 
+            node.kineticObj.name( node.name ); 
+
             node.stage = findStage( node.kineticObj );
         }
 
