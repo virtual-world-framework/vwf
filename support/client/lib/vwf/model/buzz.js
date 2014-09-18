@@ -3,10 +3,11 @@
 /// @module vwf/model/buzz
 /// @requires vwf/model
 
-define( [   "module", 
-            "vwf/model", 
-            "vwf/utility", 
-        ], function( module, model, utility ) {
+define( [   
+        "module", 
+        "vwf/model", 
+        "vwf/utility" 
+    ], function( module, model, utility ) {
 
     var self;
 
