@@ -269,7 +269,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var node = this.state.nodes[nodeID];
             var imageObj;
             var value = undefined;
-            if ( node && node.kineticObj && utility.validPropertyValue( propertyValue ) ) {
+            if ( node && node.kineticObj && utility.validObject( propertyValue ) ) {
                 
                 var kineticObj = node.kineticObj;
                 
@@ -476,7 +476,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "fillPatternImage":
-                            if ( utility.validPropertyValue( propertyValue ) ) {
+                            if ( utility.validObject( propertyValue ) ) {
                                 var imageObj = kineticObj.fillPatternImage();
                                 if ( imageObj !== undefined ) {
                                     imageObj.src = propertyValue;
@@ -902,7 +902,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "image":
-                            if ( utility.validPropertyValue( propertyValue ) ) {
+                            if ( utility.validObject( propertyValue ) ) {
                                 var imageObj = kineticObj.image();
                                 if ( imageObj !== undefined ) {
                                     imageObj.src = propertyValue;
@@ -1048,7 +1048,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "image":
-                            if ( utility.validPropertyValue( propertyValue ) ) {
+                            if ( utility.validObject( propertyValue ) ) {
                                 var imageObj = kineticObj.image();
                                 if ( imageObj !== undefined ) {
                                     imageObj.src = propertyValue;

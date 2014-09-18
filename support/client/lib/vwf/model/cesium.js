@@ -558,7 +558,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
             }
 
-            if ( utility.validPropertyValue.call( this, propertyValue ) ) {
+            if ( utility.validObject( propertyValue ) ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( node === undefined ) node = this.state.scenes[ nodeID ];
                 if ( node !== undefined ) {
@@ -583,7 +583,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
             }
 
-            if ( utility.validPropertyValue.call( this, propertyValue ) ) {
+            if ( utility.validObject( propertyValue ) ) {
                 var node = this.state.nodes[ nodeID ];
                 if ( node === undefined ) node = this.state.scenes[ nodeID ];
                 if ( node !== undefined ) {
@@ -612,7 +612,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
             if ( node ) {
 
-                if ( /*node.cesiumObj !== undefined &&*/ validPropertyValue.call( this, propertyValue ) ) {
+                if ( utility.validObject( propertyValue ) ) {
 
                     switch ( propertyName ) {
 
@@ -1186,7 +1186,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 node = this.state.scenes[ nodeID ]; 
                 var scene = node.scene;
 
-                if ( ( node.cesiumWidget !== undefined || node.globe !== undefined ) && utility.validPropertyValue.call( this, propertyValue ) ) {
+                if ( ( node.cesiumWidget !== undefined || node.globe !== undefined ) && utility.validObject( propertyValue ) ) {
 
                     switch ( propertyName ) {
 
@@ -2268,11 +2268,6 @@ define( [ "module", "vwf/model", "vwf/utility",
 
     function arrayToMatrix( arry ) {
         return Cesium.Matrix4.fromRowMajorArray( arry );
-    }
-
-    function validPropertyValue( obj ) {
-      var objType = ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
-      return ( objType != 'null' && objType != 'undefined' );
     }
 
     function getCentralBody( sceneNode, node ) {
