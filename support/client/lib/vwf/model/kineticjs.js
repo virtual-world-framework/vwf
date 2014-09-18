@@ -269,7 +269,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             var node = this.state.nodes[nodeID];
             var imageObj;
             var value = undefined;
-            if ( node && node.kineticObj && utility.validPropertyValue( propertyValue ) ) {
+            if ( node && node.kineticObj && utility.validObject( propertyValue ) ) {
                 
                 var kineticObj = node.kineticObj;
                 
@@ -476,7 +476,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "fillPatternImage":
-                            if ( utility.validPropertyValue( propertyValue ) ) {
+                            if ( utility.validObject( propertyValue ) ) {
                                 var imageObj = kineticObj.fillPatternImage();
                                 if ( imageObj !== undefined ) {
                                     imageObj.src = propertyValue;
@@ -902,17 +902,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "image":
-                            if ( utility.validPropertyValue( propertyValue ) ) {
-                                var imageObj = kineticObj.image();
-                                if ( imageObj !== undefined ) {
-                                    imageObj.src = propertyValue;
-                                } else {
-                                    imageObj = new Image();
-                                    imageObj.onload = function() {
-                                        kineticObj.image( imageObj );
-                                    };
-                                    imageObj.src = propertyValue;                                
-                                }
+                            if ( utility.validObject( propertyValue ) ) {
+                                loadImage( node, propertyValue );
                             }
                             break;
 
@@ -931,6 +922,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                     "width": Number( propertyValue.width ), "height":  Number( propertyValue.height )
                                 } );
                             } 
+                            break;
+
+                        case "scaleOnLoad":
+                            node.scaleOnLoad = Boolean( propertyValue );
                             break;
                         
                         default:
@@ -1048,18 +1043,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "image":
-                            if ( utility.validPropertyValue( propertyValue ) ) {
-                                var imageObj = kineticObj.image();
-                                if ( imageObj !== undefined ) {
-                                    imageObj.src = propertyValue;
-                                } else {
-                                    imageObj = new Image();
-                                    imageObj.onload = function() {
-                                        kineticObj.image( imageObj );
-                                    };
-                                    imageObj.src = propertyValue;                                
-                                }
+                            if ( utility.validObject( propertyValue ) ) {
+                                loadImage( node, propertyValue );
                             }
+                            break;
+
+                        case "scaleOnLoad":
+                            node.scaleOnLoad = Boolean( propertyValue );
                             break;
 
                         default:
@@ -1808,6 +1798,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         case "crop":
                             value = kineticObj.crop();
                             break;
+
+                        case "scaleOnLoad":
+                            value = node.scaleOnLoad;
+                            break;
                         
                     }                    
                 }
@@ -1900,6 +1894,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             if ( imageObj !== undefined ) {
                                 value = imageObj.src;    
                             }
+                            break;
+
+                        case "scaleOnLoad":
+                            value = node.scaleOnLoad;
                             break;
                     }
                 }
@@ -2110,6 +2108,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             kineticObj = new Kinetic.Group( config || {} );
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "image", "vwf" ] ) ) {
             var imageObj = new Image();
+            node.scaleOnLoad = false;
             kineticObj = new Kinetic.Image( {
                 image: imageObj
             } );
@@ -2129,7 +2128,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "ring", "vwf" ] ) ) {
             kineticObj = new Kinetic.Ring( config || {} );
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "sprite", "vwf" ] ) ) {
-            kineticObj = new Kinetic.Sprite( config || {} );
+            var imageObj = new Image();
+            node.scaleOnLoad = false;
+            kineticObj = new Kinetic.Sprite( {
+                image: imageObj
+            } );
+            if ( node.source !== undefined ) {
+                imageObj.src = node.source;    
+            }
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
             var stageWidth = 800;
             var stageHeight = 600;
@@ -2263,7 +2269,34 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         return found;
     }
-    function findChild( parentObj, childName ) {
-        return undefined;
+
+    function loadImage( node, url ) {
+        if ( node && node.kineticObj ) {
+            var kineticObj = node.kineticObj;
+            var imageObj = kineticObj.image();
+            var validImage = ( imageObj !== undefined ); 
+            var width = kineticObj.width();
+            var height = kineticObj.height();
+            
+            if ( !validImage ) {
+                imageObj = new Image();    
+            }
+
+            imageObj.onload = function() {
+                if ( !validImage ) {
+                    kineticObj.image( imageObj );
+                }
+                if ( node.scaleOnLoad ) {
+
+                    if ( width > height ) {
+                        kineticObj.scale( { "x": width / imageObj.width ,"y": width / imageObj.width } );
+                    } else {
+                        kineticObj.scale( { "x": height / imageObj.height ,"y": height / imageObj.height } );
+                    }
+                }
+            }
+            imageObj.src = url;
+    
+        }   
     }
 });

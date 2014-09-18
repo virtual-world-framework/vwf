@@ -273,7 +273,7 @@ define( [ "module",
             return a.href;
         },
 
-        validPropertyValue: function( obj ) {
+        validObject: function( obj ) {
             var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
             return ( objType != 'null' && objType != 'undefined' );
         },        

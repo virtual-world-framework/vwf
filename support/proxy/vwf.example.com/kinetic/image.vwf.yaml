@@ -10,5 +10,6 @@ properties:
         this.imageChanged( value );
       }   
   crop:
+  scaleOnLoad: false
 events:
   imageChanged:

@@ -7,3 +7,4 @@ properties:
   animations:
   frameIndex:
   image:
+  scaleOnLoad: false

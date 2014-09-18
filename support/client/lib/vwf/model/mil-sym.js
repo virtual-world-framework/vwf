@@ -205,7 +205,7 @@ define( [ "module",
 
             var renderImage = false;
 
-            if ( node !== undefined && ( utility.validPropertyValue( propertyValue ) ) ) {
+            if ( node !== undefined && ( utility.validObject( propertyValue ) ) ) {
                 if ( node.nodeType === "unit" ) {
                     
                     switch ( propertyName ) {

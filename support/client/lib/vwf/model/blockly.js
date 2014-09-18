@@ -218,7 +218,7 @@ define( [ "module", "vwf/model", "vwf/utility",
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
             var value = undefined;
 
-            if ( ( node !== undefined ) && ( utility.validPropertyValue( propertyValue ) ) ) {
+            if ( ( node !== undefined ) && ( utility.validObject( propertyValue ) ) ) {
 
                 switch ( propertyName ) {
                     
