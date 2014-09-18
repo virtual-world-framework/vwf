@@ -2263,7 +2263,4 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         }
         return found;
     }
-    function findChild( parentObj, childName ) {
-        return undefined;
-    }
 });
