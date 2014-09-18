@@ -182,6 +182,7 @@ this.down = function( eventData, nodeData, touch ) {
             //case "text":
             case "image":
                 retObj.opacity = 0.7;
+                retObj.scaleOnLoad = true;
                 break;
 
             default:
@@ -521,6 +522,8 @@ this.update = function( eventData, nodeData, upEvent ) {
                 drawingObject.border.stroke = userState.drawing_color;
                 drawingObject.border.strokeWidth = 4;
                 drawingObject.border.points = [ 0, 0, width, 0, width, height, 0, height, 0, 0 ];
+                drawingObject.content.width = width;
+                drawingObject.content.height = height;
                 break;
 
             case "text":
