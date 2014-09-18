@@ -9,7 +9,7 @@ define( [
         "vwf/utility" 
     ], function( module, model, utility ) {
 
-    var self;
+    var modelDriver;
 
     return model.load( module, {
 
@@ -19,7 +19,7 @@ define( [
 
         initialize: function( options ) {
             
-        	self = this;
+        	modelDriver = this;
 
             this.arguments = Array.prototype.slice.call( arguments );
 
@@ -122,21 +122,23 @@ define( [
                 
                 node.prototypes = protos;
                 node.is3DSound = this.state.is3DSoundComponent( protos );
-
             } 
-
-
         },
 
-        // initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-        //     childSource, childType, childIndex, childName ) {
+        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+            childSource, childType, childIndex, childName ) {
 
-        //     if ( this.debug.initializing ) {
-        //         this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
-        //     } 
+            if ( this.debug.initializing ) {
+                this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            } 
 
-        //     var node = this.state.nodes[ nodeID ]; 
-        // },
+            var node = this.state.nodes[ childID ];
+            if ( node !== undefined ) {
+                if ( utility.validObject( childSource ) ) {
+                    createSound( node, childSource );
+                }                
+            } 
+        },
 
         deletingNode: function( nodeID ) {
             
@@ -144,8 +146,8 @@ define( [
                 this.logger.infox( "deletingNode", nodeID );
             }
 
-            if ( this.state.node.nodes[ childID ] ) {
-                delete this.state.nodes[ childID ];
+            if ( this.state.nodes[ nodeID ] ) {
+                delete this.state.nodes[ nodeID ];
             }
 
         },
@@ -209,71 +211,18 @@ define( [
                 if ( node.delayedProperties === undefined ) {
                     node.delayedProperties = {};    
                 }
-                node.delayedProperties[ propertyName ] = Boolean( propertyValue ); 
+                node.delayedProperties[ propertyName ] = propertyValue; 
 
             } else {
                 
+                value = propertyValue;
                 switch ( propertyName ) {
                     
                     case "url": 
                         if ( node.soundObj !== undefined ) {
                             node.soundObj.set( "src", propertyValue );
                         } else {
-                             
-                            var soundProps;
-
-                            if ( propertyValue.indexOf( 'data:audio' ) === 0 ) {
-                                soundProps = { 
-                                    "preload": "metadata"
-                                };
-                            } else if ( require( "vwf/utility" ).hasFileType( propertyValue ) ) {
-                                var fType = require( "vwf/utility" ).fileType( propertyValue );
-                                soundProps= { 
-                                    "preload": "metadata",
-                                    "formats": [ fType ]
-                                };                                 
-                            } else {
-                                soundProps= { 
-                                    "preload": "metadata",
-                                    "formats": [ "ogg", "mp3", "aac", "wav" ]
-                                };                                 
-                            }
-
-                            for ( var prop in node.delayedProperties ) {
-                                switch ( prop ) {
-
-                                    case "play":
-                                        soundProps[ 'autoplay' ] = Boolean( node.delayedProperties[ prop ] );
-                                        break;
-
-                                    default:
-                                        soundProps[ prop ] = node.delayedProperties[ prop ];
-                                        break;
-                                }
-                                
-                            }
-                            node.isPlaying = soundProps[ 'autoplay' ] ? true : false;
-                            node.delayedProperties = undefined;
-                            var buzz = require( "vwf/model/buzz/buzz.min" );
-                            node.soundObj = new buzz.sound( propertyValue, soundProps ); 
-
-                            self = this;
-
-                            // http://buzz.jaysalvat.com/documentation/events/
-                            node.soundObj.bind( "ended", function( e ) {
-                                node.isPlaying = false;
-                                self.kernel.fireEvent( node.ID, "soundEnded", [ true ] );
-                            } );      
-
-                            node.soundObj.bind( "playing", function( e ) {
-                                node.isPlaying = true;
-                                self.kernel.fireEvent( node.ID, "soundPlaying", [ true ] );
-                            } );  
-
-                            node.soundObj.bind( "canplay", function( e ) {
-                                self.kernel.fireEvent( node.ID, "soundReady", [ true ] );
-                            } );  
-
+                            createSound( node, propertyValue )
                         }                    
                         break;
 
@@ -334,6 +283,10 @@ define( [
                                 node.soundObj.unloop();
                             }
                         }
+                        break;
+
+                    default:
+                        value = undefined;
                         break;
 
 
@@ -470,6 +423,63 @@ define( [
             } 
         }
         return undefined;
+    }
+
+    function createSound( node, url ) {
+        
+        var soundProps;
+        if ( url.indexOf( 'data:audio' ) === 0 ) {
+            soundProps = { 
+                "preload": "metadata"
+            };
+        } else if ( require( "vwf/utility" ).hasFileType( url ) ) {
+            var fType = require( "vwf/utility" ).fileType( url );
+            soundProps= { 
+                "preload": "metadata",
+                "formats": [ fType ]
+            };                                 
+        } else {
+            soundProps= { 
+                "preload": "metadata",
+                "formats": [ "ogg", "mp3", "aac", "wav" ]
+            };                                 
+        }
+
+        if ( node.delayedProperties !== undefined ) {
+            for ( var prop in node.delayedProperties ) {
+                switch ( prop ) {
+
+                    case "play":
+                        soundProps[ 'autoplay' ] = Boolean( node.delayedProperties[ prop ] );
+                        break;
+
+                    default:
+                        soundProps[ prop ] = node.delayedProperties[ prop ];
+                        break;
+                }
+            }
+            node.delayedProperties = undefined;
+        }
+        
+        node.isPlaying = soundProps[ 'autoplay' ] ? true : false;
+        var buzz = require( "vwf/model/buzz/buzz.min" );
+        node.soundObj = new buzz.sound( url, soundProps ); 
+
+        // http://buzz.jaysalvat.com/documentation/events/
+        node.soundObj.bind( "ended", function( e ) {
+            node.isPlaying = false;
+            modelDriver.kernel.fireEvent( node.ID, "soundEnded", [ true ] );
+        } );      
+
+        node.soundObj.bind( "playing", function( e ) {
+            node.isPlaying = true;
+            modelDriver.kernel.fireEvent( node.ID, "soundPlaying", [ true ] );
+        } );  
+
+        node.soundObj.bind( "canplay", function( e ) {
+            modelDriver.kernel.fireEvent( node.ID, "soundReady", [ true ] );
+        } );  
+
     }
 
 } );
