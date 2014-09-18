@@ -288,6 +288,22 @@
                         deps: [ "vwf/model/threejs/three" ],
                         exports: "THREE.ColladaLoader",
                     },
+                    "vwf/model/threejs/js/loaders/glTF/glTFLoader": {
+                        deps: [ "vwf/model/threejs/three" ],
+                        exports: "THREE.glTFLoader",
+                    },
+                    "vwf/model/threejs/js/loaders/glTF/glTF-parser": {
+                        deps: [ "vwf/model/threejs/three" ],
+                      
+                    },
+                    "vwf/model/threejs/js/loaders/glTF/glTFLoaderUtils": {
+                        deps: [ "vwf/model/threejs/three" ],
+                       
+                    },
+                    "vwf/model/threejs/js/loaders/glTF/glTFAnimation": {
+                        deps: [ "vwf/model/threejs/three" ],
+                       
+                    },
                     "vwf/model/blockly/blockly_compressed": {
                         exports: "Blockly"
                     },
@@ -312,7 +328,11 @@
                 { library: "vwf/model/javascript", active: true },
                 { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
                 { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
-                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
+                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader",
+                "vwf/model/threejs/js/loaders/glTF/glTF-parser",
+                "vwf/model/threejs/js/loaders/glTF/glTFLoader",
+                "vwf/model/threejs/js/loaders/glTF/glTFAnimation",
+                "vwf/model/threejs/js/loaders/glTF/glTFLoaderUtils"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
                 { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
@@ -343,6 +363,11 @@
                 { library: "vwf/model/glge/glge-compiled", active: false },
                 { library: "vwf/model/threejs/three", active: false },
                 { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
+
+                { library: "vwf/model/threejs/js/loaders/glTF/glTF-parser", active: false },
+                { library: "vwf/model/threejs/js/loaders/glTF/glTFLoader", active: false },
+                { library: "vwf/model/threejs/js/loaders/glTF/glTFAnimation", active: false },
+                { library: "vwf/model/threejs/js/loaders/glTF/glTFLoaderUtils", active: false },
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
@@ -483,6 +508,10 @@
                     requireArray["vwf/view/threejs"].active = true;
                     requireArray["vwf/model/threejs/three"].active = true;
                     requireArray["vwf/model/threejs/js/loaders/ColladaLoader"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTF-parser"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoader"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTFAnimation"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"].active = true;
                     initializers["model"]["vwf/model/threejs"].active = true;
                     initializers["view"]["vwf/view/threejs"].active = true;
                 }
@@ -1677,7 +1706,7 @@
                     // child's component specification. createChild() delegates to the models and
                     // views as before.
 
-                    async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
+                    async.forEachSeries( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
 
                         var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
 
@@ -1709,7 +1738,7 @@
                     var scripts = nodeComponent.scripts ?
                         [].concat( nodeComponent.scripts ) : []; // accept either an array or a single item
 
-                    async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
+                    async.mapSeries( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
 
                         if ( valueHasType( script ) ) {
                             if ( script.source ) {
@@ -2144,7 +2173,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                     // Create the prototype and behavior nodes (or locate previously created
                     // instances).
 
-                    async.parallel( [
+                    async.series( [
 
                         function( parallel_callback_async /* ( err, results ) */ ) {
 
@@ -2186,7 +2215,7 @@ if ( ! childComponent.source ) {
                             var behaviorComponents = childComponent.implements ?
                                 [].concat( childComponent.implements ) : []; // accept either an array or a single item
 
-                            async.map( behaviorComponents, function( behaviorComponent, map_callback_async /* ( err, result ) */ ) {
+                            async.mapSeries( behaviorComponents, function( behaviorComponent, map_callback_async /* ( err, result ) */ ) {
                                 vwf.createNode( behaviorComponent, function( behaviorID ) /* async */ {
                                     map_callback_async( undefined, behaviorID );
                                 } );
@@ -2269,7 +2298,7 @@ if ( ! childComponent.source ) {
                     // Call createdNode() on each view. The view is being notified of a node that has
                     // been constructed.
 
-                    async.forEach( vwf.views, function( view, each_callback_async /* ( err ) */ ) {
+                    async.forEachSeries( vwf.views, function( view, each_callback_async /* ( err ) */ ) {
 
                         var driver_ready = true;
 
@@ -2383,7 +2412,7 @@ if ( ! childComponent.source ) {
                     // child's component specification. createChild() delegates to the models and
                     // views as before.
 
-                    async.forEach( Object.keys( childComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
+                    async.forEachSeries( Object.keys( childComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
                         var childValue = childComponent.children[childName];
 
                         vwf.createChild( childID, childName, childValue, undefined, function( childID ) /* async */ {  // TODO: add in original order from childComponent.children  // TODO: propagate childURI + fragment identifier to children of a URI component?
@@ -2407,7 +2436,7 @@ if ( ! childComponent.source ) {
                     var scripts = childComponent.scripts ?
                         [].concat( childComponent.scripts ) : []; // accept either an array or a single item
 
-                    async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
+                    async.mapSeries( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
 
                         if ( valueHasType( script ) ) {
                             if ( script.source ) {

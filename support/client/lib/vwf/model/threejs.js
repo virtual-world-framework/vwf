@@ -255,6 +255,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 if ( childType == "model/vnd.collada+xml" || 
                     childType == "model/vnd.osgjs+json+compressed" ||
                     childType == "model/x-threejs-morphanim+json" ||
+                    childType == "model/vnd.gltf+json" ||
                     childType == "model/x-threejs-skinned+json" ) {
                     
                     // Most often this callback is used to suspend the queue until the load is complete
@@ -2425,6 +2426,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
     }
     function fixMissingUVs(mesh)
     {
+        debugger;
         if(!mesh.geometry.faceVertexUvs[0] )
             mesh.geometry.faceVertexUvs[0] = [];
         if(mesh.geometry.faceVertexUvs[0].length == 0)
@@ -2703,9 +2705,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             var meshes =[];
             GetAllLeafMeshes( asset, meshes );
 
+            console.log(nodeID);
+            if(nodeID.indexOf('rover') == nodeID.length - 5)
+                window._dMeshes = meshes;
             for( var i =0; i < meshes.length; i++ ) {
                 if ( meshes[i].material.map != null ) {
-                    fixMissingUVs( meshes[i] );
+                    //fixMissingUVs( meshes[i] );
                 }
             }
             
@@ -2755,6 +2760,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 for(var i = 0; i < keyframeAnimations.length; i++) {
                     var animation = keyframeAnimations[i];
 
+                    if(!animation.node) continue;
                     // Save references to the animations on the node that is animated, so that it can play separately
                     if( animation.node.animations == undefined ) {
                         animation.node.animations = [];
@@ -2917,6 +2923,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 node.loader = new THREE.JSONLoader()
                 node.loader.load( node.source, node.assetLoaded.bind( this ) );
             }
+                                    
+            if( childType == "model/vnd.gltf+json")
+            {
+             
+                node.loader = new THREE.glTFLoader();
+                node.loader.useBufferGeometry = false;
+                node.loader.load( node.source, node.assetLoaded.bind( this ) );
+
+            }
+
+            
         }
 
         //if the asset registry entry is not pending and it is loaded, then just grab a copy, 
