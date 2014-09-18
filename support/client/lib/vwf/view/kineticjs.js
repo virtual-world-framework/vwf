@@ -395,11 +395,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 switch( eventName ) {
 
                     case "userDragStart":
-                        node.isDragging = node.kineticObj.draggable();
-                        if ( node.isDragging && !node.uniqueInView ) {
-                            node.kineticObj.modelX = node.kineticObj.x();
-                            node.kineticObj.modelY = node.kineticObj.y();
-                        } 
+                        if ( this.kernel.client() === this.kernel.moniker() ) {
+                            node.isDragging = node.kineticObj.draggable();
+                            if ( node.isDragging && !node.uniqueInView ) {
+                                node.kineticObj.modelX = node.kineticObj.x();
+                                node.kineticObj.modelY = node.kineticObj.y();
+                            } 
+                        }
                         break;
 
                     case "userDragEnd":
