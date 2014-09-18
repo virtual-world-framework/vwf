@@ -323,6 +323,7 @@
                 { library: "vwf/model/kineticjs", linkedLibraries: [ "vwf/model/kinetic/kinetic.min" ],  active: false },
                 { library: "vwf/model/mil-sym", linkedLibraries: [ "vwf/model/mil-sym/sm-bc.min" ],  active: false },
                 { library: "vwf/model/heightmap", active: false },
+                { library: "vwf/model/buzz", linkedLibraries: ["vwf/model/buzz/buzz.min"], active: false },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
             	{ library: "vwf/view/editor", active: false },
@@ -336,6 +337,7 @@
                 { library: "vwf/view/cesium", active: false },
                 { library: "vwf/view/kineticjs", active: false },
                 { library: "vwf/view/mil-sym", active: false },
+                { library: "vwf/view/audio", active: false },
                 { library: "vwf/kernel/utility", active: true },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
@@ -348,6 +350,7 @@
                 { library: "vwf/model/blockly/JS-Interpreter/interpreter.js", active: false },
                 { library: "vwf/model/kinetic/kinetic.min", active: false },                
                 { library: "vwf/model/mil-sym/sm-bc.min", active: false }, 
+                { library: "vwf/model/buzz/buzz.min", active: false }, 
                 { library: "vwf/admin", active: true }
             ];
 
@@ -364,6 +367,7 @@
                     { library: "vwf/model/kineticjs", active: false },
                     { library: "vwf/model/mil-sym", active: false },
                     { library: "vwf/model/heightmap", active: false },
+                    { library: "vwf/model/buzz", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
@@ -379,6 +383,7 @@
                     { library: "vwf/view/touch", active: false },
                     { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/mil-sym", active: false },
+                    { library: "vwf/view/audio", active: false },
                     { library: "vwf/view/webrtc", active: false}
                 ]
             };
