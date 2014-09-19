@@ -12,7 +12,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         var returnData = { eventData: undefined, eventNodeData: undefined };
 
         if ( !propagate ) {
-            e.evt.stopPropagation();
+            // For the "dragend" event, kinetic sometimes sends us an event object that doesn't
+            // have all the expected functions and properties attached
+            e.evt.stopPropagation && e.evt.stopPropagation();
         }
 
         var eventPosition;
