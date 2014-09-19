@@ -463,7 +463,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
     function redrawGraph( graph ) {
-        graph.threeObject.remove( graph.threeObject.getObjectByName( "graph" ) );
+        var oldObj = graph.threeObject.getObjectByName( "graph" );
+        graph.threeObject.remove( oldObj );
+        if ( oldObj.children.length > 0 ) {
+            disposeObject( oldObj );
+        }
         createGraph( graph );
     }
 
@@ -471,14 +475,38 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         for ( var objID in objects ) {
             var obj = objects[ objID ];
             if ( obj.parentID === graphID && obj.initialized ) {
-            redrawObject( obj );
+                redrawObject( obj );
             }
         }
     }
 
     function redrawObject( obj ) {
-        obj.threeObject.remove( obj.threeObject.children[0] );
+        var oldObj = obj.threeObject.children[ 0 ];
+        obj.threeObject.remove( oldObj );
+        if ( oldObj.children.length > 0 ) {
+            disposeObject( oldObj );
+        }
         createObject( obj );
+    }
+
+    function disposeObject( obj ) {
+        var child, i;
+        for ( i = 0; i < obj.children.length; i++ ) {
+            child = obj.children[ i ];
+            if ( child.children.length > 0 ) {
+                disposeObject( child );
+            } else if ( child instanceof THREE.Mesh ) {
+                if ( child.geometry ) {
+                    child.geometry.dispose();
+                }
+                if ( child.material ) {
+                    if ( child.material.map ) {
+                        child.material.map.dispose();
+                    }
+                    child.material.dispose();
+                }
+            }
+        }
     }
 
     function setGraphVisibility( node, value ) {
