@@ -107,7 +107,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
 
         this.onload = null;
 
-        this.uvs = null;
+        this.uv = null;
         this.indexArray = null;
     };
 
@@ -299,7 +299,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
             for (i = 0; i < floatArray.length / 2; i++) {
             	floatArray[i*2+1] = 1.0 - floatArray[i*2+1];
             }
-            geom.geometry.attributes.uv = {
+            geom.geometry.attributes.uvMap = {
             		itemSize: nComponents,
             		array : floatArray
             };

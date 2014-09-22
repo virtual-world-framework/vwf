@@ -2426,7 +2426,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
     }
     function fixMissingUVs(mesh)
     {
-        debugger;
+       
+        if(mesh.geometry instanceof THREE.BufferGeometry) return;
         if(!mesh.geometry.faceVertexUvs[0] )
             mesh.geometry.faceVertexUvs[0] = [];
         if(mesh.geometry.faceVertexUvs[0].length == 0)
@@ -2710,7 +2711,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 window._dMeshes = meshes;
             for( var i =0; i < meshes.length; i++ ) {
                 if ( meshes[i].material.map != null ) {
-                    //fixMissingUVs( meshes[i] );
+                    fixMissingUVs( meshes[i] );
                 }
             }
             
@@ -2928,7 +2929,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             {
              
                 node.loader = new THREE.glTFLoader();
-                node.loader.useBufferGeometry = false;
+                node.loader.useBufferGeometry = true;
                 node.loader.load( node.source, node.assetLoaded.bind( this ) );
 
             }
