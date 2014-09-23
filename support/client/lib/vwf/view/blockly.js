@@ -105,6 +105,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                     trashcan: false,
                 } ); 
 
+                // HACK: Fix Blockly's hijacking of the backspace and delete keys in password fields
+                Blockly.isTargetInput_ = function ( event ){
+                    return event.target.type === "textarea" || event.target.type === "text" || event.target.type === "password";
+                };
+
                 Blockly.addChangeListener( function( event ) {
                     
                     if ( handleChangedEvents && self.state.blockly.node !== undefined ) {
