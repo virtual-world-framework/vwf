@@ -198,7 +198,7 @@ var global = window;
                 var methodForType = {
                     "buffers" : this.handleBuffer,
                     "bufferViews" : this.handleBufferView,
-                    "shaders" : this.handleShader,
+                    
                     "programs" : this.handleProgram,
                     "techniques" : this.handleTechnique,
                     "materials" : this.handleMaterial,
@@ -275,10 +275,15 @@ var global = window;
 					// this is required to avoid problems with loading large scenes
 					jsonfile.setRequestHeader("If-Modified-Since", "Sat, 01 Jan 1970 00:00:00 GMT");
                     jsonfile.addEventListener( 'load', function ( event ) {
+                        console.log('loaded json for ', jsonPath);
                         self.json = JSON.parse(jsonfile.responseText);
                         if (callback) {
                             callback(self.json);
                         }
+                    }, false );
+                    jsonfile.addEventListener( 'error', function ( event ) {
+                        console.log('error loading json for ', jsonPath);
+                        
                     }, false );
                     jsonfile.send(null);
                 } else {
