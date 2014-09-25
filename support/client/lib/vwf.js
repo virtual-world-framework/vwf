@@ -1706,7 +1706,7 @@
                     // child's component specification. createChild() delegates to the models and
                     // views as before.
 
-                    async.forEachSeries( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
+                    async.forEach( Object.keys( nodeComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
 
                         var creating = ! nodeHasOwnChild.call( vwf, nodeID, childName );
 
@@ -1738,7 +1738,7 @@
                     var scripts = nodeComponent.scripts ?
                         [].concat( nodeComponent.scripts ) : []; // accept either an array or a single item
 
-                    async.mapSeries( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
+                    async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
 
                         if ( valueHasType( script ) ) {
                             if ( script.source ) {
@@ -2173,7 +2173,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                     // Create the prototype and behavior nodes (or locate previously created
                     // instances).
 
-                    async.series( [
+                    async.parallel( [
 
                         function( parallel_callback_async /* ( err, results ) */ ) {
 
@@ -2215,7 +2215,7 @@ if ( ! childComponent.source ) {
                             var behaviorComponents = childComponent.implements ?
                                 [].concat( childComponent.implements ) : []; // accept either an array or a single item
 
-                            async.mapSeries( behaviorComponents, function( behaviorComponent, map_callback_async /* ( err, result ) */ ) {
+                            async.map( behaviorComponents, function( behaviorComponent, map_callback_async /* ( err, result ) */ ) {
                                 vwf.createNode( behaviorComponent, function( behaviorID ) /* async */ {
                                     map_callback_async( undefined, behaviorID );
                                 } );
@@ -2298,7 +2298,7 @@ if ( ! childComponent.source ) {
                     // Call createdNode() on each view. The view is being notified of a node that has
                     // been constructed.
 
-                    async.forEachSeries( vwf.views, function( view, each_callback_async /* ( err ) */ ) {
+                    async.forEach( vwf.views, function( view, each_callback_async /* ( err ) */ ) {
 
                         var driver_ready = true;
 
@@ -2412,7 +2412,7 @@ if ( ! childComponent.source ) {
                     // child's component specification. createChild() delegates to the models and
                     // views as before.
 
-                    async.forEachSeries( Object.keys( childComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
+                    async.forEach( Object.keys( childComponent.children || {} ), function( childName, each_callback_async /* ( err ) */ ) {
                         var childValue = childComponent.children[childName];
 
                         vwf.createChild( childID, childName, childValue, undefined, function( childID ) /* async */ {  // TODO: add in original order from childComponent.children  // TODO: propagate childURI + fragment identifier to children of a URI component?
@@ -2436,7 +2436,7 @@ if ( ! childComponent.source ) {
                     var scripts = childComponent.scripts ?
                         [].concat( childComponent.scripts ) : []; // accept either an array or a single item
 
-                    async.mapSeries( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
+                    async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
 
                         if ( valueHasType( script ) ) {
                             if ( script.source ) {

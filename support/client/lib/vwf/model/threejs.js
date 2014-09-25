@@ -2928,9 +2928,32 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             if( childType == "model/vnd.gltf+json")
             {
              
+                //create a queue to hold requests to the loader, since the loader cannot be re-entered for parallel loads
+                if(!THREE.glTFLoader.queue)
+                {
+                    //task is an object that olds the info about what to load
+                    //nexttask is supplied by async to trigger the next in the queue;
+                    THREE.glTFLoader.queue = new async.queue(function(task,nextTask)
+                    {
+                        var node = task.node;
+                        var cb = task.cb;
+                        //call the actual load function
+                        //signature of callback dictated by loader
+                        node.loader.load( node.source, function(geometry , materials) {
+                            //ok, this model loaded, we can start the next load
+                            nextTask();
+                            //do whatever it was (asset loaded) that this load was going to do when complete
+                            cb(geometry , materials);
+                        });
+
+                    },1);
+                }
                 node.loader = new THREE.glTFLoader();
                 node.loader.useBufferGeometry = true;
-                node.loader.load( node.source, node.assetLoaded.bind( this ) );
+                //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it 
+                //is an async function, it cannot be entered again before it completes
+                THREE.glTFLoader.queue.push({node:node,cb:node.assetLoaded.bind( this ) })
+                
 
             }
 
