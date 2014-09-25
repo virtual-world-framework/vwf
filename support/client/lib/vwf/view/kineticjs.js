@@ -168,12 +168,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     self.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
                 } );
 
-                node.kineticObj.on( "mousedown", function( evt ) {
-                    node.isDragging = node.kineticObj.draggable();
-                    if ( node.isDragging && !node.uniqueInView ) {
-                        node.kineticObj.modelX = node.kineticObj.x();
-                        node.kineticObj.modelY = node.kineticObj.y();
-                    }  
+                node.kineticObj.on( "mousedown", function( evt ) { 
                     var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     mouseDown = true;
                     //self.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );

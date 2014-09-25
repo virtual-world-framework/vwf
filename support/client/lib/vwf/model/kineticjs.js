@@ -35,7 +35,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         "prototypes": undefined,
                         "kineticObj": undefined,
                         "stage": undefined,
-                        "isDragging": false,
                         "uniqueInView": false
                     };
                 },
@@ -2011,17 +2010,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
         },
 
-
-        // TODO: creatingEvent, deltetingEvent, firingEvent
-
-        firingEvent: function( nodeID, eventName, eventParameters  ) { // TODO: parameters
-            if ( this.debug.events ) {
-                this.logger.infox( "   M === callingMethod ", nodeID, eventName );
-            }
-
-
-        },
-
         // -- executing ------------------------------------------------------------------------------
 
         // executing: function( nodeID, scriptText, scriptType ) {
@@ -2164,10 +2152,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     function addNodeToHierarchy( node ) {
         
         if ( node.kineticObj ) {
-
-            node.kineticObj.modelX = undefined;
-            node.kineticObj.modelY = undefined;
-
             if ( self.state.nodes[ node.parentID ] !== undefined ) {
                 var parent = self.state.nodes[ node.parentID ];
                 if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
