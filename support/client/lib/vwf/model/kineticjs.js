@@ -385,7 +385,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 kineticObj.modelX = Number( propertyValue.x );
                                 kineticObj.modelY = Number( propertyValue.y );
                             }
-                            if ( !node.uniqueInView ) {
+                            if ( node.viewIgnoreNextPositionUpdate ) {
+                                node.viewIgnoreNextPositionUpdate = false;
+                            } else if ( !node.uniqueInView ) {
                                 kineticObj.setPosition( { 
                                     x: kineticObj.modelX, 
                                     y: kineticObj.modelY

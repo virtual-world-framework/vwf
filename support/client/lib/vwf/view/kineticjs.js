@@ -379,6 +379,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         },
 
+        firedEvent: function( nodeID, eventName ) {
+            if ( eventName == "draggingFromView" ) {
+                var clientThatSatProperty = self.kernel.client();
+                var me = self.kernel.moniker();
+
+                // If the transform property was initially updated by this view....
+                if ( clientThatSatProperty == me ) {
+                    var node = this.state.nodes[ nodeID ];
+                    node.viewIgnoreNextPositionUpdate = true;
+                }
+            }
+        },
+
         ticked: function( vwfTime ) {
             var nodeIDs = Object.keys( this.state.nodes );
             for ( var i = 0; i < nodeIDs.length; i++ ) {
@@ -389,6 +402,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     var kineticY = node.kineticObj.y();
                     if ( ( node.kineticObj.modelX !== kineticX ) || 
                         ( node.kineticObj.modelY !== kineticY ) ) {
+                        vwf_view.kernel.fireEvent( nodeID, "draggingFromView" );
                         vwf_view.kernel.setProperty( nodeID, "position", [ kineticX, kineticY ] );
                     }
                 }
