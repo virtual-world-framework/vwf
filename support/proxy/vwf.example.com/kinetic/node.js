@@ -1,11 +1,4 @@
 this.initialize = function() {
-    this.pointerIsDown = false;
-    this.touching = false;
-
-    this.downPoint = undefined;
-    this.lastPoint = undefined;
-    this.nodePoint = undefined;
-
     this.previousVisible = undefined;
 }
 
