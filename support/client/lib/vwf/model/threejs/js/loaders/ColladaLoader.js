@@ -3545,7 +3545,11 @@ THREE.ColladaLoader = function () {
 									texture.offset.x = cot.texOpts.offsetU;
 									texture.offset.y = cot.texOpts.offsetV;
 									texture.repeat.x = cot.texOpts.repeatU;
-									texture.repeat.y = -cot.texOpts.repeatV;
+
+									if(image.init_from.indexOf('.dds') == image.init_from.length - 4)
+										texture.repeat.y = -cot.texOpts.repeatV;
+									else
+										texture.repeat.y = cot.texOpts.repeatV;
 									props[keys[prop]] = texture;
 
 									// Texture with baked lighting?
