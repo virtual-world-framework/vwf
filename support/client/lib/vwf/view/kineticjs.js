@@ -384,42 +384,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         },
 
-        // -- gotProperty ------------------------------------------------------------------------------
-
-        // gotProperty: function( nodeID, propertyName, propertyValue ) { 
-        // },
-
-        // firedEvent: function( nodeID, eventName, eventParameters ) {
-            
-        //     var node = this.state.nodes[nodeID];
-        //     var value = undefined;
-        //     if ( node ) {
-        //         switch( eventName ) {
-
-        //             case "userDragStart":
-        //                 if ( this.kernel.client() === this.kernel.moniker() ) {
-        //                     node.isDragging = node.kineticObj.draggable();
-        //                     if ( node.isDragging && !node.uniqueInView ) {
-        //                         node.kineticObj.modelX = node.kineticObj.x();
-        //                         node.kineticObj.modelY = node.kineticObj.y();
-        //                     } 
-        //                 }
-        //                 break;
-
-        //             case "userDragEnd":
-        //                 if ( this.kernel.client() === this.kernel.moniker() ) {
-        //                     node.isDragging = false;
-        //                     if ( !node.uniqueInView && node.kineticObj ) {
-        //                         node.kineticObj.modelX = undefined;
-        //                         node.kineticObj.modelY = undefined;
-        //                     }
-        //                 }
-        //                 break;
-        //         }
-        //     } 
-
-        // },
-
         ticked: function( vwfTime ) {
             var nodeIDs = Object.keys( this.state.nodes );
             for ( var i = 0; i < nodeIDs.length; i++ ) {
