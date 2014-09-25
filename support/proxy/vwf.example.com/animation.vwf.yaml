@@ -80,7 +80,7 @@ properties:
         this.animationStartTime = 0;
       }
       if(this.animationStopTime == null) {
-        this.animationStopTime = this.animationDuration;
+        this.animationStopTime = this.animationDuration || 1;
       }
       // Save copies to avoid repeated reads.
       var duration = this.animationStopTime - this.animationStartTime,
@@ -101,7 +101,7 @@ properties:
       // Update the node and fire the changed event.
       if ( value !== this.animationTimeUpdated ) {
         this.animationTimeUpdated = value;
-        this.animationUpdate( value, this.animationDuration );
+        this.animationUpdate( value, this.animationDuration || 1 );
         this.animationTimeChanged( value );
       } //@ sourceURL=animation.animationTime.set.vwf
 
@@ -123,7 +123,7 @@ properties:
       // If changed since last seen, update and fire the changed event.
       if ( value !== this.animationTimeUpdated ) {
         this.animationTimeUpdated = value;
-        this.animationUpdate( value, this.animationDuration );
+        this.animationUpdate( value, this.animationDuration || 1 );
         this.animationTimeChanged( value );
       }
       return value; //@ sourceURL=animation.animationTime.get.vwf
@@ -149,7 +149,7 @@ properties:
 
   animationRate:  # TODO: allow changes while playing
     set: |
-      var duration = this.animationDuration, rate = value;
+      var duration = this.animationDuration || 1, rate = value;
       this.animationRate = rate;
       this.animationDuration$ = ( rate >= 0 ? duration : -duration ) / rate;
     value: 1
@@ -167,7 +167,7 @@ properties:
         this.animationStartTime = 0;
       }
       if(this.animationStopTime == null) {
-        this.animationStopTime = this.animationDuration;
+        this.animationStopTime = this.animationDuration || 1;
       }
       if ( this.animationStart$ != null && this.animationPause$ == null ) {
         if ( ! value ) {
@@ -256,7 +256,7 @@ properties:
 
   animationStartTime: 
     set: |
-      this.animationStartTime = value ? Math.min( Math.max( 0, value ), this.animationDuration ) : value;
+      this.animationStartTime = value ? Math.min( Math.max( 0, value ), this.animationDuration || 1 ) : value;
     value: null
 
   ## The time that the animation should stop at. Used with animationStartTime to play
@@ -266,7 +266,7 @@ properties:
 
   animationStopTime:  
     set: |
-      this.animationStopTime = value ? Math.min( Math.max( 0, value ), this.animationDuration ) : value;
+      this.animationStopTime = value ? Math.min( Math.max( 0, value ), this.animationDuration || 1 ) : value;
     value: null
 
   ## The frame that the animation should start at. Setting this value automatically updates the "animationStartTime"
@@ -296,7 +296,7 @@ properties:
     set: |
       this.animationDuration = value / this.animationFPS;
     get: |
-      return Math.ceil(this.animationFPS * this.animationDuration); 
+      return Math.ceil(this.animationFPS * this.animationDuration || 1); 
 
   ## The current frame the animation is on. Equivalent to animationTime.
   animationFrame:
@@ -467,7 +467,7 @@ scripts:
       }
 
       if ( positions[positions.length-1].animationTime === null ) {
-        positions[positions.length-1].animationTime = this.animationDuration;
+        positions[positions.length-1].animationTime = this.animationDuration || 1;
       }
 
       positions.forEach( function( position, index ) {

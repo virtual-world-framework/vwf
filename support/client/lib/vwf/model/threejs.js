@@ -1569,6 +1569,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         }
                         value = animationDuration / fps;
                     }
+
                     return value;
                 }
 
