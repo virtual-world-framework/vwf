@@ -281,6 +281,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "x":
                             kineticObj.modelX = Number( propertyValue );
+
+                            // Update the view - though this would be more appropriate to do in the
+                            // view driver's satProperty, it is important that it be updated 
+                            // atomically with the model so there is no risk that "ticked" will 
+                            // discover the descrepancy between model and view values and assume 
+                            // that the user has dragged the node via kinetic (thus triggering it to
+                            // set the model value from the old view value)
                             if ( !node.uniqueInView ) {
                                 kineticObj.x( kineticObj.modelX );                                
                             }
@@ -288,6 +295,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "y":
                             kineticObj.modelY = Number( propertyValue );
+
+                            // Update the view - though this would be more appropriate to do in the
+                            // view driver's satProperty, it is important that it be updated 
+                            // atomically with the model so there is no risk that "ticked" will 
+                            // discover the descrepancy between model and view values and assume 
+                            // that the user has dragged the node via kinetic (thus triggering it to
+                            // set the model value from the old view value)
                             if ( !node.uniqueInView ) {
                                 kineticObj.y( Number( kineticObj.modelY ) );
                             }                            
@@ -385,6 +399,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                 kineticObj.modelX = Number( propertyValue.x );
                                 kineticObj.modelY = Number( propertyValue.y );
                             }
+
+                            // Update the view - though this would be more appropriate to do in the
+                            // view driver's satProperty, it is important that it be updated 
+                            // atomically with the model so there is no risk that "ticked" will 
+                            // discover the descrepancy between model and view values and assume 
+                            // that the user has dragged the node via kinetic (thus triggering it to
+                            // set the model value from the old view value)
+
+                            // If the node is being dragged by this client, then its view has 
+                            // already updated, and we risk updating it with a stale value.  
+                            // Therefore, if the view has told us to ignore the next update, we will
+                            // do that.  Otherwise, update the view value.
                             if ( node.viewIgnoreNextPositionUpdate ) {
                                 node.viewIgnoreNextPositionUpdate = false;
                             } else if ( !node.uniqueInView ) {
@@ -395,7 +421,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             }
                             break;
                         case "absolutePosition":
+
+                            // Store the current absolute position because we are about to tamper 
+                            // with the view value to get kinetic to compute the new model values 
+                            // for us.  If uniqueInView is true, we should not change the view 
+                            // value, so we will need to put this one back.
                             var oldAbsolutePosition = kineticObj.getAbsolutePosition();
+
+                            // Compute new modelX and modelY values
                             if ( propertyValue instanceof Array ) { 
                                 kineticObj.setAbsolutePosition( { 
                                     "x": Number( propertyValue[ 0 ] ), 
@@ -409,6 +442,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             }
                             kineticObj.modelX = kineticObj.x();
                             kineticObj.modelY = kineticObj.y();
+
+                            // If each user has a unique view value, setting the model value should
+                            // not change the view value, so we set the original view value back now
+                            // that we are done using it to calculate the new model value.
                             if ( node.uniqueInView ) {
                                 kineticObj.setAbsolutePosition( oldAbsolutePosition );
                             }
@@ -416,6 +453,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
                         case "uniqueInView":
                             node.uniqueInView = Boolean( propertyValue );
+
+                            // If we no longer have unique views, all view positions should be set
+                            // to the model value
+                            // Note: though this would be more appropriate to do in the view 
+                            // driver's satProperty, it is important that it be updated atomically 
+                            // with the model so there is no risk that "ticked" will discover the 
+                            // descrepancy between model and view values and assume that the user 
+                            // has dragged the node via kinetic (thus triggering it to set the model
+                            // value from the old view value)
                             if ( !node.uniqueInView ) {
                                 kineticObj.x( kineticObj.modelX );
                                 kineticObj.y( kineticObj.modelY );
