@@ -33,7 +33,7 @@ properties:
   uniqueInView:
   dragProperty: "position"
 methods:
-  toggleVisibilty:
+  toggleVisibility:
 events:
   pointerMove:
   pointerOut:
@@ -51,8 +51,7 @@ events:
   dragStart:
   dragMove:
   dragEnd:
-  userDragStart:
-  userDragEnd:
+  draggingFromView:
 scripts:
 - source: "http://vwf.example.com/kinetic/node.js"
 

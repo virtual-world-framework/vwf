@@ -168,12 +168,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     self.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
                 } );
 
-                node.kineticObj.on( "mousedown", function( evt ) {
-                    node.isDragging = node.kineticObj.draggable();
-                    if ( node.isDragging && !node.uniqueInView ) {
-                        node.kineticObj.modelX = node.kineticObj.x();
-                        node.kineticObj.modelY = node.kineticObj.y();
-                    }  
+                node.kineticObj.on( "mousedown", function( evt ) { 
                     var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     mouseDown = true;
                     //self.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
@@ -384,43 +379,50 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         },
 
-        // -- gotProperty ------------------------------------------------------------------------------
+        firedEvent: function( nodeID, eventName ) {
+            if ( eventName == "draggingFromView" ) {
+                var clientThatSatProperty = self.kernel.client();
+                var me = self.kernel.moniker();
 
-        // gotProperty: function( nodeID, propertyName, propertyValue ) { 
-        // },
+                // If the transform property was initially updated by this view....
+                if ( clientThatSatProperty == me ) {
 
-        firedEvent: function( nodeID, eventName, eventParameters ) {
-            
-            var node = this.state.nodes[nodeID];
-            var value = undefined;
-            if ( node ) {
-                switch( eventName ) {
-
-                    case "userDragStart":
-                        if ( this.kernel.client() === this.kernel.moniker() ) {
-                            node.isDragging = node.kineticObj.draggable();
-                            if ( node.isDragging && !node.uniqueInView ) {
-                                node.kineticObj.modelX = node.kineticObj.x();
-                                node.kineticObj.modelY = node.kineticObj.y();
-                            } 
-                        }
-                        break;
-
-                    case "userDragEnd":
-                        if ( this.kernel.client() === this.kernel.moniker() ) {
-                            node.isDragging = false;
-                            if ( !node.uniqueInView && node.kineticObj ) {
-                                node.kineticObj.modelX = undefined;
-                                node.kineticObj.modelY = undefined;
-                            }
-                        }
-                        break;
+                    // Tell the model not to update the view on the next position update because 
+                    // kinetic has already done so
+                    // (this event is fired right before this driver sets the model property, so we 
+                    // can be sure that the very next set of the position property is from us)
+                    var node = this.state.nodes[ nodeID ];
+                    node.viewIgnoreNextPositionUpdate = true;
                 }
-            } 
-
+            }
         },
 
         ticked: function( vwfTime ) {
+            var nodeIDs = Object.keys( this.state.nodes );
+            for ( var i = 0; i < nodeIDs.length; i++ ) {
+                var nodeID = nodeIDs[ i ];
+                var node = this.state.nodes[ nodeID ];
+
+                // If users can drag this node and all clients should stay synchronized, we must 
+                // pull the new node position out of kinetic and update the model with it
+                if ( node.kineticObj.draggable() && !node.uniqueInView ) {
+                    var kineticX = node.kineticObj.x();
+                    var kineticY = node.kineticObj.y();
+
+                    // If the position of this node has changes since it's last model value, set the
+                    // model property with the new value
+                    if ( ( node.kineticObj.modelX !== kineticX ) || 
+                        ( node.kineticObj.modelY !== kineticY ) ) {
+
+                        // Fire this event to notify the model that kinetic has already updated the
+                        // view and it doesn't need to (if the model set the value, it would risk 
+                        // having the model set the view back to an old value, which results in 
+                        // jitter while the user is dragging the node)
+                        vwf_view.kernel.fireEvent( nodeID, "draggingFromView" );
+                        vwf_view.kernel.setProperty( nodeID, "position", [ kineticX, kineticY ] );
+                    }
+                }
+            }
             for ( var id in self.state.stages ){
                 renderScene( self.state.stages[ id ] );                
             } 

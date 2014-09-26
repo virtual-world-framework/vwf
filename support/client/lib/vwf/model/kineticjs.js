@@ -35,7 +35,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                         "prototypes": undefined,
                         "kineticObj": undefined,
                         "stage": undefined,
-                        "isDragging": false,
                         "uniqueInView": false
                     };
                 },
@@ -281,21 +280,30 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "x":
-                            if ( node.uniqueInView ) {
-                                kineticObj.modelX = Number( propertyValue );
-                                kineticObj.x( kineticObj.modelX );                                
-                            } else {
-                                kineticObj.x( Number( propertyValue ) );     
-                            }
+                            kineticObj.modelX = Number( propertyValue );
 
+                            // Update the view - though this would be more appropriate to do in the
+                            // view driver's satProperty, it is important that it be updated 
+                            // atomically with the model so there is no risk that "ticked" will 
+                            // discover the descrepancy between model and view values and assume 
+                            // that the user has dragged the node via kinetic (thus triggering it to
+                            // set the model value from the old view value)
+                            if ( !node.uniqueInView ) {
+                                kineticObj.x( kineticObj.modelX );                                
+                            }
                             break;
 
                         case "y":
-                            if ( node.uniqueInView ) {
-                                kineticObj.modelY = Number( propertyValue );
+                            kineticObj.modelY = Number( propertyValue );
+
+                            // Update the view - though this would be more appropriate to do in the
+                            // view driver's satProperty, it is important that it be updated 
+                            // atomically with the model so there is no risk that "ticked" will 
+                            // discover the descrepancy between model and view values and assume 
+                            // that the user has dragged the node via kinetic (thus triggering it to
+                            // set the model value from the old view value)
+                            if ( !node.uniqueInView ) {
                                 kineticObj.y( Number( kineticObj.modelY ) );
-                            } else {
-                                kineticObj.y( Number( propertyValue ) );     
                             }                            
                             break;
 
@@ -384,33 +392,43 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
 
                         case "position":
-                            if ( node.uniqueInView ) {
-                                if ( propertyValue instanceof Array ) {
-                                    kineticObj.modelX = Number( propertyValue[ 0 ] );
-                                    kineticObj.modelY = Number( propertyValue[ 1 ] ); 
-                                } else {
-                                    kineticObj.modelX = Number( propertyValue.x );
-                                    kineticObj.modelY = Number( propertyValue.y );
-                                }
+                            if ( propertyValue instanceof Array ) {
+                                kineticObj.modelX = Number( propertyValue[ 0 ] );
+                                kineticObj.modelY = Number( propertyValue[ 1 ] ); 
+                            } else {
+                                kineticObj.modelX = Number( propertyValue.x );
+                                kineticObj.modelY = Number( propertyValue.y );
+                            }
+
+                            // Update the view - though this would be more appropriate to do in the
+                            // view driver's satProperty, it is important that it be updated 
+                            // atomically with the model so there is no risk that "ticked" will 
+                            // discover the descrepancy between model and view values and assume 
+                            // that the user has dragged the node via kinetic (thus triggering it to
+                            // set the model value from the old view value)
+
+                            // If the node is being dragged by this client, then its view has 
+                            // already updated, and we risk updating it with a stale value.  
+                            // Therefore, if the view has told us to ignore the next update, we will
+                            // do that.  Otherwise, update the view value.
+                            if ( node.viewIgnoreNextPositionUpdate ) {
+                                node.viewIgnoreNextPositionUpdate = false;
+                            } else if ( !node.uniqueInView ) {
                                 kineticObj.setPosition( { 
                                     x: kineticObj.modelX, 
                                     y: kineticObj.modelY
                                 } );
-                            } else {
-                                if ( propertyValue instanceof Array ) { 
-                                    kineticObj.setPosition( { 
-                                        "x": Number( propertyValue[ 0 ] ), 
-                                        "y": Number( propertyValue[ 1 ] )
-                                    });
-                                } else {
-                                    kineticObj.setPosition( { 
-                                        "x": Number( propertyValue.x ), 
-                                        "y":  Number( propertyValue.y ) 
-                                    });                                    
-                                }
                             }
                             break;
                         case "absolutePosition":
+
+                            // Store the current absolute position because we are about to tamper 
+                            // with the view value to get kinetic to compute the new model values 
+                            // for us.  If uniqueInView is true, we should not change the view 
+                            // value, so we will need to put this one back.
+                            var oldAbsolutePosition = kineticObj.getAbsolutePosition();
+
+                            // Compute new modelX and modelY values
                             if ( propertyValue instanceof Array ) { 
                                 kineticObj.setAbsolutePosition( { 
                                     "x": Number( propertyValue[ 0 ] ), 
@@ -422,14 +440,32 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                                     "y":  Number( propertyValue.y ) 
                                 });
                             }
+                            kineticObj.modelX = kineticObj.x();
+                            kineticObj.modelY = kineticObj.y();
+
+                            // If each user has a unique view value, setting the model value should
+                            // not change the view value, so we set the original view value back now
+                            // that we are done using it to calculate the new model value.
                             if ( node.uniqueInView ) {
-                                kineticObj.modelX = kineticObj.x();
-                                kineticObj.modelY = kineticObj.y();
+                                kineticObj.setAbsolutePosition( oldAbsolutePosition );
                             }
                             break;
 
                         case "uniqueInView":
                             node.uniqueInView = Boolean( propertyValue );
+
+                            // If we no longer have unique views, all view positions should be set
+                            // to the model value
+                            // Note: though this would be more appropriate to do in the view 
+                            // driver's satProperty, it is important that it be updated atomically 
+                            // with the model so there is no risk that "ticked" will discover the 
+                            // descrepancy between model and view values and assume that the user 
+                            // has dragged the node via kinetic (thus triggering it to set the model
+                            // value from the old view value)
+                            if ( !node.uniqueInView ) {
+                                kineticObj.x( kineticObj.modelX );
+                                kineticObj.y( kineticObj.modelY );
+                            }
                             break;
 
                         case "transform":
@@ -1282,19 +1318,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                     switch ( propertyName ) {
 
                         case "x":
-                            if ( node.uniqueInView || node.isDragging ) {
-                                value = kineticObj.modelX || 0;
-                            } else {
-                                value = kineticObj.x();
-                            }
+                            value = kineticObj.modelX || 0;
                             break;
 
                         case "y":
-                            if ( node.uniqueInView || node.isDragging ) {
-                                value = kineticObj.modelY || 0;
-                            } else {
-                                value = kineticObj.y();
-                            }
+                            value = kineticObj.modelY || 0;
                             break;
 
                         case "width":
@@ -1380,36 +1408,28 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             break;
                         
                         case "position":
-                            if ( node.uniqueInView || node.isDragging ) {
-                                value = {
-                                    x: kineticObj.modelX || 0,
-                                    y: kineticObj.modelY || 0
-                                };
-                            } else {
-                                value = kineticObj.getPosition();
-                            }
+                            value = {
+                                x: kineticObj.modelX || 0,
+                                y: kineticObj.modelY || 0
+                            };
                             break;
 
                         case "transform":
-                            if ( node.uniqueInView || node.isDragging ) {
-                                value = kineticObj.getTransform().m;
-                                value[ 4 ] = kineticObj.modelX || 0;
-                                value[ 5 ] = kineticObj.modelY || 0;
-                            } else {
-                                value = kineticObj.getTransform();    
-                            }
+                            value = kineticObj.getTransform().m;
+                            value[ 4 ] = kineticObj.modelX || 0;
+                            value[ 5 ] = kineticObj.modelY || 0;
                             break;
 
                         case "absolutePosition":
                             if ( !node.uniqueInView ) {
                                 value = kineticObj.getAbsolutePosition();
                             } else {
-                                // TODO: Since we are allowing the view to drag objects independent of
-                                //       the model, we can't be sure that kinetic has the proper model
-                                //       value.  Therefore, we need to compute the math ourselves.
-                                // value = kineticObj.getAbsolutePosition();
-                                this.logger.errorx( "gettingProperty", "getter for absolutePosition",
-                                    "is not implemented" );
+                                // TODO: Since we are allowing the view to drag objects independent
+                                //       of the model, we can't be sure that kinetic has the proper 
+                                //       model value.  Therefore, we need to compute the math 
+                                //       ourselves.
+                                this.logger.errorx( "gettingProperty", "getter for ",
+                                    "absolutePosition when uniqueInView is not implemented" );
                             }
                             break;
 
@@ -1417,12 +1437,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
                             if ( !node.uniqueInView ) {
                                 value = kineticObj.getAbsoluteTransform();
                             } else {
-                                // TODO: Since we are allowing the view to drag objects independent of
-                                //       the model, we can't be sure that kinetic has the proper model
-                                //       value.  Therefore, we need to compute the math ourselves.
-                                // value = kineticObj.getAbsoluteTransform();
-                                this.logger.errorx( "gettingProperty", "getter for absoluteTransform",
-                                    "is not implemented" );
+                                // TODO: Since we are allowing the view to drag objects independent 
+                                //       of the model, we can't be sure that kinetic has the proper 
+                                //       model value.  Therefore, we need to compute the math 
+                                //       ourselves.
+                                this.logger.errorx( "gettingProperty", "getter for ",
+                                    "absoluteTransform when uniqueInView is not implemented" );
                             }
                             break;
 
@@ -2038,17 +2058,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
             }
         },
 
-
-        // TODO: creatingEvent, deltetingEvent, firingEvent
-
-        firingEvent: function( nodeID, eventName, eventParameters  ) { // TODO: parameters
-            if ( this.debug.events ) {
-                this.logger.infox( "   M === callingMethod ", nodeID, eventName );
-            }
-
-
-        },
-
         // -- executing ------------------------------------------------------------------------------
 
         // executing: function( nodeID, scriptText, scriptType ) {
@@ -2191,10 +2200,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
     function addNodeToHierarchy( node ) {
         
         if ( node.kineticObj ) {
-
-            node.kineticObj.modelX = undefined;
-            node.kineticObj.modelY = undefined;
-
             if ( self.state.nodes[ node.parentID ] !== undefined ) {
                 var parent = self.state.nodes[ node.parentID ];
                 if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {

@@ -1,17 +1,8 @@
 this.initialize = function() {
-    this.pointerIsDown = false;
-    this.touching = false;
-
-    this.downPoint = undefined;
-    this.lastPoint = undefined;
-    this.nodePoint = undefined;
-
     this.previousVisible = undefined;
 }
 
-this.toggleVisibilty = function() {
-
-    var viz = this.visible;
+this.toggleVisibility = function() {
 
     // isVisible will take care of 'inherit', and 
     // trace up through the scene graph to determine
@@ -22,6 +13,8 @@ this.toggleVisibilty = function() {
         this.visible = this.previousVisible ? this.previousVisible : true;  
     }
 
+    var viz = this.visible;
+
     if ( viz === 'inherit' ) {
         this.previousVisible = 'inherit';
     } else {
@@ -30,79 +23,4 @@ this.toggleVisibilty = function() {
 
 }
 
-this.update = function( eventData, nodeData ) {
-    if ( this.draggable && ( this.pointerIsDown || this.touching ) ) {
-        var point = this[ this.dragProperty ];
-        var diff = [
-            eventData.stageRelative[ 0 ] - this.lastPoint[ 0 ],
-            eventData.stageRelative[ 1 ] - this.lastPoint[ 1 ]
-        ];
-
-        if ( point instanceof Array ) {
-            point[ 0 ] += diff[ 0 ];
-            point[ 1 ] += diff[ 1 ];
-        } else {
-            point.x += diff[ 0 ];
-            point.y += diff[ 1 ];
-        }
-
-        this[ this.dragProperty ] = point;
-        
-        this.lastPoint = eventData.stageRelative;
-    }
-}
-
-this.pointerDown = function( eventData, nodeData ) {
-    this.pointerIsDown = true;
-
-    this.draggable && this.userDragStart();
-
-    this.downPoint = eventData.stageRelative;
-    this.lastPoint = eventData.stageRelative;
-}
-
-this.pointerMove = function( eventData, nodeData ) {
-
-    this.update( eventData, nodeData );
-
-}
-
-this.pointerUp = function( eventData, nodeData ) {
-
-    this.update( eventData, nodeData );
-    
-    this.pointerIsDown = false;
-    this.downPoint = undefined;
-    this.lastPoint = undefined;
-    this.nodePoint = undefined;
-
-    this.draggable && this.userDragEnd();
-}  
-
-this.touchStart = function( eventData, nodeData ) {
-    this.touching = true;
-
-    this.draggable && this.userDragStart();
-
-    this.downPoint = eventData.stageRelative;
-    this.lastPoint = eventData.stageRelative;
-}
-
-this.touchMove = function( eventData, nodeData ) {
-
-    this.update( eventData, nodeData );
-
-}
-
-this.touchEnd = function( eventData, nodeData ) {
-
-    this.update( eventData, nodeData );
-    
-    this.touching = false;
-
-    this.downPoint = undefined;
-    this.lastPoint = undefined;
-    this.nodePoint = undefined;
-
-    this.draggable && this.userDragEnd();
-}  //@ sourceURL=kinetic_node.js
+//@ sourceURL=kinetic_node.js
