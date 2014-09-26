@@ -2,9 +2,7 @@ this.initialize = function() {
     this.previousVisible = undefined;
 }
 
-this.toggleVisibilty = function() {
-
-    var viz = this.visible;
+this.toggleVisibility = function() {
 
     // isVisible will take care of 'inherit', and 
     // trace up through the scene graph to determine
@@ -14,6 +12,8 @@ this.toggleVisibilty = function() {
     } else {
         this.visible = this.previousVisible ? this.previousVisible : true;  
     }
+
+    var viz = this.visible;
 
     if ( viz === 'inherit' ) {
         this.previousVisible = 'inherit';

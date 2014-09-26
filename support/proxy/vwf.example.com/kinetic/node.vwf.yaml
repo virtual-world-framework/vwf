@@ -33,7 +33,7 @@ properties:
   uniqueInView:
   dragProperty: "position"
 methods:
-  toggleVisibilty:
+  toggleVisibility:
 events:
   pointerMove:
   pointerOut:
