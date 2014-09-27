@@ -5814,7 +5814,7 @@ if ( ! childComponent.source ) {
 
                 if ( ! this.hasOwn( name ) ) {
 
-                    this.haveOwn( "existing" );
+                    this.makeOwn( "existing" );
 
                     // Add the member. `Object.defineProperty` is used instead of
                     // `this.existing[name] = ...` since the prototype may be a behavior proxy, and
@@ -5825,7 +5825,7 @@ if ( ! childComponent.source ) {
 
                     if ( changes ) {
 
-                        this.haveOwn( "changes" );
+                        this.makeOwn( "changes" );
 
                         if ( this.changes[ name ] !== "removed" ) {
                             this.changes[ name ] = "added";
@@ -5862,7 +5862,7 @@ if ( ! childComponent.source ) {
 
                     if ( changes ) {
 
-                        this.haveOwn( "changes" );
+                        this.makeOwn( "changes" );
 
                         if ( this.changes[ name ] !== "added" ) {
                             this.changes[ name ] = "removed";
@@ -5895,7 +5895,7 @@ if ( ! childComponent.source ) {
 
                 if ( this.hasOwn( name ) ) {
 
-                    this.haveOwn( "changes" );
+                    this.makeOwn( "changes" );
 
                     if ( this.changes[ name ] !== "added" ) {
                         this.changes[ name ] = value ?
@@ -5955,7 +5955,7 @@ if ( ! childComponent.source ) {
             /// @param {String} fieldName
             ///   The name of a field to hoist from the collection's prototype.
 
-            haveOwn: function( fieldName ) {
+            makeOwn: function( fieldName ) {
 
                 if ( ! this.hasOwnProperty( fieldName ) ) {
 
@@ -6048,12 +6048,12 @@ if ( ! childComponent.source ) {
 
                 if ( ! this.hasOwn( id ) ) {
 
-                    this.haveOwn( "existing" );
+                    this.makeOwn( "existing" );
                     this.existing.push( id );
 
                     if ( changes ) {
 
-                        this.haveOwn( "changes" );
+                        this.makeOwn( "changes" );
 
                         var removedIndex = this.changes.removed ?
                             this.changes.removed.indexOf( id ) : -1;
@@ -6096,7 +6096,7 @@ if ( ! childComponent.source ) {
 
                     if ( changes ) {
 
-                        this.haveOwn( "changes" );
+                        this.makeOwn( "changes" );
 
                         var addedIndex = this.changes.added ?
                             this.changes.added.indexOf( id ) : -1;
@@ -6133,7 +6133,7 @@ if ( ! childComponent.source ) {
 
                 if ( this.hasOwn( id ) ) {
 
-                    this.haveOwn( "changes" );
+                    this.makeOwn( "changes" );
 
                     var addedIndex = this.changes.added ?
                         this.changes.added.indexOf( id ) : -1;
@@ -6193,7 +6193,7 @@ if ( ! childComponent.source ) {
             /// @param {String} fieldName
             ///   The name of a field to hoist from the collection's prototype.
 
-            haveOwn: function( fieldName ) {
+            makeOwn: function( fieldName ) {
 
                 if ( ! this.hasOwnProperty( fieldName ) ) {
 
