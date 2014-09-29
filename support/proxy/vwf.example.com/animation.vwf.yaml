@@ -371,7 +371,19 @@ methods:
         if ( this.animationStop$ - this.time > 1 / this.animationTPS ) {
           this.in( 1 / this.animationTPS ).animationTick(); // next interval
         } else {
-          this.at( this.animationStop$ ).animationTick(); // exactly at end
+
+          // TODO: When animationStop$ is 0 (usually when a model does not actually have an 
+          //       animation on it), we schedule a method call for a time in the past (at time 0).
+          //       That immediately calls animationTick again, but this.time does not equal 
+          //       animationStop$ as we would expect.  So, it doesn't stop the animation and we get
+          //       caught in an infinite loop.
+          //       Ideally we should catch the case where animationStop$ is 0 before this point.
+          //       But for now, we catch it here.  
+          if ( this.animationStop$ > 0 ) {
+            this.at( this.animationStop$ ).animationTick(); // exactly at end
+          } else {
+            this.animationPlaying = false;
+          }
         }
       } else {
         this.logger.debug( "canceling animationTick" );
