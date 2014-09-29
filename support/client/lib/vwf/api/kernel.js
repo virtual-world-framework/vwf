@@ -186,7 +186,7 @@ define( function() {
 
         // TODO: deleteProperty
 
-        /// setProperty setsa specific property value on a node.  It will call settingProperty() 
+        /// setProperty sets a specific property value on a node.  It will call settingProperty() 
         /// on each model. The first model to return a non-undefined value has performed the
         /// set and dictates the return value. The property is considered set after each model has run.
         /// It will also call satProperty() on each view. The view is being notified that a property has
@@ -215,16 +215,20 @@ define( function() {
 
         getProperty: [ /* nodeID, propertyName */ ],
 
-        /// It will call creatingMethod() on each model. The method is considered created after each
-        /// model has run.  It will also call createdMethod() on each view. The view is being 
-        /// notified that a method has been created.
+        /// Create a method on a node. Methods are incoming function calls made to a node.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        ///   The ID of a node containing a method `methodName`.
         /// @param {String} methodName
+        ///   The name of a method on the `nodeID` node.
         /// @param {String[]} methodParameters
+        ///   An array of names of the method's positional parameters. The method body uses these
+        ///   names to refer to the caller's arguments.
         /// @param {String} methodBody
+        ///   The body of a script to be used as the handler for the method. Strings will be
+        ///   interpreted as JavaScript; other script types may be supported in future releases.
         /// 
         /// @returns {Handler} methodHandler
 
@@ -232,37 +236,44 @@ define( function() {
 
         // TODO: deleteMethod
 
-        /// xxx
+        /// Set the handler for a method on a node.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        ///   The ID of a node containing a method `methodName`.
         /// @param {String} methodName
+        ///   The name of a method on the `nodeID` node.
         /// @param {Handler} methodHandler
+        ///   A script to set as the handler for the method.
         /// 
         /// @returns {Handler} methodHandler
 
         setMethod: [ /* nodeID, methodName, methodHandler */ ],
 
-        /// xxx
+        /// Get the handler for a method on a node.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        ///   The ID of a node containing a method `methodName`.
         /// @param {String} methodName
+        ///   The name of a method on the `nodeID` node.
         /// 
         /// @returns {Handler} methodHandler
 
         getMethod: [ /* nodeID, methodName */ ],
 
-        /// It will call callingMethod() on each model. The first model to return a non-undefined value
-        /// dictates the return value.  It will also call calledMethod() on each view.
+        /// Invoke a method on a node.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        ///   The ID of a node containing a method `methodName`.
         /// @param {String} methodName
+        ///   The name of a method on the `nodeID` node.
         /// @param {Value[]} methodParameters
+        ///   An array of values to pass as arguments to the method call.
         /// 
         /// @returns {Value} returnValue
 
@@ -277,8 +288,14 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
+        ///   The ID of a node containing an event `eventName`.
         /// @param {String} eventName
+        ///   The name of an event on the `nodeID` node.
         /// @param {String[]} eventParameters
+        ///   An array of names of the event's positional parameters. The names are primarily used
+        ///   to describe arguments that the event will pass to listeners when the event is fired.
+        ///   The event's parameter list will be used as the default list for listeners that don't
+        ///   declare their own parameters.
         /// 
         /// @returns {}
 
@@ -286,26 +303,31 @@ define( function() {
 
         // TODO: deleteEvent
 
-        /// xxx
+        /// Set a node's event and its listeners.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        ///   The ID of a node containing an event `eventName`.
         /// @param {String} eventName
-        /// @param {} eventDescriptor
+        ///   The name of an event on the `nodeID` node.
+        /// @param {Event} eventDescriptor
+        ///   The new event, including its listeners.
         /// 
-        /// @returns {}
+        /// @returns {Event}
 
         setEvent: [ /* nodeID, eventName, eventDescriptor */ ],
 
-        /// xxx
+        /// Get a node's event and its listeners.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        ///   The ID of a node containing an event `eventName`.
         /// @param {String} eventName
+        ///   The name of an event on the `nodeID` node.
         /// 
-        /// @returns {}
+        /// @returns {Event}
 
         getEvent: [ /* nodeID, eventName */ ],
 
@@ -317,17 +339,17 @@ define( function() {
         /// 
         /// For dispatched events (invoked with `kernel.dispatchEvent`), events are fired from a
         /// series of nodes until the event is handled. Starting at the application root, the event
-        /// is fired on the target's ancestors, downward, in a "capture" phase, fired on the target
-        /// node, then again fired on the target's ancestors, upward, in a "bubbling" phase.
+        /// is fired on the target's ancestors, downward, in a "capture" phase, then fired on the
+        /// target node, then again fired on the target's ancestors, upward, in a "bubbling" phase.
         /// 
         /// For dispatched events, after firing the event at a particular node, if any of the
         /// handlers returned a truthy value, the event is considered _handled_ and the dispatch
         /// process stops at that node. An event that is handled during the capture phase prevents
         /// lower nodes or the target node from receiving the event. Events handled during the
-        /// bubbling phase are catching events not handled by lower nodes or by the target node.
+        /// bubbling phase catch events not handled by the target node or by lower nodes.
         /// 
-        /// By default, a listener will only be invoked if it is attached to the event target or
-        /// during the bubbling phase if it attached to a node above the target. To also invoke a
+        /// By default, a listener will only be invoked if it is attached to the event target, or
+        /// during the bubbling phase, if it attached to a node above the target. To also invoke a
         /// listener during the capture phase, pass `eventPhases` as the array `[ "capture" ]`.
         /// 
         /// @function
@@ -338,10 +360,9 @@ define( function() {
         ///   The name of an event on the `nodeID` node. When the event is fired, all of its
         ///   listeners will be called.
         /// @param {Handler} eventHandler
-        ///   A script to be evaluated as a function body and added as a handler for the event.
-        ///   Strings will be interpreted as JavaScript; other script types may be supported in
-        ///   future releases. The `eventParameters` that were provided to the `createEvent` call
-        //    will be available to the handler body as function parameters.
+        ///   A script to be added as a handler for the event. The `eventParameters` that were
+        ///   provided to the `createEvent` call will be available to the handler body as function
+        ///   parameters if the handler doesn't declare its own parameters.
         /// @param {ID} [eventContextID]
         ///   The ID of the node that the handler is _invoked on_. For JavaScript handlers, `this`
         ///   will refer to the `eventContextID` node. If `eventContextID` is not provided, the
@@ -358,8 +379,8 @@ define( function() {
 
         addEventListener: [ /* nodeID, eventName, eventHandler, eventContextID, eventPhases */ ],
 
-        /// Remove a function from a node's event. The handler will no longer be called when the
-        /// event fires.
+        /// Remove a listener function from a node's event. The handler will no longer be called
+        /// when the event fires.
         /// 
         /// @function
         /// 
@@ -376,7 +397,7 @@ define( function() {
 
         removeEventListener: [ /* nodeID, eventName, eventListenerID */ ],
 
-        /// xxx
+        /// Set the handler for a listener on a node's event.
         /// 
         /// @function
         /// 
@@ -388,16 +409,15 @@ define( function() {
         ///   A listener ID previously returned by `kernel.addEventListener` that identifies a
         ///   listener attached to this `nodeID` and `eventName`.
         /// @param {Listener} eventListener
-        ///   A script to be evaluated as a function body and added as a handler for the event.
-        ///   Strings will be interpreted as JavaScript; other script types may be supported in
-        ///   future releases. The `eventParameters` that were provided to the `createEvent` call
-        //    will be available to the handler body as function parameters.
+        ///   A script to set as the handler for the listener. The `eventParameters` that were
+        ///   provided to the `createEvent` call will be available to the handler body as function
+        ///   parameters if the handler doesn't declare its own parameters.
         /// 
         /// @returns {Listener}
 
         setEventListener: [ /* nodeID, eventName, eventListenerID, eventListener */ ],
 
-        /// xxx
+        /// Get the handler for a listener on a node's event.
         /// 
         /// @function
         /// 
@@ -413,13 +433,18 @@ define( function() {
 
         getEventListener: [ /* nodeID, eventName, eventListenerID */ ],
 
-        /// flushEventListeners.
+        /// Remove all listener functions from a node's event that are associated with a particular
+        /// context.
         /// 
         /// @function
         /// 
         /// @param {ID} nodeID
+        ///   The ID of a node containing an event `eventName`.
         /// @param {String} eventName
+        ///   The name of an event on the `nodeID` node.
         /// @param {ID} eventContextID
+        ///   The ID of a context node that handlers may be associated with. Handler context
+        ///   associations are made when `kernel.addEventListener` adds a handler to an event.
         /// 
         /// @returns {}
 
@@ -430,8 +455,11 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
+        ///   The ID of a node containing an event `eventName`.
         /// @param {String} eventName
+        ///   The name of an event on the `nodeID` node.
         /// @param {Value[]} eventParameters
+        ///   An array of values to pass as arguments to calls into the event's listeners.
         /// 
         /// @returns {}
 
@@ -444,9 +472,15 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
+        ///   The ID of a node containing an event `eventName`.
         /// @param {String} eventName
+        ///   The name of an event on the `nodeID` node.
         /// @param {Value[]} eventParameters
+        ///   An array of values to pass as arguments to calls into the event's listeners. Values
+        ///   from `eventParameters` are sent with the `kernel.fireEvent` call to each node.
         /// @param {Object} eventNodeParameters
+        ///   A collection of `ID`-indexed arrays of values to pass as additional arguments for
+        ///   `kernel.fireEvent` calls to specific nodes.
         /// 
         /// @returns {}
 
@@ -895,17 +929,17 @@ define( function() {
         /// A `Handler` is an object containing the following properties. Alternately, a `Handler`
         /// may be provided as a `string` or `function` representing just the `body` field.
         /// 
-        /// @typedef {Object} Handler
+        /// @typedef {Object|string|function} Handler
         /// 
         /// @property {string[]} [name]
         ///   The function's name. VWF doesn't make use of the name, but the field is included so
         ///   that named JavaScript functions can make a round-trip translation through a `Handler`
         ///   intact.
         /// @property {string[]} [parameters]
-        ///   An ordered list of names of the function's positional parameters. The function body
-        ///   uses these names to refer to the caller's arguments. `parameters` may be omitted if
-        ///   the function doesn't declare any parameters, or if `body` is a JavaScript `function`,
-        ///   in which case the parameters are taken from the JavaScript function itself.
+        ///   An array of names of the function's positional parameters. The function body uses
+        ///   these names to refer to the caller's arguments. `parameters` may be omitted if the
+        ///   function doesn't declare any parameters, or if `body` is a JavaScript `function`, in
+        ///   which case the parameters are taken from the JavaScript function itself.
         /// @property {string|function} body
         ///   A representation of the statements making up the function body. For handlers of `type`
         ///   `application/javascript`, `body` should be a string containing JavaScript text that is
@@ -927,7 +961,10 @@ define( function() {
 
         /// A `Listener` is an extended `Handler` with additional fields for event listeners.
         /// 
-        /// @typedef {Object} Listener
+        /// Like a `Handler`, a `Listener` may be provided as a `string` or `function` representing
+        /// just the `body` field.
+        /// 
+        /// @typedef {Object|string|function} Listener
         /// 
         /// @property {ListenerID} [id]
         ///   A unique ID as returned by `kernel.addEventListener` that identifies the listener for
@@ -951,6 +988,21 @@ define( function() {
         ///   `"capture"` in the `phases` array.` `phases` only applies to the propagation performed
         ///   by `kernel.dispatchEvent`. Once `kernel.fireEvent` is called, it always invokes all of
         ///   the event's handlers.
+
+        /// An `Event` describes an event and its listeners.
+        /// 
+        /// @typedef {Object} Event
+        /// 
+        /// @property {string[]} [parameters]
+        ///   An array of names of the event's positional parameters. The names are primarily used
+        ///   to describe arguments that the event will pass to listeners when the event is fired.
+        ///   The event's parameter list will be used as the default list for listeners that don't
+        ///   declare their own parameters. `parameters` may be omitted if the event doesn't declare
+        ///   any parameters.
+        /// @property {Listener[]} [listeners]
+        ///   An array of listeners to be invoked when the event is fired. Listeners will be invoked
+        ///   in the order provided.
+
     };
 
     return exports;
