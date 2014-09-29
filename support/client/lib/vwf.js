@@ -3682,8 +3682,6 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[nodeID];
 
-            eventHandler = normalizedHandler( eventHandler );
-
             // Encode any namespacing into the name.
 
             var encodedEventName = namespaceEncodedName( eventName );
@@ -3697,6 +3695,10 @@ if ( ! childComponent.source ) {
             // Locate the event in the registry.
 
             var event = node.events.existing[ encodedEventName ];
+
+            // Normalize the descriptor.
+
+            eventHandler = normalizedHandler( eventHandler, event.parameters );
 
             // Register the listener.
 
@@ -3784,8 +3786,6 @@ if ( ! childComponent.source ) {
 
             var node = nodes.existing[nodeID];
 
-            eventListener = normalizedHandler( eventListener );
-
             // Encode any namespacing into the name.
 
             var encodedEventName = namespaceEncodedName( eventName );
@@ -3793,6 +3793,10 @@ if ( ! childComponent.source ) {
             // Locate the event in the registry.
 
             var event = node.events.existing[ encodedEventName ];
+
+            // Normalize the descriptor.
+
+            eventListener = normalizedHandler( eventListener, event.parameters );
 
             // Record the change.
 
@@ -5055,10 +5059,11 @@ if ( ! childComponent.source ) {
         /// @name module:vwf~normalizedHandler
         /// 
         /// @param {Handler|string}
+        /// @param {string[]} [defaultParameters]
         /// 
         /// @returns {Handler}
 
-        var normalizedHandler = function( handler ) {
+        var normalizedHandler = function( handler, defaultParameters ) {
 
             // Convert abbreviated forms to the explict `Handler` form.
 
@@ -5066,6 +5071,13 @@ if ( ! childComponent.source ) {
                 handler = { body: handler };
             } else if ( require( "vwf/configuration" ).active[ "preserve-script-closures" ] && ( typeof handler == "function" || handler instanceof Function ) ) {
                 handler = { body: handler };
+            }
+
+            // Use a default parameter list if the handler doesn't provide its own and if defaults
+            // were provided.
+
+            if ( ! handler.parameters && defaultParameters ) {
+                handler.parameters = defaultParameters;
             }
 
             // Fill in a default media type if `type` is not provided. A `body` of type `string` is
