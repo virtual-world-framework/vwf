@@ -381,6 +381,8 @@ methods:
           //       But for now, we catch it here.  
           if ( this.animationStop$ > 0 ) {
             this.at( this.animationStop$ ).animationTick(); // exactly at end
+          } else {
+            this.animationPlaying = false;
           }
         }
       } else {
