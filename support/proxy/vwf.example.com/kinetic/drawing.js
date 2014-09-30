@@ -39,7 +39,7 @@ this.clientJoin = function( moniker ) {
             "drawing_color": 'black',
             "drawing_width": 4,
             "drawing_parentPath": '/',
-            "drawing_opacity": 0.4,
+            "drawing_opacity": 1.0,
             "nameIndex": 1,
             "fontSize": 16,
             "angle": 30
@@ -181,7 +181,7 @@ this.down = function( eventData, nodeData, touch ) {
             case "sprite":
             //case "text":
             case "image":
-                retObj.opacity = 0.7;
+                retObj.opacity = 1.0;
                 retObj.scaleOnLoad = true;
                 break;
 
