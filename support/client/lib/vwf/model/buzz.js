@@ -359,7 +359,6 @@ define( [
         // -- callingMethod --------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName, methodParameters ) { 
-            return undefined;
 
             if ( this.debug.method ) {
                 this.logger.infox( "   G === gettingProperty ", nodeID, propertyName );
