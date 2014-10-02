@@ -288,19 +288,19 @@
                         deps: [ "vwf/model/threejs/three" ],
                         exports: "THREE.ColladaLoader",
                     },
-                    "vwf/model/threejs/js/loaders/glTF/glTFLoader": {
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoader": {
                         deps: [ "vwf/model/threejs/three" ],
                         exports: "THREE.glTFLoader",
                     },
-                    "vwf/model/threejs/js/loaders/glTF/glTF-parser": {
+                    "vwf/model/threejs/js/loaders/gltf/glTF-parser": {
                         deps: [ "vwf/model/threejs/three" ],
                       
                     },
-                    "vwf/model/threejs/js/loaders/glTF/glTFLoaderUtils": {
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils": {
                         deps: [ "vwf/model/threejs/three" ],
                        
                     },
-                    "vwf/model/threejs/js/loaders/glTF/glTFAnimation": {
+                    "vwf/model/threejs/js/loaders/gltf/glTFAnimation": {
                         deps: [ "vwf/model/threejs/three" ],
                        
                     },
@@ -329,10 +329,10 @@
                 { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
                 { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
                 { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader",
-                "vwf/model/threejs/js/loaders/glTF/glTF-parser",
-                "vwf/model/threejs/js/loaders/glTF/glTFLoader",
-                "vwf/model/threejs/js/loaders/glTF/glTFAnimation",
-                "vwf/model/threejs/js/loaders/glTF/glTFLoaderUtils"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
+                "vwf/model/threejs/js/loaders/gltf/glTF-parser",
+                "vwf/model/threejs/js/loaders/gltf/glTFLoader",
+                "vwf/model/threejs/js/loaders/gltf/glTFAnimation",
+                "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
                 { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
@@ -364,10 +364,10 @@
                 { library: "vwf/model/threejs/three", active: false },
                 { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
 
-                { library: "vwf/model/threejs/js/loaders/glTF/glTF-parser", active: false },
-                { library: "vwf/model/threejs/js/loaders/glTF/glTFLoader", active: false },
-                { library: "vwf/model/threejs/js/loaders/glTF/glTFAnimation", active: false },
-                { library: "vwf/model/threejs/js/loaders/glTF/glTFLoaderUtils", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTF-parser", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTFLoader", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTFAnimation", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils", active: false },
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
