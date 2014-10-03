@@ -229,6 +229,9 @@ define( [
                     case "play":
                         if ( node.soundObj !== undefined ) {
                             if ( Boolean( propertyValue ) ) {
+                                if ( !node.soundObj.isEnded() ) {
+                                    node.soundObj.stop();
+                                }
                                 node.soundObj.play();
                                 node.isPlaying = true;
                             } else {
