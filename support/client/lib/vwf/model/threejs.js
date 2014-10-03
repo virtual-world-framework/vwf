@@ -1709,7 +1709,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         break;
                     case 'enableShadows':
                         if ( node.renderer ) {
-                            value = node.renderer.shadowMapEnabled = value;
+                            value = node.renderer.shadowMapEnabled;
                         }
                         break;
                     case "activeCamera":
