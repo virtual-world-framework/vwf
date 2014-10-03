@@ -2565,6 +2565,12 @@ if ( ! childComponent.source ) {
                                         [ childIndex, vwf.kutility.nodeReference( childID ) ] );
                                 }
 
+                                // Dismiss the loading spinner
+                                if ( childID === vwf.application() ) {
+                                    var spinner = document.getElementById( "loadingSpinner" );
+                                    spinner.classList.remove( "pace-active" );
+                                }
+
                                 // Restore kernel reentry.
 
                                 replicating && vwf.models.kernel.enable();
