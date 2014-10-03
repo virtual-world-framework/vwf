@@ -2707,9 +2707,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             var meshes =[];
             GetAllLeafMeshes( asset, meshes );
 
-            console.log(nodeID);
-            if(nodeID.indexOf('rover') == nodeID.length - 5)
-                window._dMeshes = meshes;
             for( var i =0; i < meshes.length; i++ ) {
                 if ( meshes[i].material.map != null ) {
                     fixMissingUVs( meshes[i] );
