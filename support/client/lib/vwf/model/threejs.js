@@ -2935,8 +2935,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 //create a queue to hold requests to the loader, since the loader cannot be re-entered for parallel loads
                 if ( !THREE.glTFLoader.queue )
                 {
-                    //task is an object that olds the info about what to load
-                    //nexttask is supplied by async to trigger the next in the queue;
+                    //task is an object that holds the info about what to load
+                    //nextTask is supplied by async to trigger the next in the queue
                     THREE.glTFLoader.queue = new async.queue( function( task, nextTask ) {
                         var node = task.node;
                         var cb = task.cb;
