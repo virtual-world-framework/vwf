@@ -42,7 +42,8 @@ define( [
                         "prototypes": undefined,
                         "delayedProperties": undefined,
                         "soundObj": undefined,
-                        "isPlaying": false
+                        "playState": "unloaded",
+                        "playOnReady": false
                     };
                 },
                 "is3DSoundComponent": function( prototypes ) {
@@ -114,8 +115,9 @@ define( [
 
                 // Create the local copy of the node properties
                 if ( this.state.nodes[ childID ] === undefined ){
-                    this.state.nodes[ childID ] = this.state.createLocalNode( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childIndex, childName, callback );
+                    this.state.nodes[ childID ] = this.state.createLocalNode( nodeID, childID, 
+                        childExtendsID, childImplementsIDs, childSource, 
+                        childType, childIndex, childName, callback );
                 }
 
                 node = this.state.nodes[ childID ];
@@ -226,18 +228,6 @@ define( [
                         }                    
                         break;
 
-                    case "play":
-                        if ( node.soundObj !== undefined ) {
-                            if ( Boolean( propertyValue ) ) {
-                                node.soundObj.play();
-                                node.isPlaying = true;
-                            } else {
-                                node.soundObj.stop();
-                                node.isPlaying = false;
-                            }  
-                        }                      
-                        break;
-
                     case "time":
                         if ( node.soundObj !== undefined ) {
                             node.soundObj.setTime( parseFloat( propertyValue ) );
@@ -317,9 +307,9 @@ define( [
                 case "url": 
                     value = node.soundObj.get( "src" );
                     break;
-
-                case "play":
-                    value = node.isPlaying;
+                
+                case "playState":
+                    value = node.playState;
                     break;
 
                 case "time":
@@ -368,12 +358,35 @@ define( [
             var value = undefined;  
 
             if ( node !== undefined && node.soundObj !== undefined ) {
-                switch( methodName ) {
-                    case "pause":
-                        node.isPlaying = false;
-                        node.soundObj.pause();
-                        break;
-                }                 
+                
+                if ( node.playState !== "unloaded" ) {
+                    
+                    switch( methodName ) {
+                        
+                        case "play":
+                            if ( node.soundObj !== undefined ) {
+                                node.soundObj.play();
+                            } 
+                            break;
+
+                        case "stop":
+                            if ( node.soundObj !== undefined ) {
+                                node.soundObj.stop();
+                            } 
+                            break;
+
+
+                        case "pause":
+                            if ( node.soundObj !== undefined ) {
+                                node.soundObj.pause();
+                            }
+                            break;
+                    }  
+                } else {
+                    
+                    node.playOnReady = ( methodName === 'play' );
+                }
+
             }
 
         
@@ -448,10 +461,6 @@ define( [
             for ( var prop in node.delayedProperties ) {
                 switch ( prop ) {
 
-                    case "play":
-                        soundProps[ 'autoplay' ] = Boolean( node.delayedProperties[ prop ] );
-                        break;
-
                     default:
                         soundProps[ prop ] = node.delayedProperties[ prop ];
                         break;
@@ -460,24 +469,41 @@ define( [
             node.delayedProperties = undefined;
         }
         
-        node.isPlaying = soundProps[ 'autoplay' ] ? true : false;
         var buzz = require( "vwf/model/buzz/buzz.min" );
         node.soundObj = new buzz.sound( url, soundProps ); 
 
         // http://buzz.jaysalvat.com/documentation/events/
         node.soundObj.bind( "ended", function( e ) {
-            node.isPlaying = false;
+            if ( node.playState === "playing" ) {
+                node.playState = "stopped";
+            }
             modelDriver.kernel.fireEvent( node.ID, "soundEnded", [ true ] );
         } );      
 
         node.soundObj.bind( "playing", function( e ) {
-            node.isPlaying = true;
+            node.playState = "playing";
             modelDriver.kernel.fireEvent( node.ID, "soundPlaying", [ true ] );
         } );  
 
         node.soundObj.bind( "canplay", function( e ) {
+            node.playState = "loaded";
+            if ( node.playOnReady ) {
+                node.soundObj.play(); 
+                node.playOnReady = false;    
+            }
             modelDriver.kernel.fireEvent( node.ID, "soundReady", [ true ] );
         } );  
+
+        // "play" is sent when the sound had been paused
+        node.soundObj.bind( "play", function( e ) {
+            node.playState = "playing";
+            modelDriver.kernel.fireEvent( node.ID, "soundReady", [ true ] );
+        } ); 
+
+        node.soundObj.bind( "pause", function( e ) {
+            node.playState = "paused";
+            modelDriver.kernel.fireEvent( node.ID, "soundReady", [ true ] );
+        } ); 
 
     }
 
