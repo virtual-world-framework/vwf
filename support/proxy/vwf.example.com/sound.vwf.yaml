@@ -9,14 +9,16 @@ properties:
 	url:
   time: 
   percent:
-  speed:
+  speed: 1
   autoplay: false
-  muted:
+  muted: false
   volume: 80
-  loop:
-  play:
+  loop: false
+  playState: "unloaded"
 methods:
+  play:
   pause:
+  stop:
 events:
   soundReady:
   soundPlaying:

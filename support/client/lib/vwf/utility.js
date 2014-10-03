@@ -282,10 +282,10 @@ define( [ "module",
             return ( this.fileType( value ) !== undefined )
         },
 
-        fileType: function( value ) {
+        fileType: function( filename ) {
             var fileFormat = undefined;
 
-            var temp = filename.split('.');
+            var temp = filename.split( '.' );
             if ( temp.length > 1 ) {
                 fileFormat = temp.pop();
                 if ( fileFormat.length > 5 ) {

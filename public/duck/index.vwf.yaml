@@ -25,6 +25,16 @@ children:
     properties:
       # spin-on-click configuration parameters
       spin-axis: [ 0, 0, 1 ]
+    children:
+      quack:
+        extends: http://vwf.example.com/sound.vwf
+        properties:
+          url: "duck"
+    scripts:
+    - |
+      this.pointerClick = function( pointerInfo, pickInfo ) {
+        this.quack.play();
+      }
   directional1:
     extends: http://vwf.example.com/light.vwf
     properties:
