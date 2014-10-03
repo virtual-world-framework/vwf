@@ -2428,23 +2428,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
     function fixMissingUVs(mesh)
     {
        
-        if(mesh.geometry instanceof THREE.BufferGeometry) return;
-        if(!mesh.geometry.faceVertexUvs[0] )
-            mesh.geometry.faceVertexUvs[0] = [];
-        if(mesh.geometry.faceVertexUvs[0].length == 0)
-        {
-            for(var i =0; i < mesh.geometry.faces.length; i++)
-            {
-                var face = mesh.geometry.faces[i];
-                if(face instanceof THREE.Face4)
+        if ( mesh.geometry instanceof THREE.BufferGeometry ) {
+            return;
+        }
+        if ( !mesh.geometry.faceVertexUvs[ 0 ] ) {
+            mesh.geometry.faceVertexUvs[ 0 ] = [];
+        }
+        if ( mesh.geometry.faceVertexUvs[ 0 ].length === 0 ) {
+            for ( var i = 0; i < mesh.geometry.faces.length; i++ ) {
+                var face = mesh.geometry.faces[ i ];
+                if ( face instanceof THREE.Face4 ) {
                     mesh.geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ),
                                                            new THREE.Vector2( 0, 1 ),
                                                            new THREE.Vector2( 0, 1 ), 
                                                            new THREE.Vector2( 0, 1 ) ] );
-                if(face instanceof THREE.Face3)
+                } else if ( face instanceof THREE.Face3 ) {
                     mesh.geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ), 
                                                            new THREE.Vector2( 0, 1 ),
                                                            new THREE.Vector2( 0, 1 ) ] );
+                }
             }
         }
          
@@ -2697,19 +2699,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             }
          
             var keyframeAnimations, animatedMesh;
-            if(asset.animations && asset.animations.length > 0) {
+            if ( asset.animations && asset.animations.length > 0 ) {
                 keyframeAnimations = asset.animations;
             }
 
-            if(asset.scene)
+            if ( asset.scene ) {
                 asset = asset.scene;
+            }
 
-            var meshes =[];
+            var meshes = [];
             GetAllLeafMeshes( asset, meshes );
 
-            for( var i =0; i < meshes.length; i++ ) {
-                if ( meshes[i].material.map != null ) {
-                    fixMissingUVs( meshes[i] );
+            for ( var i = 0; i < meshes.length; i++ ) {
+                if ( meshes[ i ].material.map != null ) {
+                    fixMissingUVs( meshes[ i ] );
                 }
             }
             
@@ -2720,7 +2723,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             
             // Don't make a copy of the three object if there are keyframe or skeletal animations associated with it
             // until we figure out a way to copy them successfully.
-            if(keyframeAnimations || skinnedAnimation) {
+            if ( keyframeAnimations || skinnedAnimation ) {
                 nodeCopy.threeObject = asset;
             }
             else {
@@ -2756,10 +2759,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 nodeCopy.threeObject.animations = keyframeAnimations;
 
                 // Initialize the key frame animations
-                for(var i = 0; i < keyframeAnimations.length; i++) {
-                    var animation = keyframeAnimations[i];
+                for ( var i = 0; i < keyframeAnimations.length; i++ ) {
+                    var animation = keyframeAnimations[ i ];
 
-                    if(!animation.node) continue;
+                    if ( !animation.node ) {
+                        continue;
+                    }
+
                     // Save references to the animations on the node that is animated, so that it can play separately
                     if( animation.node.animations == undefined ) {
                         animation.node.animations = [];
@@ -2772,13 +2778,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     var kfAnimation = new THREE.KeyFrameAnimation( animation.node, animation.name );
                     kfAnimation.timeScale = 1;
                     nodeCopy.threeObject.kfAnimations.push( kfAnimation );
-                    animation.node.kfAnimations.push(kfAnimation);
-                    for(var h = 0; h < kfAnimation.hierarchy.length; h++) {
-                        var keys = kfAnimation.data.hierarchy[h].keys;
-                        var sids = kfAnimation.data.hierarchy[h].sids;
-                        var obj = kfAnimation.hierarchy[h];
+                    animation.node.kfAnimations.push( kfAnimation );
+                    for ( var h = 0; h < kfAnimation.hierarchy.length; h++ ) {
+                        var keys = kfAnimation.data.hierarchy[ h ].keys;
+                        var sids = kfAnimation.data.hierarchy[ h ].sids;
+                        var obj = kfAnimation.hierarchy[ h ];
 
-                        if(keys.length && sids) {
+                        if ( keys.length && sids ) {
                             for(var s = 0; s < sids.length; s++) {
                                 var sid = sids[s];
                                 var next = kfAnimation.getNextKeyWith(sid, h, 0);
@@ -2923,39 +2929,37 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 node.loader.load( node.source, node.assetLoaded.bind( this ) );
             }
                                     
-            if( childType == "model/vnd.gltf+json")
+            if( childType == "model/vnd.gltf+json" )
             {
              
                 //create a queue to hold requests to the loader, since the loader cannot be re-entered for parallel loads
-                if(!THREE.glTFLoader.queue)
+                if ( !THREE.glTFLoader.queue )
                 {
                     //task is an object that olds the info about what to load
                     //nexttask is supplied by async to trigger the next in the queue;
-                    THREE.glTFLoader.queue = new async.queue(function(task,nextTask)
-                    {
+                    THREE.glTFLoader.queue = new async.queue( function( task, nextTask ) {
                         var node = task.node;
                         var cb = task.cb;
                         //call the actual load function
                         //signature of callback dictated by loader
-                        node.loader.load( node.source, function(geometry , materials) {
+                        node.loader.load( node.source, function( geometry , materials ) {
                             //ok, this model loaded, we can start the next load
                             nextTask();
                             //do whatever it was (asset loaded) that this load was going to do when complete
-                            cb(geometry , materials);
-                        });
+                            cb( geometry , materials );
+                        } );
 
-                    },1);
+                    }, 1 );
                 }
                 node.loader = new THREE.glTFLoader();
                 node.loader.useBufferGeometry = true;
                 //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it 
                 //is an async function, it cannot be entered again before it completes
-                THREE.glTFLoader.queue.push({node:node,cb:node.assetLoaded.bind( this ) })
-                
-
+                THREE.glTFLoader.queue.push( { 
+                    node: node,
+                    cb: node.assetLoaded.bind( this ) 
+                } );
             }
-
-            
         }
 
         //if the asset registry entry is not pending and it is loaded, then just grab a copy, 
