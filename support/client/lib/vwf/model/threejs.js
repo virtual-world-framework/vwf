@@ -1592,11 +1592,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     return value;
                 }
 
-                if(propertyName == "visible") {
+                if( propertyName == "visible" ) {
                     value = node.threeObject.visible;
                     return value;
                 }
                 
+                if ( propertyName == "castShadows" ) {
+                    value = node.threeObject.castShadow;
+                    return value;
+                }
+
+                if ( propertyName == "receiveShadows" ) {
+                    value = node.threeObject.receiveShadow;
+                    return value;
+                }
             }
             if(threeObject instanceof THREE.Material)
             {
@@ -1702,7 +1711,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         break;
                     case 'enableShadows':
                         if ( node.renderer ) {
-                            value = node.renderer.shadowMapEnabled = value;
+                            value = node.renderer.shadowMapEnabled;
                         }
                         break;
                     case "activeCamera":
