@@ -18,10 +18,7 @@ properties:
   scene:
     get: |
       if ( !this.scene ) {
-        if ( !this.scenePath ) {
-          this.scenePath = "/";
-        }
-        this.scene = this.find( this.scenePath )[ 0 ];
+        this.scene = this.find( this.scenePath || "/" )[ 0 ];
         if ( !this.scene ) {
           this.logger.errorx( "scene.get", "Could not find scene node: '", this.scenePath, "'" );
         }
@@ -36,3 +33,4 @@ properties:
       this.scenePath = value;
       // Nullify the current scene so that next time it is gotten, it will find it from the new path
       this.scene = null;
+      //@ sourceURL=sceneGetter.scenePath.set
