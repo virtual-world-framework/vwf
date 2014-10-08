@@ -16,6 +16,8 @@
 
 --- 
 extends: http://vwf.example.com/node.vwf
+implements:
+  - http://vwf.example.com/sceneGetter.vwf
 properties:
 
   ## Text to display to the user to explain the task
