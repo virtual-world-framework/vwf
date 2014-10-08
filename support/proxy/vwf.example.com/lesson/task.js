@@ -1,4 +1,3 @@
-this.scene;
 this.subtasks;
 
 this.enter = function() {
@@ -9,17 +8,6 @@ this.enter = function() {
     if ( parentTaskArray.length ) {
         var parentTask = parentTaskArray[ 0 ];
         this.scene = parentTask.scene;
-    }
-    else {
-        var searchResults = this.find( this.scenePath );
-
-        // If the search returned the scene node, set it for later use
-        // Else, print an error to the console
-        if ( searchResults.length )
-            this.scene = searchResults[ 0 ];
-        else
-            console.error( "Could not find scene node '" + this.scenePath + "' - please set the scenePath property " +
-                                         "on the top-level task" );
     }
 
     // If a camera pose has been specified for this task, move the camera to it
