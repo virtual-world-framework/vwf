@@ -435,7 +435,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     function renderScene( stage ) {
         //window.requestAnimationFrame( renderScene( stage ) );
         if ( stage !== undefined ) {
-            stage.draw();    
+            stage.batchDraw();    
         }
     }
 
