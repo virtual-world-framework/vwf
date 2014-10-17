@@ -1,27 +1,26 @@
 /*global define*/
 define([
+        './Cartesian3',
+        './Cartographic',
         './defined',
         './DeveloperError',
         './Math',
-        './Cartesian3',
-        './Cartographic',
         './Matrix3',
         './QuadraticRealPolynomial',
         './QuarticRealPolynomial'
-    ],
-    function(
+    ], function(
+        Cartesian3,
+        Cartographic,
         defined,
         DeveloperError,
         CesiumMath,
-        Cartesian3,
-        Cartographic,
         Matrix3,
         QuadraticRealPolynomial,
         QuarticRealPolynomial) {
     "use strict";
 
     /**
-     * DOC_TBA
+     * Functions for computing the intersection between geometries such as rays, planes, triangles, and ellipsoids.
      *
      * @exports IntersectionTests
      */
@@ -29,22 +28,24 @@ define([
 
     /**
      * Computes the intersection of a ray and a plane.
-     * @memberof IntersectionTests
      *
      * @param {Ray} ray The ray.
      * @param {Plane} plane The plane.
+     * @param {Cartesian3} [result] The object onto which to store the result.
      * @returns {Cartesian3} The intersection point or undefined if there is no intersections.
-     *
-     * @exception {DeveloperError} ray is required.
-     * @exception {DeveloperError} plane is required.
      */
     IntersectionTests.rayPlane = function(ray, plane, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(ray)) {
             throw new DeveloperError('ray is required.');
         }
-
         if (!defined(plane)) {
             throw new DeveloperError('plane is required.');
+        }
+        //>>includeEnd('debug');
+
+        if (!defined(result)) {
+            result = new Cartesian3();
         }
 
         var origin = ray.origin;
@@ -63,36 +64,36 @@ define([
             return undefined;
         }
 
-        result = direction.multiplyByScalar(t, result);
-        return Cartesian3.add(origin, result);
+        result = Cartesian3.multiplyByScalar(direction, t, result);
+        return Cartesian3.add(origin, result, result);
     };
+
+    var scratchQ = new Cartesian3();
+    var scratchW = new Cartesian3();
 
     /**
      * Computes the intersection points of a ray with an ellipsoid.
-     * @memberof IntersectionTests
      *
      * @param {Ray} ray The ray.
      * @param {Ellipsoid} ellipsoid The ellipsoid.
      * @returns {Object} An object with the first (<code>start</code>) and the second (<code>stop</code>) intersection scalars for points along the ray or undefined if there are no intersections.
-     *
-     * @exception {DeveloperError} ray is required.
-     * @exception {DeveloperError} ellipsoid is required.
      */
     IntersectionTests.rayEllipsoid = function(ray, ellipsoid) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(ray)) {
             throw new DeveloperError('ray is required.');
         }
-
         if (!defined(ellipsoid)) {
             throw new DeveloperError('ellipsoid is required.');
         }
+        //>>includeEnd('debug');
 
-        var inverseRadii = ellipsoid.getOneOverRadii();
-        var q = inverseRadii.multiplyComponents(ray.origin);
-        var w = inverseRadii.multiplyComponents(ray.direction);
+        var inverseRadii = ellipsoid.oneOverRadii;
+        var q = Cartesian3.multiplyComponents(inverseRadii, ray.origin, scratchQ);
+        var w = Cartesian3.multiplyComponents(inverseRadii, ray.direction, scratchW);
 
-        var q2 = q.magnitudeSquared();
-        var qw = q.dot(w);
+        var q2 = Cartesian3.magnitudeSquared(q);
+        var qw = Cartesian3.dot(q, w);
 
         var difference, w2, product, discriminant, temp;
 
@@ -106,7 +107,7 @@ define([
             // qw < 0.0.
             var qw2 = qw * qw;
             difference = q2 - 1.0; // Positively valued.
-            w2 = w.magnitudeSquared();
+            w2 = Cartesian3.magnitudeSquared(w);
             product = w2 * difference;
 
             if (qw2 < product) {
@@ -140,7 +141,7 @@ define([
         } else if (q2 < 1.0) {
             // Inside ellipsoid (2 intersections).
             difference = q2 - 1.0; // Negatively valued.
-            w2 = w.magnitudeSquared();
+            w2 = Cartesian3.magnitudeSquared(w);
             product = w2 * difference; // Negatively valued.
 
             discriminant = qw * qw - product;
@@ -153,7 +154,7 @@ define([
             // q2 == 1.0. On ellipsoid.
             if (qw < 0.0) {
                 // Looking inward.
-                w2 = w.magnitudeSquared();
+                w2 = Cartesian3.magnitudeSquared(w);
                 return {
                     start : 0.0,
                     stop : -qw / w2
@@ -265,25 +266,26 @@ define([
         return solutions;
     }
 
+    var firstAxisScratch = new Cartesian3();
+    var secondAxisScratch = new Cartesian3();
+    var thirdAxisScratch = new Cartesian3();
+    var referenceScratch = new Cartesian3();
     /**
      * Provides the point along the ray which is nearest to the ellipsoid.
-     * @memberof IntersectionTests
      *
      * @param {Ray} ray The ray.
      * @param {Ellipsoid} ellipsoid The ellipsoid.
      * @returns {Cartesian} The nearest planetodetic point on the ray.
-     *
-     * @exception {DeveloperError} ray is required.
-     * @exception {DeveloperError} ellipsoid is required.
      */
     IntersectionTests.grazingAltitudeLocation = function(ray, ellipsoid) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(ray)) {
             throw new DeveloperError('ray is required.');
         }
-
         if (!defined(ellipsoid)) {
             throw new DeveloperError('ellipsoid is required.');
         }
+        //>>includeEnd('debug');
 
         var position = ray.origin;
         var direction = ray.direction;
@@ -300,29 +302,29 @@ define([
         var f = ellipsoid.transformPositionToScaledSpace(direction);
 
         // Constructs a basis from the unit scaled direction vector. Construct its rotation and transpose.
-        var firstAxis = f.normalize();
-        var reference = f.mostOrthogonalAxis();
-        var secondAxis = reference.cross(firstAxis).normalize();
-        var thirdAxis = firstAxis.cross(secondAxis).normalize();
+        var firstAxis = Cartesian3.normalize(f, firstAxisScratch);
+        var reference = Cartesian3.mostOrthogonalAxis(f, referenceScratch);
+        var secondAxis = Cartesian3.normalize(Cartesian3.cross(reference, firstAxis, secondAxisScratch), secondAxisScratch);
+        var thirdAxis  = Cartesian3.normalize(Cartesian3.cross(firstAxis, secondAxis, thirdAxisScratch), thirdAxisScratch);
         var B = new Matrix3(firstAxis.x, secondAxis.x, thirdAxis.x,
                             firstAxis.y, secondAxis.y, thirdAxis.y,
                             firstAxis.z, secondAxis.z, thirdAxis.z);
-        var B_T = B.transpose();
+        var B_T = Matrix3.transpose(B);
 
         // Get the scaling matrix and its inverse.
-        var D_I = Matrix3.fromScale(ellipsoid.getRadii());
-        var D = Matrix3.fromScale(ellipsoid.getOneOverRadii());
+        var D_I = Matrix3.fromScale(ellipsoid.radii);
+        var D = Matrix3.fromScale(ellipsoid.oneOverRadii);
 
         var C = new Matrix3(0.0, direction.z, -direction.y,
                             -direction.z, 0.0, direction.x,
                             direction.y, -direction.x, 0.0);
 
-        var temp = B_T.multiply(D).multiply(C);
-        var A = temp.multiply(D_I).multiply(B);
-        var b = temp.multiplyByVector(position);
+        var temp = Matrix3.multiply(Matrix3.multiply(B_T, D), C);
+        var A = Matrix3.multiply(Matrix3.multiply(temp, D_I), B);
+        var b = Matrix3.multiplyByVector(temp, position);
 
         // Solve for the solutions to the expression in standard form:
-        var solutions = quadraticVectorExpression(A, b.negate(), 0.0, 0.0, 1.0);
+        var solutions = quadraticVectorExpression(A, Cartesian3.negate(b, firstAxisScratch), 0.0, 0.0, 1.0);
 
         var s;
         var altitude;
@@ -332,9 +334,9 @@ define([
             var maximumValue = Number.NEGATIVE_INFINITY;
 
             for ( var i = 0; i < length; ++i) {
-                s = D_I.multiplyByVector(B.multiplyByVector(solutions[i]));
-                var v = s.subtract(position).normalize();
-                var dotProduct = v.dot(direction);
+                s = Matrix3.multiplyByVector(D_I, Matrix3.multiplyByVector(B, solutions[i]));
+                var v = Cartesian3.normalize(Cartesian3.subtract(s, position, referenceScratch), referenceScratch);
+                var dotProduct = Cartesian3.dot(v, direction);
 
                 if (dotProduct > maximumValue) {
                     maximumValue = dotProduct;
@@ -344,7 +346,7 @@ define([
 
             var surfacePoint = ellipsoid.cartesianToCartographic(closest);
             maximumValue = CesiumMath.clamp(maximumValue, 0.0, 1.0);
-            altitude = closest.subtract(position).magnitude() * Math.sqrt(1.0 - maximumValue * maximumValue);
+            altitude = Cartesian3.magnitude(Cartesian3.subtract(closest, position, referenceScratch)) * Math.sqrt(1.0 - maximumValue * maximumValue);
             altitude = intersects ? -altitude : altitude;
             return ellipsoid.cartographicToCartesian(new Cartographic(surfacePoint.longitude, surfacePoint.latitude, altitude));
         }
@@ -356,7 +358,6 @@ define([
 
     /**
      * Computes the intersection of a line segment and a plane.
-     * @memberof IntersectionTests
      *
      * @param {Cartesian3} endPoint0 An end point of the line segment.
      * @param {Cartesian3} endPoint1 The other end point of the line segment.
@@ -364,32 +365,32 @@ define([
      * @param {Cartesian3} [result] The object onto which to store the result.
      * @returns {Cartesian3} The intersection point or undefined if there is no intersection.
      *
-     * @exception {DeveloperError} endPoint0 is required.
-     * @exception {DeveloperError} endPoint1 is required.
-     * @exception {DeveloperError} plane is required.
-     *
      * @example
-     * var origin = ellipsoid.cartographicToCartesian(Cartographic.fromDegrees(-75.59777, 40.03883, 0.0));
+     * var origin = Cesium.Cartesian3.fromDegrees(-75.59777, 40.03883);
      * var normal = ellipsoid.geodeticSurfaceNormal(origin);
-     * var plane = Plane.fromPointNormal(origin, normal);
+     * var plane = Cesium.Plane.fromPointNormal(origin, normal);
      *
-     * var p0 = new Cartesian3(...);
-     * var p1 = new Cartesian3(...);
+     * var p0 = new Cesium.Cartesian3(...);
+     * var p1 = new Cesium.Cartesian3(...);
      *
      * // find the intersection of the line segment from p0 to p1 and the tangent plane at origin.
-     * var intersection = IntersectionTests.lineSegmentPlane(p0, p1, plane);
+     * var intersection = Cesium.IntersectionTests.lineSegmentPlane(p0, p1, plane);
      */
     IntersectionTests.lineSegmentPlane = function(endPoint0, endPoint1, plane, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(endPoint0)) {
             throw new DeveloperError('endPoint0 is required.');
         }
-
         if (!defined(endPoint1)) {
             throw new DeveloperError('endPoint1 is required.');
         }
-
         if (!defined(plane)) {
             throw new DeveloperError('plane is required.');
+        }
+        //>>includeEnd('debug');
+
+        if (!defined(result)) {
+            result = new Cartesian3();
         }
 
         var difference = Cartesian3.subtract(endPoint1, endPoint0, lineSegmentPlaneDifference);
@@ -410,9 +411,6 @@ define([
         }
 
         // intersection is endPoint0 + t * (endPoint1 - endPoint0)
-        if (!defined(result)) {
-            result = new Cartesian3();
-        }
         Cartesian3.multiplyByScalar(difference, t, result);
         Cartesian3.add(endPoint0, result, result);
         return result;
@@ -420,37 +418,34 @@ define([
 
     /**
      * Computes the intersection of a triangle and a plane
-     * @memberof IntersectionTests
      *
      * @param {Cartesian3} p0 First point of the triangle
      * @param {Cartesian3} p1 Second point of the triangle
      * @param {Cartesian3} p2 Third point of the triangle
      * @param {Plane} plane Intersection plane
-     *
      * @returns {Object} An object with properties <code>positions</code> and <code>indices</code>, which are arrays that represent three triangles that do not cross the plane. (Undefined if no intersection exists)
      *
-     * @exception {DeveloperError} p0, p1, p2, and plane are required.
-     *
      * @example
-     * var origin = ellipsoid.cartographicToCartesian(Cartographic.fromDegrees(-75.59777, 40.03883, 0.0));
+     * var origin = Cesium.Cartesian3.fromDegrees(-75.59777, 40.03883);
      * var normal = ellipsoid.geodeticSurfaceNormal(origin);
-     * var plane = Plane.fromPointNormal(origin, normal);
+     * var plane = Cesium.Plane.fromPointNormal(origin, normal);
      *
-     * var p0 = new Cartesian3(...);
-     * var p1 = new Cartesian3(...);
-     * var p2 = new Cartesian3(...);
+     * var p0 = new Cesium.Cartesian3(...);
+     * var p1 = new Cesium.Cartesian3(...);
+     * var p2 = new Cesium.Cartesian3(...);
      *
      * // convert the triangle composed of points (p0, p1, p2) to three triangles that don't cross the plane
-     * var triangles = IntersectionTests.lineSegmentPlane(p0, p1, p2, plane);
-     *
+     * var triangles = Cesium.IntersectionTests.trianglePlaneIntersection(p0, p1, p2, plane);
      */
     IntersectionTests.trianglePlaneIntersection = function(p0, p1, p2, plane) {
+        //>>includeStart('debug', pragmas.debug);
         if ((!defined(p0)) ||
             (!defined(p1)) ||
             (!defined(p2)) ||
             (!defined(plane))) {
             throw new DeveloperError('p0, p1, p2, and plane are required.');
         }
+        //>>includeEnd('debug');
 
         var planeNormal = plane.normal;
         var planeD = plane.distance;

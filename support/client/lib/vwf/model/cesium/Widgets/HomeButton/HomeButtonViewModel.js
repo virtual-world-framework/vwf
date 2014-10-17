@@ -6,16 +6,12 @@ define([
         '../../Core/defineProperties',
         '../../Core/DeveloperError',
         '../../Core/Ellipsoid',
-        '../../Core/Extent',
-        '../../Core/Math',
         '../../Core/Matrix4',
+        '../../Core/Rectangle',
         '../../Scene/Camera',
-        '../../Scene/CameraColumbusViewMode',
-        '../../Scene/CameraFlightPath',
-        '../../Scene/PerspectiveFrustum',
         '../../Scene/SceneMode',
-        '../createCommand',
-        '../../ThirdParty/knockout'
+        '../../ThirdParty/knockout',
+        '../createCommand'
     ], function(
         Cartesian3,
         defaultValue,
@@ -23,83 +19,56 @@ define([
         defineProperties,
         DeveloperError,
         Ellipsoid,
-        Extent,
-        CesiumMath,
         Matrix4,
+        Rectangle,
         Camera,
-        CameraColumbusViewMode,
-        CameraFlightPath,
-        PerspectiveFrustum,
         SceneMode,
-        createCommand,
-        knockout) {
+        knockout,
+        createCommand) {
     "use strict";
 
-    function viewHome(scene, ellipsoid, transitioner, flightDuration) {
+    function viewHome(scene, ellipsoid, duration) {
         var mode = scene.mode;
+        var controller = scene.screenSpaceCameraController;
 
-        var camera = scene.getCamera();
-        camera.controller.constrainedAxis = Cartesian3.UNIT_Z;
+        controller.ellipsoid = ellipsoid;
 
-        var controller = scene.getScreenSpaceCameraController();
-
-        controller.setEllipsoid(ellipsoid);
-        controller.columbusViewMode = CameraColumbusViewMode.FREE;
-
-        var canvas = scene.getCanvas();
-        if (defined(transitioner) && mode === SceneMode.MORPHING) {
-            transitioner.completeMorph();
+        if (defined(scene) && mode === SceneMode.MORPHING) {
+            scene.completeMorph();
         }
-        var flight;
-        var description;
 
         if (mode === SceneMode.SCENE2D) {
-            camera.transform = new Matrix4(0, 0, 1, 0,
-                                           1, 0, 0, 0,
-                                           0, 1, 0, 0,
-                                           0, 0, 0, 1);
-            description = {
-                destination : Extent.MAX_VALUE,
-                duration : flightDuration
-            };
-            flight = CameraFlightPath.createAnimationExtent(scene, description);
-            scene.getAnimations().add(flight);
+            scene.camera.flyToRectangle({
+                destination : Rectangle.MAX_VALUE,
+                duration : duration,
+                endTransform : Matrix4.IDENTITY
+            });
         } else if (mode === SceneMode.SCENE3D) {
-            Cartesian3.add(camera.position, Matrix4.getTranslation(camera.transform), camera.position);
-            var rotation = Matrix4.getRotation(camera.transform);
-            rotation.multiplyByVector(camera.direction, camera.direction);
-            rotation.multiplyByVector(camera.up, camera.up);
-            rotation.multiplyByVector(camera.right, camera.right);
-            camera.transform = Matrix4.IDENTITY.clone();
-            var defaultCamera = new Camera(canvas);
-            description = {
+            var defaultCamera = new Camera(scene);
+            scene.camera.flyTo({
                 destination : defaultCamera.position,
-                duration : flightDuration,
+                duration : duration,
                 up : defaultCamera.up,
-                direction : defaultCamera.direction
-            };
-            flight = CameraFlightPath.createAnimation(scene, description);
-            scene.getAnimations().add(flight);
+                direction : defaultCamera.direction,
+                endTransform : Matrix4.IDENTITY
+            });
         } else if (mode === SceneMode.COLUMBUS_VIEW) {
-            camera.transform = new Matrix4(0.0, 0.0, 1.0, 0.0,
-                                           1.0, 0.0, 0.0, 0.0,
-                                           0.0, 1.0, 0.0, 0.0,
-                                           0.0, 0.0, 0.0, 1.0);
-            var maxRadii = ellipsoid.getMaximumRadius();
-            var position = new Cartesian3(0.0, -1.0, 1.0).normalize().multiplyByScalar(5.0 * maxRadii);
-            var direction = Cartesian3.ZERO.subtract(position).normalize();
-            var right = direction.cross(Cartesian3.UNIT_Z);
-            var up = right.cross(direction);
+            var maxRadii = ellipsoid.maximumRadius;
+            var position = new Cartesian3(0.0, -1.0, 1.0);
+            position = Cartesian3.multiplyByScalar(Cartesian3.normalize(position, position), 5.0 * maxRadii, position);
+            var direction = new Cartesian3();
+            direction = Cartesian3.normalize(Cartesian3.subtract(Cartesian3.ZERO, position, direction), direction);
+            var right = Cartesian3.cross(direction, Cartesian3.UNIT_Z, new Cartesian3());
+            var up = Cartesian3.cross(right, direction, new Cartesian3());
 
-            description = {
+            scene.camera.flyTo({
                 destination : position,
-                duration : flightDuration,
+                duration : duration,
                 up : up,
-                direction : direction
-            };
-
-            flight = CameraFlightPath.createAnimation(scene, description);
-            scene.getAnimations().add(flight);
+                direction : direction,
+                endTransform : Matrix4.IDENTITY,
+                convert : false
+            });
         }
     }
 
@@ -109,28 +78,26 @@ define([
      * @constructor
      *
      * @param {Scene} scene The scene instance to use.
-     * @param {SceneTransitioner} [transitioner] The scene transitioner instance to use.
      * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid to be viewed when in home position.
-     * @param {Number} [flightDuration] The duration of the camera flight in milliseconds
-     *
-     * @exception {DeveloperError} scene is required.
+     * @param {Number} [duration=1.5] The duration of the camera flight in seconds.
      */
-    var HomeButtonViewModel = function(scene, transitioner, ellipsoid, flightDuration) {
+    var HomeButtonViewModel = function(scene, ellipsoid, duration) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(scene)) {
             throw new DeveloperError('scene is required.');
         }
+        //>>includeEnd('debug');
 
         ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);
-        flightDuration = defaultValue(flightDuration, 1500);
+        duration = defaultValue(duration, 1.5);
 
         this._scene = scene;
         this._ellipsoid = ellipsoid;
-        this._transitioner = transitioner;
-        this._flightDuration = flightDuration;
+        this._duration = duration;
 
         var that = this;
         this._command = createCommand(function() {
-            viewHome(that._scene, that._ellipsoid, that._transitioner, that._flightDuration);
+            viewHome(that._scene, that._ellipsoid, that._duration);
         });
 
         /**
@@ -144,21 +111,6 @@ define([
     };
 
     defineProperties(HomeButtonViewModel.prototype, {
-        /**
-         * Gets the scene transitioner being used by the scene.
-         * If a transitioner is assigned, any running morphs will be completed
-         * when the home button is pressed.  The transitioner must be using
-         * the same Scene instance as the scene property.
-         * @memberof HomeButtonViewModel.prototype
-         *
-         * @type {SceneTransitioner}
-         */
-        sceneTransitioner : {
-            get : function() {
-                return this._transitioner;
-            }
-        },
-
         /**
          * Gets the scene to control.
          * @memberof HomeButtonViewModel.prototype
@@ -196,21 +148,24 @@ define([
         },
 
         /**
-         * Gets or sets the the duration of the camera flight in milliseconds.
+         * Gets or sets the the duration of the camera flight in seconds.
          * A value of zero causes the camera to instantly switch to home view.
          * @memberof HomeButtonViewModel.prototype
          *
          * @type {Number}
          */
-        flightDuration : {
+        duration : {
             get : function() {
-                return this._flightDuration;
+                return this._duration;
             },
             set : function(value) {
+                //>>includeStart('debug', pragmas.debug);
                 if (value < 0) {
                     throw new DeveloperError('value must be positive.');
                 }
-                this._flightDuration = value;
+                //>>includeEnd('debug');
+
+                this._duration = value;
             }
         }
     });

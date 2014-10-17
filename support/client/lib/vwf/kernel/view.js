@@ -163,6 +163,27 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             // TODO: deleteEvent
 
+            case "addEventListener":
+
+                return function( nodeID, eventName, eventHandler, eventContextID, eventPhases, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, eventName,
+                        [ eventHandler, eventContextID, eventPhases ], when || 0, callback /* result */ );
+                };
+
+            case "removeEventListener":
+
+                return function( nodeID, eventName, eventHandler, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, eventName,
+                        [ eventHandler ], when || 0, callback /* result */ );
+                };
+
+            case "flushEventListeners":
+
+                return function( nodeID, eventName, eventContextID, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, eventName,
+                        [ eventContextID ], when || 0, callback /* result */ );
+                };
+
             case "fireEvent":
 
                 return function( nodeID, eventName, eventParameters, when, callback ) {

@@ -18,9 +18,10 @@
 /// 
 /// @module vwf/model/javascript
 /// @requires vwf/model
+/// @requires vwf/kernel/utility
 /// @requires vwf/utility
 
-define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utility ) {
+define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility" ], function( module, model, kutility, utility ) {
 
     return model.load( module, {
 
@@ -141,6 +142,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
             } );
 
+            // Attach the property meta events to `node.properties.{created,initialized,deleted}`.
+
+            createEventAccessor.call( this, node.properties, "created", "properties" );
+            createEventAccessor.call( this, node.properties, "initialized", "properties" );
+            createEventAccessor.call( this, node.properties, "deleted", "properties" );
+
             node.private.getters = Object.create( prototype.private ?
                 prototype.private.getters : Object.prototype
             );
@@ -159,6 +166,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 }
             } );
 
+            // Attach the method meta events to `node.methods.{created,deleted}`.
+
+            createEventAccessor.call( this, node.methods, "created", "methods" );
+            createEventAccessor.call( this, node.methods, "deleted", "methods" );
+
             node.private.bodies = Object.create( prototype.private ?
                 prototype.private.bodies : Object.prototype
             );
@@ -174,6 +186,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     return self.kernel.createEvent( this.node.id, name, parameters );
                 }
             } );
+
+            // Attach the event meta events to `node.events.{created,deleted}`.
+
+            createEventAccessor.call( this, node.events, "created", "events" );
+            createEventAccessor.call( this, node.events, "deleted", "events" );
 
             // Provide helper functions to create the directives for adding, removing and flushing
             // event handlers.
@@ -215,22 +232,50 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             } );
 
             Object.defineProperty( node.children, "create", {
+
                 value: function( name, component, callback /* ( child ) */ ) { // "this" is node.children
+
+                    // Interpret `node.children.create( name, callback )` as
+                    // `node.children.create( name, undefined, callback )`.
+
+                    if ( typeof component === "function" || component instanceof Function ) {
+                        callback = component;
+                        component = undefined;
+                    }
+
+                    // Accept `node.children.create( name )` and treat it as
+                    // `node.children.create( name, {} )`.
+
+                    component = component || {};
+
+                    // Make the call. If a callback is provided, wrap it and translate the ID to a
+                    // node reference.
+
                     if ( callback ) {
-                        self.kernel.createChild( this.node.id, name, component, undefined, undefined, function( childID ) {
+                        self.kernel.createChild( this.node.id, name, componentKernelFromJS.call( self, component ), undefined, undefined, function( childID ) {
                             callback.call( node, self.nodes[childID] );
                         } );
                     } else { 
-                        return self.kernel.createChild( this.node.id, name, component );
+                        return self.kernel.createChild( this.node.id, name, componentKernelFromJS.call( self, component ) );
                     }
+
                 }
+
             } );
 
             Object.defineProperty( node.children, "delete", {
                 value: function( child ) {
+                    if ( typeof child === "string" ) {
+                        child = this.node.children[ child ];
+                    }
                     return self.kernel.deleteNode( child.id );
                 }
             } );
+
+            // Attach the child meta events to `node.children.{added,removed}`.
+
+            createEventAccessor.call( this, node.children, "added", "children" );
+            createEventAccessor.call( this, node.children, "removed", "children" );
 
             // Define the "random" and "seed" functions.
 
@@ -497,22 +542,15 @@ node.hasOwnProperty( childName ) ||  // TODO: recalculate as properties, methods
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
 
             var node = this.nodes[nodeID];
-            var self = this;
 
-            Object.defineProperty( node.properties, propertyName, { // "this" is node.properties in get/set
-                get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
-                enumerable: true
-            } );
+            createPropertyAccessor.call( this, node.properties, propertyName );
 
 node.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-            Object.defineProperty( node, propertyName, { // "this" is node in get/set
-                get: function() { return self.kernel.getProperty( this.id, propertyName ) },
-                set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
-                enumerable: true
-            } );
+            createPropertyAccessor.call( this, node, propertyName );
 
-            node.private.change++; // invalidate the "future" cache
+            // Invalidate the "future" cache.
+
+            node.private.change++;
 
             return propertyValue !== undefined ?
                 this.settingProperty( nodeID, propertyName, propertyValue ) : undefined;
@@ -532,7 +570,9 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             if ( setter && setter !== true ) { // is there is a setter (and not just a guard value)
                 try {
-                    return setter.call( node, propertyValue );
+                    var valueJS = valueJSFromKernel.call( this, propertyValue );
+                    var resultJS = setter.call( node, valueJS );
+                    return valueKernelFromJS.call( this, resultJS );
                 } catch ( e ) {
                     this.logger.warnx( "settingProperty", nodeID, propertyName, propertyValue,
                         "exception in setter:", utility.exceptionMessage( e ) );
@@ -551,7 +591,8 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
 
             if ( getter && getter !== true ) { // is there is a getter (and not just a guard value)
                 try {
-                    return getter.call( node );
+                    var resultJS = getter.call( node );
+                    return valueKernelFromJS.call( this, resultJS );
                 } catch ( e ) {
                     this.logger.warnx( "gettingProperty", nodeID, propertyName, propertyValue,
                         "exception in getter:", utility.exceptionMessage( e ) );
@@ -566,36 +607,11 @@ if ( ! node ) return;  // TODO: patch until full-graph sync is working; drivers 
         creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
 
             var node = this.nodes[nodeID];
-            var self = this;
 
-            Object.defineProperty( node.methods, methodName, { // "this" is node.methods in get/set
-                get: function() {
-                    return function( /* parameter1, parameter2, ... */ ) { // "this" is node.methods
-                        return self.kernel.callMethod( this.node.id, methodName, arguments );
-                    };
-                },
-                set: function( value ) {
-                    this.node.methods.hasOwnProperty( methodName ) ||
-                        self.kernel.createMethod( this.node.id, methodName );
-                    this.node.private.bodies[methodName] = value;
-                },
-                enumerable: true,
-            } );
+            createMethodAccessor.call( this, node.methods, methodName );
 
 node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-            Object.defineProperty( node, methodName, { // "this" is node in get/set
-                get: function() {
-                    return function( /* parameter1, parameter2, ... */ ) { // "this" is node
-                        return self.kernel.callMethod( this.id, methodName, arguments );
-                    };
-                },
-                set: function( value ) {
-                    this.methods.hasOwnProperty( methodName ) ||
-                        self.kernel.createMethod( this.id, methodName );
-                    this.private.bodies[methodName] = value;
-                },
-                enumerable: true,
-            } );
+            createMethodAccessor.call( this, node, methodName );
 
             try {
                 node.private.bodies[methodName] = eval( bodyScript( methodParameters || [], methodBody || "" ) );
@@ -604,7 +620,9 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
                     "exception evaluating body:", utility.exceptionMessage( e ) );
             }
         
-            node.private.change++; // invalidate the "future" cache
+            // Invalidate the "future" cache.
+
+            node.private.change++;
 
         },
 
@@ -619,7 +637,9 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
 
             if ( body ) {
                 try {
-                    return body.apply( node, methodParameters );
+                    var parametersJS = parametersJSFromKernel.call( this, methodParameters );
+                    var resultJS = body.apply( node, parametersJS );
+                    return valueKernelFromJS.call( this, resultJS );
                 } catch ( e ) {
                     this.logger.warnx( "callingMethod", nodeID, methodName, methodParameters, methodValue, // TODO: limit methodParameters for log
                         "exception:", utility.exceptionMessage( e ) );
@@ -634,72 +654,65 @@ node.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, method
         creatingEvent: function( nodeID, eventName, eventParameters ) {
 
             var node = this.nodes[nodeID];
-            var self = this;
 
-            Object.defineProperty( node.events, eventName, { // "this" is node.events in get/set
-                get: function() {
-                    return function( /* parameter1, parameter2, ... */ ) { // "this" is node.events
-                        return self.kernel.fireEvent( this.node.id, eventName, arguments );
-                    };
-                },
-                set: function( value ) {
-                    var listeners = this.node.private.listeners[eventName] ||
-                        ( this.node.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                    if ( typeof value == "function" || value instanceof Function ) {
-                        listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
-                    } else if ( value.add ) {
-                        if ( ! value.phases || value.phases instanceof Array ) {
-                            listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
-                        } else {
-                            listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
-                        }
-                    } else if ( value.remove ) {
-                        this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                            return listener.handler !== value.handler;
-                        } );
-                    } else if ( value.flush ) {
-                        this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                            return listener.context !== value.context;
-                        } );
-                    }
-                },
-                enumerable: true,
-            } );
+            createEventAccessor.call( this, node.events, eventName );
 
 node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-            Object.defineProperty( node, eventName, { // "this" is node in get/set
-                get: function() {
-                    return function( /* parameter1, parameter2, ... */ ) { // "this" is node
-                        return self.kernel.fireEvent( this.id, eventName, arguments );
-                    };
-                },
-                set: function( value ) {
-                    var listeners = this.private.listeners[eventName] ||
-                        ( this.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                    if ( typeof value == "function" || value instanceof Function ) {
-                        listeners.push( { handler: value, context: this } ); // for node.*event* = function() { ... }, context is the target node
-                    } else if ( value.add ) {
-                        if ( ! value.phases || value.phases instanceof Array ) {
-                            listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
-                        } else {
-                            listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
-                        }
-                    } else if ( value.remove ) {
-                        this.private.listeners[eventName] = listeners.filter( function( listener ) {
-                            return listener.handler !== value.handler;
-                        } );
-                    } else if ( value.flush ) {
-                        this.private.listeners[eventName] = listeners.filter( function( listener ) {
-                            return listener.context !== value.context;
-                        } );
-                    }
-                },
-                enumerable: true,
-            } );
+            createEventAccessor.call( this, node, eventName );
 
-            node.private.listeners[eventName] = [];
+            // Invalidate the "future" cache.
 
-            node.private.change++; // invalidate the "future" cache
+            node.private.change++;
+
+        },
+
+        // -- addingEventListener ------------------------------------------------------------------
+
+        addingEventListener: function( nodeID, eventName, eventHandler, eventContextID, eventPhases ) {
+
+            var node = this.nodes[nodeID];
+            var eventContext = this.nodes[eventContextID];
+
+            var listeners = node.private.listeners[eventName];
+
+            if ( ! listeners ) {
+                listeners = node.private.listeners[eventName] = [];
+            }
+
+            listeners.push( { handler: eventHandler, context: eventContext, phases: eventPhases } );
+
+        },
+
+        // -- removingEventListener ----------------------------------------------------------------
+
+        removingEventListener: function( nodeID, eventName, eventHandler ) {
+
+            var node = this.nodes[nodeID];
+
+            var listeners = node.private.listeners[eventName];
+
+            if ( listeners ) {
+                node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                    return listener.handler !== eventHandler;
+                } );
+            }
+
+        },
+
+        // -- flushingEventListeners ---------------------------------------------------------------
+
+        flushingEventListeners: function( nodeID, eventName, eventContextID ) {
+
+            var node = this.nodes[nodeID];
+            var eventContext = this.nodes[eventContextID];
+
+            var listeners = node.private.listeners[eventName];
+
+            if ( listeners ) {
+                node.private.listeners[eventName] = listeners.filter( function( listener ) {
+                    return listener.context !== eventContext;
+                } );
+            }
 
         },
 
@@ -711,6 +724,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             var node = this.nodes[nodeID];
             var listeners = findListeners( node, eventName );
+
+            var parametersJS = parametersJSFromKernel.call( this, eventParameters );
 
             var self = this;
 
@@ -726,7 +741,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
                 try {
                     if ( ! phase || listener.phases && listener.phases.indexOf( phase ) >= 0 ) {
-                        var result = listener.handler.apply( listener.context || self.nodes[0], eventParameters ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+                        var resultJS = listener.handler.apply( listener.context || self.nodes[0], parametersJS ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+                        var result = valueKernelFromJS.call( self, resultJS );
                         return handled || result || result === undefined; // interpret no return as "return true"
                     }
                 } catch ( e ) {
@@ -749,7 +765,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
             if ( scriptType == "application/javascript" ) {
                 try {
-                    return ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText || "" );
+                    var resultJS = ( function( scriptText ) { return eval( scriptText ) } ).call( node, scriptText || "" );
+                    return valueKernelFromJS.call( this, resultJS );
                 } catch ( e ) {
                     this.logger.warnx( "executing", nodeID,
                         ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType, "exception:", utility.exceptionMessage( e ) );
@@ -808,20 +825,9 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             if ( behavior.properties.hasOwnProperty( propertyName ) ) {
 
                 ( function( propertyName ) {
-
-                    Object.defineProperty( proxy.properties, propertyName, { // "this" is proxy.properties in get/set
-                        get: function() { return self.kernel.getProperty( this.node.id, propertyName ) },
-                        set: function( value ) { self.kernel.setProperty( this.node.id, propertyName, value ) },
-                        enumerable: true
-                    } );
-
+                    createPropertyAccessor.call( self, proxy.properties, propertyName );
 proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty( proxy, propertyName, { // "this" is proxy in get/set
-                        get: function() { return self.kernel.getProperty( this.id, propertyName ) },
-                        set: function( value ) { self.kernel.setProperty( this.id, propertyName, value ) },
-                        enumerable: true
-                    } );
-
+                    createPropertyAccessor.call( self, proxy, propertyName );
                 } )( propertyName );
             
                 if ( behavior.private.getters.hasOwnProperty( propertyName ) ) {
@@ -849,36 +855,9 @@ proxy.hasOwnProperty( propertyName ) ||  // TODO: recalculate as properties, met
             if ( behavior.methods.hasOwnProperty( methodName ) ) {
 
                 ( function( methodName ) {
-
-                    Object.defineProperty( proxy.methods, methodName, { // "this" is proxy.methods in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.methods
-                                return self.kernel.callMethod( this.node.id, methodName, arguments );
-                            };
-                        },
-                        set: function( value ) {
-                            this.node.methods.hasOwnProperty( methodName ) ||
-                                self.kernel.createMethod( this.node.id, methodName );
-                            this.node.private.bodies[methodName] = value;
-                        },
-                        enumerable: true,
-                    } );
-
+                    createMethodAccessor.call( self, proxy.methods, methodName );
 proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty( proxy, methodName, { // "this" is proxy in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
-                                return self.kernel.callMethod( this.id, methodName, arguments );
-                            };
-                        },
-                        set: function( value ) {
-                            this.methods.hasOwnProperty( methodName ) ||
-                                self.kernel.createMethod( this.id, methodName );
-                            this.private.bodies[methodName] = value;
-                        },
-                        enumerable: true,
-                    } );
-
+                    createMethodAccessor.call( self, proxy, methodName );
                 } )( methodName );
             
                 if ( behavior.private.bodies.hasOwnProperty( methodName ) ) {
@@ -900,68 +879,9 @@ proxy.hasOwnProperty( methodName ) ||  // TODO: recalculate as properties, metho
             if ( behavior.events.hasOwnProperty( eventName ) ) {
 
                 ( function( eventName ) {
-
-                    Object.defineProperty( proxy.events, eventName, { // "this" is proxy.events in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.events
-                                return self.kernel.fireEvent( this.node.id, eventName, arguments );
-                            };
-                        },
-                        set: function( value ) {
-                            var listeners = this.node.private.listeners[eventName] ||
-                                ( this.node.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                            if ( typeof value == "function" || value instanceof Function ) {
-                                listeners.push( { handler: value, context: this.node } ); // for node.events.*event* = function() { ... }, context is the target node
-                            } else if ( value.add ) {
-                                if ( ! value.phases || value.phases instanceof Array ) {
-                                    listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
-                                } else {
-                                    listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
-                                }
-                            } else if ( value.remove ) {
-                                this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                                    return listener.handler !== value.handler;
-                                } );
-                            } else if ( value.flush ) {
-                                this.node.private.listeners[eventName] = listeners.filter( function( listener ) {
-                                    return listener.context !== value.context;
-                                } );
-                            }
-                        },
-                        enumerable: true,
-                    } );
-
+                    createEventAccessor.call( self, proxy.events, eventName );
 proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty( proxy, eventName, { // "this" is proxy in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
-                                return self.kernel.fireEvent( this.id, eventName, arguments );
-                            };
-                        },
-                        set: function( value ) {
-                            var listeners = this.private.listeners[eventName] ||
-                                ( this.private.listeners[eventName] = [] ); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                            if ( typeof value == "function" || value instanceof Function ) {
-                                listeners.push( { handler: value, context: this } ); // for node.*event* = function() { ... }, context is the target node
-                            } else if ( value.add ) {
-                                if ( ! value.phases || value.phases instanceof Array ) {
-                                    listeners.push( { handler: value.handler, context: value.context, phases: value.phases } );
-                                } else {
-                                    listeners.push( { handler: value.handler, context: value.context, phases: [ value.phases ] } );
-                                }
-                            } else if ( value.remove ) {
-                                this.private.listeners[eventName] = listeners.filter( function( listener ) {
-                                    return listener.handler !== value.handler;
-                                } );
-                            } else if ( value.flush ) {
-                                this.private.listeners[eventName] = listeners.filter( function( listener ) {
-                                    return listener.context !== value.context;
-                                } );
-                            }
-                        },
-                        enumerable: true,
-                    } );
-
+                    createEventAccessor.call( self, proxy, eventName );
                 } )( eventName );
 
             }
@@ -1014,7 +934,7 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
             } );
 
             future.properties = Object.create( Object.getPrototypeOf( future ).properties || Object.prototype, {
-                future: { value: future } // for future.properties accessors (non-enumerable)  // TODO: hide this better
+                node: { value: future } // for future.properties accessors (non-enumerable)  // TODO: hide this better
             } );
 
             for ( var propertyName in node.properties ) {
@@ -1022,28 +942,9 @@ proxy.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, method
                 if ( node.properties.hasOwnProperty( propertyName ) ) {
 
                     ( function( propertyName ) {
-
-                        Object.defineProperty( future.properties, propertyName, { // "this" is future.properties in get/set
-                            get: function() { return self.kernel.getProperty( this.future.id,
-                                propertyName, this.future.private.when, this.future.private.callback
-                            ) },
-                            set: function( value ) { self.kernel.setProperty( this.future.id,
-                                propertyName, value, this.future.private.when, this.future.private.callback
-                            ) },
-                            enumerable: true
-                        } );
-
+                        createPropertyAccessor.call( self, future.properties, propertyName );
 future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty( future, propertyName, { // "this" is future in get/set
-                            get: function() { return self.kernel.getProperty( this.id,
-                                propertyName, this.private.when, this.private.callback
-                            ) },
-                            set: function( value ) { self.kernel.setProperty( this.id,
-                                propertyName, value, this.private.when, this.private.callback
-                            ) },
-                            enumerable: true
-                        } );
-
+                        createPropertyAccessor.call( self, future, propertyName );
                     } )( propertyName );
                 
                 }
@@ -1051,7 +952,7 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
             }
 
             future.methods = Object.create( Object.getPrototypeOf( future ).methods || Object.prototype, {
-                future: { value: future } // for future.methods accessors (non-enumerable)  // TODO: hide this better
+                node: { value: future } // for future.methods accessors (non-enumerable)  // TODO: hide this better
             } );
 
             for ( var methodName in node.methods ) {
@@ -1059,30 +960,9 @@ future.hasOwnProperty( propertyName ) ||  // TODO: calculate so that properties 
                 if ( node.methods.hasOwnProperty( methodName ) ) {
 
                     ( function( methodName ) {
-
-                        Object.defineProperty( future.methods, methodName, { // "this" is future.methods in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future.methods
-                                    return self.kernel.callMethod( this.future.id,
-                                        methodName, arguments, this.future.private.when, this.future.private.callback
-                                    );
-                                }
-                            },
-                            enumerable: true
-                        } );
-
+                        createMethodAccessor.call( self, future.methods, methodName, true );
 future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty( future, methodName, { // "this" is future in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return self.kernel.callMethod( this.id,
-                                        methodName, arguments, this.private.when, this.private.callback
-                                    );
-                                }
-                            },
-                            enumerable: true
-                        } );
-
+                        createMethodAccessor.call( self, future, methodName, true );
                     } )( methodName );
 
                 }
@@ -1090,7 +970,7 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
             }
 
             future.events = Object.create( Object.getPrototypeOf( future ).events || Object.prototype, {
-                future: { value: future } // for future.events accessors (non-enumerable)  // TODO: hide this better
+                node: { value: future } // for future.events accessors (non-enumerable)  // TODO: hide this better
             } );
 
             for ( var eventName in node.events ) {
@@ -1098,30 +978,9 @@ future.hasOwnProperty( methodName ) ||  // TODO: calculate so that properties ta
                 if ( node.events.hasOwnProperty( eventName ) ) {
 
                     ( function( eventName ) {
-
-                        Object.defineProperty( future.events, eventName, { // "this" is future.events in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
-                                    return self.kernel.fireEvent( this.future.id,
-                                        eventName, arguments, this.future.private.when, this.future.private.callback
-                                    );
-                                };
-                            },
-                            enumerable: true,
-                        } );
-
+                        createEventAccessor.call( self, future.events, eventName, undefined, true );
 future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty( future, eventName, { // "this" is future in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return self.kernel.fireEvent( this.id,
-                                        eventName, arguments, this.private.when, this.private.callback
-                                    );
-                                };
-                            },
-                            enumerable: true,
-                        } );
-
+                        createEventAccessor.call( self, future, eventName, undefined, true );
                     } )( eventName );
 
                 }
@@ -1133,6 +992,183 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
         }
 
         return future;
+    }
+
+    /// Define a (JavaScript) accessor property on a node or a node's `properties` collection that
+    /// will manipulate a (VWF) property on the node.
+    /// 
+    /// Reading `node.properties.name` invokes the `get` accessor, which calls `kernel.getProperty`
+    /// to return the value for the property on the node. Writing `node.properties.name` invokes
+    /// the `set` accessor, which calls `kernel.setProperty` to assign a new value to the property
+    /// on its node.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `createPropertyAccessor.call( driver, container, propertyName )`.
+    /// 
+    /// @param {Object} container
+    ///   A `node` or `node.properties` object to receive the property.
+    /// @param {String} propertyName
+    ///   The name of the property to create on `container`.
+
+    function createPropertyAccessor( container, propertyName ) {
+
+        var self = this;
+
+        Object.defineProperty( container, propertyName, {
+
+            // On read, call `kernel.getProperty` and return the result.
+
+            get: function() {  // `this` is the container
+                var node = this.node || this;  // the node via node.properties.node, or just node
+                var resultKernel = self.kernel.getProperty( node.id, propertyName,
+                    node.private.when, node.private.callback );
+                return valueJSFromKernel.call( self, resultKernel );
+            },
+
+            // On write, pass the assigned value to `kernel.setProperty`.
+
+            set: function( value ) {  // `this` is the container
+                var node = this.node || this;  // the node via node.properties.node, or just node
+                var valueKernel = valueKernelFromJS.call( self, value );
+                self.kernel.setProperty( node.id, propertyName, valueKernel,
+                    node.private.when, node.private.callback );
+            },
+
+            enumerable: true,
+
+        } );
+
+    }
+
+    /// Define an accessor property on a node or a node's `methods` collection that manipulates a
+    /// method on the node.
+    /// 
+    /// Reading `node.methods.name` returns a function that when called calls `kernel.callMethod` to
+    /// invoke the method on the node. Writing a function object to `node.methods.name` will set the
+    /// method body to the assigned function.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `createMethodAccessor.call( driver, container, methodName )`.
+    /// 
+    /// @param {Object} container
+    ///   A `node` or `node.methods` object to receive the property.
+    /// @param {String} methodName
+    ///   The name of the property to create on `container`.
+    /// @param {Boolean} [unsettable]
+    ///   When truthy, don't create the `set` accessor. An unsettable method property doesn't allow
+    ///   the method body to be changed.
+
+    function createMethodAccessor( container, methodName, unsettable ) {
+
+        var self = this;
+
+        Object.defineProperty( container, methodName, {
+
+            // On read, return a function that calls `kernel.callMethod` when invoked.
+
+            get: function() {  // `this` is the container
+                var node = this.node || this;  // the node via node.methods.node, or just node
+                return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
+                    var argumentsKernel = parametersKernelFromJS.call( self, arguments );
+                    var resultKernel = self.kernel.callMethod( node.id, methodName, argumentsKernel,
+                        node.private.when, node.private.callback );
+                    return valueJSFromKernel.call( self, resultKernel );
+                };
+            },
+
+            // On write, update the method body. `unsettable` methods don't accept writes.
+
+            set: unsettable ? undefined : function( value ) {  // `this` is the container
+                var node = this.node || this;  // the node via node.methods.node, or just node
+                node.methods.hasOwnProperty( methodName ) ||
+                    self.kernel.createMethod( node.id, methodName );
+                node.private.bodies[methodName] = value;
+            },
+
+            enumerable: true,
+
+        } );
+
+    }
+
+    /// Define an accessor property on a node or a node's `events` collection that manipulates an
+    /// event on the node. `createEventAccessor` is also used to define accessor properties at other
+    /// locations on the node to expose the node's meta events.
+    /// 
+    /// Reading `node.events.name` returns a function that when called calls `kernel.fireEvent` to
+    /// fire the event from the node. Writing a function object to `node.events.name` will add the
+    /// assigned function as a new listener using default parameters. To add a listener with
+    /// specified paramters, call the `node.events.add` helper function and assign the result to
+    /// `node.events.name`. Remove a listener by calling the `node.events.remove` helper and
+    /// assigning the result. Flush a set of listeners with the `node.events.flush` helper.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `createEventAccessor.call( driver, container, eventName [, eventNamespace ] [, unsettable ] )`.
+    /// 
+    /// @param {Object} container
+    ///   A `node` or `node.events` object to receive the property. Meta events will attach to
+    ///   `node.properties`, `node.methods`, `node.events`, and `node.children` as well.
+    /// @param {String} eventName
+    ///   The name of the property to create on `container`.
+    /// @param {String} [eventNamespace]
+    ///   For meta events, the namespace associated with the event.
+    /// @param {Boolean} [unsettable]
+    ///   When truthy, don't create the `set` accessor. An unsettable event property can't add or
+    ///   remove listeners.
+
+    function createEventAccessor( container, eventName, eventNamespace, unsettable ) {
+
+        var self = this;
+
+        Object.defineProperty( container, eventName, {
+
+            // On read, return a function that calls `kernel.fireEvent` when invoked. Namespaced
+            // events (which are meta events and controlled by the kernel) are ungettable and can't
+            // be fired by the application.
+
+            get: eventNamespace ? undefined : function() {  // `this` is the container
+                var node = this.node || this;  // the node via node.*collection*.node, or just node
+                return function( /* parameter1, parameter2, ... */ ) {  // `this` is the container
+                    var argumentsKernel = parametersKernelFromJS.call( self, arguments );
+                    var resultKernel = self.kernel.fireEvent( node.id, eventName, argumentsKernel,
+                        node.private.when, node.private.callback );
+                    return valueJSFromKernel.call( self, resultKernel );
+                };
+            },
+
+            // On write, update the listeners. `unsettable` events don't accept writes.
+
+            set: unsettable ? undefined : function( value ) {  // `this` is the container
+                var node = this.node || this;  // the node via node.*collection*.node, or just node
+                var namespacedName = eventNamespace ? [ eventNamespace, eventName ] : eventName;
+                if ( typeof value == "function" || value instanceof Function ) {
+                    self.kernel.addEventListener.call( self, node.id, namespacedName,
+                        value, node.id );  // for container.*event* = function() { ... }, context is the target node
+                } else if ( value.add ) {
+                    if ( ! value.phases || value.phases instanceof Array ) {
+                        self.kernel.addEventListener.call( self, node.id, namespacedName,
+                            value.handler, value.context && value.context.id, value.phases );
+                    } else {
+                        self.kernel.addEventListener.call( self, node.id, namespacedName,
+                            value.handler, value.context && value.context.id, [ value.phases ] );
+                    }
+                } else if ( value.remove ) {
+                    self.kernel.removeEventListener.call( self, node.id, namespacedName,
+                        value.handler );
+                } else if ( value.flush ) {
+                    self.kernel.flushEventListeners.call( self, node.id, namespacedName,
+                        value.context && value.context.id );
+                }
+            },
+
+            // Meta events--including the `properties`, `methods`, and `events` `created` and
+            // `deleted` events, and the `children` `added` and `removed` events--are not
+            // enumerable.
+
+            enumerable: ! eventNamespace,
+
+        } );
+
     }
 
     // -- getterScript -----------------------------------------------------------------------------
@@ -1186,6 +1222,129 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             return prototypeListeners.map( function( listener ) { // remap the prototype listeners to target the node
                 return { handler: listener.handler, context: node, phases: listener.phases };
             } ).concat( nodeListeners );
+        }
+
+    }
+
+    /// Transform node references in a component descriptor into kernel-style node references. The
+    /// resulting object will be suitable for passing to `kernel.createNode`.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `componentKernelFromJS.call( driver, component )`.
+    /// 
+    /// @param {String|Object} component
+    ///   A component URI or descriptor. A URI will pass through unchanged (as will all descriptor
+    ///   fields that aren't node references.)
+    /// 
+    /// @returns {String|Object}
+    ///   `component` with node references replaced with kernel-style node references.
+
+    function componentKernelFromJS( component ) {
+
+        var self = this;
+
+        return utility.transform( component, function( object, names ) {
+            return names[1] === "properties" ?
+                valueKernelFromJS.call( self, object ) : object;
+        } );
+
+    }
+
+    /// Convert a parameter array of values using `valueKernelFromJS`.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `parametersKernelFromJS.call( driver, parameters )`.
+    /// 
+    /// @param {Object[]} parameters
+    /// 
+    /// @returns {Object}
+
+    function parametersKernelFromJS( parameters ) {
+
+        if ( parameters && parameters.length ) {
+            return Array.prototype.slice.call( parameters ).map( function( value ) {
+                return valueKernelFromJS.call( this, value );
+            }, this );
+        } else {
+            return parameters;
+        }
+
+    }
+
+    /// Convert a parameter array of values using `valueJSFromKernel`.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `parametersJSFromKernel.call( driver, parameters )`.
+    /// 
+    /// @param {Object[]} parameters
+    /// 
+    /// @returns {Object}
+
+    function parametersJSFromKernel( parameters ) {
+
+        if ( parameters && parameters.length ) {
+            return Array.prototype.slice.call( parameters ).map( function( value ) {
+                return valueJSFromKernel.call( this, value );
+            }, this );
+        } else {
+            return parameters;
+        }
+
+    }
+
+    /// Convert node references into special values that can pass through the kernel. These values
+    /// are wrapped in such a way that they won't be confused with any other application value, and
+    /// they will be replicated correctly by the kernel.
+    /// 
+    /// Other values are returned unchanged. Use `valueJSFromKernel` to retrieve the original.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `valueKernelFromJS.call( driver, value )`.
+    /// 
+    /// @param {Object} value
+    /// 
+    /// @returns {Object}
+
+    function valueKernelFromJS( value ) {
+
+        if ( typeof value === "object" && value !== null ) {
+
+            var protoNodeNode = this.nodes[ kutility.protoNodeURI ];  // our proxy for the node.vwf prototype
+
+            if ( protoNodeNode && ( protoNodeNode.isPrototypeOf( value ) || value === protoNodeNode ) ) {
+                return kutility.nodeReference( value.id );
+            } else {
+                return value;
+            }
+
+        } else {
+            return value;
+        }
+
+    }
+
+    /// Convert values wrapped by `valueKernelFromJS` into their original form for use in the
+    /// JavaScript driver's execution environment.
+    /// 
+    /// This function must run as a method of the driver. Invoke it as:
+    ///   `valueJSFromKernel.call( driver, value )`.
+    /// 
+    /// @param {Object} value
+    /// 
+    /// @returns {Object}
+
+    function valueJSFromKernel( value ) {
+
+        if ( typeof value === "object" ) {
+
+            if ( kutility.valueIsNodeReference( value ) ) {
+                return this.nodes[ value.id ];
+            } else {
+                return value;
+            }
+
+        } else {
+            return value;
         }
 
     }

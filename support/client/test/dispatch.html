@@ -41,6 +41,7 @@
         "vwf/model/object",
         "vwf/model/stage/log",
         "vwf/kernel/view",
+        "vwf/kernel/utility",
         "vwf/utility",
         "logger",
 
@@ -480,11 +481,15 @@
 
                   }, undefined, function( bottomID ) {
 
-                    var nodes = [ topID, middleID, bottomID, baseID ];
+                    // Call the test's callback to let it run its assertions. Then clean up after it
+                    // finishes and calls us back.
 
-                    callback.apply( undefined, nodes.concat( function() {
-                      nodes.forEach( function( nodeID ) { vwf.deleteNode( nodeID ) } );
-                    } ) );
+                    callback( topID, middleID, bottomID, baseID, function() {
+                      vwf.deleteNode( bottomID );
+                      vwf.deleteNode( middleID );
+                      vwf.deleteNode( topID );
+                      vwf.deleteNode( baseID );
+                    } );
 
                   } );
 

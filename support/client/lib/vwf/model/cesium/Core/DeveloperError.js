@@ -1,5 +1,8 @@
 /*global define*/
-define(['./defined'], function(defined) {
+define([
+        './defined'
+    ], function(
+        defined) {
     "use strict";
 
     /**
@@ -13,35 +16,41 @@ define(['./defined'], function(defined) {
      * to catch.
      *
      * @alias DeveloperError
+     * @constructor
      *
-     * @param {String} [message=undefined] The error message for this exception.
+     * @param {String} [message] The error message for this exception.
      *
      * @see RuntimeError
-     * @constructor
      */
     var DeveloperError = function(message) {
         /**
          * 'DeveloperError' indicating that this exception was thrown due to a developer error.
          * @type {String}
-         * @constant
+         * @readonly
          */
         this.name = 'DeveloperError';
 
         /**
          * The explanation for why this exception was thrown.
          * @type {String}
-         * @constant
+         * @readonly
          */
         this.message = message;
 
-        var e = new Error();
+        //Browsers such as IE don't have a stack property until you actually throw the error.
+        var stack;
+        try {
+            throw new Error();
+        } catch (e) {
+            stack = e.stack;
+        }
 
         /**
          * The stack trace of this exception, if available.
          * @type {String}
-         * @constant
+         * @readonly
          */
-        this.stack = e.stack;
+        this.stack = stack;
     };
 
     DeveloperError.prototype.toString = function() {
@@ -52,6 +61,13 @@ define(['./defined'], function(defined) {
         }
 
         return str;
+    };
+
+    /**
+     * @private
+     */
+    DeveloperError.throwInstantiationError = function() {
+        throw new DeveloperError('This function defines an interface and should not be called directly.');
     };
 
     return DeveloperError;

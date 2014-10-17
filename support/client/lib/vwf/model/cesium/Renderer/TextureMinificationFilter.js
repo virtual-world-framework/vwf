@@ -1,74 +1,18 @@
 /*global define*/
-define(['../Core/Enumeration'], function(Enumeration) {
+define(function() {
     "use strict";
 
     /**
-     * DOC_TBA
-     *
-     * @exports TextureMinificationFilter
+     * @private
      */
     var TextureMinificationFilter = {
-        /**
-         * DOC_TBA
-         *
-         * @type {Enumeration}
-         * @constant
-         * @default 0x2600
-         */
-        NEAREST : new Enumeration(0x2600, 'NEAREST'),
+        NEAREST : 0x2600,
+        LINEAR : 0x2601,
+        NEAREST_MIPMAP_NEAREST : 0x2700,
+        LINEAR_MIPMAP_NEAREST : 0x2701,
+        NEAREST_MIPMAP_LINEAR : 0x2702,
+        LINEAR_MIPMAP_LINEAR : 0x2703,
 
-        /**
-         * DOC_TBA
-         *
-         * @type {Enumeration}
-         * @constant
-         * @default 0x2601
-         */
-        LINEAR : new Enumeration(0x2601, 'LINEAR'),
-
-        /**
-         * DOC_TBA
-         *
-         * @type {Enumeration}
-         * @constant
-         * @default 0x2700
-         */
-        NEAREST_MIPMAP_NEAREST : new Enumeration(0x2700, 'NEAREST_MIPMAP_NEAREST'),
-
-        /**
-         * DOC_TBA
-         *
-         * @type {Enumeration}
-         * @constant
-         * @default 0x2701
-         */
-        LINEAR_MIPMAP_NEAREST : new Enumeration(0x2701, 'LINEAR_MIPMAP_NEAREST'),
-
-        /**
-         * DOC_TBA
-         *
-         * @type {Enumeration}
-         * @constant
-         * @default 0x2702
-         */
-        NEAREST_MIPMAP_LINEAR : new Enumeration(0x2702, 'NEAREST_MIPMAP_LINEAR'),
-
-        /**
-         * DOC_TBA
-         *
-         * @type {Enumeration}
-         * @constant
-         * @default 0x2703
-         */
-        LINEAR_MIPMAP_LINEAR : new Enumeration(0x2703, 'LINEAR_MIPMAP_LINEAR'),
-
-        /**
-         * DOC_TBA
-         *
-         * @param {TextureMinificationFilter} textureMinificationFilter
-         *
-         * @returns {Boolean}
-         */
         validate : function(textureMinificationFilter) {
             return ((textureMinificationFilter === TextureMinificationFilter.NEAREST) ||
                     (textureMinificationFilter === TextureMinificationFilter.LINEAR) ||

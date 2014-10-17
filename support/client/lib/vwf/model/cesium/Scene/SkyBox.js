@@ -2,37 +2,37 @@
 define([
         '../Core/BoxGeometry',
         '../Core/Cartesian3',
+        '../Core/defaultValue',
         '../Core/defined',
         '../Core/destroyObject',
         '../Core/DeveloperError',
-        '../Core/Matrix4',
         '../Core/GeometryPipeline',
+        '../Core/Matrix4',
         '../Core/VertexFormat',
-        '../Core/PrimitiveType',
-        '../Renderer/loadCubeMap',
         '../Renderer/BufferUsage',
         '../Renderer/DrawCommand',
-        '../Renderer/BlendingState',
-        '../Scene/SceneMode',
+        '../Renderer/loadCubeMap',
+        '../Shaders/SkyBoxFS',
         '../Shaders/SkyBoxVS',
-        '../Shaders/SkyBoxFS'
+        './BlendingState',
+        './SceneMode'
     ], function(
         BoxGeometry,
         Cartesian3,
+        defaultValue,
         defined,
         destroyObject,
         DeveloperError,
-        Matrix4,
         GeometryPipeline,
+        Matrix4,
         VertexFormat,
-        PrimitiveType,
-        loadCubeMap,
         BufferUsage,
         DrawCommand,
-        BlendingState,
-        SceneMode,
+        loadCubeMap,
+        SkyBoxFS,
         SkyBoxVS,
-        SkyBoxFS) {
+        BlendingState,
+        SceneMode) {
     "use strict";
 
     /**
@@ -44,47 +44,37 @@ define([
      * @alias SkyBox
      * @constructor
      *
-     * @param {Object} sources The source URL or <code>Image</code> object for each of the six cube map faces.  See the example below.
+     * @param {Object} options Object with the following properties:
+     * @param {Object} [options.sources] The source URL or <code>Image</code> object for each of the six cube map faces.  See the example below.
+     * @param {Boolean} [options.show=true] Determines if this primitive will be shown.
      *
-     * @exception {DeveloperError} sources is required and must have positiveX, negativeX, positiveY, negativeY, positiveZ, and negativeZ properties.
-     * @exception {DeveloperError} sources properties must all be the same type.
+     * @see Scene#skyBox
+     * @see Transforms.computeTemeToPseudoFixedMatrix
      *
      * @example
-     * scene.skyBox = new SkyBox({
+     * scene.skyBox = new Cesium.SkyBox({
+     *   sources : {
      *     positiveX : 'skybox_px.png',
      *     negativeX : 'skybox_nx.png',
      *     positiveY : 'skybox_py.png',
      *     negativeY : 'skybox_ny.png',
      *     positiveZ : 'skybox_pz.png',
      *     negativeZ : 'skybox_nz.png'
+     *   }
      * });
-     *
-     * @see Scene#skyBox
-     * @see Transforms.computeTemeToPseudoFixedMatrix
      */
-    var SkyBox = function(sources) {
-        if ((!defined(sources)) ||
-            (!defined(sources.positiveX)) ||
-            (!defined(sources.negativeX)) ||
-            (!defined(sources.positiveY)) ||
-            (!defined(sources.negativeY)) ||
-            (!defined(sources.positiveZ)) ||
-            (!defined(sources.negativeZ))) {
-            throw new DeveloperError('sources is required and must have positiveX, negativeX, positiveY, negativeY, positiveZ, and negativeZ properties.');
-        }
-
-        if ((typeof sources.positiveX !== typeof sources.negativeX) ||
-            (typeof sources.positiveX !== typeof sources.positiveY) ||
-            (typeof sources.positiveX !== typeof sources.negativeY) ||
-            (typeof sources.positiveX !== typeof sources.positiveZ) ||
-            (typeof sources.positiveX !== typeof sources.negativeZ)) {
-            throw new DeveloperError('sources properties must all be the same type.');
-        }
-
-        this._command = new DrawCommand();
-        this._command.owner = this;
-        this._cubeMap = undefined;
-        this._sources = sources;
+    var SkyBox = function(options) {
+        /**
+         * The sources used to create the cube map faces: an object
+         * with <code>positiveX</code>, <code>negativeX</code>, <code>positiveY</code>,
+         * <code>negativeY</code>, <code>positiveZ</code>, and <code>negativeZ</code> properties.
+         * These can be either URLs or <code>Image</code> objects.
+         *
+         * @type Object
+         * @default undefined
+         */
+        this.sources = options.sources;
+        this._sources = undefined;
 
         /**
          * Determines if the sky box will be shown.
@@ -92,26 +82,25 @@ define([
          * @type {Boolean}
          * @default true
          */
-        this.show = true;
+        this.show = defaultValue(options.show, true);
+
+        this._command = new DrawCommand({
+            modelMatrix : Matrix4.clone(Matrix4.IDENTITY),
+            owner : this
+        });
+        this._cubeMap = undefined;
     };
 
     /**
-     * Returns the sources used to create the cube map faces: an object
-     * with <code>positiveX</code>, <code>negativeX</code>, <code>positiveY</code>,
-     * <code>negativeY</code>, <code>positiveZ</code>, and <code>negativeZ</code> properties.
-     * These are either URLs or <code>Image</code> objects, depending on how the sky box
-     * was constructed.
+     * Called when {@link Viewer} or {@link CesiumWidget} render the scene to
+     * get the draw commands needed to render this primitive.
+     * <p>
+     * Do not call this function directly.  This is documented just to
+     * list the exceptions that may be propagated when the scene is rendered:
+     * </p>
      *
-     * @memberof SkyBox
-     *
-     * @returns {Object} The sources used to create the cube map faces.
-     */
-    SkyBox.prototype.getSources = function() {
-        return this._sources;
-    };
-
-    /**
-     * @private
+     * @exception {DeveloperError} this.sources is required and must have positiveX, negativeX, positiveY, negativeY, positiveZ, and negativeZ properties.
+     * @exception {DeveloperError} this.sources properties must all be the same type.
      */
     SkyBox.prototype.update = function(context, frameState) {
         if (!this.show) {
@@ -123,27 +112,52 @@ define([
             return undefined;
         }
 
-        // The sky box is only rendered during the color pass; it is not pickable, it doesn't cast shadows, etc.
-        if (!frameState.passes.color) {
+        // The sky box is only rendered during the render pass; it is not pickable, it doesn't cast shadows, etc.
+        if (!frameState.passes.render) {
             return undefined;
+        }
+
+        if (this._sources !== this.sources) {
+            this._sources = this.sources;
+            var sources = this.sources;
+
+            //>>includeStart('debug', pragmas.debug);
+            if ((!defined(sources.positiveX)) ||
+                (!defined(sources.negativeX)) ||
+                (!defined(sources.positiveY)) ||
+                (!defined(sources.negativeY)) ||
+                (!defined(sources.positiveZ)) ||
+                (!defined(sources.negativeZ))) {
+                throw new DeveloperError('this.sources is required and must have positiveX, negativeX, positiveY, negativeY, positiveZ, and negativeZ properties.');
+            }
+
+            if ((typeof sources.positiveX !== typeof sources.negativeX) ||
+                (typeof sources.positiveX !== typeof sources.positiveY) ||
+                (typeof sources.positiveX !== typeof sources.negativeY) ||
+                (typeof sources.positiveX !== typeof sources.positiveZ) ||
+                (typeof sources.positiveX !== typeof sources.negativeZ)) {
+                throw new DeveloperError('this.sources properties must all be the same type.');
+            }
+            //>>includeEnd('debug');
+
+            if (typeof sources.positiveX === 'string') {
+                // Given urls for cube-map images.  Load them.
+                loadCubeMap(context, this._sources).then(function(cubeMap) {
+                    that._cubeMap = that._cubeMap && that._cubeMap.destroy();
+                    that._cubeMap = cubeMap;
+                });
+            } else {
+                this._cubeMap = this._cubeMap && this._cubeMap.destroy();
+                this._cubeMap = context.createCubeMap({
+                    source : sources
+                });
+            }
         }
 
         var command = this._command;
 
         if (!defined(command.vertexArray)) {
-            var sources = this._sources;
             var that = this;
-
-            if (typeof sources.positiveX === 'string') {
-                // Given urls for cube-map images.  Load them.
-                loadCubeMap(context, this._sources).then(function(cubeMap) {
-                    that._cubeMap = cubeMap;
-                });
-            } else {
-                this._cubeMap = context.createCubeMap({
-                    source : sources
-                });
-            }
 
             command.uniformMap = {
                 u_cubeMap: function() {
@@ -155,16 +169,14 @@ define([
                 dimensions : new Cartesian3(2.0, 2.0, 2.0),
                 vertexFormat : VertexFormat.POSITION_ONLY
             }));
-            var attributeIndices = GeometryPipeline.createAttributeIndices(geometry);
+            var attributeLocations = GeometryPipeline.createAttributeLocations(geometry);
 
-            command.primitiveType = PrimitiveType.TRIANGLES;
-            command.modelMatrix = Matrix4.IDENTITY.clone();
             command.vertexArray = context.createVertexArrayFromGeometry({
                 geometry: geometry,
-                attributeIndices: attributeIndices,
+                attributeLocations: attributeLocations,
                 bufferUsage: BufferUsage.STATIC_DRAW
             });
-            command.shaderProgram = context.getShaderCache().getShaderProgram(SkyBoxVS, SkyBoxFS, attributeIndices);
+            command.shaderProgram = context.createShaderProgram(SkyBoxVS, SkyBoxFS, attributeLocations);
             command.renderState = context.createRenderState({
                 blending : BlendingState.ALPHA_BLEND
             });
@@ -183,8 +195,6 @@ define([
      * If this object was destroyed, it should not be used; calling any function other than
      * <code>isDestroyed</code> will result in a {@link DeveloperError} exception.
      *
-     * @memberof SkyBox
-     *
      * @returns {Boolean} <code>true</code> if this object was destroyed; otherwise, <code>false</code>.
      *
      * @see SkyBox#destroy
@@ -201,8 +211,6 @@ define([
      * <code>isDestroyed</code> will result in a {@link DeveloperError} exception.  Therefore,
      * assign the return value (<code>undefined</code>) to the object as done in the example.
      *
-     * @memberof SkyBox
-     *
      * @returns {undefined}
      *
      * @exception {DeveloperError} This object was destroyed, i.e., destroy() was called.
@@ -215,7 +223,7 @@ define([
     SkyBox.prototype.destroy = function() {
         var command = this._command;
         command.vertexArray = command.vertexArray && command.vertexArray.destroy();
-        command.shaderProgram = command.shaderProgram && command.shaderProgram.release();
+        command.shaderProgram = command.shaderProgram && command.shaderProgram.destroy();
         this._cubeMap = this._cubeMap && this._cubeMap.destroy();
         return destroyObject(this);
     };

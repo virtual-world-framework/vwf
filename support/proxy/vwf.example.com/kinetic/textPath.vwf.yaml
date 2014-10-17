@@ -1,0 +1,11 @@
+# http://kineticjs.com/docs/Kinetic.TextPath.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  fontFamily:
+  fontSize:
+  fontStyle:
+  fontVariant:
+  text:
+  data:

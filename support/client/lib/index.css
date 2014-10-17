@@ -5,6 +5,7 @@ body {
   -moz-user-select: -moz-none;
   -khtml-user-select: none;
   -webkit-user-select: none;
+  margin: 0px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -165,7 +166,7 @@ input {
 
 #vwf-root {
   position:absolute;
-  left:10px;
+  z-index:-1;
 }
 
 #vwf-root > .vwf-label > .vwf-attribute {

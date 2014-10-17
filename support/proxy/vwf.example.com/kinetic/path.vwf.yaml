@@ -1,0 +1,6 @@
+# http://kineticjs.com/docs/Kinetic.Path.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  data:

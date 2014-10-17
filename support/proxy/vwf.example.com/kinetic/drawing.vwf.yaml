@@ -1,0 +1,31 @@
+---
+extends:
+  http://vwf.example.com/kinetic/stage.vwf
+properties:
+  drawing_clients:
+  drawing_index: 1
+methods:
+  update:
+  down:
+  move:
+  up:  
+  clientWatch:
+  clientJoin:
+  clientLeave:
+  setUpPrivate:
+  setClientUIState:
+  isValid:
+  getStageRelativePoint:
+events:
+  pointerDown:
+  pointerMove:
+  pointerUp:
+  touchStart:
+  touchMove:
+  touchEnd:
+  drawingObjectCreated:
+  textCreated:
+  imageCreated:
+  findChild:
+scripts:
+- source: "http://vwf.example.com/kinetic/drawing.js"

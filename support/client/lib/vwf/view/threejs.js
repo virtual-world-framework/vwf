@@ -41,7 +41,36 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     var boundingBox = undefined;
     var userObjectRequested = false;
     var usersShareView = true;
+    var degreesToRadians = Math.PI / 180;
+    var movingForward = false;
+    var movingBack = false;
+    var movingLeft = false;
+    var movingRight = false;
+    var rotatingLeft = false;
+    var rotatingRight = false;
+    var startMousePosition;
+
+    // HACK: This is to deal with an issue with webkitMovementX in Chrome:
+    // https://code.google.com/p/chromium/issues/detail?id=386791&thanks=386791&ts=1403213097
+    // where the two values after pointerLock are inaccurate.
+    // This is used to ignore those values.
+    // Please check frequently to see if this can be removed.
+    // Last checked status of issue on 6/19/14.
+    var nextMouseMoveIsErroneous = false;
+    var nextTwoMouseMovesAreErroneous = false;
+    // END HACK
+
     // End Navigation
+
+    var lastXPos = -1;
+    var lastYPos = -1;
+    var mouseDown = {
+        left: false,
+        right: false,
+        middle: false
+    };
+    var touchGesture = false;
+    var prevGesture = undefined;
 
     var Vec3 = goog.vec.Vec3;
     var Quaternion = goog.vec.Quaternion;
@@ -57,6 +86,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             this.pickInterval = 10;
             this.disableInputs = false;
+            this.applicationWantsPointerEvents = false;
 
             // Store parameter options for persistence functionality
             this.parameters = options;
@@ -77,8 +107,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             this.height = 600;
             this.width = 800;
             this.canvasQuery = null;
-            if ( window && window.innerHeight ) this.height = window.innerHeight - 20;
-            if ( window && window.innerWidth ) this.width = window.innerWidth - 20;
+            if ( window && window.innerHeight ) this.height = window.innerHeight;
+            if ( window && window.innerWidth ) this.width = window.innerWidth;
             this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
 
             pitchMatrix = new THREE.Matrix4();
@@ -174,11 +204,11 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
             // rotationSpeed
             if ( navObject && ( nodeID == navObject.ID ) ) {
-                if ( propertyName == "navmode" ) { 
-                    if ( ( propertyValue == "none" ) && ( navmode != "none" ) && pointerLockImplemented ) {
+                if ( propertyName == "navmode" ) {
+                    navmode = propertyValue;
+                    if ( pointerLockImplemented && !self.appRequestsPointerLock( navmode, mouseDown ) ) {
                         document.exitPointerLock();
                     }
-                    navmode = propertyValue;
                 } else if ( propertyName == "translationSpeed" ) {
                     translationSpeed = propertyValue;
                 } else if ( propertyName == "rotationSpeed" ) {
@@ -339,12 +369,57 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 case "worldTransformTo":
                     // If the duration of the transform is 0, set the transforms to their final value so it doesn't interpolate
                     if(methodParameters.length < 2 || methodParameters[1] == 0) {
-                        this.nodes[nodeID].lastTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
+                        this.nodes[nodeID].lastTickTransform = getTransform(nodeID);
                         this.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(this.nodes[nodeID].lastTickTransform);
                     }
                     break;
             }
         },
+
+        // -- addedEventListener -------------------------------------------------------------------
+
+        addedEventListener: function( nodeID, eventName, eventHandler, eventContextID, eventPhases ) {
+            switch( eventName ) {
+                case "pointerClick":
+                case "pointerDown":
+                case "pointerMove":
+                case "pointerUp":
+                case "pointerOver":
+                case "pointerOut":
+                case "pointerWheel":
+                case "touchHold":
+                case "touchTap":
+                case "touchDoubleTap":
+                case "touchDrag":
+                case "touchDragStart":
+                case "touchDragEnd":
+                case "touchDragUp":
+                case "touchDragDown":
+                case "touchDragLeft":
+                case "touchDragRight":
+                case "touchSwipe":
+                case "touchSwipeUp":
+                case "touchSwipeDown":
+                case "touchSwipeLeft":
+                case "touchSwipeRight":
+                case "touchTransform":
+                case "touchTransformStart":
+                case "touchTransformEnd":
+                case "touchRotate":
+                case "touchPinch":
+                case "touchPinchIn":
+                case "touchPinchOut":
+                case "touchStart":
+                case "touchRelease":
+                    if ( this.kernel.find( nodeID, 
+                            "self::element(*,'http://vwf.example.com/node3.vwf')" ).length || 
+                        this.kernel.find( nodeID,
+                            "self::element(*,'http://vwf.example.com/scene.vwf')" ).length ) {
+                        this.applicationWantsPointerEvents = true;
+                    }
+                    break;
+            }
+       },
 
         // -- firedEvent -----------------------------------------------------------------------------
 
@@ -386,10 +461,468 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         // -- render -----------------------------------------------------------------------------------
 
-        render: function(renderer, scene, camera) {
-            renderer.render(scene, camera);
+        render: function( renderer, scene, camera ) {
+            renderer.render( scene, camera );
         },
     
+        // -- Navigation -------------------------------------------------------------------------------
+
+        navigationKeyMapping: {
+            "w": "forward",
+            "a": "left",
+            "s": "back",
+            "d": "right",
+            "uparrow": "forward",
+            "leftarrow": "left",
+            "downarrow": "back",
+            "rightarrow": "right",
+            "q": "rotateLeft",
+            "e": "rotateRight"
+        },      
+
+        handleMouseNavigation: function( deltaX, deltaY, navObj, navMode, rotationSpeed, translationSpeed, mouseDown, mouseEventData ) {
+            var yawQuat = new THREE.Quaternion();
+            var pitchQuat = new THREE.Quaternion();
+            var rotationSpeedRadians = degreesToRadians * rotationSpeed;
+
+            var orbiting = mouseDown.middle && ( navmode == "fly" );
+
+            // We will soon want to use the yawMatrix and pitchMatrix,
+            // so let's update them
+            extractRotationAndTranslation( navObject.threeObject );
+
+            if ( orbiting ) {
+                var pitchRadians = deltaY * rotationSpeedRadians;
+                var yawRadians = deltaX * rotationSpeedRadians;
+                orbit( pitchRadians, yawRadians );
+            } else if ( mouseDown.right ) {
+                var navThreeObject = navObj.threeObject;
+
+                // --------------------
+                // Calculate new pitch
+                // --------------------
+
+                // deltaY is negated because a positive change (downward) generates a negative rotation 
+                // around the horizontal x axis (clockwise as viewed from the right)
+                pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -deltaY * rotationSpeedRadians );
+                var pitchDeltaMatrix = new THREE.Matrix4();
+                pitchDeltaMatrix.makeRotationFromQuaternion( pitchQuat );
+
+                if ( ( navMode == "fly" )  ||
+                     ( ( navMode == "walk" ) && ( cameraNode == navObj ) ) ) {
+                    pitchMatrix.multiplyMatrices( pitchDeltaMatrix, pitchMatrix );
+
+                    // Constrain the camera's pitch to +/- 90 degrees
+                    // We need to do something if zAxis.z is < 0
+                    var pitchMatrixElements = pitchMatrix.elements;
+                    if ( pitchMatrixElements[ 10 ] < 0 ) {
+
+                        var xAxis = goog.vec.Vec3.create();
+                        xAxis = goog.vec.Vec3.setFromArray( xAxis, [ pitchMatrixElements[ 0 ], 
+                                                                     pitchMatrixElements[ 1 ], 
+                                                                     pitchMatrixElements[ 2 ] ] );
+
+                        var yAxis = goog.vec.Vec3.create();
+
+                        // If forward vector is tipped up
+                        if ( pitchMatrixElements[ 6 ] > 0 ) {
+                            yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                        } else {
+                            yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                        }
+
+                        // Calculate the zAxis as a crossProduct of x and y
+                        var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                        // Put these values back in the camera matrix
+                        pitchMatrixElements[ 4 ] = yAxis[ 0 ];
+                        pitchMatrixElements[ 5 ] = yAxis[ 1 ];
+                        pitchMatrixElements[ 6 ] = yAxis[ 2 ];
+                        pitchMatrixElements[ 8 ] = zAxis[ 0 ];
+                        pitchMatrixElements[ 9 ] = zAxis[ 1 ];
+                        pitchMatrixElements[ 10 ] = zAxis[ 2 ];
+                    }
+                } else if ( navMode == "walk" ) {
+
+                    // Perform pitch on camera - right-multiply to keep pitch separate from yaw
+                    var camera = self.state.cameraInUse;
+                    if ( camera ) {
+                        var cameraMatrix = camera.matrix;
+                        var originalCameraTransform = goog.vec.Mat4.clone( cameraMatrix.elements );
+                        var cameraPos = new THREE.Vector3();
+                        cameraPos.setFromMatrixPosition( cameraMatrix );
+                        cameraMatrix.multiply( pitchDeltaMatrix );
+
+                        // Constrain the camera's pitch to +/- 90 degrees
+                        var camWorldMatrix = camera.matrixWorld;
+                        var camWorldMatrixElements = camWorldMatrix.elements;
+
+                        // We need to do something if zAxis.z is < 0
+                        // This can get a little weird because this matrix is in three.js coordinates, 
+                        // but we care about VWF coordinates:
+                        // -the VWF y-axis is the three.js -z axis 
+                        // -the VWF z-axis is the three.js y axis
+                        if ( camWorldMatrixElements[ 6 ] < 0 ) {
+
+                            var xAxis = goog.vec.Vec3.create();
+                            xAxis = goog.vec.Vec3.setFromArray( xAxis, [ camWorldMatrixElements[ 0 ], 
+                                                                         camWorldMatrixElements[ 1 ], 
+                                                                         camWorldMatrixElements[ 2 ] ] );
+
+                            var yAxis = goog.vec.Vec3.create();
+
+                            // If forward vector is tipped up
+                            if ( camWorldMatrixElements[ 10 ] > 0 ) {
+                                yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                            } else {
+                                yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                            }
+
+                            // Calculate the zAxis as a crossProduct of x and y
+                            var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                            // Put these values back in the camera matrix
+                            camWorldMatrixElements[ 4 ] = zAxis[ 0 ];
+                            camWorldMatrixElements[ 5 ] = zAxis[ 1 ];
+                            camWorldMatrixElements[ 6 ] = zAxis[ 2 ];
+                            camWorldMatrixElements[ 8 ] = -yAxis[ 0 ];
+                            camWorldMatrixElements[ 9 ] = -yAxis[ 1 ];
+                            camWorldMatrixElements[ 10 ] = -yAxis[ 2 ];
+
+                            setTransformFromWorldTransform( camera );
+                        }
+
+                        // Restore camera position so rotation is done around camera center
+                        cameraMatrix.setPosition( cameraPos );
+                        
+                        updateRenderObjectTransform( camera );
+                        callModelTransformBy( cameraNode, originalCameraTransform, 
+                                              cameraMatrix.elements );
+                    } else {
+                        self.logger.warnx( "There is no camera to move" );
+                    }
+                }
+
+                // ------------------
+                // Calculate new yaw
+                // ------------------
+
+                // deltaX is negated because a positive change (to the right) generates a negative rotation 
+                // around the vertical z axis (clockwise as viewed from above)
+                yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), -deltaX * rotationSpeedRadians );
+                var yawDeltaMatrix = new THREE.Matrix4();
+                yawDeltaMatrix.makeRotationFromQuaternion( yawQuat );
+                yawMatrix.multiplyMatrices( yawDeltaMatrix, yawMatrix );
+
+                // -------------------------------------------------
+                // Put all components together and set the new pose
+                // -------------------------------------------------
+                                    
+                var navObjectWorldMatrix = navObject.threeObject.matrixWorld;
+                navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
+                navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
+                if ( navObject.threeObject instanceof THREE.Camera ) {
+                    var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
+                    navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
+                }
+            }
+        },
+
+        handleScroll: function ( wheelDelta, navObj, navMode, rotationSpeed, translationSpeed, distanceToTarget ) {
+            
+            if ( navMode !== "fly" ) {
+                return;
+            }
+
+            var orbiting = ( navMode == "fly" ) && ( mouseDown.middle )
+
+            if ( orbiting || !pickDirectionVector ) {
+                return;
+            }
+
+            var navThreeObject = navObj.threeObject;
+            
+            // wheelDelta has a value of 3 for every click
+            var numClicks = Math.abs( wheelDelta / 3 );
+
+            // Prepare variables for calculation
+            var dist = Math.min( Math.max( distanceToTarget || translationSpeed, 
+                                           2 * self.state.cameraInUse.near ),
+                                 9 * translationSpeed );
+            var percentDistRemainingEachStep = 0.8;
+            var amountToMove = 0;
+
+            // If wheelDelta is negative, user pushed wheel forward - move toward the object
+            // Else, user pulled wheel back - move away from object
+            if ( wheelDelta < 0 ) { 
+                amountToMove = dist * ( 1 - Math.pow( percentDistRemainingEachStep, numClicks ) );
+            } else {
+                amountToMove = dist * ( 1 - Math.pow( 1 / percentDistRemainingEachStep, numClicks ) );
+            }
+
+            // We are about to use the translationMatrix, so let's update it
+            extractRotationAndTranslation( navObject.threeObject );
+
+            var translationArray = translationMatrix.elements;
+            translationArray[ 12 ] += amountToMove * pickDirectionVector.x;
+            translationArray[ 13 ] += amountToMove * pickDirectionVector.y;
+            translationArray[ 14 ] += amountToMove * pickDirectionVector.z;
+            if ( boundingBox != undefined ) {
+                if ( translationArray[ 12 ] < boundingBox[ 0 ][ 0 ] ) {
+                    translationArray[ 12 ] = boundingBox[ 0 ][ 0 ];
+                }
+                else if ( translationArray[ 12 ] > boundingBox[ 0 ][ 1 ] ) {
+                    translationArray[ 12 ] = boundingBox[ 0 ][ 1 ];
+                }
+                if ( translationArray[ 13 ] < boundingBox[ 1 ][ 0 ] ) {
+                    translationArray[ 13 ] = boundingBox[ 1 ][ 0 ];
+                }
+                else if ( translationArray[ 13 ] > boundingBox[ 1 ][ 1 ] ) {
+                    translationArray[ 13 ] = boundingBox[ 1 ][ 1 ];
+                }
+                if ( translationArray[ 14 ] < boundingBox[ 2 ][ 0 ] ) {
+                    translationArray[ 14 ] = boundingBox[ 2 ][ 0 ];
+                }
+                else if ( translationArray[ 14 ] > boundingBox[ 2 ][ 1 ] ) {
+                    translationArray[ 14 ] = boundingBox[ 2 ][ 1 ];
+                }
+            }
+            var worldTransformArray = navThreeObject.matrixWorld.elements;
+            worldTransformArray[ 12 ] = translationArray[ 12 ];
+            worldTransformArray[ 13 ] = translationArray[ 13 ];
+            worldTransformArray[ 14 ] = translationArray[ 14 ];
+        },
+
+        handleTouchNavigation: function ( touchEventData ) {
+            var currentMousePosition = touchEventData[ 0 ].position;
+
+            var deltaX = 0;
+            var deltaY = 0;
+
+            if ( touchPosition ) {
+                deltaX = currentMousePosition[ 0 ] - touchPosition [ 0 ];
+                deltaY = currentMousePosition[ 1 ] - touchPosition [ 1 ];
+            }
+
+            // We will soon want to use the yawMatrix and pitchMatrix,
+            // so let's update them
+            extractRotationAndTranslation( navObject.threeObject );
+
+            if ( deltaX || deltaY ) {
+                var yawQuat = new THREE.Quaternion();
+                var pitchQuat = new THREE.Quaternion();
+                var rotationSpeedRadians = degreesToRadians * rotationSpeed;
+
+                if ( touchmode == "orbit" ) {
+                    var pitchRadians = deltaY * rotationSpeedRadians;
+                    var yawRadians = deltaX * rotationSpeedRadians;
+                    orbit( pitchRadians, yawRadians );
+                } else if ( touchmode == "look" ) {
+                    if ( navObject ) {
+
+                        var navThreeObject = navObject.threeObject;
+                        var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+
+                        // --------------------
+                        // Calculate new pitch
+                        // --------------------
+
+                        // deltaY is negated because a positive change (downward) generates a negative rotation 
+                        // around the horizontal x axis (clockwise as viewed from the right)
+                        pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -deltaY * rotationSpeedRadians );
+                        var pitchDeltaMatrix = new THREE.Matrix4();
+                        pitchDeltaMatrix.makeRotationFromQuaternion( pitchQuat );
+
+                        if ( ( touchmode == "look" )  ||
+                             ( ( touchmode == "orbit" ) && ( cameraNode == navObject ) ) ) {
+                            pitchMatrix.multiplyMatrices( pitchDeltaMatrix, pitchMatrix );
+
+                            // Constrain the camera's pitch to +/- 90 degrees
+                            // We need to do something if zAxis.z is < 0
+                            var pitchMatrixElements = pitchMatrix.elements;
+                            if ( pitchMatrixElements[ 10 ] < 0 ) {
+
+                                var xAxis = goog.vec.Vec3.create();
+                                xAxis = goog.vec.Vec3.setFromArray( xAxis, [ pitchMatrixElements[ 0 ], 
+                                                                             pitchMatrixElements[ 1 ], 
+                                                                             pitchMatrixElements[ 2 ] ] );
+
+                                var yAxis = goog.vec.Vec3.create();
+
+                                // If forward vector is tipped up
+                                if ( pitchMatrixElements[ 6 ] > 0 ) {
+                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
+                                } else {
+                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
+                                }
+
+                                // Calculate the zAxis as a crossProduct of x and y
+                                var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
+
+                                // Put these values back in the camera matrix
+                                pitchMatrixElements[ 4 ] = yAxis[ 0 ];
+                                pitchMatrixElements[ 5 ] = yAxis[ 1 ];
+                                pitchMatrixElements[ 6 ] = yAxis[ 2 ];
+                                pitchMatrixElements[ 8 ] = zAxis[ 0 ];
+                                pitchMatrixElements[ 9 ] = zAxis[ 1 ];
+                                pitchMatrixElements[ 10 ] = zAxis[ 2 ];
+                            }
+                        } 
+
+                        // ------------------
+                        // Calculate new yaw
+                        // ------------------
+
+                        // deltaX is negated because a positive change (to the right) generates a negative rotation 
+                        // around the vertical z axis (clockwise as viewed from above)
+                        yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), -deltaX * rotationSpeedRadians );
+                        var yawDeltaMatrix = new THREE.Matrix4();
+                        yawDeltaMatrix.makeRotationFromQuaternion( yawQuat );
+                        yawMatrix.multiplyMatrices( yawDeltaMatrix, yawMatrix );
+
+                        // -------------------------------------------------
+                        // Put all components together and set the new pose
+                        // -------------------------------------------------
+                                            
+                        var navObjectWorldMatrix = navThreeObject.matrixWorld;
+                        navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
+                        navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
+                        if ( navThreeObject instanceof THREE.Camera ) {
+                            var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
+                            navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
+                        }
+                        setTransformFromWorldTransform( navObject.threeObject );
+                        callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+                    } else {
+                        self.logger.warnx( "handleTouchNavigation: There is no navigation object to move" );
+                    }
+
+                }
+            } 
+            touchPosition = currentMousePosition;
+        },
+
+        handleHammer: function( ev ) {
+            // disable browser scrolling
+            ev.gesture.preventDefault();
+
+            var eData = getTouchEventData( ev, false );
+            touchID = touchPick ? getPickObjectID.call( sceneView, touchPick.object, false ) : sceneID;
+
+            switch(ev.type) {
+                case 'hold':
+                    sceneView.kernel.dispatchEvent( touchID, "touchHold", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'tap':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTap", eData.eventData, eData.eventNodeData );
+                    // Emulate pointer events
+                    eData.eventData[0].button = "left"; 
+                    sceneView.kernel.dispatchEvent( touchID, "pointerClick", eData.eventData, eData.eventNodeData );
+                    sceneView.kernel.dispatchEvent( touchID, "pointerDown", eData.eventData, eData.eventNodeData );
+                    sceneView.kernel.dispatchEvent( touchID, "pointerUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'doubletap':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDoubleTap", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'drag': 
+                    // Fly or Orbit Navigation Behavior
+                    if ( touchmode != "none") {
+                        if ( prevGesture == "drag" || prevGesture == "dragleft" || prevGesture == "dragright") {
+                            self.handleTouchNavigation( eData.eventData );
+                        }
+                    }
+                    sceneView.kernel.dispatchEvent( touchID, "touchDrag", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragstart':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragend':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragEnd", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragup':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragdown':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragDown", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragleft':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragLeft", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragright':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragRight", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipe':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipe", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipeup':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipedown':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeDown", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipeleft':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeLeft", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swiperight':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeRight", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transform':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransform", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transformstart':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransformStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transformend':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransformEnd", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'rotate':
+                    sceneView.kernel.dispatchEvent( touchID, "touchRotate", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinch':
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinch", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinchin':
+                    // Zoom Out
+                    if ( touchmode != "none" ) {
+                        inputHandleScroll( ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
+                    }
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinchIn", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinchout':
+                    // Zoom In
+                    if ( touchmode != "none" ) {
+                        inputHandleScroll( -1 * ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
+                    }
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinchOut", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'touch':
+                    touchGesture = true;
+                    sceneView.kernel.dispatchEvent( touchID, "touchStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'release':
+                    touchGesture = false;
+                    sceneView.kernel.dispatchEvent( touchID, "touchRelease", eData.eventData, eData.eventNodeData );
+                    break;
+            }
+
+            // Set previous gesture (only perform drag if the previous is not a pinch gesture - causes jumpiness)
+            prevGesture = ev.type;
+        },
+
+        appRequestsPointerLock: function( navmode, mouseDown ) {
+
+            // By default, an app will request pointer lock when:
+            //   - the middle mouse button is hit in fly mode (for orbit)
+            //   - the right mouse button is hit in any mode other than "none" (for look)
+
+            if ( mouseDown.middle && ( navmode === "fly" ) ) {
+                return true;
+            }
+            if ( mouseDown.right && ( navmode !== "none" ) ) {
+                return true;
+            }
+            return false;
+        }
     } );
 
     // private ===============================================================================
@@ -405,14 +938,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         //reset - loading can cause us to get behind and always but up against the max prediction value
         self.tickTime = 0;
 
-        for(var nodeID in self.nodes) {
-            if(self.state.nodes[nodeID] && (!navObject || nodeID != navObject.ID)) {       
+        for ( var nodeID in self.nodes ) {
+            if ( self.state.nodes[nodeID] ) {       
                 self.nodes[nodeID].lastTickTransform = self.nodes[nodeID].selfTickTransform;
-                self.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(getTransform(nodeID));
-                
-                if(self.nodes[nodeID].selfTickTransform) {
-                    self.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(self.nodes[nodeID].selfTickTransform);
-                }
+                self.nodes[nodeID].selfTickTransform = getTransform(nodeID);
             }
         }
     }
@@ -548,7 +1077,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             if(last && now && !matCmp(last,now,.0001) ) {             
                 var interp = matrixLerp(last, now, step || 0);
                 
-                if(!navObject || nodeID != navObject.ID) {             
+                var objectIsControlledByUser = ( ( navmode !== "none" ) &&
+                                                 ( ( navObject && ( nodeID === navObject.ID ) ) || 
+                                                   ( cameraNode && ( nodeID === cameraNode.ID ) ) ) );
+                if ( !objectIsControlledByUser ) {             
                     setTransform(nodeID, interp);    
                     self.nodes[nodeID].needTransformRestore = true;
                 }
@@ -633,8 +1165,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 if ( navmode != "none" && !self.disableInputs ) {
 
                     // Move the user's camera according to their input
-                    self.moveNavObject( timepassed );
-                    self.rotateNavObjectByKey( timepassed );
+                    inputMoveNavObject( timepassed );
+                    inputRotateNavObjectByKey( timepassed );
                     
                     // If the camera has been created, turn it to look back at its lookat position after 
                     // moving/rotating
@@ -650,9 +1182,15 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             {
                 sceneNode.frameCount = 0;
             
-                var newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
-                
-                var newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+                var newPick, newPickId;
+
+                if ( self.applicationWantsPointerEvents ) {
+                    newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
+                    newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+                } else {
+                    newPick = undefined;
+                    newPickId = undefined;
+                }
 
                 if ( self.lastPickId != newPickId && self.lastEventData )
                 {
@@ -661,9 +1199,11 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                                                    self.lastEventData.eventData, 
                                                    self.lastEventData.eventNodeData );
                     }
-                    view.kernel.dispatchEvent( newPickId, "pointerOver",
-                                               self.lastEventData.eventData, 
-                                               self.lastEventData.eventNodeData );
+                    if ( newPickId ) {
+                        view.kernel.dispatchEvent( newPickId, "pointerOver",
+                                                   self.lastEventData.eventData, 
+                                                   self.lastEventData.eventNodeData );
+                    }
                 }
 
                 if ( view.lastEventData && 
@@ -746,21 +1286,31 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             window.onresize = function () {
                 var origWidth = self.width;
                 var origHeight = self.height;
-                if ( window && window.innerHeight ) self.height = window.innerHeight - 20;
-                if ( window && window.innerWidth ) self.width = window.innerWidth - 20;
+                var viewWidth = mycanvas.width;
+                var viewHeight = mycanvas.height;
 
-                if ( ( origWidth != self.width ) || ( origHeight != self.height ) ) {
-                    mycanvas.height = self.height;
-                    mycanvas.width = self.width;
+                if ( window && window.innerHeight ) self.height = window.innerHeight;
+                if ( window && window.innerWidth ) self.width = window.innerWidth;
+
+                if ( ( origWidth != self.width || origHeight != self.height ) ) {
+                    // If canvas changed size, use canvas dimentions instead
+                    if ( viewWidth != mycanvas.clientWidth || viewHeight != mycanvas.clientHeight ) {
+                        mycanvas.width = self.width = mycanvas.clientWidth;
+                        mycanvas.height = self.height = mycanvas.clientHeight;
+                    } else {
+                        mycanvas.width = self.width;
+                        mycanvas.height = self.height;
+                    }
+
                     if ( sceneNode.renderer ) {
-                        sceneNode.renderer.setViewport( 0, 0, self.width, self.height );
+                        sceneNode.renderer.setViewport( 0, 0, mycanvas.width, mycanvas.height );
                     }
-                    
-                    var viewCam = view.state.cameraInUse;
-                    if ( viewCam ) {
-                        viewCam.aspect =  mycanvas.width / mycanvas.height;
-                        viewCam.updateProjectionMatrix();
-                    }
+                }
+
+                var viewCam = view.state.cameraInUse;
+                if ( viewCam ) {
+                    viewCam.aspect = mycanvas.width / mycanvas.height;
+                    viewCam.updateProjectionMatrix();
                 }
             }
 
@@ -859,12 +1409,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         var pointerPickID = undefined;
         var threeActualObj = undefined;
 
-        var lastXPos = -1;
-        var lastYPos = -1;
-        var mouseRightDown = false;
-        var mouseLeftDown = false;
-        var mouseMiddleDown = false;
-        var touchGesture = false;
         var win = window;
 
         var container = document.getElementById("container");
@@ -907,9 +1451,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 button: mouseButton,
                 clicks: 1,
                 buttons: {
-                        left: mouseLeftDown,
-                        middle: mouseMiddleDown,
-                        right: mouseRightDown,
+                        left: mouseDown.left,
+                        middle: mouseDown.middle,
+                        right: mouseDown.right,
                     },
                 gestures: touchGesture,
                 modifiers: {
@@ -918,7 +1462,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         shift: e.shiftKey,
                         meta: e.metaKey,
                     },
-                position: [ mousePos.x / sceneView.width, mousePos.y / sceneView.height ],
+                position: [ mousePos.x / canvas.clientWidth, mousePos.y / canvas.clientHeight ],
                 screenPosition: [ mousePos.x, mousePos.y ]
             } ];
 
@@ -941,23 +1485,29 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }
 
             if ( pickInfo ) {
-                var nml;
-                if ( pickInfo.face ) {
-                    nml = pickInfo.face.normal
-                    localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml.x, nml.y, nml.z );
-                } else if ( pickInfo.normal ) {
-                    nml = pickInfo.normal;
-                    localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml[0], nml[1], nml[2] );
-                }
-                localPickNormal = goog.vec.Vec3.normalize( localPickNormal, goog.vec.Vec3.create() );
                 if ( sceneView.state.nodes[ pointerPickID ] ) {
+
                     var pickObj = sceneView.state.nodes[ pointerPickID ];
+                    var nml;
+
                     if ( pickObj.threeObject.matrixWorld ) {
                         worldTransform = goog.vec.Mat4.createFromArray( pickObj.threeObject.matrixWorld.elements );
                     } else {
                         worldTransform = goog.vec.Mat4.createFromArray( getWorldTransform( pickObj ).elements );
-                    } 
-                    worldPickNormal = goog.vec.Mat4.multVec3NoTranslate( worldTransform, localPickNormal, goog.vec.Vec3.create() );    
+                    }
+
+                    if ( pickInfo.face ) {
+                        nml = pickInfo.face.normal
+                        localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml.x, nml.y, nml.z );
+                    } else if ( pickInfo.normal ) {
+                        nml = pickInfo.normal;
+                        localPickNormal = goog.vec.Vec3.createFloat32FromValues( nml[0], nml[1], nml[2] );
+                    }
+                    
+                    if ( localPickNormal !== undefined ) {
+                        localPickNormal = goog.vec.Vec3.normalize( localPickNormal, goog.vec.Vec3.create() );
+                        worldPickNormal = goog.vec.Mat4.multVec3NoTranslate( worldTransform, localPickNormal, goog.vec.Vec3.create() );    
+                    }
                 }
             }
 
@@ -1074,204 +1624,108 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             return returnData;
         }       
 
-        var prevGesture = undefined;
-        function handleHammer(ev) {
-            // disable browser scrolling
-            ev.gesture.preventDefault();
-
-            var eData = getTouchEventData( ev, false );
-            touchID = touchPick ? getPickObjectID.call( sceneView, touchPick.object, false ) : sceneID;
-
-            switch(ev.type) {
-                case 'hold':
-                    sceneView.kernel.dispatchEvent( touchID, "touchHold", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'tap':
-                    sceneView.kernel.dispatchEvent( touchID, "touchTap", eData.eventData, eData.eventNodeData );
-                    // Emulate pointer events
-                    eData.eventData[0].button = "left"; 
-                    sceneView.kernel.dispatchEvent( touchID, "pointerClick", eData.eventData, eData.eventNodeData );
-                    sceneView.kernel.dispatchEvent( touchID, "pointerDown", eData.eventData, eData.eventNodeData );
-                    sceneView.kernel.dispatchEvent( touchID, "pointerUp", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'doubletap':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDoubleTap", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'drag': 
-                    // Fly or Orbit Navigation Behavior
-                    if ( touchmode != "none") {
-                        if ( prevGesture == "drag" || prevGesture == "dragleft" || prevGesture == "dragright") {
-                            handleTouchNavigation( eData.eventData );
-                        }
-                    }
-                    sceneView.kernel.dispatchEvent( touchID, "touchDrag", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragstart':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragStart", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragend':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragEnd", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragup':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragUp", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragdown':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragDown", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragleft':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragLeft", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragright':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragRight", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'swipe':
-                    sceneView.kernel.dispatchEvent( touchID, "touchSwipe", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'swipeup':
-                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeUp", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'swipedown':
-                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeDown", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'swipeleft':
-                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeLeft", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'swiperight':
-                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeRight", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'transform':
-                    sceneView.kernel.dispatchEvent( touchID, "touchTransform", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'transformstart':
-                    sceneView.kernel.dispatchEvent( touchID, "touchTransformStart", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'transformend':
-                    sceneView.kernel.dispatchEvent( touchID, "touchTransformEnd", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'rotate':
-                    sceneView.kernel.dispatchEvent( touchID, "touchRotate", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'pinch':
-                    sceneView.kernel.dispatchEvent( touchID, "touchPinch", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'pinchin':
-                    // Zoom Out
-                    if ( touchmode != "none" ) {
-                        handleScroll( ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
-                    }
-                    sceneView.kernel.dispatchEvent( touchID, "touchPinchIn", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'pinchout':
-                    // Zoom In
-                    if ( touchmode != "none" ) {
-                        handleScroll( -1 * ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
-                    }
-                    sceneView.kernel.dispatchEvent( touchID, "touchPinchOut", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'touch':
-                    touchGesture = true;
-                    sceneView.kernel.dispatchEvent( touchID, "touchStart", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'release':
-                    touchGesture = false;
-                    sceneView.kernel.dispatchEvent( touchID, "touchRelease", eData.eventData, eData.eventNodeData );
-                    break;
-            }
-
-            // Set previous gesture (only perform drag if the previous is not a pinch gesture - causes jumpiness)
-            prevGesture = ev.type;
-        }
-
         // Do not emulate mouse events on touch
         Hammer.NO_MOUSEEVENTS = true;
 
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("touch release", handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("hold tap doubletap", handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("drag dragstart dragend dragup dragdown dragleft dragright", handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("swipe swipeup swipedown swipeleft,swiperight", handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("transform transformstart transformend", handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("rotate", handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("pinch pinchin pinchout", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("touch release", self.handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("hold tap doubletap", self.handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("drag dragstart dragend dragup dragdown dragleft dragright", self.handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("swipe swipeup swipedown swipeleft,swiperight", self.handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("transform transformstart transformend", self.handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("rotate", self.handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("pinch pinchin pinchout", self.handleHammer);
 
         canvas.onmousedown = function( e ) {
-            var event = getEventData( e, false );
-            var shiftDown = e.shiftKey;
 
-            if ( shiftDown ) {
-                if ( pointerLockImplemented && ( navmode == "fly" ) ) {
-                    canvas.requestPointerLock();
-                    positionUnderMouseClick = event.eventNodeData[ "" ][ 0 ].globalPosition;
-                }
-                mouseMiddleDown = true;        
+            // Set appropriate button / key states
+            // Shift+click of any button is treated as the middle button to accomodate mice that
+            // don't have a middle button
+            var shiftDown = e.shiftKey;
+            switch( e.button ) {
+                case 0: // Left button
+                    if ( shiftDown ) {
+                        mouseDown.middle = true;
+                    } else {
+                        mouseDown.left = true;
+                    }
+                    break;
+                case 1: // Middle button
+                    mouseDown.middle = true;
+                    break;
+                case 2: // Right button
+                    if ( shiftDown ) {
+                        mouseDown.middle = true;
+                    } else {
+                        mouseDown.right = true;
+                    }
+                    break;
+            };
+
+            // Set pointerLock if appropriate
+            var event = getEventData( e, false );           
+            if ( pointerLockImplemented && self.appRequestsPointerLock( navmode, mouseDown ) ) {
+
+                // HACK: This is to deal with an issue with webkitMovementX in Chrome:
+                nextMouseMoveIsErroneous = true;
+                nextTwoMouseMovesAreErroneous = true;
+                // END HACK
+
+                canvas.requestPointerLock();
+                positionUnderMouseClick = event && event.eventNodeData[ "" ][ 0 ].globalPosition;
             }
-            else {
-                switch( e.button ) {
-                    case 2:
-                        if ( pointerLockImplemented && ( navmode != "none" ) ) {
-                            canvas.requestPointerLock();
-                        }
-                        mouseRightDown = true;
-                        break;
-                    case 1:
-                        if ( pointerLockImplemented && ( navmode == "fly" ) ) {
-                            canvas.requestPointerLock();
-                            positionUnderMouseClick = event.eventNodeData[ "" ][ 0 ].globalPosition;
-                        }
-                        mouseMiddleDown = true;
-                        break;
-                    case 0:
-                        mouseLeftDown = true;
-                        break;
-                };
-                if ( event ) {
-                    pointerDownID = pointerPickID ? pointerPickID : sceneID;
-                    sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
-                    
-                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                    startMousePosition = event.eventData[ 0 ].position;
-                    // END TODO
-                }
-                e.preventDefault();
+
+            // Process mouse down event
+            if ( event ) {
+                pointerDownID = pointerPickID ? pointerPickID : sceneID;
+                sceneView.kernel.dispatchEvent( pointerDownID, "pointerDown", event.eventData, event.eventNodeData );
+                
+                // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                startMousePosition = event.eventData[ 0 ].position;
+                // END TODO
             }
+            e.preventDefault();
         }
 
         // Listen for onmouseup from the document (instead of the canvas like all the other mouse events)
         // because it will catch mouseup events that occur outside the window, whereas canvas.onmouseup does
         // not.
         document.onmouseup = function( e ) {
+
+            // Set appropriate button / key states
             var ctrlDown = e.ctrlKey;
             var atlDown = e.altKey;
             var ctrlAndAltDown = ctrlDown && atlDown;
             
-            if ( pointerLockImplemented && ( navmode == "fly" ) && mouseMiddleDown ) {
+            // Shift+click w/ any button is considered a middle click to accomodate mice w/o a 
+            // middle mouse button.  Therefore, if the left or right mouse button is released, 
+            // but the system did not record that it was down, it must be a Shift+click for the 
+            // middle mouse button that was released
+            switch( e.button ) {
+                case 0: // Left button
+                    if ( mouseDown.left ) {
+                        mouseDown.left = false;
+                    } else {
+                        mouseDown.middle = false;
+                    }
+                    break;
+                case 1: // Middle button
+                    mouseDown.middle = false;
+                    break;
+                case 2: // Right button
+                    if ( mouseDown.right ) {
+                        mouseDown.right = false;
+                    } else {
+                        mouseDown.middle = false;
+                    }
+                    break;
+            };       
+
+            // Release pointerLock if appropriate
+            if ( pointerLockImplemented && !self.appRequestsPointerLock( navmode, mouseDown ) ) {
                 document.exitPointerLock();
             }
-            mouseMiddleDown = false;
 
-            switch( e.button ) {
-                case 2:
-                    if ( pointerLockImplemented && ( navmode != "none" ) ) {
-
-                        // If we're in fly mode and the middle mouse button is down, then we are orbiting, and
-                        // we do not want to release pointer lock.
-                        // But otherwise, release it
-                        if ( !( ( navmode == "fly" ) && ( mouseMiddleDown ) ) ) {
-                            document.exitPointerLock();
-                        }
-                    }
-                    mouseRightDown = false;
-                    break;
-                case 1: 
-                    if ( pointerLockImplemented && ( navmode == "fly" ) && !mouseRightDown ) {
-                        document.exitPointerLock();
-                    }
-                    mouseMiddleDown = false;
-                    break;
-                case 0:
-                    mouseLeftDown = false;
-                    break;
-            };
-           
+            // Process mouse up event
             var eData = getEventData( e, ctrlAndAltDown );
             if ( eData !== undefined ) {
                 var mouseUpObjectID = pointerPickID;
@@ -1318,7 +1772,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 }
             }
 
-            if ( !( mouseLeftDown || mouseRightDown || mouseMiddleDown ) ) {
+            if ( !( mouseDown.left || mouseDown.right || mouseDown.middle ) ) {
                 pointerDownID = undefined;
 
                 // TODO: Navigation - see main "TODO: Navigation" comment for explanation
@@ -1340,16 +1794,28 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         }
 
         canvas.onmousemove = function( e ) {
+
+            // HACK: This is to deal with an issue with webkitMovementX in Chrome:
+            if ( nextMouseMoveIsErroneous ) {
+                if ( nextTwoMouseMovesAreErroneous ) {
+                    nextTwoMouseMovesAreErroneous = false;
+                } else {
+                    nextMouseMoveIsErroneous = false;
+                }
+                return;
+            }
+            // END HACK
+
             var eData = getEventData( e, false );
             
             if ( eData ) {
-                if ( mouseLeftDown || mouseRightDown || mouseMiddleDown ) {
+                if ( mouseDown.left || mouseDown.right || mouseDown.middle ) {
                 
                     // TODO: Navigation - see main "TODO: Navigation" comment for explanation
                     if ( navmode != "none" ) {
                         if ( cameraNode ) {
                             if ( !cameraNode.lookatval ) {
-                                handleMouseNavigation( eData.eventData );
+                                inputHandleMouseNavigation( eData.eventData );
                             }
                         } else {
                             self.logger.warnx( "canvas.onmousemove: camera does not exist" );
@@ -1500,16 +1966,14 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         deltaY: e.wheelDeltaY / -40,
                     };
                     var id = sceneID;
-                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                    if ( pointerDownID && mouseDown.right || mouseDown.left || mouseDown.middle )
                         id = pointerDownID;
                     else if ( pointerOverID )
                         id = pointerOverID; 
                         
                     sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
 
-                    if ( navmode == "fly" ) {
-                        handleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
-                    }
+                    inputHandleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
                 }
             };
         } else if ( canvas.onwheel !== undefined ) {
@@ -1530,16 +1994,14 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         deltaY: e.deltaY,
                     };
                     var id = sceneID;
-                    if ( pointerDownID && mouseRightDown || mouseLeftDown || mouseMiddleDown )
+                    if ( pointerDownID && mouseDown.right || mouseDown.left || mouseDown.middle )
                         id = pointerDownID;
                     else if ( pointerOverID )
                         id = pointerOverID; 
                         
                     sceneView.kernel.dispatchEvent( id, "pointerWheel", eData.eventData, eData.eventNodeData );
 
-                    if ( navmode == "fly" ) {
-                        handleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
-                    }
+                    inputHandleScroll( eventNodeData.wheel.delta, eventNodeData.distance );
                 }
             };
         } else {
@@ -1550,15 +2012,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         // TODO: Navigation - This section should become a view component as soon as that system is available
         //       When altering this, search for other sections that say "TODO: Navigation"
-
-        var degreesToRadians = Math.PI / 180;
-        var movingForward = false;
-        var movingBack = false;
-        var movingLeft = false;
-        var movingRight = false;
-        var rotatingLeft = false;
-        var rotatingRight = false;
-        var startMousePosition;
 
         var onPointerLockChange = function() {
             if ( document.pointerLockElement === canvas ||
@@ -1574,37 +2027,19 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         document.addEventListener( "mozpointerlockchange", onPointerLockChange, false);
         document.addEventListener( "webkitpointerlockchange", onPointerLockChange, false);
 
-        this.moveNavObject = function( msSinceLastFrame ) {
+        this.moveNavObject = function( x, y, navObj, navMode, rotationSpeed, translationSpeed, msSinceLastFrame ) {
 
-            var x = 0;
-            var y = 0;
-
-            // Calculate the movement increments
-            if ( movingForward )
-                y += 1;
-            if ( movingBack )
-                y -= 1;
-            if ( movingLeft )
-                x -= 1;
-            if ( movingRight )
-                x += 1;
-
-            // If there is no movement since last frame, return
-            if ( ! ( x || y ) )
-                return;
-
-            var navThreeObject = navObject.threeObject;
-            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+            var navThreeObject = navObj.threeObject;
 
             // Compute the distance traveled in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
             // one key press doesn't send them off in space
             var dist = translationSpeed * Math.min( msSinceLastFrame * 0.001, 0.5 );
             var dir = [ 0, 0, 0 ];
-            var camera = this.state.cameraInUse;
+            var camera = self.state.cameraInUse;
             var cameraWorldTransformArray = camera.matrixWorld.elements;
 
-            var orbiting = ( navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
+            var orbiting = ( navMode == "fly" ) && mouseDown.middle && positionUnderMouseClick;
 
             if ( orbiting ) {
                 if ( y ) {
@@ -1650,7 +2085,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }
             
             // If user is walking, constrain movement to the horizontal plane
-            if ( navmode == "walk") {
+            if ( navMode == "walk") {
                 dir[ 2 ] = 0;
             }
 
@@ -1694,6 +2129,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     }
                 }
                 
+                // We are about to use the translationMatrix, so let's update it
+                extractRotationAndTranslation( navObject.threeObject );
+
                 // Insert the new navObject position into the translation array
                 var translationArray = translationMatrix.elements;
                 translationArray[ 12 ] = navObjectWorldPos [ 0 ];
@@ -1706,28 +2144,11 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 navObjectWorldTransformMatrixArray[ 13 ] = navObjectWorldPos [ 1 ];
                 navObjectWorldTransformMatrixArray[ 14 ] = navObjectWorldPos [ 2 ];
             }
-
-            // Update the navigation object's local transform from its new world transform
-            setTransformFromWorldTransform( navThreeObject );
-
-            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
         }
 
-        this.rotateNavObjectByKey = function( msSinceLastFrame ) {
-            var direction = 0;
+        this.rotateNavObjectByKey = function( direction, navObj, navMode, rotationSpeed, translationSpeed, msSinceLastFrame ) {
 
-            // Calculate movement increment
-            if ( rotatingLeft )
-                direction += 1;
-            if ( rotatingRight )
-                direction -= 1;
-
-            // If there is no rotation this frame, return
-            if ( !direction )
-                return;
-
-            var navThreeObject = navObject.threeObject;
-            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+            var navThreeObject = navObj.threeObject;
 
             // Compute the distance rotated in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
@@ -1735,13 +2156,17 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var theta = direction * ( rotationSpeed * degreesToRadians ) * 
                         Math.min( msSinceLastFrame * 0.001, 0.5 );
 
-            var orbiting = ( navmode == "fly" ) && mouseMiddleDown && positionUnderMouseClick;
+            var orbiting = ( navMode == "fly" ) && mouseDown.middle && positionUnderMouseClick;
 
             if ( orbiting ) {
                 var pitchRadians = 0;
                 var yawRadians = -theta;
                 orbit( pitchRadians, yawRadians );
             } else {
+
+                // We will soon want to use the yawMatrix and pitchMatrix,
+                // so let's update them
+                extractRotationAndTranslation( navObject.threeObject );
 
                 var cos = Math.cos( theta );
                 var sin = Math.sin( theta );
@@ -1766,378 +2191,33 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     navObjectWorldTransform.elements = convertCameraTransformFromVWFtoThreejs( navObjectWorldTransformArray );
                 }
             }
-
-            // Force the navObject's world transform to update from its local transform
-            setTransformFromWorldTransform( navThreeObject );
-
-            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
         }
 
         var handleKeyNavigation = function( keyCode, keyIsDown ) {
-            switch ( keyCode ) {
-                case 87:  //w
-                case 38:  //up
+
+            var key = getKeyValue( keyCode ).key;
+            key = key && key.toLowerCase();
+
+            switch ( self.navigationKeyMapping[ key ] ) {
+                case "forward":
                     movingForward = keyIsDown;
                     break;
-                case 83:  //s
-                case 40:  //down
+                case "back":
                     movingBack = keyIsDown;
                     break;
-                case 37: // left              
-                case 65:  //a
+                case "left":
                     movingLeft = keyIsDown;
                     break;
-                case 39: // right              
-                case 68:  //d
+                case "right":
                     movingRight = keyIsDown;
                     break;
-                case 81: // q
+                case "rotateLeft":
                     rotatingLeft = keyIsDown;
                     break;
-                case 69: // e
+                case "rotateRight":
                     rotatingRight = keyIsDown;
                     break;
-                case 82: // r
-                    break;
-                case 67: // c
-                    break;
             }
-        }
-
-        var handleMouseNavigation = function( mouseEventData ) {
-            var deltaX = 0;
-            var deltaY = 0;
-
-            if ( pointerLocked ) {
-                deltaX = mouseEventData.movementX / sceneView.width;
-                deltaY = mouseEventData.movementY / sceneView.height;
-            } else if ( startMousePosition ) {
-                var currentMousePosition = mouseEventData[ 0 ].position;
-                deltaX = currentMousePosition[ 0 ] - startMousePosition [ 0 ];
-                deltaY = currentMousePosition[ 1 ] - startMousePosition [ 1 ];
-            }
-
-            if ( deltaX || deltaY ) {
-                var yawQuat = new THREE.Quaternion();
-                var pitchQuat = new THREE.Quaternion();
-                var rotationSpeedRadians = degreesToRadians * rotationSpeed;
-
-                var orbiting = mouseMiddleDown && ( navmode == "fly" );
-
-                if ( orbiting ) {
-                    var pitchRadians = deltaY * rotationSpeedRadians;
-                    var yawRadians = deltaX * rotationSpeedRadians;
-                    orbit( pitchRadians, yawRadians );
-                } else if ( mouseRightDown ) {
-                    if ( navObject ) {
-
-                        var navThreeObject = navObject.threeObject;
-                        var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
-
-                        // --------------------
-                        // Calculate new pitch
-                        // --------------------
-
-                        // deltaY is negated because a positive change (downward) generates a negative rotation 
-                        // around the horizontal x axis (clockwise as viewed from the right)
-                        pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -deltaY * rotationSpeedRadians );
-                        var pitchDeltaMatrix = new THREE.Matrix4();
-                        pitchDeltaMatrix.makeRotationFromQuaternion( pitchQuat );
-
-                        if ( ( navmode == "fly" )  ||
-                             ( ( navmode == "walk" ) && ( cameraNode == navObject ) ) ) {
-                            pitchMatrix.multiplyMatrices( pitchDeltaMatrix, pitchMatrix );
-
-                            // Constrain the camera's pitch to +/- 90 degrees
-                            // We need to do something if zAxis.z is < 0
-                            var pitchMatrixElements = pitchMatrix.elements;
-                            if ( pitchMatrixElements[ 10 ] < 0 ) {
-
-                                var xAxis = goog.vec.Vec3.create();
-                                xAxis = goog.vec.Vec3.setFromArray( xAxis, [ pitchMatrixElements[ 0 ], 
-                                                                             pitchMatrixElements[ 1 ], 
-                                                                             pitchMatrixElements[ 2 ] ] );
-
-                                var yAxis = goog.vec.Vec3.create();
-
-                                // If forward vector is tipped up
-                                if ( pitchMatrixElements[ 6 ] > 0 ) {
-                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
-                                } else {
-                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
-                                }
-
-                                // Calculate the zAxis as a crossProduct of x and y
-                                var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
-
-                                // Put these values back in the camera matrix
-                                pitchMatrixElements[ 4 ] = yAxis[ 0 ];
-                                pitchMatrixElements[ 5 ] = yAxis[ 1 ];
-                                pitchMatrixElements[ 6 ] = yAxis[ 2 ];
-                                pitchMatrixElements[ 8 ] = zAxis[ 0 ];
-                                pitchMatrixElements[ 9 ] = zAxis[ 1 ];
-                                pitchMatrixElements[ 10 ] = zAxis[ 2 ];
-                            }
-                        } else if ( navmode == "walk" ) {
-
-                            // Perform pitch on camera - right-multiply to keep pitch separate from yaw
-                            var camera = sceneView.state.cameraInUse;
-                            if ( camera ) {
-                                var cameraMatrix = camera.matrix;
-                                var originalCameraTransform = goog.vec.Mat4.clone( cameraMatrix.elements );
-                                var cameraPos = new THREE.Vector3();
-                                cameraPos.setFromMatrixPosition( cameraMatrix );
-                                cameraMatrix.multiply( pitchDeltaMatrix );
-
-                                // Constrain the camera's pitch to +/- 90 degrees
-                                var camWorldMatrix = camera.matrixWorld;
-                                var camWorldMatrixElements = camWorldMatrix.elements;
-
-                                // We need to do something if zAxis.z is < 0
-                                // This can get a little weird because this matrix is in three.js coordinates, 
-                                // but we care about VWF coordinates:
-                                // -the VWF y-axis is the three.js -z axis 
-                                // -the VWF z-axis is the three.js y axis
-                                if ( camWorldMatrixElements[ 6 ] < 0 ) {
-
-                                    var xAxis = goog.vec.Vec3.create();
-                                    xAxis = goog.vec.Vec3.setFromArray( xAxis, [ camWorldMatrixElements[ 0 ], 
-                                                                                 camWorldMatrixElements[ 1 ], 
-                                                                                 camWorldMatrixElements[ 2 ] ] );
-
-                                    var yAxis = goog.vec.Vec3.create();
-
-                                    // If forward vector is tipped up
-                                    if ( camWorldMatrixElements[ 10 ] > 0 ) {
-                                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
-                                    } else {
-                                        yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
-                                    }
-
-                                    // Calculate the zAxis as a crossProduct of x and y
-                                    var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
-
-                                    // Put these values back in the camera matrix
-                                    camWorldMatrixElements[ 4 ] = zAxis[ 0 ];
-                                    camWorldMatrixElements[ 5 ] = zAxis[ 1 ];
-                                    camWorldMatrixElements[ 6 ] = zAxis[ 2 ];
-                                    camWorldMatrixElements[ 8 ] = -yAxis[ 0 ];
-                                    camWorldMatrixElements[ 9 ] = -yAxis[ 1 ];
-                                    camWorldMatrixElements[ 10 ] = -yAxis[ 2 ];
-
-                                    setTransformFromWorldTransform( camera );
-                                }
-
-                                // Restore camera position so rotation is done around camera center
-                                cameraMatrix.setPosition( cameraPos );
-                                
-                                updateRenderObjectTransform( camera );
-                                callModelTransformBy( cameraNode, originalCameraTransform, 
-                                                      cameraMatrix.elements );
-                            } else {
-                                self.logger.warnx( "There is no camera to move" );
-                            }
-                        }
-
-                        // ------------------
-                        // Calculate new yaw
-                        // ------------------
-
-                        // deltaX is negated because a positive change (to the right) generates a negative rotation 
-                        // around the vertical z axis (clockwise as viewed from above)
-                        yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), -deltaX * rotationSpeedRadians );
-                        var yawDeltaMatrix = new THREE.Matrix4();
-                        yawDeltaMatrix.makeRotationFromQuaternion( yawQuat );
-                        yawMatrix.multiplyMatrices( yawDeltaMatrix, yawMatrix );
-
-                        // -------------------------------------------------
-                        // Put all components together and set the new pose
-                        // -------------------------------------------------
-                                            
-                        var navObjectWorldMatrix = navThreeObject.matrixWorld;
-                        navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
-                        navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
-                        if ( navThreeObject instanceof THREE.Camera ) {
-                            var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
-                            navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
-                        }
-                        setTransformFromWorldTransform( navObject.threeObject );
-                        callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
-                    } else {
-                        self.logger.warnx( "handleMouseNavigation: There is no navigation object to move" );
-                    }
-
-                }
-
-                startMousePosition = currentMousePosition;
-            } 
-        }
-
-        function handleScroll( wheelDelta, distanceToTarget ) {
-            
-            var orbiting = ( navmode == "fly" ) && ( mouseMiddleDown )
-
-            if ( orbiting || !pickDirectionVector ) {
-                return;
-            }
-
-            var navThreeObject = navObject.threeObject;
-            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
-
-            // wheelDelta has a value of 3 for every click
-            var numClicks = Math.abs( wheelDelta / 3 );
-
-            // Prepare variables for calculation
-            var dist = Math.min( Math.max( distanceToTarget || translationSpeed, 
-                                           2 * self.state.cameraInUse.near ),
-                                 9 * translationSpeed );
-            var percentDistRemainingEachStep = 0.8;
-            var amountToMove = 0;
-
-            // If wheelDelta is negative, user pushed wheel forward - move toward the object
-            // Else, user pulled wheel back - move away from object
-            if ( wheelDelta < 0 ) { 
-                amountToMove = dist * ( 1 - Math.pow( percentDistRemainingEachStep, numClicks ) );
-            } else {
-                amountToMove = dist * ( 1 - Math.pow( 1 / percentDistRemainingEachStep, numClicks ) );
-            }
-
-            var translationArray = translationMatrix.elements;
-            translationArray[ 12 ] += amountToMove * pickDirectionVector.x;
-            translationArray[ 13 ] += amountToMove * pickDirectionVector.y;
-            translationArray[ 14 ] += amountToMove * pickDirectionVector.z;
-            if ( boundingBox != undefined ) {
-                if ( translationArray[ 12 ] < boundingBox[ 0 ][ 0 ] ) {
-                    translationArray[ 12 ] = boundingBox[ 0 ][ 0 ];
-                }
-                else if ( translationArray[ 12 ] > boundingBox[ 0 ][ 1 ] ) {
-                    translationArray[ 12 ] = boundingBox[ 0 ][ 1 ];
-                }
-                if ( translationArray[ 13 ] < boundingBox[ 1 ][ 0 ] ) {
-                    translationArray[ 13 ] = boundingBox[ 1 ][ 0 ];
-                }
-                else if ( translationArray[ 13 ] > boundingBox[ 1 ][ 1 ] ) {
-                    translationArray[ 13 ] = boundingBox[ 1 ][ 1 ];
-                }
-                if ( translationArray[ 14 ] < boundingBox[ 2 ][ 0 ] ) {
-                    translationArray[ 14 ] = boundingBox[ 2 ][ 0 ];
-                }
-                else if ( translationArray[ 14 ] > boundingBox[ 2 ][ 1 ] ) {
-                    translationArray[ 14 ] = boundingBox[ 2 ][ 1 ];
-                }
-            }
-            var worldTransformArray = navThreeObject.matrixWorld.elements;
-            worldTransformArray[ 12 ] = translationArray[ 12 ];
-            worldTransformArray[ 13 ] = translationArray[ 13 ];
-            worldTransformArray[ 14 ] = translationArray[ 14 ];
-
-            setTransformFromWorldTransform( navThreeObject );
-            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
-        }
-
-        function handleTouchNavigation( touchEventData ) {
-            var currentMousePosition = touchEventData[ 0 ].position;
-
-            var deltaX = 0;
-            var deltaY = 0;
-
-            if ( touchPosition ) {
-                deltaX = currentMousePosition[ 0 ] - touchPosition [ 0 ];
-                deltaY = currentMousePosition[ 1 ] - touchPosition [ 1 ];
-            }
-
-            if ( deltaX || deltaY ) {
-                var yawQuat = new THREE.Quaternion();
-                var pitchQuat = new THREE.Quaternion();
-                var rotationSpeedRadians = degreesToRadians * rotationSpeed;
-
-                if ( touchmode == "orbit" ) {
-                    var pitchRadians = deltaY * rotationSpeedRadians;
-                    var yawRadians = deltaX * rotationSpeedRadians;
-                    orbit( pitchRadians, yawRadians );
-                } else if ( touchmode == "look" ) {
-                    if ( navObject ) {
-
-                        var navThreeObject = navObject.threeObject;
-                        var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
-
-                        // --------------------
-                        // Calculate new pitch
-                        // --------------------
-
-                        // deltaY is negated because a positive change (downward) generates a negative rotation 
-                        // around the horizontal x axis (clockwise as viewed from the right)
-                        pitchQuat.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), -deltaY * rotationSpeedRadians );
-                        var pitchDeltaMatrix = new THREE.Matrix4();
-                        pitchDeltaMatrix.makeRotationFromQuaternion( pitchQuat );
-
-                        if ( ( touchmode == "look" )  ||
-                             ( ( touchmode == "orbit" ) && ( cameraNode == navObject ) ) ) {
-                            pitchMatrix.multiplyMatrices( pitchDeltaMatrix, pitchMatrix );
-
-                            // Constrain the camera's pitch to +/- 90 degrees
-                            // We need to do something if zAxis.z is < 0
-                            var pitchMatrixElements = pitchMatrix.elements;
-                            if ( pitchMatrixElements[ 10 ] < 0 ) {
-
-                                var xAxis = goog.vec.Vec3.create();
-                                xAxis = goog.vec.Vec3.setFromArray( xAxis, [ pitchMatrixElements[ 0 ], 
-                                                                             pitchMatrixElements[ 1 ], 
-                                                                             pitchMatrixElements[ 2 ] ] );
-
-                                var yAxis = goog.vec.Vec3.create();
-
-                                // If forward vector is tipped up
-                                if ( pitchMatrixElements[ 6 ] > 0 ) {
-                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, 1 ] );
-                                } else {
-                                    yAxis = goog.vec.Vec3.setFromArray( yAxis, [ 0, 0, -1 ] );
-                                }
-
-                                // Calculate the zAxis as a crossProduct of x and y
-                                var zAxis = goog.vec.Vec3.cross( xAxis, yAxis, goog.vec.Vec3.create() );
-
-                                // Put these values back in the camera matrix
-                                pitchMatrixElements[ 4 ] = yAxis[ 0 ];
-                                pitchMatrixElements[ 5 ] = yAxis[ 1 ];
-                                pitchMatrixElements[ 6 ] = yAxis[ 2 ];
-                                pitchMatrixElements[ 8 ] = zAxis[ 0 ];
-                                pitchMatrixElements[ 9 ] = zAxis[ 1 ];
-                                pitchMatrixElements[ 10 ] = zAxis[ 2 ];
-                            }
-                        } 
-
-                        // ------------------
-                        // Calculate new yaw
-                        // ------------------
-
-                        // deltaX is negated because a positive change (to the right) generates a negative rotation 
-                        // around the vertical z axis (clockwise as viewed from above)
-                        yawQuat.setFromAxisAngle( new THREE.Vector3( 0, 0, 1 ), -deltaX * rotationSpeedRadians );
-                        var yawDeltaMatrix = new THREE.Matrix4();
-                        yawDeltaMatrix.makeRotationFromQuaternion( yawQuat );
-                        yawMatrix.multiplyMatrices( yawDeltaMatrix, yawMatrix );
-
-                        // -------------------------------------------------
-                        // Put all components together and set the new pose
-                        // -------------------------------------------------
-                                            
-                        var navObjectWorldMatrix = navThreeObject.matrixWorld;
-                        navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
-                        navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
-                        if ( navThreeObject instanceof THREE.Camera ) {
-                            var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
-                            navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
-                        }
-                        setTransformFromWorldTransform( navObject.threeObject );
-                        callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
-                    } else {
-                        self.logger.warnx( "handleMouseNavigation: There is no navigation object to move" );
-                    }
-
-                }
-            } 
-            touchPosition = currentMousePosition;
         }
 
         // END TODO
@@ -2237,6 +2317,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
          
     };
 
+
+    // TODO: is this function needed?
+    // seems to be an exact copy of the ThreeJSPick
+    // should be tested and removed if this is not needed
     function ThreeJSTouchPick ( canvas, sceneNode, mousepos )
     {
         if(!this.lastEventData) return;
@@ -2260,15 +2344,22 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         pickDirectionVector = new THREE.Vector3();
         pickDirectionVector.set( x, y, 0.5 );
-        
-        this.projector.unprojectVector(pickDirectionVector, threeCam);
-        var pos = new THREE.Vector3();
-        pos.setFromMatrixPosition( threeCam.matrixWorld );
-        pickDirectionVector.sub(pos);
-        pickDirectionVector.normalize();
-                
-        this.raycaster.set(pos, pickDirectionVector);
-        var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
+
+        var intersects = undefined;
+
+        if ( threeCam instanceof THREE.OrthographicCamera ) {
+            var ray = this.projector.pickingRay( pickDirectionVector, threeCam );
+            intersects = ray.intersectObjects( sceneNode.threeScene.children, true );
+        } else {
+            this.projector.unprojectVector(pickDirectionVector, threeCam);
+            var pos = new THREE.Vector3();
+            pos.setFromMatrixPosition( threeCam.matrixWorld );
+            pickDirectionVector.sub(pos);
+            pickDirectionVector.normalize();
+                    
+            this.raycaster.set(pos, pickDirectionVector);
+            intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
+        }
         
         // intersections are, by default, ordered by distance,
         // so we only care for the first (visible) one. The intersection
@@ -2279,7 +2370,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         // Cycle through the list of intersected objects and return the first visible one
         for ( var i = 0; i < intersects.length; i++ ) {
             if ( intersects[ i ].object.visible ) {
-                return intersects[ i ];
+                if ( getPickObjectID( intersects[ i ].object ) !== null ) {
+                    return intersects[ i ];
+                }
             }
         }
         return null;
@@ -2301,26 +2394,38 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         var SCREEN_HEIGHT = window.innerHeight;
         var SCREEN_WIDTH = window.innerWidth;
 
-        var mousepos = { x: this.lastEventData.eventData[0].position[0], y: this.lastEventData.eventData[0].position[1] }; // window coordinates
-        //mousepos = utility.coordinates.contentFromWindow( canvas, mousepos ); // canvas coordinates
+        var mousepos = { 
+            "x": this.lastEventData.eventData[0].position[0], 
+            "y": this.lastEventData.eventData[0].position[1] 
+        }; // window coordinates
 
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
         pickDirectionVector = new THREE.Vector3();
         
-        //console.info( "mousepos = " + x + ", " + y );
         pickDirectionVector.set( x, y, 0.5 );
-        
-        this.projector.unprojectVector( pickDirectionVector, threeCam);
-        var pos = new THREE.Vector3();
-        pos.setFromMatrixPosition( threeCam.matrixWorld );
-        pickDirectionVector.sub(pos);
-        pickDirectionVector.normalize();
-        
-        this.raycaster.set( pos, pickDirectionVector );
-        var intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
+
+        var intersects = undefined;
         var target = undefined;
+
+
+        // TODO: The check for the camera type may not be needed
+        // the first option should work for the perspective camera as well
+        // we just need to make the switch and then test thoroughly 
+        if ( threeCam instanceof THREE.OrthographicCamera ) {
+            var ray = this.projector.pickingRay( pickDirectionVector, threeCam );
+            intersects = ray.intersectObjects( sceneNode.threeScene.children, true );
+        } else {
+            this.projector.unprojectVector( pickDirectionVector, threeCam );
+            var pos = new THREE.Vector3();
+            pos.setFromMatrixPosition( threeCam.matrixWorld );
+            pickDirectionVector.sub(pos);
+            pickDirectionVector.normalize();
+            
+            this.raycaster.set( pos, pickDirectionVector );
+            intersects = this.raycaster.intersectObjects( sceneNode.threeScene.children, true );
+        }
 
         // intersections are, by default, ordered by distance,
         // so we only care for the first (visible) one. The intersection
@@ -2337,7 +2442,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }   
 
             if ( intersects[ i ].object.visible ) {
-                target = intersects[ i ];
+                if ( getPickObjectID( intersects[ i ].object ) !== null ) {
+                    target = intersects[ i ];
+                }
             }
         }
         return target;
@@ -2940,9 +3047,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }
         }
 
-        // Pull the initial pitch, yaw, and translation out of the navObject's transform
-        extractRotationAndTranslation( navObject.threeObject );
-
         // Request properties from the navigation object
         vwf_view.kernel.getProperty( navObject.ID, "navmode" );
         vwf_view.kernel.getProperty( navObject.ID, "touchmode" );
@@ -2973,6 +3077,104 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         }
     }
 
+    function inputHandleMouseNavigation( mouseEventData ) {
+        var deltaX = 0;
+        var deltaY = 0;
+
+        if ( pointerLocked ) {
+            deltaX = mouseEventData.movementX / self.width;
+            deltaY = mouseEventData.movementY / self.height;
+        } else if ( startMousePosition ) {
+            var currentMousePosition = mouseEventData[ 0 ].position;
+            deltaX = currentMousePosition[ 0 ] - startMousePosition [ 0 ];
+            deltaY = currentMousePosition[ 1 ] - startMousePosition [ 1 ];
+        }
+
+        if ( deltaX || deltaY ) {
+            if ( navObject ) {
+                var navThreeObject = navObject.threeObject;
+                var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+
+                self.handleMouseNavigation( deltaX, deltaY, navObject, navmode, 
+                    rotationSpeed, translationSpeed, mouseDown, mouseEventData );
+
+                setTransformFromWorldTransform( navThreeObject );
+                callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+            } else {
+                self.logger.warnx( "handleMouseNavigation: There is no navigation object to move" );
+            }
+
+            startMousePosition = currentMousePosition;
+        } 
+    }
+
+    function inputHandleScroll( wheelDelta, distanceToTarget ) {
+        var navThreeObject = navObject.threeObject;
+        var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+        self.handleScroll( wheelDelta, navObject, navmode, rotationSpeed, translationSpeed, distanceToTarget );
+        setTransformFromWorldTransform( navThreeObject );
+        callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+    }
+
+    function inputMoveNavObject( msSinceLastFrame ) {
+        var x = 0;
+        var y = 0;
+
+        // Calculate the movement increments
+        if ( movingForward )
+            y += 1;
+        if ( movingBack )
+            y -= 1;
+        if ( movingLeft )
+            x -= 1;
+        if ( movingRight )
+            x += 1;
+
+        // If there is no movement since last frame, return
+        if ( ! ( x || y ) )
+            return;
+
+        if ( navObject ) {
+            var navThreeObject = navObject.threeObject;
+            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+
+            self.moveNavObject( x, y, navObject, navmode, rotationSpeed, translationSpeed, msSinceLastFrame );
+
+            // Update the navigation object's local transform from its new world transform
+            setTransformFromWorldTransform( navThreeObject );
+            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+        } else {
+            self.logger.warnx( "moveNavObject: There is no navigation object to move" );
+        }
+    }    
+
+    function inputRotateNavObjectByKey( msSinceLastFrame ) {
+        var direction = 0;
+
+        // Calculate movement increment
+        if ( rotatingLeft )
+            direction += 1;
+        if ( rotatingRight )
+            direction -= 1;
+
+        // If there is no rotation this frame, return
+        if ( !direction )
+            return;
+
+        if ( navObject ) {
+            var navThreeObject = navObject.threeObject;
+            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+
+            self.rotateNavObjectByKey( direction, navObject, navmode, 
+                rotationSpeed, translationSpeed, msSinceLastFrame );
+
+            // Force the navObject's world transform to update from its local transform
+            setTransformFromWorldTransform( navThreeObject );
+            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+        } else {
+            self.logger.warnx( "rotateNavObjectByKey: There is no navigation object to move" );
+        }
+    }
      
     // Receive Model Transform Changes algorithm 
     // 1.0 If (own view changes) then IGNORE (only if no external changes have occurred since the user’s view 
@@ -3020,12 +3222,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         }
 
         threeObject.matrix.elements = transformMatrix;
-        updateRenderObjectTransform( threeObject );
-
-        if ( node == navObject ) {
-            extractRotationAndTranslation( threeObject );
-        }
-        
+        updateRenderObjectTransform( threeObject );   
         nodeLookAt( node );
     }
 
@@ -3204,6 +3401,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         return newTransform;
     }
 
+    // TODO: This should be replaced with self.state.setMeshPropertyRecursively
     function setVisibleRecursively( threeObject, visible ) {
         if ( !threeObject ) {
             return;
@@ -3260,6 +3458,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             // We can only orbit around a point if there is a point to orbit around
             if ( positionUnderMouseClick ) {
+
+                // We will soon want to use the yawMatrix and pitchMatrix,
+                // so let's update them
+                extractRotationAndTranslation( navObject.threeObject );
 
                 var navThreeObject = navObject.threeObject;
                 var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
@@ -3400,15 +3602,16 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         }
     }
 
-    function setActiveCamera(cameraID) {
+    function setActiveCamera( cameraID ) {
         var sceneRootID = this.state.sceneRootID;
         var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
-        if( modelCameraInfo.threeJScameras[cameraID] )
-        {
+        if( modelCameraInfo.threeJScameras[ cameraID ] ) {
             // If the view is currently using the model's activeCamera, update it to the new activeCamera
             if ( usersShareView ) {
                 cameraNode = this.state.nodes[cameraID];
                 this.state.cameraInUse = cameraNode.threeObject;
+                var canvas = this.canvasQuery[ 0 ];
+                this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
             }
         }
     }

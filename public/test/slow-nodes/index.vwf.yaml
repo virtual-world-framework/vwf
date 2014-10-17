@@ -1,0 +1,49 @@
+# Test case for https://github.com/virtual-world-framework/vwf/pull/251.
+# 
+# Prototypes with URIs not matching `RegExp( "^http://vwf.example.com/" )` (including relative URIs)
+# can appear ready before they are fully constructed. References to the incomplete prototype can
+# cause any number of errors.
+# 
+# Before the fix, this application would generate the following warnings in the console:
+# 
+#   - vwf.model.object.Node 'prototype1.vwf' does not have a valid behaviors array 
+# 
+#   - vwf.model.javascript.initializingNodeFromPrototype: index-vwf:n-nn-x:n-nn-xx exception in initialize: 
+#       TypeError: Cannot read property 'hasOwnProperty' of undefined
+#         ...
+# 
+# After the fix, this application should load without any console warnings or errors.
+# 
+# If the kernel still depends on a built-in driver registry, apply this patch before running the
+# test:
+# 
+#     diff --git a/support/client/lib/vwf.js b/support/client/lib/vwf.js
+#     index 9fc8667..9e5b0c5 100644
+#     --- a/support/client/lib/vwf.js
+#     +++ b/support/client/lib/vwf.js
+#     @@ -344,7 +344,8 @@
+#                      { library: "vwf/model/cesium/Cesium", active: false },
+#                      { library: "vwf/model/blockly/JS-Interpreter/interpreter.js", active: false },
+#                      { library: "vwf/model/mil-sym/sm-bc.min", active: false },                
+#     -                { library: "vwf/admin", active: true }
+#     +                { library: "vwf/admin", active: true },
+#     +                { library: "slow-load", active: false }
+#                  ];
+#      
+#                  var initializers = {
+#     @@ -358,7 +359,8 @@
+#                          { library: "vwf/model/graphtool", active: false },
+#                          { library: "vwf/model/sound", active: false },
+#                          { library: "vwf/model/mil-sym", active: false },
+#     -                    { library: "vwf/model/object", active: true }
+#     +                    { library: "vwf/model/object", active: true },
+#     +                    { library: "slow-load", active: false }
+#                      ],
+
+--- 
+children:
+  a: { children: { aa: { extends: "prototype1.vwf" } } }
+  b: { children: { bb: { extends: "prototype1.vwf" } } }
+  c: { children: { cc: { extends: "prototype1.vwf" } } }
+  d: { children: { dd: { extends: "prototype1.vwf" } } }
+  e: { children: { ee: { extends: "prototype1.vwf" } } }

@@ -4,17 +4,17 @@ define([
         '../../Core/defineProperties',
         '../../Core/destroyObject',
         '../../Core/DeveloperError',
+        '../../ThirdParty/knockout',
         '../getElement',
-        './HomeButtonViewModel',
-        '../../ThirdParty/knockout'
+        './HomeButtonViewModel'
     ], function(
         defined,
         defineProperties,
         destroyObject,
         DeveloperError,
+        knockout,
         getElement,
-        HomeButtonViewModel,
-        knockout) {
+        HomeButtonViewModel) {
     "use strict";
 
     /**
@@ -25,28 +25,37 @@ define([
      *
      * @param {Element|String} container The DOM element or ID that will contain the widget.
      * @param {Scene} scene The Scene instance to use.
-     * @param {SceneTransitioner} [transitioner] The SceneTransitioner instance to use.
      * @param {Ellipsoid} [ellipsoid] The Scene's primary ellipsoid.
-     *
-     * @exception {DeveloperError} container is required.
-     * @exception {DeveloperError} scene is required.
+     * @param {Number} [duration] The time, in seconds, it takes to complete the camera flight home.
      */
-    var HomeButton = function(container, scene, transitioner, ellipsoid, flightDuration) {
+    var HomeButton = function(container, scene, ellipsoid, duration) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(container)) {
             throw new DeveloperError('container is required.');
         }
+        //>>includeEnd('debug');
 
         container = getElement(container);
 
+        var viewModel = new HomeButtonViewModel(scene, ellipsoid, duration);
+
+        viewModel._svgPath = 'M14,4l-10,8.75h20l-4.25-3.7188v-4.6562h-2.812v2.1875l-2.938-2.5625zm-7.0938,9.906v10.094h14.094v-10.094h-14.094zm2.1876,2.313h3.3122v4.25h-3.3122v-4.25zm5.8442,1.281h3.406v6.438h-3.406v-6.438z';
+
+        var element = document.createElement('button');
+        element.type = 'button';
+        element.className = 'cesium-button cesium-toolbar-button cesium-home-button';
+        element.setAttribute('data-bind', '\
+attr: { title: tooltip },\
+click: command,\
+cesiumSvgPath: { path: _svgPath, width: 28, height: 28 }');
+
+        container.appendChild(element);
+
+        knockout.applyBindings(viewModel, element);
+
         this._container = container;
-        this._viewModel = new HomeButtonViewModel(scene, transitioner, ellipsoid, flightDuration);
-
-        this._element = document.createElement('span');
-        this._element.className = 'cesium-homeButton';
-        this._element.setAttribute('data-bind', 'attr: { title: tooltip }, click: command');
-        container.appendChild(this._element);
-
-        knockout.applyBindings(this._viewModel, this._element);
+        this._viewModel = viewModel;
+        this._element = element;
     };
 
     defineProperties(HomeButton.prototype, {
@@ -76,7 +85,6 @@ define([
     });
 
     /**
-     * @memberof HomeButton
      * @returns {Boolean} true if the object has been destroyed, false otherwise.
      */
     HomeButton.prototype.isDestroyed = function() {
@@ -86,12 +94,11 @@ define([
     /**
      * Destroys the widget.  Should be called if permanently
      * removing the widget from layout.
-     * @memberof HomeButton
      */
     HomeButton.prototype.destroy = function() {
-        var container = this._container;
-        knockout.cleanNode(container);
-        container.removeChild(this._element);
+        knockout.cleanNode(this._element);
+        this._container.removeChild(this._element);
+
         return destroyObject(this);
     };
 

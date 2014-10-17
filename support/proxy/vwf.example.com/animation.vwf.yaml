@@ -103,26 +103,30 @@ properties:
         this.animationTimeUpdated = value;
         this.animationUpdate( value, this.animationDuration );
         this.animationTimeChanged( value );
-      }
+      } //@ sourceURL=animation.animationTime.set.vwf
 
     get: |
       // Save copies to avoid repeated reads.
-      var duration = this.animationStopTime - this.animationStartTime,
-        rate = this.animationRate;
+      var startTime = this.animationStartTime;
+      var stopTime = this.animationStopTime;
+      var rate = this.animationRate;
+      var animationPause$ = this.animationPause$;
+      var animationStart$ = this.animationStart$;
+      var time = this.time;
       // Calculate the time from the start and current/pause times.
       var value = (
-        ( this.animationPause$ != null ? this.animationPause$ : this.time ) -
-        ( this.animationStart$ != null ? this.animationStart$ : this.time )
-      ) * rate + ( rate >= 0 ? this.animationStartTime : this.animationStopTime );
+        ( animationPause$ != null ? animationPause$ : time ) -
+        ( animationStart$ != null ? animationStart$ : time )
+      ) * rate + ( rate >= 0 ? startTime : stopTime );
       // Range limit the value.
-      value = Math.min( Math.max( this.animationStartTime, value ), this.animationStopTime );
+      value = Math.min( Math.max( startTime, value ), stopTime );
       // If changed since last seen, update and fire the changed event.
       if ( value !== this.animationTimeUpdated ) {
         this.animationTimeUpdated = value;
         this.animationUpdate( value, this.animationDuration );
         this.animationTimeChanged( value );
       }
-      return value;
+      return value; //@ sourceURL=animation.animationTime.get.vwf
 
   ## The length of the animation in seconds.
   ## 
@@ -200,7 +204,7 @@ properties:
           this.logger.debug( "scheduling animationTick" );
           this.animationTick();
         }
-      }
+      } //@ sourceURL=animation.animationPlaying.set.vwf
 
     get: |
       return this.animationStart$ != null && this.animationPause$ == null;
@@ -305,6 +309,10 @@ properties:
         return Math.floor(this.animationTime * this.animationFPS);
       }
 
+  ## The animation update rate in ticks per second of simulation time.
+
+  animationTPS: 60
+
 methods:
 
   # Play the animation from the start.
@@ -346,7 +354,8 @@ methods:
   animationTick: |
     if ( this.animationPlaying ) {
       // Read the time to recognize the current time and update.
-      this.animationTime;
+      // TODO: move side effects out of the getter!!! (says Kevin)
+      this.animationTime; 
       // Loop or stop after reaching the end.
       if ( this.time === this.animationStop$ ) {
         if ( this.animationLoop ) {
@@ -359,15 +368,27 @@ methods:
       }
       // Schedule the next tick if still playing.
       if ( this.animationPlaying ) {
-        if ( this.animationStop$ - this.time > 1/60 ) {
-          this.in( 1/60 ).animationTick(); // next interval
+        if ( this.animationStop$ - this.time > 1 / this.animationTPS ) {
+          this.in( 1 / this.animationTPS ).animationTick(); // next interval
         } else {
-          this.at( this.animationStop$ ).animationTick(); // exactly at end
+
+          // TODO: When animationStop$ is 0 (usually when a model does not actually have an 
+          //       animation on it), we schedule a method call for a time in the past (at time 0).
+          //       That immediately calls animationTick again, but this.time does not equal 
+          //       animationStop$ as we would expect.  So, it doesn't stop the animation and we get
+          //       caught in an infinite loop.
+          //       Ideally we should catch the case where animationStop$ is 0 before this point.
+          //       But for now, we catch it here.  
+          if ( this.animationStop$ > 0 ) {
+            this.at( this.animationStop$ ).animationTick(); // exactly at end
+          } else {
+            this.animationPlaying = false;
+          }
         }
       } else {
         this.logger.debug( "canceling animationTick" );
       }
-    }
+    } //@ sourceURL=animation.animationTick.vwf
 
   ## `animation.vwf` calls `animationUpdate` each time `animationTime` changes. Nodes that
   ## implement `animation.vwf` should provide an `animationUpdate` method to calculate the animation

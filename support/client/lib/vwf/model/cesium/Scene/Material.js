@@ -1,93 +1,73 @@
 /*global define*/
 define([
-        '../ThirdParty/when',
-        '../Core/loadImage',
-        '../Core/DeveloperError',
-        '../Core/createGuid',
+        '../Core/Cartesian2',
         '../Core/clone',
         '../Core/Color',
         '../Core/combine',
+        '../Core/createGuid',
         '../Core/defaultValue',
         '../Core/defined',
+        '../Core/defineProperties',
         '../Core/destroyObject',
-        '../Core/Cartesian2',
+        '../Core/DeveloperError',
+        '../Core/isArray',
+        '../Core/loadImage',
         '../Core/Matrix2',
         '../Core/Matrix3',
         '../Core/Matrix4',
-        '../Renderer/Texture',
         '../Renderer/CubeMap',
-        '../Shaders/Materials/AsphaltMaterial',
-        '../Shaders/Materials/BlobMaterial',
-        '../Shaders/Materials/BrickMaterial',
+        '../Renderer/Texture',
         '../Shaders/Materials/BumpMapMaterial',
-        '../Shaders/Materials/CementMaterial',
         '../Shaders/Materials/CheckerboardMaterial',
         '../Shaders/Materials/DotMaterial',
-        '../Shaders/Materials/FacetMaterial',
-        '../Shaders/Materials/FresnelMaterial',
-        '../Shaders/Materials/GrassMaterial',
+        '../Shaders/Materials/FadeMaterial',
         '../Shaders/Materials/GridMaterial',
         '../Shaders/Materials/NormalMapMaterial',
-        '../Shaders/Materials/ReflectionMaterial',
-        '../Shaders/Materials/RefractionMaterial',
-        '../Shaders/Materials/StripeMaterial',
-        '../Shaders/Materials/TieDyeMaterial',
-        '../Shaders/Materials/Water',
-        '../Shaders/Materials/WoodMaterial',
-        '../Shaders/Materials/RimLightingMaterial',
-        '../Shaders/Materials/ErosionMaterial',
-        '../Shaders/Materials/FadeMaterial',
         '../Shaders/Materials/PolylineArrowMaterial',
         '../Shaders/Materials/PolylineGlowMaterial',
-        '../Shaders/Materials/PolylineOutlineMaterial'
+        '../Shaders/Materials/PolylineOutlineMaterial',
+        '../Shaders/Materials/RimLightingMaterial',
+        '../Shaders/Materials/StripeMaterial',
+        '../Shaders/Materials/Water',
+        '../ThirdParty/when'
     ], function(
-        when,
-        loadImage,
-        DeveloperError,
-        createGuid,
+        Cartesian2,
         clone,
         Color,
         combine,
+        createGuid,
         defaultValue,
         defined,
+        defineProperties,
         destroyObject,
-        Cartesian2,
+        DeveloperError,
+        isArray,
+        loadImage,
         Matrix2,
         Matrix3,
         Matrix4,
-        Texture,
         CubeMap,
-        AsphaltMaterial,
-        BlobMaterial,
-        BrickMaterial,
+        Texture,
         BumpMapMaterial,
-        CementMaterial,
         CheckerboardMaterial,
         DotMaterial,
-        FacetMaterial,
-        FresnelMaterial,
-        GrassMaterial,
+        FadeMaterial,
         GridMaterial,
         NormalMapMaterial,
-        ReflectionMaterial,
-        RefractionMaterial,
-        StripeMaterial,
-        TieDyeMaterial,
-        WaterMaterial,
-        WoodMaterial,
-        RimLightingMaterial,
-        ErosionMaterial,
-        FadeMaterial,
         PolylineArrowMaterial,
         PolylineGlowMaterial,
-        PolylineOutlineMaterial) {
+        PolylineOutlineMaterial,
+        RimLightingMaterial,
+        StripeMaterial,
+        WaterMaterial,
+        when) {
     "use strict";
 
     /**
      * A Material defines surface appearance through a combination of diffuse, specular,
      * normal, emission, and alpha components. These values are specified using a
      * JSON schema called Fabric which gets parsed and assembled into glsl shader code
-     * behind-the-scenes. Check out the <a href='https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric'>wiki page</a>
+     * behind-the-scenes. Check out the {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric|wiki page}
      * for more details on Fabric.
      * <br /><br />
      * <style type="text/css">
@@ -164,69 +144,20 @@ define([
      *      <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li>
      *      <li><code>strength</code>:  Bump strength value between 0.0 and 1.0 where 0.0 is small bumps and 1.0 is large bumps.</li>
      *  </ul>
-     *  <li>Reflection</li>
-     *  <ul>
-     *      <li><code>cubeMap</code>:  Object with positiveX, negativeX, positiveY, negativeY, positiveZ, and negativeZ image paths. </li>
-     *      <li><code>channels</code>:  Three character string containing any combination of r, g, b, and a for selecting the desired image channels.</li>
-     *  </ul>
-     *  <li>Refraction</li>
-     *  <ul>
-     *      <li><code>cubeMap</code>:  Object with positiveX, negativeX, positiveY, negativeY, positiveZ, and negativeZ image paths. </li>
-     *      <li><code>channels</code>:  Three character string containing any combination of r, g, b, and a for selecting the desired image channels.</li>
-     *      <li><code>indexOfRefractionRatio</code>:  Number representing the refraction strength where 1.0 is the lowest and 0.0 is the highest.</li>
-     *  </ul>
-     *  <li>Fresnel</li>
-     *  <ul>
-     *      <li><code>reflection</code>:  Reflection Material.</li>
-     *      <li><code>refraction</code>:  Refraction Material.</li>
-     *  </ul>
-     *  <li>Brick</li>
-     *  <ul>
-     *      <li><code>brickColor</code>:  rgba color object for the brick color.</li>
-     *      <li><code>mortarColor</code>:  rgba color object for the mortar color.</li>
-     *      <li><code>brickSize</code>:  Number between 0.0 and 1.0 where 0.0 is many small bricks and 1.0 is one large brick.</li>
-     *      <li><code>brickPct</code>:  Number for the ratio of brick to mortar where 0.0 is all mortar and 1.0 is all brick.</li>
-     *      <li><code>brickRoughness</code>:  Number between 0.0 and 1.0 representing how rough the brick looks.</li>
-     *      <li><code>mortarRoughness</code>:  Number between 0.0 and 1.0 representing how rough the mortar looks.</li>
-     *  </ul>
-     *  <li>Wood</li>
-     *  <ul>
-     *      <li><code>lightWoodColor</code>:  rgba color object for the wood's base color.</li>
-     *      <li><code>darkWoodColor</code>:  rgba color object for the color of rings in the wood.</li>
-     *      <li><code>ringFrequency</code>:  Number for the frequency of rings in the wood.</li>
-     *      <li><code>noiseScale</code>:  Object with x and y values specifying the noisiness of the ring patterns in both directions.</li>
-     *  </ul>
-     *  <li>Asphalt</li>
-     *  <ul>
-     *      <li><code>asphaltColor</code>:  rgba color object for the asphalt's color.</li>
-     *      <li><code>bumpSize</code>:  Number for the size of the asphalt's bumps.</li>
-     *      <li><code>roughness</code>:  Number that controls how rough the asphalt looks.</li>
-     *  </ul>
-     *  <li>Cement</li>
-     *  <ul>
-     *  <li><code>cementColor</code>:  rgba color object for the cement's color. </li>
-     *  <li><code>grainScale</code>:  Number for the size of rock grains in the cement. </li>
-     *  <li><code>roughness</code>:  Number that controls how rough the cement looks.</li>
-     *  </ul>
-     *  <li>Grass</li>
-     *  <ul>
-     *      <li><code>grassColor</code>:  rgba color object for the grass' color. </li>
-     *      <li><code>dirtColor</code>:  rgba color object for the dirt's color. </li>
-     *      <li><code>patchiness</code>:  Number that controls the size of the color patches in the grass.</li>
-     *  </ul>
      *  <li>Grid</li>
      *  <ul>
      *      <li><code>color</code>:  rgba color object for the whole material.</li>
      *      <li><code>cellAlpha</code>: Alpha value for the cells between grid lines.  This will be combined with color.alpha.</li>
      *      <li><code>lineCount</code>:  Object with x and y values specifying the number of columns and rows respectively.</li>
      *      <li><code>lineThickness</code>:  Object with x and y values specifying the thickness of grid lines (in pixels where available).</li>
+     *      <li><code>lineOffset</code>:  Object with x and y values specifying the offset of grid lines (range is 0 to 1).</li>
      *  </ul>
      *  <li>Stripe</li>
      *  <ul>
      *      <li><code>horizontal</code>:  Boolean that determines if the stripes are horizontal or vertical.</li>
-     *      <li><code>lightColor</code>:  rgba color object for the stripe's light alternating color.</li>
-     *      <li><code>darkColor</code>:  rgba color object for the stripe's dark alternating color.</li>
-     *      <li><code>offset</code>:  Number that controls the stripe offset from the edge.</li>
+     *      <li><code>evenColor</code>:  rgba color object for the stripe's first color.</li>
+     *      <li><code>oddColor</code>:  rgba color object for the stripe's second color.</li>
+     *      <li><code>offset</code>:  Number that controls at which point into the pattern to begin drawing; with 0.0 being the beginning of the even color, 1.0 the beginning of the odd color, 2.0 being the even color again, and any multiple or fractional values being in between.</li>
      *      <li><code>repeat</code>:  Number that controls the total number of stripes, half light and half dark.</li>
      *  </ul>
      *  <li>Checkerboard</li>
@@ -240,24 +171,6 @@ define([
      *      <li><code>lightColor</code>:  rgba color object for the dot color.</li>
      *      <li><code>darkColor</code>:  rgba color object for the background color.</li>
      *      <li><code>repeat</code>:  Object with x and y values specifying the number of columns and rows of dots respectively.</li>
-     *  </ul>
-     *  <li>TieDye</li>
-     *  <ul>
-     *      <li><code>lightColor</code>:  rgba color object for the light color.</li>
-     *      <li><code>darkColor</code>:  rgba color object for the dark color.</li>
-     *      <li><code>frequency</code>:  Number that controls the frequency of the pattern.</li>
-     *  </ul>
-     *  <li>Facet</li>
-     *  <ul>
-     *      <li><code>lightColor</code>:  rgba color object for the light color.</li>
-     *      <li><code>darkColor</code>:  rgba color object for the dark color.</li>
-     *      <li><code>frequency</code>:  Number that controls the frequency of the pattern.</li>
-     *  </ul>
-     *  <li>Blob</li>
-     *  <ul>
-     *      <li><code>lightColor</code>:  rgba color object for the light color.</li>
-     *      <li><code>darkColor</code>:  rgba color object for the dark color.</li>
-     *      <li><code>frequency</code>:  Number that controls the frequency of the pattern.</li>
      *  </ul>
      *  <li>Water</li>
      *  <ul>
@@ -276,11 +189,6 @@ define([
      *      <li><code>color</code>:  diffuse color and alpha.</li>
      *      <li><code>rimColor</code>:  diffuse color and alpha of the rim.</li>
      *      <li><code>width</code>:  Number that determines the rim's width.</li>
-     *  </ul>
-     *  <li>Erosion</li>
-     *  <ul>
-     *      <li><code>color</code>:  diffuse color and alpha.</li>
-     *      <li><code>time</code>:  Time of erosion.  1.0 is no erosion; 0.0 is fully eroded.</li>
      *  </ul>
      *  <li>Fade</li>
      *  <ul>
@@ -311,9 +219,11 @@ define([
      *
      * @alias Material
      *
-     * @param {Context} description.context The context used to create textures if the material uses them.
-     * @param {Boolean} [description.strict = false] Throws errors for issues that would normally be ignored, including unused uniforms or materials.
-     * @param {Object} description.fabric The fabric JSON used to generate the material.
+     * @param {Object} [options] Object with the following properties:
+     * @param {Boolean} [options.strict=false] Throws errors for issues that would normally be ignored, including unused uniforms or materials.
+     * @param {Boolean|Function} [options.translucent=true] When <code>true</code> or a function that returns <code>true</code>, the geometry
+     *                           with this material is expected to appear translucent.
+     * @param {Object} options.fabric The fabric JSON used to generate the material.
      *
      * @constructor
      *
@@ -322,45 +232,33 @@ define([
      * @exception {DeveloperError} fabric: cannot have source and components in the same section.
      * @exception {DeveloperError} fabric: property name is not valid. It should be 'type', 'materials', 'uniforms', 'components', or 'source'.
      * @exception {DeveloperError} fabric: property name is not valid. It should be 'diffuse', 'specular', 'shininess', 'normal', 'emission', or 'alpha'.
-     * @exception {DeveloperError} image: context is not defined.
      * @exception {DeveloperError} strict: shader source does not use string.
      * @exception {DeveloperError} strict: shader source does not use uniform.
      * @exception {DeveloperError} strict: shader source does not use material.
      *
+     * @see {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric|Fabric wiki page} for a more detailed options of Fabric.
+     *
+     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Materials.html|Cesium Sandcastle Materials Demo}
+     *
      * @example
      * // Create a color material with fromType:
-     * polygon.material = Material.fromType(context, 'Color');
-     * polygon.material.uniforms.color = {
-     *     red : 1.0,
-     *     green : 1.0,
-     *     blue : 0.0
-     *     alpha : 1.0
-     * };
+     * polygon.material = Cesium.Material.fromType('Color');
+     * polygon.material.uniforms.color = new Cesium.Color(1.0, 1.0, 0.0, 1.0);
      *
      * // Create the default material:
-     * polygon.material = new Material();
+     * polygon.material = new Cesium.Material();
      *
      * // Create a color material with full Fabric notation:
-     * polygon.material = new Material({
-     *     context : context,
+     * polygon.material = new Cesium.Material({
      *     fabric : {
      *         type : 'Color',
      *         uniforms : {
-     *             color : {
-     *                 red : 1.0,
-     *                 green : 1.0,
-     *                 blue : 0.0,
-     *                 alpha : 1.0
-     *             }
+     *             color : new Cesium.Color(1.0, 1.0, 0.0, 1.0)
      *         }
      *     }
      * });
-     *
-     * @see <a href='https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric'>Fabric wiki page</a> for a more detailed description of Fabric.
-     *
-     * @demo <a href="http://cesium.agi.com/Cesium/Apps/Sandcastle/index.html?src=Materials.html">Cesium Sandcastle Materials Demo</a>
      */
-    var Material = function(description) {
+    var Material = function(options) {
         /**
          * The material type. Can be an existing type or a new type. If no type is specified in fabric, type is a GUID.
          * @type {String}
@@ -390,15 +288,32 @@ define([
         this.uniforms = undefined;
         this._uniforms = undefined;
 
-        this._context = undefined;
+        /**
+         * When <code>true</code> or a function that returns <code>true</code>,
+         * the geometry is expected to appear translucent.
+         * @type {Boolean|Function}
+         * @default undefined
+         */
+        this.translucent = undefined;
+
         this._strict = undefined;
         this._template = undefined;
         this._count = undefined;
 
-        initializeMaterial(description, this);
-        Object.defineProperty(this, 'type', {
-            value : this.type,
-            writable : false
+        this._texturePaths = {};
+        this._loadedImages = [];
+        this._loadedCubeMaps = [];
+
+        this._textures = {};
+
+        this._updateFunctions = [];
+
+        initializeMaterial(options, this);
+        defineProperties(this, {
+            type : {
+                value : this.type,
+                writable : false
+            }
         });
 
         if (!defined(Material._uniformList[this.type])) {
@@ -413,29 +328,145 @@ define([
     /**
      * Creates a new material using an existing material type.
      * <br /><br />
-     * Shorthand for: new Material({context : context, fabric : {type : type}});
+     * Shorthand for: new Material({fabric : {type : type}});
      *
-     * @param {Context} context The context used to create textures if the material uses them.
      * @param {String} type The base material type.
-     *
+     * @param {Object} [uniforms] Overrides for the default uniforms.
      * @returns {Material} New material object.
      *
      * @exception {DeveloperError} material with that type does not exist.
      *
      * @example
-     * var material = Material.fromType(context, 'Color');
-     * material.uniforms.color = vec4(1.0, 0.0, 0.0, 1.0);
+     * var material = Cesium.Material.fromType('Color', {
+     *     color : new Cesium.Color(1.0, 0.0, 0.0, 1.0)
+     * });
      */
-    Material.fromType = function(context, type) {
+    Material.fromType = function(type, uniforms) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(Material._materialCache.getMaterial(type))) {
             throw new DeveloperError('material with type \'' + type + '\' does not exist.');
         }
-        return new Material({
-            context : context,
+        //>>includeEnd('debug');
+
+        var material = new Material({
             fabric : {
                 type : type
             }
         });
+
+        if (defined(uniforms)) {
+            for (var name in uniforms) {
+                if (uniforms.hasOwnProperty(name)) {
+                    material.uniforms[name] = uniforms[name];
+                }
+            }
+        }
+
+        return material;
+    };
+
+    Material.prototype.isTranslucent = function() {
+        if (defined(this.translucent)) {
+            if (typeof this.translucent === 'function') {
+                return this.translucent();
+            }
+
+            return this.translucent;
+        }
+
+        var translucent = true;
+        var funcs = this._translucentFunctions;
+        var length = funcs.length;
+        for (var i = 0; i < length; ++i) {
+            var func = funcs[i];
+            if (typeof func === 'function') {
+                translucent = translucent && func();
+            } else {
+                translucent = translucent && func;
+            }
+
+            if (!translucent) {
+                break;
+            }
+        }
+        return translucent;
+    };
+
+    /**
+     * @private
+     */
+    Material.prototype.update = function(context) {
+        var i;
+        var uniformId;
+
+        var loadedImages = this._loadedImages;
+        var length = loadedImages.length;
+
+        for (i = 0; i < length; ++i) {
+            var loadedImage = loadedImages[i];
+            uniformId = loadedImage.id;
+            var image = loadedImage.image;
+
+            var texture = Material._textureCache.getTexture(this._texturePaths[uniformId]);
+            if (!defined(texture)) {
+                texture = context.createTexture2D({
+                    source : image
+                });
+                Material._textureCache.addTexture(this._texturePaths[uniformId], texture);
+            }
+
+            this._textures[uniformId] = texture;
+
+            var uniformDimensionsName = uniformId + 'Dimensions';
+            if (this.uniforms.hasOwnProperty(uniformDimensionsName)) {
+                var uniformDimensions = this.uniforms[uniformDimensionsName];
+                uniformDimensions.x = texture._width;
+                uniformDimensions.y = texture._height;
+            }
+        }
+
+        loadedImages.length = 0;
+
+        var loadedCubeMaps = this._loadedCubeMaps;
+        length = loadedCubeMaps.length;
+
+        for (i = 0; i < length; ++i) {
+            var loadedCubeMap = loadedCubeMaps[i];
+            uniformId = loadedCubeMap.id;
+            var images = loadedCubeMap.images;
+
+            var cubeMap = Material._textureCache.getTexture(this._texturePaths[uniformId]);
+            if (!defined(cubeMap)) {
+                cubeMap = context.createCubeMap({
+                    source : {
+                        positiveX : images[0],
+                        negativeX : images[1],
+                        positiveY : images[2],
+                        negativeY : images[3],
+                        positiveZ : images[4],
+                        negativeZ : images[5]
+                    }
+                });
+                Material._textureCache.addTexture(this._texturePaths[uniformId], cubeMap);
+            }
+
+            this._textures[uniformId] = cubeMap;
+        }
+
+        loadedCubeMaps.length = 0;
+
+        var updateFunctions = this._updateFunctions;
+        length = updateFunctions.length;
+        for (i = 0; i < length; ++i) {
+            updateFunctions[i](this, context);
+        }
+
+        var subMaterials = this.materials;
+        for (var name in subMaterials) {
+            if (subMaterials.hasOwnProperty(name)) {
+                subMaterials[name].update(context);
+            }
+        }
     };
 
     /**
@@ -443,8 +474,6 @@ define([
     * <br /><br />
     * If this object was destroyed, it should not be used; calling any function other than
     * <code>isDestroyed</code> will result in a {@link DeveloperError} exception.
-    *
-    * @memberof Material
     *
     * @returns {Boolean} True if this object was destroyed; otherwise, false.
     *
@@ -462,8 +491,6 @@ define([
      * <code>isDestroyed</code> will result in a {@link DeveloperError} exception.  Therefore,
      * assign the return value (<code>undefined</code>) to the object as done in the example.
      *
-     * @memberof Material
-     *
      * @returns {undefined}
      *
      * @exception {DeveloperError} This object was destroyed, i.e., destroy() was called.
@@ -478,10 +505,8 @@ define([
         var uniforms = this.uniforms;
         for ( var uniformId in uniforms) {
             if (uniforms.hasOwnProperty(uniformId)) {
-                var uniformValue = uniforms[uniformId];
-                if (uniformValue instanceof Texture || uniformValue instanceof CubeMap) {
-                    Material._textureCache.releaseTexture(this, uniformValue);
-                }
+                var path = this._texturePaths[uniformId];
+                Material._textureCache.releaseTexture(path);
             }
         }
         for ( var material in materials) {
@@ -492,12 +517,11 @@ define([
         return destroyObject(this);
     };
 
-    function initializeMaterial(description, result) {
-        description = defaultValue(description, defaultValue.EMPTY_OBJECT);
-        result._context = description.context;
-        result._strict = defaultValue(description.strict, false);
-        result._count = defaultValue(description.count, 0);
-        result._template = clone(defaultValue(description.fabric, defaultValue.EMPTY_OBJECT));
+    function initializeMaterial(options, result) {
+        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
+        result._strict = defaultValue(options.strict, false);
+        result._count = defaultValue(options.count, 0);
+        result._template = clone(defaultValue(options.fabric, defaultValue.EMPTY_OBJECT));
         result._template.uniforms = clone(defaultValue(result._template.uniforms, defaultValue.EMPTY_OBJECT));
         result._template.materials = clone(defaultValue(result._template.materials, defaultValue.EMPTY_OBJECT));
 
@@ -507,25 +531,45 @@ define([
         result.materials = {};
         result.uniforms = {};
         result._uniforms = {};
+        result._translucentFunctions = [];
+
+        var translucent;
 
         // If the cache contains this material type, build the material template off of the stored template.
-        var cachedTemplate = Material._materialCache.getMaterial(result.type);
-        if (defined(cachedTemplate)) {
-            var template = clone(cachedTemplate, true);
-            result._template = combine([result._template, template]);
+        var cachedMaterial = Material._materialCache.getMaterial(result.type);
+        if (defined(cachedMaterial)) {
+            var template = clone(cachedMaterial.fabric, true);
+            result._template = combine(result._template, template, true);
+            translucent = cachedMaterial.translucent;
         }
 
         // Make sure the template has no obvious errors. More error checking happens later.
         checkForTemplateErrors(result);
 
         // If the material has a new type, add it to the cache.
-        if (!defined(cachedTemplate)) {
-            Material._materialCache.addMaterial(result.type, result._template);
+        if (!defined(cachedMaterial)) {
+            Material._materialCache.addMaterial(result.type, result);
         }
 
         createMethodDefinition(result);
         createUniforms(result);
         createSubMaterials(result);
+
+        var defaultTranslucent = result._translucentFunctions.length === 0 ? true : undefined;
+        translucent = defaultValue(translucent, defaultTranslucent);
+        translucent = defaultValue(options.translucent, translucent);
+
+        if (defined(translucent)) {
+            if (typeof translucent === 'function') {
+                var wrappedTranslucent = function() {
+                    return translucent(result);
+                };
+                result._translucentFunctions.push(wrappedTranslucent);
+            } else {
+                result._translucentFunctions.push(translucent);
+            }
+
+        }
     }
 
     function checkForValidProperties(object, properties, result, throwNotFound) {
@@ -603,6 +647,124 @@ define([
         }
     }
 
+    var matrixMap = {
+        'mat2' : Matrix2,
+        'mat3' : Matrix3,
+        'mat4' : Matrix4
+    };
+
+    function createTexture2DUpdateFunction(uniformId) {
+        return function(material, context) {
+            var uniforms = material.uniforms;
+            var uniformValue = uniforms[uniformId];
+            var texture = material._textures[uniformId];
+
+            var uniformDimensionsName;
+            var uniformDimensions;
+
+            if (uniformValue instanceof Texture && uniformValue !== texture) {
+                Material._textureCache.releaseTexture(material._texturePaths[uniformId]);
+                material._texturePaths[uniformId] = undefined;
+                material._textures[uniformId] = uniformValue;
+
+                uniformDimensionsName = uniformId + 'Dimensions';
+                if (uniforms.hasOwnProperty(uniformDimensionsName)) {
+                    uniformDimensions = uniforms[uniformDimensionsName];
+                    uniformDimensions.x = uniformValue._width;
+                    uniformDimensions.y = uniformValue._height;
+                }
+
+                return;
+            }
+
+            if (!defined(texture)) {
+                material._texturePaths[uniformId] = undefined;
+                texture = material._textures[uniformId] = context.defaultTexture;
+
+                uniformDimensionsName = uniformId + 'Dimensions';
+                if (uniforms.hasOwnProperty(uniformDimensionsName)) {
+                    uniformDimensions = uniforms[uniformDimensionsName];
+                    uniformDimensions.x = texture._width;
+                    uniformDimensions.y = texture._height;
+                }
+            }
+
+            if (uniformValue === Material.DefaultImageId) {
+                return;
+            }
+
+            if (uniformValue !== material._texturePaths[uniformId]) {
+                var newTexture = Material._textureCache.getTexture(uniformValue);
+                if (defined(newTexture)) {
+                    Material._textureCache.releaseTexture(material._texturePaths[uniformId]);
+                    material._textures[uniformId] = newTexture;
+                } else {
+                    when(loadImage(uniformValue), function(image) {
+                        material._loadedImages.push({
+                            id : uniformId,
+                            image : image
+                        });
+                    });
+                }
+
+                material._texturePaths[uniformId] = uniformValue;
+            }
+        };
+    }
+
+    function createCubeMapUpdateFunction(uniformId) {
+        return function(material, context) {
+            var uniformValue = material.uniforms[uniformId];
+
+            if (uniformValue instanceof CubeMap) {
+                Material._textureCache.releaseTexture(material._texturePaths[uniformId]);
+                material._texturePaths[uniformId] = undefined;
+                material._textures[uniformId] = uniformValue;
+                return;
+            }
+
+            if (!defined(material._textures[uniformId])) {
+                material._texturePaths[uniformId] = undefined;
+                material._textures[uniformId] = context.defaultCubeMap;
+            }
+
+            if (uniformValue === Material.DefaultCubeMapId) {
+                return;
+            }
+
+            var path =
+                uniformValue.positiveX + uniformValue.negativeX +
+                uniformValue.positiveY + uniformValue.negativeY +
+                uniformValue.positiveZ + uniformValue.negativeZ;
+
+            if (path !== material._texturePaths[uniformId]) {
+                var newTexture = Material._textureCache.getTexture(path);
+                if (defined(newTexture)) {
+                    Material._textureCache.releaseTexture(material._texturePaths[uniformId]);
+                    material._textures[uniformId] = newTexture;
+                } else {
+                    var promises = [
+                        loadImage(uniformValue.positiveX),
+                        loadImage(uniformValue.negativeX),
+                        loadImage(uniformValue.positiveY),
+                        loadImage(uniformValue.negativeY),
+                        loadImage(uniformValue.positiveZ),
+                        loadImage(uniformValue.negativeZ)
+                    ];
+
+                    when.all(promises).then(function(images) {
+                        material._loadedCubeMaps.push({
+                            id : uniformId,
+                            images : images
+                        });
+                    });
+                }
+
+                material._texturePaths[uniformId] = path;
+            }
+        };
+    }
+
     function createUniforms(material) {
         var uniforms = material._template.uniforms;
         for ( var uniformId in uniforms) {
@@ -619,6 +781,7 @@ define([
         var materialUniforms = material._template.uniforms;
         var uniformValue = materialUniforms[uniformId];
         var uniformType = getUniformType(uniformValue);
+
         if (!defined(uniformType)) {
             throw new DeveloperError('fabric: uniform \'' + uniformId + '\' has invalid type.');
         } else if (uniformType === 'channels') {
@@ -626,12 +789,6 @@ define([
                 throw new DeveloperError('strict: shader source does not use channels \'' + uniformId + '\'.');
             }
         } else {
-            // If uniform type is an image, add image dimension uniforms.
-            if (uniformType.indexOf('sampler') !== -1) {
-                if (!defined(material._context)) {
-                    throw new DeveloperError('image: context is not defined');
-                }
-            }
             // Since webgl doesn't allow texture dimension queries in glsl, create a uniform to do it.
             // Check if the shader source actually uses texture dimensions before creating the uniform.
             if (uniformType === 'sampler2D') {
@@ -657,47 +814,28 @@ define([
             }
             // Set uniform value
             material.uniforms[uniformId] = uniformValue;
-            material._uniforms[newUniformId] = returnUniform(material, uniformId, uniformType);
-        }
-    }
 
-    // Checks for updates to material values to refresh the uniforms.
-    var matrixMap = {
-        'mat2' : Matrix2,
-        'mat3' : Matrix3,
-        'mat4' : Matrix4
-    };
-    function returnUniform(material, uniformId, originalUniformType) {
-        return function() {
-            var uniforms = material.uniforms;
-            var uniformValue = uniforms[uniformId];
-            var uniformType = getUniformType(uniformValue);
-
-            if (originalUniformType === 'sampler2D' && (uniformType === originalUniformType || uniformValue instanceof Texture)) {
-                if (uniformType === originalUniformType) {
-                    uniformValue = Material._textureCache.registerTexture2DToMaterial(material, uniformId, uniformValue);
-                }
-                // Since texture dimensions can't be updated manually, update them when the texture is updated.
-                var uniformDimensionsName = uniformId + 'Dimensions';
-                if (uniforms.hasOwnProperty(uniformDimensionsName)) {
-                    var uniformDimensions = uniforms[uniformDimensionsName];
-                    uniformDimensions.x = uniformValue._width;
-                    uniformDimensions.y = uniformValue._height;
-                }
-            } else if (originalUniformType === 'samplerCube' && (uniformType === originalUniformType || uniformValue instanceof CubeMap)) {
-                if (uniformType === originalUniformType) {
-                    uniformValue = Material._textureCache.registerCubeMapToMaterial(material, uniformId, uniformValue);
-                }
-            } else if (originalUniformType.indexOf('mat') !== -1 && (uniformType === originalUniformType || uniformValue instanceof matrixMap[originalUniformType])) {
-                if (uniformType === originalUniformType) {
-                    uniformValue = matrixMap[originalUniformType].fromColumnMajorArray(uniformValue);
-                }
-            } else if (!defined(uniformType) || originalUniformType !== uniformType) {
-                throw new DeveloperError('fabric: uniform \'' + uniformId + '\' has invalid value.');
+            if (uniformType === 'sampler2D') {
+                material._uniforms[newUniformId] = function() {
+                    return material._textures[uniformId];
+                };
+                material._updateFunctions.push(createTexture2DUpdateFunction(uniformId));
+            } else if (uniformType === 'samplerCube') {
+                material._uniforms[newUniformId] = function() {
+                    return material._textures[uniformId];
+                };
+                material._updateFunctions.push(createCubeMapUpdateFunction(uniformId));
+            } else if (uniformType.indexOf('mat') !== -1) {
+                var scratchMatrix = new matrixMap[uniformType]();
+                material._uniforms[newUniformId] = function() {
+                    return matrixMap[uniformType].fromColumnMajorArray(material.uniforms[uniformId], scratchMatrix);
+                };
+            } else {
+                material._uniforms[newUniformId] = function() {
+                    return material.uniforms[uniformId];
+                };
             }
-            uniforms[uniformId] = uniformValue;
-            return uniforms[uniformId];
-        };
+        }
     }
 
     // Determines the uniform type based on the uniform in the template.
@@ -718,7 +856,7 @@ define([
                     uniformType = 'sampler2D';
                 }
             } else if (type === 'object') {
-                if (Array.isArray(uniformValue)) {
+                if (isArray(uniformValue)) {
                     if (uniformValue.length === 4 || uniformValue.length === 9 || uniformValue.length === 16) {
                         uniformType = 'mat' + Math.sqrt(uniformValue.length);
                     }
@@ -742,22 +880,21 @@ define([
 
     // Create all sub-materials by combining source and uniforms together.
     function createSubMaterials(material) {
-        var context = material._context;
         var strict = material._strict;
         var subMaterialTemplates = material._template.materials;
         for ( var subMaterialId in subMaterialTemplates) {
             if (subMaterialTemplates.hasOwnProperty(subMaterialId)) {
                 // Construct the sub-material.
                 var subMaterial = new Material({
-                    context : context,
                     strict : strict,
                     fabric : subMaterialTemplates[subMaterialId],
                     count : material._count
                 });
 
                 material._count = subMaterial._count;
-                material._uniforms = combine([material._uniforms, subMaterial._uniforms]);
+                material._uniforms = combine(material._uniforms, subMaterial._uniforms, true);
                 material.materials[subMaterialId] = subMaterial;
+                material._translucentFunctions = material._translucentFunctions.concat(subMaterial._translucentFunctions);
 
                 // Make the material's czm_getMaterial unique by appending the sub-material type.
                 var originalMethodName = 'czm_getMaterial';
@@ -799,107 +936,32 @@ define([
     }
 
     Material._textureCache = {
-        _pathsToMaterials : {},
+        _textures : {},
 
-        _pathsToTextures : {},
-
-        _updateMaterialsOnLoad : function(texture, path) {
-            this._pathsToTextures[path] = texture;
-            var materialContainers = this._pathsToMaterials[path];
-            for ( var i = 0; i < materialContainers.length; i++) {
-                var materialContainer = materialContainers[i];
-                var material = materialContainer.material;
-                var property = materialContainer.property;
-                this.releaseTexture(material, material.uniforms[property]);
-                material.uniforms[property] = texture;
-            }
+        addTexture : function(path, texture) {
+            this._textures[path] = {
+                texture : texture,
+                count : 1
+            };
         },
 
-        releaseTexture : function(material, texture) {
-            var pathsToTexture = this._pathsToTextures;
-            for ( var path in pathsToTexture) {
-                if (pathsToTexture[path] === texture) {
-                    var materialsWithTexture = this._pathsToMaterials[path];
-                    for ( var i = 0; i < materialsWithTexture.length; i++) {
-                        if (materialsWithTexture[i].material === material) {
-                            materialsWithTexture.splice(i, 1);
-                            var numMaterialsWithTexture = materialsWithTexture.length;
-                            if (numMaterialsWithTexture === 0) {
-                                texture.destroy();
-                                delete pathsToTexture.path;
-                                delete materialsWithTexture.path;
-                            }
-                        }
-                    }
-                }
+        getTexture : function(path) {
+            var entry = this._textures[path];
+
+            if (defined(entry)) {
+                entry.count++;
+                return entry.texture;
             }
+
+            return undefined;
         },
 
-        registerCubeMapToMaterial : function(material, property, info) {
-            var that = this;
-            var texture;
-            if (info === Material.DefaultCubeMapId) {
-                texture = material._context.getDefaultCubeMap();
-            } else {
-                var path = info.positiveX + info.negativeX + info.positiveY + info.negativeY + info.positiveZ + info.negativeZ;
-                this._pathsToMaterials[path] = defaultValue(this._pathsToMaterials[path], []);
-                this._pathsToMaterials[path].push({
-                    'material' : material,
-                    'property' : property
-                });
-                texture = this._pathsToTextures[path];
-                if (!defined(texture)) {
-                    var oldTexture = material.uniforms[property];
-                    var hasOldTexture = oldTexture instanceof CubeMap;
-                    texture = hasOldTexture ? oldTexture : material._context.getDefaultCubeMap();
-                    if (this._pathsToMaterials[path].length === 1) {
-                        when.all([loadImage(info.positiveX), loadImage(info.negativeX), loadImage(info.positiveY), loadImage(info.negativeY), loadImage(info.positiveZ), loadImage(info.negativeZ)]).then(function(images) {
-                            texture = material._context.createCubeMap({
-                                source : {
-                                    positiveX : images[0],
-                                    negativeX : images[1],
-                                    positiveY : images[2],
-                                    negativeY : images[3],
-                                    positiveZ : images[4],
-                                    negativeZ : images[5]
-                                }
-                            });
-                            that._updateMaterialsOnLoad(texture, path);
-                        });
-                    }
-                }
+        releaseTexture : function(path) {
+            var entry = this._textures[path];
+            if (defined(entry) && --entry.count === 0) {
+                entry.texture = entry.texture && entry.texture.destroy();
+                this._textures[path] = undefined;
             }
-            return texture;
-        },
-
-        registerTexture2DToMaterial : function(material, property, info) {
-            var that = this;
-            var texture;
-            if (info === Material.DefaultImageId) {
-                texture = material._context.getDefaultTexture();
-            } else {
-                var path = info;
-                this._pathsToMaterials[path] = defaultValue(this._pathsToMaterials[path], []);
-                this._pathsToMaterials[path].push({
-                    'material' : material,
-                    'property' : property
-                });
-                texture = this._pathsToTextures[path];
-                if (!defined(texture)) {
-                    var oldTexture = material.uniforms[property];
-                    var hasOldTexture = oldTexture instanceof Texture;
-                    texture = hasOldTexture ? oldTexture : material._context.getDefaultTexture();
-                    if (this._pathsToMaterials[path].length === 1) {
-                        when(loadImage(path), function(image) {
-                            texture = material._context.createTexture2D({
-                                source : image
-                            });
-                            that._updateMaterialsOnLoad(texture, path);
-                        });
-                    }
-                }
-            }
-            return texture;
         }
     };
 
@@ -918,373 +980,306 @@ define([
 
     Material.ColorType = 'Color';
     Material._materialCache.addMaterial(Material.ColorType, {
-        type : Material.ColorType,
-        uniforms : {
-            color : new Color(1.0, 0.0, 0.0, 0.5)
+        fabric : {
+            type : Material.ColorType,
+            uniforms : {
+                color : new Color(1.0, 0.0, 0.0, 0.5)
+            },
+            components : {
+                diffuse : 'color.rgb',
+                alpha : 'color.a'
+            }
         },
-        components : {
-            diffuse : 'color.rgb',
-            alpha : 'color.a'
+        translucent : function(material) {
+            return material.uniforms.color.alpha < 1.0;
         }
     });
 
     Material.ImageType = 'Image';
     Material._materialCache.addMaterial(Material.ImageType, {
-        type : Material.ImageType,
-        uniforms : {
-            image : Material.DefaultImageId,
-            repeat : new Cartesian2(1.0, 1.0)
+        fabric : {
+            type : Material.ImageType,
+            uniforms : {
+                image : Material.DefaultImageId,
+                repeat : new Cartesian2(1.0, 1.0)
+            },
+            components : {
+                diffuse : 'texture2D(image, fract(repeat * materialInput.st)).rgb',
+                alpha : 'texture2D(image, fract(repeat * materialInput.st)).a'
+            }
         },
-        components : {
-            diffuse : 'texture2D(image, fract(repeat * materialInput.st)).rgb',
-            alpha : 'texture2D(image, fract(repeat * materialInput.st)).a'
-        }
+        translucent : true
     });
 
     Material.DiffuseMapType = 'DiffuseMap';
     Material._materialCache.addMaterial(Material.DiffuseMapType, {
-        type : Material.DiffuseMapType,
-        uniforms : {
-            image : Material.DefaultImageId,
-            channels : 'rgb',
-            repeat : new Cartesian2(1.0, 1.0)
+        fabric : {
+            type : Material.DiffuseMapType,
+            uniforms : {
+                image : Material.DefaultImageId,
+                channels : 'rgb',
+                repeat : new Cartesian2(1.0, 1.0)
+            },
+            components : {
+                diffuse : 'texture2D(image, fract(repeat * materialInput.st)).channels'
+            }
         },
-        components : {
-            diffuse : 'texture2D(image, fract(repeat * materialInput.st)).channels'
-        }
+        translucent : false
     });
 
     Material.AlphaMapType = 'AlphaMap';
     Material._materialCache.addMaterial(Material.AlphaMapType, {
-        type : Material.AlphaMapType,
-        uniforms : {
-            image : Material.DefaultImageId,
-            channel : 'a',
-            repeat : new Cartesian2(1.0, 1.0)
+        fabric : {
+            type : Material.AlphaMapType,
+            uniforms : {
+                image : Material.DefaultImageId,
+                channel : 'a',
+                repeat : new Cartesian2(1.0, 1.0)
+            },
+            components : {
+                alpha : 'texture2D(image, fract(repeat * materialInput.st)).channel'
+            }
         },
-        components : {
-            alpha : 'texture2D(image, fract(repeat * materialInput.st)).channel'
-        }
+        translucent : true
     });
 
     Material.SpecularMapType = 'SpecularMap';
     Material._materialCache.addMaterial(Material.SpecularMapType, {
-        type : Material.SpecularMapType,
-        uniforms : {
-            image : Material.DefaultImageId,
-            channel : 'r',
-            repeat : new Cartesian2(1.0, 1.0)
+        fabric : {
+            type : Material.SpecularMapType,
+            uniforms : {
+                image : Material.DefaultImageId,
+                channel : 'r',
+                repeat : new Cartesian2(1.0, 1.0)
+            },
+            components : {
+                specular : 'texture2D(image, fract(repeat * materialInput.st)).channel'
+            }
         },
-        components : {
-            specular : 'texture2D(image, fract(repeat * materialInput.st)).channel'
-        }
+        translucent : false
     });
 
     Material.EmissionMapType = 'EmissionMap';
     Material._materialCache.addMaterial(Material.EmissionMapType, {
-        type : Material.EmissionMapType,
-        uniforms : {
-            image : Material.DefaultImageId,
-            channels : 'rgb',
-            repeat : new Cartesian2(1.0, 1.0)
+        fabric : {
+            type : Material.EmissionMapType,
+            uniforms : {
+                image : Material.DefaultImageId,
+                channels : 'rgb',
+                repeat : new Cartesian2(1.0, 1.0)
+            },
+            components : {
+                emission : 'texture2D(image, fract(repeat * materialInput.st)).channels'
+            }
         },
-        components : {
-            emission : 'texture2D(image, fract(repeat * materialInput.st)).channels'
-        }
+        translucent : false
     });
 
     Material.BumpMapType = 'BumpMap';
     Material._materialCache.addMaterial(Material.BumpMapType, {
-        type : Material.BumpMapType,
-        uniforms : {
-            image : Material.DefaultImageId,
-            channel : 'r',
-            strength : 0.8,
-            repeat : new Cartesian2(1.0, 1.0)
+        fabric : {
+            type : Material.BumpMapType,
+            uniforms : {
+                image : Material.DefaultImageId,
+                channel : 'r',
+                strength : 0.8,
+                repeat : new Cartesian2(1.0, 1.0)
+            },
+            source : BumpMapMaterial
         },
-        source : BumpMapMaterial
+        translucent : false
     });
 
     Material.NormalMapType = 'NormalMap';
     Material._materialCache.addMaterial(Material.NormalMapType, {
-        type : Material.NormalMapType,
-        uniforms : {
-            image : Material.DefaultImageId,
-            channels : 'rgb',
-            strength : 0.8,
-            repeat : new Cartesian2(1.0, 1.0)
-        },
-        source : NormalMapMaterial
-    });
-
-    Material.ReflectionType = 'Reflection';
-    Material._materialCache.addMaterial(Material.ReflectionType, {
-        type : Material.ReflectionType,
-        uniforms : {
-            cubeMap : Material.DefaultCubeMapId,
-            channels : 'rgb'
-        },
-        source : ReflectionMaterial
-    });
-
-    Material.RefractionType = 'Refraction';
-    Material._materialCache.addMaterial(Material.RefractionType, {
-        type : Material.RefractionType,
-        uniforms : {
-            cubeMap : Material.DefaultCubeMapId,
-            channels : 'rgb',
-            indexOfRefractionRatio : 0.9
-        },
-        source : RefractionMaterial
-    });
-
-    Material.FresnelType = 'Fresnel';
-    Material._materialCache.addMaterial(Material.FresnelType, {
-        type : Material.FresnelType,
-        materials : {
-            reflection : {
-                type : Material.ReflectionType
+        fabric : {
+            type : Material.NormalMapType,
+            uniforms : {
+                image : Material.DefaultImageId,
+                channels : 'rgb',
+                strength : 0.8,
+                repeat : new Cartesian2(1.0, 1.0)
             },
-            refraction : {
-                type : Material.RefractionType
-            }
+            source : NormalMapMaterial
         },
-        source : FresnelMaterial
-    });
-
-    Material.BrickType = 'Brick';
-    Material._materialCache.addMaterial(Material.BrickType, {
-        type : Material.BrickType,
-        uniforms : {
-            brickColor : new Color(0.6, 0.3, 0.1, 1.0),
-            mortarColor : new Color(0.8, 0.8, 0.7, 1.0),
-            brickSize : new Cartesian2(0.3, 0.15),
-            brickPct : new Cartesian2(0.9, 0.85),
-            brickRoughness : 0.2,
-            mortarRoughness : 0.1
-        },
-        source : BrickMaterial
-    });
-
-    Material.WoodType = 'Wood';
-    Material._materialCache.addMaterial(Material.WoodType, {
-        type : Material.WoodType,
-        uniforms : {
-            lightWoodColor : new Color(0.6, 0.3, 0.1, 1.0),
-            darkWoodColor : new Color(0.4, 0.2, 0.07, 1.0),
-            ringFrequency : 3.0,
-            noiseScale : new Cartesian2(0.7, 0.5),
-            grainFrequency : 27.0
-        },
-        source : WoodMaterial
-    });
-
-    Material.AsphaltType = 'Asphalt';
-    Material._materialCache.addMaterial(Material.AsphaltType, {
-        type : Material.AsphaltType,
-        uniforms : {
-            asphaltColor : new Color(0.15, 0.15, 0.15, 1.0),
-            bumpSize : 0.02,
-            roughness : 0.2
-        },
-        source : AsphaltMaterial
-    });
-
-    Material.CementType = 'Cement';
-    Material._materialCache.addMaterial(Material.CementType, {
-        type : Material.CementType,
-        uniforms : {
-            cementColor : new Color(0.95, 0.95, 0.85, 1.0),
-            grainScale : 0.01,
-            roughness : 0.3
-        },
-        source : CementMaterial
-    });
-
-    Material.GrassType = 'Grass';
-    Material._materialCache.addMaterial(Material.GrassType, {
-        type : Material.GrassType,
-        uniforms : {
-            grassColor : new Color(0.25, 0.4, 0.1, 1.0),
-            dirtColor : new Color(0.1, 0.1, 0.1, 1.0),
-            patchiness : 1.5
-        },
-        source : GrassMaterial
+        translucent : false
     });
 
     Material.GridType = 'Grid';
     Material._materialCache.addMaterial(Material.GridType, {
-        type : Material.GridType,
-        uniforms : {
-            color : new Color(0.0, 1.0, 0.0, 1.0),
-            cellAlpha : 0.1,
-            lineCount : new Cartesian2(8.0, 8.0),
-            lineThickness : new Cartesian2(1.0, 1.0)
+        fabric : {
+            type : Material.GridType,
+            uniforms : {
+                color : new Color(0.0, 1.0, 0.0, 1.0),
+                cellAlpha : 0.1,
+                lineCount : new Cartesian2(8.0, 8.0),
+                lineThickness : new Cartesian2(1.0, 1.0),
+                lineOffset : new Cartesian2(0.0, 0.0)
+            },
+            source : GridMaterial
         },
-        source : GridMaterial
+        translucent : function(material) {
+            var uniforms = material.uniforms;
+            return (uniforms.color.alpha < 1.0) || (uniforms.cellAlpha < 1.0);
+        }
     });
 
     Material.StripeType = 'Stripe';
     Material._materialCache.addMaterial(Material.StripeType, {
-        type : Material.StripeType,
-        uniforms : {
-            horizontal : true,
-            lightColor : new Color(1.0, 1.0, 1.0, 0.5),
-            darkColor : new Color(0.0, 0.0, 1.0, 0.5),
-            offset : 0.0,
-            repeat : 5.0
+        fabric : {
+            type : Material.StripeType,
+            uniforms : {
+                horizontal : true,
+                evenColor : new Color(1.0, 1.0, 1.0, 0.5),
+                oddColor : new Color(0.0, 0.0, 1.0, 0.5),
+                offset : 0.0,
+                repeat : 5.0
+            },
+            source : StripeMaterial
         },
-        source : StripeMaterial
+        translucent : function(material) {
+            var uniforms = material.uniforms;
+            return (uniforms.evenColor.alpha < 1.0) || (uniforms.oddColor.alpha < 0.0);
+        }
     });
 
     Material.CheckerboardType = 'Checkerboard';
     Material._materialCache.addMaterial(Material.CheckerboardType, {
-        type : Material.CheckerboardType,
-        uniforms : {
-            lightColor : new Color(1.0, 1.0, 1.0, 0.5),
-            darkColor : new Color(0.0, 0.0, 0.0, 0.5),
-            repeat : new Cartesian2(5.0, 5.0)
+        fabric : {
+            type : Material.CheckerboardType,
+            uniforms : {
+                lightColor : new Color(1.0, 1.0, 1.0, 0.5),
+                darkColor : new Color(0.0, 0.0, 0.0, 0.5),
+                repeat : new Cartesian2(5.0, 5.0)
+            },
+            source : CheckerboardMaterial
         },
-        source : CheckerboardMaterial
+        translucent : function(material) {
+            var uniforms = material.uniforms;
+            return (uniforms.lightColor.alpha < 1.0) || (uniforms.darkColor.alpha < 0.0);
+        }
     });
 
     Material.DotType = 'Dot';
     Material._materialCache.addMaterial(Material.DotType, {
-        type : Material.DotType,
-        uniforms : {
-            lightColor : new Color(1.0, 1.0, 0.0, 0.75),
-            darkColor : new Color(0.0, 1.0, 1.0, 0.75),
-            repeat : new Cartesian2(5.0, 5.0)
+        fabric : {
+            type : Material.DotType,
+            uniforms : {
+                lightColor : new Color(1.0, 1.0, 0.0, 0.75),
+                darkColor : new Color(0.0, 1.0, 1.0, 0.75),
+                repeat : new Cartesian2(5.0, 5.0)
+            },
+            source : DotMaterial
         },
-        source : DotMaterial
-    });
-
-    Material.TyeDyeType = 'TieDye';
-    Material._materialCache.addMaterial(Material.TyeDyeType, {
-        type : Material.TyeDyeType,
-        uniforms : {
-            lightColor : new Color(1.0, 1.0, 0.0, 0.75),
-            darkColor : new Color(1.0, 0.0, 0.0, 0.75),
-            frequency : 5.0
-        },
-        source : TieDyeMaterial
-    });
-
-    Material.FacetType = 'Facet';
-    Material._materialCache.addMaterial(Material.FacetType, {
-        type : Material.FacetType,
-        uniforms : {
-            lightColor : new Color(0.25, 0.25, 0.25, 0.75),
-            darkColor : new Color(0.75, 0.75, 0.75, 0.75),
-            frequency : 10.0
-        },
-        source : FacetMaterial
-    });
-
-    Material.BlobType = 'Blob';
-    Material._materialCache.addMaterial(Material.BlobType, {
-        type : Material.BlobType,
-        uniforms : {
-            lightColor : new Color(1.0, 1.0, 1.0, 0.5),
-            darkColor : new Color(0.0, 0.0, 1.0, 0.5),
-            frequency : 10.0
-        },
-        source : BlobMaterial
+        translucent : function(material) {
+            var uniforms = material.uniforms;
+            return (uniforms.lightColor.alpha < 1.0) || (uniforms.darkColor.alpha < 0.0);
+        }
     });
 
     Material.WaterType = 'Water';
     Material._materialCache.addMaterial(Material.WaterType, {
-        type : Material.WaterType,
-        uniforms : {
-            baseWaterColor : {
-                red : 0.2,
-                green : 0.3,
-                blue : 0.6,
-                alpha : 1.0
+        fabric : {
+            type : Material.WaterType,
+            uniforms : {
+                baseWaterColor : new Color(0.2, 0.3, 0.6, 1.0),
+                blendColor : new Color(0.0, 1.0, 0.699, 1.0),
+                specularMap : Material.DefaultImageId,
+                normalMap : Material.DefaultImageId,
+                frequency : 10.0,
+                animationSpeed : 0.01,
+                amplitude : 1.0,
+                specularIntensity : 0.5,
+                fadeFactor : 1.0
             },
-            blendColor : {
-                red : 0.0,
-                green : 1.0,
-                blue : 0.699,
-                alpha : 1.0
-            },
-            specularMap : Material.DefaultImageId,
-            normalMap : Material.DefaultImageId,
-            frequency : 10.0,
-            animationSpeed : 0.01,
-            amplitude : 1.0,
-            specularIntensity : 0.5,
-            fadeFactor : 1.0
+            source : WaterMaterial
         },
-        source : WaterMaterial
+        translucent : function(material) {
+            var uniforms = material.uniforms;
+            return (uniforms.baseWaterColor.alpha < 1.0) || (uniforms.blendColor.alpha < 0.0);
+        }
     });
 
     Material.RimLightingType = 'RimLighting';
     Material._materialCache.addMaterial(Material.RimLightingType, {
-        type : Material.RimLightingType,
-        uniforms : {
-            color : new Color(1.0, 0.0, 0.0, 0.7),
-            rimColor : new Color(1.0, 1.0, 1.0, 0.4),
-            width : 0.3
+        fabric : {
+            type : Material.RimLightingType,
+            uniforms : {
+                color : new Color(1.0, 0.0, 0.0, 0.7),
+                rimColor : new Color(1.0, 1.0, 1.0, 0.4),
+                width : 0.3
+            },
+            source : RimLightingMaterial
         },
-        source : RimLightingMaterial
-    });
-
-    Material.ErosionType = 'Erosion';
-    Material._materialCache.addMaterial(Material.ErosionType, {
-        type : Material.ErosionType,
-        uniforms : {
-            color : new Color(1.0, 0.0, 0.0, 0.5),
-            time : 1.0
-        },
-        source : ErosionMaterial
+        translucent : function(material) {
+            var uniforms = material.uniforms;
+            return (uniforms.color.alpha < 1.0) || (uniforms.rimColor.alpha < 0.0);
+        }
     });
 
     Material.FadeType = 'Fade';
     Material._materialCache.addMaterial(Material.FadeType, {
-        type : Material.FadeType,
-        uniforms : {
-            fadeInColor : new Color(1.0, 0.0, 0.0, 1.0),
-            fadeOutColor : new Color(0.0, 0.0, 0.0, 0.0),
-            maximumDistance : 0.5,
-            repeat : true,
-            fadeDirection : {
-                x : true,
-                y : true
+        fabric : {
+            type : Material.FadeType,
+            uniforms : {
+                fadeInColor : new Color(1.0, 0.0, 0.0, 1.0),
+                fadeOutColor : new Color(0.0, 0.0, 0.0, 0.0),
+                maximumDistance : 0.5,
+                repeat : true,
+                fadeDirection : {
+                    x : true,
+                    y : true
+                },
+                time : new Cartesian2(0.5, 0.5)
             },
-            time : new Cartesian2(0.5, 0.5)
+            source : FadeMaterial
         },
-        source : FadeMaterial
+        translucent : function(material) {
+            var uniforms = material.uniforms;
+            return (uniforms.fadeInColor.alpha < 1.0) || (uniforms.fadeOutColor.alpha < 0.0);
+        }
     });
 
     Material.PolylineArrowType = 'PolylineArrow';
     Material._materialCache.addMaterial(Material.PolylineArrowType, {
-        type : Material.PolylineArrowType,
-        uniforms : {
-            color : new Color(1.0, 1.0, 1.0, 1.0)
+        fabric : {
+            type : Material.PolylineArrowType,
+            uniforms : {
+                color : new Color(1.0, 1.0, 1.0, 1.0)
+            },
+            source : PolylineArrowMaterial
         },
-        source : PolylineArrowMaterial
+        translucent : true
     });
 
     Material.PolylineGlowType = 'PolylineGlow';
     Material._materialCache.addMaterial(Material.PolylineGlowType, {
-        type : Material.PolylineGlowType,
-        uniforms : {
-            color : new Color(0.0, 0.5, 1.0, 1.0),
-            glowPower : 0.1
+        fabric : {
+            type : Material.PolylineGlowType,
+            uniforms : {
+                color : new Color(0.0, 0.5, 1.0, 1.0),
+                glowPower : 0.1
+            },
+            source : PolylineGlowMaterial
         },
-        source : PolylineGlowMaterial
+        translucent : true
     });
 
     Material.PolylineOutlineType = 'PolylineOutline';
     Material._materialCache.addMaterial(Material.PolylineOutlineType, {
-        type : Material.PolylineOutlineType,
-        uniforms : {
-            color : new Color(1.0, 1.0, 1.0, 1.0),
-            outlineColor : new Color(1.0, 0.0, 0.0, 1.0),
-            outlineWidth : 1.0
+        fabric : {
+            type : Material.PolylineOutlineType,
+            uniforms : {
+                color : new Color(1.0, 1.0, 1.0, 1.0),
+                outlineColor : new Color(1.0, 0.0, 0.0, 1.0),
+                outlineWidth : 1.0
+            },
+            source : PolylineOutlineMaterial
         },
-        source : PolylineOutlineMaterial
+        translucent : function(material) {
+            var uniforms = material.uniforms;
+            return (uniforms.color.alpha < 1.0) || (uniforms.outlineColor.alpha < 1.0);
+        }
     });
 
     return Material;

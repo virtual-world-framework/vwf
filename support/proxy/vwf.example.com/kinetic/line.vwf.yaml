@@ -1,0 +1,10 @@
+# http://kineticjs.com/docs/Kinetic.Line.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  points: []
+  tension: 0
+  closed: false
+  stroke: "#000000"
+  strokeWidth: 1

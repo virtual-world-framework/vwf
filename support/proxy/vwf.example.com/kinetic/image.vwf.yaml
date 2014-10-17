@@ -1,0 +1,15 @@
+# http://kineticjs.com/docs/Kinetic.Image.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  image:
+    set: |
+      if ( value !== this.image ) {
+        this.image = value;
+        this.imageChanged( value );
+      }   
+  crop:
+  scaleOnLoad: false
+events:
+  imageChanged:

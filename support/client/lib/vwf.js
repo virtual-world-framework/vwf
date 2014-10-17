@@ -40,6 +40,14 @@
 
         this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/configuration" as a dependency
 
+        /// Kernel utility functions and objects.
+        /// 
+        /// @name module:vwf.utility
+        /// 
+        /// @private
+
+        this.kutility = undefined; // require( "vwf/kernel/utility" );  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/kernel/utility" as a dependency
+
         /// The kernel logger.
         /// 
         /// @name module:vwf.logger
@@ -206,12 +214,6 @@
 
         this.private = {}; // for debugging
 
-        /// The application root ID.
-        /// 
-        /// @name module:vwf~applicationID
-
-        var applicationID = undefined;
-
         /// Components describe the objects that make up the simulation. They may also serve as
         /// prototype objects for further derived components. External components are identified by
         /// URIs. Once loaded, we save a mapping here from its URI to the node ID of its prototype so
@@ -221,19 +223,6 @@
         /// @name module:vwf~components
 
         var components = this.private.components = {}; // maps component node ID => component specification
-
-        /// The proto-prototype of all nodes is "node", identified by this URI. This type is
-        /// intrinsic to the system and nothing is loaded from the URI.
-        /// 
-        /// @name module:vwf~nodeTypeURI
-
-        var nodeTypeURI = "http://vwf.example.com/node.vwf";
-
-        /// The "node" component descriptor.
-        /// 
-        /// @name module:vwf~nodeTypeDescriptor
-
-        var nodeTypeDescriptor = { extends: null };  // TODO: detect nodeTypeDescriptor in createChild() a different way and remove this explicit null prototype
 
         /// This is the connection to the reflector. In this sample implementation, "socket" is a
         /// socket.io client that communicates over a channel provided by the server hosting the
@@ -299,6 +288,34 @@
                         deps: [ "vwf/model/threejs/three" ],
                         exports: "THREE.ColladaLoader",
                     },
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoader": {
+                        deps: [ "vwf/model/threejs/three" ],
+                        exports: "THREE.glTFLoader",
+                    },
+                    "vwf/model/threejs/js/loaders/gltf/glTF-parser": {
+                        deps: [ "vwf/model/threejs/three" ],
+                      
+                    },
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils": {
+                        deps: [ "vwf/model/threejs/three" ],
+                       
+                    },
+                    "vwf/model/threejs/js/loaders/gltf/glTFAnimation": {
+                        deps: [ "vwf/model/threejs/three" ],
+                       
+                    },
+                    "vwf/model/blockly/blockly_compressed": {
+                        exports: "Blockly"
+                    },
+                    "vwf/model/blockly/blocks_compressed": {
+                        deps: [ "vwf/model/blockly/blockly_compressed" ]
+                    },
+                    "vwf/model/blockly/javascript_compressed": {
+                        deps: [ "vwf/model/blockly/blockly_compressed" ]
+                    },
+                    "vwf/model/blockly/msg/js/en": {
+                        deps: [ "vwf/model/blockly/blockly_compressed" ]
+                    },
                 }
             };
 
@@ -311,11 +328,25 @@
                 { library: "vwf/model/javascript", active: true },
                 { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
                 { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
-                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
+                { library: "vwf/model/threejs", linkedLibraries: [
+                    "vwf/model/threejs/three",
+                    "vwf/model/threejs/js/loaders/ColladaLoader",
+                    "vwf/model/threejs/js/loaders/gltf/glTF-parser",
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoader",
+                    "vwf/model/threejs/js/loaders/gltf/glTFAnimation",
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"
+                ], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
+                { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
+                { library: "vwf/model/graphtool", active: false },
+                { library: "vwf/model/sound", active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
+                { library: "vwf/model/kineticjs", linkedLibraries: [ "vwf/model/kinetic/kinetic.min" ],  active: false },
+                { library: "vwf/model/mil-sym", linkedLibraries: [ "vwf/model/mil-sym/sm-bc.min" ],  active: false },
+                { library: "vwf/model/heightmap", active: false },
+                { library: "vwf/model/buzz", linkedLibraries: ["vwf/model/buzz/buzz.min"], active: false },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
             	{ library: "vwf/view/editor", active: false },
@@ -323,15 +354,30 @@
                 { library: "vwf/view/lesson", active: false},
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
+                { library: "vwf/view/blockly", active: false },
+                { library: "vwf/view/sound", active: false },
+                { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
+                { library: "vwf/view/kineticjs", active: false },
+                { library: "vwf/view/mil-sym", active: false },
+                { library: "vwf/view/audio", active: false },
+                { library: "vwf/kernel/utility", active: true },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
                 { library: "vwf/model/threejs/three", active: false },
                 { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTF-parser", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTFLoader", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTFAnimation", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils", active: false },
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
+                { library: "vwf/model/blockly/JS-Interpreter/interpreter.js", active: false },
+                { library: "vwf/model/kinetic/kinetic.min", active: false },                
+                { library: "vwf/model/mil-sym/sm-bc.min", active: false }, 
+                { library: "vwf/model/buzz/buzz.min", active: false }, 
                 { library: "vwf/admin", active: true }
             ];
 
@@ -342,6 +388,13 @@
                     { library: "vwf/model/glge", active: false },
                     { library: "vwf/model/threejs", active: false },
                     { library: "vwf/model/cesium", active: false },
+                    { library: "vwf/model/blockly", active: false },
+                    { library: "vwf/model/graphtool", active: false },
+                    { library: "vwf/model/sound", active: false },
+                    { library: "vwf/model/kineticjs", active: false },
+                    { library: "vwf/model/mil-sym", active: false },
+                    { library: "vwf/model/heightmap", active: false },
+                    { library: "vwf/model/buzz", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
@@ -352,6 +405,12 @@
                     { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
+                    { library: "vwf/view/blockly", active: false },
+                    { library: "vwf/view/sound", active: false },
+                    { library: "vwf/view/touch", active: false },
+                    { library: "vwf/view/kineticjs", active: false },
+                    { library: "vwf/view/mil-sym", active: false },
+                    { library: "vwf/view/audio", active: false },
                     { library: "vwf/view/webrtc", active: false}
                 ]
             };
@@ -451,6 +510,10 @@
                     requireArray["vwf/view/threejs"].active = true;
                     requireArray["vwf/model/threejs/three"].active = true;
                     requireArray["vwf/model/threejs/js/loaders/ColladaLoader"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTF-parser"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoader"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTFAnimation"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"].active = true;
                     initializers["model"]["vwf/model/threejs"].active = true;
                     initializers["view"]["vwf/view/threejs"].active = true;
                 }
@@ -513,6 +576,10 @@
             // provide additional settings when we connect.
 
             this.configuration = require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference
+
+            // Load the kernel utilities.
+
+            this.kutility = require( "vwf/kernel/utility" );
 
             // Create the logger.
 
@@ -698,86 +765,54 @@
 
             // Connect to the reflector. This implementation uses the socket.io library, which
             // communicates using a channel back to the server that provided the client documents.
+
             try {
+
+                var options = {
+
+                    // The socket is relative to the application path.
+
+                    resource: window.location.pathname.slice( 1,
+                        window.location.pathname.lastIndexOf("/") ),
+
+                    // Use a secure connection when the application comes from https.
+
+                    secure: window.location.protocol === "https:",
+
+                };
+
                 if ( isSocketIO07() ) {
-                    var options = {
-    
-                        // The socket is relative to the application path.
-                        resource: window.location.pathname.slice( 1,
-                            window.location.pathname.lastIndexOf("/") ),
-    
-                        // The ruby socket.io server only supports WebSockets. Don't try the others.
-                        transports: [
-                            'websocket',
-                            // 'flashsocket',
-                            // 'htmlfile',
-                            // 'xhr-multipart',
-                            // 'xhr-polling',
-                            // 'jsonp-polling',
-                        ],
-    
-                        // Increase the timeout due to starvation while loading the scene. The server
-                        // timeout must also be increased.
-                        // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-                        transportOptions: {
-                            "websocket": { timeout: 90000 }
-                            // "flashsocket": { timeout: 90000 },
-                            // "htmlfile": { timeout: 90000 },
-                            // "xhr-multipart": { timeout: 90000 },
-                            // "xhr-polling": { timeout: 90000 },
-                            // "jsonp-polling": { timeout: 90000 },
-                        }
-    
-                    };
-                    if ( window.location.protocol === "https:" )
-                    {
-                        options.secure = true;
-                        socket = io.connect("wss://"+window.location.host, options);
-                    } else {
-                        socket = io.connect("ws://"+window.location.host, options); 
-                    }
- 
-                } else {  // Ruby Server
 
-                    socket = new io.Socket( undefined, {
-    
-                        // The socket is relative to the application path.
-    
-                        resource: window.location.pathname.slice( 1,
-                            window.location.pathname.lastIndexOf("/") ),
+                    socket = io.connect( window.location.protocol + "//" + window.location.host,
+                        options );
 
-                        // Use a secure connection when the application comes from https.
+                } else {  // Ruby Server -- only supports socket.io 0.6
 
-                        secure: window.location.protocol === "https:",
+                    io.util.merge( options, {
+
+                        // For socket.io 0.6, specify the port since the default isn't correct when
+                        // using https.
 
                         port: window.location.port ||
                             ( window.location.protocol === "https:" ? 443 : 80 ),
-    
+
                         // The ruby socket.io server only supports WebSockets. Don't try the others.
-    
+
                         transports: [
                             'websocket',
-                            // 'flashsocket',
-                            // 'htmlfile',
-                            // 'xhr-multipart',
-                            // 'xhr-polling',
-                            // 'jsonp-polling',
                         ],
-    
-                        // Increase the timeout due to starvation while loading the scene. The server
-                        // timeout must also be increased.
-                        // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-    
+
+                        // Increase the timeout because of starvation while loading the scene. The
+                        // server timeout must also be increased. (For socket.io 0.7+, the client
+                        // timeout is controlled by the server.)
+
                         transportOptions: {
-                            "websocket": { timeout: 90000 }
-                            // "flashsocket": { timeout: 90000 },
-                            // "htmlfile": { timeout: 90000 },
-                            // "xhr-multipart": { timeout: 90000 },
-                            // "xhr-polling": { timeout: 90000 },
-                            // "jsonp-polling": { timeout: 90000 },
-                        }
-    
+                            "websocket": { timeout: 90000 },
+                        },
+
                     } );
+
+                    socket = new io.Socket( undefined, options );
                 }
 
             } catch ( e ) {
@@ -1038,7 +1073,7 @@
             // Note that the message should be validated before looking up and invoking an arbitrary
             // handler.
 
-            var args = [];
+            var args = [], result;
 
             if ( nodeID || nodeID === 0 ) args.push( nodeID );
             if ( memberName ) args.push( memberName );
@@ -1046,7 +1081,12 @@
 
             // Invoke the action.
 
-            var result = this[actionName] && this[actionName].apply( this, args );
+            if ( origin !== "reflector" || ! nodeID || nodes.existing[ nodeID ] ) {
+                result = this[ actionName ] && this[ actionName ].apply( this, args );
+            } else {
+                this.logger.debugx( "receive", "ignoring reflector action on non-existent node", nodeID );
+                result = undefined;
+            }
 
             // Return the result.
 
@@ -1257,7 +1297,7 @@
 
                 nodes: [  // TODO: all global objects
                     this.getNode( "http-vwf-example-com-clients-vwf", full ),
-                    this.getNode( applicationID, full ),
+                    this.getNode( this.application(), full ),
                 ],
 
                 // `createNode` annotations, keyed by `nodes` indexes.
@@ -1375,17 +1415,18 @@
                 nodeComponent = nodeComponent.patches;  // TODO: possible sync errors if the patched node is a URI component and the kernel state (time, random) is different from when the node was created on the originating client
             }
 
-            // nodeComponent may be a URI, a descriptor, or an ID, and while being created will
+            // nodeComponent may be a URI, a descriptor, or an ID. While being created, it will
             // transform from a URI to a descriptor to an ID (depending on its starting state).
-            // nodeURI, nodeDescriptor, and nodeID capture the applicable intermediate states.
+            // nodeURI, nodeDescriptor, and nodeID capture the intermediate states.
 
             var nodeURI, nodeDescriptor, nodeID;
 
             async.series( [
 
-                // If nodeComponent is a URI, load the descriptor.
+                // If `nodeComponent` is a URI, load the descriptor. `nodeComponent` may be a URI, a
+                // descriptor or an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is a URI, a descriptor, or an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( componentIsURI( nodeComponent ) ) { // URI  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
@@ -1462,9 +1503,10 @@
 
                 },
 
-                // If nodeComponent is a descriptor, construct and get the ID.
+                // If `nodeComponent` is a descriptor, construct and get the ID. `nodeComponent` may
+                // be a descriptor or an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is a descriptor or an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( componentIsDescriptor( nodeComponent ) ) { // descriptor  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
@@ -1483,11 +1525,11 @@
 
                 },
 
-                // nodeComponent is the ID.
+                // nodeComponent is an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
-                    if ( componentIsID( nodeComponent ) ) {  // ID
+                    if ( componentIsID( nodeComponent ) || components[ nodeComponent ] instanceof Array ) {  // ID
 
                         nodeID = nodeComponent;
 
@@ -1542,6 +1584,24 @@
 
             this.logger.debuggx( "deleteNode", nodeID );
 
+            // Send the meta event into the application. We send it before deleting the child so
+            // that the child will still be available for review.
+
+            var parentID = this.parent( nodeID );
+
+            if ( parentID !== 0 ) {
+
+                var nodeIndex = this.children( parentID ).indexOf( nodeID );
+
+                if ( nodeIndex < 0 ) {
+                    nodeIndex = undefined;
+                }
+
+                this.fireEvent( parentID, [ "children", "removed" ],
+                    [ nodeIndex, this.kutility.nodeReference( nodeID ) ] );
+
+            }
+
             // Remove the entry in the components list if this was the root of a component loaded
             // from a URI.
 
@@ -1562,12 +1622,6 @@
             // Unregister the node.
 
             nodes.delete( nodeID );
-
-            // Clear the root ID if the application root node is deleted.
-
-            if ( nodeID === applicationID ) {
-                applicationID = undefined;
-            }
 
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
@@ -1621,6 +1675,13 @@
                 // Otherwise, initialize the property.
 
                 var creating = ! node.properties.has( propertyName );  // not defined on node or prototype
+
+                // Translate node references in the descriptor's form `{ node: nodeID }` into kernel
+                // node references.
+
+                if ( valueHasAccessors( propertyValue ) && propertyValue.node ) {
+                    propertyValue = vwf.kutility.nodeReference( propertyValue.node );
+                }
 
                 // Create or initialize the property.
 
@@ -1766,7 +1827,7 @@
 
                 if ( prototypeID === undefined ) {
                     nodeComponent.extends = null;
-                } else if ( prototypeID !== nodeTypeURI ) {
+                } else if ( prototypeID !== this.kutility.protoNodeURI ) {
                     nodeComponent.extends = this.getNode( prototypeID );  // TODO: move to vwf/model/object and get from intrinsics
                 }
 
@@ -1806,9 +1867,15 @@
                 nodeComponent.properties = this.getProperties( nodeID );
 
                 for ( var propertyName in nodeComponent.properties ) {  // TODO: distinguish add, change, remove
-                    if ( nodeComponent.properties[propertyName] === undefined ) {
+                    var propertyValue = nodeComponent.properties[propertyName];
+
+                    if ( propertyValue === undefined ) {
                         delete nodeComponent.properties[propertyName];
+                    } else if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
+                        // Translate kernel node references into descriptor node references.
+                        nodeComponent.properties[propertyName] = { node: propertyValue.id };
                     }
+
                 }
 
                 if ( Object.keys( nodeComponent.properties ).length == 0 ) { 
@@ -1824,7 +1891,15 @@
                 nodeComponent.properties = {};
 
                 Object.keys( node.properties.changed ).forEach( function( propertyName ) {
-                    nodeComponent.properties[propertyName] = this.getProperty( nodeID, propertyName );
+                    var propertyValue = this.getProperty( nodeID, propertyName );
+
+                    if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
+                        // Translate kernel node references into descriptor node references.
+                        nodeComponent.properties[propertyName] = { node: propertyValue.id };
+                    } else {
+                        nodeComponent.properties[propertyName] = propertyValue;
+                    }
+
                 }, this );
 
                 patched = true;
@@ -2002,7 +2077,7 @@ var useLegacyID = nodeID === 0 && childURI &&
     childURI != "http://vwf.example.com/node.vwf";
     
 useLegacyID = useLegacyID ||
-    nodeID == applicationID && childName == "camera"; // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
+    childName === "camera" && nodeID === this.application(); // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 childID = childComponent.id;
@@ -2016,7 +2091,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                 childIndex = childURI;
             } else {  // descendant: parent id + next from parent's sequence
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    childID = ( childComponent.extends || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+    childID = ( childComponent.extends || this.kutility.protoNodeURI ) + "." + childName;  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
     childIndex = this.children( nodeID ).length;
 } else {    
@@ -2025,13 +2100,6 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
                 childIndex = this.children( nodeID ).length;
 }
-            }
-
-            // Record the application root ID. The application is the first global node annotated as
-            // "application".
-
-            if ( nodeID === 0 && childName == "application" && ! applicationID ) {
-                applicationID = childID;
             }
 
             // Register the node.
@@ -2114,7 +2182,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                             // Create or find the prototype and save the ID in childPrototypeID.
 
                             if ( childComponent.extends !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
-                                vwf.createNode( childComponent.extends || nodeTypeURI, function( prototypeID ) /* async */ {
+                                vwf.createNode( childComponent.extends || vwf.kutility.protoNodeURI, function( prototypeID ) /* async */ {
                                     childPrototypeID = prototypeID;
 
 // TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
@@ -2171,6 +2239,21 @@ if ( ! childComponent.source ) {
                     // Re-register the node now that we have the prototypes and behaviors.
 
                     child = nodes.create( childID, childPrototypeID, childBehaviorIDs, childURI, childName, nodeID );
+
+                    // For the proto-prototype node `node.vwf`, register the meta events.
+
+                    if ( childID === vwf.kutility.nodeTypeURI ) {
+                        // TODO: uncomment when the node registry starts tracking events
+                        // child.events.create( namespaceEncodedName( [ "properties", "created" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "properties", "initialized" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "properties", "deleted" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "methods", "created" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "methods", "deleted" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "events", "created" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "events", "deleted" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "children", "added" ] ) );
+                        // child.events.create( namespaceEncodedName( [ "children", "removed" ] ) );
+                    }
 
                     // Re-register the node in vwf/model/object now that we have the prototypes and
                     // behaviors. vwf/model/object knows that we call it more than once and only
@@ -2263,7 +2346,7 @@ if ( ! childComponent.source ) {
                         var value = propertyValue, get, set, create;
 
                         if ( valueHasAccessors( propertyValue ) ) {
-                            value = propertyValue.value;
+                            value = propertyValue.node ? vwf.kutility.nodeReference( propertyValue.node ) : propertyValue.value;
                             get = propertyValue.get;
                             set = propertyValue.set;
                             create = propertyValue.create;
@@ -2469,6 +2552,28 @@ if ( ! childComponent.source ) {
 
                                 // Mark the node as initialized.
                                 nodes.initialize( childID );
+
+                                // Suppress kernel reentry so that meta event handlers don't make
+                                // any changes during replication.
+
+                                replicating && vwf.models.kernel.disable();
+
+                                // Send the meta event into the application.
+
+                                if ( nodeID !== 0 ) {
+                                    vwf.fireEvent( nodeID, [ "children", "added" ],
+                                        [ childIndex, vwf.kutility.nodeReference( childID ) ] );
+                                }
+
+                                // Dismiss the loading spinner
+                                if ( childID === vwf.application() ) {
+                                    var spinner = document.getElementById( "vwf-loading-spinner" );
+                                    spinner.classList.remove( "pace-active" );
+                                }
+
+                                // Restore kernel reentry.
+
+                                replicating && vwf.models.kernel.enable();
 
                                 series_callback_async( err, undefined );
                             } );
@@ -2746,7 +2851,8 @@ if ( ! childComponent.source ) {
         this.createProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
             this.logger.debuggx( "createProperty", function() {
-                return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];  // TODO: add truncated propertyGet, propertySet to log
+                return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ),
+                    loggableScript( propertyGet ), loggableScript( propertySet ) ];
             } );
 
             var node = nodes.existing[nodeID];
@@ -2759,7 +2865,8 @@ if ( ! childComponent.source ) {
             // models have run.
 
             this.models.forEach( function( model ) {
-                model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
+                model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue,
+                    propertyGet, propertySet );
             } );
 
             // Record the change.
@@ -2772,8 +2879,13 @@ if ( ! childComponent.source ) {
             // been created.
 
             this.views.forEach( function( view ) {
-                view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
+                view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue,
+                    propertyGet, propertySet );
             } );
+
+            // Send the meta event into the application.
+
+            this.fireEvent( nodeID, [ "properties", "created" ], [ propertyName ] );
 
             this.logger.debugu();
 
@@ -2933,19 +3045,30 @@ if ( ! childComponent.source ) {
                 } );
             }
 
-            // For a reentrant call, restore the previous state, move the index forward to cover
-            // the models we called.
-
             if ( reentered ) {
+
+                // For a reentrant call, restore the previous state and move the index forward to
+                // cover the models we called.
+
                 entrants[nodeID+'-'+propertyName] = entry;
                 entry.completed = true;
-            }
 
-            // Delete the call record if this is the first, non-reentrant call here (the normal
-            // case).
+            } else {
 
-            else {
+                // Delete the call record if this is the first, non-reentrant call here (the normal
+                // case).
+
                 delete entrants[nodeID+'-'+propertyName];
+
+                // If the property was created or initialized, send the corresponding meta event
+                // into the application.
+
+                if ( settingPropertyEtc === "creatingProperty" ) {
+                    this.fireEvent( nodeID, [ "properties", "created" ], [ propertyName ] );
+                } else if ( settingPropertyEtc === "initializingProperty" ) {
+                    this.fireEvent( nodeID, [ "properties", "initialized" ], [ propertyName ] );
+                }
+
             }
 
             // Clear the assignment counter when the outermost `setProperty` completes.
@@ -3091,7 +3214,7 @@ if ( ! childComponent.source ) {
 
                         if ( prototypeIndex < prototypeArray.length - 1 ) {
                             propertyValue = this.getProperty( prototypeID, propertyName, true ); // behavior node only, not its prototypes
-                        } else if ( prototypeID !== nodeTypeURI ) {
+                        } else if ( prototypeID !== this.kutility.protoNodeURI ) {
                             propertyValue = this.getProperty( prototypeID, propertyName ); // prototype node, recursively
                         }
 
@@ -3130,21 +3253,29 @@ if ( ! childComponent.source ) {
 
         this.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
 
-            this.logger.debuggx( "createMethod", nodeID, methodName, methodParameters );
+            this.logger.debuggx( "createMethod", function() {
+                return [ nodeID, methodName, methodParameters, loggableScript( methodBody ) ];
+            } );
 
             // Call creatingMethod() on each model. The method is considered created after all
             // models have run.
 
             this.models.forEach( function( model ) {
-                model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters, methodBody );
+                model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters,
+                    methodBody );
             } );
 
             // Call createdMethod() on each view. The view is being notified that a method has been
             // created.
 
             this.views.forEach( function( view ) {
-                view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters, methodBody );
+                view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters,
+                    methodBody );
             } );
+
+            // Send the meta event into the application.
+
+            this.fireEvent( nodeID, [ "methods", "created" ], [ methodName ] );
 
             this.logger.debugu();
         };
@@ -3184,7 +3315,7 @@ if ( ! childComponent.source ) {
 
         // -- createEvent --------------------------------------------------------------------------
 
-        /// @name module:vwf.creatEvent
+        /// @name module:vwf.createEvent
         /// 
         /// @see {@link module:vwf/api/kernel.createEvent}
 
@@ -3192,18 +3323,120 @@ if ( ! childComponent.source ) {
 
             this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
 
+            // Encode any namespacing into the name. (Namespaced names were added in 0.6.21.)
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
             // Call creatingEvent() on each model. The event is considered created after all models
             // have run.
 
             this.models.forEach( function( model ) {
-                model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
+                model.creatingEvent && model.creatingEvent( nodeID, encodedEventName, eventParameters );
             } );
 
             // Call createdEvent() on each view. The view is being notified that a event has been
             // created.
 
             this.views.forEach( function( view ) {
-                view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
+                view.createdEvent && view.createdEvent( nodeID, encodedEventName, eventParameters );
+            } );
+
+            // Send the meta event into the application.
+
+            this.fireEvent( nodeID, [ "events", "created" ], [ eventName ] );
+
+            this.logger.debugu();
+        };
+
+        // -- addEventListener --------------------------------------------------------------------------
+
+        /// @name module:vwf.addEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.addEventListener}
+
+        this.addEventListener = function( nodeID, eventName, eventHandler, eventContextID, eventPhases ) {
+
+            this.logger.debuggx( "addEventListener", function() {
+                return [ nodeID, eventName, loggableScript( eventHandler ),
+                    eventContextID, eventPhases ];
+            } );
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Call addingEventListener() on each model.
+
+            this.models.forEach( function( model ) {
+                model.addingEventListener && model.addingEventListener( nodeID, encodedEventName, eventHandler,
+                    eventContextID, eventPhases );
+            } );
+
+            // Call addedEventListener() on each view.
+
+            this.views.forEach( function( view ) {
+                view.addedEventListener && view.addedEventListener( nodeID, encodedEventName, eventHandler,
+                    eventContextID, eventPhases );
+            } );
+
+            this.logger.debugu();
+        };
+
+        // -- removeEventListener --------------------------------------------------------------------------
+
+        /// @name module:vwf.removeEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.removeEventListener}
+
+        this.removeEventListener = function( nodeID, eventName, eventHandler ) {
+
+            this.logger.debuggx( "removeEventListener", function() {
+                return [ nodeID, eventName, loggableScript( eventHandler ) ];
+            } );
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Call removingEventListener() on each model.
+
+            this.models.forEach( function( model ) {
+                model.removingEventListener && model.removingEventListener( nodeID, encodedEventName, eventHandler );
+            } );
+
+            // Call removedEventListener() on each view.
+
+            this.views.forEach( function( view ) {
+                view.removedEventListener && view.removedEventListener( nodeID, encodedEventName, eventHandler );
+            } );
+
+            this.logger.debugu();
+        };
+
+        // -- flushEventListeners --------------------------------------------------------------------------
+
+        /// @name module:vwf.flushEventListeners
+        /// 
+        /// @see {@link module:vwf/api/kernel.flushEventListeners}
+
+        this.flushEventListeners = function( nodeID, eventName, eventContextID ) {
+
+            this.logger.debuggx( "flushEventListeners", nodeID, eventName, eventContextID );
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Call flushingEventListeners() on each model.
+
+            this.models.forEach( function( model ) {
+                model.flushingEventListeners && model.flushingEventListeners( nodeID, encodedEventName, eventContextID );
+            } );
+
+            // Call flushedEventListeners() on each view.
+
+            this.views.forEach( function( view ) {
+                view.flushedEventListeners && view.flushedEventListeners( nodeID, encodedEventName, eventContextID );
             } );
 
             this.logger.debugu();
@@ -3221,16 +3454,20 @@ if ( ! childComponent.source ) {
                 return [ nodeID, eventName, JSON.stringify( loggableValues( eventParameters ) ) ];
             } );
 
+            // Encode any namespacing into the name. (Namespaced names were added in 0.6.21.)
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
             // Call firingEvent() on each model.
 
             var handled = this.models.reduce( function( handled, model ) {
-                return model.firingEvent && model.firingEvent( nodeID, eventName, eventParameters ) || handled;
+                return model.firingEvent && model.firingEvent( nodeID, encodedEventName, eventParameters ) || handled;
             }, false );
 
             // Call firedEvent() on each view.
 
             this.views.forEach( function( view ) {
-                view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
+                view.firedEvent && view.firedEvent( nodeID, encodedEventName, eventParameters );
             } );
 
             this.logger.debugu();
@@ -3338,7 +3575,7 @@ if ( ! childComponent.source ) {
         this.execute = function( nodeID, scriptText, scriptType, callback_async /* result */ ) {
 
             this.logger.debuggx( "execute", function() {
-                return [ nodeID, ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType ];  // TODO: loggableScript()
+                return [ nodeID, loggableScript( scriptText ), scriptType ];
             } );
 
             // Assume JavaScript if the type is not specified and the text is a string.
@@ -3441,8 +3678,17 @@ if ( ! childComponent.source ) {
         /// @see {@link module:vwf/api/kernel.application}
 
         this.application = function( initializedOnly ) {
-            return applicationID && ( ! initializedOnly || this.models.object.initialized( applicationID ) ) ?
-                applicationID : undefined;
+
+            var applicationID;
+
+            Object.keys( nodes.globals ).forEach( function( globalID ) {
+                var global = nodes.existing[ globalID ];
+                if ( ( ! initializedOnly || global.initialized ) && global.name === "application" ) {
+                    applicationID = globalID;
+                }
+            }, this );
+
+            return applicationID;
         };
 
         // -- intrinsics ---------------------------------------------------------------------------
@@ -3526,6 +3772,84 @@ if ( ! childComponent.source ) {
             return this.models.object.behaviors( nodeID );
         };
 
+        // -- globals ------------------------------------------------------------------------------
+
+        /// @name module:vwf.globals
+        /// 
+        /// @see {@link module:vwf/api/kernel.globals}
+
+        this.globals = function( initializedOnly ) {
+
+            var globals = {};
+
+            Object.keys( nodes.globals ).forEach( function( globalID ) {
+                if ( ! initializedOnly || nodes.existing[ globalID ].initialized ) {
+                    globals[ globalID ] = undefined;
+                }
+            }, this );
+
+            return globals;
+        };
+
+        // -- global -------------------------------------------------------------------------------
+
+        /// @name module:vwf.global
+        /// 
+        /// @see {@link module:vwf/api/kernel.global}
+
+        this.global = function( globalReference, initializedOnly ) {
+
+            var globals = this.globals( initializedOnly );
+
+            // Look for a global node whose URI matches `globalReference`. If there is no match by
+            // URI, then search again by name.
+
+            return matches( "uri" ) || matches( "name" );
+
+            // Look for a global node where the field named by `field` matches `globalReference`.
+
+            function matches( field ) {
+
+                var matchingID;
+
+                Object.keys( globals ).some( function( globalID ) {
+                    if ( nodes.existing[ globalID ][ field ] === globalReference ) {
+                        matchingID = globalID;
+                        return true;
+                    }
+                } );
+
+                return matchingID;
+            }
+
+        };
+
+        // -- root ---------------------------------------------------------------------------------
+
+        /// @name module:vwf.root
+        /// 
+        /// @see {@link module:vwf/api/kernel.root}
+
+        this.root = function( nodeID, initializedOnly ) {
+
+            var rootID;
+
+            // Walk the ancestors to the top of the tree. Stop when we reach the pseudo-node at the
+            // global root, which unlike all other nodes has a falsy ID, or `undefined` if we could
+            // not reach the top because `initializedOnly` is set and we attempted to cross between
+            // nodes that have and have not completed initialization.
+
+            do {
+                rootID = nodeID;
+                nodeID = this.parent( nodeID, initializedOnly );
+            } while ( nodeID );
+
+            // Return the root ID, or `undefined` when `initializedOnly` is set and the node can't
+            // see the root.
+
+            return nodeID === undefined ? undefined : rootID;
+        };
+
         // -- ancestors ----------------------------------------------------------------------------
 
         /// @name module:vwf.ancestors
@@ -3538,7 +3862,7 @@ if ( ! childComponent.source ) {
 
             nodeID = this.parent( nodeID, initializedOnly );
 
-            while ( nodeID && nodeID !== 0 ) {
+            while ( nodeID ) {
                 ancestors.push( nodeID );
                 nodeID = this.parent( nodeID, initializedOnly );
             }
@@ -3562,14 +3886,34 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.children}
 
-        this.children = function( nodeID ) {
+        this.children = function( nodeID, initializedOnly ) {
 
             if ( nodeID === undefined ) {
                 this.logger.errorx( "children", "cannot retrieve children of nonexistent node" );
                 return;
             }
 
-            return this.models.object.children( nodeID );
+            return this.models.object.children( nodeID, initializedOnly );
+        };
+
+        // -- child --------------------------------------------------------------------------------
+
+        /// @name module:vwf.child
+        /// 
+        /// @see {@link module:vwf/api/kernel.child}
+
+        this.child = function( nodeID, childReference, initializedOnly ) {
+
+            var children = this.children( nodeID, initializedOnly );
+
+            if ( typeof childReference === "number" || childReference instanceof Number ) {
+                return children[ childReference ];
+            } else {
+                return children.filter( function( childID ) {
+                    return childID && this.name( childID ) === childReference;
+                }, this )[ 0 ];
+            }
+
         };
 
         // -- descendants --------------------------------------------------------------------------
@@ -3578,7 +3922,7 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.descendants}
 
-        this.descendants = function( nodeID ) {
+        this.descendants = function( nodeID, initializedOnly ) {
 
             if ( nodeID === undefined ) {
                 this.logger.errorx( "descendants", "cannot retrieve children of nonexistent node" );
@@ -3587,10 +3931,10 @@ if ( ! childComponent.source ) {
 
             var descendants = [];
 
-            this.children( nodeID ).forEach( function( childID ) {
+            this.children( nodeID, initializedOnly ).forEach( function( childID ) {
                 descendants.push( childID );
-                Array.prototype.push.apply( descendants, this.descendants( childID ) );
-            }, this );             
+                childID && Array.prototype.push.apply( descendants, this.descendants( childID, initializedOnly ) );
+            }, this );
 
             return descendants;
         };
@@ -3638,13 +3982,11 @@ if ( ! childComponent.source ) {
                 initializedOnly = undefined;
             }
 
-            // Evaluate the expression, using the application as the root and the provided node as
-            // the reference.
+            // Run the query.
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
+            var matchIDs = find.call( this, nodeID, matchPattern, initializedOnly );
 
-            // Return the result, either by invoking the callback when provided, or returning the
+            // Return the result. Invoke the callback if one was provided. Otherwise, return the
             // array directly.
 
             if ( callback ) {
@@ -3656,12 +3998,6 @@ if ( ! childComponent.source ) {
             } else {  // TODO: future iterator proxy
 
                 return matchIDs;
-            }
-
-            // Wrap `xpathResolver` to pass `initializedOnly` through.
-
-            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
-                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
             }
 
         };
@@ -3684,24 +4020,21 @@ if ( ! childComponent.source ) {
         /// @returns {ID[]|undefined}
         ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
         /// 
-        /// @see {@link module:vwf/api/kernel.clients}
+        /// @deprecated in version 0.6.21. Instead of `kernel.findClients( reference, "/pattern" )`,
+        ///   use `kernel.find( reference, "doc('http://vwf.example.com/clients.vwf')/pattern" )`.
+        /// 
+        /// @see {@link module:vwf/api/kernel.findClients}
 
         this.findClients = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                "http-vwf-example-com-clients-vwf", nodeID, xpathResolver, this );
+            this.logger.warn( "`kernel.findClients` is deprecated. Use " +
+                "`kernel.find( nodeID, \"doc('http://vwf.example.com/clients.vwf')/pattern\" )`" +
+                " instead." );
 
-            if ( callback ) {
+            var clientsMatchPattern = "doc('http://vwf.example.com/clients.vwf')" +
+                ( matchPattern[0] === "/" ? "" : "/" ) + matchPattern;
 
-                matchIDs.forEach( function( matchID ) {
-                    callback( matchID );
-                } );
-
-            } else { 
-
-                return matchIDs;
-            }
-
+            return this.find( nodeID || this.application(), clientsMatchPattern, callback );
         };
 
         /// Test a node against a search pattern. See vwf.api.kernel#test for details.
@@ -3727,23 +4060,15 @@ if ( ! childComponent.source ) {
 
         this.test = function( nodeID, matchPattern, testID, initializedOnly ) {
 
-            // Evaluate the expression, using the application as the root and the provided node as
-            // the reference.
+            // Run the query.
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
+            var matchIDs = find.call( this, nodeID, matchPattern, initializedOnly );
 
             // Search for the test node in the result.
 
             return matchIDs.some( function( matchID ) {
                 return matchID == testID;
             } );
-
-            // Wrap `xpathResolver` to pass `initializedOnly` through.
-
-            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
-                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
-            }
 
         };
 
@@ -3759,9 +4084,9 @@ if ( ! childComponent.source ) {
 
         var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
 
-            if ( nodeURI == nodeTypeURI ) {
+            if ( nodeURI == vwf.kutility.protoNodeURI ) {
 
-                callback_async( nodeTypeDescriptor );
+                callback_async( vwf.kutility.protoNodeDescriptor );
 
             } else if ( nodeURI.match( RegExp( "^data:application/json;base64," ) ) ) {
 
@@ -3950,7 +4275,8 @@ if ( ! childComponent.source ) {
         /// @returns {Boolean}
 
         var componentIsID = function( candidate ) {
-            return isPrimitive( candidate ) && vwf.models.object.exists( candidate );
+            return isPrimitive( candidate ) && vwf.models.object.exists( candidate ) &&
+                ! ( components[candidate] instanceof Array );
         };
 
         /// Determine if a value is a JavaScript primitive, or the boxed version of a JavaScript
@@ -4037,6 +4363,7 @@ if ( ! childComponent.source ) {
                 "get",
                 "set",
                 "value",
+                "node",
                 "create",
                 "undefined",
             ];
@@ -4113,6 +4440,43 @@ if ( ! childComponent.source ) {
             }
             
             return hasType; 
+        };
+
+        /// Convert a potentially-namespaced member name into a string such that a namespaced name
+        /// will be distinct from an encoded name in any other namespace, or from any simple name
+        /// not having a namespace.
+        /// 
+        /// Simple names are strings such as `"name"`. Namespaced names are arrays of strings, such
+        /// as `[ "ns", "name" ]` or `[ "outer", "inner", "name" ]`. An array containing a single
+        /// string, such as `[ "name" ]`, is not namespaced and is the same name as `"name"`.
+        /// 
+        /// Each of the following encodes into a distinct value:
+        /// 
+        ///   `"name"` or `[ "name" ]`
+        ///   `[ "a", "name" ]`
+        ///   `[ "b", "name" ]`
+        ///   `[ "a", "a", "name" ]`
+        ///   `[ "a", "b", "name" ]`
+        ///   `[ "b", "b", "name" ]`
+        ///   *etc.*
+        /// 
+        /// @name module:vwf~namespaceEncodedName
+        /// 
+        /// @param {String|String[]} memberName
+        ///   A string, or an array of strings containing a name preceded by any number of namespace
+        ///   names. In an array, each element defines a unique space for the member name and for
+        ///   any intermediate namespaces.
+        /// 
+        /// @returns {String}
+
+        var namespaceEncodedName = function( memberName ) {
+
+            if ( typeof memberName === "object" && memberName instanceof Array ) {
+                return ( memberName.length !== 1 ) ? "vwf$" + memberName.join( "$" ) : memberName[0];
+            } else {
+                return memberName;
+            }
+
         };
 
         /// Convert a (potentially-abbreviated) component specification to a descriptor parsable by
@@ -4195,8 +4559,8 @@ if ( ! childComponent.source ) {
             return component;
         };
 
-        /// Convert a fields object as passed between the client and reflector, and stored in the
-        /// message queue, into a form suitable for writing to a log.
+        /// Convert a `fields` object as passed between the client and reflector and stored in the
+        /// message queue into a form suitable for writing to a log.
         /// 
         /// @name module:vwf~loggableFields
         /// 
@@ -4224,7 +4588,7 @@ if ( ! childComponent.source ) {
         /// 
         /// @name module:vwf~loggableValue
         /// 
-        /// @param {Object} component
+        /// @param {Object} value
         /// 
         /// @returns {Object}
 
@@ -4240,9 +4604,9 @@ if ( ! childComponent.source ) {
         /// 
         /// @name module:vwf~loggableValues
         /// 
-        /// @param {Array|undefined} component
+        /// @param {Object[]|undefined} values
         /// 
-        /// @returns {Array|undefined}
+        /// @returns {Object[]|undefined}
 
         var loggableValues = function( values ) {
             return loggableValue( values );
@@ -4253,12 +4617,24 @@ if ( ! childComponent.source ) {
         /// 
         /// @name module:vwf~loggableIndexedValues
         /// 
-        /// @param {Object|undefined} component
+        /// @param {Object|undefined} values
         /// 
         /// @returns {Object|undefined}
 
         var loggableIndexedValues = function( values ) {
             return loggableValue( values );
+        };
+
+        /// Convert script text into a form suitable for writing to a log.
+        /// 
+        /// @name module:vwf~loggableScript
+        /// 
+        /// @param {String|undefined} script
+        /// 
+        /// @returns {String}
+
+        var loggableScript = function( script ) {
+            return ( script || "" ).replace( /\s+/g, " " ).substring( 0, 100 );
         };
 
         // -- remappedURI --------------------------------------------------------------------------
@@ -4299,7 +4675,7 @@ if ( ! childComponent.source ) {
                 // reinserted.
 
                 return object.filter( function( fields ) {
-                    return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+                    return ! ( fields.origin === "reflector" && fields.sequence > vwf.sequence_ ) && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
                 } ).sort( function( fieldsA, fieldsB ) {
                     return fieldsA.sequence - fieldsB.sequence;
                 } );
@@ -4495,6 +4871,51 @@ if ( ! childComponent.source ) {
             return object;
         };
 
+        /// Locate nodes matching a search pattern. {@link module:vwf/api/kernel.find} describes the
+        /// supported patterns.
+        /// 
+        /// This is the internal implementation used by {@link module:vwf.find} and
+        /// {@link module:vwf.test}.
+        /// 
+        /// This function must run as a method of the kernel. Invoke it as:
+        ///   `find.call( kernel, nodeID, matchPattern, initializedOnly )`.
+        /// 
+        /// @name module:vwf~find
+        /// 
+        /// @param {ID} nodeID
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
+        /// @param {String} matchPattern
+        ///   The search pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
+        /// 
+        /// @returns {ID[]|undefined}
+        ///   An array of the node ids of the result.
+
+        var find = function( nodeID, matchPattern, initializedOnly ) {
+
+            // Evaluate the expression using the provided node as the reference. Take the root node
+            // to be the root of the reference node's tree. If a reference node is not provided, use
+            // the application as the root.
+
+            var rootID = nodeID ? this.root( nodeID, initializedOnly ) :
+                this.application( initializedOnly );
+
+            return require( "vwf/utility" ).xpath.resolve( matchPattern, rootID, nodeID,
+                resolverWithInitializedOnly, this );
+
+
+            // Wrap `xpathResolver` to pass `initializedOnly` through.
+
+            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
+                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
+            }
+
+        }
+
         // -- xpathResolver ------------------------------------------------------------------------
 
         /// Interpret the steps of an XPath expression being resolved. Use with
@@ -4540,16 +4961,28 @@ if ( ! childComponent.source ) {
                     break;
 
                 case "child":
-                    Array.prototype.push.apply( resultIDs, this.children( contextID ) );
+                    Array.prototype.push.apply( resultIDs,
+                        this.children( contextID, initializedOnly ).filter( function( childID ) {
+                            return childID;
+                        }, this )
+                    );
                     break;
 
                 case "descendant":
-                    Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                    Array.prototype.push.apply( resultIDs,
+                        this.descendants( contextID, initializedOnly ).filter( function( descendantID ) {
+                            return descendantID;
+                        }, this )
+                    );
                     break;
 
                 case "descendant-or-self":
                     resultIDs.push( contextID );
-                    Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                    Array.prototype.push.apply( resultIDs,
+                        this.descendants( contextID, initializedOnly ).filter( function( descendantID ) {
+                            return descendantID;
+                        }, this )
+                    );
                     break;
 
                 // case "following-sibling":  // TODO
@@ -4599,11 +5032,27 @@ if ( ! childComponent.source ) {
 
                     break;
 
+                // Attribute test.
+
                 case "attribute":
 
                     resultIDs = resultIDs.filter( function( resultID ) {
                         return resultID[0] == "@" && xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
                     }, this );
+
+                    break;
+
+                // The `doc()` function for referencing globals outside the current tree.
+                // http://www.w3.org/TR/xpath-functions/#func-doc.
+
+                case "doc":
+
+                    if ( this.root( contextID, initializedOnly ) ) {
+                        var globalID = this.global( step.name, initializedOnly );
+                        resultIDs = globalID ? [ globalID ] : [];
+                    } else {
+                        resultIDs = [];
+                    }
 
                     break;
 
@@ -4965,7 +5414,17 @@ if ( ! childComponent.source ) {
                         return self.proxy( prototypeNode, self.existing[behaviorID] );
                     }, this.existing[prototypeID] );
 
+                    // Look up the parent.
+
                     var parentNode = this.existing[parentID];
+
+                    // If this is the global root of a new tree, add it to the `globals` set.
+
+                    if ( ! parentNode ) {
+                        this.globals[nodeID] = undefined;
+                    }
+
+                    // Add the node to the registry.
 
                     return this.existing[nodeID] = {
 
@@ -4982,8 +5441,7 @@ if ( ! childComponent.source ) {
                         // type: ...,
 
                         uri: nodeURI,
-
-                        // name: ...,
+                        name: nodeName,
 
                         // Internal state. The change flags are omitted until needed. -- not implemented here yet; still using vwf/model/object
 
@@ -5139,6 +5597,7 @@ if ( ! childComponent.source ) {
                 if ( this.existing[nodeID] ) {
 
                     delete this.existing[nodeID];
+                    delete this.globals[nodeID];
 
                     return true;
 
@@ -5219,6 +5678,15 @@ if ( ! childComponent.source ) {
                 //     ...
                 // }
 
+            },
+
+            /// Global root nodes. Each of these is the root of a tree.
+            /// 
+            /// The `globals` object is a set: the keys are the data, and only existence on the
+            /// object is significant.
+
+            globals: {
+                // id: undefined,
             },
 
         };
