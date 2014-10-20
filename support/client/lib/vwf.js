@@ -347,6 +347,7 @@
                 { library: "vwf/model/mil-sym", linkedLibraries: [ "vwf/model/mil-sym/sm-bc.min" ],  active: false },
                 { library: "vwf/model/heightmap", active: false },
                 { library: "vwf/model/buzz", linkedLibraries: ["vwf/model/buzz/buzz.min"], active: false },
+                { library: "vwf/model/jPlayer", linkedLibraries: ["vwf/model/jPlayer.2.7.0/jquery.jplayer.min"], active: false },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
             	{ library: "vwf/view/editor", active: false },
@@ -378,6 +379,7 @@
                 { library: "vwf/model/kinetic/kinetic.min", active: false },                
                 { library: "vwf/model/mil-sym/sm-bc.min", active: false }, 
                 { library: "vwf/model/buzz/buzz.min", active: false }, 
+                { library: "vwf/model/jPlayer.2.7.0/jquery.jplayer.min", active: false },
                 { library: "vwf/admin", active: true }
             ];
 
@@ -395,6 +397,7 @@
                     { library: "vwf/model/mil-sym", active: false },
                     { library: "vwf/model/heightmap", active: false },
                     { library: "vwf/model/buzz", active: false },
+                    { library: "vwf/model/jPlayer", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
