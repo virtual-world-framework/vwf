@@ -159,7 +159,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 node.kineticObj.on( "mouseenter", function( evt ) {
                     var eData = processEvent( evt, node, !TOUCH_EVENT, false );
                     //self.kernel.dispatchEvent( node.ID, 'pointerEnter', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
+                    self.kernel.fireEvent( node.ID, 'pointerEnter', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseleave", function( evt ) {
