@@ -1,6 +1,10 @@
 "use strict";
 	
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function( module, model, utility, color ) {
+define( [ "module", 
+          "vwf/model", 
+          "vwf/utility", 
+          "vwf/utility/color" 
+        ], function( module, model, utility, color ) {
 
     var self;
 
@@ -88,13 +92,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
 
+            var appID = this.kernel.application();
+
             if ( this.debug.creation ) {
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName );
             }
 
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
-            var prototypeID = ifPrototypeGetId( nodeID, childID );
+            var prototypeID = utility.ifPrototypeGetId( appID, this.state.prototypes, nodeID, childID );
             if ( prototypeID !== undefined ) {
                 
                 if ( this.debug.prototypes ) {
@@ -2069,21 +2075,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color" ], function(
 
     } );
     // == PRIVATE  ========================================================================================
-
-    function ifPrototypeGetId( nodeID, childID ) {
-        var ptID = undefined;
-        if ( ( nodeID === 0 && childID != self.kernel.application() ) || self.state.prototypes[ nodeID ] !== undefined ) {
-            if ( nodeID !== 0 || childID != self.kernel.application() ) {
-                ptID = nodeID ? nodeID : childID;
-                if ( self.state.prototypes[ ptID ] !== undefined ) {
-                    ptID = childID;
-                }
-                return ptID;
-            } 
-        }
-        return undefined;
-    }
-
 
     function getPrototypes( kernel, extendsID ) {
         var prototypes = [];

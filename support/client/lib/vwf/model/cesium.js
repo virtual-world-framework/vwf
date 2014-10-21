@@ -15,8 +15,12 @@
 
   
     
-define( [ "module", "vwf/model", "vwf/utility", 
-          "vwf/utility/color", "vwf/model/cesium/Cesium" ], 
+define( [ "module", 
+          "vwf/model", 
+          "vwf/utility", 
+          "vwf/utility/color", 
+          "vwf/model/cesium/Cesium" 
+        ], 
 
     function( module, model, utility, Color, Cesium ) {
 
@@ -61,6 +65,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                                 childSource, childType, childIndex, childName, callback ) {
 
             var childURI = nodeID === 0 ? childIndex : undefined;
+            var appID = this.kernel.application();
 
             if ( this.debug.creation ) {
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
@@ -69,7 +74,7 @@ define( [ "module", "vwf/model", "vwf/utility",
             var self = this;
             var kernel = this.kernel;
 
-            var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
+            var prototypeID = utility.ifPrototypeGetId( appID, this.state.prototypes, nodeID, childID );
             if ( prototypeID !== undefined ) {
                 
                 if ( this.debug.prototypes ) {
@@ -2038,21 +2043,6 @@ define( [ "module", "vwf/model", "vwf/utility",
         }
         return sceneNode;
     }
-
-    function ifPrototypeGetId( nodeID, childID ) {
-        var ptID;
-        if ( ( nodeID == 0 && childID != this.kernel.application() ) || this.state.prototypes[ nodeID ] !== undefined ) {
-            if ( nodeID != 0 || childID != this.kernel.application() ) {
-                ptID = nodeID ? nodeID : childID;
-                if ( this.state.prototypes[ ptID ] !== undefined ) {
-                    ptID = childID;
-                }
-                return ptID;
-            } 
-        }
-        return undefined;
-    }
-
 
     function isCesium( prototypes ) {
         var foundCesium = false;

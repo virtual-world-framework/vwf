@@ -84,13 +84,14 @@ define( [
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
 
+            var appID = this.kernel.application();
             if ( this.debug.creation ) {
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             }
 
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
-            var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
+            var prototypeID = utility.ifPrototypeGetId( appID, this.state.prototypes, nodeID, childID );
             if ( prototypeID !== undefined ) {
                 
                 if ( this.debug.prototypes ) {
@@ -421,20 +422,6 @@ define( [
         }
                 
         return prototypes;
-    }
-
-    function ifPrototypeGetId( nodeID, childID ) {
-        var ptID;
-        if ( ( nodeID == 0 && childID != this.kernel.application() ) || this.state.prototypes[ nodeID ] !== undefined ) {
-            if ( nodeID != 0 || childID != this.kernel.application() ) {
-                ptID = nodeID ? nodeID : childID;
-                if ( this.state.prototypes[ ptID ] !== undefined ) {
-                    ptID = childID;
-                }
-                return ptID;
-            } 
-        }
-        return undefined;
     }
 
     function createSound( node, url ) {
