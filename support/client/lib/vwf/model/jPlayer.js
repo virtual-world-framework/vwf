@@ -258,15 +258,15 @@ define( [
             //             break;
 
                 case "loop":
-                    // node.loop = Boolean( propertyValue );
-                    // if ( node.loop ) {
-                    //     $( "#jp_container_1" ).bind( $.jPlayer.event.ended + ".jp-repeat",
-                    //         function() {
-                    //             $( this ).jPlayer( "play" );
-                    //         } );
-                    // } else {
-                    //     $( "#jp_container_1" ).unbind( $.jPlayer.event.ended + ".jp-repeat" );
-                    // }
+                    node.loop = Boolean( propertyValue );
+                    var $jPlayerElement = $( "#jp_container_1" );
+                    if ( node.loop ) {
+                        $jPlayerElement.bind( $.jPlayer.event.ended, function() {
+                            $( this ).jPlayer( "play" );
+                        } );
+                    } else {
+                        $jPlayerElement.unbind( $.jPlayer.event.ended );
+                    }
                     break;
 
             //         default:
@@ -429,10 +429,10 @@ define( [
             ready: function () {
                 $( this ).jPlayer( "setMedia", {
                     title: node.name,
-                    mp3: "http://localhost:3000/tbs-tdg/TDG/Kalimba.mp3"
+                    wav: "http://localhost:3000/tbs-tdg/TDG/1_short_Open_16_16.wav"
                 } );
             },
-            supplied: "mp3"
+            supplied: "mp3,ogg,wav"
         } );
 
         // var soundProps;
