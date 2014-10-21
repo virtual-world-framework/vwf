@@ -107,6 +107,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             // If the parent nodeID is 0, this node is attached directly to the root and is therefore either 
             // the scene or a prototype.  In either of those cases, save the uri of the new node
             var childURI = ( nodeID === 0 ? childIndex : undefined );
+            var appID = this.kernel.application();
 
             if ( this.debug.creation ) {
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
@@ -114,7 +115,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
-            var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
+            var prototypeID = utility.ifPrototypeGetId( appID, this.state.prototypes, nodeID, childID );
             if ( prototypeID !== undefined ) {
                 
                 if ( this.debug.prototypes ) {
@@ -1983,20 +1984,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         }
                 
         return prototypes;
-    }
-
-    function ifPrototypeGetId( nodeID, childID ) {
-        var ptID;
-        if ( ( nodeID == 0 && childID != this.kernel.application() ) || this.state.prototypes[ nodeID ] !== undefined ) {
-            if ( nodeID != 0 || childID != this.kernel.application() ) {
-                ptID = nodeID ? nodeID : childID;
-                if ( this.state.prototypes[ ptID ] !== undefined ) {
-                    ptID = childID;
-                }
-                return ptID;
-            } 
-        }
-        return undefined;
     }
 
     function getThreeScene( id ) {

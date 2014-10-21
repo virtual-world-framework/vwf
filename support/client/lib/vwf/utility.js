@@ -293,7 +293,22 @@ define( [ "module",
                 }
             }
             return fileFormat;
-        },        
+        },  
+
+        ifPrototypeGetId: function( appID, prototypes, nodeID, childID ) {
+            var prototypeID = undefined;
+            if ( ( nodeID == 0 && childID != appID ) || prototypes[ nodeID ] !== undefined ) {
+                if ( nodeID != 0 || childID != appID ) {
+                    prototypeID = nodeID ? nodeID : childID;
+                    if ( prototypes[ prototypeID ] !== undefined ) {
+                        prototypeID = childID;
+                    }
+                    return prototypeID;
+                } 
+            }
+            return undefined;
+        },
+
 
         // -- xpath --------------------------------------------------------------------------------
 
