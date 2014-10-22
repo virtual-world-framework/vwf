@@ -1,3 +1,5 @@
+"use strict";
+
 /// vwf/model/buzz.js is a sound driver
 /// 
 /// @module vwf/model/buzz
@@ -111,6 +113,7 @@ define( [
             }
 
             var protos = getPrototypes( this.kernel, childExtendsID );
+            var node;
 
             if ( this.state.isSoundComponent( protos ) ) {
 
