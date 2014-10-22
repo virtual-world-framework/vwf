@@ -257,17 +257,17 @@ define( [
             //             }
             //             break;
 
-                case "loop":
-                    node.loop = Boolean( propertyValue );
-                    var $jPlayerElement = $( "#jp_container_1" );
-                    if ( node.loop ) {
-                        $jPlayerElement.bind( $.jPlayer.event.ended, function() {
-                            $( this ).jPlayer( "play" );
-                        } );
-                    } else {
-                        $jPlayerElement.unbind( $.jPlayer.event.ended );
-                    }
-                    break;
+                // case "loop":
+                //     node.loop = Boolean( propertyValue );
+                //     var $jPlayerElement = $( "#jp_container_1" );
+                //     if ( node.loop ) {
+                //         $jPlayerElement.bind( $.jPlayer.event.ended, function() {
+                //             $( this ).jPlayer( "play" );
+                //         } );
+                //     } else {
+                //         $jPlayerElement.unbind( $.jPlayer.event.ended );
+                //     }
+                //     break;
 
             //         default:
             //             value = undefined;
@@ -421,7 +421,7 @@ define( [
     function createSound( node, url ) {
         
         // Create the html element from which jPlayer commands will issue
-        var $jPlayerElement = $( "<div id='" + node.ID.replace( /:/g, "_" ) + "' class='jp-jplayer'></div>" );
+        var $jPlayerElement = $( "<div id='jplayerElement' class='jp-jplayer'></div>" );
         $( "body" ).append( $jPlayerElement );
 
         // Create the jPlayer instance for the type of media
