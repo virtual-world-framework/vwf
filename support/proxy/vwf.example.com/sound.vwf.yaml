@@ -6,7 +6,7 @@
 --- 
 extends: http://vwf.example.com/node.vwf
 properties:
-	url:
+  url:
   time: 
   percent:
   speed: 1
