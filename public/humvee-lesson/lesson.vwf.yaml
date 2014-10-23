@@ -35,14 +35,15 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Walk to Vehicle" );
-                var app = this.parent.parent.parent.parent;
-                app.keyUp = app.pointerWheel = app.touchPinchOut = this.events.add( function() {
-                  var trans = app.camera.translation;
+                this.app$ = this.parent.parent.parent.parent;
+                this.app$.keyUp = this.app$.pointerWheel = this.app$.touchPinchOut = this.events.add( function() {
+                  
+                  var trans = this.app$.camera.translation;
                   if( trans[0] > -55 && trans[0] < 45 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
                   {
-                    app.keyUp = app.events.flush( this );
-                    app.pointerWheel = app.events.flush( this );
-                    app.touchPinchOut = app.events.flush( this );
+                    this.app$.keyUp = this.app$.events.flush( this );
+                    this.app$.pointerWheel = this.app$.events.flush( this );
+                    this.app$.touchPinchOut = this.app$.events.flush( this );
                     this.logger.info( "Step: Walk to Vehicle - Completed" );
                     this.completed();
                   }
@@ -61,11 +62,11 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Open Door" );
-                var humveeDoor = this.find( "/humvee/DoorDriverFront" )[ 0 ];
-                humveeDoor.controlValueUpdated = humveeDoor.events.add( function() {
-                  if(humveeDoor.controlValue == humveeDoor.open.controlValue)
+                this.humveeDoor$ = this.find( "/humvee/DoorDriverFront" )[ 0 ];
+                this.humveeDoor$.controlValueUpdated = this.humveeDoor$.events.add( function() {
+                  if(this.humveeDoor$.controlValue == this.humveeDoor$.open.controlValue)
                   {
-                    humveeDoor.controlValueUpdated = humveeDoor.events.flush( this );
+                    this.humveeDoor$.controlValueUpdated = this.humveeDoor$.events.flush( this );
                     this.logger.info( "Step: Open Door - Completed" );
                     this.completed();
                   }
@@ -84,9 +85,9 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Jump In" );
-                var humvee = this.find( "/humvee/HumveeBody" )[ 0 ];
-                humvee.pointerClick = humvee.events.add( function() {
-                  humvee.pointerClick = humvee.events.flush( this );
+                this.humvee$ = this.find( "/humvee/HumveeBody" )[ 0 ];
+                this.humvee$.pointerClick = this.humvee$.events.add( function() {
+                  this.humvee$.pointerClick = this.humvee$.events.flush( this );
                   this.logger.info( "Step: Jump In - Completed" );
                   this.completed();
                 }, this );
@@ -105,11 +106,11 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Close Door" );
-                var humveeDoor = this.find( "/humvee/DoorDriverFront" )[ 0 ];
-                humveeDoor.controlValueUpdated = humveeDoor.events.add( function() {
-                  if(humveeDoor.controlValue == humveeDoor.close.controlValue)
+                this.humveeDoor$ = this.find( "/humvee/DoorDriverFront" )[ 0 ];
+                this.humveeDoor$.controlValueUpdated = this.humveeDoor$.events.add( function() {
+                  if(this.humveeDoor$.controlValue == this.humveeDoor$.close.controlValue)
                   {
-                    humveeDoor.controlValueUpdated = humveeDoor.events.flush( this );
+                    this.humveeDoor$.controlValueUpdated = this.humveeDoor$.events.flush( this );
                     this.logger.info( "Step: Close Door - Completed" );
                     this.completed();
                   }
@@ -139,17 +140,18 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Run" );
-                var ignition = this.find( "/humvee/Ignition" )[ 0 ];
+                this.ignition$ = this.find( "/humvee/Ignition" )[ 0 ];
                 // Verify control value is coming from "STOP" position
-                var currentControlValue = ignition.controlValue;
-                ignition.controlValueUpdated = ignition.events.add( function() {
-                  if(currentControlValue == ignition.stop.controlValue && ignition.controlValue == ignition.run.controlValue) {
-                    ignition.controlValueUpdated = ignition.events.flush( this );
+                this.currentControlValue$ = this.ignition$.controlValue;
+                this.ignition$.controlValueUpdated = this.ignition$.events.add( function() {
+                  if ( ( this.currentControlValue$ === this.ignition$.stop.controlValue ) && 
+                      ( this.ignition$.controlValue === this.ignition$.run.controlValue) ) {
+                    this.ignition$.controlValueUpdated = this.ignition$.events.flush( this );
                     this.logger.info( "Step: Set Ignition to Run - Completed" );
                     this.completed();
                   }
                   else {
-                    currentControlValue = ignition.controlValue;
+                    this.currentControlValue$ = this.ignition$.controlValue;
                   }
                 }, this );
               }
@@ -177,11 +179,11 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Start" );
-                var ignition = this.find( "/humvee/Ignition" )[ 0 ];
-                ignition.controlValueUpdated = ignition.events.add( function() {
-                  if(ignition.controlValue > 0.9)
+                this.ignition$ = this.find( "/humvee/Ignition" )[ 0 ];
+                this.ignition$.controlValueUpdated = this.ignition$.events.add( function() {
+                  if(this.ignition$.controlValue > 0.9)
                   {
-                    ignition.controlValueUpdated = ignition.events.flush( this );
+                    this.ignition$.controlValueUpdated = this.ignition$.events.flush( this );
                     this.logger.info( "Step: Set Ignition to Start - Completed" );
                     this.completed();
                   }
@@ -219,11 +221,11 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Move Gear Shift to Drive" );
-                var gearShift = this.find( "/humvee/GearShift" )[ 0 ];
-                gearShift.controlValueUpdated = gearShift.events.add( function() {
-                  if(gearShift.controlValue == gearShift.drive.controlValue )
+                this.gearShift$ = this.find( "/humvee/GearShift" )[ 0 ];
+                this.gearShift$.controlValueUpdated = this.gearShift$.events.add( function() {
+                  if(this.gearShift$.controlValue == this.gearShift$.drive.controlValue )
                   {
-                    gearShift.controlValueUpdated = gearShift.events.flush( this );
+                    this.gearShift$.controlValueUpdated = this.gearShift$.events.flush( this );
                     this.logger.info( "Step: Move Gear Shift to Drive - Completed" );
                     this.completed();
                   }
@@ -242,11 +244,11 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Release Parking Brake" );
-                var parkingBrake = this.find( "/humvee/EmergencyBrake" )[ 0 ];
-                parkingBrake.controlValueUpdated = parkingBrake.events.add( function() {
-                  if(parkingBrake.controlValue == parkingBrake.release.controlValue )
+                this.parkingBrake$ = this.find( "/humvee/EmergencyBrake" )[ 0 ];
+                this.parkingBrake$.controlValueUpdated = this.parkingBrake$.events.add( function() {
+                  if(this.parkingBrake$.controlValue == this.parkingBrake$.release.controlValue )
                   {
-                    parkingBrake.controlValueUpdated = parkingBrake.events.flush( this );
+                    this.parkingBrake$.controlValueUpdated = this.parkingBrake$.events.flush( this );
                     this.logger.info( "Step: Release Parking Brake - Completed" );
                     this.completed();
                   }
@@ -266,31 +268,39 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Drive Vehicle" );
-                var complete = false;
-                var app = this.parent.parent.parent.parent;
+                this.complete$ = false;
+                this.app$ = this.parent.parent.parent.parent;
                 var activeMotion = false;
-                var intervalId;
-                function moveHumvee() {
-                  app.camera.translateTo( [ app.camera.translation[0] - 10, app.camera.translation[1], app.camera.translation[2] ] );
-                  app.humvee.translateTo( [ app.humvee.translation[0] - 10, app.humvee.translation[1], app.humvee.translation[2] ] );
-                }
-                app.keyDown = this.events.add( function(e) {
+                this.app$.keyDown = this.events.add( function(e) {
+                  var app = this.app$;
                   var kd = $.extend(true, {}, e.keysDown);
                   for ( var keyPress in kd ) {
                     if (Number( kd[ keyPress ].code == 71)) // G
                     {
-                      intervalId = setInterval(moveHumvee, 50);
-                      if(!complete)
+                      this.intervalId$ = setInterval(moveHumvee, 50);
+                      if ( !this.complete$ )
                       {
                         this.logger.info( "Step: Drive Vehicle - Completed" );
                         this.completed();
-                        complete = true;
+                        this.complete$ = true;
                       }
                     }
                   }
+                  function moveHumvee() {
+                    app.camera.translateTo( [ 
+                      app.camera.translation[0] - 10, 
+                      app.camera.translation[1], 
+                      app.camera.translation[2] 
+                    ] );
+                    app.humvee.translateTo( [ 
+                      app.humvee.translation[0] - 10, 
+                      app.humvee.translation[1], 
+                      app.humvee.translation[2] 
+                    ] );
+                  }
                 }, this );
-                app.keyUp = this.events.add( function(e) {
-                  clearInterval(intervalId);
+                this.app$.keyUp = this.events.add( function(e) {
+                  clearInterval( this.intervalId$ );
                 }, this);
               } //@ sourceURL=moveVehicleTask.vwf
   cameraPoseEnteringVehicle:
