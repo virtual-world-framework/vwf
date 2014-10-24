@@ -31,6 +31,7 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Use WASD, the mouse wheel, or pinch-to-zoom gestures to navigate to the vehicle door."
+              app$:
             scripts:
             - |
               this.entering = function() {
@@ -48,7 +49,8 @@ children:
                     this.completed();
                   }
                 }, this );
-              }
+                //@ sourceURL=humvee-lesson/lesson.enterVehicle.walkToVehicle.walkInstructions.js
+              } 
       openDoor:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
@@ -71,7 +73,8 @@ children:
                     this.completed();
                   }
                 }, this );
-              }
+                //@ sourceURL=humvee-lesson/lesson.enterVehicle.openDoor.openDoorInstructions.js
+              }           
       jumpIn:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
@@ -264,6 +267,7 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Press the 'G' key to simulate gas pedal interaction to drive the vehicle forward." 
+              app$:
             scripts:
             - |
               this.entering = function() {
