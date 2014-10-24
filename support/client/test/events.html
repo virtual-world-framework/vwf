@@ -351,6 +351,15 @@
               equal( vwf.execute( nodeID, "this.result.count1" ), 20, "" );
               equal( vwf.execute( nodeID, "this.result.count2" ), 28, "" );
 
+              // Do a getEvent to verify that kernel recognizes that event listeners are gone
+
+              try {
+                var testEvent = vwf.getEvent( nodeID, "empty" );
+                equal( testEvent.listeners, undefined, "" );
+              } catch( e ) {
+                equal( e.message, "No error", "" );
+              }
+
               // Add a listener with no context, which should execute in the context of the global
               // node.
 
