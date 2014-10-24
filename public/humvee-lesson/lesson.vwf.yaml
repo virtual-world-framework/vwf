@@ -31,20 +31,19 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Use WASD, the mouse wheel, or pinch-to-zoom gestures to navigate to the vehicle door."
-              app$:
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Walk to Vehicle" );
-                this.app$ = this.parent.parent.parent.parent;
-                this.app$.keyUp = this.app$.pointerWheel = this.app$.touchPinchOut = this.events.add( function() {
+                this.scene = this.parent.parent.parent.parent;
+                this.scene.keyUp = this.scene.pointerWheel = this.scene.touchPinchOut = this.events.add( function() {
                   
-                  var trans = this.app$.camera.translation;
+                  var trans = this.scene.camera.translation;
                   if( trans[0] > -55 && trans[0] < 45 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
                   {
-                    this.app$.keyUp = this.app$.events.flush( this );
-                    this.app$.pointerWheel = this.app$.events.flush( this );
-                    this.app$.touchPinchOut = this.app$.events.flush( this );
+                    this.scene.keyUp = this.scene.events.flush( this );
+                    this.scene.pointerWheel = this.scene.events.flush( this );
+                    this.scene.touchPinchOut = this.scene.events.flush( this );
                     this.logger.info( "Step: Walk to Vehicle - Completed" );
                     this.completed();
                   }
@@ -267,16 +266,15 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Press the 'G' key to simulate gas pedal interaction to drive the vehicle forward." 
-              app$:
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Drive Vehicle" );
                 this.complete$ = false;
-                this.app$ = this.parent.parent.parent.parent;
+                this.scene = this.parent.parent.parent.parent;
                 var activeMotion = false;
-                this.app$.keyDown = this.events.add( function(e) {
-                  var app = this.app$;
+                this.scene.keyDown = this.events.add( function(e) {
+                  var scene = this.scene;
                   var kd = $.extend(true, {}, e.keysDown);
                   for ( var keyPress in kd ) {
                     if (Number( kd[ keyPress ].code == 71)) // G
@@ -291,19 +289,19 @@ children:
                     }
                   }
                   function moveHumvee() {
-                    app.camera.translateTo( [ 
-                      app.camera.translation[0] - 10, 
-                      app.camera.translation[1], 
-                      app.camera.translation[2] 
+                    scene.camera.translateTo( [ 
+                      scene.camera.translation[0] - 10, 
+                      scene.camera.translation[1], 
+                      scene.camera.translation[2] 
                     ] );
-                    app.humvee.translateTo( [ 
-                      app.humvee.translation[0] - 10, 
-                      app.humvee.translation[1], 
-                      app.humvee.translation[2] 
+                    scene.humvee.translateTo( [ 
+                      scene.humvee.translation[0] - 10, 
+                      scene.humvee.translation[1], 
+                      scene.humvee.translation[2] 
                     ] );
                   }
                 }, this );
-                this.app$.keyUp = this.events.add( function(e) {
+                this.scene.keyUp = this.events.add( function(e) {
                   clearInterval( this.intervalId$ );
                 }, this);
               } //@ sourceURL=moveVehicleTask.vwf
