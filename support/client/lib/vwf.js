@@ -3910,11 +3910,27 @@ if ( ! childComponent.source ) {
 
             var encodedEventName = namespaceEncodedName( eventName );
 
+            // Retrieve the event in case we need to remove listeners from it
+
+            var node = nodes.existing[ nodeID ];
+            var event = node.events.existing[ encodedEventName ];
+
             // Call `flushingEventListeners` on each model.
 
             this.models.forEach( function( model ) {
-                model.flushingEventListeners &&
+                var removedIds = model.flushingEventListeners &&
                     model.flushingEventListeners( nodeID, encodedEventName, eventContextID );
+                
+                // If the model driver returned an array of the ids of event listeners that it 
+                // removed, remove their references in the kernel
+
+                if ( removedIds && removedIds.length ) {
+
+                    // Unregister the listeners that were flushed
+                    removedIds.forEach( function( removedId ) {
+                        event.listeners.delete( removedId, node.initialized && node.patchable );
+                    } );
+                }
             } );
 
             // Call `flushedEventListeners` on each view.
