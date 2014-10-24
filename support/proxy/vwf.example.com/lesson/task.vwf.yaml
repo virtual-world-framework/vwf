@@ -42,6 +42,26 @@ properties:
 
   scenePath:
 
+  ## the scene node that the lesson listens to for task completion events
+  ## 
+  ## @name lesson.task.vwf#scene
+  ## @property
+
+  scene:
+
+  ## Array of this task's subtasks
+  ## 
+  ## @name lesson.task.vwf#subtasks
+  ## @property
+
+  subtasks:
+    get: |
+      if ( !this.hasOwnProperty( "subtaskCache" ) ) {
+        this.subtaskCache = this.find( "./element(*,'http://vwf.example.com/lesson/task.vwf')" );
+      }
+      return this.subtaskCache;
+      //@ sourceURL=task.subtasks.get
+
   ## Index of the currently active subtask
   ## 
   ## @name lesson.task.vwf#taskIndex
