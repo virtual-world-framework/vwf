@@ -1305,6 +1305,7 @@ children:
         }
         this.transform = this.initialTransform;
         this.rotateBy([0, 0, -1, time * 360], 0, "rotated");
+        //@ sourceURL=humvee.DoorDriverFront.animationUpdate
       }
   RearHatch: 
     extends: http://vwf.example.com/node3.vwf 
