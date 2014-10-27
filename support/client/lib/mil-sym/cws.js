@@ -4374,6 +4374,7 @@ define( function(){
                     retStr = this.region( symbolID );
                     break; 
                 case "null":
+                case "none":
                 default:
                     retStr = this._null( symbolID );
                     break; 

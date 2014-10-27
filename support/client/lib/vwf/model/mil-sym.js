@@ -264,6 +264,7 @@ define( [ "module",
                                     case "front":
                                     case "region":
                                     case "null":
+                                    case "none":
                                         if ( node.symbolID !== undefined ) {
                                             node.symbolID = cws.addEchelonToSymbolId( node.symbolID, propertyValue );
                                         }
