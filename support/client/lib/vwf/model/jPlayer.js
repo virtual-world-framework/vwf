@@ -426,13 +426,7 @@ define( [
 
         // Create the jPlayer instance for the type of media
         $jPlayerElement.jPlayer( {
-            ready: function () {
-                $( this ).jPlayer( "setMedia", {
-                    title: node.name,
-                    wav: "http://localhost:3000/tbs-tdg/TDG/1_short_Open_16_16.wav"
-                } );
-            },
-            supplied: "mp3,ogg,wav"
+            supplied: "mp3,wav"
         } );
 
         // var soundProps;
