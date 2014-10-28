@@ -1,0 +1,11 @@
+---
+extends: http://vwf.example.com/node.vwf
+properties:
+  url:
+  loop: false
+  containerDivId: "audioContainer"
+  playerDivId: "audioPlayer"
+methods:
+  play:
+  pause:
+  stop:

@@ -1,0 +1,13 @@
+---
+extends: http://vwf.example.com/node.vwf
+properties:
+  url:
+  posterImageUrl:
+  loop: false
+  containerDivId: "videoContainer"
+  playerDivId: "videoScreen"
+methods:
+  play:
+  pause:
+  stop:
+  

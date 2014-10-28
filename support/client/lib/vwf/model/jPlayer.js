@@ -7,10 +7,13 @@ define( [
         "module", 
         "vwf/model", 
         "vwf/utility",
-        "jquery" 
+        "jquery"
     ], function( module, model, utility, $ ) {
 
     var modelDriver;
+    var jPlayerInstanceCreated = false;
+    var audioManagerProtoId = "http-vwf-example-com-jplayer-audioManager-vwf";
+    var videoManagerProtoId = "http-vwf-example-com-jplayer-videoManager-vwf";
 
     return model.load( module, {
 
@@ -47,20 +50,20 @@ define( [
                         "playOnReady": false
                     };
                 },
-                "is3DSoundComponent": function( prototypes ) {
+                "isAudioManager": function( prototypes ) {
                     var found = false;
                     if ( prototypes ) {
                         for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                            found = ( prototypes[ i ].indexOf( "http-vwf-example-com-sound3-vwf" ) != -1 );    
+                            found = ( prototypes[ i ].indexOf( audioManagerProtoId ) !== -1 );    
                         }
                     }
                     return found;
                 },
-                "isSoundComponent": function( prototypes ) {
+                "isVideoManager": function( prototypes ) {
                     var found = false;
                     if ( prototypes ) {
                         for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                            found = ( prototypes[ i ].indexOf( "http-vwf-example-com-sound-vwf" ) != -1 );    
+                            found = ( prototypes[ i ].indexOf( videoManagerProtoId ) !== -1 );    
                         }
                     }
                     return found;
@@ -106,12 +109,21 @@ define( [
                     type: childType,
                     name: childName
                 };
+
+                if ( prototypeID.indexOf( audioManagerProtoId ) !== -1 ) {
+                    this.state.audioManagerProto = this.state.prototypes[ prototypeID ];
+                } else if ( prototypeID.indexOf( videoManagerProtoId ) !== -1 ) {
+                    this.state.videoManagerProto = this.state.prototypes[ prototypeID ];
+                }
+
                 return;                
             }
 
             var protos = getPrototypes( this.kernel, childExtendsID );
 
-            if ( this.state.isSoundComponent( protos ) ) {
+            var isAudioManager = this.state.isAudioManager( protos );
+            var isVideoManager = this.state.isVideoManager( protos );
+            if ( isAudioManager || isVideoManager ) {
 
                 // Create the local copy of the node properties
                 if ( this.state.nodes[ childID ] === undefined ){
@@ -123,23 +135,15 @@ define( [
                 node = this.state.nodes[ childID ];
                 
                 node.prototypes = protos;
-                node.is3DSound = this.state.is3DSoundComponent( protos );
-            } 
-        },
 
-        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childIndex, childName ) {
-
-            if ( this.debug.initializing ) {
-                this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
-            } 
-
-            var node = this.state.nodes[ childID ];
-            if ( node !== undefined ) {
-                if ( utility.validObject( childSource ) ) {
-                    createSound( node, childSource );
-                }                
-            } 
+                if ( isAudioManager ) {
+                    node.managerType = "audio";
+                    setWithPrototypeProperties( this.state.audioManagerProto );
+                } else {
+                    node.managerType = "video";
+                    setWithPrototypeProperties( this.state.videoManagerProto );
+                }
+            }
         },
 
         deletingNode: function( nodeID ) {
@@ -153,24 +157,6 @@ define( [
             }
 
         },
-
-        // addingChild: function( nodeID, childID, childName ) {
-        //     if ( this.debug.parenting ) {
-        //         this.logger.infox( "addingChild", nodeID, childID, childName );
-        //     }
-        // },
-
-        // movingChild: function( nodeID, childID, childName ) {
-        //     if ( this.debug.parenting ) {
-        //         this.logger.infox( "movingChild", nodeID, childID, childName );
-        //     }
-        // },
-
-        // removingChild: function( nodeID, childID, childName ) {
-        //     if ( this.debug.parenting ) {
-        //         this.logger.infox( "removingChild", nodeID, childID, childName );
-        //     }
-        // },
 
         // -- creatingProperty ---------------------------------------------------------------------
 
@@ -201,81 +187,100 @@ define( [
                 this.logger.infox( "    S === settingProperty ", nodeID, propertyName, propertyValue );
             }
 
-            var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
+            // Prepare return value
             var value = undefined;
 
-            // this driver has no representation of this node, so there is nothing to do.
-            if ( node === undefined ) {
-                return;
+            var node = this.state.nodes[ nodeID ];
+ 
+            if ( node !== undefined ) {
+                switch ( propertyName ) {
+                    case "url":
+                        setUrl( node, propertyValue );
+                        value = node.url;
+                        break;
+                    case "loop":
+                        setLoop( node, propertyValue );
+                        value = node.loop;
+                        break;
+                    case "playerDivId":
+                        if ( propertyValue === node.playerDivId ) {
+                            break;
+                        }
+                        if ( node.playerDivId ) {
+                            $( "#" + node.playerDivId ).remove();
+                        }
+                        node.playerDivId = propertyValue;
+                        var $existingElement = $( "#" + node.playerDivId );
+                        if ( $existingElement.length ) {
+                            node.jPlayerElement = $existingElement;
+                        } else {
+                            node.jPlayerElement = $( "<div/>", {
+                                id: node.playerDivId
+                            } );
+                            $( "body" ).append( node.jPlayerElement );
+                        }
+                        var fileTypes = ( node.managerType === "audio" ) ? "mp3,wav" : "m4v";
+                        node.jPlayerElement.jPlayer( {
+                            ready: function() {
+                                if ( node.url !== undefined ) {
+                                    setUrl( node, node.url );
+                                }
+                                if ( node.loop !== undefined ) {
+                                    setLoop( node, node.loop );
+                                }
+                                if ( node.containerDivId !== undefined ) {
+                                    setControlDivId( node, node.containerDivId );
+                                }
+                            },
+                            supplied: fileTypes
+                        } );
+                        value = node.playerDivId;
+                        break;
+                    case "containerDivId":
+                        setControlDivId( node, propertyValue );
+                        value = node.containerDivId;
+                        break;
+                    case "posterImageUrl":
+                        setPosterImageUrl( node, propertyValue );
+                        value = node.posterImageUrl;
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                var proto;
+                var audioManagerProto = this.state.audioManagerProto;
+                var videoManagerProto = this.state.videoManagerProto;
+                if ( audioManagerProto && ( nodeID === audioManagerProto.ID ) ) {
+                    proto = this.state.audioManagerProto;
+                } else if ( videoManagerProto && ( nodeID === videoManagerProto.ID ) ) {
+                    proto = this.state.videoManagerProto;
+                }
+                switch ( propertyName ) {
+                    case "url":
+                        proto.url = propertyValue;
+                        value = proto.url;
+                        break;
+                    case "loop":
+                        proto.loop = propertyValue;
+                        value = proto.loop;
+                        break;
+                    case "playerDivId":
+                        proto.playerDivId = propertyValue;
+                        value = proto.playerDivId;
+                        break;
+                    case "containerDivId":
+                        proto.containerDivId = propertyValue;
+                        value = proto.containerDivId;
+                        break;
+                    case "posterImageUrl":
+                        proto.posterImageUrl = propertyValue;
+                        value = proto.posterImageUrl;
+                        break;
+                    default:
+                        break;
+                }
             }
-
-
-            switch ( propertyName ) {
-                    
-            //         case "url": 
-            //             if ( node.soundObj !== undefined ) {
-            //                 node.soundObj.set( "src", propertyValue );
-            //             } else {
-            //                 createSound( node, propertyValue )
-            //             }                    
-            //             break;
-
-            //         case "time":
-            //             if ( node.soundObj !== undefined ) {
-            //                 node.soundObj.setTime( parseFloat( propertyValue ) );
-            //             }                      
-            //             break;
-
-            //         case "percent":
-            //             if ( node.soundObj !== undefined ) {
-            //                 node.soundObj.setPercent( parseFloat( propertyValue ) );
-            //             }                      
-            //             break;
-
-            //         case "speed":
-            //             if ( node.soundObj !== undefined ) {
-            //                 node.soundObj.setSpeed( parseFloat( propertyValue ) );
-            //             }                      
-            //             break;
-
-            //         case "muted":
-            //             if ( node.soundObj !== undefined ) {
-            //                 if ( Boolean( propertyValue ) ) {
-            //                     node.soundObj.mute();
-            //                 } else {
-            //                     node.soundObj.unmute();
-            //                 }
-            //             }
-            //             break;
-
-            //         case "volume":
-            //             if ( node.soundObj !== undefined ) {
-            //                 var newVolume = Number( propertyValue );
-            //                 if ( newVolume >= 0 && newVolume <= 100 ) {
-            //                     node.soundObj.setVolume( newVolume );    
-            //                 }
-            //             }
-            //             break;
-
-                // case "loop":
-                //     node.loop = Boolean( propertyValue );
-                //     var $jPlayerElement = $( "#jp_container_1" );
-                //     if ( node.loop ) {
-                //         $jPlayerElement.bind( $.jPlayer.event.ended, function() {
-                //             $( this ).jPlayer( "play" );
-                //         } );
-                //     } else {
-                //         $jPlayerElement.unbind( $.jPlayer.event.ended );
-                //     }
-                //     break;
-
-            //         default:
-            //             value = undefined;
-            //             break;
-             
-            }
-
-
 
             return value;
         },
@@ -289,50 +294,8 @@ define( [
             }
 
             var node = this.state.nodes[ nodeID ]; // { name: childName, glgeObject: undefined }
-            var value = undefined;
 
-            // //this driver has no representation of this node, so there is nothing to do.
-            // if( node === undefined || node.soundObj === undefined ) return;
-
-            // switch ( propertyName ) {
-                
-            //     case "url": 
-            //         value = node.soundObj.get( "src" );
-            //         break;
-                
-            //     case "playState":
-            //         value = node.playState;
-            //         break;
-
-            //     case "time":
-            //         value = node.soundObj.getTime();
-            //         break;
-
-            //     case "percent":
-            //         value = node.soundObj.getPercent();                    
-            //         break;
-
-            //     case "speed":
-            //         value = node.soundObj.getSpeed();
-            //         break;
-
-            //     case "muted":
-            //         value = node.soundObj.isMuted();
-            //         break;
-
-            //     case "volume":
-            //         value = node.soundObj.getVolume();
-            //         break;
-
-            //     case "loop":
-            //         value = node.soundObj.get( "loop" );
-            //         break;
-
-
-            // } 
-
-
-            return value;
+            return node && node[ propertyName ];
         },
 
 
@@ -346,49 +309,33 @@ define( [
                 this.logger.infox( "   G === gettingProperty ", nodeID, propertyName );
             }
 
-            var node = this.state.nodes[ nodeID ]; 
-            var value = undefined;  
+            var node = this.state.nodes[ nodeID ];   
 
-            if ( node !== undefined ) {
+            if ( !node ) {
+                return;
+            }
             
-                $jPlayerElement = $( "#" + nodeID.replace( /:/g, "_" ) );
+            if ( node.jPlayerElement ) {
 
                 switch( methodName ) {
                     
                     case "play":
-                        $jPlayerElement.jPlayer( "play" ); 
-                        break;
-
-                    case "stop":
-                        $jPlayerElement.jPlayer( "stop" );
+                        node.jPlayerElement.jPlayer( "play" ); 
                         break;
 
                     case "pause":
-                        $jPlayerElement.jPlayer( "pause" );
+                        node.jPlayerElement.jPlayer( "pause" );
                         break;
+
+                    case "stop":
+                        node.jPlayerElement.jPlayer( "stop" );
+                        break;
+
                 }  
 
             }
-
-        
+       
         },
-
-
-        // TODO: creatingEvent, deltetingEvent, firingEvent
-
-        // -- executing ------------------------------------------------------------------------------
-
-        // executing: function( nodeID, scriptText, scriptType ) {
-        //     return undefined;
-        // },
-
-        // == ticking =============================================================================
-
-        // ticking: function( vwfTime ) {
-            
-        // }
-
-
 
     } );
 
@@ -418,83 +365,104 @@ define( [
         return undefined;
     }
 
-    function createSound( node, url ) {
-        
-        // Create the html element from which jPlayer commands will issue
-        var $jPlayerElement = $( "<div id='jplayerElement' class='jp-jplayer'></div>" );
-        $( "body" ).append( $jPlayerElement );
-
-        // Create the jPlayer instance for the type of media
-        $jPlayerElement.jPlayer( {
-            supplied: "mp3,wav"
-        } );
-
-        // var soundProps;
-        // if ( url.indexOf( 'data:audio' ) === 0 ) {
-        //     soundProps = { 
-        //         "preload": "metadata"
-        //     };
-        // } else if ( require( "vwf/utility" ).hasFileType( url ) ) {
-        //     var fType = require( "vwf/utility" ).fileType( url );
-        //     soundProps= { 
-        //         "preload": "metadata",
-        //         "formats": [ fType ]
-        //     };                                 
-        // } else {
-        //     soundProps= { 
-        //         "preload": "metadata",
-        //         "formats": [ "ogg", "mp3", "aac", "wav" ]
-        //     };                                 
-        // }
-
-        // if ( node.delayedProperties !== undefined ) {
-        //     for ( var prop in node.delayedProperties ) {
-        //         switch ( prop ) {
-
-        //             default:
-        //                 soundProps[ prop ] = node.delayedProperties[ prop ];
-        //                 break;
-        //         }
-        //     }
-        //     node.delayedProperties = undefined;
-        // }
-        
-        // var buzz = require( "vwf/model/buzz/buzz.min" );
-        // node.soundObj = new buzz.sound( url, soundProps ); 
-
-        // // http://buzz.jaysalvat.com/documentation/events/
-        // node.soundObj.bind( "ended", function( e ) {
-        //     if ( node.playState === "playing" ) {
-        //         node.playState = "stopped";
-        //     }
-        //     modelDriver.kernel.fireEvent( node.ID, "soundEnded", [ true ] );
-        // } );      
-
-        // node.soundObj.bind( "playing", function( e ) {
-        //     node.playState = "playing";
-        //     modelDriver.kernel.fireEvent( node.ID, "soundPlaying", [ true ] );
-        // } );  
-
-        // node.soundObj.bind( "canplay", function( e ) {
-        //     node.playState = "loaded";
-        //     if ( node.playOnReady ) {
-        //         node.soundObj.play(); 
-        //         node.playOnReady = false;    
-        //     }
-        //     modelDriver.kernel.fireEvent( node.ID, "soundReady", [ true ] );
-        // } );  
-
-        // // "play" is sent when the sound had been paused
-        // node.soundObj.bind( "play", function( e ) {
-        //     node.playState = "playing";
-        //     modelDriver.kernel.fireEvent( node.ID, "soundReady", [ true ] );
-        // } ); 
-
-        // node.soundObj.bind( "pause", function( e ) {
-        //     node.playState = "paused";
-        //     modelDriver.kernel.fireEvent( node.ID, "soundReady", [ true ] );
-        // } ); 
-
+    function setWithPrototypeProperties( proto ) {
+        if ( proto.url !== null ) {
+            vwf.setProperty( node.ID, "url", proto.url );
+        }
+        if ( proto.loop !== null ) {
+            vwf.setProperty( node.ID, "loop", proto.loop );
+        }
+        if ( proto.playerDivId !== null ) {
+            vwf.setProperty( node.ID, "playerDivId", proto.playerDivId );
+        }
+        if ( proto.containerDivId !== null ) {
+            vwf.setProperty( node.ID, "containerDivId", proto.containerDivId );
+        }
+        if ( proto.posterImageUrl !== null ) {
+            vwf.setProperty( node.ID, "posterImageUrl", proto.posterImageUrl );
+        }
     }
 
+    function setUrl( node, url ) {
+        node.url = url;
+
+        // If there is no jPlayerElement, there is nothing to do yet so we return.
+        // Once the jPlayerElement is created, setUrl will run again using the saved value
+        if ( !node.jPlayerElement ) {
+            return;
+        }
+
+        // If there is a url, set the media for the jPlayer object appropriately
+        // Otherwise, clear the media
+        if ( url ) {
+
+            // Construct the media object based on the type of file being passed in
+            var mediaObject;
+            switch ( node.managerType ) {
+                case "audio":
+                    if ( url.search( "data:audio/mp3" ) === 0 ) {
+                        mediaObject = {
+                            mp3: url
+                        };
+                    } else if ( url.search( "data:audio/wav" ) === 0 ) {
+                        mediaObject = {
+                            wav: url
+                        };
+                    } else {
+                        modelDriver.logger.errorx( "setUrl", 
+                            "Unsupported sound type for '", url, "'" );
+                    }
+                    break;
+                case "video":
+                    if ( url.search( "data:video/mp4" ) === 0 ) {
+                        mediaObject = {
+                            m4v: url,
+                            poster: node.posterImageUrl
+                        };
+                    } else {
+                        modelDriver.logger.errorx( "setUrl", 
+                            "Unsupported video type for '", url, "'" );
+                    }
+                    break;
+                default:
+                    modelDriver.logger.errorx( "setUrl",
+                            "Unsupported manager type '", node.managerType, "'" );
+                    break;
+            }
+
+            // If we succeeded in creating a media object, set it on the jPlayer object
+            // Otherwise, clear the current media
+            if ( mediaObject ) {
+                node.jPlayerElement.jPlayer( "setMedia", mediaObject );
+            }  else {
+                node.jPlayerElement.jPlayer( "clearMedia" );
+            }
+        } else {
+            node.jPlayerElement.jPlayer( "clearMedia" );
+        }
+    }
+
+    function setLoop( node, loop ) {
+        node.loop = loop;
+        if ( node.jPlayerElement ) {
+            node.jPlayerElement.jPlayer( "option", { loop: loop } );
+        }
+    }
+
+    function setControlDivId( node, containerDivId ) {
+        node.containerDivId = containerDivId;
+        if ( node.jPlayerElement ) {
+            node.jPlayerElement.jPlayer( "option", { cssSelectorAncestor: "#" + containerDivId } );
+        }
+    }
+
+    function setPosterImageUrl( node, posterImageUrl ) {
+        node.posterImageUrl = posterImageUrl;
+        if ( node.jPlayerElement ) {
+            node.jPlayerElement.jPlayer( "setMedia", {
+                m4v: node.url,
+                poster: posterImageUrl
+            } );
+        }
+    }
 } );
