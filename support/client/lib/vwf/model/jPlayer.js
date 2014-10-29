@@ -93,7 +93,8 @@ define( [
 
             // If the node being created is a prototype, construct it and add it to the array of prototypes,
             // and then return
-            var prototypeID = ifPrototypeGetId.call( this, nodeID, childID );
+            var prototypeID = utility.ifPrototypeGetId.call( this, this.kernel.application(), 
+                this.state.prototypes, nodeID, childID );
             if ( prototypeID !== undefined ) {
                 
                 if ( this.debug.prototypes ) {
@@ -256,29 +257,31 @@ define( [
                 } else if ( videoManagerProto && ( nodeID === videoManagerProto.ID ) ) {
                     proto = this.state.videoManagerProto;
                 }
-                switch ( propertyName ) {
-                    case "url":
-                        proto.url = propertyValue;
-                        value = proto.url;
-                        break;
-                    case "loop":
-                        proto.loop = propertyValue;
-                        value = proto.loop;
-                        break;
-                    case "playerDivId":
-                        proto.playerDivId = propertyValue;
-                        value = proto.playerDivId;
-                        break;
-                    case "containerDivId":
-                        proto.containerDivId = propertyValue;
-                        value = proto.containerDivId;
-                        break;
-                    case "posterImageUrl":
-                        proto.posterImageUrl = propertyValue;
-                        value = proto.posterImageUrl;
-                        break;
-                    default:
-                        break;
+                if ( proto ) {
+                    switch ( propertyName ) {
+                        case "url":
+                            proto.url = propertyValue;
+                            value = proto.url;
+                            break;
+                        case "loop":
+                            proto.loop = propertyValue;
+                            value = proto.loop;
+                            break;
+                        case "playerDivId":
+                            proto.playerDivId = propertyValue;
+                            value = proto.playerDivId;
+                            break;
+                        case "containerDivId":
+                            proto.containerDivId = propertyValue;
+                            value = proto.containerDivId;
+                            break;
+                        case "posterImageUrl":
+                            proto.posterImageUrl = propertyValue;
+                            value = proto.posterImageUrl;
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
 
@@ -349,20 +352,6 @@ define( [
         }
                 
         return prototypes;
-    }
-
-    function ifPrototypeGetId( nodeID, childID ) {
-        var ptID;
-        if ( ( nodeID == 0 && childID != this.kernel.application() ) || this.state.prototypes[ nodeID ] !== undefined ) {
-            if ( nodeID != 0 || childID != this.kernel.application() ) {
-                ptID = nodeID ? nodeID : childID;
-                if ( this.state.prototypes[ ptID ] !== undefined ) {
-                    ptID = childID;
-                }
-                return ptID;
-            } 
-        }
-        return undefined;
     }
 
     function setWithPrototypeProperties( proto ) {
