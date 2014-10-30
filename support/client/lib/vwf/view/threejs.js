@@ -14,7 +14,12 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( module, view, utility, Hammer, $ ) {
+define( [ "module", 
+          "vwf/view", 
+          "vwf/utility", 
+          "hammer", 
+          "jquery" 
+    ], function( module, view, utility, Hammer, $ ) {
 
     var self;
 
@@ -32,7 +37,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                                  "mozPointerLockElement" in document ||
                                  "webkitPointerLockElement" in document;
     var pointerLocked = false;
-    var pickDirectionVector;
+    var pickDirection = undefined;
+    var raycaster = undefined;
     var pitchMatrix;
     var rollMatrix;
     var yawMatrix;
@@ -116,6 +122,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             rollMatrix = new THREE.Matrix4();
             yawMatrix = new THREE.Matrix4();
             translationMatrix = new THREE.Matrix4();
+            pickDirection = new THREE.Vector3();
+            raycaster = new THREE.Raycaster();
         
             window._dView = this;
             this.nodes = {};
@@ -637,7 +645,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             var orbiting = ( navMode == "fly" ) && ( mouseDown.middle )
 
-            if ( orbiting || !pickDirectionVector ) {
+            if ( orbiting || !pickDirection ) {
                 return;
             }
 
@@ -665,9 +673,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             extractRotationAndTranslation( navObject.threeObject );
 
             var translationArray = translationMatrix.elements;
-            translationArray[ 12 ] += amountToMove * pickDirectionVector.x;
-            translationArray[ 13 ] += amountToMove * pickDirectionVector.y;
-            translationArray[ 14 ] += amountToMove * pickDirectionVector.z;
+            translationArray[ 12 ] += amountToMove * pickDirection.x;
+            translationArray[ 13 ] += amountToMove * pickDirection.y;
+            translationArray[ 14 ] += amountToMove * pickDirection.z;
             if ( boundingBox != undefined ) {
                 if ( translationArray[ 12 ] < boundingBox[ 0 ][ 0 ] ) {
                     translationArray[ 12 ] = boundingBox[ 0 ][ 0 ];
@@ -1422,7 +1430,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             returnData.eventNodeData = { "": [ {
                 pickID: pointerPickID,
-                pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
+                pointerVector: pickDirection ? vec3ToArray( pickDirection ) : undefined,
                 distance: pickInfo ? pickInfo.distance : undefined,
                 origin: pickInfo ? pickInfo.worldCamPos : undefined,
                 globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
@@ -1477,7 +1485,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                                         
                     returnData.eventNodeData[ childID ] = [ {
                         pickID: pointerPickID,
-                        pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
+                        pointerVector: pickDirection ? vec3ToArray( pickDirection ) : undefined,
                         position: localTrans,
                         normal: localNormal,
                         source: relativeCamPos,
@@ -2347,41 +2355,26 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             return;
         }
 
-        if(!this.raycaster) this.raycaster = new THREE.Raycaster();
-        if(!this.projector) this.projector = new THREE.Projector();
-        
-        var SCREEN_HEIGHT = window.innerHeight;
-        var SCREEN_WIDTH = window.innerWidth;
-
-        var mousepos = { x: this.lastEventData.eventData[0].position[0], y: this.lastEventData.eventData[0].position[1] }; // window coordinates
+        var intersects = undefined;
+         var mousepos = { 
+            "x": this.lastEventData.eventData[0].position[0], 
+            "y": this.lastEventData.eventData[0].position[1] 
+        }; // window coordinates
 
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
-        pickDirectionVector = new THREE.Vector3();
-        pickDirectionVector.set( x, y, 0.5 );
+        pickDirection.set( x, y, threeCam.near );
 
-        var intersects = undefined;
+        var camPos = new THREE.Vector3(
+            threeCam.matrixWorld.elements[ 12 ],  
+            threeCam.matrixWorld.elements[ 13 ], 
+            threeCam.matrixWorld.elements[ 14 ]  
+        );
 
-        if ( threeCam instanceof THREE.OrthographicCamera ) {
-            var ray = this.projector.pickingRay( pickDirectionVector, threeCam );
-            intersects = ray.intersectObjects( sceneNode.threeScene.children, true );
-        } else {
-            this.projector.unprojectVector(pickDirectionVector, threeCam);
-            var pos = new THREE.Vector3();
-            pos.setFromMatrixPosition( threeCam.matrixWorld );
-            pickDirectionVector.sub(pos);
-            pickDirectionVector.normalize();
-                    
-            this.raycaster.set(pos, pickDirectionVector);
-            intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
-        }
-        
-        // intersections are, by default, ordered by distance,
-        // so we only care for the first (visible) one. The intersection
-        // object holds the intersection point, the face that's
-        // been "hit" by the ray, and the object to which that
-        // face belongs. We only care for the object itself.
+        pickDirection.unproject( threeCam );
+        raycaster.ray.set( camPos, pickDirection.sub( camPos ).normalize() );
+        intersects = raycaster.intersectObjects( sceneNode.threeScene.children, true );
 
         // Cycle through the list of intersected objects and return the first visible one
         for ( var i = 0; i < intersects.length; i++ ) {
@@ -2404,12 +2397,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             return;
         }
 
-        if(!this.raycaster) this.raycaster = new THREE.Raycaster();
-        if(!this.projector) this.projector = new THREE.Projector();
-        
-        var SCREEN_HEIGHT = window.innerHeight;
-        var SCREEN_WIDTH = window.innerWidth;
-
+        var intersects = undefined;
+        var target = undefined;
         var mousepos = { 
             "x": this.lastEventData.eventData[0].position[0], 
             "y": this.lastEventData.eventData[0].position[1] 
@@ -2418,45 +2407,25 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
-        pickDirectionVector = new THREE.Vector3();
-        
-        pickDirectionVector.set( x, y, 0.5 );
+        pickDirection.set( x, y, threeCam.near );
 
-        var intersects = undefined;
-        var target = undefined;
+        var camPos = new THREE.Vector3(
+            threeCam.matrixWorld.elements[ 12 ],  
+            threeCam.matrixWorld.elements[ 13 ], 
+            threeCam.matrixWorld.elements[ 14 ]  
+        );
 
-
-        // TODO: The check for the camera type may not be needed
-        // the first option should work for the perspective camera as well
-        // we just need to make the switch and then test thoroughly 
-        if ( threeCam instanceof THREE.OrthographicCamera ) {
-            var ray = this.projector.pickingRay( pickDirectionVector, threeCam );
-            intersects = ray.intersectObjects( sceneNode.threeScene.children, true );
-        } else {
-            this.projector.unprojectVector( pickDirectionVector, threeCam );
-            var pos = new THREE.Vector3();
-            pos.setFromMatrixPosition( threeCam.matrixWorld );
-            pickDirectionVector.sub(pos);
-            pickDirectionVector.normalize();
-            
-            this.raycaster.set( pos, pickDirectionVector );
-            intersects = this.raycaster.intersectObjects( sceneNode.threeScene.children, true );
-        }
-
-        // intersections are, by default, ordered by distance,
-        // so we only care for the first (visible) one. The intersection
-        // object holds the intersection point, the face that's
-        // been "hit" by the ray, and the object to which that
-        // face belongs. We only care for the object itself.
+        pickDirection.unproject( threeCam );
+        raycaster.ray.set( camPos, pickDirection.sub( camPos ).normalize() );
+        intersects = raycaster.intersectObjects( sceneNode.threeScene.children, true );
 
         // Cycle through the list of intersected objects and return the first visible one
         for ( var i = 0; i < intersects.length && target === undefined; i++ ) {
             if ( debug ) {
-                for ( var i = 0; i < intersects.length; i++ ) { 
-                    console.info( i + ". " + intersects[i].object.name ) 
+                for ( var j = 0; j < intersects.length; j++ ) { 
+                    console.info( j + ". " + intersects[ j ].object.name ) 
                 }
             }   
-
             if ( intersects[ i ].object.visible ) {
                 if ( getPickObjectID( intersects[ i ].object ) !== null ) {
                     target = intersects[ i ];
