@@ -143,7 +143,6 @@ define([
     var scratchNormal = new Cartesian3();
     var scratchTangent = new Cartesian3();
     var scratchBinormal = new Cartesian3();
-    var scratchBoundingSphere = new BoundingSphere();
     var p1Scratch = new Cartesian3();
     var p2Scratch = new Cartesian3();
 
@@ -488,6 +487,8 @@ define([
      * @see PolygonGeometry#createGeometry
      * @see PolygonGeometry#fromPositions
      *
+     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Polygon.html|Cesium Sandcastle Polygon Demo}
+     *
      * @example
      * // 1. create a polygon from points
      * var polygon = new Cesium.PolygonGeometry({
@@ -538,20 +539,22 @@ define([
      *     }]
      *   }
      * });
-     * var geometry = PolygonGeometry.createGeometry(polygonWithHole);
+     * var geometry = Cesium.PolygonGeometry.createGeometry(polygonWithHole);
      *
      * // 3. create extruded polygon
-     * var extrudedPolygon = new PolygonGeometry({
-     *   positions : Cesium.Cartesian3.fromDegreesArray([
-     *     -72.0, 40.0,
-     *     -70.0, 35.0,
-     *     -75.0, 30.0,
-     *     -70.0, 30.0,
-     *     -68.0, 40.0
-     *   ]),
-     *   extrudedHeight: 300000
+     * var extrudedPolygon = new Cesium.PolygonGeometry({
+     *   polygonHierarchy : {
+     *     positions : Cesium.Cartesian3.fromDegreesArray([
+     *       -72.0, 40.0,
+     *       -70.0, 35.0,
+     *       -75.0, 30.0,
+     *       -70.0, 30.0,
+     *       -68.0, 40.0
+     *     ]),
+     *     extrudedHeight: 300000
+     *   } 
      * });
-     * var geometry = PolygonGeometry.createGeometry(extrudedPolygon);
+     * var geometry = Cesium.PolygonGeometry.createGeometry(extrudedPolygon);
      */
     var PolygonGeometry = function(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);

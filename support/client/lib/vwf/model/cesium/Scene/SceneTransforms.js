@@ -26,13 +26,14 @@ define([
     /**
      * Functions that do scene-dependent transforms between rendering-related coordinate systems.
      *
-     * @exports SceneTransforms
+     * @namespace
+     * @alias SceneTransforms
      */
     var SceneTransforms = {};
 
-    var actualPosition = new Cartesian4(0, 0, 0, 1);
+    var actualPositionScratch = new Cartesian4(0, 0, 0, 1);
     var positionCC = new Cartesian4();
-    var viewProjectionScratch;
+    var viewProjectionScratch = new Matrix4();
 
     /**
      * Transforms a position in WGS84 coordinates to window coordinates.  This is commonly used to place an
@@ -47,7 +48,7 @@ define([
      * // Output the window position of longitude/latitude (0, 0) every time the mouse moves.
      * var scene = widget.scene;
      * var ellipsoid = scene.globe.ellipsoid;
-     * var position = ellipsoid.cartographicToCartesian(new Cesium.Cartographic(0.0, 0.0));
+     * var position = Cesium.Cartesian3.fromDegrees(0.0, 0.0));
      * var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
      * handler.setInputAction(function(movement) {
      *     console.log(Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, position));
@@ -64,17 +65,20 @@ define([
         //>>includeEnd('debug');
 
         // Transform for 3D, 2D, or Columbus view
-        SceneTransforms.computeActualWgs84Position(scene.frameState, position, actualPosition);
+        var actualPosition = SceneTransforms.computeActualWgs84Position(scene.frameState, position, actualPositionScratch);
 
         if (!defined(actualPosition)) {
-            result = undefined;
             return undefined;
         }
 
         // View-projection matrix to transform from world coordinates to clip coordinates
         var camera = scene.camera;
-        viewProjectionScratch = Matrix4.multiply(camera.frustum.projectionMatrix, camera.viewMatrix, viewProjectionScratch);
-        Matrix4.multiplyByVector(viewProjectionScratch, actualPosition, positionCC);
+        var viewProjection = Matrix4.multiply(camera.frustum.projectionMatrix, camera.viewMatrix, viewProjectionScratch);
+        Matrix4.multiplyByVector(viewProjection, Cartesian4.fromElements(actualPosition.x, actualPosition.y, actualPosition.z, 1, positionCC), positionCC);
+
+        if ((positionCC.z < 0) && (scene.mode !== SceneMode.SCENE2D)) {
+            return undefined;
+        }
 
         result = SceneTransforms.clipToGLWindowCoordinates(scene, positionCC, result);
         result.y = scene.canvas.clientHeight - result.y;
@@ -94,7 +98,7 @@ define([
      * // Output the window position of longitude/latitude (0, 0) every time the mouse moves.
      * var scene = widget.scene;
      * var ellipsoid = scene.globe.ellipsoid;
-     * var position = ellipsoid.cartographicToCartesian(new Cesium.Cartographic(0.0, 0.0));
+     * var position = Cesium.Cartesian3.fromDegrees(0.0, 0.0));
      * var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
      * handler.setInputAction(function(movement) {
      *     console.log(Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, position));
@@ -112,15 +116,20 @@ define([
         //>>includeEnd('debug');
 
         // Transform for 3D, 2D, or Columbus view
-        SceneTransforms.computeActualWgs84Position(scene.frameState, position, actualPosition);
+        var actualPosition = SceneTransforms.computeActualWgs84Position(scene.frameState, position, actualPositionScratch);
 
         if (!defined(actualPosition)) {
             return undefined;
         }
 
         // View-projection matrix to transform from world coordinates to clip coordinates
-        var viewProjection = scene.context.uniformState.viewProjection;
+        var camera = scene.camera;
+        var viewProjection = Matrix4.multiply(camera.frustum.projectionMatrix, camera.viewMatrix, viewProjectionScratch);
         Matrix4.multiplyByVector(viewProjection, Cartesian4.fromElements(actualPosition.x, actualPosition.y, actualPosition.z, 1, positionCC), positionCC);
+
+        if ((positionCC.z < 0) && (scene.mode !== SceneMode.SCENE2D)) {
+            return undefined;
+        }
 
         return SceneTransforms.clipToDrawingBufferCoordinates(scene, positionCC, result);
     };
@@ -139,13 +148,12 @@ define([
         }
 
         var projection = frameState.mapProjection;
-        projection.ellipsoid.cartesianToCartographic(position, positionInCartographic);
-        if (!defined(positionInCartographic)) {
-            result = undefined;
-            return result;
+        var cartographic = projection.ellipsoid.cartesianToCartographic(position, positionInCartographic);
+        if (!defined(cartographic)) {
+            return undefined;
         }
 
-        projection.project(positionInCartographic, projectedPosition);
+        projection.project(cartographic, projectedPosition);
 
         if (mode === SceneMode.COLUMBUS_VIEW) {
             return Cartesian3.fromElements(projectedPosition.z, projectedPosition.x, projectedPosition.y, result);

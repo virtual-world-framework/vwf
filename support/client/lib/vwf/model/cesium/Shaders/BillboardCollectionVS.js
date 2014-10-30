@@ -35,12 +35,9 @@ float getNearFarScalar(vec4 nearFarScalar, float cameraDistSq)\n\
     float nearDistanceSq = nearFarScalar.x * nearFarScalar.x;\n\
     float farDistanceSq = nearFarScalar.z * nearFarScalar.z;\n\
 \n\
-    // ensure that t will fall within the range of [0.0, 1.0]\n\
-    cameraDistSq = clamp(cameraDistSq, nearDistanceSq, farDistanceSq);\n\
-\n\
     float t = (cameraDistSq - nearDistanceSq) / (farDistanceSq - nearDistanceSq);\n\
 \n\
-    t = pow(t, 0.15);\n\
+    t = pow(clamp(t, 0.0, 1.0), 0.2);\n\
 \n\
     return mix(valueAtMin, valueAtMax, t);\n\
 }\n\
