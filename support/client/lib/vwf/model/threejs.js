@@ -47,7 +47,12 @@
     }
     
     
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ], function( module, model, utility, Color, $ ) {
+define( [ "module", 
+          "vwf/model", 
+          "vwf/utility", 
+          "vwf/utility/color", 
+          "jquery" 
+    ], function( module, model, utility, Color, $ ) {
 
     var self;
 
@@ -2491,29 +2496,32 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         if ( mesh.geometry instanceof THREE.BufferGeometry ) {
             return;
         }
-        if ( !mesh.geometry.faceVertexUvs[ 0 ] ) {
-            mesh.geometry.faceVertexUvs[ 0 ] = [];
+        var geometry = mesh.geometry;
+        if ( !geometry.faceVertexUvs[ 0 ] ) {
+            geometry.faceVertexUvs[ 0 ] = [];
         }
-        if ( mesh.geometry.faceVertexUvs[ 0 ].length === 0 ) {
-            for ( var i = 0; i < mesh.geometry.faces.length; i++ ) {
-                var face = mesh.geometry.faces[ i ];
+        if ( geometry.faceVertexUvs[ 0 ].length === 0 ) {
+            for ( var i = 0; i < geometry.faces.length; i++ ) {
+                var face = geometry.faces[ i ];
                 if ( face instanceof THREE.Face4 ) {
-                    mesh.geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ),
-                                                           new THREE.Vector2( 0, 1 ),
-                                                           new THREE.Vector2( 0, 1 ), 
-                                                           new THREE.Vector2( 0, 1 ) ] );
+                    geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ),
+                                                      new THREE.Vector2( 0, 1 ),
+                                                      new THREE.Vector2( 0, 1 ), 
+                                                      new THREE.Vector2( 0, 1 ) 
+                                                    ] );
                 } else if ( face instanceof THREE.Face3 ) {
-                    mesh.geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ), 
-                                                           new THREE.Vector2( 0, 1 ),
-                                                           new THREE.Vector2( 0, 1 ) ] );
+                    geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ), 
+                                                      new THREE.Vector2( 0, 1 ),
+                                                      new THREE.Vector2( 0, 1 ) 
+                                                    ] );
                 }
             }
         }
          
-        mesh.geometry.computeCentroids();
-        mesh.geometry.computeFaceNormals();
-        mesh.geometry.computeVertexNormals();
-        mesh.geometry.uvsNeedUpdate = true;
+        geometry.computeCentroids && geometry.computeCentroids();
+        geometry.computeFaceNormals && geometry.computeFaceNormals();
+        geometry.computeVertexNormals && geometry.computeVertexNormals();
+        geometry.uvsNeedUpdate = true;
 
     }
     //set the material on all the sub meshes of an object.
