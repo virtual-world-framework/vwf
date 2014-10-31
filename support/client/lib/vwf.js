@@ -1771,7 +1771,6 @@
 
                 if ( creating ) {
                     vwf.createEvent( nodeID, eventName, eventDescriptor.parameters );
-                    vwf.setEvent( nodeID, eventName, eventDescriptor );
                 } else {
                     vwf.setEvent( nodeID, eventName, eventDescriptor );
                 }  // TODO: delete when eventDescriptor === null in patch
