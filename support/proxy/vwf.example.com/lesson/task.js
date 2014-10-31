@@ -35,6 +35,8 @@ this.enter = function() {
         }
     }
 
+    this.status = "entered";
+
     // Fire the entering event which runs lesson-specific code
     this.entering( this.text );
 
@@ -69,6 +71,8 @@ this.next = function() {
     }
     else
         this.completed();
+
+    //@ sourceURL=task.next
 } 
 
 this.exit = function() {
@@ -79,4 +83,9 @@ this.exit = function() {
     // Fire the exiting event
     this.exiting();
 
+    this.status = "inactive";
+}
+
+this.completed = function() {
+    this.status = "completed";
 }

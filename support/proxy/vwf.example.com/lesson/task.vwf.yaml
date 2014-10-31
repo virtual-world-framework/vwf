@@ -62,6 +62,14 @@ properties:
       return this.subtaskCache;
       //@ sourceURL=task.subtasks.get
 
+  ## Whether this task is inactive, entered, or completed
+  ## inactive -> entered -> completed -> inactive
+  ## 
+  ## @name lesson.task.vwf#active
+  ## @property
+
+  status: "inactive"
+
   ## Index of the currently active subtask
   ## 
   ## @name lesson.task.vwf#taskIndex
