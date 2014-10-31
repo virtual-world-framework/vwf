@@ -3850,15 +3850,9 @@ if ( ! childComponent.source ) {
                 return [ nodeID, eventName, eventListenerID ];
             } );
 
-            var node = nodes.existing[nodeID];
-
             // Encode any namespacing into the name.
 
             var encodedEventName = namespaceEncodedName( eventName );
-
-            // Locate the event in the registry.
-
-            var event = node.events.existing[ encodedEventName ];
 
             // Call `gettingEventListener` on each model. The first model to return a non-undefined
             // value dictates the return value.
