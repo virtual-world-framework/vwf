@@ -86,7 +86,7 @@ define( function() {
 
         // -- environment --------------------------------------------------------------------------
 
-        /// The name of the active envionment.
+        /// The name of the active environment.
 
         environment: {
 
