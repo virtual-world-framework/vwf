@@ -3812,7 +3812,7 @@ if ( ! childComponent.source ) {
                 // Call the driver.
 
                 var listener = model.settingEventListener &&
-                    model.settingEventListener( nodeID, eventName, eventListenerID, eventListener );
+                    model.settingEventListener( nodeID, encodedEventName, eventListenerID, eventListener );
 
                 // Update the value to the value assigned if the driver handled it.
 
@@ -3830,7 +3830,7 @@ if ( ! childComponent.source ) {
 
             this.views.forEach( function( view ) {
                 view.satEventListener &&
-                    view.satEventListener( nodeID, eventName, eventListenerID, eventListener );
+                    view.satEventListener( nodeID, encodedEventName, eventListenerID, eventListener );
             } );
 
             this.logger.debugu();
@@ -3870,7 +3870,7 @@ if ( ! childComponent.source ) {
                 // Call the driver.
 
                 var listener = model.gettingEventListener &&
-                    model.gettingEventListener( nodeID, eventName, eventListenerID );
+                    model.gettingEventListener( nodeID, encodedEventName, eventListenerID );
 
                 // Update the value to the value assigned if the driver handled it.
 
@@ -3888,7 +3888,7 @@ if ( ! childComponent.source ) {
 
             this.views.forEach( function( view ) {
                 view.gotEventListener &&
-                    view.gotEventListener( nodeID, eventName, eventListenerID, eventListener );
+                    view.gotEventListener( nodeID, encodedEventName, eventListenerID, eventListener );
             } );
 
             this.logger.debugu();
