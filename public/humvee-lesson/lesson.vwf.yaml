@@ -303,8 +303,10 @@ children:
                 }, this );
                 this.scene.keyUp = this.events.add( function(e) {
                   clearInterval( this.intervalId$ );
+                  //@ sourceURL=moveVehicleInstructions.keyUp
                 }, this);
-              } //@ sourceURL=moveVehicleTask.vwf
+                //@ sourceURL=lesson.driveVehicle.moveVehicle.moveVehicleInstructions.entering
+              } 
   cameraPoseEnteringVehicle:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -341,6 +343,7 @@ scripts:
       0,0,1,0,
       -14.136186599731445,-42.1671028137207,88.4365005493164,1 ];
   }
+
   this.entering = function() {
     // Reset control value positions and humvee translation
     this.parent.humvee.DoorDriverFront.controlValue = this.parent.humvee.DoorDriverFront.close.controlValue;
@@ -348,4 +351,10 @@ scripts:
     this.parent.humvee.GearShift.controlValue = this.parent.humvee.GearShift.neutral.controlValue;
     this.parent.humvee.EmergencyBrake.controlValue = this.parent.humvee.EmergencyBrake.engage.controlValue;
     this.parent.humvee.translation = [ 0, 0, 0 ];
-  } //@ sourceURL=humvee-lesson.vwf
+  }
+
+  this.exiting = function() {
+    var taskThatSetsKeyListeners = this.driveVehicle.moveVehicle.moveVehicleInstructions;
+    this.scene.keyDown = this.scene.events.flush( taskThatSetsKeyListeners );
+    this.scene.keyUp = this.scene.events.flush( taskThatSetsKeyListeners );
+  }
