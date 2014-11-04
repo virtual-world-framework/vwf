@@ -2291,6 +2291,11 @@ define( [ "module",
                     }
                 }
             }
+            imageObj.onerror = function() {
+                self.logger.errorx( "loadImage", "Invalid image url:", url );
+                imageObj.src = oldSrc;
+            }
+            var oldSrc = imageObj.src;
             imageObj.src = url;
     
         }   
