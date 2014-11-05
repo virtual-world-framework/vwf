@@ -1,0 +1,23 @@
+---
+extends: http://vwf.example.com/node.vwf
+properties:
+  ## Uniforms
+  ## 
+  ## @name shaderMaterial.vwf#uniforms
+  ## @property
+  uniforms:
+  ## Vertex Shader
+  ## 
+  ## @name shaderMaterial.vwf#vertexShader
+  ## @property
+  vertexShader:
+  ## Fragment Shader
+  ## 
+  ## @name shaderMaterial.vwf#fragmentShader
+  ## @property
+  fragmentShader:
+  ## Update Function
+  ## 
+  ## @name shaderMaterial.vwf#updateFunction
+  ## @property
+  updateFunction:

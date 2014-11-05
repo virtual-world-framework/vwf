@@ -1133,6 +1133,19 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }           
                 return list;
         }
+
+        function GetShaderMaterials(node,list)
+        {
+            if(!list)
+                list = [];
+            for(var i =0; i<node.children.length; i++)
+            {
+                if(node.children[i] instanceof THREE.Mesh && node.children[i].material instanceof THREE.ShaderMaterial)
+                    list.push(node.children[i].material);
+                list =  GetShaderMaterials(node.children[i],list);
+            }           
+                return list;
+        }
         
         function renderScene(time) {
 
@@ -1160,6 +1173,14 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 {
                     if(pss[i].update)
                         pss[i].update(timepassed);
+                }
+                
+                var shaderMaterials = GetShaderMaterials( sceneNode.threeScene );
+                for ( var i in shaderMaterials )
+                {
+                    if( shaderMaterials[ i ].updateFunction ) {
+                        shaderMaterials[ i ].updateFunction();
+                    }
                 }
 
                 if ( navmode != "none" && !self.disableInputs ) {

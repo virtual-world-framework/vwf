@@ -1,0 +1,95 @@
+# Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+# Secretary of Defense (Personnel & Readiness).
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License. You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed under the License
+# is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+# or implied. See the License for the specific language governing permissions and limitations under
+# the License.
+
+--- 
+extends: http://vwf.example.com/scene.vwf
+properties:
+  ambientColor: [ 50, 50, 50 ]
+children:
+  duck:
+    extends: http://vwf.example.com/node3.vwf
+    implements:
+    - http://vwf.example.com/spin-on-click.vwf
+    source: duck.dae
+    type: model/vnd.collada+xml
+    properties:
+      # spin-on-click configuration parameters
+      spin-axis: [ 0, 0, 1 ]
+    children:
+      material:
+        extends: http://vwf.example.com/shaderMaterial.vwf
+        properties:
+          uniforms:
+            time:
+              type: "f"
+              value: 0
+            distance:
+              type: "f"
+              value: 0
+            texture:
+              type: "t"
+              value: 0
+            lightDir:
+              type: "v3"
+              value: { x: 0.5, y: 0.25, z: 1}
+          vertexShader: |
+            varying vec2 vUv;
+            varying vec3 myNormal;
+            void main() {
+              myNormal = normalMatrix * normal;
+              vUv = uvMap;
+              vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+              gl_Position = projectionMatrix * mvPosition;
+            }
+          fragmentShader: |
+            uniform float time;
+            uniform float distance;
+            uniform sampler2D texture;
+            uniform vec3 lightDir;
+            varying vec2 vUv;
+            varying vec3 myNormal;
+            void main( void ) {
+              vec4 color = texture2D( texture, vUv );
+              float depth = gl_FragCoord.z / gl_FragCoord.w;
+              depth = 1.0 - ( depth - distance ) / 200.0;
+              color.r *= ( sin( time * 0.75 ) + 0.75 ) * 0.25 + depth;
+              color.g *= ( sin( time ) + 0.75 ) * 0.25 + depth;
+              color.b *= ( sin( time * 1.25 ) + 0.75 ) * 0.25 + depth;
+              float intensity;
+              vec3 l = ( viewMatrix * vec4( lightDir, 0.0 ) ).xyz;
+              intensity = dot(normalize(lightDir),normalize(myNormal));
+              if (intensity > 0.8)
+                color *= vec4(1.0,1.0,1.0,1.0);
+              else if (intensity > 0.5)
+                color *= vec4(0.75,0.75,0.75,1.0);
+              else if (intensity > 0.1)
+                color *= vec4(0.5,0.5,0.5,1.0);
+              else
+                color = vec4(0.0,0.0,0.0,1.0);
+              gl_FragColor = color;
+            }
+          updateFunction: |
+              this.uniforms.time.value = ( Date.now() / 1000 ) % ( Math.PI * 12 );
+scripts:
+- |
+    this.initialize = function(){
+      this.camera.transform = [ -1,   0,  0, 0, 
+                                 0,  -1,  0, 0, 
+                                 0,   0,  1, 0, 
+                                16, 600, 90, 1 ];
+      this.camera.far *= 4;
+      this.camera.navmode = "none";
+      this.duck.material.uniforms.distance.value = Math.sqrt( Math.pow( 16, 2 ) + Math.pow( 600, 2 ) + Math.pow( 90, 2 ) ) - 200;
+      this.duck.material.uniforms.texture.value = THREE.ImageUtils.loadTexture( "images/duckCM.png" );
+      this.duck.material.uniforms = this.duck.material.uniforms;
+    }
