@@ -4208,8 +4208,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
     function UTF8JsonLoader(node,callback)
     {
-        
-        self = this;
         this.url = node.source;
         this.callback = callback;
         this.children=[];
