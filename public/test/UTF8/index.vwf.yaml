@@ -16,7 +16,7 @@ extends: http://vwf.example.com/scene.vwf
 methods:
   initializeCamera:
 children:
-  Terrain2:
+  duck:
     extends: http://vwf.example.com/node3.vwf
     #source: https://3dr.adlnet.gov/api/_3DRAPI.svc/adl:844/Model/json/uncompressed?ID=00-00-00
     source: duck.json
