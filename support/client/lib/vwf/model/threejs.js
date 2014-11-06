@@ -1194,10 +1194,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         threeObject.fragmentShader = value;
                     }
                     if ( propertyName === "updateFunction" ) {
-                        value = function() {
-                            eval( propertyValue );
-                        };
+                        value = propertyValue;
                         threeObject.updateFunction = value;
+                        threeObject.update = function() {
+                            eval( this.updateFunction );
+                        }
                     }
                 }
                 if( threeObject instanceof THREE.Scene )

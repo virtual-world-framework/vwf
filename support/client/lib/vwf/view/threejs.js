@@ -1179,7 +1179,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 for ( var i in shaderMaterials )
                 {
                     if( shaderMaterials[ i ].updateFunction ) {
-                        shaderMaterials[ i ].updateFunction();
+                        shaderMaterials[ i ].update();
                     }
                 }
 
