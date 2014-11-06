@@ -895,15 +895,15 @@ define( [ "module",
                     
                     switch ( propertyName ) {
 
-                        case width:
+                        case "width":
                             kineticObj.setWidth( Number( propertyValue ) );
                             break;
 
-                        case height:
+                        case "height":
                             kineticObj.setHeight( Number( propertyValue ) );
                             break;
 
-                        case pixelRatio:
+                        case "pixelRatio":
                             kineticObj.setPixelRatio( parseFloat( propertyValue ) );
                             break;
                         
