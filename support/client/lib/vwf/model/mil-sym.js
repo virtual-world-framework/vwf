@@ -333,7 +333,12 @@ define( [ "module",
                             break;
 
                         case "quantity":
-                            unit.modifiers[ mu.C_QUANTITY ] = Number( propertyValue );
+                            if ( (propertyValue === "") && unit.modifiers[ mu.C_QUANTITY ] ) {
+                                delete unit.modifiers[ mu.C_QUANTITY ];
+                            }
+                            else {
+                                unit.modifiers[ mu.C_QUANTITY ] = Number( propertyValue );
+                            }
                             break;
 
                         case "additionalInfo1":
@@ -357,7 +362,12 @@ define( [ "module",
                             break;
 
                         case "directionOfMovement":
-                            unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ] = propertyValue;
+                            if ( (propertyValue === "") && unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ] ) {
+                                delete unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ];
+                            }
+                            else {
+                                unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ] = propertyValue;
+                            }
                             break;
 
                         case "DTG1":
@@ -389,7 +399,12 @@ define( [ "module",
                             break;
 
                         case "reinforcedReduced":
-                            unit.modifiers[ mu.F_REINFORCED_REDUCED ] = propertyValue;
+                            if ( (propertyValue === "") && unit.modifiers[ mu.F_REINFORCED_REDUCED ] ) {
+                                delete unit.modifiers[ mu.F_REINFORCED_REDUCED ];
+                            }
+                            else {
+                                unit.modifiers[ mu.F_REINFORCED_REDUCED ] = propertyValue;
+                            }
                             break;
 
                         case "signatureEquip":
