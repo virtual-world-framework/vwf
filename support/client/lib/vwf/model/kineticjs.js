@@ -2137,14 +2137,8 @@ define( [ "module",
                 imageObj.src = node.source;    
             }
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
-            var stageWidth = 800;
-            var stageHeight = 600;
-            if ( window && window.innerWidth ) {
-                stageWidth = window.innerWidth - 20;
-            }            
-            if ( window && window.innerHeight ) {
-                stageHeight = window.innerHeight - 20;
-            }
+            var stageWidth = ( window && window.innerWidth ) ? window.innerWidth : 800;
+            var stageHeight = ( window && window.innerHeight ) ? window.innerHeight : 600;
             var stageContainer = ( config && config.container ) || 'vwf-root';
             var stageWidth = ( config && config.width ) || stageWidth;
             var stageHeight = ( config && config.height ) || stageHeight;
