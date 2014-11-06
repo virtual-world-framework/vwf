@@ -30,56 +30,35 @@ children:
         extends: http://vwf.example.com/shaderMaterial.vwf
         properties:
           uniforms:
-            time:
-              type: "f"
-              value: 0
-            distance:
-              type: "f"
-              value: 0
             texture:
               type: "t"
               value: 0
-            lightDir:
-              type: "v3"
-              value: { x: 0.5, y: 0.25, z: 1}
           vertexShader: |
             varying vec2 vUv;
-            varying vec3 myNormal;
+            varying vec3 fragNormal;
             void main() {
-              myNormal = normalMatrix * normal;
+              fragNormal = normalMatrix * normal;
               vUv = uvMap;
               vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
               gl_Position = projectionMatrix * mvPosition;
             }
           fragmentShader: |
-            uniform float time;
-            uniform float distance;
             uniform sampler2D texture;
-            uniform vec3 lightDir;
             varying vec2 vUv;
-            varying vec3 myNormal;
+            varying vec3 fragNormal;
             void main( void ) {
-              vec4 color = texture2D( texture, vUv );
-              float depth = gl_FragCoord.z / gl_FragCoord.w;
-              depth = ( depth - distance ) / 200.0;
-              color.r *= ( sin( time * 0.75 ) + 0.75 ) * 0.25 + depth;
-              color.g *= ( sin( time ) + 0.75 ) * 0.25 + depth;
-              color.b *= ( sin( time * 1.25 ) + 0.75 ) * 0.25 + depth;
-              float intensity;
-              intensity = dot( normalize( lightDir ), normalize( myNormal ) );
-              if ( intensity > 0.8 ) {
-                color.rgb *= 1.0;
-              } else if ( intensity > 0.4 ) {
-                color.rgb *= 0.75;
-              } else if ( intensity > 0.1 ) {
-                color.rgb *= 0.5;
-              } else {
-                color.rgb *= 0.0;
+              vec4 color;
+              float angle = 1.0 - acos( dot( normalize( vec3( 0.0, 0.0, 1.0 ) ), normalize( fragNormal ) ) ) / 3.15;
+              color.r = ( 1.0 - angle ) + 0.3;
+              color.g = ( 1.0 - angle ) + 0.35;
+              color.b = ( 1.0 - angle ) + 0.4;
+              vec3 tex = texture2D( texture, vUv ).xyz;
+              color.xyz += vec3( ( tex.x + tex.y + tex.z ) / 3.0 * 0.25 );
+              if ( angle > 0.65 && angle < 0.75 ) {
+                color.xyz *= 1.15;
               }
               gl_FragColor = color;
             }
-          updateFunction: |
-              this.uniforms.time.value = ( Date.now() / 1000 ) % ( Math.PI * 12 );
 scripts:
 - |
     this.initialize = function(){
@@ -89,7 +68,6 @@ scripts:
                                 16, 600, 90, 1 ];
       this.camera.far *= 4;
       this.camera.navmode = "none";
-      this.duck.material.uniforms.distance.value = Math.sqrt( Math.pow( 16, 2 ) + Math.pow( 600, 2 ) + Math.pow( 90, 2 ) ) - 200;
       this.duck.material.uniforms.texture.value = THREE.ImageUtils.loadTexture( "images/duckCM.png" );
       this.duck.material.uniforms = this.duck.material.uniforms;
     }
