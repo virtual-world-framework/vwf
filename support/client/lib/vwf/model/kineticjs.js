@@ -474,11 +474,21 @@ define( [ "module",
                             }
                             break;
 
+                        case "dragBoundFunc":
+                            var functionString = propertyValue;
+                            if ( typeof functionString !== "string" ) {
+                                this.logger.errorx( "settingProperty", 
+                                    "The value of dragBoundFunc should be a string of the " +
+                                    "function to be used." );
+                                break;
+                            }
+                            node.kineticObj.dragBoundFunc( eval( "(" + functionString + ")" ) );
+                            break;
+
                         case "transform":
                         case "absoluteTransform":
                         case "absoluteOpacity":
                         case "absoluteZIndex":
-                        case "dragBoundFunc":
                             this.logger.errorx( "settingProperty", "Cannot set property ", 
                                 propertyName );
                             value = undefined;
@@ -1403,6 +1413,7 @@ define( [ "module",
                             break;
 
                         case "dragBoundFunc":
+                            value = node.kineticObj.dragBoundFunc().toString();
                             break;
 
                         case "id":
