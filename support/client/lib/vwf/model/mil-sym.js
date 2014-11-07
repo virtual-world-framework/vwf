@@ -335,8 +335,7 @@ define( [ "module",
                         case "quantity":
                             if ( (propertyValue === "") && unit.modifiers[ mu.C_QUANTITY ] ) {
                                 delete unit.modifiers[ mu.C_QUANTITY ];
-                            }
-                            else {
+                            } else {
                                 unit.modifiers[ mu.C_QUANTITY ] = Number( propertyValue );
                             }
                             break;
@@ -364,8 +363,7 @@ define( [ "module",
                         case "directionOfMovement":
                             if ( (propertyValue === "") && unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ] ) {
                                 delete unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ];
-                            }
-                            else {
+                            } else {
                                 unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ] = propertyValue;
                             }
                             break;
@@ -401,8 +399,7 @@ define( [ "module",
                         case "reinforcedReduced":
                             if ( (propertyValue === "") && unit.modifiers[ mu.F_REINFORCED_REDUCED ] ) {
                                 delete unit.modifiers[ mu.F_REINFORCED_REDUCED ];
-                            }
-                            else {
+                            } else {
                                 unit.modifiers[ mu.F_REINFORCED_REDUCED ] = propertyValue;
                             }
                             break;

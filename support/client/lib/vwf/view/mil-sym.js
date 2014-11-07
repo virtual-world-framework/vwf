@@ -296,7 +296,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             
             // Define the list of valid modifiers
             updatedUnit[ "validModifiers" ] = [];
-            _aliasModifiers.forEach ( function(thisAliasModifier) {
+            _aliasModifiers.forEach ( function( thisAliasModifier ) {
                                             var modifier = renderer.utilities.ModifiersUnits[ thisAliasModifier.modifier ];
                                             if ( symUtil.hasModifier( updatedUnit.symbolID, 
                                                                       modifier,
