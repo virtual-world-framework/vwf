@@ -474,11 +474,21 @@ define( [ "module",
                             }
                             break;
 
+                        case "dragBoundFunc":
+                            var functionString = propertyValue;
+                            if ( typeof functionString !== "string" ) {
+                                this.logger.errorx( "settingProperty", 
+                                    "The value of dragBoundFunc should be a string of the " +
+                                    "function to be used." );
+                                break;
+                            }
+                            node.kineticObj.dragBoundFunc( eval( "(" + functionString + ")" ) );
+                            break;
+
                         case "transform":
                         case "absoluteTransform":
                         case "absoluteOpacity":
                         case "absoluteZIndex":
-                        case "dragBoundFunc":
                             this.logger.errorx( "settingProperty", "Cannot set property ", 
                                 propertyName );
                             value = undefined;
@@ -885,15 +895,15 @@ define( [ "module",
                     
                     switch ( propertyName ) {
 
-                        case width:
+                        case "width":
                             kineticObj.setWidth( Number( propertyValue ) );
                             break;
 
-                        case height:
+                        case "height":
                             kineticObj.setHeight( Number( propertyValue ) );
                             break;
 
-                        case pixelRatio:
+                        case "pixelRatio":
                             kineticObj.setPixelRatio( parseFloat( propertyValue ) );
                             break;
                         
@@ -1403,6 +1413,7 @@ define( [ "module",
                             break;
 
                         case "dragBoundFunc":
+                            value = node.kineticObj.dragBoundFunc().toString();
                             break;
 
                         case "id":
@@ -2137,14 +2148,8 @@ define( [ "module",
                 imageObj.src = node.source;    
             }
         } else if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
-            var stageWidth = 800;
-            var stageHeight = 600;
-            if ( window && window.innerWidth ) {
-                stageWidth = window.innerWidth - 20;
-            }            
-            if ( window && window.innerHeight ) {
-                stageHeight = window.innerHeight - 20;
-            }
+            var stageWidth = ( window && window.innerWidth ) ? window.innerWidth : 800;
+            var stageHeight = ( window && window.innerHeight ) ? window.innerHeight : 600;
             var stageContainer = ( config && config.container ) || 'vwf-root';
             var stageWidth = ( config && config.width ) || stageWidth;
             var stageHeight = ( config && config.height ) || stageHeight;
