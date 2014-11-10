@@ -235,6 +235,21 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     node.threeObject = new THREE.MeshPhongMaterial();
                     SetMaterial( parentNode.threeObject, node.threeObject, childName );
                 }
+            } else if ( protos && isShaderMaterialDefinition.call( this, protos ) ) {
+
+                node = this.state.nodes[childID] = {
+                    name: childName,
+                    threeObject: GetMaterial(parentNode.threeObject, childName),
+                    ID: childID,
+                    parentID: nodeID,
+                    type: childExtendsID,
+                    sourceType: childType,
+                };
+                if ( true )
+                {
+                    node.threeObject = new THREE.ShaderMaterial();
+                    SetMaterial( parentNode.threeObject, node.threeObject, childName );
+                }
             } else if ( protos && isParticleDefinition.call( this, protos ) ) {
                 
                 node = this.state.nodes[childID] = {
@@ -1165,6 +1180,27 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     }
 
                 }
+                if ( threeObject instanceof THREE.ShaderMaterial ) {
+                    if ( propertyName === "uniforms" ) {
+                        value = propertyValue;
+                        threeObject.uniforms = value;
+                    }
+                    if ( propertyName === "vertexShader" ) {
+                        value = propertyValue;
+                        threeObject.vertexShader = value;
+                    }
+                    if ( propertyName === "fragmentShader" ) {
+                        value = propertyValue;
+                        threeObject.fragmentShader = value;
+                    }
+                    if ( propertyName === "updateFunction" ) {
+                        value = propertyValue;
+                        threeObject.updateFunction = value;
+                        threeObject.update = function() {
+                            eval( this.updateFunction );
+                        }
+                    }
+                }
                 if( threeObject instanceof THREE.Scene )
                 {
                     if(propertyName == 'activeCamera')
@@ -1661,6 +1697,24 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     return value;
                 }
             }
+            if ( threeObject instanceof THREE.ShaderMaterial ) {
+                if ( propertyName === "uniforms" ) {
+                    value = threeObject.uniforms;
+                    return value;
+                }
+                if ( propertyName === "vertexShader" ) {
+                    value = threeObject.vertexShader;
+                    return value;
+                }
+                if ( propertyName === "fragmentShader" ) {
+                    value = threeObject.fragmentShader;
+                    return value;
+                }
+                if ( propertyName === "updateFunction" ) {
+                    value = threeObject.updateFunction;
+                    return value;
+                }
+            }
             if( threeObject instanceof THREE.Camera ) {
                 switch ( propertyName ) {
                     case "fovy":
@@ -2011,6 +2065,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundMaterial; i++ ) {
                 foundMaterial = ( prototypes[i] == "http-vwf-example-com-material-vwf" );    
+            }
+        }
+
+        return foundMaterial;
+    }
+    function isShaderMaterialDefinition( prototypes ) {
+        var foundMaterial = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundMaterial; i++ ) {
+                foundMaterial = ( prototypes[i] == "http-vwf-example-com-shaderMaterial-vwf" );    
             }
         }
 
