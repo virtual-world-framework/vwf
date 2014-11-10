@@ -1176,8 +1176,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 }
                 
                 var shaderMaterials = GetShaderMaterials( sceneNode.threeScene );
-                for ( var i in shaderMaterials )
-                {
+                for ( var i = 0; i < shaderMaterials.length; i++ ) {
                     if( shaderMaterials[ i ].updateFunction ) {
                         shaderMaterials[ i ].update();
                     }
