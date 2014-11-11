@@ -311,127 +311,10 @@ define( [ "module",
                     if ( unit === undefined ) {
                         return undefined;
                     }
-
-                    renderImage = true;
-
-                    switch ( propertyName ) {
-
-                        case "pixelSize":
-                            unit.modifiers[ msa.PixelSize ] = Number( propertyValue );
-                            break;
-
-                        case "icon":
-                            unit.modifiers[ msa.Icon ] = Boolean( propertyValue );
-                            break;
-
-                        case "keepUnitRatio":
-                            unit.modifiers[ msa.KeepUnitRatio ] = Boolean( propertyValue );
-                            break;  
-
-                        case "symbologyStandard":
-                            unit.modifiers[ msa.SymbologyStandard ] = Number( propertyValue );
-                            break;
-
-                        case "quantity":
-                            if ( (propertyValue === "") && unit.modifiers[ mu.C_QUANTITY ] ) {
-                                delete unit.modifiers[ mu.C_QUANTITY ];
-                            } else {
-                                unit.modifiers[ mu.C_QUANTITY ] = Number( propertyValue );
-                            }
-                            break;
-
-                        case "additionalInfo1":
-                            unit.modifiers[ mu.H_ADDITIONAL_INFO_1 ] = propertyValue;
-                            break;
-
-                        case "additionalInfo2":
-                            unit.modifiers[ mu.H1_ADDITIONAL_INFO_2 ] = propertyValue;
-                            break;
-
-                        case "additionalInfo3":
-                            unit.modifiers[ mu.H2_ADDITIONAL_INFO_3 ] = propertyValue;
-                            break;
-
-                        case "altitudeDepth":
-                            unit.modifiers[ mu.X_ALTITUDE_DEPTH ] = propertyValue;
-                            break;
-
-                        case "combatEffectiveness":
-                            unit.modifiers[ mu.K_COMBAT_EFFECTIVENESS ] = propertyValue;
-                            break;
-
-                        case "directionOfMovement":
-                            if ( (propertyValue === "") && unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ] ) {
-                                delete unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ];
-                            } else {
-                                unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ] = propertyValue;
-                            }
-                            break;
-
-                        case "DTG1":
-                            // date
-                            break;
-
-                        case "DTG2":
-                            // date
-                            break;
-
-                        case "evaluationRating":
-                            unit.modifiers[ mu.J_EVALUATION_RATING ] = propertyValue;
-                            break;
-
-                        case "higherFormation":
-                            unit.modifiers[ mu.M_HIGHER_FORMATION ] = propertyValue;
-                            break;
-
-                        case "hostile":
-                            unit.modifiers[ mu.N_HOSTILE ] = propertyValue;
-                            break;
-
-                        case "iffSif":
-                            unit.modifiers[ mu.P_IFF_SIF ] = propertyValue;
-                            break;
-
-                        case "location":
-                            unit.modifiers[ mu.Y_LOCATION ] = propertyValue;
-                            break;
-
-                        case "reinforcedReduced":
-                            if ( (propertyValue === "") && unit.modifiers[ mu.F_REINFORCED_REDUCED ] ) {
-                                delete unit.modifiers[ mu.F_REINFORCED_REDUCED ];
-                            } else {
-                                unit.modifiers[ mu.F_REINFORCED_REDUCED ] = propertyValue;
-                            }
-                            break;
-
-                        case "signatureEquip":
-                            unit.modifiers[ mu.L_SIGNATURE_EQUIP ] = propertyValue;
-                            break; 
-
-                        case "staffComments":
-                            unit.modifiers[ mu.G_STAFF_COMMENTS ] = propertyValue;
-                            break;
-
-                        case "equipType":
-                            unit.modifiers[ mu.V_EQUIP_TYPE ] = propertyValue;
-                            break; 
-
-                        case "uniqueDesignation1":
-                            unit.modifiers[ mu.T_UNIQUE_DESIGNATION_1 ] = propertyValue;
-                            break;
-
-                        case "uniqueDesignation2":
-                            unit.modifiers[ mu.T1_UNIQUE_DESIGNATION_2 ] = propertyValue;
-                            break;
-
-                        case "speed":
-                            unit.modifiers[ mu.Z_SPEED ] = propertyValue;
-                            break;
-
-                        default:
-                            renderImage = false;
-                            break;
-                    }                    
+                   
+                    // Render image if modifier is valid
+                    renderImage = setModifier( unit, propertyName, propertyValue );
+                    
                 }
             }
 
@@ -497,108 +380,8 @@ define( [ "module",
                     return undefined;
                 }
 
-                switch ( propertyName ) {
-
-                    case "pixelSize":
-                        value = unit.modifiers[ msa.PixelSize ];
-                        break;
-
-                    case "icon":
-                        value = unit.modifiers[ msa.Icon ];
-                        break;
-
-                    case "keepUnitRatio":
-                        value = unit.modifiers[ msa.KeepUnitRatio ];
-                        break;  
-
-                    case "symbologyStandard":
-                        value = unit.modifiers[ msa.SymbologyStandard ];
-                        break;
-
-                    case "quantity":
-                        value = unit.modifiers[ mu.C_QUANTITY ];
-                        break;
-
-                    case "additionalInfo1":
-                        value = unit.modifiers[ mu.H_ADDITIONAL_INFO_1 ];
-                        break;
-
-                    case "additionalInfo2":
-                        value = unit.modifiers[ mu.H1_ADDITIONAL_INFO_2 ];
-                        break;
-
-                    case "additionalInfo3":
-                        value = unit.modifiers[ mu.H2_ADDITIONAL_INFO_3 ];
-                        break;
-
-                    case "altitudeDepth":
-                        value = unit.modifiers[ mu.X_ALTITUDE_DEPTH ];
-                        break;
-
-                    case "combatEffectiveness":
-                        value = unit.modifiers[ mu.K_COMBAT_EFFECTIVENESS ];
-                        break;
-
-                    case "directionOfMovement":
-                        value = unit.modifiers[ mu.Q_DIRECTION_OF_MOVEMENT ];
-                        break;
-
-                    case "DTG1":
-                        // date
-                        break;
-
-                    case "DTG2":
-                        // date
-                        break;
-
-                    case "evaluationRating":
-                        value = unit.modifiers[ mu.J_EVALUATION_RATING ];
-                        break;
-
-                    case "higherFormation":
-                        value = unit.modifiers[ mu.M_HIGHER_FORMATION ];
-                        break;
-
-                    case "hostile":
-                        value = unit.modifiers[ mu.N_HOSTILE ];
-                        break;
-
-                    case "iffSif":
-                        value = unit.modifiers[ mu.P_IFF_SIF ];
-                        break;
-
-                    case "location":
-                        value = unit.modifiers[ mu.Y_LOCATION ];
-                        break;
-
-                    case "reinforcedReduced":
-                        value = unit.modifiers[ mu.F_REINFORCED_REDUCED ];
-                        break;
-
-                    case "signatureEquip":
-                        value = unit.modifiers[ mu.L_SIGNATURE_EQUIP ];
-                        break; 
-
-                    case "staffComments":
-                        value = unit.modifiers[ mu.G_STAFF_COMMENTS ];
-                        break;
-
-                    case "equipType":
-                        value = unit.modifiers[ mu.V_EQUIP_TYPE ];
-                        break; 
-
-                    case "uniqueDesignation1":
-                        value = unit.modifiers[ mu.T_UNIQUE_DESIGNATION_1 ];
-                        break;
-
-                    case "uniqueDesignation2":
-                        value = unit.modifiers[ mu.T1_UNIQUE_DESIGNATION_2 ];
-                        break;
-
-                    case "speed":
-                        value = unit.modifiers[ mu.Z_SPEED ];
-                        break;
-                }                    
+                value = getModifier( unit, propertyName );
+                
             }
 
 
@@ -689,4 +472,88 @@ define( [ "module",
         return value;       
     }
 
+    function setModifier( unit, modifierAlias, modifierValue ) {
+        
+        var modObj = cws.modifierByAlias( modifierAlias );
+        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
+        var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
+        var modifierSet = false;
+        
+        if ( modObj !== undefined ) {
+            
+            var modifierActualName;
+            
+            switch ( modObj.type ) {
+                case "ModifiersUnits":
+                    modifierActualName = mu[ modObj.modifier ];
+                    break;
+                    
+                case "MilStdAttributes":
+                    modifierActualName = msa[ modObj.modifier ];
+                    break;
+                    
+                default:
+                    self.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified." );
+                    return modifierSet;
+            }
+            
+            if ( modifierValue === "" ) {
+                if ( unit.modifiers[ modifierActualName ] !== undefined ) {
+                    delete unit.modifiers[ modifierActualName ];
+                    modifierSet = true;
+                }
+            } else {
+                switch ( modObj.valueType ) {
+                    case "Boolean":
+                        unit.modifiers[ modifierActualName ] = Boolean(modifierValue);
+                        break;
+                        
+                    case "Number":
+                        unit.modifiers[ modifierActualName ] = Number(modifierValue);
+                        break;
+                        
+                    case "Array":
+                    case "Text":
+                    default:
+                        unit.modifiers[ modifierActualName ] = modifierValue;
+                        break;
+                }
+                modifierSet = true;
+            }
+        }
+        
+        return modifierSet;
+    }
+    
+    function getModifier( unit, modifierAlias ) {
+ 
+        var modObj = cws.modifierByAlias( modifierAlias );
+        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
+        var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
+        var value = undefined;
+        
+        if ( modObj !== undefined ) {
+            
+            var modifierActualName;
+            
+            switch ( modObj.type ) {
+                case "ModifiersUnits":
+                    modifierActualName = mu[ modObj.modifier ];
+                    break;
+                    
+                case "MilStdAttributes":
+                    modifierActualName = msa[ modObj.modifier ];
+                    break;
+                    
+                default:
+                    self.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
+                    return value;
+            }
+
+            value = unit.modifiers[ modifierActualName ];            
+        }
+         
+        return value;
+    }
+    
 } );

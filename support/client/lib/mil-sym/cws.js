@@ -4253,6 +4253,77 @@ define( function(){
             }
         },
 
+        "aliasModifiers": { 
+            "quantity":            { modifier:  "C_QUANTITY",
+                                     type:      "ModifiersUnits",
+                                     valueType: "Number" },
+            "additionalInfo1":     { modifier:  "H_ADDITIONAL_INFO_1",
+                                     type:      "ModifiersUnits",
+                                     valueType: "Text" },
+            "additionalInfo2":      { modifier:  "H1_ADDITIONAL_INFO_2",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "additionalInfo3":      { modifier:  "H2_ADDITIONAL_INFO_3",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "altitudeDepth":        { modifier:  "X_ALTITUDE_DEPTH",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "combatEffectiveness":  { modifier:  "K_COMBAT_EFFECTIVENESS",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "directionOfMovement":  { modifier:  "Q_DIRECTION_OF_MOVEMENT",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "evaluationRating":     { modifier:  "J_EVALUATION_RATING",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "higherFormation":      { modifier:  "M_HIGHER_FORMATION",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "hostile":              { modifier:  "N_HOSTILE",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "iffSif":               { modifier:  "P_IFF_SIF",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "location":             { modifier:  "Y_LOCATION",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Array" },
+            "reinforcedReduced":    { modifier:  "F_REINFORCED_REDUCED",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "signatureEquip":       { modifier:  "L_SIGNATURE_EQUIP",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "staffComments":        { modifier:  "G_STAFF_COMMENTS",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "equipType":            { modifier:  "V_EQUIP_TYPE",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "uniqueDesignation1":   { modifier:  "T_UNIQUE_DESIGNATION_1",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "uniqueDesignation2":   { modifier:  "T1_UNIQUE_DESIGNATION_2",
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "speed":                { modifier:  "Z_SPEED",                            
+                                      type:      "ModifiersUnits",
+                                      valueType: "Text" },
+            "pixelSize":            { modifier:  "PixelSize",                            
+                                      type:      "MilStdAttributes",
+                                      valueType: "Number" },
+            "icon":                 { modifier:  "Icon",                            
+                                      type:      "MilStdAttributes",
+                                      valueType: "Boolean" },
+            "keepUnitRatio":        { modifier:  "KeepUnitRatio",                            
+                                      type:      "MilStdAttributes",
+                                      valueType: "Boolean" },
+            "symbologyStandard":    { modifier:  "SymbologyStandard",                            
+                                      type:      "MilStdAttributes",
+                                      valueType: "Number" }
+         },
         "find": function( section, tag ) {
             var units = {};
             var sec = undefined;
@@ -4453,8 +4524,16 @@ define( function(){
         },
         "hostile": function( symbolID ) {
             return symbolID.substr( 0, 1 ) + "H" + symbolID.substr( 2 );
-        }  
-
+        },  
+        "modifierByAlias": function( alias ) {
+            var modifierObj = undefined;
+                                
+            if ( this.aliasModifiers[ alias ] ) {
+                modifierObj = this.aliasModifiers[ alias ];
+            }
+            
+            return modifierObj;
+        }
     };
 
     return cws;
