@@ -493,6 +493,7 @@ define( [ "module",
                     break;
                     
                 default:
+                    self.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified.");
                     return modifierSet;
             }
             
@@ -540,11 +541,12 @@ define( [ "module",
                     modifierActualName = mu[ modObj.modifier ];
                     break;
                     
-                case "MilStdAttributes":
+                case "MilStdAttributes":                    
                     modifierActualName = msa[ modObj.modifier ];
                     break;
                     
                 default:
+                    self.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
                     return value;
             }
 

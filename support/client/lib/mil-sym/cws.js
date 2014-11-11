@@ -4528,8 +4528,8 @@ define( function(){
         "modifierByAlias": function( alias ) {
             var modifierObj = undefined;
                                 
-            if ( this[ "aliasModifiers"][ alias ] ) {
-                modifierObj = this[ "aliasModifiers" ][ alias ];
+            if ( this.aliasModifiers[ alias ] ) {
+                modifierObj = this.aliasModifiers[ alias ];
             }
             
             return modifierObj;
