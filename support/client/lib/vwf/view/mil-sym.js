@@ -17,46 +17,6 @@
 define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
     var self;
-
-    var _aliasModifiers = [ { alias:     "quantity",
-                              modifier:  "C_QUANTITY" },
-                            { alias:     "additionalInfo1",
-                              modifier:  "H_ADDITIONAL_INFO_1" },
-                            { alias:     "additionalInfo2",
-                              modifier:  "H1_ADDITIONAL_INFO_2" },
-                            { alias:     "additionalInfo3",
-                              modifier:  "H2_ADDITIONAL_INFO_3" },
-                            { alias:     "altitudeDepth",
-                              modifier:  "X_ALTITUDE_DEPTH" },
-                            { alias:     "combatEffectiveness",
-                              modifier:  "K_COMBAT_EFFECTIVENESS" },
-                            { alias:     "directionOfMovement",
-                              modifier:  "Q_DIRECTION_OF_MOVEMENT" },
-                            { alias:     "evaluationRating",
-                              modifier:  "J_EVALUATION_RATING" },
-                            { alias:     "higherFormation",
-                              modifier:  "M_HIGHER_FORMATION" },
-                            { alias:     "hostile",
-                              modifier:  "N_HOSTILE" },
-                            { alias:     "iffSif",
-                              modifier:  "P_IFF_SIF" },
-                            { alias:     "location",
-                              modifier:  "Y_LOCATION" },
-                            { alias:     "reinforcedReduced",
-                              modifier:  "F_REINFORCED_REDUCED" },
-                            { alias:     "signatureEquip",
-                              modifier:  "L_SIGNATURE_EQUIP" },
-                            { alias:     "staffComments",
-                              modifier:  "G_STAFF_COMMENTS" },
-                            { alias:     "equipType",
-                              modifier:  "V_EQUIP_TYPE" },
-                            { alias:     "uniqueDesignation1",
-                              modifier:  "T_UNIQUE_DESIGNATION_1" },
-                            { alias:     "uniqueDesignation2",
-                              modifier:  "T1_UNIQUE_DESIGNATION_2" },
-                            { alias:     "speed",
-                              modifier:  "Z_SPEED" }                            
-                          ];
     
     return view.load( module, {
 
@@ -296,15 +256,20 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             
             // Define the list of valid modifiers
             updatedUnit[ "validModifiers" ] = [];
-            _aliasModifiers.forEach ( function( thisAliasModifier ) {
-                                            var modifier = renderer.utilities.ModifiersUnits[ thisAliasModifier.modifier ];
-                                            if ( symUtil.hasModifier( updatedUnit.symbolID, 
-                                                                      modifier,
-                                                                      rs.getSymbologyStandard() ) ) {
-                                                // Add to the array of valid modifiers
-                                                updatedUnit[ "validModifiers" ].push( thisAliasModifier.alias );
-                                            }
-                                      });
+            
+            for ( var alias in cws.aliasModifiers ) {
+                
+                var modObj = cws.aliasModifiers[ alias ];
+                
+                var modifier = renderer.utilities.ModifiersUnits[ modObj.modifier ];
+                if ( symUtil.hasModifier( updatedUnit.symbolID, 
+                                          modifier,
+                                          rs.getSymbologyStandard() ) ) {
+                    // Add to the array of valid modifiers
+                    updatedUnit[ "validModifiers" ].push( alias );
+                }
+
+            }
             
             // Render the unit image
             
