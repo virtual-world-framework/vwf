@@ -44,11 +44,23 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         var stageId = undefined;
         if ( node && node.stage ) {
-            stageId = node.stage.getId();
-            returnData.eventData[ 0 ].stage = [ node.stage.x(), node.stage.y() ];
+            var stage = node.stage;
+            stageId = stage.getId();
+            returnData.eventData[ 0 ].stage = [ stage.x(), stage.y() ];
+
+            // The "adjust" is any adjustment due to the application changing the position of the 
+            // stage's canvas in the window (this needs to be supplied by the application if it 
+            // moves the canvas), whereas the stage.x() and stage.y() are the translation of the
+            // contents of the stage
+            if ( stage.adjustX === undefined ) {
+                stage.adjustX = 0;
+            }
+            if ( stage.adjustY === undefined ) {
+                stage.adjustY = 0;
+            }
             returnData.eventData[ 0 ].stageRelative = [ 
-                ( eventPosition.pageX - node.stage.x() ) / node.stage.scaleX(),
-                ( eventPosition.pageY - node.stage.y() ) / node.stage.scaleY()
+                ( eventPosition.pageX - stage.adjustX - stage.x() ) / stage.scaleX(),
+                ( eventPosition.pageY - stage.adjustY - stage.y() ) / stage.scaleY()
             ];    
         }
 
