@@ -284,9 +284,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
-            if ( propertyName === "enableEvents" ) {
-                var node = this.state.nodes[ nodeID ];
-                if ( node && node.kineticObj ) {
+            var node = this.state.nodes[ nodeID ];
+
+            // If we don't have a record of this node, it is not a kinetic node, and we ignore it
+            if ( !( node && node.kineticObj ) ) {
+                return;
+            }
+
+            var kineticObj = node.kineticObj;
+            switch ( propertyName ) {
+                case "enableEvents":
                     var mouseDown = false;
                     var touch = false;
                     var mouseDownTime = null;
@@ -297,7 +304,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     var protos = node.prototypes;
                     if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
 
-                        var stage = node.kineticObj;
+                        var stage = kineticObj;
                         var TOUCH_EVENT = true;
 
                         // these are the events for the global space, ie the stage
@@ -341,36 +348,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                                 mouseDownTime = null;
                                 mouseDownId = null;
-                            });
-
-
-                            // touch events: below, never tested but these are the events 
-                            // for the touch, ie mobile devices
-                            //
-                            // stage.on( 'contentTouchstart', function( evt ) {
-                            //     var node = evt.targetNode;
-                            //     touchId = ( node !== undefined ) ? node.getId() : stage.getId();
-                            //     touch = true;
-                            //     if ( node ) {
-                            //         console.info( "node: " + touchId )
-                            //     }
-                            // });
-
-                            // stage.on( 'contentTouchmove', function( evt ) {
-                            //     var shape = evt.targetNode;
-
-                            // });
-
-                            // stage.on( 'contentTouchend', function( evt ) {
-                            //     var shape = evt.targetNode;
-
-                            //     touch = null;
-                            //     touchId = null;
-                            // });
-
-                            // stage.on( 'contentTap', function( evt ) {
-                            //     var shape = evt.targetNode;
-                            // });
+                            } );
+                            
                         } else {
 
                             // remove handlers
@@ -382,11 +361,26 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                             // stage.off( 'contentTouchend' );
                             // stage.off( 'contentTap' );                            
                         }
-
                     }
-
-                }
-
+                    break;
+                case "scale":
+                    if ( !node.uniqueInView ) {
+                        kineticObj.scale( { 
+                            "x": kineticObj.modelScaleX, 
+                            "y": kineticObj.modelScaleY 
+                        } );
+                    }
+                    break;
+                case "scaleX":
+                    if ( !node.uniqueInView ) {
+                        kineticObj.scaleX( kineticObj.modelScaleX );
+                    }
+                    break;
+                case "scaleY":
+                    if ( !node.uniqueInView ) {
+                        kineticObj.scaleY( kineticObj.modelScaleY );
+                    }
+                    break;
             }            
 
         },

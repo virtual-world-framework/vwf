@@ -271,7 +271,7 @@ define( [ "module",
             if ( this.debug.properties || this.debug.setting ) {
                 this.logger.infox( "    S === settingProperty ", nodeID, propertyName, propertyValue );
             }          
-            var node = this.state.nodes[nodeID];
+            var node = this.state.nodes[ nodeID ];
             var imageObj;
             var value = undefined;
             if ( node && node.kineticObj && utility.validObject( propertyValue ) ) {
@@ -342,19 +342,21 @@ define( [ "module",
                             break;
 
                         case "scale":
-                            if ( propertyValue instanceof Array ) { 
-                                kineticObj.scale( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
+                            if ( propertyValue instanceof Array ) {
+                                kineticObj.modelScaleX = Number( propertyValue[ 0 ] );
+                                kineticObj.modelScaleY = Number( propertyValue[ 1 ] ); 
                             } else {
-                                kineticObj.scale( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
-                            } 
+                                kineticObj.modelScaleX = Number( propertyValue.x );
+                                kineticObj.modelScaleY = Number( propertyValue.y );
+                            }
                             break;
 
                         case "scaleX":
-                            kineticObj.scaleX( Number( propertyValue ) );
+                            kineticObj.modelScaleX = Number( propertyValue );
                             break;
 
                         case "scaleY":
-                            kineticObj.scaleY( Number( propertyValue ) );
+                            kineticObj.modelScaleY = Number( propertyValue );
                             break;
 
                         case "rotation":
