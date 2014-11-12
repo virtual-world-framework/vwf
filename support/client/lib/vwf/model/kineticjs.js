@@ -342,19 +342,33 @@ define( [ "module",
                             break;
 
                         case "scale":
-                            if ( propertyValue instanceof Array ) { 
-                                kineticObj.scale( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
+                            if ( propertyValue instanceof Array ) {
+                                kineticObj.modelScaleX = Number( propertyValue[ 0 ] );
+                                kineticObj.modelScaleY = Number( propertyValue[ 1 ] ); 
                             } else {
-                                kineticObj.scale( { "x": Number( propertyValue.x ), "y":  Number( propertyValue.y ) });
-                            } 
+                                kineticObj.modelScaleX = Number( propertyValue.x );
+                                kineticObj.modelScaleY = Number( propertyValue.y );
+                            }
+                            if ( !node.uniqueInView ) {
+                                kineticObj.scale( { 
+                                    "x": kineticObj.modelScaleX, 
+                                    "y": kineticObj.modelScaleY 
+                                } );
+                            }
                             break;
 
                         case "scaleX":
-                            kineticObj.scaleX( Number( propertyValue ) );
+                            kineticObj.modelScaleX = Number( propertyValue );
+                            if ( !node.uniqueInView ) {
+                                kineticObj.scaleX( kineticObj.modelScaleX );
+                            }
                             break;
 
                         case "scaleY":
-                            kineticObj.scaleY( Number( propertyValue ) );
+                            kineticObj.modelScaleY = Number( propertyValue );
+                            if ( !node.uniqueInView ) {
+                                kineticObj.scaleY( Number( propertyValue ) );
+                            }
                             break;
 
                         case "rotation":
