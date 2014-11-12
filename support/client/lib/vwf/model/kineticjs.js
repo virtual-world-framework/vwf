@@ -1415,7 +1415,8 @@ define( [ "module",
                             break;
 
                         case "dragBoundFunc":
-                            value = node.kineticObj.dragBoundFunc().toString();
+                            var dragBoundFunc = node.kineticObj.dragBoundFunc();
+                            value = dragBoundFunc ? dragBoundFunc.toString() : undefined;
                             break;
 
                         case "id":
