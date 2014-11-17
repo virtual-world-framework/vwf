@@ -2303,6 +2303,7 @@ define( [ "module",
             imageObj.onerror = function() {
                 self.logger.errorx( "loadImage", "Invalid image url:", url );
                 imageObj.src = oldSrc;
+                self.kernel.fireEvent( node.ID, "imageLoadError", [ url ] );
             }
             var oldSrc = imageObj.src;
             imageObj.src = url;
