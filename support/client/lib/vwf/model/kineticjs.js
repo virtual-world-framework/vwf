@@ -2298,6 +2298,7 @@ define( [ "module",
                         kineticObj.scale( { "x": height / imageObj.height ,"y": height / imageObj.height } );
                     }
                 }
+                self.kernel.fireEvent( node.ID, "imageLoaded", [ url ] );
             }
             imageObj.onerror = function() {
                 self.logger.errorx( "loadImage", "Invalid image url:", url );

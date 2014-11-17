@@ -3,13 +3,8 @@
 --- 
 extends: http://vwf.example.com/kinetic/shape.vwf
 properties:
-  image:
-    set: |
-      if ( value !== this.image ) {
-        this.image = value;
-        this.imageChanged( value );
-      }   
+  image: 
   crop:
   scaleOnLoad: false
 events:
-  imageChanged:
+  imageLoaded:
