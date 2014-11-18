@@ -192,6 +192,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     mouseDown = false;
                     //self.kernel.dispatchEvent( node.ID, 'pointerUp', eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
+                    if ( node.kineticObj.mouseDragging ) {
+                        self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
+                        node.kineticObj.mouseDragging = false;
+                    }
                 } );
 
                 node.kineticObj.on( "click", function( evt ) {
@@ -240,6 +244,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     var eData = processEvent( evt, node, undefined, false );
                     //self.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
                     self.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
+                    node.kineticObj.mouseDragging = true;
                 } );
 
                 node.kineticObj.on( "dragmove", function( evt ) {
@@ -248,11 +253,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     self.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
                 } );
 
-                node.kineticObj.on( "dragend", function( evt ) {
-                    var eData = processEvent( evt, node, undefined, false );
-                    //self.kernel.dispatchEvent( node.ID, "dragEnd", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
-                } );
+                // I couldn't get this to work, so instead I keep track of mouseDragging separately
+                // in dragstart and mouseup (Eric - 11/18/14)
+                // node.kineticObj.on( "dragend", function( evt ) {
+                //     var eData = processEvent( evt, node, undefined, false );
+                //     //self.kernel.dispatchEvent( node.ID, "dragEnd", eData.eventData, eData.eventNodeData );
+                //     self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
+                // } );
 
             }
 
