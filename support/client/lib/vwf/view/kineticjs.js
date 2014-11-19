@@ -8,7 +8,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var stageWidth = 800;
     var stageHeight = 600;
 
-    var processEvent = function( e, node, isTouchEvent, propagate ) {
+    function processEvent( e, node, isTouchEvent, propagate ) {
         var returnData = { eventData: undefined, eventNodeData: undefined };
 
         if ( !propagate ) {
@@ -24,48 +24,30 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             eventPosition = e.evt;
         }
 
-        returnData.eventData = [ { 
-            "button": e.evt.button,
-            "timeStamp": e.evt.timeStamp,
-            "location": [ eventPosition.x, eventPosition.y ],
-            "stage": [ 0, 0 ],
-            "stageRelative": [ eventPosition.pageX, eventPosition.pageY ],
-            "client": [ eventPosition.clientX, eventPosition.clientY ],
-            "screen": [ eventPosition.screenX, eventPosition.screenY ],
-            "layer": [ eventPosition.layerX, eventPosition.layerY ],
-            "page": [ eventPosition.pageX, eventPosition.pageY ],
-            "offset": [ eventPosition.offsetX, eventPosition.offsetY ],
-            "movement": [ eventPosition.webkitMovementX, eventPosition.webkitMovementY ],
-            "shiftKey": e.evt.shiftKey,
-            "ctrlKey": e.evt.ctrlKey,                        
-            "altKey": e.evt.altKey, 
-            "metaKey": e.evt.metaKey
-        } ];
+        var stage = node && node.stage;
+        returnData.eventData = [ convertBrowserEventDataIntoVwfEventData( eventPosition, stage ) ];
 
-        var stageId = undefined;
-        if ( node && node.stage ) {
-            var stage = node.stage;
-            stageId = stage.getId();
-            returnData.eventData[ 0 ].stage = [ stage.x(), stage.y() ];
+        var eventDataElement = returnData.eventData[ 0 ];
+        eventDataElement.button = e.evt.button;
+        eventDataElement.timeStamp = e.evt.timeStamp;
+        eventDataElement.shiftKey = e.evt.shiftKey;
+        eventDataElement.ctrlKey = e.evt.ctrlKey;
+        eventDataElement.altKey = e.evt.altKey;
+        eventDataElement.metaKey = e.evt.metaKey;
 
-            // The "adjust" is any adjustment due to the application changing the position of the 
-            // stage's canvas in the window (this needs to be supplied by the application if it 
-            // moves the canvas), whereas the stage.x() and stage.y() are the translation of the
-            // contents of the stage
-            if ( stage.adjustX === undefined ) {
-                stage.adjustX = 0;
-            }
-            if ( stage.adjustY === undefined ) {
-                stage.adjustY = 0;
-            }
-            returnData.eventData[ 0 ].stageRelative = [ 
-                ( eventPosition.pageX - stage.adjustX - stage.x() ) / stage.scaleX(),
-                ( eventPosition.pageY - stage.adjustY - stage.y() ) / stage.scaleY()
-            ];    
+        if ( isTouchEvent ) {
+            returnData.eventData[ 0 ].touches = [];
+            for ( var i = 0; i < e.evt.touches.length; i++ ) {
+                returnData.eventData[ 0 ].touches[ i ] = convertBrowserEventDataIntoVwfEventData( 
+                    e.evt.touches[ i ], 
+                    stage 
+                );
+            }    
         }
 
         if ( propagate ) {
 
+            var stageId = stage && stage.getId();
             var pointerPickID = e.targetNode ? e.targetNode.getId() : stageId;
 
             returnData.eventNodeData = { "": [ {
@@ -94,6 +76,39 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         return returnData;
     };
+
+    function convertBrowserEventDataIntoVwfEventData( browserEventData, stage ) {
+        var vwfEventData = { 
+            "location": [ browserEventData.x, browserEventData.y ],
+            "stageRelative": [ browserEventData.pageX, browserEventData.pageY ],
+            "client": [ browserEventData.clientX, browserEventData.clientY ],
+            "screen": [ browserEventData.screenX, browserEventData.screenY ],
+            "layer": [ browserEventData.layerX, browserEventData.layerY ],
+            "page": [ browserEventData.pageX, browserEventData.pageY ],
+            "offset": [ browserEventData.offsetX, browserEventData.offsetY ],
+            "movement": [ browserEventData.webkitMovementX, browserEventData.webkitMovementY ]
+        };
+
+        if ( stage ) {
+            vwfEventData.stage = [ stage.x(), stage.y() ];
+
+            // The "adjust" is any adjustment due to the application changing the position of the 
+            // stage's canvas in the window (this needs to be supplied by the application if it 
+            // moves the canvas), whereas the stage.x() and stage.y() are the translation of the
+            // contents of the stage
+            if ( stage.adjustX === undefined ) {
+                stage.adjustX = 0;
+            }
+            if ( stage.adjustY === undefined ) {
+                stage.adjustY = 0;
+            }
+            vwfEventData.stageRelative = [ 
+                ( browserEventData.pageX - stage.adjustX - stage.x() ) / stage.scaleX(),
+                ( browserEventData.pageY - stage.adjustY - stage.y() ) / stage.scaleY()
+            ];    
+        }
+        return vwfEventData;
+    }
 
     return view.load( module, {
 
@@ -237,7 +252,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 node.kineticObj.on( "dbltap", function( evt ) {
                     var eData = processEvent( evt, node, TOUCH_EVENT, node );
                     //self.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
+                    self.kernel.fireEvent( node.ID, 'doubleTap', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dragstart", function( evt ) {
