@@ -464,9 +464,11 @@ define( [ "module",
         if ( node !== undefined && node.nodeType === "unit" && node.symbolID !== undefined ) {
             var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
             var img = iconRender.Render( node.symbolID, node.modifiers );
+            var centerPt = img.getCenterPoint();
             value = node.image = img.toDataUrl();
             var imgSize = img.getImageBounds();
-            self.kernel.fireEvent( node.ID, "imageChanged", [ node.image, imgSize.width, imgSize.height ] );
+            self.kernel.fireEvent( node.ID, "imageChanged", [ node.image, imgSize.width, imgSize.height, centerPt.x, centerPt.y ] );
+            //self.kernel.fireEvent( node.ID, "imageChanged", [ node.image, imgSize.width, imgSize.height ] );
         } 
 
         return value;       
