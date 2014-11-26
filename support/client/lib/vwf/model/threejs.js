@@ -52,7 +52,9 @@ define( [ "module",
           "vwf/utility", 
           "vwf/utility/color", 
           "jquery" 
-    ], function( module, model, utility, Color, $ ) {
+        ], 
+
+    function( module, model, utility, Color, $ ) {
 
     var self;
 
