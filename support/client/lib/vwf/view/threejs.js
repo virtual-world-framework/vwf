@@ -19,7 +19,9 @@ define( [ "module",
           "vwf/utility", 
           "hammer", 
           "jquery" 
-    ], function( module, view, utility, Hammer, $ ) {
+        ], 
+
+    function( module, view, utility, Hammer, $ ) {
 
     var self;
 
@@ -81,6 +83,9 @@ define( [ "module",
 
     var Vec3 = goog.vec.Vec3;
     var Quaternion = goog.vec.Quaternion;
+
+    var enableStereo = false;
+
     return view.load( module, {
 
         initialize: function( options ) {
@@ -98,14 +103,17 @@ define( [ "module",
             // Store parameter options for persistence functionality
             this.parameters = options;
 
-            if(typeof options == "object") {
+            if ( typeof options == "object" ) {
+
                 this.rootSelector = options["application-root"];
+
                 if("experimental-pick-interval" in options) {
                     this.pickInterval = options["experimental-pick-interval"];
                 }
                 if("experimental-disable-inputs" in options) {
                     this.disableInputs = options["experimental-disable-inputs"];
                 }
+                enableStereo = ( options.stereo !== undefined ) ? options.stereo : false;
             }
             else {
                 this.rootSelector = options;
@@ -114,8 +122,10 @@ define( [ "module",
             this.height = 600;
             this.width = 800;
             this.canvasQuery = null;
+
             if ( window && window.innerHeight ) this.height = window.innerHeight;
             if ( window && window.innerWidth ) this.width = window.innerWidth;
+
             this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
 
             pitchMatrix = new THREE.Matrix4();
@@ -1146,10 +1156,14 @@ define( [ "module",
                 lastPickTime = now;
             }
 
-            self.render(renderer, scene, camera);
+            if ( enableStereo && sceneNode && sceneNode.stereo ) {
+                sceneNode.stereo.effect.render( scene, camera );
+            } else {
+                self.render( renderer, scene, camera );    
+            }
             sceneNode.lastTime = now;
             
-            if(self.interpolateTransforms) {
+            if ( self.interpolateTransforms ) {
                 restoreTransforms();        
             }
         };
@@ -1232,12 +1246,51 @@ define( [ "module",
                 }
             }
 
-            if(detectWebGL() && getURLParameter('disableWebGL') == 'null')
-            {
-                sceneNode.renderer = new THREE.WebGLRenderer({canvas:mycanvas,antialias:true});
-            }else
-            {
-                sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
+            if ( detectWebGL() && getURLParameter('disableWebGL') == 'null' ){
+                
+                sceneNode.renderer = new THREE.WebGLRenderer( { canvas: mycanvas, antialias: true } );
+                
+                debugger;
+
+                var viewCam = view.state.cameraInUse;
+
+                if ( enableStereo ) {
+                    sceneNode.stereo = {
+                        "effect": new THREE.StereoEffect( sceneNode.renderer ),
+                        "element": sceneNode.renderer.domElement,
+                        "controls": undefined
+                    }
+
+                    var controls = sceneNode.stereo.controls = new THREE.OrbitControls( viewCam, element );
+                    controls.rotateUp( Math.PI / 4 );
+                    controls.target.set(
+                        camera.position.x + 0.1,
+                        camera.position.y,
+                        camera.position.z
+                    );
+                    controls.noZoom = true;
+                    controls.noPan = true;
+
+                    function setOrientationControls( e ) {
+                        
+                        if ( !e.alpha ) {
+                            return;
+                        }
+
+                        controls = new THREE.DeviceOrientationControls( viewCam, true );
+                        controls.connect();
+                        controls.update();
+
+                        element.addEventListener( 'click', fullscreen, false );
+
+                        window.removeEventListener( 'deviceorientation', setOrientationControls );
+                    }
+                    window.addEventListener( 'deviceorientation', setOrientationControls, true );
+
+                }
+            } else {
+                sceneNode.renderer = new THREE.CanvasRenderer( { canvas: mycanvas, antialias: true } );
+                sceneNode.renderer.setSize( window.innerWidth,window.innerHeight );
             }
             sceneNode.renderer.setSize(self.width,self.height,true);
 
@@ -1263,7 +1316,7 @@ define( [ "module",
             }
             
             rebuildAllMaterials.call(this);
-            if(sceneNode.renderer.setFaceCulling)
+            if ( sceneNode.renderer.setFaceCulling )
                 sceneNode.renderer.setFaceCulling( THREE.CullFaceBack );
 
             // Schedule the renderer.
@@ -1277,7 +1330,7 @@ define( [ "module",
             if(!this.disableInputs) {
                 initInputEvents.call(this,mycanvas);
             }
-            renderScene((+new Date));
+            renderScene( ( +new Date ) );
         }
 
         // If scene is already loaded, find the user's navigation object
