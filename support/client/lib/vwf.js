@@ -295,15 +295,21 @@
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTF-parser": {
                         deps: [ "vwf/model/threejs/three" ],
-                      
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils": {
                         deps: [ "vwf/model/threejs/three" ],
-                       
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTFAnimation": {
                         deps: [ "vwf/model/threejs/three" ],
-                       
+                    },
+                    "vwf/model/threejs/js/stereo/DeviceOrientationControls": {
+                        deps: [ "vwf/model/threejs/three" ],
+                    },
+                    "vwf/model/threejs/js/stereo/OrbitControls": {
+                        deps: [ "vwf/model/threejs/three" ],
+                    },
+                    "vwf/model/threejs/js/stereo/StereoEffect": {
+                        deps: [ "vwf/model/threejs/three" ],
                     },
                     "vwf/model/blockly/blockly_compressed": {
                         exports: "Blockly"
@@ -561,6 +567,9 @@
                     requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoader"].active = true;
                     requireArray["vwf/model/threejs/js/loaders/gltf/glTFAnimation"].active = true;
                     requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"].active = true;
+                    requireArray["vwf/model/threejs/js/stereo/DeviceOrientationControls"].active = true;
+                    requireArray["vwf/model/threejs/js/stereo/OrbitControls"].active = true;
+                    requireArray["vwf/model/threejs/js/stereo/StereoEffect"].active = true;
                     initializers["model"]["vwf/model/threejs"].active = true;
                     initializers["view"]["vwf/view/threejs"].active = true;
                 }
