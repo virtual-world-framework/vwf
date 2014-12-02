@@ -1249,44 +1249,16 @@ define( [ "module",
             if ( detectWebGL() && getURLParameter('disableWebGL') == 'null' ){
                 
                 sceneNode.renderer = new THREE.WebGLRenderer( { canvas: mycanvas, antialias: true } );
-                
-                debugger;
 
                 var viewCam = view.state.cameraInUse;
 
                 if ( enableStereo ) {
+                    
                     sceneNode.stereo = {
                         "effect": new THREE.StereoEffect( sceneNode.renderer ),
                         "element": sceneNode.renderer.domElement,
-                        "controls": undefined
+                        "controls": createControls( sceneNode, viewCam, element )
                     }
-
-                    var controls = sceneNode.stereo.controls = new THREE.OrbitControls( viewCam, element );
-                    controls.rotateUp( Math.PI / 4 );
-                    controls.target.set(
-                        camera.position.x + 0.1,
-                        camera.position.y,
-                        camera.position.z
-                    );
-                    controls.noZoom = true;
-                    controls.noPan = true;
-
-                    function setOrientationControls( e ) {
-                        
-                        if ( !e.alpha ) {
-                            return;
-                        }
-
-                        controls = new THREE.DeviceOrientationControls( viewCam, true );
-                        controls.connect();
-                        controls.update();
-
-                        element.addEventListener( 'click', fullscreen, false );
-
-                        window.removeEventListener( 'deviceorientation', setOrientationControls );
-                    }
-                    window.addEventListener( 'deviceorientation', setOrientationControls, true );
-
                 }
             } else {
                 sceneNode.renderer = new THREE.CanvasRenderer( { canvas: mycanvas, antialias: true } );
@@ -1381,7 +1353,7 @@ define( [ "module",
 
         var win = window;
 
-        var container = document.getElementById("container");
+        var container = document.getElementById( "container" );
         var sceneCanvas = canvas;
         //var mouse = new GLGE.MouseInput( sceneCanvas );
 
@@ -3653,4 +3625,52 @@ define( [ "module",
             }
         }
     }
+
+    function createControls( viewCam, element ) {
+
+        var controls = new THREE.OrbitControls( viewCam, element );
+        
+        controls.rotateUp( Math.PI / 4 );
+        controls.target.set(
+            camera.position.x + 0.1,
+            camera.position.y,
+            camera.position.z
+        );
+        controls.noZoom = true;
+        controls.noPan = true;
+
+        function setOrientationControls( e ) {
+            
+            if ( !e.alpha ) {
+                return;
+            }
+
+            controls = new THREE.DeviceOrientationControls( viewCam, true );
+            controls.connect();
+            controls.update();
+
+            element.addEventListener( 'click', fullscreen, false );
+
+            window.removeEventListener( 'deviceorientation', setOrientationControls );
+        }
+        window.addEventListener( 'deviceorientation', setOrientationControls, true );
+
+        return controls;
+    }
+
+    function fullscreen() {
+        var container = document.getElementById( "container" );
+        if ( container ) {
+            if ( container.requestFullscreen ) {
+                container.requestFullscreen();
+            } else if ( container.msRequestFullscreen ) {
+                container.msRequestFullscreen();
+            } else if ( container.mozRequestFullScreen ) {
+                container.mozRequestFullScreen();
+            } else if ( container.webkitRequestFullscreen ) {
+                container.webkitRequestFullscreen();
+            }
+        }
+    }
+
 });
