@@ -881,25 +881,24 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
         flushingEventListeners: function( nodeID, eventName, eventContextID ) {
 
             // Prepare the return value
-            var removedListenerIds = [];
+            var removedListenerIDs = [];
 
             // Extract the listeners of the specified node
             var node = this.nodes[ nodeID ];
             var listeners = node.private.listeners[ eventName ];
-            
+
             // If listeners exist for the given eventName, loop through them, removing any for which
             // the context is the node specified by the parameter eventContextID
             if ( listeners ) {
                 var eventContext = this.nodes[ eventContextID ];
-                for ( var i = 0; i < listeners.length; i++ ){
-                    var listener = listeners[ i ];
-                    if ( listener && ( listener.context === eventContext ) ) {
-                        delete listeners[ i ];
-                        removedListenerIds.push( i );
+                listeners.forEach( function( listener, listenerID ) {
+                    if ( listener.context === eventContext ) {
+                        delete listeners[ listenerID ];
+                        removedListenerIDs.push( listenerID );
                     }
-                }
+                } );
             }
-            return removedListenerIds;
+            return removedListenerIDs;
         },
 
         // -- firingEvent --------------------------------------------------------------------------
