@@ -92,20 +92,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         if ( stage ) {
             vwfEventData.stage = [ stage.x(), stage.y() ];
-
-            // The "adjust" is any adjustment due to the application changing the position of the 
-            // stage's canvas in the window (this needs to be supplied by the application if it 
-            // moves the canvas), whereas the stage.x() and stage.y() are the translation of the
-            // contents of the stage
-            if ( stage.adjustX === undefined ) {
-                stage.adjustX = 0;
-            }
-            if ( stage.adjustY === undefined ) {
-                stage.adjustY = 0;
-            }
             vwfEventData.stageRelative = [ 
-                ( browserEventData.pageX - stage.adjustX - stage.x() ) / stage.scaleX(),
-                ( browserEventData.pageY - stage.adjustY - stage.y() ) / stage.scaleY()
+                ( browserEventData.pageX - stage.x() ) / stage.scaleX(),
+                ( browserEventData.pageY - stage.y() ) / stage.scaleY()
             ];    
         }
         return vwfEventData;
