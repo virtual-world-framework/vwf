@@ -471,7 +471,14 @@ define( [ "module",
 
             value = node.image = img.toDataUrl();
 
-            self.kernel.fireEvent( node.ID, "imageRendered", [ node.image, imgSize, centerPt, symbolBounds ] );
+            // we should really use the event, but we're having troubles
+            // getting the events to replicate, this should be switched
+            // back to the event when the replication is fixed.  handleRender
+            // can then be completely removed
+            //self.kernel.fireEvent( node.ID, "imageRendered", [ node.image, imgSize, centerPt, symbolBounds ] );
+            
+            self.kernel.callMethod( node.ID, "handleRender", [ node.image, imgSize, centerPt, symbolBounds ] );
+
         } 
 
         return value;       
