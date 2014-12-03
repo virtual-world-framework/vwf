@@ -219,7 +219,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         var symUtil = renderer.utilities.SymbolUtilities;
         var modifiers = {};
 
-        console.info(" Mil-SymJS  SymbolID before echelon and affiliation: " + symbolID );
+        self.logger.info(" Mil-SymJS  SymbolID before echelon and affiliation: " + symbolID );
     
         if ( cws ) {
             updatedUnit = unit;
@@ -229,9 +229,9 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             
             // Add echelon
             if ( echelonID != undefined ) {
-                console.info(" Mil-SymJS Adding Echelon: " + echelonID );            
+                self.logger.info(" Mil-SymJS Adding Echelon: " + echelonID );            
                 updatedUnit.symbolID = cws.addEchelonToSymbolId( updatedUnit.symbolID, echelonID );
-                console.info(" Mil-SymJS  SymbolID after echelon and affiliation: " + updatedUnit.symbolID );
+                self.logger.info(" Mil-SymJS  SymbolID after echelon and affiliation: " + updatedUnit.symbolID );
             }
             
             // Add modifiers
@@ -327,7 +327,6 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         modifiers[ msa.Icon ] = true;
         modifiers[ msa.SymbologyStandard ] = rs.Symbology_2525C;
         
-        //console.info( "Render( "+symbolID+", "+JSON.stringify( modifiers )+" )" )
         var img = renderer.MilStdIconRenderer.Render( symbolID, modifiers );
         if ( img ) {
             return img.toDataUrl();
