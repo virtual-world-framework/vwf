@@ -19,3 +19,4 @@ model:
   vwf/model/buzz:
 view:
   vwf/view/threejs: "#vwf-root"
+  #vwf/view/threejs: { "application-root": "#vwf-root", "stereo": true }
