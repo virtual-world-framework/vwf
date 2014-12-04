@@ -452,8 +452,14 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
             }
 
             if ( internals ) { // set
-                object.sequence = internals.sequence !== undefined ? internals.sequence : object.sequence;
-                merge( object.prng.state, internals.random || {} );
+                if ( internals.sequence !== undefined ) {
+                    object.sequence = internals.sequence;
+                    object.initialized && object.patches && ( object.patches.internals = true );
+                }
+                if ( internals.random !== undefined ) {
+                    merge( object.prng.state, internals.random );
+                    object.initialized && object.patches && ( object.patches.internals = true );
+                }
             } else { // get
                 internals = {};
                 internals.sequence = object.sequence;
