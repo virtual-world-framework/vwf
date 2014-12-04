@@ -2493,6 +2493,7 @@ if ( ! childComponent.source ) {
 
                         if ( valueHasBody( eventValue ) ) {
                             vwf.createEvent( childID, eventName, eventValue.parameters );
+                            vwf.setEvent( childID, eventName, eventValue );  // set the listeners since `createEvent` can't do it yet
                         } else {
                             vwf.createEvent( childID, eventName, undefined );
                         }
@@ -4900,6 +4901,7 @@ if ( ! childComponent.source ) {
             var bodyAttributes = [
                 "parameters",
                 "body",
+                "listeners",
             ];
 
             var hasBody = false;  // TODO: "body" term is confusing, but that's the current terminology used in vwf/model/javascript
