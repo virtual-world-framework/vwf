@@ -87,9 +87,10 @@ properties:
         rate = this.animationRate;
       // Range limit the incoming value.
       value = Math.min( Math.max( this.animationStartTime, value ), this.animationStopTime );
-      // Keep paused if updating start/pause from null/null.
-      if ( this.animationStart$ == null || this.animationPause$ == 0 ) {
-        this.animationPause$ = this.time;
+      // Keep paused if updating start/pause from null/null. Use t=0 instead of `this.time` so that
+      // setting `node.animationTime` during initialization is consistent across multiple clients.
+      if ( this.animationStart$ == null ) {
+        this.animationPause$ = 0;
       }
       // Calculate the start and stop times that makes the new time work.
       this.animationStart$ =
@@ -189,8 +190,8 @@ properties:
           }
           // Recalculate the start and stop times to keep paused time unchanged, then resume.
           this.animationStart$ =
-            ( this.animationStart$ || this.time ) -
-            ( this.animationPause$ || this.time ) +
+            ( this.animationStart$ != null ? this.animationStart$ : this.time ) -
+            ( this.animationPause$ != null ? this.animationPause$ : this.time ) +
             this.time;
           this.animationStop$ =
             this.animationStart$ +
