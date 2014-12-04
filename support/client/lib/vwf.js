@@ -3702,7 +3702,7 @@ if ( ! childComponent.source ) {
 
             // Register the listener.
 
-            var eventListenerID = this.sequence( nodeID );
+            var eventListenerID = eventHandler.id || this.sequence( nodeID );
 
             event.listeners.create( eventListenerID, node.initialized && node.patchable );
 
