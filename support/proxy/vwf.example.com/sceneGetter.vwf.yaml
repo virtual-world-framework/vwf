@@ -34,3 +34,19 @@ properties:
       // Nullify the current scene so that next time it is gotten, it will find it from the new path
       this.scene = null;
       //@ sourceURL=sceneGetter.scenePath.set
+
+methods:
+
+  # A helper that does basically what Find does, except that it handles some of
+  #   the busywork (and assumes that we'll be looking in the scene).
+  # Arguments: 
+  #   objectName  - the string to search for
+  findInScene:
+
+  # Same as findInScene, except that this looks by type rather than by name.
+  # Arguments: 
+  #   typeName    - the type to search for
+  findTypeInScene:
+
+scripts:
+- source: "http://vwf.example.com/sceneGetter.js"
