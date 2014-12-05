@@ -820,7 +820,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
                 listeners[ eventListenerID ] = {
                     handler: handler,
-                    context: this.nodes[ eventListener.context ],
+                    context: eventListener.context,
                     phases: eventListener.phases,
                 };
 
@@ -834,7 +834,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 // precise result.
 
                 // return utility.merge( handlerFromFunction( listener.handler ), {
-                //     context: listener.context && listener.context.id,
+                //     context: listener.context,
                 //     phases: listener.phases,
                 // } );
 
@@ -867,7 +867,7 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
                 var listener = listeners[ eventListenerID ];
 
                 return utility.merge( handlerFromFunction( listener.handler ), {
-                    context: listener.context && listener.context.id,
+                    context: listener.context,
                     phases: listener.phases,
                 } );
 
@@ -890,9 +890,8 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
             // If listeners exist for the given eventName, loop through them, removing any for which
             // the context is the node specified by the parameter eventContextID
             if ( listeners ) {
-                var eventContext = this.nodes[ eventContextID ];
                 listeners.forEach( function( listener, listenerID ) {
-                    if ( listener.context === eventContext ) {
+                    if ( listener.context === eventContextID ) {
                         delete listeners[ listenerID ];
                         removedListenerIDs.push( listenerID );
                     }
@@ -926,9 +925,10 @@ node.hasOwnProperty( eventName ) ||  // TODO: recalculate as properties, methods
 
                 try {
                     if ( ! phase || listener.phases && listener.phases.indexOf( phase ) >= 0 ) {
-                        var resultJS = listener.handler.apply( listener.context || self.nodes[0], parametersJS ); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+                        var contextNode = self.nodes[ listener.context ] || self.nodes[ 0 ];  // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+                        var resultJS = listener.handler.apply( contextNode, parametersJS );
                         var result = valueKernelFromJS.call( self, resultJS );
-                        return handled || result || result === undefined; // interpret no return as "return true"
+                        return handled || result || result === undefined;  // interpret no return as "return true"
                     }
                 } catch ( e ) {
                     self.logger.warnx( "firingEvent", nodeID, eventName, eventParameters,  // TODO: limit eventParameters for log
@@ -1574,18 +1574,19 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     function findListeners( node, eventName, targetOnly ) {
 
-        var prototypeListeners = Object.getPrototypeOf( node ).private ? // get any self-targeted listeners from the prototypes
+        var prototypeListeners = Object.getPrototypeOf( node ).private ?  // get any self-targeted listeners from the prototypes
             findListeners( Object.getPrototypeOf( node ), eventName, true ) : [];
 
         var nodeListeners = node.private.listeners && node.private.listeners[eventName] || [];
 
         if ( targetOnly ) {
             return prototypeListeners.concat( nodeListeners.filter( function( listener ) {
-                return listener.context == node || listener.context == node.private.origin; // in the prototypes, select self-targeted listeners only
+                return listener.context === node.id ||  // in the prototypes, select self-targeted listeners only
+                    ( node.private.origin && listener.context === node.private.origin.id );
             } ) );
         } else {
-            return prototypeListeners.map( function( listener ) { // remap the prototype listeners to target the node
-                return { handler: listener.handler, context: node, phases: listener.phases };
+            return prototypeListeners.map( function( listener ) {  // remap the prototype listeners to target the node
+                return { handler: listener.handler, context: node.id, phases: listener.phases };
             } ).concat( nodeListeners );
         }
 
