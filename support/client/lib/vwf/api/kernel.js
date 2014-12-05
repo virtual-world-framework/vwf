@@ -977,9 +977,9 @@ define( function() {
         ///   @see {@link module:vwf/api/kernel.Handler}
         /// @property {string} [type]
         ///   @see {@link module:vwf/api/kernel.Handler}
-        /// @property {ID} [contextID]
+        /// @property {ID} [context]
         ///   The ID of a node that the handler will be _invoked on_. For JavaScript handlers,
-        ///   `this` will refer to the `contextID` node. If `contextID` is not provided, the context
+        ///   `this` will refer to the `context` node. If `context` is not provided, the context
         ///   will be the global root pseudo-node.
         /// @property {String[]} [phases]
         ///   An array of strings indicating the event dispatch phases that this handler should
