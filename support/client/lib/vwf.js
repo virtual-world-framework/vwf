@@ -363,6 +363,7 @@
                     active: false 
                 },
                 { library: "vwf/model/graphtool", active: false },
+                { library: "vwf/model/eventManager", active: false },
                 { library: "vwf/model/sound", active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
@@ -439,6 +440,7 @@
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/blockly", active: false },
                     { library: "vwf/model/graphtool", active: false },
+                    { library: "vwf/model/eventManager", active: false },
                     { library: "vwf/model/sound", active: false },
                     { library: "vwf/model/kineticjs", active: false },
                     { library: "vwf/model/mil-sym", active: false },
