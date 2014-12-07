@@ -11,7 +11,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         initialize: function() {
             this.state.nodes = {};
-            this.state.kernel = this.kernel.kernel.kernel;
         },
 
         // == Model API ============================================================================
@@ -54,48 +53,25 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         },
 
-        // -- addingChild --------------------------------------------------------------------------
-
-        addingChild: function( nodeID, childID, childName ) {
-        },
-
-        // -- removingChild ------------------------------------------------------------------------
-
-        removingChild: function( nodeID, childID ) {
-        },
-
         // -- creatingProperty ---------------------------------------------------------------------
 
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
-
             return this.initializingProperty( nodeID, propertyName, propertyValue );
-
         },
 
         // -- initializingProperty -----------------------------------------------------------------
 
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
-
-            var value = undefined;
-            if ( propertyValue !== undefined ) {
-                var node = this.state.nodes[ nodeID ];
-                if ( node !== undefined && propertyName ) {
-                    value = this.settingProperty( nodeID, propertyName, propertyValue );
-                }
-            }
-            return value;
-
+            return this.settingProperty( nodeID, propertyName, propertyValue );
         },
-
-        // TODO: deletingProperty
 
         // -- settingProperty ----------------------------------------------------------------------
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
 
-            var node, value;
-            if ( this.state.nodes[ nodeID ] ) {
-                node = this.state.nodes[ nodeID ];
+            var node = this.state.nodes[ nodeID ];
+            var value;
+            if ( node ) {
                 switch ( propertyName ) {
                     case "isBroadcasting":
                         value = propertyValue;
@@ -138,25 +114,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         },
 
-        // -- creatingMethod -----------------------------------------------------------------------
-
-        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
-        },
-
-        // TODO: deletingMethod
-
         // -- callingMethod ------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
             var node = this.state.nodes[ nodeID ];
-            var eventName, callbackName;
+            var eventName, eventHandlerName;
 
             if ( node ) {                
                 switch ( methodName ) {
                     case "addListener":
                         eventName = methodParameters[ 0 ];
-                        callbackName = methodParameters[ 1 ];
-                        node.eventMap[ eventName ] = callbackName;
+                        eventHandlerName = methodParameters[ 1 ];
+                        node.eventMap[ eventName ] = eventHandlerName;
                         break;
                     case "removeListener":
                         eventName = methodParameters[ 0 ];
@@ -167,25 +136,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         },
 
-        // -- creatingEvent ------------------------------------------------------------------------
-
-        creatingEvent: function( nodeID, eventName, eventParameters ) {
-        },
-
-        // TODO: deletingEvent
-
         // -- firingEvent --------------------------------------------------------------------------
 
         firingEvent: function( nodeID, eventName, eventParameters ) {
             
             var node = this.state.nodes[ nodeID ];
-            var listeners, listenerNode;
+            var listenerIDs, listenerNode;
             if ( node && node.isBroadcasting ) {
-                listeners = findListeners( this.state.nodes, eventName );
-                for ( var i = 0; i < listeners.length; i++ ) {
-                    listenerNode = this.state.nodes[ listeners[ i ] ];
+                listenerIDs = findListenerIDs( this.state.nodes, eventName );
+                for ( var i = 0; i < listenerIDs.length; i++ ) {
+                    listenerNode = this.state.nodes[ listenerIDs[ i ] ];
                     this.kernel.callMethod(
-                        listeners[ i ],
+                        listenerIDs[ i ],
                         listenerNode.eventMap[ eventName ],
                         eventParameters
                     );
@@ -194,28 +156,23 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         },
 
-        // -- executing ----------------------------------------------------------------------------
-
-        executing: function( nodeID, scriptText, scriptType ) {
-        },
-
     } );
 
     function isEventManager( implementsIDs ) {
         return implementsIDs && implementsIDs.indexOf( "http-vwf-example-com-eventManager-vwf" ) !== -1;
     }
 
-    function findListeners( nodes, eventName ) {
-        var listeners = new Array();
+    function findListenerIDs( nodes, eventName ) {
+        var listenerIDs = [];
         var keys = Object.keys( nodes );
         var node;
         for ( var i = 0; i < keys.length; i++ ) {
             node = nodes[ keys[ i ] ]
             if ( node.isListening && node.eventMap.hasOwnProperty( eventName ) ) {
-                listeners.push( keys[ i ] );
+                listenerIDs.push( keys[ i ] );
             }
         }
-        return listeners;
+        return listenerIDs;
     }
 
 } );
