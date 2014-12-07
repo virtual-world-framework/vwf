@@ -20,5 +20,3 @@ properties:
 methods:
   addListener:
   removeListener:
-scripts:
-- source: "http://vwf.example.com/eventManager.js"
