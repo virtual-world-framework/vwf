@@ -1600,8 +1600,10 @@
                     nodeIndex = undefined;
                 }
 
-                this.fireEvent( parentID, [ "children", "removed" ],
-                    [ nodeIndex, this.kutility.nodeReference( nodeID ) ] );
+                if ( this.models.kernel.enabled() ) {
+                    this.fireEvent( parentID, [ "children", "removed" ],
+                        [ nodeIndex, this.kutility.nodeReference( nodeID ) ] );
+                }
 
             }
 
@@ -2554,16 +2556,12 @@ if ( ! childComponent.source ) {
                                 } );
 
                                 // Mark the node as initialized.
+
                                 nodes.initialize( childID );
-
-                                // Suppress kernel reentry so that meta event handlers don't make
-                                // any changes during replication.
-
-                                replicating && vwf.models.kernel.disable();
 
                                 // Send the meta event into the application.
 
-                                if ( nodeID !== 0 ) {
+                                if ( ! replicating && nodeID !== 0 ) {
                                     vwf.fireEvent( nodeID, [ "children", "added" ],
                                         [ childIndex, vwf.kutility.nodeReference( childID ) ] );
                                 }
@@ -2573,10 +2571,6 @@ if ( ! childComponent.source ) {
                                     var spinner = document.getElementById( "vwf-loading-spinner" );
                                     spinner.classList.remove( "pace-active" );
                                 }
-
-                                // Restore kernel reentry.
-
-                                replicating && vwf.models.kernel.enable();
 
                                 series_callback_async( err, undefined );
                             } );
@@ -2888,7 +2882,9 @@ if ( ! childComponent.source ) {
 
             // Send the meta event into the application.
 
-            this.fireEvent( nodeID, [ "properties", "created" ], [ propertyName ] );
+            if ( this.models.kernel.enabled() ) {
+                this.fireEvent( nodeID, [ "properties", "created" ], [ propertyName ] );
+            }
 
             this.logger.debugu();
 
@@ -3066,10 +3062,12 @@ if ( ! childComponent.source ) {
                 // If the property was created or initialized, send the corresponding meta event
                 // into the application.
 
-                if ( settingPropertyEtc === "creatingProperty" ) {
-                    this.fireEvent( nodeID, [ "properties", "created" ], [ propertyName ] );
-                } else if ( settingPropertyEtc === "initializingProperty" ) {
-                    this.fireEvent( nodeID, [ "properties", "initialized" ], [ propertyName ] );
+                if ( this.models.kernel.enabled() ) {
+                    if ( settingPropertyEtc === "creatingProperty" ) {
+                        this.fireEvent( nodeID, [ "properties", "created" ], [ propertyName ] );
+                    } else if ( settingPropertyEtc === "initializingProperty" ) {
+                        this.fireEvent( nodeID, [ "properties", "initialized" ], [ propertyName ] );
+                    }
                 }
 
             }
@@ -3278,7 +3276,9 @@ if ( ! childComponent.source ) {
 
             // Send the meta event into the application.
 
-            this.fireEvent( nodeID, [ "methods", "created" ], [ methodName ] );
+            if ( this.models.kernel.enabled() ) {
+                this.fireEvent( nodeID, [ "methods", "created" ], [ methodName ] );
+            }
 
             this.logger.debugu();
         };
@@ -3346,7 +3346,9 @@ if ( ! childComponent.source ) {
 
             // Send the meta event into the application.
 
-            this.fireEvent( nodeID, [ "events", "created" ], [ eventName ] );
+            if ( this.models.kernel.enabled() ) {
+                this.fireEvent( nodeID, [ "events", "created" ], [ eventName ] );
+            }
 
             this.logger.debugu();
         };
