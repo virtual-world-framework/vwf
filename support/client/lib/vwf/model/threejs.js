@@ -1425,6 +1425,11 @@ define( [ "module",
                     //{
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
+                    else if ( propertyName == 'position' ) {
+                        if ( threeObject.position !== null ) {
+                            threeObject.position.set( propertyValue[0], propertyValue[1], propertyValue[2] );  
+                        }
+                    }
                     else if ( propertyName == 'distance' ) {
                         value = Number( propertyValue );
                         threeObject.distance = value;
@@ -1802,6 +1807,12 @@ define( [ "module",
                             value = 'point';
                         }
                         break;
+                    case "position":
+                        if ( threeObject.position !== null ) {
+                            value = [ threeObject.position.x, threeObject.position.y, threeObject.position.z ];  
+                        }
+                        break;
+
                     case "distance":
                         value = threeObject.distance;
                         break;
