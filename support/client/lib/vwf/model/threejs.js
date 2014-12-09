@@ -57,6 +57,7 @@ define( [ "module",
     var self;
 
     var checkLights = true;
+    var sceneCreated = false;
 
     return model.load( module, {
 
@@ -170,11 +171,11 @@ define( [ "module",
             {
                 this.state.sceneRootID = childID;
 
+                console.info( "CreateThreeJSSceneNode =================================" );
                 var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
-                this.state.scenes[childID] = sceneNode;
+                this.state.scenes[childID] = sceneNode
+                sceneCreated = true;
             }
-            
-            
             
             if ( protos && isCameraDefinition.call( this, protos ) ) {
 
@@ -1090,7 +1091,7 @@ define( [ "module",
                     //console.log(["setting material property: ",nodeID,propertyName,propertyValue]);
                     if(propertyName == "texture")
                     {
-                        if(propertyValue !== "")
+                        if ( propertyValue !== "" && utility.validObject( propertyValue ) )
                         {
                             THREE.ImageUtils.loadTexture( propertyValue, undefined, function( texture ) { 
                                     threeObject.map = texture;
@@ -2002,7 +2003,7 @@ define( [ "module",
 
         ticking: function( vwfTime ) {
             
-            if ( this.state.appInitialized && checkLights ) {
+            if ( checkLights && this.state.appInitialized && sceneCreated ) {
                 
                 var lightsInScene = sceneLights.call( this );
 
