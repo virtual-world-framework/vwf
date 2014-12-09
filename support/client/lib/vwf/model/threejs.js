@@ -2759,7 +2759,7 @@ define( [ "module",
 
                     //  THREE.AnimationHandler.add( geometry.animation );   
                     var asset = new THREE.SkinnedMesh( geometry, meshMaterial );
-                    var skinnedAnimation = new THREE.Animation( asset, geometry.animation.name ); 
+                    var skinnedAnimation = new THREE.Animation( asset, geometry.animation ); 
                     skinnedAnimation.play();
                 }
 
