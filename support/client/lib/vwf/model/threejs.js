@@ -2648,8 +2648,8 @@ define( [ "module",
 
                 node.threeObject.add( mesh ); 
                 
-                geo.computeCentroids();
-                geo.computeFaceNormals();                
+                //geo.computeCentroids();
+                geo.computeFaceNormals && geo.computeFaceNormals();                
             }
 
         }         
