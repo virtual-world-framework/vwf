@@ -149,21 +149,23 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                                     delete blocksInWorkspace[ blockIDsRemoved[ i ] ];   
                                 }
 
+                            } else {
+                                self.kernel.fireEvent( self.kernel.application(), "blocklyContentChanged", [ true ] );
+                                self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
+                                self.kernel.setProperty( self.state.blockly.node.ID, "blockly_topBlockCount", topBlockCount );
+
+                                // Set the appropriate model properties based on this change
+                                var xmlDom = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
+                                if ( xmlDom ) {
+                                    var newXmlText = Blockly.Xml.domToText( xmlDom );
+                                    self.kernel.setProperty( self.state.blockly.node.ID, "blockly_xml", 
+                                        Blockly.Xml.domToText( xmlDom ) );
+                                }
+                                self.kernel.setProperty( self.state.blockly.node.ID, "blockly_code", 
+                                    Blockly.JavaScript.workspaceToCode() );
                             }
                             
-                            self.kernel.fireEvent( self.kernel.application(), "blocklyContentChanged", [ true ] );
-                            self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
-                            self.kernel.setProperty( self.state.blockly.node.ID, "blockly_topBlockCount", topBlockCount );
-
-                            // Set the appropriate model properties based on this change
-                            var xmlDom = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
-                            if ( xmlDom ) {
-                                var newXmlText = Blockly.Xml.domToText( xmlDom );
-                                self.kernel.setProperty( self.state.blockly.node.ID, "blockly_xml", 
-                                    Blockly.Xml.domToText( xmlDom ) );
-                            }
-                            self.kernel.setProperty( self.state.blockly.node.ID, "blockly_code", 
-                                Blockly.JavaScript.workspaceToCode() );
+                            
                         }
                     } else {
                         handleChangeEvents = true;
