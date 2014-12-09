@@ -171,7 +171,6 @@ define( [ "module",
             {
                 this.state.sceneRootID = childID;
 
-                console.info( "CreateThreeJSSceneNode =================================" );
                 var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
                 this.state.scenes[childID] = sceneNode
                 sceneCreated = true;
