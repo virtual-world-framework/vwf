@@ -1513,6 +1513,9 @@
                             loadComponent( nodeURI, function( nodeDescriptor ) /* async */ {
                                 nodeComponent = nodeDescriptor;
                                 series_callback_async( undefined, undefined );
+                            }, function( errorMessage ) {
+                                nodeComponent = undefined;
+                                series_callback_async( errorMessage, undefined );
                             } );
 
                         // If we've seen this URI, but it is still loading, just add our callback to
@@ -1566,6 +1569,9 @@
                         loadComponent( prototypeURI, function( prototypeDescriptor ) /* async */ {
                             nodeComponent = mergeDescriptors( nodeComponent, prototypeDescriptor ); // modifies prototypeDescriptor
                             series_callback_async( undefined, undefined );
+                        }, function( errorMessage ) {
+                            nodeComponent = undefined;
+                            series_callback_async( errorMessage, undefined );
                         } );
 
                     } else {
@@ -1854,6 +1860,8 @@
                             if ( script.source ) {
                                 loadScript( script.source, function( scriptText ) /* async */ {  // TODO: this load would be better left to the driver, which may want to ignore it in certain cases, but that would require a completion callback from kernel.execute()
                                     map_callback_async( undefined, { text: scriptText, type: script.type } );
+                                }, function( errorMessage ) {
+                                    map_callback_async( errorMessage, undefined );
                                 } );
                             } else {
                                 map_callback_async( undefined, { text: script.text, type: script.type } );
@@ -2269,6 +2277,9 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                                 series_callback_async( undefined, undefined );
                             }
 
+                        }, function( errorMessage ) {
+                            childComponent = undefined;
+                            series_callback_async( errorMessage, undefined );
                         } );
 
                         sync = false; // not if we got here first
@@ -2383,6 +2394,7 @@ if ( ! childComponent.source ) {
                     async.forEachSeries( vwf.models, function( model, each_callback_async /* ( err ) */ ) {
 
                         var driver_ready = true;
+                        var timeoutID;
 
                         // TODO: suppress kernel reentry here (just for childID?) with kernel/model showing a warning when breached; no actions are allowed until all drivers have seen creatingNode()
 
@@ -2390,12 +2402,23 @@ if ( ! childComponent.source ) {
                                 childComponent.source, childComponent.type, childIndex, childName, function( ready ) /* async */ {
 
                             if ( driver_ready && ! ready ) {
-                                queue.suspend( "while loading " + childComponent.source + " for " + childID + " in creatingNode" ); // suspend the queue
-                                driver_ready = false;
+                                suspend();
                             } else if ( ! driver_ready && ready ) {
-                                each_callback_async( undefined ); // resume createChild()
-                                queue.resume( "after loading " + childComponent.source + " for " + childID + " in creatingNode" ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                                resume();
+                            }
+
+                            function suspend() {
+                                queue.suspend( "while loading " + childComponent.source + " for " + childID + " in creatingNode" ); // suspend the queue
+                                timeoutID = window.setTimeout( function() { resume( "timeout loading " + childComponent.source ) }, vwf.configuration[ "load-timeout" ] * 1000 );
+                                driver_ready = false;
+                            }
+
+                            function resume( err ) {
+                                window.clearTimeout( timeoutID );
                                 driver_ready = true;
+                                err && vwf.logger.warnx( "createChild", nodeID, childName + ":", err );
+                                each_callback_async( err ); // resume createChild()
+                                queue.resume( "after loading " + childComponent.source + " for " + childID + " in creatingNode" ); // resume the queue; may invoke dispatch(), so call last before returning to the host
                             }
 
                         } );
@@ -2418,17 +2441,29 @@ if ( ! childComponent.source ) {
                     async.forEach( vwf.views, function( view, each_callback_async /* ( err ) */ ) {
 
                         var driver_ready = true;
+                        var timeoutID;
 
                         view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
                                 childComponent.source, childComponent.type, childIndex, childName, function( ready ) /* async */ {
 
                             if ( driver_ready && ! ready ) {
-                                queue.suspend( "while loading " + childComponent.source + " for " + childID + " in createdNode" ); // suspend the queue
-                                driver_ready = false;
+                                suspend();
                             } else if ( ! driver_ready && ready ) {
-                                each_callback_async( undefined ); // resume createChild()
-                                queue.resume( "after loading " + childComponent.source + " for " + childID + " in createdNode" ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                                resume();
+                            }
+
+                            function suspend() {
+                                queue.suspend( "while loading " + childComponent.source + " for " + childID + " in createdNode" ); // suspend the queue
+                                timeoutID = window.setTimeout( function() { resume( "timeout loading " + childComponent.source ) }, vwf.configuration[ "load-timeout" ] * 1000 );
+                                driver_ready = false;
+                            }
+
+                            function resume( err ) {
+                                window.clearTimeout( timeoutID );
                                 driver_ready = true;
+                                err && vwf.logger.warnx( "createChild", nodeID, childName + ":", err );
+                                each_callback_async( err ); // resume createChild()
+                                queue.resume( "after loading " + childComponent.source + " for " + childID + " in createdNode" ); // resume the queue; may invoke dispatch(), so call last before returning to the host
                             }
 
                         } );
@@ -2563,6 +2598,8 @@ if ( ! childComponent.source ) {
                             if ( script.source ) {
                                 loadScript( script.source, function( scriptText ) /* async */ {  // TODO: this load would be better left to the driver, which may want to ignore it in certain cases, but that would require a completion callback from kernel.execute()
                                     map_callback_async( undefined, { text: scriptText, type: script.type } );
+                                }, function( errorMessage ) {
+                                    map_callback_async( errorMessage, undefined );
                                 } );
                             } else {
                                 map_callback_async( undefined, { text: script.text, type: script.type } );
@@ -4612,7 +4649,7 @@ if ( ! childComponent.source ) {
 
         /// @name module:vwf~loadComponent
 
-        var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
+        var loadComponent = function( nodeURI, callback_async /* nodeDescriptor */, errback_async /* errorMessage */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
 
             if ( nodeURI == vwf.kutility.protoNodeURI ) {
 
@@ -4634,14 +4671,17 @@ if ( ! childComponent.source ) {
 
                     url: remappedURI( nodeURI ),
                     dataType: "jsonp",
+                    timeout: vwf.configuration["load-timeout"] * 1000,
 
                     success: function( nodeDescriptor ) /* async */ {
                         callback_async( nodeDescriptor );
                         queue.resume( "after loading " + nodeURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
                     },
 
-                    // error: function() {  // TODO
-                    // },
+                    error: function( xhr, status, error ) /* async */ {
+                        errback_async( error );
+                        queue.resume( "after loading " + nodeURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                    },
 
                 } );
 
@@ -4653,7 +4693,7 @@ if ( ! childComponent.source ) {
 
         /// @name module:vwf~loadScript
 
-        var loadScript = function( scriptURI, callback_async /* ( scriptText ) */ ) {
+        var loadScript = function( scriptURI, callback_async /* scriptText */, errback_async /* errorMessage */ ) {
 
             if ( scriptURI.match( RegExp( "^data:application/javascript;base64," ) ) ) {
 
@@ -4667,10 +4707,23 @@ if ( ! childComponent.source ) {
 
                 queue.suspend( "while loading " + scriptURI ); // suspend the queue
 
-                jQuery.get( remappedURI( scriptURI ), function( scriptText ) /* async */ {
-                    callback_async( scriptText );
-                    queue.resume( "after loading " + scriptURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
-                }, "text" );
+                jQuery.ajax( {
+
+                    url: remappedURI( scriptURI ),
+                    dataType: "text",
+                    timeout: vwf.configuration["load-timeout"] * 1000,
+
+                    success: function( scriptText ) /* async */ {
+                        callback_async( scriptText );
+                        queue.resume( "after loading " + scriptURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                    },
+
+                    error: function( xhr, status, error ) /* async */ {
+                        errback_async( error );
+                        queue.resume( "after loading " + scriptURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                    },
+
+                } );
 
             }
 

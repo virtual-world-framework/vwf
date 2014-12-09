@@ -174,11 +174,13 @@ define( function() {
             "randomize-ids": false,               // randomize IDs to discourage assumptions about ID allocation
             "humanize-ids": false,                // append recognizable strings to node IDs
             "preserve-script-closures": false,    // retain method/event closures by not serializing functions (breaks replication, persistence)
+            "load-timeout": 10,                   // resource load timeout in seconds
         },
 
         /// Changes for production environments.
 
         production: {
+            "load-timeout": 60,
         },
 
         /// Changes for development environments.
@@ -187,6 +189,7 @@ define( function() {
             "log-level": "info",
             "randomize-ids": true,
             "humanize-ids": true,
+            "load-timeout": 30,
         },
 
         /// Changes for testing environments.
