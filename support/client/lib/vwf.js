@@ -2576,7 +2576,7 @@ if ( ! childComponent.source ) {
                                 // Dismiss the loading spinner
                                 if ( childID === vwf.application() ) {
                                     var spinner = document.getElementById( "vwf-loading-spinner" );
-                                    spinner.classList.remove( "pace-active" );
+                                    spinner && spinner.classList.remove( "pace-active" );
                                 }
 
                                 // Restore kernel reentry.
