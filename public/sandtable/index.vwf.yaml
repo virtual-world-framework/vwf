@@ -36,10 +36,13 @@ properties:
   pushpinIndex: 1
   selectedColor: black
 methods:
-  initializeCamera:
   draw:
   pindrop:
   clear:
+events:
+  pointerDown:
+  pointerUp:
+  pointerMove:
 children:
   terrain:
     extends: http://vwf.example.com/node3.vwf
@@ -109,7 +112,7 @@ children:
         this["followPath-lastTime"] = this.time;
         this.translation = this["followPath-path"][ this["followPath-lastPathIndex"] || 0 ].translation;
 
-        this["followPath-following"] = true;          
+        this["followPath-following"] = true;
       } //@ sourceURL=predator1.vwf
   predator2:
     extends: http://vwf.example.com/node3.vwf 
@@ -159,7 +162,7 @@ children:
           len = this["followPath-path"].length;
           pos = [ x, y, z ];
           this["followPath-path"].push( { translation: pos, time: 2 } );
-        } 
+        }
 
         x = 0;
         for ( var y = radius - step; y > -radius ; y -= step ) {
@@ -174,14 +177,14 @@ children:
           len = this["followPath-path"].length;
           pos = [ x, y, z ];
           this["followPath-path"].push( { translation: pos, time: 2 } );
-        } 
+        }
 
         y = 0;
         for ( var x = -radius + step; x < radius; x += step ) {
           pos = [ x, 0, 1200 ];
           len = this["followPath-path"].length;
           this["followPath-path"].push( { translation: pos, time: 1 } );
-        }            
+        }
 
         for ( var theta = 1.5 * Math.PI; theta < 3.0 * Math.PI; theta += Math.PI / 90 ) {
           x = radius + (radius * Math.cos( theta ) );
@@ -190,7 +193,7 @@ children:
           pos = [ x, y, z ];
           this["followPath-path"].push( { translation: pos, time: 2 } );
         }
-        
+
         x = 0;
         for ( var y = radius - step; y > -radius; y -= step ) {
           pos = [ 0, y, 1200 ];
@@ -204,12 +207,12 @@ children:
           len = this["followPath-path"].length;
           pos = [ x, y, z ];
           this["followPath-path"].push( { translation: pos, time: 2 } );
-        }            
-       
+        }
+
         this["followPath-nextPathIndex"] = ( this["followPath-lastPathIndex"] || 0 ) + 1;
         this["followPath-lastTime"] = this.time;
         this.translation = this["followPath-path"][ this["followPath-lastPathIndex"] || 0 ].translation;
-        
+
         this["followPath-following"] = true;
       } //@ sourceURL=predator2.vwf
 scripts:
@@ -238,13 +241,6 @@ scripts:
   // Function definitions
 
   this.initialize = function() {
-
-    // TODO: When we can assume that initialize doesn't complete until all created nodes are in place, this
-    //       will no longer need to be a future call because we will be able to assume that the camera exists
-    this.future( 0 ).initializeCamera();
-  }
-
-  this.initializeCamera = function() {
     this.camera.transform = [ -1,     0,         0,     0,
                                0,    -0.894,    -0.447, 0,
                                0,    -0.447,     0.894, 0,
@@ -252,6 +248,18 @@ scripts:
     this.camera.far = 500000;
     this.camera.near = 2;
     this.camera.translationSpeed = 10000;
+  }
+
+  this.pointerDown = function() {
+    // This event is handled in the view
+  }
+
+  this.pointerUp = function() {
+    // This event is handled in the view
+  }
+
+  this.pointerMove = function() {
+    // This event is handled in the view
   }
 
   this.draw = function( lastDrawPoint, pickInfo ) {
@@ -332,12 +340,10 @@ scripts:
 
         this.lineIndex++;
       }
-      
     }
   }
 
   this.pindrop = function( pickInfo ) {
-    
     if ( pickInfo && pickInfo.globalPosition ) {
       pushpin.properties.translation = pickInfo.globalPosition;
       
@@ -359,7 +365,6 @@ scripts:
       } );
 
       this.pushpinIndex++;        
-      
     }
   } 
 
