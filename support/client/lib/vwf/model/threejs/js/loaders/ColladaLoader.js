@@ -992,7 +992,7 @@ THREE.ColladaLoader = function () {
 
 						}
 
-						material3js.opacity = !material3js.opacity ? 1 : material3js.opacity;
+						material3js.opacity = ( material3js.opacity === undefined ) ? 1 : material3js.opacity;
 						used_materials[ instance_material.symbol ] = num_materials;
 						used_materials_array.push( material3js );
 						first_material = material3js;
@@ -2666,17 +2666,12 @@ THREE.ColladaLoader = function () {
 
 		}
 
-		this.geometry3js.computeCentroids();
-		this.geometry3js.computeFaceNormals();
-
 		if ( this.geometry3js.calcNormals ) {
 
 			this.geometry3js.computeVertexNormals();
 			delete this.geometry3js.calcNormals;
 
 		}
-
-		// this.geometry3js.computeBoundingBox();
 
 		return this;
 
@@ -3406,32 +3401,11 @@ THREE.ColladaLoader = function () {
 				case 'emission':
 				case 'diffuse':
 				case 'specular':
+				case 'specularLevel':
 				case 'transparent':
-
-					this[ child.nodeName ] = ( new ColorOrTexture() ).parse( child );
-					break;
-
 				case 'bump':
 
-					// If 'bumptype' is 'heightfield', create a 'bump' property
-					// Else if 'bumptype' is 'normalmap', create a 'normal' property
-					// (Default to 'bump')
-					var bumpType = child.getAttribute( 'bumptype' );
-					if ( bumpType ) {
-						if ( bumpType.toLowerCase() === "heightfield" ) {
-							this[ 'bump' ] = ( new ColorOrTexture() ).parse( child );
-						} else if ( bumpType.toLowerCase() === "normalmap" ) {
-							this[ 'normal' ] = ( new ColorOrTexture() ).parse( child );
-						} else {
-							console.error( "Shader.prototype.parse: Invalid value for attribute 'bumptype' (" + bumpType + 
-								           ") - valid bumptypes are 'HEIGHTFIELD' and 'NORMALMAP' - defaulting to 'HEIGHTFIELD'" );
-							this[ 'bump' ] = ( new ColorOrTexture() ).parse( child );
-						}
-					} else {
-						console.warn( "Shader.prototype.parse: Attribute 'bumptype' missing from bump node - defaulting to 'HEIGHTFIELD'" );
-						this[ 'bump' ] = ( new ColorOrTexture() ).parse( child );
-					}
-
+					this[ child.nodeName ] = ( new ColorOrTexture() ).parse( child );
 					break;
 
 				case 'shininess':
@@ -3462,43 +3436,45 @@ THREE.ColladaLoader = function () {
 
 		var props = {};
 
-		var transparent = false;
-
 		if (this['transparency'] !== undefined && this['transparent'] !== undefined) {
 			// convert transparent color RBG to average value
 			var transparentColor = this['transparent'];
 			var transparencyLevel = 0;
-			
-			// Support both transparent modes
-			if(transparentColor.opaque == "A_ONE") {
+
+			// Determine transparency level based on opaque mode
+			if (transparentColor.opaque == "RGB_ONE") {
 				transparencyLevel = (3 - this.transparent.color.r -
 					this.transparent.color.g - 
 					this.transparent.color.b) / 
 					3 * this.transparency;
-			}
-			else if(transparentColor.opaque == "RGB_ZERO") {
+			} else if (transparentColor.opaque == "RGB_ZERO") {
 				transparencyLevel = (this.transparent.color.r +
 					this.transparent.color.g + 
 					this.transparent.color.b) / 
 					3 * this.transparency;
+			} else if (transparentColor.opaque == "A_ONE") {
+				transparencyLevel = ( 1 - this.transparent.color.a ) * this.transparency;
+			} else { // A_ZERO (default in collada 1.5.0) - http://www.khronos.org/files/collada_1_5_release_notes.pdf (pg 16)
+				transparencyLevel = this.transparent.color.a * this.transparency;
 			}
-			
-			if (transparencyLevel > 0) {
-				transparent = true;
+
+			// Assumes all texures in the 'transparent' field will have an alpha channel
+			if ( transparentColor.isTexture() || transparencyLevel > 0 ) {
 				props[ 'transparent' ] = true;
-				props[ 'opacity' ] = 1 - transparencyLevel;
-
-			}
-
+ 			} else {
+ 				props[ 'transparent' ] = false;
+ 			}
+				
+			props[ 'opacity' ] = 1 - transparencyLevel;
 		}
 		
 		var keys = {
 			'diffuse':'map', 
-			'ambient':'lightMap' ,
+			'ambient':"lightMap" ,
 			'specular':'specularMap',
+			'specularLevel':'specularMap',
 			'emission':'emissionMap',
-			'bump':'bumpMap',
-			'normal':'normalMap'
+			'bump':'normalMap'
 			};
 		
 		for ( var prop in this ) {
@@ -3509,8 +3485,8 @@ THREE.ColladaLoader = function () {
 				case 'emission':
 				case 'diffuse':
 				case 'specular':
+				case 'specularLevel':
 				case 'bump':
-				case 'normal':
 
 					var cot = this[ prop ];
 
@@ -3528,14 +3504,23 @@ THREE.ColladaLoader = function () {
 
 								if (image) {
 
-									var texture = THREE.ImageUtils.loadTexture(baseUrl + image.init_from);
+									var texture;
+									if(image.init_from.indexOf('.dds') == image.init_from.length - 4)
+									{	
+										texture = THREE.ImageUtils.loadCompressedTexture(baseUrl + image.init_from); 
+									}else
+										texture = THREE.ImageUtils.loadTexture(baseUrl + image.init_from);
 									texture.texcoord = cot.texcoord;
 									texture.wrapS = cot.texOpts.wrapU ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 									texture.wrapT = cot.texOpts.wrapV ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 									texture.offset.x = cot.texOpts.offsetU;
 									texture.offset.y = cot.texOpts.offsetV;
 									texture.repeat.x = cot.texOpts.repeatU;
-									texture.repeat.y = cot.texOpts.repeatV;
+
+									if(image.init_from.indexOf('.dds') == image.init_from.length - 4)
+										texture.repeat.y = -cot.texOpts.repeatV;
+									else
+										texture.repeat.y = cot.texOpts.repeatV;
 									props[keys[prop]] = texture;
 
 									// Texture with baked lighting?
@@ -3545,11 +3530,15 @@ THREE.ColladaLoader = function () {
 
 							}
 
-						} else if ( prop === 'diffuse' || !transparent ) {
+						} else {
 
 							if ( prop === 'emission' ) {
 
 								props[ 'emissive' ] = cot.color.getHex();
+
+							} else if ( prop === 'specularLevel' ) {
+
+								props[ 'specular' ] = cot.color.getHex();
 
 							} else {
 
@@ -4959,7 +4948,7 @@ THREE.ColladaLoader = function () {
 
 		}
 
-		return new THREE.Matrix4(
+		return new THREE.Matrix4().set(
 			data[0], data[1], data[2], data[3],
 			data[4], data[5], data[6], data[7],
 			data[8], data[9], data[10], data[11],
