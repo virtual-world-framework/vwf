@@ -1,92 +1,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml">    
   <head>      
     <title>Virtual World Framework</title>
-
-    <style>
-      body {
-        padding-top: 50px;
-        text-align: center;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 18px;
-        color: #222;
-      }
-
-      a {
-        color: #eb6864;
-        text-decoration: none;
-      }
-
-      a:hover {
-        color: #e22620;
-        text-decoration: underline;
-      }
-
-      p {
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .small {
-        font-size: 14px;
-        color: #bbb;
-      }
-
-      .small a {
-        color: #f2a297;
-      }
-
-      .small a:hover {
-        color: #ef897f;
-      }
-
-      @-webkit-keyframes flip {
-        from {
-          -webkit-transform: rotateY(0deg) scale(1); 
-        }
-        50% {
-          -webkit-transform: rotateY(180deg) scale(1);
-          -webkit-animation-timing-function: linear;
-        }
-        to {
-          -webkit-transform: rotateY(360deg) scale(1); 
-        }
-      }
-
-      @-webkit-keyframes unflip {
-        from {
-          -webkit-transform: rotateY(360deg);
-        }
-        to {
-          -webkit-transform: rotateY(0deg);
-        }
-      }
-
-      img.logo {
-        -webkit-animation-duration: 0.8s;
-        -webkit-animation-name: unflip;
-        -webkit-perspective: 800px;
-      }
-
-      img.logo:hover {
-        -webkit-animation-duration: 0.7s;
-        -webkit-animation-name: flip;
-        -webkit-perspective: 800px;
-        -webkit-animation-timing-function: ease-in-out;
-      }
-
-    </style>
+    <link href="/web/css/redirect.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
     <img class="logo" src="/web/images/vwf-logo.png" width="300" height="300" />
-
     <p>
       Unfortunately, your path in this virtual world hit a dead end. 
     </p>
     <p>
       Check out the <a href="https://virtual.wf/demos.html">demo page</a> for more VWF apps.
     </p> 
-
     <p class="small">
       Development of the Virtual World Framework is sponsored by the Department of Defense and is licensed under the Apache License, Version 2.0. Source is available on <a href="http://www.github.com/virtual-world-framework/vwf">Github</a>.
     </p> 
