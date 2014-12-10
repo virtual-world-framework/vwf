@@ -1127,6 +1127,7 @@
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
+                    this.tock();
                 }
 
                 // Perform the action.
@@ -1149,6 +1150,7 @@
                 this.sequence_ = undefined; // clear after the previous action
                 this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
+                this.tock();
             }
             
         };
@@ -1192,6 +1194,25 @@
 
             this.tickable.nodeIDs.forEach( function( nodeID ) {
                 this.callMethod( nodeID, "tick", [ this.now ] );
+            }, this );
+
+        };
+
+        // -- tock ---------------------------------------------------------------------------------
+
+        /// Notify views of a kernel time change. Unlike `tick`, `tock` messages are sent each time
+        /// that time moves forward. Time changes may occur when previously scheduled actions are
+        /// executed or in response to reflector idle messages. Only view drivers are notified since
+        /// the model state should be independent of any particular sequence of idle messages.
+        /// 
+        /// @name module:vwf.tock
+
+        this.tock = function() {
+
+            // Call tocked() on each view.
+
+            this.views.forEach( function( view ) {
+                view.tocked && view.tocked( this.now );
             }, this );
 
         };

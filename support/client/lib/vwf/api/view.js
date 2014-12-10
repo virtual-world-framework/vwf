@@ -269,6 +269,20 @@ define( function() {
 
         ticked: [ /* time */ ],
 
+        /// Kernel time has changed.
+        /// 
+        /// Unlike `ticked`, `tocked` messages are sent each time that time moves forward. Time
+        /// changes may occur when previously scheduled actions are executed or as regular idle
+        /// progress.
+        /// 
+        /// @function
+        /// 
+        /// @param {Number} time
+        /// 
+        /// @returns {}
+
+        tocked: [ /* time */ ],
+
         /// Description.
         /// 
         /// @callback module:vwf/api/view~readyCallback

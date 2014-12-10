@@ -73,7 +73,7 @@ define( [ "module" ], function( module ) {
 
             // Listen for the kernel tick.
 
-            window.vwf_view.ticked = function( time ) {
+            window.vwf_view.tocked = function( time ) {
 
                 if ( next < assertions.length ) {
 
@@ -92,7 +92,7 @@ define( [ "module" ], function( module ) {
                     // When finished, unlisten for the kernel tick, run the cleanup function, and
                     // tell qunit that we're done.
 
-                    window.vwf_view.ticked = undefined;
+                    window.vwf_view.tocked = undefined;
                     cleanup && cleanup();
 
                     start();
