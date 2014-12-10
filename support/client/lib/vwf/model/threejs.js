@@ -208,7 +208,11 @@ define( [ "module",
                   
                     } else if ( node.threeObject ) {
                         sceneNode.camera.threeJScameras[ childID ] = node.threeObject;
-                        sceneNode.threeScene.add( node.threeObject ); 
+                        if ( !node.threeObject.parent ) {
+                            this.logger.warnx( "creatingNode", "adding camera to the scene: parent(id:"+nodeID+") not found", childID );
+                            sceneNode.threeScene.add( node.threeObject );                             
+                        }
+
                     }
                 }               
             } else if(protos && isLightDefinition.call(this,protos)) {
@@ -2658,6 +2662,12 @@ define( [ "module",
                 mesh.receiveShadow = node.threeObject.receiveShadow;
 
                 node.threeObject.add( mesh ); 
+
+                node.threeObject.vwfID = node.ID;
+                node.threeObject.name = node.name;
+
+                mesh.vwfID = node.ID;
+                mesh.name = node.name;
                 
                 //geo.computeCentroids();
                 geo.computeFaceNormals && geo.computeFaceNormals();                
