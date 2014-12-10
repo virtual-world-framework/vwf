@@ -121,6 +121,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             var blockCount = blocks.length;
                             var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
                             
+                            self.kernel.fireEvent( self.kernel.application(), "blocklyContentChanged", [ true ] );
+                            self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
+                            self.kernel.setProperty( self.state.blockly.node.ID, "blockly_topBlockCount", topBlockCount );
+
+
                             if ( blockCount > previousBlockCount ) {
                                 
                                 for ( i = 0; i < blocks.length; i++ ) {
@@ -150,12 +155,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                                 }
 
                             } else {
-                                self.kernel.fireEvent( self.kernel.application(), "blocklyContentChanged", [ true ] );
-                                self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
-                                self.kernel.setProperty( self.state.blockly.node.ID, "blockly_topBlockCount", topBlockCount );
 
                                 // Set the appropriate model properties based on this change
                                 var xmlDom = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
+                                console.log ('event');
+                                console.log (xmlDom);
+                                console.log ('eventend');
                                 if ( xmlDom ) {
                                     var newXmlText = Blockly.Xml.domToText( xmlDom );
                                     self.kernel.setProperty( self.state.blockly.node.ID, "blockly_xml", 
@@ -494,6 +499,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             }
         }
         if ( xmlDom ) {
+            console.log (xmlDom);
             clearBeforeSet && Blockly.mainWorkspace.clear();
             domCopyToWorkspace( Blockly.mainWorkspace, xmlDom );
         }
