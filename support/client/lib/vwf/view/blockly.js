@@ -158,9 +158,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
                                 // Set the appropriate model properties based on this change
                                 var xmlDom = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
-                                console.log ('event');
                                 console.log (xmlDom);
-                                console.log ('eventend');
                                 if ( xmlDom ) {
                                     var newXmlText = Blockly.Xml.domToText( xmlDom );
                                     self.kernel.setProperty( self.state.blockly.node.ID, "blockly_xml", 
@@ -237,14 +235,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         if ( blocklyNode !== undefined ) {
                             var show = true;
 
+                            //HACK: REMOVED THIS CODE - CAUSED REPLICATED BLOCKLY WINDOW TO CLOSE
+
                             // If there was already an active blockly node, deal with it before
                             // activating the new one
-                            if ( previousActiveNode !== undefined ) {
-                                getBlockXML( previousActiveNode );
-                                setBlocklyUIVisibility( previousActiveNode, false ); 
-                                show = ( previousActiveNode.ID !== newActiveNodeId );
-                                this.state.blockly.node = undefined;                           
-                            }
+                            //if ( previousActiveNode !== undefined ) {
+                             //   getBlockXML( previousActiveNode );
+                             //   setBlocklyUIVisibility( previousActiveNode, false ); 
+                             //   show = ( previousActiveNode.ID !== newActiveNodeId );
+                             //   this.state.blockly.node = undefined;                           
+                            //}
 
                             // If the new active node is different than the old,
                             // then we need to load its program into the toolbox
@@ -300,7 +300,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         if ( clientThatSetProperty !== me ) {
                             var xmlText = propertyValue;
                             handleChangeEvents = false;
-                            setWorkspaceFromXmlText( xmlText );
+                            setWorkspaceFromXmlText( xmlText, true );
                         }
                         break;
                     default:
