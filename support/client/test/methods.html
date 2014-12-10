@@ -33,19 +33,19 @@
 
         "domReady",
         "utility.js",
+        "vwf/utility",
+        "vwf/configuration",
 
         "jquery",
-        "vwf/configuration",
         "vwf/kernel/model",
         "vwf/model/javascript",
         "vwf/model/object",
         "vwf/model/stage/log",
         "vwf/kernel/view",
         "vwf/kernel/utility",
-        "vwf/utility",
         "logger",
 
-      ], function( ready, testUtility ) {
+      ], function( ready, testUtility, utility, configuration ) {
 
         // Test methods.
 
@@ -169,6 +169,207 @@
 
           } );
 
+          // Method gets
+
+          asyncTest( "Method gets", function() {
+
+            createFixture( function( nodeID, cleanup ) {
+
+              deepEqual( vwf.getMethod( nodeID, "unhandled" ), unhandledDescriptor, "Null, unhandled" );
+
+              deepEqual( vwf.getMethod( nodeID, "empty1" ), emptyDescriptor, "Empty, as text" );
+              deepEqual( vwf.getMethod( nodeID, "empty2" ), emptyDescriptor, "Empty, as body" );
+              deepEqual( vwf.getMethod( nodeID, "empty3" ), emptyDescriptor, "Empty, as parameters" );
+
+              deepEqual( vwf.getMethod( nodeID, "noParameters1" ), noParametersDescriptor, "No parameters, as text" );
+              deepEqual( vwf.getMethod( nodeID, "noParameters2" ), noParametersDescriptor, "No parameters, as body" );
+              deepEqual( vwf.getMethod( nodeID, "noParameters3" ), noParametersDescriptor, "No parameters, as parameters/body" );
+
+              deepEqual( vwf.getMethod( nodeID, "unnamedParameters1" ), unnamedParametersDescriptor, "Unnamed parameters, as text" );
+              deepEqual( vwf.getMethod( nodeID, "unnamedParameters2" ), unnamedParametersDescriptor, "Unnamed parameters, as body" );
+              deepEqual( vwf.getMethod( nodeID, "unnamedParameters3" ), unnamedParametersDescriptor, "Unnamed parameters, as parameters/body" );
+
+              deepEqual( vwf.getMethod( nodeID, "oneParameter" ), oneParameterDescriptor, "One parameter" );
+
+              deepEqual( vwf.getMethod( nodeID, "twoParameters" ), twoParametersDescriptor, "Two parameters" );
+
+              cleanup();
+              start();
+
+            } );
+
+          } );
+
+          // Method sets directly to the kernel
+
+          asyncTest( "Method sets kernel", function() {
+
+            createFixture( function( nodeID, cleanup ) {
+
+              vwf.setMethod( nodeID, "morphable",
+                "return 'set as string'" );
+
+              deepEqual( vwf.getMethod( nodeID, "morphable" ), {
+                body: "return 'set as string'",
+                type: "application/javascript",
+              }, "As string" );
+
+              vwf.setMethod( nodeID, "morphable",
+                { body: "return 'set as descriptor'" } );
+
+              deepEqual( vwf.getMethod( nodeID, "morphable" ), {
+                body: "return 'set as descriptor'",
+                type: "application/javascript",
+              }, "As descriptor" );
+
+              vwf.setMethod( nodeID, "morphable",
+                { body: "return 'set with type'", type: "application/javascript" } );
+
+              deepEqual( vwf.getMethod( nodeID, "morphable" ), {
+                body: "return 'set with type'",
+                type: "application/javascript",
+              }, "As descriptor with type" );
+
+              vwf.setMethod( nodeID, "morphable",
+                { body: "return 'set with foreign type'", type: "application/bogoscript" } );
+
+              deepEqual( vwf.getMethod( nodeID, "morphable" ), {
+                body: "return 'set with foreign type'",
+                type: "application/bogoscript",
+              }, "As descriptor with foreign type" );
+
+              cleanup();
+              start();
+
+            } );
+
+          } );
+
+          // Method sets through JavaScript
+
+          asyncTest( "Method sets JavaScript", function() {
+
+            createFixture( function( nodeID, cleanup ) {
+
+              // Save the configuration settings.
+
+              var config = configuration.instance;
+
+              // Direct assignment from a function object.
+
+              vwf.execute( nodeID,
+                "this.methods.morphable = function() { return 'set as function' }" );
+
+              deepEqual( vwf.getMethod( nodeID, "morphable" ), {
+                body: "return 'set as function'",
+                type: "application/javascript",
+              }, "As function" );
+
+              // Assignment of a function with a reference to a variable in the closure.
+
+              var functionClosureScript =
+                "var closureVariable = 'in the closure'; " +
+                "this.methods.morphable = function() { " +
+                  "try { " +
+                    "return 'set as function with a closure reference: ' + closureVariable; " +
+                  "} catch ( exception ) { " +
+                    "return 'set as function with a broken closure reference'; " +
+                  "} " +
+                "}";
+
+              // With the "preserve-script-closures" compatibility option enabled.
+
+              configuration.instance = { "preserve-script-closures": true };
+
+              vwf.execute( nodeID, functionClosureScript );
+              equal( vwf.callMethod( nodeID, "morphable" ), "set as function with a closure reference: in the closure", "..." );
+
+              // With the "preserve-script-closures" compatibility option disabled.
+
+              configuration.instance = { "preserve-script-closures": false };
+
+              vwf.execute( nodeID, functionClosureScript );
+              equal( vwf.callMethod( nodeID, "morphable" ), "set as function with a broken closure reference", "..." );
+
+              // Restore the configuration settings.
+
+              configuration.instance = config;
+
+              cleanup();
+              start();
+
+            } );
+
+          } );
+
+          // Method changes and node state
+
+          var changesComponentDescriptor = {
+            methods: {
+              method: "return 'original'"
+            }
+          };
+
+          var changesComponentURI =
+            testUtility.dataURIFromDescriptor( changesComponentDescriptor );
+
+          var changesMethodDescriptor = {
+            body: "return 'original'",
+            type: "application/javascript",
+          };
+
+          var changesMethodNewBody = "return 'changed'";
+
+          var changesMethodDescriptorChanged = utility.merge( {}, changesMethodDescriptor, {
+            body: changesMethodNewBody
+          } );
+
+          asyncTest( "Method changes in node state", function() {
+
+            vwf.createNode( changesComponentURI, function( nodeID ) {
+
+              deepEqual( vwf.getMethod( nodeID, "method" ), changesMethodDescriptor, "Unchanged" );
+
+              vwf.setMethod( nodeID, "method", changesMethodNewBody );
+
+              deepEqual( vwf.getNode( nodeID ), {
+                patches:
+                  changesComponentURI,
+                methods: {
+                  method: changesMethodDescriptorChanged,
+                }
+              }, "Method changed" );
+
+              vwf.deleteNode( nodeID );
+              start();
+
+            } );
+
+          } );
+
+          asyncTest( "Method changes to node state", function() {
+
+            vwf.createNode( changesComponentURI, function( nodeID ) {
+
+              deepEqual( vwf.getMethod( nodeID, "method" ), changesMethodDescriptor, "Unchanged" );
+
+              vwf.setNode( nodeID, {
+                patches:
+                  changesComponentURI,
+                methods: {
+                  method: changesMethodDescriptorChanged,
+                }
+              } );
+
+              deepEqual( vwf.getMethod( nodeID, "method" ).body, changesMethodNewBody, "Method changed from node state" );
+
+              vwf.deleteNode( nodeID );
+              start();
+
+            } );
+
+          } );
+
           // == Helper functions =====================================================================
 
           // Create a node with methods to invoke.
@@ -182,9 +383,11 @@
 
               methods: {
 
-                empty1: undefined,
+                unhandled: undefined,
+
+                empty1: "",
                 empty2: { body: "" },
-                empty3: { parameters: [] },
+                empty3: { parameters: [], body: "" },
 
                 noParameters1: "return 'result'",
                 noParameters2: { body: "return 'result'" },
@@ -197,6 +400,8 @@
                 oneParameter: { parameters: [ "one" ], body: "return one" },
                 twoParameters: { parameters: [ "one", "two" ], body: "return [ one, 'extra', two ]" },
 
+                morphable: undefined,  // for `setMethod` tests
+
               },
 
             }, undefined, function( nodeID ) {
@@ -208,6 +413,37 @@
             } );
 
           }
+
+          // Descriptors for the methods created in `createFixture`.
+
+          var unhandledDescriptor = {};
+
+          var emptyDescriptor = {
+            body: "",
+            type: "application/javascript",
+          };
+
+          var noParametersDescriptor = {
+            body: "return 'result'",
+            type: "application/javascript",
+          };
+
+          var unnamedParametersDescriptor = {
+            body: "return arguments[0]",
+            type: "application/javascript",
+          };
+
+          var oneParameterDescriptor = {
+            parameters: [ "one" ],
+            body: "return one",
+            type: "application/javascript",
+          };
+
+          var twoParametersDescriptor = {
+            parameters: [ "one", "two" ],
+            body: "return [ one, 'extra', two ]",
+            type: "application/javascript",
+          };
 
           // Create a node with two levels of inheritance and methods to invoke.
 

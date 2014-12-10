@@ -1,5 +1,3 @@
-this.subtasks;
-
 this.enter = function() {
 
     // If this task has a parent task, get the scene node from the parent
@@ -22,29 +20,33 @@ this.enter = function() {
                         var duration = 2;
                         camera.worldTransformTo( newCameraPose.worldTransform, duration);
                         this.in(duration).cameraTransformComplete();
-                    }
-                    else
+                    } else {
                         console.error( "Could not find camera - to move the 3D camera using cameraPose, make sure the " +
                                                      "scene derives from navScene.vwf or another component that defines a valid camera" );
-                }
-                else
+                    }
+                } else {
                     console.error( "Scene property is not set - must be set for task to find camera to move" );
-            }
-            else
+                }
+            } else {
                 console.error( "Camera pose '" + this.cameraPoseRef + "' is not a valid node3" );
-        }
-        else
+            }
+        } else {
             console.error( "Could not find camera pose: " + this.cameraPoseRef + " - will not move camera" );
+        }
     }
+
+    this.status = "entered";
 
     // Fire the entering event which runs lesson-specific code
     this.entering( this.text );
 
     // Activate subtasks if they exist
     this.taskIndex = null;
-    this.subtasks = this.find( "./element(*,'http://vwf.example.com/lesson/task.vwf')" );
-    if ( this.subtasks && this.subtasks.length )
+    if ( this.subtasks && this.subtasks.length ) {
         this.next();
+    }
+
+    //@ sourceURL=task.enter
 }
 
 this.next = function() {
@@ -69,6 +71,8 @@ this.next = function() {
     }
     else
         this.completed();
+
+    //@ sourceURL=task.next
 } 
 
 this.exit = function() {
@@ -79,4 +83,9 @@ this.exit = function() {
     // Fire the exiting event
     this.exiting();
 
-} //@ sourceURL=lesson.task.vwf
+    this.status = "inactive";
+}
+
+this.completed = function() {
+    this.status = "completed";
+}

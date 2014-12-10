@@ -12,10 +12,5 @@
 # the License.
 
 ---
-model:
-  vwf/model/jiglib:
-  vwf/model/threejs:
-view:
-  vwf/view/threejs: "#vwf-root"
 configuration:
   preserve-script-closures: true

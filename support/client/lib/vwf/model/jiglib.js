@@ -462,7 +462,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        //callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+        //callingMethod: function( nodeID, methodName, methodParameters ) {
         //},
 
         // -- creatingEvent ------------------------------------------------------------------------

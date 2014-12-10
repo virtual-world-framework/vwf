@@ -36,10 +36,10 @@ methods:
       - translation
       - duration
     body: |
-      var startTranslation = this.translation || goog.vec.Vec3.create();
+      this.startTranslation$ = this.translation || goog.vec.Vec3.create();
       var deltaTranslation = this.translationFromValue( translation );
-      var stopTranslation = goog.vec.Vec3.add(
-        startTranslation,
+      this.stopTranslation$ = goog.vec.Vec3.add(
+        this.startTranslation$,
         deltaTranslation,
         goog.vec.Vec3.create()
       );
@@ -47,7 +47,7 @@ methods:
         this.animationDuration = duration;
         this.animationUpdate = function(time, duration) {
           this.translation = goog.vec.Vec3.lerp(
-            startTranslation, stopTranslation,
+            this.startTranslation$, this.stopTranslation$,
             time >= duration ? 1 : time / duration,
             goog.vec.Vec3.create()
           );
@@ -55,7 +55,7 @@ methods:
         this.animationPlay(0, duration);
       }
       else {
-        this.translation = stopTranslation;
+        this.translation = this.stopTranslation$;
       } //@ sourceURL=node3.animation.translateBy.vwf
 
   ## Translate to given translation over duration.
@@ -72,13 +72,13 @@ methods:
       - translation
       - duration
     body: |
-      var startTranslation = this.translation || goog.vec.Vec3.create();
-      var stopTranslation = this.translationFromValue( translation );
+      this.startTranslation$ = this.translation || goog.vec.Vec3.create();
+      this.stopTranslation$ = this.translationFromValue( translation );
       if(duration > 0) {
         this.animationDuration = duration;
         this.animationUpdate = function(time, duration) {
           this.translation = goog.vec.Vec3.lerp(
-            startTranslation, stopTranslation,
+            this.startTranslation$, this.stopTranslation$,
             duration == 0 ? duration : time / duration,
             goog.vec.Vec3.create()
           );
@@ -86,7 +86,7 @@ methods:
         this.animationPlay(0, duration);
       }
       else {
-        this.translation = stopTranslation;
+        this.translation = this.stopTranslation$;
       } //@ sourceURL=node3.animation.translateTo.vwf
 
   ## Rotate by given rotation over duration.
@@ -151,17 +151,17 @@ methods:
       - duration
       - frame
     body: |
-      var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+      this.startQuaternion$ = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
       var deltaQuaternion = this.quaternionFromValue( quaternion );
       if ( ! frame || frame == "rotated" ) {
-        var stopQuaternion = goog.vec.Quaternion.concat(
+        this.stopQuaternion$ = goog.vec.Quaternion.concat(
           deltaQuaternion,
-          startQuaternion,
+          this.startQuaternion$,
           goog.vec.Quaternion.create()
         );
       } else if ( frame == "scaled" ) {
-        var stopQuaternion = goog.vec.Quaternion.concat(
-          startQuaternion,
+        this.stopQuaternion$ = goog.vec.Quaternion.concat(
+          this.startQuaternion$,
           deltaQuaternion,
           goog.vec.Quaternion.create()
         );
@@ -170,7 +170,7 @@ methods:
         this.animationDuration = duration;
         this.animationUpdate = function(time, duration) {
           this.quaternion = goog.vec.Quaternion.slerp(
-            startQuaternion, stopQuaternion,
+            this.startQuaternion$, this.stopQuaternion$,
             time >= duration ? 1 : time / duration,
             goog.vec.Quaternion.create()
           );
@@ -178,7 +178,7 @@ methods:
         this.animationPlay(0, duration);
       }
       else {
-        this.quaternion = stopQuaternion;
+        this.quaternion = this.stopQuaternion$;
       } //@ sourceURL=node3.animation.quaterniateBy.vwf
 
   ## Rotate to given quaternion over duration.
@@ -195,13 +195,13 @@ methods:
       - quaternion
       - duration
     body: |
-      var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
-      var stopQuaternion = this.quaternionFromValue( quaternion );
+      this.startQuaternion$ = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+      this.stopQuaternion$ = this.quaternionFromValue( quaternion );
       if(duration > 0) {
         this.animationDuration = duration;
         this.animationUpdate = function(time, duration) {
           this.quaternion = goog.vec.Quaternion.slerp(
-            startQuaternion, stopQuaternion,
+            this.startQuaternion$, this.stopQuaternion$,
             duration == 0 ? duration : time / duration,
             goog.vec.Quaternion.create()
           );
@@ -209,7 +209,7 @@ methods:
         this.animationPlay(0, duration);
       }
       else {
-        this.quaternion = stopQuaternion;
+        this.quaternion = this.stopQuaternion$;
       } //@ sourceURL=node3.animation.quaterniateTo.vwf
 
   ## Scale by given scale over duration.
@@ -226,18 +226,18 @@ methods:
       - scale
       - duration
     body: |
-      var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+      this.startScale$ = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
       var deltaScale = this.scaleFromValue( scale );
-      var stopScale = goog.vec.Vec3.createFromValues(
-        startScale[0] * deltaScale[0],
-        startScale[1] * deltaScale[1],
-        startScale[2] * deltaScale[2]
+      this.stopScale$ = goog.vec.Vec3.createFromValues(
+        this.startScale$[0] * deltaScale[0],
+        this.startScale$[1] * deltaScale[1],
+        this.startScale$[2] * deltaScale[2]
       );
       if(duration > 0) {
         this.animationDuration = duration;
         this.animationUpdate = function(time, duration) {
           this.scale = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
-            startScale, stopScale,
+            this.startScale$, this.stopScale$,
             duration == 0 ? duration : time / duration,
             goog.vec.Vec3.create()
           );
@@ -245,7 +245,7 @@ methods:
         this.animationPlay(0, duration);
       }
       else {
-        this.scale = stopScale;
+        this.scale = this.stopScale$;
       } //@ sourceURL=node3.animation.scaleBy.vwf
 
   ## Scale to given scale over duration.
@@ -262,13 +262,13 @@ methods:
       - scale
       - duration
     body: |
-      var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
-      var stopScale = this.scaleFromValue( scale );
+      this.startScale$ = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+      this.stopScale$ = this.scaleFromValue( scale );
       if(duration > 0) {
         this.animationDuration = duration;
         this.animationUpdate = function(time, duration) {
           this.scale = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
-            startScale, stopScale,
+            this.startScale$, this.stopScale$,
             duration == 0 ? duration : time / duration,
             goog.vec.Vec3.create()
           );
@@ -276,7 +276,7 @@ methods:
         this.animationPlay(0, duration); 
       }
       else {
-        this.scale = stopScale;
+        this.scale = this.stopScale$;
       }//@ sourceURL=node3.animation.scaleTo.vwf
 
   ## Transform by the given amount over duration.
@@ -318,15 +318,15 @@ methods:
       if ( duration > 0 ) {
 
         // Calculate the start and stop translations
-        var startTranslation = this.translation || goog.vec.Vec3.create();
-        var stopTranslation = goog.vec.Vec3.create();
-        goog.vec.Mat4.getColumn( stopTransform, 3, stopTranslation );
+        this.startTranslation$ = this.translation || goog.vec.Vec3.create();
+        this.stopTranslation$ = goog.vec.Vec3.create();
+        goog.vec.Mat4.getColumn( stopTransform, 3, this.stopTranslation$ );
         // Calculate the start and stop quaternion and scale
-        var startScale = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
-        var stopScale = goog.vec.Vec3.create();
-        var startQuaternion = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
-        var stopQuaternion = goog.vec.Quaternion.fromRotationMatrix4(
-          this.unscaledTransform( stopTransform || goog.vec.Mat4.createIdentity(), stopScale, goog.vec.Mat4.create() ),
+        this.startScale$ = this.scale || goog.vec.Vec3.createFromValues( 1, 1, 1 );
+        this.stopScale$ = goog.vec.Vec3.create();
+        this.startQuaternion$ = this.quaternion || goog.vec.Quaternion.createFromValues( 0, 0, 0, 1 );
+        this.stopQuaternion$ = goog.vec.Quaternion.fromRotationMatrix4(
+          this.unscaledTransform( stopTransform || goog.vec.Mat4.createIdentity(), this.stopScale$, goog.vec.Mat4.create() ),
           goog.vec.Quaternion.create()
         );
 
@@ -334,17 +334,17 @@ methods:
         // Call the appropriate functions to do the translation and quaterniation (that is totally a word)
         this.animationUpdate = function(time, duration) {
           this.translation = goog.vec.Vec3.lerp(
-            startTranslation, stopTranslation,
+            this.startTranslation$, this.stopTranslation$,
             duration == 0 ? duration : time / duration,
             goog.vec.Vec3.create()
           );
           this.quaternion = goog.vec.Quaternion.slerp(
-            startQuaternion, stopQuaternion,
+            this.startQuaternion$, this.stopQuaternion$,
             duration == 0 ? duration : time / duration,
             goog.vec.Quaternion.create()
           );
           this.scale = goog.vec.Vec3.lerp(  // TODO: should be geometric interpolation
-            startScale, stopScale,
+            this.startScale$, this.stopScale$,
             duration == 0 ? duration : time / duration,
             goog.vec.Vec3.create()
           );

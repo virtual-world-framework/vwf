@@ -16,3 +16,5 @@ model:
   vwf/model/threejs:
 view:
   vwf/view/threejs: "#vwf-root"
+configuration:
+  preserve-script-closures: true

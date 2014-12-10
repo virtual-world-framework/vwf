@@ -147,6 +147,20 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             // TODO: deleteMethod
 
+            case "setMethod":
+
+                return function( nodeID, methodName, methodHandler, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, methodName,
+                        [ methodHandler ], when || 0, callback /* result */ );
+                };
+
+            case "getMethod":
+
+                return function( nodeID, methodName, when, callback ) {
+                    this.kernel.send( nodeID, kernelFunctionName, methodName,
+                        undefined, when || 0, callback /* result */ );
+                };
+
             case "callMethod":
 
                 return function( nodeID, methodName, methodParameters, when, callback ) {
@@ -172,9 +186,9 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             case "removeEventListener":
 
-                return function( nodeID, eventName, eventHandler, when, callback ) {
+                return function( nodeID, eventName, eventListenerID, when, callback ) {
                     this.kernel.send( nodeID, kernelFunctionName, eventName,
-                        [ eventHandler ], when || 0, callback /* result */ );
+                        [ eventListenerID ], when || 0, callback /* result */ );
                 };
 
             case "flushEventListeners":

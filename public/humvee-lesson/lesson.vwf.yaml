@@ -35,19 +35,21 @@ children:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Walk to Vehicle" );
-                var app = this.parent.parent.parent.parent;
-                app.keyUp = app.pointerWheel = app.touchPinchOut = this.events.add( function() {
-                  var trans = app.camera.translation;
+                this.scene = this.parent.parent.parent.parent;
+                this.scene.keyUp = this.scene.pointerWheel = this.scene.touchPinchOut = this.events.add( function() {
+                  
+                  var trans = this.scene.camera.translation;
                   if( trans[0] > -55 && trans[0] < 45 && trans[1] > -200 && trans[1] < -100 && trans[2] > 35 && trans[2] < 95 )
                   {
-                    app.keyUp = app.events.flush( this );
-                    app.pointerWheel = app.events.flush( this );
-                    app.touchPinchOut = app.events.flush( this );
+                    this.scene.keyUp = this.scene.events.flush( this );
+                    this.scene.pointerWheel = this.scene.events.flush( this );
+                    this.scene.touchPinchOut = this.scene.events.flush( this );
                     this.logger.info( "Step: Walk to Vehicle - Completed" );
                     this.completed();
                   }
                 }, this );
-              }
+                //@ sourceURL=humvee-lesson/lesson.enterVehicle.walkToVehicle.walkInstructions.js
+              } 
       openDoor:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
@@ -57,20 +59,26 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Click on the door to open it."
+              humveeDoor$:
+                get: |
+                  if ( !this.humveeDoor$ ) {
+                    this.humveeDoor$ = this.find( "/humvee/DoorDriverFront" )[ 0 ];
+                  }
+                  return this.humveeDoor$;
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Open Door" );
-                var humveeDoor = this.find( "/humvee/DoorDriverFront" )[ 0 ];
-                humveeDoor.controlValueUpdated = humveeDoor.events.add( function() {
-                  if(humveeDoor.controlValue == humveeDoor.open.controlValue)
+                this.humveeDoor$.controlValueUpdated = this.humveeDoor$.events.add( function() {
+                  if(this.humveeDoor$.controlValue == this.humveeDoor$.open.controlValue)
                   {
-                    humveeDoor.controlValueUpdated = humveeDoor.events.flush( this );
+                    this.humveeDoor$.controlValueUpdated = this.humveeDoor$.events.flush( this );
                     this.logger.info( "Step: Open Door - Completed" );
                     this.completed();
                   }
                 }, this );
-              }
+                //@ sourceURL=humvee-lesson/lesson.enterVehicle.openDoor.openDoorInstructions.js
+              }           
       jumpIn:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
@@ -80,13 +88,18 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Click on the vehicle's driver seat to jump in."
+              humvee$:
+                get: |
+                  if ( !this.humvee$ ) {
+                    this.humvee$ = this.find( "/humvee/HumveeBody" )[ 0 ];
+                  }
+                  return this.humvee$;
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Jump In" );
-                var humvee = this.find( "/humvee/HumveeBody" )[ 0 ];
-                humvee.pointerClick = humvee.events.add( function() {
-                  humvee.pointerClick = humvee.events.flush( this );
+                this.humvee$.pointerClick = this.humvee$.events.add( function() {
+                  this.humvee$.pointerClick = this.humvee$.events.flush( this );
                   this.logger.info( "Step: Jump In - Completed" );
                   this.completed();
                 }, this );
@@ -101,15 +114,20 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Click on the door to close it."
+              humveeDoor$:
+                get: |
+                  if ( !this.humveeDoor$ ) {
+                    this.humveeDoor$ = this.find( "/humvee/DoorDriverFront" )[ 0 ];
+                  }
+                  return this.humveeDoor$;
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Close Door" );
-                var humveeDoor = this.find( "/humvee/DoorDriverFront" )[ 0 ];
-                humveeDoor.controlValueUpdated = humveeDoor.events.add( function() {
-                  if(humveeDoor.controlValue == humveeDoor.close.controlValue)
+                this.humveeDoor$.controlValueUpdated = this.humveeDoor$.events.add( function() {
+                  if(this.humveeDoor$.controlValue == this.humveeDoor$.close.controlValue)
                   {
-                    humveeDoor.controlValueUpdated = humveeDoor.events.flush( this );
+                    this.humveeDoor$.controlValueUpdated = this.humveeDoor$.events.flush( this );
                     this.logger.info( "Step: Close Door - Completed" );
                     this.completed();
                   }
@@ -135,22 +153,29 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Click on the rotary ignition switch to the left of the steering wheel to move it to RUN position."
+              ignition$:
+                get: |
+                  if ( !this.ignition$ ) {
+                    this.ignition$ = this.find( "/humvee/Ignition" )[ 0 ];
+                  }
+                  return this.ignition$;
+              lastControlValue$:
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Run" );
-                var ignition = this.find( "/humvee/Ignition" )[ 0 ];
                 // Verify control value is coming from "STOP" position
-                var currentControlValue = ignition.controlValue;
-                ignition.controlValueUpdated = ignition.events.add( function() {
-                  if(currentControlValue == ignition.stop.controlValue && ignition.controlValue == ignition.run.controlValue) {
-                    ignition.controlValueUpdated = ignition.events.flush( this );
+                this.lastControlValue$ = this.ignition$.controlValue;
+                this.ignition$.controlValueUpdated = this.ignition$.events.add( function() {
+                  if ( ( this.lastControlValue$ === this.ignition$.stop.controlValue ) && 
+                      ( this.ignition$.controlValue === this.ignition$.run.controlValue) ) {
+                    this.ignition$.controlValueUpdated = this.ignition$.events.flush( this );
                     this.logger.info( "Step: Set Ignition to Run - Completed" );
                     this.completed();
+                  } else {
+                    this.lastControlValue$ = this.ignition$.controlValue;
                   }
-                  else {
-                    currentControlValue = ignition.controlValue;
-                  }
+                  //@ sourceURL=lesson.startEngine.moveIgnitionToRun.runIgnitionInstructions.entering.ignitiion$.controlValueUpdated
                 }, this );
               }
           waitForLightInstructions:
@@ -173,15 +198,20 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Drag the rotary ignition switch to START position. Release the switch, and it will automatically return to the RUN position."
+              ignition$:
+                get: |
+                  if ( !this.ignition$ ) {
+                    this.ignition$ = this.find( "/humvee/Ignition" )[ 0 ];
+                  }
+                  return this.ignition$;
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Set Ignition to Start" );
-                var ignition = this.find( "/humvee/Ignition" )[ 0 ];
-                ignition.controlValueUpdated = ignition.events.add( function() {
-                  if(ignition.controlValue > 0.9)
+                this.ignition$.controlValueUpdated = this.ignition$.events.add( function() {
+                  if(this.ignition$.controlValue > 0.9)
                   {
-                    ignition.controlValueUpdated = ignition.events.flush( this );
+                    this.ignition$.controlValueUpdated = this.ignition$.events.flush( this );
                     this.logger.info( "Step: Set Ignition to Start - Completed" );
                     this.completed();
                   }
@@ -215,15 +245,20 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "With parking brake applied, click and drag the transmission range selector from the N to the D position." 
+              gearShift$:
+                get: |
+                  if ( !this.gearShift$ ) {
+                    this.gearShift$ = this.find( "/humvee/GearShift" )[ 0 ];
+                  }
+                  return this.gearShift$;
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Move Gear Shift to Drive" );
-                var gearShift = this.find( "/humvee/GearShift" )[ 0 ];
-                gearShift.controlValueUpdated = gearShift.events.add( function() {
-                  if(gearShift.controlValue == gearShift.drive.controlValue )
+                this.gearShift$.controlValueUpdated = this.gearShift$.events.add( function() {
+                  if(this.gearShift$.controlValue == this.gearShift$.drive.controlValue )
                   {
-                    gearShift.controlValueUpdated = gearShift.events.flush( this );
+                    this.gearShift$.controlValueUpdated = this.gearShift$.events.flush( this );
                     this.logger.info( "Step: Move Gear Shift to Drive - Completed" );
                     this.completed();
                   }
@@ -238,15 +273,20 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Click the parking brake to release it, and ensure brake warning light goes out." 
+              parkingBrake$:
+                get: |
+                  if ( !this.parkingBrake$ ) {
+                    this.parkingBrake$ = this.find( "/humvee/EmergencyBrake" )[ 0 ];
+                  }
+                  return this.parkingBrake$;
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Release Parking Brake" );
-                var parkingBrake = this.find( "/humvee/EmergencyBrake" )[ 0 ];
-                parkingBrake.controlValueUpdated = parkingBrake.events.add( function() {
-                  if(parkingBrake.controlValue == parkingBrake.release.controlValue )
+                this.parkingBrake$.controlValueUpdated = this.parkingBrake$.events.add( function() {
+                  if(this.parkingBrake$.controlValue == this.parkingBrake$.release.controlValue )
                   {
-                    parkingBrake.controlValueUpdated = parkingBrake.events.flush( this );
+                    this.parkingBrake$.controlValueUpdated = this.parkingBrake$.events.flush( this );
                     this.logger.info( "Step: Release Parking Brake - Completed" );
                     this.completed();
                   }
@@ -262,37 +302,46 @@ children:
             extends: http://vwf.example.com/lesson/task.vwf
             properties:
               text: "Press the 'G' key to simulate gas pedal interaction to drive the vehicle forward." 
+              intervalId$:
             scripts:
             - |
               this.entering = function() {
                 this.logger.info( "Step: Drive Vehicle" );
-                var complete = false;
-                var app = this.parent.parent.parent.parent;
+                this.scene = this.parent.parent.parent.parent;
                 var activeMotion = false;
-                var intervalId;
-                function moveHumvee() {
-                  app.camera.translateTo( [ app.camera.translation[0] - 10, app.camera.translation[1], app.camera.translation[2] ] );
-                  app.humvee.translateTo( [ app.humvee.translation[0] - 10, app.humvee.translation[1], app.humvee.translation[2] ] );
-                }
-                app.keyDown = this.events.add( function(e) {
+                this.scene.keyDown = this.events.add( function(e) {
+                  var scene = this.scene;
                   var kd = $.extend(true, {}, e.keysDown);
                   for ( var keyPress in kd ) {
                     if (Number( kd[ keyPress ].code == 71)) // G
                     {
-                      intervalId = setInterval(moveHumvee, 50);
-                      if(!complete)
+                      this.intervalId$ = setInterval(moveHumvee, 50);
+                      if ( this.status === "entered" )
                       {
                         this.logger.info( "Step: Drive Vehicle - Completed" );
                         this.completed();
-                        complete = true;
                       }
                     }
                   }
+                  function moveHumvee() {
+                    scene.camera.translateTo( [ 
+                      scene.camera.translation[0] - 10, 
+                      scene.camera.translation[1], 
+                      scene.camera.translation[2] 
+                    ] );
+                    scene.humvee.translateTo( [ 
+                      scene.humvee.translation[0] - 10, 
+                      scene.humvee.translation[1], 
+                      scene.humvee.translation[2] 
+                    ] );
+                  }
                 }, this );
-                app.keyUp = this.events.add( function(e) {
-                  clearInterval(intervalId);
+                this.scene.keyUp = this.events.add( function(e) {
+                  clearInterval( this.intervalId$ );
+                  //@ sourceURL=moveVehicleInstructions.keyUp
                 }, this);
-              } //@ sourceURL=moveVehicleTask.vwf
+                //@ sourceURL=lesson.driveVehicle.moveVehicle.moveVehicleInstructions.entering
+              } 
   cameraPoseEnteringVehicle:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -329,6 +378,7 @@ scripts:
       0,0,1,0,
       -14.136186599731445,-42.1671028137207,88.4365005493164,1 ];
   }
+
   this.entering = function() {
     // Reset control value positions and humvee translation
     this.parent.humvee.DoorDriverFront.controlValue = this.parent.humvee.DoorDriverFront.close.controlValue;
@@ -336,4 +386,10 @@ scripts:
     this.parent.humvee.GearShift.controlValue = this.parent.humvee.GearShift.neutral.controlValue;
     this.parent.humvee.EmergencyBrake.controlValue = this.parent.humvee.EmergencyBrake.engage.controlValue;
     this.parent.humvee.translation = [ 0, 0, 0 ];
-  } //@ sourceURL=humvee-lesson.vwf
+  }
+
+  this.exiting = function() {
+    var taskThatSetsKeyListeners = this.driveVehicle.moveVehicle.moveVehicleInstructions;
+    this.scene.keyDown = this.scene.events.flush( taskThatSetsKeyListeners );
+    this.scene.keyUp = this.scene.events.flush( taskThatSetsKeyListeners );
+  }
