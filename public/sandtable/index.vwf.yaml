@@ -39,10 +39,6 @@ methods:
   draw:
   pindrop:
   clear:
-events:
-  pointerDown:
-  pointerUp:
-  pointerMove:
 children:
   terrain:
     extends: http://vwf.example.com/node3.vwf
