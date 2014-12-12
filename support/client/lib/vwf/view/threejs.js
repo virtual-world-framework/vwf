@@ -1306,8 +1306,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             window.onresize = function () {
                 var origWidth = self.width;
                 var origHeight = self.height;
-                var viewWidth = mycanvas.width;
-                var viewHeight = mycanvas.height;
+                var viewWidth = mycanvas.width / sceneNode.renderer.devicePixelRatio;
+                var viewHeight = mycanvas.height / sceneNode.renderer.devicePixelRatio;
 
                 if ( window && window.innerHeight ) self.height = window.innerHeight;
                 if ( window && window.innerWidth ) self.width = window.innerWidth;
@@ -1315,21 +1315,16 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 if ( ( origWidth != self.width || origHeight != self.height ) ) {
                     // If canvas changed size, use canvas dimentions instead
                     if ( viewWidth != mycanvas.clientWidth || viewHeight != mycanvas.clientHeight ) {
-                        mycanvas.width = self.width = mycanvas.clientWidth;
-                        mycanvas.height = self.height = mycanvas.clientHeight;
-                    } else {
-                        mycanvas.width = self.width;
-                        mycanvas.height = self.height;
+                        self.width = mycanvas.clientWidth;
+                        self.height = mycanvas.clientHeight;
                     }
 
-                    if ( sceneNode.renderer ) {
-                        sceneNode.renderer.setViewport( 0, 0, mycanvas.width, mycanvas.height );
-                    }
+                    sceneNode.renderer.setSize( self.width, self.height, true );
                 }
 
                 var viewCam = view.state.cameraInUse;
                 if ( viewCam ) {
-                    viewCam.aspect = mycanvas.width / mycanvas.height;
+                    viewCam.aspect = mycanvas.clientWidth / mycanvas.clientHeight;
                     viewCam.updateProjectionMatrix();
                 }
             }
@@ -1340,8 +1335,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }else
             {
                 sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
-                sceneNode.renderer.setSize(window.innerWidth,window.innerHeight);
             }
+            sceneNode.renderer.setSize(self.width,self.height,true);
 
             // backgroundColor, enableShadows, shadowMapCullFace and shadowMapType are dependent on the renderer object, but if they are set in a prototype,
             // the renderer is not available yet, so set them now.
