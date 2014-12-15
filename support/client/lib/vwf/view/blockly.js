@@ -51,7 +51,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             this.options.toolbox = options.toolbox ? options.toolbox : 'toolbox'; 
             this.options.createButton = options.createButton !== undefined ? options.createButton : true;
 
-
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -125,7 +124,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
                             self.kernel.setProperty( self.state.blockly.node.ID, "blockly_topBlockCount", topBlockCount );
 
-
                             if ( blockCount > previousBlockCount ) {
                                 
                                 for ( i = 0; i < blocks.length; i++ ) {
@@ -167,7 +165,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                                 self.kernel.setProperty( self.state.blockly.node.ID, "blockly_code", 
                                     Blockly.JavaScript.workspaceToCode() );
                             }
-                            
                             
                         }
                     } else {
@@ -289,7 +286,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             this.delayedProperties.blockly_autoClose = Boolean( propertyValue );
                         }
                         break;
-
                 }
 
             } else if ( this.state.blockly.node && ( nodeID === this.state.blockly.node.ID ) ) {
