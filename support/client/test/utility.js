@@ -48,7 +48,7 @@ define( [ "module" ], function( module ) {
         /// actions are scheduled for t1, t1, and t2, then the assertion will run after both t1
         /// actions execute.
         /// 
-        /// @param {Function} [ticked]
+        /// @param {Function} [tocked]
         ///   A function to call each time the time changes, just before any assertions scheduled
         ///   for that time are run.
         /// @param {Array} assertions
@@ -60,26 +60,27 @@ define( [ "module" ], function( module ) {
         ///   A function that may be used to clean up the test environment. If provided, `cleanup`
         ///   runs after the assertion functions have run, just before `start` is called.
 
-        runFutureAssertions: function( ticked, assertions, cleanup ) {
+        runFutureAssertions: function( tocked, assertions, cleanup ) {
 
             // Interpret runFutureAssertions( assertions, cleanup ) as
             // runFutureAssertions( undefined, assertions, cleanup )
 
-            if ( typeof ticked != "function" && ! ( ticked instanceof Function ) ) {
+            if ( typeof tocked != "function" && ! ( tocked instanceof Function ) ) {
                 cleanup = assertions;
-                assertions = ticked;
-                ticked = undefined;
+                assertions = tocked;
+                tocked = undefined;
             }
 
-            // Listen for the kernel tick.
+            // Listen for the kernel tock.
 
             window.vwf_view.tocked = function( time ) {
 
                 if ( next < assertions.length ) {
 
-                    // Call our caller's tick every time the time changes, just before any assertions.
+                    // Call our caller's function every time the time changes. The function runs
+                    // just before any assertions.
 
-                    ticked && ticked( time );
+                    tocked && tocked( time );
 
                     // Run any assertions that are ready.
 
@@ -89,7 +90,7 @@ define( [ "module" ], function( module ) {
 
                 } else {
 
-                    // When finished, unlisten for the kernel tick, run the cleanup function, and
+                    // When finished, unlisten for the kernel tock, run the cleanup function, and
                     // tell qunit that we're done.
 
                     window.vwf_view.tocked = undefined;

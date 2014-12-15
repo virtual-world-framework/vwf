@@ -281,12 +281,23 @@ define( function() {
 
         executing: [],
 
-        /// Description.
+        /// Time has changed, probably by about the same amount as last time.
+        /// 
+        /// Don't rely on `ticking` notifications; but if you do, don't rely on them to arrive at
+        /// any particular rate. `ticking` may be removed in the future to allow the reflector to
+        /// vary the idle message interval.
+        /// 
+        /// To schedule actions for certain times, use the `when` parameter in the
+        /// {@link module:vwf/kernel/model Kernel API}.
         /// 
         /// @function
         /// 
-        /// @param {}
+        /// @param {Number} time
+        /// 
         /// @returns {}
+        /// 
+        /// @deprecated in version 0.6.23. Use the {@link module:vwf/kernel/model Kernel API} `when`
+        ///   parameter to schedule future actions.
 
         ticking: [],
 

@@ -1169,7 +1169,7 @@
 
         // -- tick ---------------------------------------------------------------------------------
 
-        /// Tick each tickable model, view, and node. Ticks are sent on each time change.
+        /// Tick each tickable model, view, and node. Ticks are sent on each reflector idle message.
         /// 
         /// @name module:vwf.tick
 
@@ -1201,9 +1201,8 @@
         // -- tock ---------------------------------------------------------------------------------
 
         /// Notify views of a kernel time change. Unlike `tick`, `tock` messages are sent each time
-        /// that time moves forward. Time changes may occur when previously scheduled actions are
-        /// executed or in response to reflector idle messages. Only view drivers are notified since
-        /// the model state should be independent of any particular sequence of idle messages.
+        /// that time moves forward. Only view drivers are notified since the model state should be
+        /// independent of any particular sequence of idle messages.
         /// 
         /// @name module:vwf.tock
 
