@@ -213,6 +213,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     translationSpeed = propertyValue;
                 } else if ( propertyName == "rotationSpeed" ) {
                     rotationSpeed = propertyValue;
+                } else if ( propertyName == "navTransform" ) {
+                    transformNavigable( navObject, propertyValue );
                 }
             } else if ( nodeID == this.kernel.application() ) {
                 if ( propertyName == "makeOwnAvatarVisible" ) {
@@ -3241,6 +3243,24 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             threeObject.updateTransform( transformMatrix );
         }
 
+        threeObject.matrix.elements = transformMatrix;
+        updateRenderObjectTransform( threeObject );   
+        nodeLookAt( node );
+    }
+
+    function transformNavigable( node, transform ) {
+        var transformMatrix;
+        var threeObject;
+        if ( !node ) {
+            return;
+        }
+        transformMatrix = goog.vec.Mat4.clone( transform );
+        threeObject = node.userControlledObject;
+        if ( threeObject instanceof THREE.Camera ) {  
+            transformMatrix = convertCameraTransformFromVWFtoThreejs( transformMatrix );
+        } else if( threeObject instanceof THREE.ParticleSystem ) {
+            threeObject.updateTransform( transformMatrix );
+        }
         threeObject.matrix.elements = transformMatrix;
         updateRenderObjectTransform( threeObject );   
         nodeLookAt( node );
