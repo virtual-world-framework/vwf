@@ -2,6 +2,141 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.6.23
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change. 
+
+- NEW: Add view interpolation to smooth navigation. 
+- NEW: Website redesign and getting started guide. 
+- NEW: Add admin/instances/jsonp request to ruby server to allow new website to query current sessions using jsonp.
+- NEW: Add support for blocky and a blockly app. 
+- NEW: Update to latest three.js. 
+- NEW: Add "checkForSuccess", "checkForFailure", and "failed" to task.vwf.yaml. Factor js out of task.vwf.yaml into task.js.
+- NEW: Add 3D graph tool with example app. 
+- NEW: Add graphFunction method to graph.vwf.
+- NEW: Add graphgroup type. 
+- NEW: Add sound driver. 
+- NEW: Add sound driver layers. 
+- NEW: Add ability to queue sounds. 
+- NEW: Add handler for specularLevel in collada loader. 
+- NEW: Add the mil-sym model and view drivers. 
+- NEW*: Add kernel actions and driver handlers for managing event listeners. Event namespaces will be known to the kernel but will not normally be known by the drivers. Changes to an event's listeners need to pass through the kernel so that a possible namespace may be encoded into the name before the driver sees it. The kernel will also need knowledge of the listeners for replication and to check listened events for validity.
+- NEW*: Support namespaced events to be used for node meta events. Namespaced events will allow the kernel to use the normal event listening/firing mechanism for meta events that are distinct from a node's regular events. Meta events will be used to announce changes to a node, such as adding and removing children, creating and deleting properties, methods and events, etc.
+- NEW*: Add kernel utility module. 
+- NEW*: Translate between kernel and model/javascript node references. The translation is performed for each value (property value, method or event parameter, or return value) that crosses between the kernel and the model/javascript driver. This allows components to make persistent, direct node references. Nodes may be assigned to properties and passed through methods and events.
+- NEW*: Replicate node references. Regular properties replicate as `{ propertyName: value, ... }`, or the more general `{ propertyName: { value: value }, ... }`. Extend the general form to encode properties containing node references as `{ propertyName: { node: nodeID }, ... }`. The `node` field indicates that the property is a node reference instead of a simple value. Using a distinict field ensures that the reference won't be confused with any other value that could otherwise resemble a node ID.
+- NEW*: Support property node references in `kernel.createChild`. Support properties containing node references in `kernel.createChild`, in addition to `kernel.setNode`. Node references are only valid during
+replication, but properties of nodes created during replication are assigned in `kernel.createChild` and not `kernel.setNode`. Node references are property descriptors in the form: { properties: { p: { node: id } } } This is in contrast with regular property values, which have descriptors in the form: { properties: { p: { value: v } } } 
+- NEW*: Clarify names that reference the proto-prototype node `node.vwf`. Rename the `kernel/utility` items `nodeTypeURI` and `nodeTypeDescriptor` to `protoNodeURI` and `protoNodeDescriptor`, respectively, to better reflect that they refer to the proto-prototype node. Rename the `model/javascript` internal variable `nodeNode` to `protoNodeNode` so that it parallels the `protoNodeURI` name it derives from and to hopefully clarify that it is the `model/javascript` `...Node` data for the `protoNode...` node. 
+- NEW*: Support namespaced events to be used for node meta events. Namespaced events will allow the kernel to use the normal event listening/firing mechanism for meta events that are distinct from a node's regular events. Meta events will announce changes to a node, such as adding and removing children, creating and deleting properties, methods and events, etc. References #3094.
+- NEW*: Track globals in the node registry. Keep track of which nodes are roots in the global space (such as the application, other reflector-created trees such as `clients.vwf` and the prototypes). Add the node name to the registry. This is to allow locating extra-application trees by URI and by annotation (name).
+- NEW*: Add `kernel.globals`, `kernel.global` and `kernel.root`. `globals` returns the set of root nodes of the application and the other global trees. `global` locates a tree by URI or annotation. `root`
+locates the root of the tree containing a reference node. 
+- NEW*: Add `kernel.child`. Add `initializedOnly` to child functions. Since `kernel.children` has the global analogue `kernel.globals`, add `kernel.child` for consistency with `kernel.global`. `kernel.child`
+locates a child by index number or name. Add `initializedOnly` protection to the downward query functions `kernel.children` and `kernel.descendants`. When enabled, `initializedOnly` in `kernel.parent` and
+`kernel.ancestors` guards against references out of uninitialized nodes. In `kernel.children` and `kernel.descendants`, it guards against references into uninitialized nodes. Similarly, `initializedOnly` in `kernel.globals` and `kernel.global` guards against references into uninitialized trees. In `kernel.root`, it guards against a reference out of the current tree into the global space when the current tree is not yet initialized.
+- NEW*: Use `kernel.root` instead of `kernel.application` for the `find` root. Use `kernel.root` to locate the node corresponding to `node.find( "/" )` to allow `find` and `test` to work if the context is a non-application tree. 
+- NEW*: Support XPath `doc` for locating trees outside the application. In an XPath query, `doc(uri)` or `doc(annotation)` locates the root of a tree loaded from the given URI or assigned the annotation. A URI or annotation that doesn't look like an XPath QName must be quoted. 
+  - `node.find( "/" )` locates the application root.
+  - `node.find( "doc('application')" )` or `node.find( "doc(application)" )`
+  locates the application root through the `"application"` annotation.
+  - `node.find( "doc('http://vwf.example.com/clients.vwf')/" ) locates the
+  root of the clients tree.
+- NEW*: Clarify `kernel.createNode` comments. Describe slightly better how a URI is loaded to transform into a descriptor and is then constructed to transform into an ID. `createNode` will accept a component in any of the three forms and will walk it through the remaining steps. 
+- NEW*: Allow `node.create` without the `component` parameter.
+- NEW*: Allow `node.delete` by name as well as by reference.
+- NEW: Add kinetic model and view drivers, and implement touch drawing interface. 
+- NEW: Create kinetic example app. 
+- NEW: Add a property to control the animation tick rate. It may be useful to reduce the rate at which animations are calculated to reduce the CPU load when 60 fps animations are not required. The tick rate may be set globally for all nodes that implement `animation.vwf` (after the animation component has loaded): node.find( "doc('http://vwf.example.com/animation.vwf')" )[0].animationTPS = 30; Or just for individual nodes: node.animationTPS = 10; The default animation tick rate is unchanged at 60 per second.
+- NEW: Allow .dds files to load from collada.
+- NEW: Add jPlayer driver. 
+- NEW: Add basic shader material support. 
+- NEW*: Add a `tock` variant of `tick` to restore per-change notifications. Tests for future-related functions need to see each time change. Fixes #4053, #4083.
+- NEW: Support `devicePixelRatio` !== 1. Fixes resize issues on Retina displays.
+- NEW*: Define `kernel.setMethod` and `kernel.getMethod`.
+- NEW*: Only call `model.callingMethod` until the first driver returns a result.
+- NEW*: Replace `jQuery.each` with `Object.keys` to remove dependency on jQuery.
+- NEW*: Add new utility functions to convert between Handlers and functions.
+- NEW*: Support keyed and indexed collections in preparation for listener tracking. Add `indexedCollectionPrototype` as a parallel to `nodeCollectionPrototype` for tracking event listeners and other ordered, id-based members. (Should for `node.children` in the future.) Rename `nodeCollectionPrototype` to `keyedCollectionPrototype`. Accept values for the collection `existing` members to be used for kernel-authoritative data about the member, such as event parameters and listener ids. Collect the added/removed/changed bits into one object per collection and allow for detailed change state. The detail will  include listener changes within events. Support ordered change lists for indexed collections so that patches may apply members added in the necessary order.
+- NEW*: Record creations and deletions in the registry. Include "added" and "changed" members in the patch data. Previously creations were as changes, like any other change. The replication data still can't indicate deletions. 
+- NEW*: Allow `*.vwf.config.yaml` files to include client configuration options. Provide a `configuration` section to specify `vwf/configuration` options for the application. Any options provided will override the factory and environment defaults. For example:
+    ---
+    info:
+      title: "VWF Duck Application"
+    configuration:
+      preserve-script-closures: true
+- CHG: Fix broken closure in apps caused by event handler replication change. 
+- CHG: Make the kernel `jQuery` reference available for the tests. The tests initialize using `kernel.initialize`. They don't call `kernel.loadConfiguration` first. Setting the internal `jQuery` reference only in `loadConfiguration` breaks the tests.
+- CHG: Add pointer event definitions to the sandtable yaml file to fix bug introducted with API changes. 
+- CHG: Update 404 page to match new website styling. Fixes #4061. 
+- CHG: Fix when the VWF spinner is present and add it to its own namespace to avoid app conflicts. 
+- CHG: Updates to GTLT loader. 
+- CHG: Only pick when the model has pointer event listeners to hear it.
+- CHG: Add check for a material map before correcting any missing UV coordinates.
+- CHG: Update cesium to the latest version 30. 
+- CHG: Enabled editor interface in sandtable app. Fixes #2974. 
+- CHG: Update bzflag to allow players to rejoin. Fix other bzflag bugs. 
+- CHG: Fix path checking order for Mac/Linux. 
+- CHG: Fix issues with default browser, and fixes relative path issues. Fixes #3172.
+- CHG: Fix bzflag particle implementation. 
+- CHG*: Only move queue forward on ticks. 
+- CHG*: `kernel.execute` async adjustments.
+- CHG*: Pass the `kernel.execute` result in its callback.
+- CHG*: Rename the `initializingNode` callback parameter to include `callback`.
+- CHG*: Use the name `prototypeDepth` consistently for that concept.
+- CHG*: Rename to `callInitializers` and `initializerScript` for clarity.
+- CHG*: Move per-prototype `initialize` from `model/javascript` to the kernel.
+- CHG*: Refactor the `properties`, `methods` and `events` accessors. Refs #3078. 
+- CHG: Update mouse navigation. 
+- CHG: Remove library dependencies. 
+- CHG: Change humvee-lesson driving to use translateTo, so it's not interpolated. 
+- CHG: Notify user if websocket connection is blocked. 
+- CHG: Rearrange order of prototype array so nodes come before their behaviors. 
+- CHG: Moved the WebGLRenderer render call out of the renderScene function. Added a default render function to the view driver.
+- CHG: Pass in renderer, scene, and camera rather than finding them in the render function.
+- CHG: Create two directional lights and an ambientLight if the application omits lights.
+- CHG: Change the default lights to directional and creates the lights directly in the render.
+- CHG: Update RequireJS to 2.1.11 from 2.1.5. 
+- CHG: Bail on view-side matrix interpolation if rotation matrices are not orthogonal. 
+- CHG: Fix mirrored animations. 
+- CHG: Fix hammer.js dependency for touch applications. 
+- CHG: Allow app developer to disable creation of default nav object. 
+- CHG: Enable view interpolation on navObject and camera when navigation mode is "none. 
+- CHG: Add model side support for raycasting in Threejs.
+- CHG: Add source URLs to animation.vwf.yaml.
+- CHG: Ignore a pick on an object not in the VWF node hierarchy. 
+- CHG: Fix collada opacity and alpha. 
+- CHG: Refactor key navigation such that it will be easier for apps to specify their own. 
+- CHG: Move navigation functions up into the driver object (now accessible from app). 
+- CHG: Make navigation overridable. 
+- CHG: Update logger. 
+- CHG: Fix spacing and add mouseEventData to handler params
+- CHG: Add pointerlock params and combine separate mousedowns into one object
+- CHG: Tweak duck app for better home webpage viewing. 
+
+
+----------------------------------
+0.6.22
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change. 
+
+- NEW: Add ability to run the node.js server from any directory. Refs #3065
+- NEW: Add ability to node.js server to parse URL paramaters. Fixes #2980, #3060. 
+- NEW: Add single character ssl flag to node server options. Fixes #3096. 
+- CHG: Refactor particle effects.
+- CHG: Update documentation. 
+- CHG: Remove concept of node.threeMaterial and instead save material in node.threeObject.
+- CHG: Update references from "worldMatrix" to "matrixWorld". Fixes #3127. 
+- CHG: Update command-center app to use default VWF navigation. Refs #3119. 
+- CHG: Update catalog/demos page and added a VWF users section. Refs #2910. 
+- CHG: Windows installer updates. Fixes #3144. 
+- CHG: Fix synchronization issue with humvee cameras and other humvee bugs. 
+- CHG: Hide 404 errors when there is no app config file. 
+- CHG: Fix infinite redirect for unsupported browsers. 
+- CHG: Update installation procedures. 
+
+
+----------------------------------
 0.6.21
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change. 
