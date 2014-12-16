@@ -1,0 +1,8 @@
+# http://kineticjs.com/docs/Kinetic.Canvas.html
+
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+  width:
+  height:
+  pixelRatio:

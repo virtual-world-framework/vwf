@@ -1,7 +1,5 @@
 /*global define*/
-define([
-    ], function(
-        ) {
+define([], function() {
     "use strict";
 
     /**
@@ -12,7 +10,7 @@ define([
      *
      * @see DiscardMissingTileImagePolicy
      */
-    var NeverTileDiscardPolicy = function(description) {
+    var NeverTileDiscardPolicy = function(options) {
     };
 
     /**
@@ -27,7 +25,6 @@ define([
      * Given a tile image, decide whether to discard that image.
      *
      * @param {Image|Promise} image An image, or a promise that will resolve to an image.
-     *
      * @returns A promise that will resolve to true if the tile should be discarded.
      */
     NeverTileDiscardPolicy.prototype.shouldDiscardImage = function(image) {

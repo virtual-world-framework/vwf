@@ -1,0 +1,65 @@
+--- 
+extends: http://vwf.example.com/kinetic/stage.vwf
+properties:
+  visible: true
+children:
+  background:
+    extends: http://vwf.example.com/kinetic/layer.vwf
+    children:
+      image:
+        extends: http://vwf.example.com/kinetic/image.vwf
+        source: ferns.jpg
+  layer1:
+    extends: http://vwf.example.com/kinetic/layer.vwf
+    properties:
+      clearBeforeDraw: true
+      visible: true
+    children:
+      circle1:
+        extends: http://vwf.example.com/kinetic/circle.vwf 
+        properties:
+          visible: true
+          x: 420
+          y: 40
+          radius: 30
+          fill: red
+          fillEnabled: true 
+          draggable: true
+      rectImage:
+        extends: http://vwf.example.com/kinetic/rect.vwf 
+        properties:
+          fillPatternImage: x.png
+          visible: true
+          x: 20
+          y: 20
+          width: 32
+          height: 32
+          draggable: true
+  layer2:
+    extends: http://vwf.example.com/kinetic/layer.vwf
+    properties:
+      clearBeforeDraw: true
+      visible: true
+    children:
+      rect1:
+        extends: http://vwf.example.com/kinetic/rect.vwf 
+        properties:
+          visible: true
+          x: 420
+          y: 200
+          width: 50
+          height: 50
+          radius: 10
+          fill: blue
+          fillEnabled: true 
+          draggable: true
+      rectImage:
+        extends: http://vwf.example.com/kinetic/rect.vwf 
+        properties:
+          fillPatternImage: rainbow.png
+          visible: true
+          x: 20
+          y: 80
+          width: 48
+          height: 48
+          draggable: true

@@ -88,7 +88,7 @@ children:
   clients:
     extends: http://vwf.example.com/node.vwf
   earth:
-    extends: http://vwf.example.com/cesium/centralBody.vwf 
+    extends: http://vwf.example.com/cesium/globe.vwf 
 scripts:
 - |
     this.initialize = function() {

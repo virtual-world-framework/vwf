@@ -1,17 +1,20 @@
 /*global define*/
 define([
+        './defaultValue',
         './defined',
         './Fullscreen'
     ], function(
+        defaultValue,
         defined,
         Fullscreen) {
     "use strict";
 
     function extractVersion(versionString) {
         var parts = versionString.split('.');
-        for ( var i = 0, len = parts.length; i < len; ++i) {
+        for (var i = 0, len = parts.length; i < len; ++i) {
             parts[i] = parseInt(parts[i], 10);
         }
+        return parts;
     }
 
     var isChromeResult;
@@ -84,12 +87,21 @@ define([
     var internetExplorerVersionResult;
     function isInternetExplorer() {
         if (!defined(isInternetExplorerResult)) {
-            var fields = (/ MSIE ([\.0-9]+)/).exec(navigator.userAgent);
-            if (fields === null) {
-                isInternetExplorerResult = false;
+            var fields;
+            if (navigator.appName === 'Microsoft Internet Explorer') {
+                fields = /MSIE ([0-9]{1,}[\.0-9]{0,})/.exec(navigator.userAgent);
+                if (fields !== null) {
+                    isInternetExplorerResult = true;
+                    internetExplorerVersionResult = extractVersion(fields[1]);
+                }
+            } else if (navigator.appName === 'Netscape') {
+                fields = /Trident\/.*rv:([0-9]{1,}[\.0-9]{0,})/.exec(navigator.userAgent);
+                if (fields !== null) {
+                    isInternetExplorerResult = true;
+                    internetExplorerVersionResult = extractVersion(fields[1]);
+                }
             } else {
-                isInternetExplorerResult = true;
-                internetExplorerVersionResult = extractVersion(fields[1]);
+                isInternetExplorerResult = false;
             }
         }
         return isInternetExplorerResult;
@@ -113,32 +125,8 @@ define([
         isWebkit : isWebkit,
         webkitVersion : webkitVersion,
         isInternetExplorer : isInternetExplorer,
-        internetExplorerVersion : internetExplorerVersion
-    };
-
-    var supportsCrossOriginImagery;
-
-    /**
-     * Detects whether the current browser supports the use of cross-origin
-     * requests to load streaming imagery.
-     *
-     * @returns true if the browser can load cross-origin streaming imagery, false if not.
-     *
-     * @see <a href='http://www.w3.org/TR/cors/'>Cross-Origin Resource Sharing</a>
-     */
-    FeatureDetection.supportsCrossOriginImagery = function() {
-        if (!defined(supportsCrossOriginImagery)) {
-            if (isSafari() && webkitVersion()[0] < 536) {
-                // versions of Safari below this incorrectly throw a DOM error when calling
-                // readPixels on a canvas containing a cross-origin image.
-                supportsCrossOriginImagery = false;
-            } else {
-                // any other versions of browsers that incorrectly block
-                // readPixels on canvas containing crossOrigin images?
-                supportsCrossOriginImagery = 'withCredentials' in new XMLHttpRequest();
-            }
-        }
-        return supportsCrossOriginImagery;
+        internetExplorerVersion : internetExplorerVersion,
+        hardwareConcurrency : defaultValue(navigator.hardwareConcurrency, 3)
     };
 
     /**
@@ -147,7 +135,7 @@ define([
      * @returns true if the browser supports the full screen standard, false if not.
      *
      * @see Fullscreen
-     * @see <a href='http://dvcs.w3.org/hg/fullscreen/raw-file/tip/Overview.html'>W3C Fullscreen Living Specification</a>
+     * @see {@link http://dvcs.w3.org/hg/fullscreen/raw-file/tip/Overview.html|W3C Fullscreen Living Specification}
      */
     FeatureDetection.supportsFullscreen = function() {
         return Fullscreen.supportsFullscreen();
@@ -158,7 +146,7 @@ define([
      *
      * @returns true if the browser supports typed arrays, false if not.
      *
-     * @see <a href='http://www.khronos.org/registry/typedarray/specs/latest/'>Typed Array Specification</a>
+     * @see {@link http://www.khronos.org/registry/typedarray/specs/latest/|Typed Array Specification}
      */
     FeatureDetection.supportsTypedArrays = function() {
         return typeof ArrayBuffer !== 'undefined';

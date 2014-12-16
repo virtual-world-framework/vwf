@@ -13,41 +13,13 @@
     bottom: 0;
     left: 0;
     color: #ffffff;
-    font-size: 10pt;
+    font-size: 10px;
     text-shadow: 0px 0px 2px #000000;
     padding-right: 5px;
 }
 
-.cesium-widget-button {
-    display: inline-block;
-    background: #303336;
-    border: 1px solid #444;
-    border-radius: 5px;
-    padding: 4px 12px;
-    margin: 0 3px;
-    cursor: pointer;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
-}
-
-.cesium-widget-button:focus {
-    color: #fff;
-    border-color: #ea4;
-}
-
-.cesium-widget-button:hover {
-    color: #fff;
-    background: #48b;
-    border-color: #aef;
-    box-shadow: 0 0 8px #fff;
-}
-
-.cesium-widget-button:active {
-    color: #000;
-    background: #adf;
-    border-color: #fff;
-    box-shadow: 0 0 8px #fff;
+.cesium-credit-text {
+    white-space: nowrap;
 }
 
 .cesium-widget-errorPanel {
@@ -86,11 +58,10 @@
     color: #fe4;
 }
 
-.cesium-widget-errorPanel-message {
+.cesium-widget-errorPanel-scroll {
     overflow: auto;
     font-family: monospace;
     white-space: pre-wrap;
-    resize: vertical;
     padding: 0;
     margin: 10px 0;
 }

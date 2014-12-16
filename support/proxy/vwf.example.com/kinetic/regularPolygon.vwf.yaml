@@ -1,0 +1,7 @@
+# http://kineticjs.com/docs/Kinetic.RegularPolygon.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  sides:
+  radius:

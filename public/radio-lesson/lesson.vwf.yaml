@@ -26,6 +26,12 @@ children:
         extends: http://vwf.example.com/lesson/task.vwf
         properties:
           text: "1.1 Turn on the IC-40 radio"
+          radio$:
+            get: |
+              if ( !this.radio$ ) {
+                this.radio$ = this.find( "/radio" )[ 0 ];
+              }
+              return this.radio$;
         children:
           turnOnRadioInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
@@ -35,10 +41,9 @@ children:
         - |
           this.entering = function( ) {
             this.logger.info( "Step 1 entering", this );
-            var radio = this.find( "/radio" )[ 0 ];
-            radio.Radio.ic40Volume.controlValueUpdated = radio.events.add( function( ) {
-              if ( radio.Radio.ic40Volume.controlValue == 1 ) {
-                radio.Radio.ic40Volume.controlValueUpdated = radio.events.flush( this );
+            this.radio$.Radio.ic40Volume.controlValueUpdated = this.radio$.events.add( function( ) {
+              if ( this.radio$.Radio.ic40Volume.controlValue == 1 ) {
+                this.radio$.Radio.ic40Volume.controlValueUpdated = this.radio$.events.flush( this );
                 this.logger.info( "Step 1 completed" );
                 this.completed();
                 this.logger.info( "Step 1 after completed" );
@@ -50,6 +55,12 @@ children:
         properties:
           text: "1.2 Change to Backlight mode"
           cameraPoseRef: /lesson/cameraPose2
+          radio$:
+            get: |
+              if ( !this.radio$ ) {
+                this.radio$ = this.find( "/radio" )[ 0 ];
+              }
+              return this.radio$;
         children:
           lightModeInstructions:
             extends: http://vwf.example.com/lesson/task.vwf
@@ -59,10 +70,9 @@ children:
         - |
           this.entering = function() {
             this.logger.info( "Step 2 entering" );
-            var radio = this.find( "/radio" )[ 0 ];
-            radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
-              if ( radio.powerOn && radio.menuMode == "channel" ) {
-                radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
+            this.radio$.Radio.ic40Red.pointerClick = this.radio$.events.add( function() {
+              if ( this.radio$.powerOn && this.radio$.menuMode == "channel" ) {
+                this.radio$.Radio.ic40Red.pointerClick = this.radio$.events.flush( this );
                 this.logger.info( "Step 2 completed" );
                 this.completed();
                 this.logger.info( "Step 2 after completed");
@@ -74,6 +84,12 @@ children:
           properties:
             text: "1.3 Turn backlight on"
             cameraPoseRef: /lesson/cameraPose3
+            radio$:
+              get: |
+                if ( !this.radio$ ) {
+                  this.radio$ = this.find( "/radio" )[ 0 ];
+                }
+                return this.radio$;
           children:
             lightOnInstructions:
               extends: http://vwf.example.com/lesson/task.vwf
@@ -83,10 +99,9 @@ children:
           - |
             this.entering = function() {
               this.logger.info( "Step 3 entering" );
-              var radio = this.find( "/radio" )[ 0 ];
-              radio.Radio.ic40Up.pointerClick = radio.events.add( function() {
-                if ( radio.powerOn && radio.menuMode == "backLight" ) {
-                  radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
+              this.radio$.Radio.ic40Up.pointerClick = this.radio$.events.add( function() {
+                if ( this.radio$.powerOn && this.radio$.menuMode == "backLight" ) {
+                  this.radio$.Radio.ic40Up.pointerClick = this.radio$.events.flush( this );
                   this.logger.info( "Step 3 completed" );
                   this.completed();
                   this.logger.info( "Step 3 after completed");
@@ -98,6 +113,12 @@ children:
           properties:
             text: "1.4 Change to squelch mode"
             cameraPoseRef: /lesson/cameraPose4
+            radio$:
+              get: |
+                if ( !this.radio$ ) {
+                  this.radio$ = this.find( "/radio" )[ 0 ];
+                }
+                return this.radio$;
           children:
             squelchModeInstructions:
               extends: http://vwf.example.com/lesson/task.vwf
@@ -107,10 +128,9 @@ children:
           - |
             this.entering = function() {
               this.logger.info( "Step 4 entering" );
-              var radio = this.find( "/radio" )[ 0 ];
-              radio.Radio.ic40Red.pointerClick = radio.events.add( function() {
-                if ( radio.powerOn && radio.menuMode == "backLight" ) {
-                  radio.Radio.ic40Red.pointerClick = radio.events.flush( this );
+              this.radio$.Radio.ic40Red.pointerClick = this.radio$.events.add( function() {
+                if ( this.radio$.powerOn && this.radio$.menuMode == "backLight" ) {
+                  this.radio$.Radio.ic40Red.pointerClick = this.radio$.events.flush( this );
                   this.logger.info( "Step 4 completed" );
                   this.completed();
                   this.logger.info( "Step 4 after completed");
@@ -122,6 +142,12 @@ children:
           properties:
             text: "1.5 Tune radio channel"
             cameraPoseRef: /lesson/cameraPose3
+            radio$:
+              get: |
+                if ( !this.radio$ ) {
+                  this.radio$ = this.find( "/radio" )[ 0 ];
+                }
+                return this.radio$;
           children:
             removeStaticInstructions:
               extends: http://vwf.example.com/lesson/task.vwf
@@ -133,12 +159,11 @@ children:
           - |
             this.entering = function() {
               this.logger.info( "Step 5 entering" );
-              var radio = this.find( "/radio" )[ 0 ];
-              radio.Radio.ic40Up.pointerClick = radio.events.add( function() {
-                if ( radio.powerOn && radio.menuMode == "squelch" ) {              
-                  if (radio.squelch >= 60) 
+              this.radio$.Radio.ic40Up.pointerClick = this.radio$.events.add( function() {
+                if ( this.radio$.powerOn && this.radio$.menuMode == "squelch" ) {              
+                  if (this.radio$.squelch >= 60) 
                   {
-                    radio.Radio.ic40Up.pointerClick = radio.events.flush( this );
+                    this.radio$.Radio.ic40Up.pointerClick = this.radio$.events.flush( this );
                     this.completed();
                     this.logger.info( "Step 5 after completed");
                   }

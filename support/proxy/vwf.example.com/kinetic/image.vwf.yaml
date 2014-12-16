@@ -1,0 +1,11 @@
+# http://kineticjs.com/docs/Kinetic.Image.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  image: 
+  crop:
+  scaleOnLoad: false
+events:
+  imageLoaded:
+  imageLoadError:

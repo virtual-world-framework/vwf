@@ -1,0 +1,6 @@
+# http://kineticjs.com/docs/Kinetic.Rect.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  cornerRadius:

@@ -1,49 +1,17 @@
 /*global define*/
-define(['../Core/Enumeration'], function(Enumeration) {
+define(function() {
     "use strict";
 
     /**
-     * DOC_TBA
-     *
-     * @exports TextureWrap
+     * @private
      */
     var TextureWrap = {
-        /**
-         * DOC_TBA
-         *
-         * @type {Enumeration}
-         * @constant
-         * @default 0x812F
-         */
-        CLAMP : new Enumeration(0x812F, 'CLAMP'),
+        CLAMP_TO_EDGE : 0x812F,
+        REPEAT : 0x2901,
+        MIRRORED_REPEAT : 0x8370,
 
-        /**
-         * DOC_TBA
-         *
-         * @type {Enumeration}
-         * @constant
-         * @default 0x2901
-         */
-        REPEAT : new Enumeration(0x2901, 'REPEAT'),
-
-        /**
-         * DOC_TBA
-         *
-         * @type {Enumeration}
-         * @constant
-         * @default 0x8370
-         */
-        MIRRORED_REPEAT : new Enumeration(0x8370, 'MIRRORED_REPEAT'),
-
-        /**
-         * DOC_TBA
-         *
-         * @param {TextureWrap} textureWrap
-         *
-         * @returns {Boolean}
-         */
         validate : function(textureWrap) {
-            return ((textureWrap === TextureWrap.CLAMP) ||
+            return ((textureWrap === TextureWrap.CLAMP_TO_EDGE) ||
                     (textureWrap === TextureWrap.REPEAT) ||
                     (textureWrap === TextureWrap.MIRRORED_REPEAT));
         }

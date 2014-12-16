@@ -1,30 +1,30 @@
 /*global define*/
 define([
+        './BoundingSphere',
+        './Cartesian3',
+        './ComponentDatatype',
         './defaultValue',
         './DeveloperError',
-        './Cartesian3',
-        './Math',
         './Ellipsoid',
-        './ComponentDatatype',
-        './IndexDatatype',
-        './PrimitiveType',
-        './BoundingSphere',
         './Geometry',
         './GeometryAttribute',
-        './GeometryAttributes'
+        './GeometryAttributes',
+        './IndexDatatype',
+        './Math',
+        './PrimitiveType'
     ], function(
+        BoundingSphere,
+        Cartesian3,
+        ComponentDatatype,
         defaultValue,
         DeveloperError,
-        Cartesian3,
-        CesiumMath,
         Ellipsoid,
-        ComponentDatatype,
-        IndexDatatype,
-        PrimitiveType,
-        BoundingSphere,
         Geometry,
         GeometryAttribute,
-        GeometryAttributes) {
+        GeometryAttributes,
+        IndexDatatype,
+        CesiumMath,
+        PrimitiveType) {
     "use strict";
 
     var defaultRadii = new Cartesian3(1.0, 1.0, 1.0);
@@ -37,6 +37,7 @@ define([
      * @alias EllipsoidOutlineGeometry
      * @constructor
      *
+     * @param {Object} [options] Object with the following properties:
      * @param {Cartesian3} [options.radii=Cartesian3(1.0, 1.0, 1.0)] The radii of the ellipsoid in the x, y, and z directions.
      * @param {Number} [options.stackPartitions=10] The count of stacks for the ellipsoid (1 greater than the number of parallel lines).
      * @param {Number} [options.slicePartitions=8] The count of slices for the ellipsoid (Equal to the number of radial lines).
@@ -47,12 +48,12 @@ define([
      * @exception {DeveloperError} options.subdivisions must be greater than or equal to zero.
      *
      * @example
-     * var ellipsoid = new EllipsoidOutlineGeometry({
-     *   radii : new Cartesian3(1000000.0, 500000.0, 500000.0),
+     * var ellipsoid = new Cesium.EllipsoidOutlineGeometry({
+     *   radii : new Cesium.Cartesian3(1000000.0, 500000.0, 500000.0),
      *   stackPartitions: 6,
      *   slicePartitions: 5
      * });
-     * var geometry = EllipsoidOutlineGeometry.createGeometry(ellipsoid);
+     * var geometry = Cesium.EllipsoidOutlineGeometry.createGeometry(ellipsoid);
      */
     var EllipsoidOutlineGeometry = function(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
@@ -62,17 +63,17 @@ define([
         var slicePartitions = defaultValue(options.slicePartitions, 8);
         var subdivisions = defaultValue(options.subdivisions, 128);
 
+        //>>includeStart('debug', pragmas.debug);
         if (stackPartitions < 1) {
             throw new DeveloperError('options.stackPartitions cannot be less than 1');
         }
-
         if (slicePartitions < 0) {
             throw new DeveloperError('options.slicePartitions cannot be less than 0');
         }
-
         if (subdivisions < 0) {
             throw new DeveloperError('options.subdivisions must be greater than or equal to zero.');
         }
+        //>>includeEnd('debug');
 
         this._radii = Cartesian3.clone(radii);
         this._stackPartitions = stackPartitions;
@@ -83,7 +84,6 @@ define([
 
     /**
      * Computes the geometric representation of an outline of an ellipsoid, including its vertices, indices, and a bounding sphere.
-     * @memberof EllipsoidOutlineGeometry
      *
      * @param {EllipsoidOutlineGeometry} ellipsoidGeometry A description of the ellipsoid outline.
      * @returns {Geometry} The computed vertices and indices.

@@ -1,44 +1,42 @@
 /*global define*/
 define([
+        './Cartesian3',
+        './Cartographic',
         './defaultValue',
         './defined',
         './DeveloperError',
-        './Cartographic',
-        './Cartesian3',
-        './Cartesian4',
         './Ellipsoid',
         './EllipsoidGeodesic',
         './IntersectionTests',
+        './isArray',
         './Math',
         './Matrix4',
         './Plane'
     ], function(
+        Cartesian3,
+        Cartographic,
         defaultValue,
         defined,
         DeveloperError,
-        Cartographic,
-        Cartesian3,
-        Cartesian4,
         Ellipsoid,
         EllipsoidGeodesic,
         IntersectionTests,
+        isArray,
         CesiumMath,
         Matrix4,
         Plane) {
     "use strict";
 
     /**
-     * DOC_TBA
-     *
-     * @exports PolylinePipeline
+     * @private
      */
     var PolylinePipeline = {};
 
     var wrapLongitudeInversMatrix = new Matrix4();
-    var wrapLongitudeOrigin = new Cartesian4();
-    var wrapLongitudeXZNormal = new Cartesian4();
+    var wrapLongitudeOrigin = new Cartesian3();
+    var wrapLongitudeXZNormal = new Cartesian3();
     var wrapLongitudeXZPlane = new Plane(Cartesian3.ZERO, 0.0);
-    var wrapLongitudeYZNormal = new Cartesian4();
+    var wrapLongitudeYZNormal = new Cartesian3();
     var wrapLongitudeYZPlane = new Plane(Cartesian3.ZERO, 0.0);
     var wrapLongitudeIntersection = new Cartesian3();
     var wrapLongitudeOffset = new Cartesian3();
@@ -46,19 +44,23 @@ define([
     var carto1 = new Cartographic();
     var carto2 = new Cartographic();
     var cartesian = new Cartesian3();
+    var scaleFirst = new Cartesian3();
+    var scaleLast = new Cartesian3();
     var ellipsoidGeodesic = new EllipsoidGeodesic();
     //Returns subdivided line scaled to ellipsoid surface starting at p1 and ending at p2.
     //Result includes p1, but not include p2.  This function is called for a sequence of line segments,
     //and this prevents duplication of end point.
     function generateCartesianArc(p1, p2, granularity, ellipsoid) {
-        var separationAngle = Cartesian3.angleBetween(p1, p2);
-        var numPoints = Math.ceil(separationAngle/granularity);
-        var result = new Array(numPoints*3);
-        var start = ellipsoid.cartesianToCartographic(p1, carto1);
-        var end = ellipsoid.cartesianToCartographic(p2, carto2);
+        var first = ellipsoid.scaleToGeodeticSurface(p1, scaleFirst);
+        var last = ellipsoid.scaleToGeodeticSurface(p2, scaleLast);
+        var separationAngle = Cartesian3.angleBetween(first, last);
+        var numPoints = Math.ceil(separationAngle / granularity);
+        var result = new Array(numPoints * 3);
+        var start = ellipsoid.cartesianToCartographic(first, carto1);
+        var end = ellipsoid.cartesianToCartographic(last, carto2);
 
         ellipsoidGeodesic.setEndPoints(start, end);
-        var surfaceDistanceBetweenPoints = ellipsoidGeodesic.getSurfaceDistance() / (numPoints);
+        var surfaceDistanceBetweenPoints = ellipsoidGeodesic.surfaceDistance / (numPoints);
 
         var index = 0;
         start.height = 0;
@@ -92,14 +94,12 @@ define([
 
     /**
      * Breaks a {@link Polyline} into segments such that it does not cross the &plusmn;180 degree meridian of an ellipsoid.
-     * @memberof PolylinePipeline
      *
-     * @param {Array} positions The polyline's Cartesian positions.
+     * @param {Cartesian3[]} positions The polyline's Cartesian positions.
      * @param {Matrix4} [modelMatrix=Matrix4.IDENTITY] The polyline's model matrix. Assumed to be an affine
      * transformation matrix, where the upper left 3x3 elements are a rotation matrix, and
      * the upper three elements in the fourth column are the translation.  The bottom row is assumed to be [0, 0, 0, 1].
      * The matrix is not verified to be in the proper form.
-     *
      * @returns {Object} An object with a <code>positions</code> property that is an array of positions and a
      * <code>segments</code> property.
      *
@@ -108,11 +108,11 @@ define([
      * @see PolylineCollection
      *
      * @example
-     * var polylines = new PolylineCollection();
+     * var polylines = new Cesium.PolylineCollection();
      * var polyline = polylines.add(...);
-     * var positions = polyline.getPositions();
+     * var positions = polyline.positions;
      * var modelMatrix = polylines.modelMatrix;
-     * var segments = PolylinePipeline.wrapLongitude(positions, modelMatrix);
+     * var segments = Cesium.PolylinePipeline.wrapLongitude(positions, modelMatrix);
      */
     PolylinePipeline.wrapLongitude = function(positions, modelMatrix) {
         var cartesians = [];
@@ -123,9 +123,9 @@ define([
             var inverseModelMatrix = Matrix4.inverseTransformation(modelMatrix, wrapLongitudeInversMatrix);
 
             var origin = Matrix4.multiplyByPoint(inverseModelMatrix, Cartesian3.ZERO, wrapLongitudeOrigin);
-            var xzNormal = Matrix4.multiplyByVector(inverseModelMatrix, Cartesian4.UNIT_Y, wrapLongitudeXZNormal);
+            var xzNormal = Matrix4.multiplyByPointAsVector(inverseModelMatrix, Cartesian3.UNIT_Y, wrapLongitudeXZNormal);
             var xzPlane = Plane.fromPointNormal(origin, xzNormal, wrapLongitudeXZPlane);
-            var yzNormal = Matrix4.multiplyByVector(inverseModelMatrix, Cartesian4.UNIT_X, wrapLongitudeYZNormal);
+            var yzNormal = Matrix4.multiplyByPointAsVector(inverseModelMatrix, Cartesian3.UNIT_X, wrapLongitudeYZNormal);
             var yzPlane = Plane.fromPointNormal(origin, yzNormal, wrapLongitudeYZPlane);
 
             var count = 1;
@@ -133,7 +133,7 @@ define([
             var prev = cartesians[0];
 
             var length = positions.length;
-            for ( var i = 1; i < length; ++i) {
+            for (var i = 1; i < length; ++i) {
                 var cur = positions[i];
 
                 // intersects the IDL if either endpoint is on the negative side of the yz-plane
@@ -147,11 +147,11 @@ define([
                             Cartesian3.negate(offset, offset);
                         }
 
-                        cartesians.push(Cartesian3.add(intersection, offset));
+                        cartesians.push(Cartesian3.add(intersection, offset, new Cartesian3()));
                         segments.push(count + 1);
 
                         Cartesian3.negate(offset, offset);
-                        cartesians.push(Cartesian3.add(intersection, offset));
+                        cartesians.push(Cartesian3.add(intersection, offset, new Cartesian3()));
                         count = 1;
                     }
                 }
@@ -174,26 +174,23 @@ define([
     /**
      * Removes adjacent duplicate positions in an array of positions.
      *
-     * @memberof PolylinePipeline
-     *
-     * @param {Array} positions The array of {Cartesian3} positions.
-     *
-     * @returns {Array} A new array of positions with no adjacent duplicate positions.  Positions are shallow copied.
-     *
-     * @exception {DeveloperError} positions is required.
+     * @param {Cartesian3[]} positions The array of positions.
+     * @returns {Cartesian3[]} A new array of positions with no adjacent duplicate positions.  Positions are shallow copied.
      *
      * @example
      * // Returns [(1.0, 1.0, 1.0), (2.0, 2.0, 2.0)]
      * var positions = [
-     *     new Cartesian3(1.0, 1.0, 1.0),
-     *     new Cartesian3(1.0, 1.0, 1.0),
-     *     new Cartesian3(2.0, 2.0, 2.0)];
-     * var nonDuplicatePositions = PolylinePipeline.removeDuplicates(positions);
+     *     new Cesium.Cartesian3(1.0, 1.0, 1.0),
+     *     new Cesium.Cartesian3(1.0, 1.0, 1.0),
+     *     new Cesium.Cartesian3(2.0, 2.0, 2.0)];
+     * var nonDuplicatePositions = Cesium.PolylinePipeline.removeDuplicates(positions);
      */
     PolylinePipeline.removeDuplicates = function(positions) {
-        if (!defined(positions )) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(positions)) {
             throw new DeveloperError('positions is required.');
         }
+        //>>includeEnd('debug');
 
         var length = positions.length;
         if (length < 2) {
@@ -218,29 +215,27 @@ define([
     /**
      * Subdivides polyline and raises all points to the ellipsoid surface
      *
-     * @memberof PolylinePipeline
-     *
-     * @param {Array} positions The array of positions of type {Cartesian3}.
+     * @param {Cartesian3[]} positions The array of positions of type {Cartesian3}.
      * @param {Number} [granularity = CesiumMath.RADIANS_PER_DEGREE] The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
-     * @param {Ellipsoid} [ellipsoid = Ellipsoid.WGS84] The ellipsoid on which the positions lie.
-     *
-     * @returns {Array} A new array of positions of type {Number} that have been subdivided and raised to the surface of the ellipsoid.
-     *
-     * @exception {DeveloperError} positions is required
+     * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid on which the positions lie.
+     * @returns {Number[]} A new array of positions of type {Number} that have been subdivided and raised to the surface of the ellipsoid.
      *
      * @example
-     * var positions = ellipsoid.cartographicArrayToCartesianArray([
-     *      Cartographic.fromDegrees(-105.0, 40.0),
-     *      Cartographic.fromDegrees(-100.0, 38.0),
-     *      Cartographic.fromDegrees(-105.0, 35.0),
-     *      Cartographic.fromDegrees(-100.0, 32.0)
-     * ]));
-     * var surfacePositions = PolylinePipeline.scaleToSurface(positions);
+     * var positions = Cesium.Cartesian3.fromDegreesArray([
+     *   -105.0, 40.0,
+     *   -100.0, 38.0,
+     *   -105.0, 35.0,
+     *   -100.0, 32.0
+     * ]);
+     * var surfacePositions = Cesium.PolylinePipeline.scaleToSurface(positions);
      */
     PolylinePipeline.scaleToSurface = function(positions, granularity, ellipsoid) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(positions)) {
             throw new DeveloperError('positions is required');
         }
+        //>>includeEnd('debug');
+
         granularity = defaultValue(granularity, CesiumMath.RADIANS_PER_DEGREE);
         ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);
 
@@ -248,11 +243,11 @@ define([
         var newPositions = [];
         for (var i = 0; i < length - 1; i++) {
             var p0 = positions[i];
-            var p1 = positions[i+1];
+            var p1 = positions[i + 1];
             newPositions = newPositions.concat(generateCartesianArc(p0, p1, granularity, ellipsoid));
         }
 
-        var lastPoint = positions[length-1];
+        var lastPoint = positions[length - 1];
         var carto = ellipsoid.cartesianToCartographic(lastPoint, carto1);
         carto.height = 0;
         var cart = ellipsoid.cartographicToCartesian(carto, cartesian);
@@ -264,14 +259,11 @@ define([
     /**
      * Raises the positions to the given height.
      *
-     * @memberof PolylinePipeline
-     *
-     * @param {Array} positions The array of type {Number} representing positions.
-     * @param {Number|Array} height A number or array of numbers representing the heights of each position.
-     * @param {Ellipsoid} [ellipsoid = Ellipsoid.WGS84] The ellipsoid on which the positions lie.
-     * @param {Array} [result] An array to place the resultant positions in.
-     *
-     * @returns {Array} The array of positions scaled to height.
+     * @param {Number[]} positions The array of type {Number} representing positions.
+     * @param {Number|Number[]} height A number or array of numbers representing the heights of each position.
+     * @param {Ellipsoid} [ellipsoid=Ellipsoid.WGS84] The ellipsoid on which the positions lie.
+     * @param {Number[]} [result] An array to place the resultant positions in.
+     * @returns {Number[]} The array of positions scaled to height.
 
      * @exception {DeveloperError} positions must be defined.
      * @exception {DeveloperError} height must be defined.
@@ -279,22 +271,24 @@ define([
      * @exception {DeveloperError} height.length must be equal to positions.length
      *
      * @example
-     * var p1 = ellipsoid.cartographicToCartesian(Cartographic.fromDegrees(-105.0, 40.0));
-     * var p2 = ellipsoid.cartographicToCartesian(Cartographic.fromDegrees(-100.0, 38.0));
+     * var p1 = Cesium.Cartesian3.fromDegrees(-105.0, 40.0);
+     * var p2 = Cesium.Cartesian3.fromDegrees(-100.0, 38.0);
      * var positions = [p1.x, p1.y, p1.z, p2.x, p2.y, p2.z];
      * var heights = [1000, 1000, 2000, 2000];
      *
-     * var raisedPositions = PolylinePipeline.scaleToGeodeticHeight(positions, heights);
+     * var raisedPositions = Cesium.PolylinePipeline.scaleToGeodeticHeight(positions, heights);
      */
-     PolylinePipeline.scaleToGeodeticHeight = function(positions, height, ellipsoid, result) {
+    PolylinePipeline.scaleToGeodeticHeight = function(positions, height, ellipsoid, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(positions)) {
             throw new DeveloperError('positions must be defined.');
         }
         if (!defined(height)) {
             throw new DeveloperError('height must be defined');
         }
-        ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);
+        //>>includeEnd('debug');
 
+        ellipsoid = defaultValue(ellipsoid, Ellipsoid.WGS84);
         var length = positions.length;
         var i;
         var p = scaleP;
@@ -308,8 +302,8 @@ define([
             newPositions = new Array(positions.length);
         }
 
-        if (height === 0) {
-            for(i = 0; i < length; i+=3) {
+        if (height === 0.0) {
+            for (i = 0; i < length; i += 3) {
                 p = ellipsoid.scaleToGeodeticSurface(Cartesian3.fromArray(positions, i, p), p);
                 newPositions[i] = p.x;
                 newPositions[i + 1] = p.y;
@@ -319,12 +313,12 @@ define([
         }
 
         var h;
-        if (Array.isArray(height)) {
-            if (height.length !== length/3) {
+        if (isArray(height)) {
+            if (height.length !== length / 3) {
                 throw new DeveloperError('height.length must be equal to positions.length');
             }
             for (i = 0; i < length; i += 3) {
-                h = height[i/3];
+                h = height[i / 3];
                 p = Cartesian3.fromArray(positions, i, p);
                 p = computeHeight(p, h, ellipsoid);
                 newPositions[i] = p.x;

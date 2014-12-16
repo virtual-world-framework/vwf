@@ -16,3 +16,5 @@ model:
   vwf/model/threejs:
 view:
   vwf/view/threejs: { application-root: "#vwf-root", experimental-disable-inputs: true }
+configuration:
+  preserve-script-closures: true

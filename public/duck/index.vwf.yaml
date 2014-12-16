@@ -11,8 +11,10 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
---- 
+---
 extends: http://vwf.example.com/scene.vwf
+properties:
+  ambientColor: [ 50, 50, 50 ]
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -23,24 +25,40 @@ children:
     properties:
       # spin-on-click configuration parameters
       spin-axis: [ 0, 0, 1 ]
-  point1:
+    children:
+      quack:
+        extends: http://vwf.example.com/sound.vwf
+        properties:
+          url: "duck"
+    scripts:
+    - |
+      this.pointerClick = function( pointerInfo, pickInfo ) {
+        this.quack.play();
+      }
+  directional1:
     extends: http://vwf.example.com/light.vwf
     properties:
-      lightType: "point"
+      lightType: "directional"
       enable: true
-      distance: 2000
-      intensity: 2
-      color: [ 128, 128, 128 ]
-      translation: [ -400, 400, -900 ]
-  point2:
+      intensity: 0.75
+      color: [ 255, 255, 255 ]
+      translation: [ 400, 400, 100 ]
+  directional2:
     extends: http://vwf.example.com/light.vwf
     properties:
-      lightType: "point"
+      lightType: "directional"
       enable: true
-      distance: 2000
-      intensity: 2
-      color: [ 128, 128, 128 ]
-      translation: [ 400, 400, 900 ]
+      intensity: 0.33
+      color: [ 255, 255, 255 ]
+      translation: [ -600, 400, -100 ]
+  directional3:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "directional"
+      enable: true
+      intensity: 0.67
+      color: [ 255, 255, 255 ]
+      translation: [ 0, -400, 100 ]
 scripts:
 - |
     this.initialize = function(){

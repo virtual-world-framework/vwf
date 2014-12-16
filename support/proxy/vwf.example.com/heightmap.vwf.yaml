@@ -1,0 +1,16 @@
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+  heightmap:
+  heightmapWidth:
+  heightmapHeight:
+  minWorldX:
+  maxWorldX:
+  minWorldY:
+  maxWorldY:
+  minWorldZ:
+  maxWorldZ:
+methods:
+  getHeight:
+scripts:
+- source: http://vwf.example.com/heightmap.js

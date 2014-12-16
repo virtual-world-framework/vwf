@@ -1,0 +1,16 @@
+# http://kineticjs.com/docs/Kinetic.Text.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  fontFamily:
+  fontSize:
+  fontStyle:
+  fontVariant:
+  text:
+  align:
+  padding:
+  width:
+  height:
+  lineHeight:
+  wrap:

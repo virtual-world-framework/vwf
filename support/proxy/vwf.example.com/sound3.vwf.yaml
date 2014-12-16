@@ -1,0 +1,15 @@
+## The component representation of a 3D sound 
+## 
+## @name sound3.vwf
+## @namespace
+
+--- 
+extends: http://vwf.example.com/sound.vwf
+properties:
+  endrange:
+  startrange:
+methods:
+  tick:
+  updateVolume:
+scripts:
+- source: "http://vwf.example.com/sound3.js"

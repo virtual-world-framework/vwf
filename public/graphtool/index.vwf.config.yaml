@@ -1,0 +1,8 @@
+---
+model:
+  vwf/model/threejs:
+  vwf/model/graphtool:
+view:
+  vwf/view/threejs: "#vwf-root"
+  vwf/view/editor:
+  

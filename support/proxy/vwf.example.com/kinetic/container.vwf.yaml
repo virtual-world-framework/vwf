@@ -1,0 +1,10 @@
+# http://kineticjs.com/docs/Kinetic.Container.html
+
+--- 
+extends: http://vwf.example.com/kinetic/node.vwf
+properties: 
+  clipFunc:
+method:
+  deleteChildNode:
+scripts:
+- source: "http://vwf.example.com/kinetic/container.js"

@@ -1,32 +1,54 @@
 /*global define*/
 define([
+        '../Core/BoundingRectangle',
         '../Core/BoundingSphere',
+        '../Core/Cartesian2',
         '../Core/Cartesian3',
+        '../Core/Cartesian4',
+        '../Core/Color',
         '../Core/ComponentDatatype',
         '../Core/defined',
+        '../Core/defineProperties',
         '../Core/destroyObject',
+        '../Core/IndexDatatype',
         '../Core/Math',
+        '../Core/Matrix4',
+        '../Core/PixelFormat',
         '../Core/PrimitiveType',
-        '../Renderer/BlendingState',
         '../Renderer/BufferUsage',
+        '../Renderer/ClearCommand',
         '../Renderer/DrawCommand',
-        './SceneMode',
+        '../Shaders/SunFS',
+        '../Shaders/SunTextureFS',
         '../Shaders/SunVS',
-        '../Shaders/SunFS'
+        './BlendingState',
+        './SceneMode',
+        './SceneTransforms'
     ], function(
+        BoundingRectangle,
         BoundingSphere,
+        Cartesian2,
         Cartesian3,
+        Cartesian4,
+        Color,
         ComponentDatatype,
         defined,
+        defineProperties,
         destroyObject,
+        IndexDatatype,
         CesiumMath,
+        Matrix4,
+        PixelFormat,
         PrimitiveType,
-        BlendingState,
         BufferUsage,
+        ClearCommand,
         DrawCommand,
-        SceneMode,
+        SunFS,
+        SunTextureFS,
         SunVS,
-        SunFS) {
+        BlendingState,
+        SceneMode,
+        SceneTransforms) {
     "use strict";
 
     /**
@@ -36,20 +58,12 @@ define([
      * @alias Sun
      * @constructor
      *
-     * @example
-     * scene.sun = new Sun();
-     *
      * @see Scene.sun
+     *
+     * @example
+     * scene.sun = new Cesium.Sun();
      */
     var Sun = function() {
-        this._command = new DrawCommand();
-
-        this._boundingVolume = new BoundingSphere();
-        this._boundingVolume.radius = CesiumMath.SOLAR_RADIUS * 30.0;
-
-        this._boundingVolume2D = new BoundingSphere();
-        this._boundingVolume2D.radius = this._boundingVolume.radius;
-
         /**
          * Determines if the sun will be shown.
          *
@@ -57,12 +71,67 @@ define([
          * @default true
          */
         this.show = true;
+
+        this._command = new DrawCommand({
+            primitiveType : PrimitiveType.TRIANGLES,
+            boundingVolume : new BoundingSphere(),
+            owner : this
+        });
+        this._boundingVolume = new BoundingSphere();
+        this._boundingVolume2D = new BoundingSphere();
+
+        this._texture = undefined;
+        this._drawingBufferWidth = undefined;
+        this._drawingBufferHeight = undefined;
+        this._radiusTS = undefined;
+        this._size = undefined;
+
+        this.glowFactor = 1.0;
+        this._glowFactorDirty = false;
+
+        var that = this;
+        this._uniformMap = {
+            u_texture : function() {
+                return that._texture;
+            },
+            u_size : function() {
+                return that._size;
+            }
+        };
     };
+
+    defineProperties(Sun.prototype, {
+        /**
+         * Gets or sets a number that controls how "bright" the Sun's lens flare appears
+         * to be.  Zero shows just the Sun's disc without any flare.
+         * Use larger values for a more pronounced flare around the Sun.
+         *
+         * @memberof Sun.prototype
+         * @type {Number}
+         * @default 1.0
+         */
+        glowFactor : {
+            get : function () { return this._glowFactor; },
+            set : function (glowFactor) {
+                glowFactor = Math.max(glowFactor, 0.0);
+                this._glowFactor = glowFactor;
+                this._glowFactorDirty = true;
+            }
+        }
+    });
+
+    var scratchPositionWC = new Cartesian2();
+    var scratchLimbWC = new Cartesian2();
+    var scratchPositionEC = new Cartesian4();
+    var scratchCartesian4 = new Cartesian4();
 
     /**
      * @private
      */
-    Sun.prototype.update = function(context, frameState) {
+    Sun.prototype.update = function(scene) {
+        var frameState = scene.frameState;
+        var context = scene.context;
+
         if (!this.show) {
             return undefined;
         }
@@ -72,14 +141,76 @@ define([
             return undefined;
         }
 
-        if (!frameState.passes.color) {
+        if (!frameState.passes.render) {
             return undefined;
+        }
+
+        var drawingBufferWidth = scene.drawingBufferWidth;
+        var drawingBufferHeight = scene.drawingBufferHeight;
+
+        if (!defined(this._texture) ||
+                drawingBufferWidth !== this._drawingBufferWidth ||
+                drawingBufferHeight !== this._drawingBufferHeight ||
+                this._glowFactorDirty) {
+            this._texture = this._texture && this._texture.destroy();
+            this._drawingBufferWidth = drawingBufferWidth;
+            this._drawingBufferHeight = drawingBufferHeight;
+            this._glowFactorDirty = false;
+
+            var size = Math.max(drawingBufferWidth, drawingBufferHeight);
+            size = Math.pow(2.0, Math.ceil(Math.log(size) / Math.log(2.0)) - 2.0);
+
+            this._texture = context.createTexture2D({
+                width : size,
+                height : size,
+                pixelFormat : PixelFormat.RGBA
+            });
+
+            var fbo = context.createFramebuffer({
+                colorTextures : [this._texture]
+            });
+            fbo.destroyAttachments = false;
+
+            var clearCommand = new ClearCommand({
+                color : new Color(0.0, 0.0, 0.0, 0.0),
+                framebuffer : fbo
+            });
+
+            var rs = context.createRenderState({
+                viewport : new BoundingRectangle(0.0, 0.0, size, size)
+            });
+
+            this._glowLengthTS = this._glowFactor * 5.0;
+            this._radiusTS = (1.0 / (1.0 + 2.0 * this._glowLengthTS)) * 0.5;
+
+            var that = this;
+            var uniformMap = {
+                u_glowLengthTS : function() {
+                    return that._glowLengthTS;
+                },
+                u_radiusTS : function() {
+                    return that._radiusTS;
+                }
+            };
+
+            var drawCommand = context.createViewportQuadCommand(SunTextureFS, {
+                renderState : rs,
+                uniformMap : uniformMap,
+                framebuffer : fbo,
+                owner : this
+            });
+
+            clearCommand.execute(context);
+            drawCommand.execute(context);
+
+            drawCommand.shaderProgram.destroy();
+            fbo.destroy();
         }
 
         var command = this._command;
 
         if (!defined(command.vertexArray)) {
-            var attributeIndices = {
+            var attributeLocations = {
                 direction : 0
             };
 
@@ -98,24 +229,24 @@ define([
 
             var vertexBuffer = context.createVertexBuffer(directions, BufferUsage.STATIC_DRAW);
             var attributes = [{
-                index : attributeIndices.direction,
+                index : attributeLocations.direction,
                 vertexBuffer : vertexBuffer,
                 componentsPerAttribute : 2,
                 normalize : true,
                 componentDatatype : ComponentDatatype.UNSIGNED_BYTE
             }];
-            command.vertexArray = context.createVertexArray(attributes);
-            command.primitiveType = PrimitiveType.TRIANGLE_FAN;
-
-            command.shaderProgram = context.getShaderCache().getShaderProgram(SunVS, SunFS, attributeIndices);
+            // Workaround Internet Explorer 11.0.8 lack of TRIANGLE_FAN
+            var indexBuffer = context.createIndexBuffer(new Uint16Array([0, 1, 2, 0, 2, 3]), BufferUsage.STATIC_DRAW, IndexDatatype.UNSIGNED_SHORT);
+            command.vertexArray = context.createVertexArray(attributes, indexBuffer);
+            command.shaderProgram = context.createShaderProgram(SunVS, SunFS, attributeLocations);
             command.renderState = context.createRenderState({
                 blending : BlendingState.ALPHA_BLEND
             });
-            command.boundingVolume = new BoundingSphere();
+            command.uniformMap = this._uniformMap;
         }
 
-        var sunPosition = context.getUniformState().getSunPositionWC();
-        var sunPositionCV = context.getUniformState().getSunPositionColumbusView();
+        var sunPosition = context.uniformState.sunPositionWC;
+        var sunPositionCV = context.uniformState.sunPositionColumbusView;
 
         var boundingVolume = this._boundingVolume;
         var boundingVolume2D = this._boundingVolume2D;
@@ -125,11 +256,35 @@ define([
         boundingVolume2D.center.y = sunPositionCV.x;
         boundingVolume2D.center.z = sunPositionCV.y;
 
+        boundingVolume.radius = CesiumMath.SOLAR_RADIUS + CesiumMath.SOLAR_RADIUS * this._glowLengthTS;
+        boundingVolume2D.radius = boundingVolume.radius;
+
         if (mode === SceneMode.SCENE3D) {
             BoundingSphere.clone(boundingVolume, command.boundingVolume);
         } else if (mode === SceneMode.COLUMBUS_VIEW) {
             BoundingSphere.clone(boundingVolume2D, command.boundingVolume);
         }
+
+        var position = SceneTransforms.computeActualWgs84Position(frameState, sunPosition, scratchCartesian4);
+
+        var dist = Cartesian3.magnitude(Cartesian3.subtract(position, frameState.camera.position, scratchCartesian4));
+        var projMatrix = context.uniformState.projection;
+
+        var positionEC = scratchPositionEC;
+        positionEC.x = 0;
+        positionEC.y = 0;
+        positionEC.z = -dist;
+        positionEC.w = 1;
+
+        var positionCC = Matrix4.multiplyByVector(projMatrix, positionEC, scratchCartesian4);
+        var positionWC = SceneTransforms.clipToDrawingBufferCoordinates(scene, positionCC, scratchPositionWC);
+
+        positionEC.x = CesiumMath.SOLAR_RADIUS;
+        var limbCC = Matrix4.multiplyByVector(projMatrix, positionEC, scratchCartesian4);
+        var limbWC = SceneTransforms.clipToDrawingBufferCoordinates(scene, limbCC, scratchLimbWC);
+
+        this._size = Math.ceil(Cartesian2.magnitude(Cartesian2.subtract(limbWC, positionWC, scratchCartesian4)));
+        this._size = 2.0 * this._size * (1.0 + 2.0 * this._glowLengthTS);
 
         return command;
     };
@@ -139,8 +294,6 @@ define([
      * <br /><br />
      * If this object was destroyed, it should not be used; calling any function other than
      * <code>isDestroyed</code> will result in a {@link DeveloperError} exception.
-     *
-     * @memberof Sun
      *
      * @returns {Boolean} <code>true</code> if this object was destroyed; otherwise, <code>false</code>.
      *
@@ -158,8 +311,6 @@ define([
      * <code>isDestroyed</code> will result in a {@link DeveloperError} exception.  Therefore,
      * assign the return value (<code>undefined</code>) to the object as done in the example.
      *
-     * @memberof Sun
-     *
      * @returns {undefined}
      *
      * @exception {DeveloperError} This object was destroyed, i.e., destroy() was called.
@@ -172,7 +323,10 @@ define([
     Sun.prototype.destroy = function() {
         var command = this._command;
         command.vertexArray = command.vertexArray && command.vertexArray.destroy();
-        command.shaderProgram = command.shaderProgram && command.shaderProgram.release();
+        command.shaderProgram = command.shaderProgram && command.shaderProgram.destroy();
+
+        this._texture = this._texture && this._texture.destroy();
+
         return destroyObject(this);
     };
 

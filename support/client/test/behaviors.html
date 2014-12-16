@@ -40,6 +40,7 @@
         "vwf/model/object",
         "vwf/model/stage/log",
         "vwf/kernel/view",
+        "vwf/kernel/utility",
         "vwf/utility",
         "logger",
 
@@ -240,21 +241,21 @@
                 derivedID, derivedBaseBehaviorID, derivedBaseBehaviorOtherBehaviorID, derivedDerivedBehaviorID,
                 baseID, derivedBehaviorID, baseBehaviorID, otherBehaviorID, cleanup ) {
 
-              var nodeTypeURI = "http://vwf.example.com/node.vwf";  // TODO: get from kernel/utility.js once it's available
+              var protoNodeURI = require( "vwf/kernel/utility" ).protoNodeURI;
 
               // Base node.
 
-              equal( vwf.prototype( baseID ), nodeTypeURI, "base prototype" );
+              equal( vwf.prototype( baseID ), protoNodeURI, "base prototype" );
               deepEqual( vwf.behaviors( baseID ), [], "base behaviors" );
-              deepEqual( vwf.prototypes( baseID ), [ nodeTypeURI ], "base prototypes" );
-              deepEqual( vwf.prototypes( baseID, true ), [ nodeTypeURI ], "base prototypes with behaviors" );
+              deepEqual( vwf.prototypes( baseID ), [ protoNodeURI ], "base prototypes" );
+              deepEqual( vwf.prototypes( baseID, true ), [ protoNodeURI ], "base prototypes with behaviors" );
 
               // Derived node without behaviors.
 
               equal( vwf.prototype( derivedID ), baseID, "derived prototype" );
               deepEqual( vwf.behaviors( derivedID ), [], "derived behaviors" );
-              deepEqual( vwf.prototypes( derivedID ), [ baseID, nodeTypeURI ], "derived prototypes" );
-              deepEqual( vwf.prototypes( derivedID, true ), [ baseID, nodeTypeURI ], "derived prototypes with behaviors" );
+              deepEqual( vwf.prototypes( derivedID ), [ baseID, protoNodeURI ], "derived prototypes" );
+              deepEqual( vwf.prototypes( derivedID, true ), [ baseID, protoNodeURI ], "derived prototypes with behaviors" );
 
               // Derived node with two behaviors. A node's behaviors should be inserted before its
               // prototype, and the behaviors should be in descending order of inheritance.
@@ -264,9 +265,9 @@
               deepEqual( vwf.behaviors( derivedBaseBehaviorOtherBehaviorID ),
                 [ otherBehaviorID, baseBehaviorID ], "derived-with-behaviors behaviors" );
               deepEqual( vwf.prototypes( derivedBaseBehaviorOtherBehaviorID ),
-                [ baseID, nodeTypeURI ], "derived-with-behaviors prototypes" );
+                [ baseID, protoNodeURI ], "derived-with-behaviors prototypes" );
               deepEqual( vwf.prototypes( derivedBaseBehaviorOtherBehaviorID, true ),
-                [ baseBehaviorID, otherBehaviorID, baseID, nodeTypeURI ], "derived-with-behaviors prototypes with behaviors" );
+                [ baseBehaviorID, otherBehaviorID, baseID, protoNodeURI ], "derived-with-behaviors prototypes with behaviors" );
 
               // Node with a behavior derived from a derived node with a behavior. Each node's
               // behaviors should be inserted before their prototypes.
@@ -276,9 +277,9 @@
               deepEqual( vwf.behaviors( doubleDerivedOtherBehaviorDerivedBaseBehaviorID ),
                 [ otherBehaviorID ], "double-derived behaviors" );
               deepEqual( vwf.prototypes( doubleDerivedOtherBehaviorDerivedBaseBehaviorID ),
-                [ derivedBaseBehaviorID, baseID, nodeTypeURI ], "double-derived prototypes" );
+                [ derivedBaseBehaviorID, baseID, protoNodeURI ], "double-derived prototypes" );
               deepEqual( vwf.prototypes( doubleDerivedOtherBehaviorDerivedBaseBehaviorID, true ),
-                [ otherBehaviorID, derivedBaseBehaviorID, baseBehaviorID, baseID, nodeTypeURI ],
+                [ otherBehaviorID, derivedBaseBehaviorID, baseBehaviorID, baseID, protoNodeURI ],
                 "double-derived prototypes with behaviors" );
 
               cleanup();

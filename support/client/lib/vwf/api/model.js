@@ -189,7 +189,7 @@ define( function() {
         /// @param {String[]} methodParameters
         /// @param {String} methodBody
         /// 
-        /// @returns {}
+        /// @returns {Handler} methodHandler
 
         creatingMethod: [ /* nodeID, methodName, methodParameters, methodBody */ ],
 
@@ -201,12 +201,98 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} methodName
+        /// @param {Handler} methodHandler
+        /// 
+        /// @returns {Handler} methodHandler
+
+        settingMethod: [ /* nodeID, methodName, methodHandler */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
+        /// 
+        /// @returns {Handler} methodHandler
+
+        gettingMethod: [ /* nodeID, methodName */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
         /// @param {String[]} methodParameters
-        /// @param {Value} methodValue
         /// 
         /// @returns {}
 
-        callingMethod: [ /* nodeID, methodName, methodParameters, methodValue */ ],
+        callingMethod: [ /* nodeID, methodName, methodParameters */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// @param {Handler} eventHandler
+        /// @param {ID} eventContextID
+        /// @param {String[]} eventPhases
+        /// 
+        /// @returns {Boolean}
+
+        addingEventListener: [ /* nodeID, eventName, eventListenerID, eventHandler, eventContextID, eventPhases */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// 
+        /// @returns {Boolean}
+
+        removingEventListener: [ /* nodeID, eventName, eventListenerID */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// @param {Listener} eventListener
+        /// 
+        /// @returns {Listener}
+
+        settingEventListener: [ /* nodeID, eventName, eventListenerID, eventListener */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// 
+        /// @returns {Listener}
+
+        gettingEventListener: [ /* nodeID, eventName, eventListenerID */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ID} eventContextID
+        /// 
+        /// @returns {}
+
+        flushingEventListeners: [ /* nodeID, eventName, eventContextID */ ],
 
         /// Description.
         /// 
@@ -243,12 +329,23 @@ define( function() {
 
         executing: [],
 
-        /// Description.
+        /// Time has changed, probably by about the same amount as last time.
+        /// 
+        /// Don't rely on `ticking` notifications; but if you do, don't rely on them to arrive at
+        /// any particular rate. `ticking` may be removed in the future to allow the reflector to
+        /// vary the idle message interval.
+        /// 
+        /// To schedule actions for certain times, use the `when` parameter in the
+        /// {@link module:vwf/kernel/model Kernel API}.
         /// 
         /// @function
         /// 
-        /// @param {}
+        /// @param {Number} time
+        /// 
         /// @returns {}
+        /// 
+        /// @deprecated in version 0.6.23. Use the {@link module:vwf/kernel/model Kernel API} `when`
+        ///   parameter to schedule future actions.
 
         ticking: [],
 

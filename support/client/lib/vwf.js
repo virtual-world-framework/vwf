@@ -40,6 +40,14 @@
 
         this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/configuration" as a dependency
 
+        /// Kernel utility functions and objects.
+        /// 
+        /// @name module:vwf.utility
+        /// 
+        /// @private
+
+        this.kutility = undefined; // require( "vwf/kernel/utility" );  // TODO: assign here after converting vwf.js to a RequireJS module and listing "vwf/kernel/utility" as a dependency
+
         /// The kernel logger.
         /// 
         /// @name module:vwf.logger
@@ -206,12 +214,6 @@
 
         this.private = {}; // for debugging
 
-        /// The application root ID.
-        /// 
-        /// @name module:vwf~applicationID
-
-        var applicationID = undefined;
-
         /// Components describe the objects that make up the simulation. They may also serve as
         /// prototype objects for further derived components. External components are identified by
         /// URIs. Once loaded, we save a mapping here from its URI to the node ID of its prototype so
@@ -221,19 +223,6 @@
         /// @name module:vwf~components
 
         var components = this.private.components = {}; // maps component node ID => component specification
-
-        /// The proto-prototype of all nodes is "node", identified by this URI. This type is
-        /// intrinsic to the system and nothing is loaded from the URI.
-        /// 
-        /// @name module:vwf~nodeTypeURI
-
-        var nodeTypeURI = "http://vwf.example.com/node.vwf";
-
-        /// The "node" component descriptor.
-        /// 
-        /// @name module:vwf~nodeTypeDescriptor
-
-        var nodeTypeDescriptor = { extends: null };  // TODO: detect nodeTypeDescriptor in createChild() a different way and remove this explicit null prototype
 
         /// This is the connection to the reflector. In this sample implementation, "socket" is a
         /// socket.io client that communicates over a channel provided by the server hosting the
@@ -287,6 +276,7 @@
             }
 
             var userLibraries = args.shift() || {};
+            var applicationConfig = {};
 
             var callback = args.shift();
 
@@ -298,6 +288,34 @@
                     "vwf/model/threejs/js/loaders/ColladaLoader": {
                         deps: [ "vwf/model/threejs/three" ],
                         exports: "THREE.ColladaLoader",
+                    },
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoader": {
+                        deps: [ "vwf/model/threejs/three" ],
+                        exports: "THREE.glTFLoader",
+                    },
+                    "vwf/model/threejs/js/loaders/gltf/glTF-parser": {
+                        deps: [ "vwf/model/threejs/three" ],
+                      
+                    },
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils": {
+                        deps: [ "vwf/model/threejs/three" ],
+                       
+                    },
+                    "vwf/model/threejs/js/loaders/gltf/glTFAnimation": {
+                        deps: [ "vwf/model/threejs/three" ],
+                       
+                    },
+                    "vwf/model/blockly/blockly_compressed": {
+                        exports: "Blockly"
+                    },
+                    "vwf/model/blockly/blocks_compressed": {
+                        deps: [ "vwf/model/blockly/blockly_compressed" ]
+                    },
+                    "vwf/model/blockly/javascript_compressed": {
+                        deps: [ "vwf/model/blockly/blockly_compressed" ]
+                    },
+                    "vwf/model/blockly/msg/js/en": {
+                        deps: [ "vwf/model/blockly/blockly_compressed" ]
                     },
                 }
             };
@@ -311,11 +329,26 @@
                 { library: "vwf/model/javascript", active: true },
                 { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
                 { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
-                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three", "vwf/model/threejs/js/loaders/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
+                { library: "vwf/model/threejs", linkedLibraries: [
+                    "vwf/model/threejs/three",
+                    "vwf/model/threejs/js/loaders/ColladaLoader",
+                    "vwf/model/threejs/js/loaders/gltf/glTF-parser",
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoader",
+                    "vwf/model/threejs/js/loaders/gltf/glTFAnimation",
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"
+                ], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
+                { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
+                { library: "vwf/model/graphtool", active: false },
+                { library: "vwf/model/sound", active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
+                { library: "vwf/model/kineticjs", linkedLibraries: [ "vwf/model/kinetic/kinetic.min" ],  active: false },
+                { library: "vwf/model/mil-sym", linkedLibraries: [ "vwf/model/mil-sym/sm-bc.min" ],  active: false },
+                { library: "vwf/model/heightmap", active: false },
+                { library: "vwf/model/buzz", linkedLibraries: ["vwf/model/buzz/buzz.min"], active: false },
+                { library: "vwf/model/jPlayer", linkedLibraries: ["vwf/model/jPlayer.2.7.1/jquery.jplayer.min"], active: false },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
             	{ library: "vwf/view/editor", active: false },
@@ -323,15 +356,31 @@
                 { library: "vwf/view/lesson", active: false},
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
+                { library: "vwf/view/blockly", active: false },
+                { library: "vwf/view/sound", active: false },
+                { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
+                { library: "vwf/view/kineticjs", active: false },
+                { library: "vwf/view/mil-sym", active: false },
+                { library: "vwf/view/audio", active: false },
+                { library: "vwf/kernel/utility", active: true },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
                 { library: "vwf/model/threejs/three", active: false },
                 { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTF-parser", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTFLoader", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTFAnimation", active: false },
+                { library: "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils", active: false },
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
+                { library: "vwf/model/blockly/JS-Interpreter/interpreter.js", active: false },
+                { library: "vwf/model/kinetic/kinetic.min", active: false },                
+                { library: "vwf/model/mil-sym/sm-bc.min", active: false }, 
+                { library: "vwf/model/buzz/buzz.min", active: false }, 
+                { library: "vwf/model/jPlayer.2.7.1/jquery.jplayer.min", active: false },
                 { library: "vwf/admin", active: true }
             ];
 
@@ -342,6 +391,14 @@
                     { library: "vwf/model/glge", active: false },
                     { library: "vwf/model/threejs", active: false },
                     { library: "vwf/model/cesium", active: false },
+                    { library: "vwf/model/blockly", active: false },
+                    { library: "vwf/model/graphtool", active: false },
+                    { library: "vwf/model/sound", active: false },
+                    { library: "vwf/model/kineticjs", active: false },
+                    { library: "vwf/model/mil-sym", active: false },
+                    { library: "vwf/model/heightmap", active: false },
+                    { library: "vwf/model/buzz", active: false },
+                    { library: "vwf/model/jPlayer", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
@@ -352,6 +409,12 @@
                     { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
+                    { library: "vwf/view/blockly", active: false },
+                    { library: "vwf/view/sound", active: false },
+                    { library: "vwf/view/touch", active: false },
+                    { library: "vwf/view/kineticjs", active: false },
+                    { library: "vwf/view/mil-sym", active: false },
+                    { library: "vwf/view/audio", active: false },
                     { library: "vwf/view/webrtc", active: false}
                 ]
             };
@@ -384,6 +447,9 @@
 
             jQuery.getJSON("admin/config", function(configLibraries) {
                 if(configLibraries && typeof configLibraries == "object") {
+                    if (typeof configLibraries.configuration == "object") {
+                        applicationConfig = configLibraries.configuration;
+                    }
                     Object.keys(configLibraries).forEach(function(libraryType) {
                         if(libraryType == 'info' && configLibraries[libraryType]["title"])
                         {
@@ -451,6 +517,10 @@
                     requireArray["vwf/view/threejs"].active = true;
                     requireArray["vwf/model/threejs/three"].active = true;
                     requireArray["vwf/model/threejs/js/loaders/ColladaLoader"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTF-parser"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoader"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTFAnimation"].active = true;
+                    requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"].active = true;
                     initializers["model"]["vwf/model/threejs"].active = true;
                     initializers["view"]["vwf/view/threejs"].active = true;
                 }
@@ -458,6 +528,12 @@
                 require( requireConfig, getActiveLibraries(requireArray, false), function( ready ) {
 
                     ready( function() {
+
+                        // Merge any application configuration settings into the configuration
+                        // object.
+
+                        require( "vwf/configuration" ).instance = require( "vwf/utility" ).merge(
+                            {}, require( "vwf/configuration" ).instance, applicationConfig );
 
                         // With the scripts loaded, we must initialize the framework. vwf.initialize()
                         // accepts three parameters: a world specification, model configuration parameters,
@@ -514,9 +590,18 @@
 
             this.configuration = require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference
 
+            // Load the kernel utilities.
+
+            this.kutility = require( "vwf/kernel/utility" );
+
             // Create the logger.
 
             this.logger = require( "logger" ).for( "vwf", this );  // TODO: for( "vwf", ... ), and update existing calls
+
+            // Get the jQuery reference. This also happens in `loadConfiguration`, but the tests
+            // initialize using `initialize` and don't call `loadConfiguration` first.
+
+            jQuery = require("jquery");
 
             // Parse the function parameters. If the first parameter is not an array, then treat it
             // as the application specification. Otherwise, fall back to the "application" parameter
@@ -698,86 +783,54 @@
 
             // Connect to the reflector. This implementation uses the socket.io library, which
             // communicates using a channel back to the server that provided the client documents.
+
             try {
+
+                var options = {
+
+                    // The socket is relative to the application path.
+
+                    resource: window.location.pathname.slice( 1,
+                        window.location.pathname.lastIndexOf("/") ),
+
+                    // Use a secure connection when the application comes from https.
+
+                    secure: window.location.protocol === "https:",
+
+                };
+
                 if ( isSocketIO07() ) {
-                    var options = {
-    
-                        // The socket is relative to the application path.
-                        resource: window.location.pathname.slice( 1,
-                            window.location.pathname.lastIndexOf("/") ),
-    
-                        // The ruby socket.io server only supports WebSockets. Don't try the others.
-                        transports: [
-                            'websocket',
-                            // 'flashsocket',
-                            // 'htmlfile',
-                            // 'xhr-multipart',
-                            // 'xhr-polling',
-                            // 'jsonp-polling',
-                        ],
-    
-                        // Increase the timeout due to starvation while loading the scene. The server
-                        // timeout must also be increased.
-                        // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-                        transportOptions: {
-                            "websocket": { timeout: 90000 }
-                            // "flashsocket": { timeout: 90000 },
-                            // "htmlfile": { timeout: 90000 },
-                            // "xhr-multipart": { timeout: 90000 },
-                            // "xhr-polling": { timeout: 90000 },
-                            // "jsonp-polling": { timeout: 90000 },
-                        }
-    
-                    };
-                    if ( window.location.protocol === "https:" )
-                    {
-                        options.secure = true;
-                        socket = io.connect("wss://"+window.location.host, options);
-                    } else {
-                        socket = io.connect("ws://"+window.location.host, options); 
-                    }
- 
-                } else {  // Ruby Server
 
-                    socket = new io.Socket( undefined, {
-    
-                        // The socket is relative to the application path.
-    
-                        resource: window.location.pathname.slice( 1,
-                            window.location.pathname.lastIndexOf("/") ),
+                    socket = io.connect( window.location.protocol + "//" + window.location.host,
+                        options );
 
-                        // Use a secure connection when the application comes from https.
+                } else {  // Ruby Server -- only supports socket.io 0.6
 
-                        secure: window.location.protocol === "https:",
+                    io.util.merge( options, {
+
+                        // For socket.io 0.6, specify the port since the default isn't correct when
+                        // using https.
 
                         port: window.location.port ||
                             ( window.location.protocol === "https:" ? 443 : 80 ),
-    
+
                         // The ruby socket.io server only supports WebSockets. Don't try the others.
-    
+
                         transports: [
                             'websocket',
-                            // 'flashsocket',
-                            // 'htmlfile',
-                            // 'xhr-multipart',
-                            // 'xhr-polling',
-                            // 'jsonp-polling',
                         ],
-    
-                        // Increase the timeout due to starvation while loading the scene. The server
-                        // timeout must also be increased.
-                        // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-    
+
+                        // Increase the timeout because of starvation while loading the scene. The
+                        // server timeout must also be increased. (For socket.io 0.7+, the client
+                        // timeout is controlled by the server.)
+
                         transportOptions: {
-                            "websocket": { timeout: 90000 }
-                            // "flashsocket": { timeout: 90000 },
-                            // "htmlfile": { timeout: 90000 },
-                            // "xhr-multipart": { timeout: 90000 },
-                            // "xhr-polling": { timeout: 90000 },
-                            // "jsonp-polling": { timeout: 90000 },
-                        }
-    
+                            "websocket": { timeout: 90000 },
+                        },
+
                     } );
+
+                    socket = new io.Socket( undefined, options );
                 }
 
             } catch ( e ) {
@@ -1038,7 +1091,7 @@
             // Note that the message should be validated before looking up and invoking an arbitrary
             // handler.
 
-            var args = [];
+            var args = [], result;
 
             if ( nodeID || nodeID === 0 ) args.push( nodeID );
             if ( memberName ) args.push( memberName );
@@ -1046,7 +1099,14 @@
 
             // Invoke the action.
 
-            var result = this[actionName] && this[actionName].apply( this, args );
+            if ( environment( actionName, parameters ) ) {
+                require( "vwf/configuration" ).environment = environment( actionName, parameters );
+            } else if ( origin !== "reflector" || ! nodeID || nodes.existing[ nodeID ] ) {
+                result = this[ actionName ] && this[ actionName ].apply( this, args );
+            } else {
+                this.logger.debugx( "receive", "ignoring reflector action on non-existent node", nodeID );
+                result = undefined;
+            }
 
             // Return the result.
 
@@ -1054,6 +1114,37 @@
 
             // origin == "reflector" ?
             //     this.logger.infou() : this.logger.debugu();
+
+
+            /// The reflector sends a `setState` action as part of the application launch to pass
+            /// the server's execution environment to the client. A `setState` action isn't really
+            /// appropriate though since `setState` should be the last part of the launch, whereas
+            /// the environment ought to be set much earlier--ideally before the kernel loads.
+            /// 
+            /// Executing the `setState` as received would overwrite any configuration settings
+            /// already applied by the application. So instead, we detect this particular message
+            /// and only use it to update the environment in the configuration object.
+            /// 
+            /// `environment` determines if a message is the reflector's special pre-launch
+            /// `setState` action, and if so, and if the application hasn't been created yet,
+            /// returns the execution environment property.
+
+            function environment( actionName, parameters ) {
+
+                if ( actionName === "setState" && ! vwf.application() ) {
+
+                    var applicationState = parameters && parameters[0];
+
+                    if ( applicationState && Object.keys( applicationState ).length === 1 &&
+                            applicationState.configuration && Object.keys( applicationState.configuration ).length === 1 ) {
+                        return applicationState.configuration.environment;
+                    }
+
+                }
+
+                return undefined;
+            }
+
         };
 
         // -- dispatch -----------------------------------------------------------------------------
@@ -1079,6 +1170,7 @@
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
+                    this.tock();
                 }
 
                 // Perform the action.
@@ -1101,6 +1193,7 @@
                 this.sequence_ = undefined; // clear after the previous action
                 this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
+                this.tock();
             }
             
         };
@@ -1119,7 +1212,7 @@
 
         // -- tick ---------------------------------------------------------------------------------
 
-        /// Tick each tickable model, view, and node. Ticks are sent on each time change.
+        /// Tick each tickable model, view, and node. Ticks are sent on each reflector idle message.
         /// 
         /// @name module:vwf.tick
 
@@ -1144,6 +1237,24 @@
 
             this.tickable.nodeIDs.forEach( function( nodeID ) {
                 this.callMethod( nodeID, "tick", [ this.now ] );
+            }, this );
+
+        };
+
+        // -- tock ---------------------------------------------------------------------------------
+
+        /// Notify views of a kernel time change. Unlike `tick`, `tock` messages are sent each time
+        /// that time moves forward. Only view drivers are notified since the model state should be
+        /// independent of any particular sequence of idle messages.
+        /// 
+        /// @name module:vwf.tock
+
+        this.tock = function() {
+
+            // Call tocked() on each view.
+
+            this.views.forEach( function( view ) {
+                view.tocked && view.tocked( this.now );
             }, this );
 
         };
@@ -1257,7 +1368,7 @@
 
                 nodes: [  // TODO: all global objects
                     this.getNode( "http-vwf-example-com-clients-vwf", full ),
-                    this.getNode( applicationID, full ),
+                    this.getNode( this.application(), full ),
                 ],
 
                 // `createNode` annotations, keyed by `nodes` indexes.
@@ -1375,17 +1486,18 @@
                 nodeComponent = nodeComponent.patches;  // TODO: possible sync errors if the patched node is a URI component and the kernel state (time, random) is different from when the node was created on the originating client
             }
 
-            // nodeComponent may be a URI, a descriptor, or an ID, and while being created will
+            // nodeComponent may be a URI, a descriptor, or an ID. While being created, it will
             // transform from a URI to a descriptor to an ID (depending on its starting state).
-            // nodeURI, nodeDescriptor, and nodeID capture the applicable intermediate states.
+            // nodeURI, nodeDescriptor, and nodeID capture the intermediate states.
 
             var nodeURI, nodeDescriptor, nodeID;
 
             async.series( [
 
-                // If nodeComponent is a URI, load the descriptor.
+                // If `nodeComponent` is a URI, load the descriptor. `nodeComponent` may be a URI, a
+                // descriptor or an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is a URI, a descriptor, or an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( componentIsURI( nodeComponent ) ) { // URI  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
@@ -1462,9 +1574,10 @@
 
                 },
 
-                // If nodeComponent is a descriptor, construct and get the ID.
+                // If `nodeComponent` is a descriptor, construct and get the ID. `nodeComponent` may
+                // be a descriptor or an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is a descriptor or an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
                     if ( componentIsDescriptor( nodeComponent ) ) { // descriptor  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
@@ -1483,11 +1596,11 @@
 
                 },
 
-                // nodeComponent is the ID.
+                // nodeComponent is an ID here.
 
-                function( series_callback_async /* ( err, results ) */ ) { // nodeComponent is an ID
+                function( series_callback_async /* ( err, results ) */ ) {
 
-                    if ( componentIsID( nodeComponent ) ) {  // ID
+                    if ( componentIsID( nodeComponent ) || components[ nodeComponent ] instanceof Array ) {  // ID
 
                         nodeID = nodeComponent;
 
@@ -1542,6 +1655,26 @@
 
             this.logger.debuggx( "deleteNode", nodeID );
 
+            // Send the meta event into the application. We send it before deleting the child so
+            // that the child will still be available for review.
+
+            var parentID = this.parent( nodeID );
+
+            if ( parentID !== 0 ) {
+
+                var nodeIndex = this.children( parentID ).indexOf( nodeID );
+
+                if ( nodeIndex < 0 ) {
+                    nodeIndex = undefined;
+                }
+
+                if ( this.models.kernel.enabled() ) {
+                    this.fireEvent( parentID, [ "children", "removed" ],
+                        [ nodeIndex, this.kutility.nodeReference( nodeID ) ] );
+                }
+
+            }
+
             // Remove the entry in the components list if this was the root of a component loaded
             // from a URI.
 
@@ -1562,12 +1695,6 @@
             // Unregister the node.
 
             nodes.delete( nodeID );
-
-            // Clear the root ID if the application root node is deleted.
-
-            if ( nodeID === applicationID ) {
-                applicationID = undefined;
-            }
 
             // Call deletedNode() on each view. The view is being notified that a node has been
             // deleted.
@@ -1609,10 +1736,12 @@
 
             // Create the properties, methods, and events. For each item in each set, invoke
             // createProperty(), createMethod(), or createEvent() to create the field. Each
-
             // delegates to the models and views as above.
 
-            nodeComponent.properties && jQuery.each( nodeComponent.properties, function( propertyName, propertyValue ) {  // TODO: setProperties should be adapted like this to be used here
+            // Properties.
+
+            nodeComponent.properties && Object.keys( nodeComponent.properties ).forEach( function( propertyName ) {  // TODO: setProperties should be adapted like this to be used here
+                var propertyValue = nodeComponent.properties[ propertyName ];
 
                 // Is the property specification directing us to create a new property, or
                 // initialize a property already defined on a prototype?
@@ -1621,6 +1750,13 @@
                 // Otherwise, initialize the property.
 
                 var creating = ! node.properties.has( propertyName );  // not defined on node or prototype
+
+                // Translate node references in the descriptor's form `{ node: nodeID }` into kernel
+                // node references.
+
+                if ( valueHasAccessors( propertyValue ) && propertyValue.node ) {
+                    propertyValue = vwf.kutility.nodeReference( propertyValue.node );
+                }
 
                 // Create or initialize the property.
 
@@ -1632,7 +1768,40 @@
 
             } );
 
-            // TODO: methods, events
+            // Methods.
+
+            nodeComponent.methods && Object.keys( nodeComponent.methods ).forEach( function( methodName ) {
+                var methodHandler = nodeComponent.methods[ methodName ];
+
+                var creating = ! node.methods.has( methodName );  // not defined on node or prototype
+
+                // Create or initialize the method.
+
+                if ( creating ) {
+                    vwf.createMethod( nodeID, methodName, methodHandler.parameters, methodHandler.body );
+                } else {
+                    vwf.setMethod( nodeID, methodName, methodHandler );
+                }  // TODO: delete when methodHandler === null in patch
+
+            } );
+
+            // Events.
+
+            nodeComponent.events && Object.keys( nodeComponent.events ).forEach( function( eventName ) {
+                var eventDescriptor = nodeComponent.events[ eventName ];
+
+                var creating = ! node.events.has( eventName );  // not defined on node or prototype
+
+                // Create or initialize the event.
+
+                if ( creating ) {
+                    vwf.createEvent( nodeID, eventName, eventDescriptor.parameters );
+                    vwf.setEvent( nodeID, eventName, eventDescriptor );  // set the listeners since `createEvent` can't do it yet
+                } else {
+                    vwf.setEvent( nodeID, eventName, eventDescriptor );
+                }  // TODO: delete when eventDescriptor === null in patch
+
+            } );
 
             // Restore kernel reentry.
 
@@ -1766,7 +1935,7 @@
 
                 if ( prototypeID === undefined ) {
                     nodeComponent.extends = null;
-                } else if ( prototypeID !== nodeTypeURI ) {
+                } else if ( prototypeID !== this.kutility.protoNodeURI ) {
                     nodeComponent.extends = this.getNode( prototypeID );  // TODO: move to vwf/model/object and get from intrinsics
                 }
 
@@ -1805,61 +1974,83 @@
 
                 nodeComponent.properties = this.getProperties( nodeID );
 
-                for ( var propertyName in nodeComponent.properties ) {  // TODO: distinguish add, change, remove
-                    if ( nodeComponent.properties[propertyName] === undefined ) {
+                for ( var propertyName in nodeComponent.properties ) {
+                    var propertyValue = nodeComponent.properties[propertyName];
+
+                    if ( propertyValue === undefined ) {
                         delete nodeComponent.properties[propertyName];
+                    } else if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
+                        // Translate kernel node references into descriptor node references.
+                        nodeComponent.properties[propertyName] = { node: propertyValue.id };
                     }
+
                 }
 
-                if ( Object.keys( nodeComponent.properties ).length == 0 ) { 
-                    delete nodeComponent.properties;
-                } else {
-                    patched = true;
-                }
-
-            } else if ( node.properties.changed ) {
+            } else if ( node.properties.changes ) {
 
                 // The node is patchable and properties have changed.
 
                 nodeComponent.properties = {};
 
-                Object.keys( node.properties.changed ).forEach( function( propertyName ) {
-                    nodeComponent.properties[propertyName] = this.getProperty( nodeID, propertyName );
+                Object.keys( node.properties.changes ).forEach( function( propertyName ) {
+
+                    if ( node.properties.changes[ propertyName ] !== "removed" ) {  // TODO: handle delete
+
+                        var propertyValue = this.getProperty( nodeID, propertyName );
+
+                        if ( this.kutility.valueIsNodeReference( propertyValue ) ) {
+                            // Translate kernel node references into descriptor node references.
+                            nodeComponent.properties[propertyName] = { node: propertyValue.id };
+                        } else {
+                            nodeComponent.properties[propertyName] = propertyValue;
+                        }
+
+                    }
+
                 }, this );
 
-                patched = true;
+            }
 
+            if ( Object.keys( nodeComponent.properties ).length == 0 ) {
+                delete nodeComponent.properties;
+            } else {
+                patched = true;
             }
 
             // Methods.
 
-            // Because methods are much more data than properties, we only send them when patching
-            if ( patches && patches.methods ) {
-                var self = this;
-                nodeComponent.methods = {};
-                patches.methods.forEach( function( methodName ) {
-                    var method = self.models.javascript.nodes[ nodeID ].methods.node.private.bodies[ methodName ];
-                    if ( method )
-                        nodeComponent.methods[ methodName ] = method.toString();
-                } );
+            if ( full || ! node.patchable ) {
 
-                if ( Object.keys( nodeComponent.methods ).length == 0 )
-                    delete nodeComponent.methods;
-                else
+                Object.keys( node.methods.existing ).forEach( function( methodName ) {
+                    nodeComponent.methods = nodeComponent.methods || {};
+                    nodeComponent.methods[ methodName ] = this.getMethod( nodeID, methodName );
                     patched = true;
+                }, this );
+
+            } else if ( node.methods.changes ) {
+
+                Object.keys( node.methods.changes ).forEach( function( methodName ) {
+                    if ( node.methods.changes[ methodName ] !== "removed" ) {  // TODO: handle delete
+                        nodeComponent.methods = nodeComponent.methods || {};
+                        nodeComponent.methods[ methodName ] = this.getMethod( nodeID, methodName );
+                        patched = true;
+                    }
+                }, this );
+
             }
 
             // Events.
 
-            // nodeComponent.events = {};  // TODO
+            var events = full || ! node.patchable ?
+                node.events.existing : node.events.changes;
 
-            // for ( var eventName in nodeComponent.events ) {
-            //     nodeComponent.events[eventName] === undefined &&
-            //         delete nodeComponent.events[eventName];
-            // }
-
-            // Object.keys( nodeComponent.events ).length ||
-            //     delete nodeComponent.events;
+            if ( events ) {
+                Object.keys( events ).forEach( function( eventName ) {
+                    nodeComponent.events = nodeComponent.events || {};
+                    nodeComponent.events[ eventName ] = this.getEvent( nodeID, eventName );
+                    patched = true;
+                }, this );
+            }
 
             // Restore kernel reentry.
 
@@ -2002,7 +2193,7 @@ var useLegacyID = nodeID === 0 && childURI &&
     childURI != "http://vwf.example.com/node.vwf";
     
 useLegacyID = useLegacyID ||
-    nodeID == applicationID && childName == "camera"; // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
+    childName === "camera" && nodeID === this.application(); // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
 
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 childID = childComponent.id;
@@ -2016,7 +2207,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                 childIndex = childURI;
             } else {  // descendant: parent id + next from parent's sequence
 if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    childID = ( childComponent.extends || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+    childID = ( childComponent.extends || this.kutility.protoNodeURI ) + "." + childName;  // TODO: fix static ID references and remove
     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
     childIndex = this.children( nodeID ).length;
 } else {    
@@ -2025,13 +2216,6 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
                 childIndex = this.children( nodeID ).length;
 }
-            }
-
-            // Record the application root ID. The application is the first global node annotated as
-            // "application".
-
-            if ( nodeID === 0 && childName == "application" && ! applicationID ) {
-                applicationID = childID;
             }
 
             // Register the node.
@@ -2114,7 +2298,7 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                             // Create or find the prototype and save the ID in childPrototypeID.
 
                             if ( childComponent.extends !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
-                                vwf.createNode( childComponent.extends || nodeTypeURI, function( prototypeID ) /* async */ {
+                                vwf.createNode( childComponent.extends || vwf.kutility.protoNodeURI, function( prototypeID ) /* async */ {
                                     childPrototypeID = prototypeID;
 
 // TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
@@ -2171,6 +2355,20 @@ if ( ! childComponent.source ) {
                     // Re-register the node now that we have the prototypes and behaviors.
 
                     child = nodes.create( childID, childPrototypeID, childBehaviorIDs, childURI, childName, nodeID );
+
+                    // For the proto-prototype node `node.vwf`, register the meta events.
+
+                    if ( childID === vwf.kutility.protoNodeURI ) {
+                        child.events.create( namespaceEncodedName( [ "properties", "created" ] ) );
+                        child.events.create( namespaceEncodedName( [ "properties", "initialized" ] ) );
+                        child.events.create( namespaceEncodedName( [ "properties", "deleted" ] ) );
+                        child.events.create( namespaceEncodedName( [ "methods", "created" ] ) );
+                        child.events.create( namespaceEncodedName( [ "methods", "deleted" ] ) );
+                        child.events.create( namespaceEncodedName( [ "events", "created" ] ) );
+                        child.events.create( namespaceEncodedName( [ "events", "deleted" ] ) );
+                        child.events.create( namespaceEncodedName( [ "children", "added" ] ) );
+                        child.events.create( namespaceEncodedName( [ "children", "removed" ] ) );
+                    }
 
                     // Re-register the node in vwf/model/object now that we have the prototypes and
                     // behaviors. vwf/model/object knows that we call it more than once and only
@@ -2258,12 +2456,13 @@ if ( ! childComponent.source ) {
                     // createProperty(), createMethod(), or createEvent() to create the field. Each
                     // delegates to the models and views as above.
 
-                    childComponent.properties && jQuery.each( childComponent.properties, function( propertyName, propertyValue ) {
+                    childComponent.properties && Object.keys( childComponent.properties ).forEach( function( propertyName ) {
+                        var propertyValue = childComponent.properties[ propertyName ];
 
                         var value = propertyValue, get, set, create;
 
                         if ( valueHasAccessors( propertyValue ) ) {
-                            value = propertyValue.value;
+                            value = propertyValue.node ? vwf.kutility.nodeReference( propertyValue.node ) : propertyValue.value;
                             get = propertyValue.get;
                             set = propertyValue.set;
                             create = propertyValue.create;
@@ -2303,7 +2502,8 @@ if ( ! childComponent.source ) {
 
                     } );
 
-                    childComponent.methods && jQuery.each( childComponent.methods, function( methodName, methodValue ) {
+                    childComponent.methods && Object.keys( childComponent.methods ).forEach( function( methodName ) {
+                        var methodValue = childComponent.methods[ methodName ];
 
                         if ( valueHasBody( methodValue ) ) {
                             vwf.createMethod( childID, methodName, methodValue.parameters, methodValue.body );
@@ -2313,10 +2513,12 @@ if ( ! childComponent.source ) {
 
                     } );
 
-                    childComponent.events && jQuery.each( childComponent.events, function( eventName, eventValue ) {
+                    childComponent.events && Object.keys( childComponent.events ).forEach( function( eventName ) {
+                        var eventValue = childComponent.events[ eventName ];
 
                         if ( valueHasBody( eventValue ) ) {
                             vwf.createEvent( childID, eventName, eventValue.parameters );
+                            vwf.setEvent( childID, eventName, eventValue );  // set the listeners since `createEvent` can't do it yet
                         } else {
                             vwf.createEvent( childID, eventName, undefined );
                         }
@@ -2468,7 +2670,21 @@ if ( ! childComponent.source ) {
                                 } );
 
                                 // Mark the node as initialized.
+
                                 nodes.initialize( childID );
+
+                                // Send the meta event into the application.
+
+                                if ( ! replicating && nodeID !== 0 ) {
+                                    vwf.fireEvent( nodeID, [ "children", "added" ],
+                                        [ childIndex, vwf.kutility.nodeReference( childID ) ] );
+                                }
+
+                                // Dismiss the loading spinner
+                                if ( childID === vwf.application() ) {
+                                    var spinner = document.getElementById( "vwf-loading-spinner" );
+                                    spinner && spinner.classList.remove( "pace-active" );
+                                }
 
                                 series_callback_async( err, undefined );
                             } );
@@ -2746,34 +2962,37 @@ if ( ! childComponent.source ) {
         this.createProperty = function( nodeID, propertyName, propertyValue, propertyGet, propertySet ) {
 
             this.logger.debuggx( "createProperty", function() {
-                return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ) ];  // TODO: add truncated propertyGet, propertySet to log
+                return [ nodeID, propertyName, JSON.stringify( loggableValue( propertyValue ) ),
+                    loggableScript( propertyGet ), loggableScript( propertySet ) ];
             } );
 
             var node = nodes.existing[nodeID];
 
             // Register the property.
 
-            node.properties.create( propertyName );
+            node.properties.create( propertyName, node.initialized && node.patchable );
 
             // Call creatingProperty() on each model. The property is considered created after all
             // models have run.
 
             this.models.forEach( function( model ) {
-                model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
+                model.creatingProperty && model.creatingProperty( nodeID, propertyName, propertyValue,
+                    propertyGet, propertySet );
             } );
-
-            // Record the change.
-
-            if ( node.initialized && node.patchable ) {
-                node.properties.change( propertyName );
-            }
 
             // Call createdProperty() on each view. The view is being notified that a property has
             // been created.
 
             this.views.forEach( function( view ) {
-                view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue, propertyGet, propertySet );
+                view.createdProperty && view.createdProperty( nodeID, propertyName, propertyValue,
+                    propertyGet, propertySet );
             } );
+
+            // Send the meta event into the application.
+
+            if ( this.models.kernel.enabled() ) {
+                this.fireEvent( nodeID, [ "properties", "created" ], [ propertyName ] );
+            }
 
             this.logger.debugu();
 
@@ -2813,12 +3032,12 @@ if ( ! childComponent.source ) {
                 reentry.creating = true;
                 var settingPropertyEtc = "creatingProperty";
                 var satPropertyEtc = "createdProperty";
-                node.properties.create( propertyName );
+                node.properties.create( propertyName, node.initialized && node.patchable );
             } else if ( ! node.properties.hasOwn( propertyName ) || entry.initializing ) {
                 reentry.initializing = true;
                 var settingPropertyEtc = "initializingProperty";
                 var satPropertyEtc = "initializedProperty";
-                node.properties.create( propertyName );
+                node.properties.create( propertyName, node.initialized && node.patchable );
             } else {
                 var settingPropertyEtc = "settingProperty";
                 var satPropertyEtc = "satProperty";
@@ -2933,19 +3152,32 @@ if ( ! childComponent.source ) {
                 } );
             }
 
-            // For a reentrant call, restore the previous state, move the index forward to cover
-            // the models we called.
-
             if ( reentered ) {
+
+                // For a reentrant call, restore the previous state and move the index forward to
+                // cover the models we called.
+
                 entrants[nodeID+'-'+propertyName] = entry;
                 entry.completed = true;
-            }
 
-            // Delete the call record if this is the first, non-reentrant call here (the normal
-            // case).
+            } else {
 
-            else {
+                // Delete the call record if this is the first, non-reentrant call here (the normal
+                // case).
+
                 delete entrants[nodeID+'-'+propertyName];
+
+                // If the property was created or initialized, send the corresponding meta event
+                // into the application.
+
+                if ( this.models.kernel.enabled() ) {
+                    if ( settingPropertyEtc === "creatingProperty" ) {
+                        this.fireEvent( nodeID, [ "properties", "created" ], [ propertyName ] );
+                    } else if ( settingPropertyEtc === "initializingProperty" ) {
+                        this.fireEvent( nodeID, [ "properties", "initialized" ], [ propertyName ] );
+                    }
+                }
+
             }
 
             // Clear the assignment counter when the outermost `setProperty` completes.
@@ -3091,7 +3323,7 @@ if ( ! childComponent.source ) {
 
                         if ( prototypeIndex < prototypeArray.length - 1 ) {
                             propertyValue = this.getProperty( prototypeID, propertyName, true ); // behavior node only, not its prototypes
-                        } else if ( prototypeID !== nodeTypeURI ) {
+                        } else if ( prototypeID !== this.kutility.protoNodeURI ) {
                             propertyValue = this.getProperty( prototypeID, propertyName ); // prototype node, recursively
                         }
 
@@ -3130,23 +3362,152 @@ if ( ! childComponent.source ) {
 
         this.createMethod = function( nodeID, methodName, methodParameters, methodBody ) {
 
-            this.logger.debuggx( "createMethod", nodeID, methodName, methodParameters );
+            this.logger.debuggx( "createMethod", function() {
+                return [ nodeID, methodName, methodParameters, loggableScript( methodBody ) ];
+            } );
 
-            // Call creatingMethod() on each model. The method is considered created after all
+            var node = nodes.existing[nodeID];
+
+            // Register the method.
+
+            node.methods.create( methodName, node.initialized && node.patchable );
+
+            // Call `creatingMethod` on each model. The method is considered created after all
             // models have run.
 
             this.models.forEach( function( model ) {
-                model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters, methodBody );
+                model.creatingMethod && model.creatingMethod( nodeID, methodName, methodParameters,
+                    methodBody );
             } );
 
-            // Call createdMethod() on each view. The view is being notified that a method has been
+            // Call `createdMethod` on each view. The view is being notified that a method has been
             // created.
 
             this.views.forEach( function( view ) {
-                view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters, methodBody );
+                view.createdMethod && view.createdMethod( nodeID, methodName, methodParameters,
+                    methodBody );
+            } );
+
+            // Send the meta event into the application.
+
+            if ( this.models.kernel.enabled() ) {
+                this.fireEvent( nodeID, [ "methods", "created" ], [ methodName ] );
+            }
+
+            this.logger.debugu();
+        };
+
+        // -- setMethod ----------------------------------------------------------------------------
+
+        /// @name module:vwf.setMethod
+        /// 
+        /// @see {@link module:vwf/api/kernel.setMethod}
+
+        this.setMethod = function( nodeID, methodName, methodHandler ) {
+
+            this.logger.debuggx( "setMethod", function() {
+                return [ nodeID, methodName ];  // TODO loggable methodHandler
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            methodHandler = normalizedHandler( methodHandler );
+
+            if ( ! node.methods.hasOwn( methodName ) ) {
+
+                // If the method doesn't exist on this node, delegate to `kernel.createMethod` to
+                // create and assign the method.
+
+                this.createMethod( nodeID, methodName, methodHandler.parameters, methodHandler.body );  // TODO: result
+
+            } else {
+
+                // Call `settingMethod` on each model. The first model to return a non-undefined
+                // value dictates the return value.
+
+                this.models.some( function( model ) {
+
+                    // Call the driver.
+
+                    var handler = model.settingMethod && model.settingMethod( nodeID, methodName, methodHandler );
+
+                    // Update the value to the value assigned if the driver handled it.
+
+                    if ( handler !== undefined ) {
+                        methodHandler = require( "vwf/utility" ).merge( {}, handler );  // omit `undefined` values
+                    }
+
+                    // Exit the iterator once a driver has handled the assignment.
+
+                    return handler !== undefined;
+
+                } );
+
+                // Record the change.
+
+                if ( node.initialized && node.patchable ) {
+                    node.methods.change( methodName );
+                }
+
+                // Call `satMethod` on each view.
+
+                this.views.forEach( function( view ) {
+                    view.satMethod && view.satMethod( nodeID, methodName, methodHandler );
+                } );
+
+            }
+
+            this.logger.debugu();
+
+            return methodHandler;
+        };
+
+        // -- getMethod ----------------------------------------------------------------------------
+
+        /// @name module:vwf.getMethod
+        /// 
+        /// @see {@link module:vwf/api/kernel.getMethod}
+
+        this.getMethod = function( nodeID, methodName ) {
+
+            this.logger.debuggx( "getMethod", function() {
+                return [ nodeID, methodName ];
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // Call `gettingMethod` on each model. The first model to return a non-undefined value
+            // dictates the return value.
+
+            var methodHandler = {};
+
+            this.models.some( function( model ) {
+
+                // Call the driver.
+
+                var handler = model.gettingMethod && model.gettingMethod( nodeID, methodName );
+
+                // Update the value to the value assigned if the driver handled it.
+
+                if ( handler !== undefined ) {
+                    methodHandler = require( "vwf/utility" ).merge( {}, handler );  // omit `undefined` values
+                }
+
+                // Exit the iterator once a driver has handled the retrieval.
+
+                return handler !== undefined;
+
+            } );
+
+            // Call `gotMethod` on each view.
+
+            this.views.forEach( function( view ) {
+                view.gotMethod && view.gotMethod( nodeID, methodName, methodHandler );
             } );
 
             this.logger.debugu();
+
+            return methodHandler;
         };
 
         // -- callMethod ---------------------------------------------------------------------------
@@ -3166,9 +3527,9 @@ if ( ! childComponent.source ) {
 
             var methodValue = undefined;
 
-            this.models.forEach( function( model ) {
-                var value = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters, methodValue );
-                methodValue = value !== undefined ? value : methodValue;
+            this.models.some( function( model ) {
+                methodValue = model.callingMethod && model.callingMethod( nodeID, methodName, methodParameters );
+                return methodValue !== undefined;
             } );
 
             // Call calledMethod() on each view.
@@ -3184,7 +3545,7 @@ if ( ! childComponent.source ) {
 
         // -- createEvent --------------------------------------------------------------------------
 
-        /// @name module:vwf.creatEvent
+        /// @name module:vwf.createEvent
         /// 
         /// @see {@link module:vwf/api/kernel.createEvent}
 
@@ -3192,19 +3553,416 @@ if ( ! childComponent.source ) {
 
             this.logger.debuggx( "createEvent", nodeID, eventName, eventParameters );
 
-            // Call creatingEvent() on each model. The event is considered created after all models
+            var node = nodes.existing[nodeID];
+
+            // Encode any namespacing into the name. (Namespaced names were added in 0.6.21.)
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Register the event.
+
+            node.events.create( encodedEventName, node.initialized && node.patchable, eventParameters );
+
+            // Call `creatingEvent` on each model. The event is considered created after all models
             // have run.
 
             this.models.forEach( function( model ) {
-                model.creatingEvent && model.creatingEvent( nodeID, eventName, eventParameters );
+                model.creatingEvent && model.creatingEvent( nodeID, encodedEventName, eventParameters );
             } );
 
-            // Call createdEvent() on each view. The view is being notified that a event has been
+            // Call `createdEvent` on each view. The view is being notified that a event has been
             // created.
 
             this.views.forEach( function( view ) {
-                view.createdEvent && view.createdEvent( nodeID, eventName, eventParameters );
+                view.createdEvent && view.createdEvent( nodeID, encodedEventName, eventParameters );
             } );
+
+            // Send the meta event into the application.
+
+            if ( this.models.kernel.enabled() ) {
+                this.fireEvent( nodeID, [ "events", "created" ], [ eventName ] );
+            }
+
+            this.logger.debugu();
+        };
+
+        // -- setEvent -----------------------------------------------------------------------------
+
+        /// @name module:vwf.setEvent
+        /// 
+        /// @see {@link module:vwf/api/kernel.setEvent}
+
+        this.setEvent = function( nodeID, eventName, eventDescriptor ) {
+
+            this.logger.debuggx( "setEvent", function() {
+                return [ nodeID, eventName ];  // TODO: loggable eventDescriptor
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // eventDescriptor = normalizedHandler( eventDescriptor );  // TODO
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            if ( ! node.events.hasOwn( encodedEventName ) ) {
+
+                // If the event doesn't exist on this node, delegate to `kernel.createEvent` to
+                // create and assign the event.
+
+                this.createEvent( nodeID, eventName, eventDescriptor.parameters );  // TODO: result
+
+                ( eventDescriptor.listeners || [] ).forEach( function( listener ) {
+                    return this.addEventListener( nodeID, eventName, listener, listener.context, listener.phases );
+                }, this );
+
+            } else {
+
+                // Locate the event in the registry.
+
+                var event = node.events.existing[ encodedEventName ];
+
+                // xxx
+
+                eventDescriptor = {
+
+                    parameters: event.parameters ?
+                        event.parameters.slice() : [],  // TODO: note: we're ignoring eventDescriptor.parameters in the set
+
+                    listeners: ( eventDescriptor.listeners || [] ).map( function( listener ) {
+
+                        if ( event.listeners.hasOwn( listener.id ) ) {
+                            return this.setEventListener( nodeID, eventName, listener.id, listener );
+                        } else {
+                            return this.addEventListener( nodeID, eventName, listener, listener.context, listener.phases );
+                        }
+
+                    }, this ),
+
+                };
+
+            }
+
+            this.logger.debugu();
+
+            return eventDescriptor;
+        };
+
+        // -- getEvent -----------------------------------------------------------------------------
+
+        /// @name module:vwf.getEvent
+        /// 
+        /// @see {@link module:vwf/api/kernel.getEvent}
+
+        this.getEvent = function( nodeID, eventName ) {
+
+            this.logger.debuggx( "getEvent", function() {
+                return [ nodeID, eventName ];
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Build the result descriptor. Omit the `parameters` and `listeners` fields when the
+            // parameters or listeners are missing or empty, respectively.
+
+            var eventDescriptor = {};
+
+            if ( event.parameters ) {
+                eventDescriptor.parameters = event.parameters.slice();
+            }
+
+            if ( event.listeners.existing.length ) {
+                eventDescriptor.listeners = event.listeners.existing.map( function( eventListenerID ) {
+                    var listener = this.getEventListener( nodeID, eventName, eventListenerID );
+                    listener.id = eventListenerID;
+                    return listener;
+                }, this );
+            }
+
+            this.logger.debugu();
+
+            return eventDescriptor;
+        };
+
+        // -- addEventListener ---------------------------------------------------------------------
+
+        /// @name module:vwf.addEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.addEventListener}
+
+        this.addEventListener = function( nodeID, eventName, eventHandler, eventContextID, eventPhases ) {
+
+            this.logger.debuggx( "addEventListener", function() {
+                return [ nodeID, eventName, loggableScript( eventHandler ),
+                    eventContextID, eventPhases ];
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Register the event if this is the first listener added to an event on a prototype.
+
+            if ( ! node.events.hasOwn( encodedEventName ) ) {
+                node.events.create( encodedEventName, node.initialized && node.patchable );
+            }
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Normalize the descriptor.
+
+            eventHandler = normalizedHandler( eventHandler, event.parameters );
+
+            // Register the listener.
+
+            var eventListenerID = eventHandler.id || this.sequence( nodeID );
+
+            event.listeners.create( eventListenerID, node.initialized && node.patchable );
+
+            // Call `addingEventListener` on each model.
+
+            this.models.forEach( function( model ) {
+                model.addingEventListener &&
+                    model.addingEventListener( nodeID, encodedEventName, eventListenerID,
+                        eventHandler, eventContextID, eventPhases );
+            } );
+
+            // Call `addedEventListener` on each view.
+
+            this.views.forEach( function( view ) {
+                view.addedEventListener &&
+                    view.addedEventListener( nodeID, encodedEventName, eventListenerID,
+                        eventHandler, eventContextID, eventPhases );
+            } );
+
+            this.logger.debugu();
+
+            return eventListenerID;
+        };
+
+        // -- removeEventListener ------------------------------------------------------------------
+
+        /// @name module:vwf.removeEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.removeEventListener}
+
+        this.removeEventListener = function( nodeID, eventName, eventListenerID ) {
+
+            this.logger.debuggx( "removeEventListener", function() {
+                return [ nodeID, eventName, loggableScript( eventListenerID ) ];
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Unregister the listener.
+
+            event.listeners.delete( eventListenerID, node.initialized && node.patchable );
+
+            // Call `removingEventListener` on each model.
+
+            this.models.forEach( function( model ) {
+                model.removingEventListener &&
+                    model.removingEventListener( nodeID, encodedEventName, eventListenerID );
+            } );
+
+            // Call `removedEventListener` on each view.
+
+            this.views.forEach( function( view ) {
+                view.removedEventListener &&
+                    view.removedEventListener( nodeID, encodedEventName, eventListenerID );
+            } );
+
+            this.logger.debugu();
+
+            return eventListenerID;
+        };
+
+        // -- setEventListener ---------------------------------------------------------------------
+
+        /// @name module:vwf.setEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.setEventListener}
+
+        this.setEventListener = function( nodeID, eventName, eventListenerID, eventListener ) {
+
+            this.logger.debuggx( "setEventListener", function() {
+                return [ nodeID, eventName, eventListenerID ];  // TODO: loggable eventListener
+            } );
+
+            var node = nodes.existing[nodeID];
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Locate the event in the registry.
+
+            var event = node.events.existing[ encodedEventName ];
+
+            // Normalize the descriptor.
+
+            eventListener = normalizedHandler( eventListener, event.parameters );
+
+            // Record the change.
+
+            if ( node.initialized && node.patchable ) {
+                event.listeners.change( eventListenerID );
+            }
+
+            // Call `settingEventListener` on each model. The first model to return a non-undefined
+            // value dictates the return value.
+
+            this.models.some( function( model ) {
+
+                // Call the driver.
+
+                var listener = model.settingEventListener &&
+                    model.settingEventListener( nodeID, encodedEventName, eventListenerID, eventListener );
+
+                // Update the value to the value assigned if the driver handled it.
+
+                if ( listener !== undefined ) {
+                    eventListener = require( "vwf/utility" ).merge( {}, listener );  // omit `undefined` values
+                }
+
+                // Exit the iterator once a driver has handled the assignment.
+
+                return listener !== undefined;
+
+            } );
+
+            // Call `satEventListener` on each view.
+
+            this.views.forEach( function( view ) {
+                view.satEventListener &&
+                    view.satEventListener( nodeID, encodedEventName, eventListenerID, eventListener );
+            } );
+
+            this.logger.debugu();
+
+            return eventListener;
+        };
+
+        // -- getEventListener ---------------------------------------------------------------------
+
+        /// @name module:vwf.getEventListener
+        /// 
+        /// @see {@link module:vwf/api/kernel.getEventListener}
+
+        this.getEventListener = function( nodeID, eventName, eventListenerID ) {
+
+            this.logger.debuggx( "getEventListener", function() {
+                return [ nodeID, eventName, eventListenerID ];
+            } );
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Call `gettingEventListener` on each model. The first model to return a non-undefined
+            // value dictates the return value.
+
+            var eventListener = {};
+
+            this.models.some( function( model ) {
+
+                // Call the driver.
+
+                var listener = model.gettingEventListener &&
+                    model.gettingEventListener( nodeID, encodedEventName, eventListenerID );
+
+                // Update the value to the value assigned if the driver handled it.
+
+                if ( listener !== undefined ) {
+                    eventListener = require( "vwf/utility" ).merge( {}, listener );  // omit `undefined` values
+                }
+
+                // Exit the iterator once a driver has handled the assignment.
+
+                return listener !== undefined;
+
+            } );
+
+            // Call `gotEventListener` on each view.
+
+            this.views.forEach( function( view ) {
+                view.gotEventListener &&
+                    view.gotEventListener( nodeID, encodedEventName, eventListenerID, eventListener );
+            } );
+
+            this.logger.debugu();
+
+            return eventListener;
+        };
+
+        // -- flushEventListeners ------------------------------------------------------------------
+
+        /// @name module:vwf.flushEventListeners
+        /// 
+        /// @see {@link module:vwf/api/kernel.flushEventListeners}
+
+        this.flushEventListeners = function( nodeID, eventName, eventContextID ) {
+
+            this.logger.debuggx( "flushEventListeners", nodeID, eventName, eventContextID );
+
+            // Encode any namespacing into the name.
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Retrieve the event in case we need to remove listeners from it
+
+            var node = nodes.existing[ nodeID ];
+            var event = node.events.existing[ encodedEventName ];
+
+            // Call `flushingEventListeners` on each model.
+
+            this.models.forEach( function( model ) {
+                var removedIds = model.flushingEventListeners &&
+                    model.flushingEventListeners( nodeID, encodedEventName, eventContextID );
+                
+                // If the model driver returned an array of the ids of event listeners that it 
+                // removed, remove their references in the kernel
+
+                if ( removedIds && removedIds.length ) {
+
+                    // Unregister the listeners that were flushed
+                    removedIds.forEach( function( removedId ) {
+                        event.listeners.delete( removedId, node.initialized && node.patchable );
+                    } );
+                }
+            } );
+
+            // Call `flushedEventListeners` on each view.
+
+            this.views.forEach( function( view ) {
+                view.flushedEventListeners &&
+                    view.flushedEventListeners( nodeID, encodedEventName, eventContextID );
+            } );
+
+            // TODO: `flushEventListeners` can be interpreted by the kernel now and handled with a
+            // `removeEventListener` call instead of separate `flushingEventListeners` and
+            // `flushedEventListeners` calls to the drivers.
 
             this.logger.debugu();
         };
@@ -3221,19 +3979,26 @@ if ( ! childComponent.source ) {
                 return [ nodeID, eventName, JSON.stringify( loggableValues( eventParameters ) ) ];
             } );
 
-            // Call firingEvent() on each model.
+            // Encode any namespacing into the name. (Namespaced names were added in 0.6.21.)
+
+            var encodedEventName = namespaceEncodedName( eventName );
+
+            // Call `firingEvent` on each model.
 
             var handled = this.models.reduce( function( handled, model ) {
-                return model.firingEvent && model.firingEvent( nodeID, eventName, eventParameters ) || handled;
+                return model.firingEvent && model.firingEvent( nodeID, encodedEventName, eventParameters ) || handled;
             }, false );
 
-            // Call firedEvent() on each view.
+            // Call `firedEvent` on each view.
 
             this.views.forEach( function( view ) {
-                view.firedEvent && view.firedEvent( nodeID, eventName, eventParameters );
+                view.firedEvent && view.firedEvent( nodeID, encodedEventName, eventParameters );
             } );
 
             this.logger.debugu();
+
+            // TODO: `fireEvent` needs to tell the drivers to invoke each listener individually
+            // now that listeners can be spread across multiple drivers.
 
             return handled;
         };
@@ -3255,7 +4020,9 @@ if ( ! childComponent.source ) {
                     JSON.stringify( loggableIndexedValues( eventNodeParameters ) ) ];
             } );
 
-            // Defaults for the parameter parameters.
+            // Defaults for the parameters to send with the events. Values from `eventParameters`
+            // are sent to each node. `eventNodeParameters` contains additional values to send to
+            // specific nodes.
 
             eventParameters = eventParameters || [];
             eventNodeParameters = eventNodeParameters || {};
@@ -3338,7 +4105,7 @@ if ( ! childComponent.source ) {
         this.execute = function( nodeID, scriptText, scriptType, callback_async /* result */ ) {
 
             this.logger.debuggx( "execute", function() {
-                return [ nodeID, ( scriptText || "" ).replace( /\s+/g, " " ).substring( 0, 100 ), scriptType ];  // TODO: loggableScript()
+                return [ nodeID, loggableScript( scriptText ), scriptType ];
             } );
 
             // Assume JavaScript if the type is not specified and the text is a string.
@@ -3441,8 +4208,17 @@ if ( ! childComponent.source ) {
         /// @see {@link module:vwf/api/kernel.application}
 
         this.application = function( initializedOnly ) {
-            return applicationID && ( ! initializedOnly || this.models.object.initialized( applicationID ) ) ?
-                applicationID : undefined;
+
+            var applicationID;
+
+            Object.keys( nodes.globals ).forEach( function( globalID ) {
+                var global = nodes.existing[ globalID ];
+                if ( ( ! initializedOnly || global.initialized ) && global.name === "application" ) {
+                    applicationID = globalID;
+                }
+            }, this );
+
+            return applicationID;
         };
 
         // -- intrinsics ---------------------------------------------------------------------------
@@ -3526,6 +4302,84 @@ if ( ! childComponent.source ) {
             return this.models.object.behaviors( nodeID );
         };
 
+        // -- globals ------------------------------------------------------------------------------
+
+        /// @name module:vwf.globals
+        /// 
+        /// @see {@link module:vwf/api/kernel.globals}
+
+        this.globals = function( initializedOnly ) {
+
+            var globals = {};
+
+            Object.keys( nodes.globals ).forEach( function( globalID ) {
+                if ( ! initializedOnly || nodes.existing[ globalID ].initialized ) {
+                    globals[ globalID ] = undefined;
+                }
+            }, this );
+
+            return globals;
+        };
+
+        // -- global -------------------------------------------------------------------------------
+
+        /// @name module:vwf.global
+        /// 
+        /// @see {@link module:vwf/api/kernel.global}
+
+        this.global = function( globalReference, initializedOnly ) {
+
+            var globals = this.globals( initializedOnly );
+
+            // Look for a global node whose URI matches `globalReference`. If there is no match by
+            // URI, then search again by name.
+
+            return matches( "uri" ) || matches( "name" );
+
+            // Look for a global node where the field named by `field` matches `globalReference`.
+
+            function matches( field ) {
+
+                var matchingID;
+
+                Object.keys( globals ).some( function( globalID ) {
+                    if ( nodes.existing[ globalID ][ field ] === globalReference ) {
+                        matchingID = globalID;
+                        return true;
+                    }
+                } );
+
+                return matchingID;
+            }
+
+        };
+
+        // -- root ---------------------------------------------------------------------------------
+
+        /// @name module:vwf.root
+        /// 
+        /// @see {@link module:vwf/api/kernel.root}
+
+        this.root = function( nodeID, initializedOnly ) {
+
+            var rootID;
+
+            // Walk the ancestors to the top of the tree. Stop when we reach the pseudo-node at the
+            // global root, which unlike all other nodes has a falsy ID, or `undefined` if we could
+            // not reach the top because `initializedOnly` is set and we attempted to cross between
+            // nodes that have and have not completed initialization.
+
+            do {
+                rootID = nodeID;
+                nodeID = this.parent( nodeID, initializedOnly );
+            } while ( nodeID );
+
+            // Return the root ID, or `undefined` when `initializedOnly` is set and the node can't
+            // see the root.
+
+            return nodeID === undefined ? undefined : rootID;
+        };
+
         // -- ancestors ----------------------------------------------------------------------------
 
         /// @name module:vwf.ancestors
@@ -3538,7 +4392,7 @@ if ( ! childComponent.source ) {
 
             nodeID = this.parent( nodeID, initializedOnly );
 
-            while ( nodeID && nodeID !== 0 ) {
+            while ( nodeID ) {
                 ancestors.push( nodeID );
                 nodeID = this.parent( nodeID, initializedOnly );
             }
@@ -3562,14 +4416,34 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.children}
 
-        this.children = function( nodeID ) {
+        this.children = function( nodeID, initializedOnly ) {
 
             if ( nodeID === undefined ) {
                 this.logger.errorx( "children", "cannot retrieve children of nonexistent node" );
                 return;
             }
 
-            return this.models.object.children( nodeID );
+            return this.models.object.children( nodeID, initializedOnly );
+        };
+
+        // -- child --------------------------------------------------------------------------------
+
+        /// @name module:vwf.child
+        /// 
+        /// @see {@link module:vwf/api/kernel.child}
+
+        this.child = function( nodeID, childReference, initializedOnly ) {
+
+            var children = this.children( nodeID, initializedOnly );
+
+            if ( typeof childReference === "number" || childReference instanceof Number ) {
+                return children[ childReference ];
+            } else {
+                return children.filter( function( childID ) {
+                    return childID && this.name( childID ) === childReference;
+                }, this )[ 0 ];
+            }
+
         };
 
         // -- descendants --------------------------------------------------------------------------
@@ -3578,7 +4452,7 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.descendants}
 
-        this.descendants = function( nodeID ) {
+        this.descendants = function( nodeID, initializedOnly ) {
 
             if ( nodeID === undefined ) {
                 this.logger.errorx( "descendants", "cannot retrieve children of nonexistent node" );
@@ -3587,10 +4461,10 @@ if ( ! childComponent.source ) {
 
             var descendants = [];
 
-            this.children( nodeID ).forEach( function( childID ) {
+            this.children( nodeID, initializedOnly ).forEach( function( childID ) {
                 descendants.push( childID );
-                Array.prototype.push.apply( descendants, this.descendants( childID ) );
-            }, this );             
+                childID && Array.prototype.push.apply( descendants, this.descendants( childID, initializedOnly ) );
+            }, this );
 
             return descendants;
         };
@@ -3638,13 +4512,11 @@ if ( ! childComponent.source ) {
                 initializedOnly = undefined;
             }
 
-            // Evaluate the expression, using the application as the root and the provided node as
-            // the reference.
+            // Run the query.
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
+            var matchIDs = find.call( this, nodeID, matchPattern, initializedOnly );
 
-            // Return the result, either by invoking the callback when provided, or returning the
+            // Return the result. Invoke the callback if one was provided. Otherwise, return the
             // array directly.
 
             if ( callback ) {
@@ -3656,12 +4528,6 @@ if ( ! childComponent.source ) {
             } else {  // TODO: future iterator proxy
 
                 return matchIDs;
-            }
-
-            // Wrap `xpathResolver` to pass `initializedOnly` through.
-
-            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
-                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
             }
 
         };
@@ -3684,24 +4550,21 @@ if ( ! childComponent.source ) {
         /// @returns {ID[]|undefined}
         ///   If callback is provided, undefined; otherwise an array of the node ids of the result.
         /// 
-        /// @see {@link module:vwf/api/kernel.clients}
+        /// @deprecated in version 0.6.21. Instead of `kernel.findClients( reference, "/pattern" )`,
+        ///   use `kernel.find( reference, "doc('http://vwf.example.com/clients.vwf')/pattern" )`.
+        /// 
+        /// @see {@link module:vwf/api/kernel.findClients}
 
         this.findClients = function( nodeID, matchPattern, callback /* ( matchID ) */ ) {
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                "http-vwf-example-com-clients-vwf", nodeID, xpathResolver, this );
+            this.logger.warn( "`kernel.findClients` is deprecated. Use " +
+                "`kernel.find( nodeID, \"doc('http://vwf.example.com/clients.vwf')/pattern\" )`" +
+                " instead." );
 
-            if ( callback ) {
+            var clientsMatchPattern = "doc('http://vwf.example.com/clients.vwf')" +
+                ( matchPattern[0] === "/" ? "" : "/" ) + matchPattern;
 
-                matchIDs.forEach( function( matchID ) {
-                    callback( matchID );
-                } );
-
-            } else { 
-
-                return matchIDs;
-            }
-
+            return this.find( nodeID || this.application(), clientsMatchPattern, callback );
         };
 
         /// Test a node against a search pattern. See vwf.api.kernel#test for details.
@@ -3727,23 +4590,15 @@ if ( ! childComponent.source ) {
 
         this.test = function( nodeID, matchPattern, testID, initializedOnly ) {
 
-            // Evaluate the expression, using the application as the root and the provided node as
-            // the reference.
+            // Run the query.
 
-            var matchIDs = require( "vwf/utility" ).xpath.resolve( matchPattern,
-                this.application( initializedOnly ), nodeID, resolverWithInitializedOnly, this );
+            var matchIDs = find.call( this, nodeID, matchPattern, initializedOnly );
 
             // Search for the test node in the result.
 
             return matchIDs.some( function( matchID ) {
                 return matchID == testID;
             } );
-
-            // Wrap `xpathResolver` to pass `initializedOnly` through.
-
-            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
-                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
-            }
 
         };
 
@@ -3759,9 +4614,9 @@ if ( ! childComponent.source ) {
 
         var loadComponent = function( nodeURI, callback_async /* ( nodeDescriptor ) */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
 
-            if ( nodeURI == nodeTypeURI ) {
+            if ( nodeURI == vwf.kutility.protoNodeURI ) {
 
-                callback_async( nodeTypeDescriptor );
+                callback_async( vwf.kutility.protoNodeDescriptor );
 
             } else if ( nodeURI.match( RegExp( "^data:application/json;base64," ) ) ) {
 
@@ -3950,7 +4805,8 @@ if ( ! childComponent.source ) {
         /// @returns {Boolean}
 
         var componentIsID = function( candidate ) {
-            return isPrimitive( candidate ) && vwf.models.object.exists( candidate );
+            return isPrimitive( candidate ) && vwf.models.object.exists( candidate ) &&
+                ! ( components[candidate] instanceof Array );
         };
 
         /// Determine if a value is a JavaScript primitive, or the boxed version of a JavaScript
@@ -4037,6 +4893,7 @@ if ( ! childComponent.source ) {
                 "get",
                 "set",
                 "value",
+                "node",
                 "create",
                 "undefined",
             ];
@@ -4069,6 +4926,7 @@ if ( ! childComponent.source ) {
             var bodyAttributes = [
                 "parameters",
                 "body",
+                "listeners",
             ];
 
             var hasBody = false;  // TODO: "body" term is confusing, but that's the current terminology used in vwf/model/javascript
@@ -4113,6 +4971,43 @@ if ( ! childComponent.source ) {
             }
             
             return hasType; 
+        };
+
+        /// Convert a potentially-namespaced member name into a string such that a namespaced name
+        /// will be distinct from an encoded name in any other namespace, or from any simple name
+        /// not having a namespace.
+        /// 
+        /// Simple names are strings such as `"name"`. Namespaced names are arrays of strings, such
+        /// as `[ "ns", "name" ]` or `[ "outer", "inner", "name" ]`. An array containing a single
+        /// string, such as `[ "name" ]`, is not namespaced and is the same name as `"name"`.
+        /// 
+        /// Each of the following encodes into a distinct value:
+        /// 
+        ///   `"name"` or `[ "name" ]`
+        ///   `[ "a", "name" ]`
+        ///   `[ "b", "name" ]`
+        ///   `[ "a", "a", "name" ]`
+        ///   `[ "a", "b", "name" ]`
+        ///   `[ "b", "b", "name" ]`
+        ///   *etc.*
+        /// 
+        /// @name module:vwf~namespaceEncodedName
+        /// 
+        /// @param {String|String[]} memberName
+        ///   A string, or an array of strings containing a name preceded by any number of namespace
+        ///   names. In an array, each element defines a unique space for the member name and for
+        ///   any intermediate namespaces.
+        /// 
+        /// @returns {String}
+
+        var namespaceEncodedName = function( memberName ) {
+
+            if ( typeof memberName === "object" && memberName instanceof Array ) {
+                return ( memberName.length !== 1 ) ? "vwf$" + memberName.join( "$" ) : memberName[0];
+            } else {
+                return memberName;
+            }
+
         };
 
         /// Convert a (potentially-abbreviated) component specification to a descriptor parsable by
@@ -4195,8 +5090,47 @@ if ( ! childComponent.source ) {
             return component;
         };
 
-        /// Convert a fields object as passed between the client and reflector, and stored in the
-        /// message queue, into a form suitable for writing to a log.
+        /// Convert a `Handler` specification into the standard form of an object containing
+        /// `parameters`, `body` and `type` fields.
+        /// 
+        /// @name module:vwf~normalizedHandler
+        /// 
+        /// @param {Handler|string}
+        /// @param {string[]} [defaultParameters]
+        /// 
+        /// @returns {Handler}
+
+        var normalizedHandler = function( handler, defaultParameters ) {
+
+            // Convert abbreviated forms to the explict `Handler` form.
+
+            if ( typeof handler !== "object" || handler instanceof Array ) {
+                handler = { body: handler };
+            } else if ( require( "vwf/configuration" ).active[ "preserve-script-closures" ] && ( typeof handler == "function" || handler instanceof Function ) ) {
+                handler = { body: handler };
+            }
+
+            // Use a default parameter list if the handler doesn't provide its own and if defaults
+            // were provided.
+
+            if ( ! handler.parameters && defaultParameters ) {
+                handler.parameters = defaultParameters;
+            }
+
+            // Fill in a default media type if `type` is not provided. A `body` of type `string` is
+            // taken to be `application/javascript`.
+
+            if ( handler.type === undefined ) {
+                if ( typeof handler.body === "string" || handler.body instanceof String ) {
+                    handler.type = "application/javascript";
+                }
+            }
+
+            return handler;
+        };
+
+        /// Convert a `fields` object as passed between the client and reflector and stored in the
+        /// message queue into a form suitable for writing to a log.
         /// 
         /// @name module:vwf~loggableFields
         /// 
@@ -4224,7 +5158,7 @@ if ( ! childComponent.source ) {
         /// 
         /// @name module:vwf~loggableValue
         /// 
-        /// @param {Object} component
+        /// @param {Object} value
         /// 
         /// @returns {Object}
 
@@ -4240,9 +5174,9 @@ if ( ! childComponent.source ) {
         /// 
         /// @name module:vwf~loggableValues
         /// 
-        /// @param {Array|undefined} component
+        /// @param {Object[]|undefined} values
         /// 
-        /// @returns {Array|undefined}
+        /// @returns {Object[]|undefined}
 
         var loggableValues = function( values ) {
             return loggableValue( values );
@@ -4253,12 +5187,24 @@ if ( ! childComponent.source ) {
         /// 
         /// @name module:vwf~loggableIndexedValues
         /// 
-        /// @param {Object|undefined} component
+        /// @param {Object|undefined} values
         /// 
         /// @returns {Object|undefined}
 
         var loggableIndexedValues = function( values ) {
             return loggableValue( values );
+        };
+
+        /// Convert script text into a form suitable for writing to a log.
+        /// 
+        /// @name module:vwf~loggableScript
+        /// 
+        /// @param {String|undefined} script
+        /// 
+        /// @returns {String}
+
+        var loggableScript = function( script ) {
+            return ( script || "" ).replace( /\s+/g, " " ).substring( 0, 100 );
         };
 
         // -- remappedURI --------------------------------------------------------------------------
@@ -4299,7 +5245,7 @@ if ( ! childComponent.source ) {
                 // reinserted.
 
                 return object.filter( function( fields ) {
-                    return ! fields.respond && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+                    return ! ( fields.origin === "reflector" && fields.sequence > vwf.sequence_ ) && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
                 } ).sort( function( fieldsA, fieldsB ) {
                     return fieldsA.sequence - fieldsB.sequence;
                 } );
@@ -4495,6 +5441,51 @@ if ( ! childComponent.source ) {
             return object;
         };
 
+        /// Locate nodes matching a search pattern. {@link module:vwf/api/kernel.find} describes the
+        /// supported patterns.
+        /// 
+        /// This is the internal implementation used by {@link module:vwf.find} and
+        /// {@link module:vwf.test}.
+        /// 
+        /// This function must run as a method of the kernel. Invoke it as:
+        ///   `find.call( kernel, nodeID, matchPattern, initializedOnly )`.
+        /// 
+        /// @name module:vwf~find
+        /// 
+        /// @param {ID} nodeID
+        ///   The reference node. Relative patterns are resolved with respect to this node. `nodeID`
+        ///   is ignored for absolute patterns.
+        /// @param {String} matchPattern
+        ///   The search pattern.
+        /// @param {Boolean} [initializedOnly]
+        ///   Interpret nodes that haven't completed initialization as though they don't have
+        ///   ancestors. Drivers that manage application code should set `initializedOnly` since
+        ///   applications should never have access to uninitialized parts of the application graph.
+        /// 
+        /// @returns {ID[]|undefined}
+        ///   An array of the node ids of the result.
+
+        var find = function( nodeID, matchPattern, initializedOnly ) {
+
+            // Evaluate the expression using the provided node as the reference. Take the root node
+            // to be the root of the reference node's tree. If a reference node is not provided, use
+            // the application as the root.
+
+            var rootID = nodeID ? this.root( nodeID, initializedOnly ) :
+                this.application( initializedOnly );
+
+            return require( "vwf/utility" ).xpath.resolve( matchPattern, rootID, nodeID,
+                resolverWithInitializedOnly, this );
+
+
+            // Wrap `xpathResolver` to pass `initializedOnly` through.
+
+            function resolverWithInitializedOnly( step, contextID, resolveAttributes ) {
+                return xpathResolver.call( this, step, contextID, resolveAttributes, initializedOnly );
+            }
+
+        }
+
         // -- xpathResolver ------------------------------------------------------------------------
 
         /// Interpret the steps of an XPath expression being resolved. Use with
@@ -4540,16 +5531,28 @@ if ( ! childComponent.source ) {
                     break;
 
                 case "child":
-                    Array.prototype.push.apply( resultIDs, this.children( contextID ) );
+                    Array.prototype.push.apply( resultIDs,
+                        this.children( contextID, initializedOnly ).filter( function( childID ) {
+                            return childID;
+                        }, this )
+                    );
                     break;
 
                 case "descendant":
-                    Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                    Array.prototype.push.apply( resultIDs,
+                        this.descendants( contextID, initializedOnly ).filter( function( descendantID ) {
+                            return descendantID;
+                        }, this )
+                    );
                     break;
 
                 case "descendant-or-self":
                     resultIDs.push( contextID );
-                    Array.prototype.push.apply( resultIDs, this.descendants( contextID ) );
+                    Array.prototype.push.apply( resultIDs,
+                        this.descendants( contextID, initializedOnly ).filter( function( descendantID ) {
+                            return descendantID;
+                        }, this )
+                    );
                     break;
 
                 // case "following-sibling":  // TODO
@@ -4599,11 +5602,27 @@ if ( ! childComponent.source ) {
 
                     break;
 
+                // Attribute test.
+
                 case "attribute":
 
                     resultIDs = resultIDs.filter( function( resultID ) {
                         return resultID[0] == "@" && xpathPropertyMatchesStep.call( this, resultID.slice( 1 ), step.name );  // TODO: @?
                     }, this );
+
+                    break;
+
+                // The `doc()` function for referencing globals outside the current tree.
+                // http://www.w3.org/TR/xpath-functions/#func-doc.
+
+                case "doc":
+
+                    if ( this.root( contextID, initializedOnly ) ) {
+                        var globalID = this.global( step.name, initializedOnly );
+                        resultIDs = globalID ? [ globalID ] : [];
+                    } else {
+                        resultIDs = [];
+                    }
 
                     break;
 
@@ -4764,124 +5783,189 @@ if ( ! childComponent.source ) {
             return prototypeDescriptor;
         };
 
+        /// Return an {@link external:Object.defineProperty} descriptor for a property that is to be
+        /// enumerable, but not writable or configurable. 
+        /// 
+        /// @param value
+        ///   A value to wrap in a descriptor.
+        /// 
+        /// @returns
+        ///   An {@link external:Object.defineProperty} descriptor.
+
+        var enumerable = function( value ) {
+            return {
+                value: value,
+                enumerable: true,
+                writable: false,
+                configurable: false,
+            };
+        };
+
+        /// Return an {@link external:Object.defineProperty} descriptor for a property that is to be
+        /// enumerable and writable, but not configurable. 
+        /// 
+        /// @param value
+        ///   A value to wrap in a descriptor.
+        /// 
+        /// @returns
+        ///   An {@link external:Object.defineProperty} descriptor.
+
+        var writable = function( value ) {
+            return {
+                value: value,
+                enumerable: true,
+                writable: true,
+                configurable: false,
+            };
+        };
+
+        /// Return an {@link external:Object.defineProperty} descriptor for a property that is to be
+        /// enumerable, writable, and configurable. 
+        /// 
+        /// @param value
+        ///   A value to wrap in a descriptor.
+        /// 
+        /// @returns
+        ///   An {@link external:Object.defineProperty} descriptor.
+
+        var configurable = function( value ) {
+            return {
+                value: value,
+                enumerable: true,
+                writable: true,
+                configurable: true,
+            };
+        };
+
         // == Private variables ====================================================================
 
-        // Prototype for the `properties`, `methods` and `events` collections in the `nodes`
-        // objects.
+        /// Prototype for name-based, unordered collections in the node registry, including
+        /// `node.properties`, `node.methods`, and `node.events`.
 
-        var nodeCollectionPrototype = {
+        var keyedCollectionPrototype = {
 
             /// Record that a property, method or event has been created.
             /// 
             /// @param {String} name
+            ///   The member name.
+            /// @param {Boolean} changes
+            ///   For patchable nodes, record changes so that `kernel.getNode` may create a patch
+            ///   when retrieving the node.
+            /// @param [value]
+            ///   An optional value to assign to the record. If `value` is omitted, the record will
+            ///   exist in the collection but have the value `undefined`.
             /// 
             /// @returns {Boolean}
             ///   `true` if the member was successfully added. `false` if a member by that name
             ///   already exists.
 
-            create: function( name ) {
+            create: function( name, changes, value ) {
 
                 if ( ! this.hasOwn( name ) ) {
 
-                    // Add the member. We just record its existence. Everything else is managed by
-                    // the drivers.
-                    // 
-                    // `Object.defineProperty` is used instead of `this.existing[name] = ...` since
-                    // the prototype may be a behavior proxy, and the accessor properties would
-                    // prevent normal assignment.
+                    this.makeOwn( "existing" );
 
-                    Object.defineProperty( this.existing, name, {
-                        value: undefined,
-                        configurable: true,
-                        enumerable: true,
-                        writable: true,
-                    } );
+                    // Add the member. `Object.defineProperty` is used instead of
+                    // `this.existing[name] = ...` since the prototype may be a behavior proxy, and
+                    // the accessor properties would prevent normal assignment.
+
+                    Object.defineProperty( this.existing, name,
+                        configurable( value ? value : undefined ) );
+
+                    if ( changes ) {
+
+                        this.makeOwn( "changes" );
+
+                        if ( this.changes[ name ] !== "removed" ) {
+                            this.changes[ name ] = "added";
+                        } else {
+                            this.changes[ name ] = "changed";  // previously removed, then added
+                        }
+
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
+
+                    }
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
-            /// Record that a member has been deleted. Remove it from any change lists that is in.
+            /// Record that a member has been deleted.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
             ///   `true` if the member was successfully removed. `false` if a member by that name
             ///   does not exist.
 
-            delete: function( name ) {
+            delete: function( name, changes ) {
 
                 if ( this.hasOwn( name ) ) {
 
-                    // Remove the member.
+                    delete this.existing[ name ];
 
-                    delete this.existing[name];
+                    if ( changes ) {
 
-                    // Remmove the member from any change lists it's in. Completely remove lists
-                    // that become empty.
+                        this.makeOwn( "changes" );
 
-                    if ( this.added ) {
-                        delete this.added[name];
-                        Object.keys( this.added ).length || delete this.added;
-                    }
+                        if ( this.changes[ name ] !== "added" ) {
+                            this.changes[ name ] = "removed";
+                        } else {
+                            delete this.changes[ name ];  // previously added, then removed
+                        }
 
-                    if ( this.removed ) {
-                        delete this.removed[name];
-                        Object.keys( this.removed ).length || delete this.removed;
-                    }
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
 
-                    if ( this.changed ) {
-                        delete this.changed[name];
-                        Object.keys( this.changed ).length || delete this.changed;
                     }
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
-            /// Record that a member has changed. Create the change list if it does not exist.
+            /// Record that a member has changed.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
             ///   `true` if the change was successfully recorded. `false` if a member by that name
             ///   does not exist.
 
-            change: function( name ) {
+            change: function( name, value ) {
 
                 if ( this.hasOwn( name ) ) {
 
-                    // Ensure that the change list exists and record the change.
+                    this.makeOwn( "changes" );
 
-                    this.changed = this.changed || {};
-                    this.changed[name] = undefined;
+                    if ( this.changes[ name ] !== "added" ) {
+                        this.changes[ name ] = value ?
+                            value : this.changes[ name ] || "changed";
+                    }
+
+                    if ( this.container && this.containerMember ) {
+                        this.container.change( this.containerMember );
+                    }
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
             /// Determine if a node has a member with the given name, either directly on the node or
             /// inherited from a prototype.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
 
@@ -4893,6 +5977,7 @@ if ( ! childComponent.source ) {
             /// considered.
             /// 
             /// @param {String} name
+            ///   The member name.
             /// 
             /// @returns {Boolean}
 
@@ -4908,7 +5993,348 @@ if ( ! childComponent.source ) {
                 return Object.prototype.hasOwnProperty.call( this.existing, name );
             },
 
+            /// Hoist a field from a prototype to the collection in preparation for making local
+            /// changes.
+            /// 
+            /// If the field in the prototype is an object, create a new object with that field as
+            /// its prototype. If the field in the prototype is an array, clone the field since
+            /// arrays can't readily serve as prototypes for other arrays. In other cases, copy the
+            /// field from the prototype. Only objects, arrays and primitive values are supported.
+            /// 
+            /// @param {String} fieldName
+            ///   The name of a field to hoist from the collection's prototype.
+
+            makeOwn: function( fieldName ) {
+
+                if ( ! this.hasOwnProperty( fieldName ) ) {
+
+                    if ( this[ fieldName ] instanceof Array ) {
+                        this[ fieldName ] = this[ fieldName ].slice();  // clone arrays
+                    } else if ( typeof this[ fieldName ] === "object" && this[ fieldName ] !== null ) {
+                        this[ fieldName ] = Object.create( this[ fieldName ] );  // inherit from objects
+                    } else {
+                        this[ fieldName ] = this[ fieldName ];  // copy primitives
+                    }
+
+                }
+
+            },
+
+            /// The property, method, or event members defined in this collection.
+            /// 
+            /// `existing` is an unordered collection of elements and optional values. The keys are
+            /// the primary data. Existence on the object is significant regardless of the value.
+            /// Some collections store data in the element when the kernel owns additional details
+            /// about the member. Values will be `undefined` in other collections.
+            /// 
+            /// For each collection, `existing` is the authoritative list of the node's members. Use
+            /// `collection.hasOwn( memberName )` to determine if the node defines a property,
+            /// method or event by that name.
+            /// 
+            /// The prototype of each `existing` object will be the `existing` object of the node's
+            /// prototype (or a proxy to the top behavior for nodes with behaviors). Use
+            /// `collection.has( memberName )` to determine if a property, method or event is
+            /// defined on the node or its prototypes.
+
+            existing: Object.create( null
+                // name: undefined,
+                // name: { ... } -- details
+                // ...
+            ),
+
+            /// The change list for members in this collection.
+            /// 
+            /// For patchable nodes, `changes` records the members that have been added, removed, or
+            /// changed since the node was first initialized. `changes` is not created in the
+            /// collection until the first change occurs. Only the change is recorded here. The
+            /// state behind the change is retrieved from the drivers when needed.
+
+            changes: {
+                // name: "added"
+                // name: "removed"
+                // name: "changed"
+                // name: { ... } -- changed, with details
+                // ...
+            },
+
+            /// The parent collection if this collection is a member of another. Changes applied to
+            /// members of this collection will call `container.change( containerMember )` to also
+            /// set the change flag for the containing member.
+            /// 
+            /// For example, members of the `node.events` collection contain listener collections at
+            /// `node.events.existing[name].listeners`. Each listener collection knows its event
+            /// name and points back to `node.events`. Changing a listener will call
+            /// `node.events.change( name )` to mark the event as changed.
+
+            container: undefined,
+
+            /// This collection's name in the parent if this collection is a member of another
+            /// collection. Changes to members of this collection will mark that member changed in
+            /// the containing collection.
+
+            containerMember: undefined,
+
         };
+
+        /// Prototype for index-based, ordered collections in the node registry, including
+        /// `event.listeners`.
+
+        var indexedCollectionPrototype = {
+
+            /// Record that a member has been created.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// @param {Boolean} changes
+            ///   For patchable nodes, record changes so that `kernel.getNode` may create a patch
+            ///   when retrieving the node.
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the member was successfully added. `false` if a member with that id
+            ///   already exists.
+
+            create: function( id, changes ) {
+
+                if ( ! this.hasOwn( id ) ) {
+
+                    this.makeOwn( "existing" );
+                    this.existing.push( id );
+
+                    if ( changes ) {
+
+                        this.makeOwn( "changes" );
+
+                        var removedIndex = this.changes.removed ?
+                            this.changes.removed.indexOf( id ) : -1;
+
+                        if ( removedIndex < 0 ) {
+                            this.changes.added = this.changes.added || [];
+                            this.changes.added.push( id );
+                        } else {
+                            this.changes.removed.splice( removedIndex, 1 );
+                            this.changes.changed = this.changes.changed || [];
+                            this.changes.changed.push( id );
+                        }
+
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
+
+                    }
+
+                    return true;
+                }
+
+                return false;
+            },
+
+            /// Record that a member has been deleted.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the member was successfully removed. `false` if a member with that id
+            ///   does not exist.
+
+            delete: function( id, changes ) {
+
+                if ( this.hasOwn( id ) ) {
+
+                    this.existing.splice( this.existing.indexOf( id ), 1 );
+
+                    if ( changes ) {
+
+                        this.makeOwn( "changes" );
+
+                        var addedIndex = this.changes.added ?
+                            this.changes.added.indexOf( id ) : -1;
+
+                        if ( addedIndex < 0 ) {
+                            this.changes.removed = this.changes.removed || [];
+                            this.changes.removed.push( id );
+                        } else {
+                            this.changes.added.splice( addedIndex, 1 );
+                        }
+
+                        if ( this.container && this.containerMember ) {
+                            this.container.change( this.containerMember );
+                        }
+
+                    }
+
+                    return true;
+                }
+
+                return false;
+            },
+
+            /// Record that a member has changed.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+            ///   `true` if the change was successfully recorded. `false` if a member with that id
+            ///   does not exist.
+
+            change: function( id ) {
+
+                if ( this.hasOwn( id ) ) {
+
+                    this.makeOwn( "changes" );
+
+                    var addedIndex = this.changes.added ?
+                        this.changes.added.indexOf( id ) : -1;
+
+                    var changedIndex = this.changes.changed ?
+                        this.changes.changed.indexOf( id ) : -1;
+
+                    if ( addedIndex < 0 && changedIndex < 0 ) {
+                        this.changes.changed = this.changes.changed || [];
+                        this.changes.changed.push( id );
+                    }
+
+                    if ( this.container && this.containerMember ) {
+                        this.container.change( this.containerMember );
+                    }
+
+                    return true;
+                }
+
+                return false;
+            },
+
+            /// Determine if a node has a member with the given id.
+            /// 
+            /// `has` is the same as `hasOwn` for `indexedCollectionPrototype` since index-based
+            /// collections don't automatically inherit from their prototypes.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+
+            has: function( id ) {
+                return this.hasOwn( id );
+            },
+
+            /// Determine if a node has a member with the given id. The node's prototypes are not
+            /// considered.
+            /// 
+            /// @param {string|number|boolean|null} id
+            ///   The member's unique id.
+            /// 
+            /// @returns {Boolean}
+
+            hasOwn: function( id ) {
+                return this.existing ? this.existing.indexOf( id ) >= 0 : false;
+            },
+
+            /// Hoist a field from a prototype to the collection in preparation for making local
+            /// changes.
+            /// 
+            /// If the field in the prototype is an object, create a new object with that field as
+            /// its prototype. If the field in the prototype is an array, clone the field since
+            /// arrays can't readily serve as prototypes for other arrays. In other cases, copy the
+            /// field from the prototype. Only objects, arrays and primitive values are supported.
+            /// 
+            /// @param {String} fieldName
+            ///   The name of a field to hoist from the collection's prototype.
+
+            makeOwn: function( fieldName ) {
+
+                if ( ! this.hasOwnProperty( fieldName ) ) {
+
+                    if ( this[ fieldName ] instanceof Array ) {
+                        this[ fieldName ] = this[ fieldName ].slice();  // clone arrays
+                    } else if ( typeof this[ fieldName ] === "object" && this[ fieldName ] !== null ) {
+                        this[ fieldName ] = Object.create( this[ fieldName ] );  // inherit from objects
+                    } else {
+                        this[ fieldName ] = this[ fieldName ];  // copy primitives
+                    }
+
+                }
+
+            },
+
+            /// IDs of the members defined in this collection.
+            /// 
+            /// `existing` is an ordered list of IDs, which much be unique within the collection.
+            /// The IDs retain the order in which they were originally added.
+            /// 
+            /// For each collection, `existing` is the authoritative list of the node's members. Use
+            /// `collection.hasOwn( memberID )` to determine if the collection contains a member
+            /// with that id. Unlike `keyedCollectionPrototype` collections,
+            /// `indexedCollectionPrototype` collections aren't connected in parallel with their
+            /// containers' prototype chains.
+
+            existing: [
+                // id,
+                // id,
+                // ...
+            ],
+
+            /// The change list for members in this collection.
+            /// 
+            /// For patchable nodes, `changes` records the members that have been added, removed, or
+            /// changed since the node was first initialized. Changes are recorded in separate
+            /// `added`, `removed`, and `changed` arrays, respectively. The `added` array retains
+            /// the order in which the members were added. Although `removed` and `changed` are also
+            /// arrays, the order of removals and changes is not significant.
+            /// 
+            /// `changes` is not created in the collection until the first change occurs. Only the
+            /// change is recorded here. The state behind the change is retrieved from the drivers
+            /// when needed.
+
+            changes: {
+                // added: [ id, ... ],
+                // removed: [ id, ... ],
+                // changed: [ id, ... ],
+            },
+
+            /// The parent collection if this collection is a member of another. Changes applied to
+            /// members of this collection will call `container.change( containerMember )` to also
+            /// set the change flag for the containing member.
+            /// 
+            /// For example, members of the `node.events` collection contain listener collections at
+            /// `node.events.existing[name].listeners`. Each listener collection knows its event
+            /// name and points back to `node.events`. Changing a listener will call
+            /// `node.events.change( name )` to mark the event as changed.
+
+            container: undefined,
+
+            /// This collection's name in the parent if this collection is a member of another
+            /// collection. Changes to members of this collection will mark that member changed in
+            /// the containing collection.
+
+            containerMember: undefined,
+
+        };
+
+        // Prototype for the `events` collection in the `nodes` objects.
+
+        var eventCollectionPrototype = Object.create( keyedCollectionPrototype, {
+
+            create: {
+
+                value: function( name, changes, parameters ) {
+
+                    var value = parameters ? {
+                        parameters: parameters.slice(), // clone
+                    } : {};
+
+                    value.listeners = Object.create( indexedCollectionPrototype, {
+                        container: enumerable( this ),
+                        containerMember: enumerable( name ),
+                    } );
+
+                    return keyedCollectionPrototype.create.call( this, name, changes, value );
+                }
+
+            },
+
+        } );
 
         /// The application's nodes, indexed by ID.
         /// 
@@ -4965,7 +6391,17 @@ if ( ! childComponent.source ) {
                         return self.proxy( prototypeNode, self.existing[behaviorID] );
                     }, this.existing[prototypeID] );
 
+                    // Look up the parent.
+
                     var parentNode = this.existing[parentID];
+
+                    // If this is the global root of a new tree, add it to the `globals` set.
+
+                    if ( ! parentNode ) {
+                        this.globals[nodeID] = undefined;
+                    }
+
+                    // Add the node to the registry.
 
                     return this.existing[nodeID] = {
 
@@ -4982,8 +6418,7 @@ if ( ! childComponent.source ) {
                         // type: ...,
 
                         uri: nodeURI,
-
-                        // name: ...,
+                        name: nodeName,
 
                         // Internal state. The change flags are omitted until needed. -- not implemented here yet; still using vwf/model/object
 
@@ -4999,98 +6434,21 @@ if ( ! childComponent.source ) {
                         // children: [],
 
                         // Property, Method and Event members defined on the node.
-                        // 
-                        // The `existing`, `added`, `removed` and `changed` objects are sets: the
-                        // keys are the data, and only existence on the object is significant. As an
-                        // exception, the last known value for a delegating property is stored on
-                        // its `existing` entry.
-                        // 
-                        // For each collection, `existing` is the authoritative list the node's
-                        // members. Use `existing.hasOwnProperty( memberName )` to determine if the
-                        // node defines a property, method or event by that name.
-                        // 
-                        // The prototype of each `existing` object is the `existing` object of the
-                        // node's prototype (or a proxy to the top behavior for nodes with
-                        // behaviors). Use `memberName in existing` to determine if a property,
-                        // method or event is defined on the node or its prototypes.
-                        // 
-                        // For patchable nodes, `added`, `removed`, and `changed` record changes
-                        // that occurred after the node was first initialized. They are omitted
-                        // until needed. Only the change is recorded here. Values are retrieved from
-                        // the drivers when needed.
 
-                        properties: Object.create( nodeCollectionPrototype, {
-
-                            existing: {
-                                value: Object.create( prototypeNode ?
-                                    prototypeNode.properties.existing : null ),
-                            },
-
-                            // Created when needed.
-
-                            // added: {
-                            //     name: undefined
-                            // },
-
-                            // removed: {
-                            //     name: undefined
-                            // },
-
-                            // changed: {
-                            //     name: undefined
-                            // },
-
+                        properties: Object.create( keyedCollectionPrototype, {
+                            existing: enumerable( Object.create( prototypeNode ?
+                                prototypeNode.properties.existing : null ) ),
                         } ),
 
-                        // TODO: Store nodes' methods and events here in the kernel
+                        methods: Object.create( keyedCollectionPrototype, {
+                            existing: enumerable( Object.create( prototypeNode ?
+                                prototypeNode.methods.existing : null ) ),
+                        } ),
 
-                        // methods: Object.create( nodeCollectionPrototype, {
-
-                        //     existing: {
-                        //         value: Object.create( prototypeNode ?
-                        //             prototypeNode.methods.existing : null ),
-                        //     },
-
-                        //     // Created when needed.
-
-                        //     // added: {
-                        //     //     name: undefined
-                        //     // },
-
-                        //     // removed: {
-                        //     //     name: undefined
-                        //     // },
-
-                        //     // changed: {
-                        //     //     name: undefined
-                        //     // },
-
-                        // } ),
-
-                        // events: Object.create( nodeCollectionPrototype, {
-
-                        //     existing: {
-                        //         value: Object.create( prototypeNode ?
-                        //             prototypeNode.events.existing : null ),
-                        //     },
-
-                        //     // Created when needed.
-
-                        //     // added: {
-                        //     //     name: undefined
-                        //     // },
-
-                        //     // removed: {
-                        //     //     name: undefined
-                        //     // },
-
-                        //     // changed: {
-                        //     //     name: undefined
-                        //     // },
-
-                        // } ),
-
-                        // END TODO
+                        events: Object.create( eventCollectionPrototype, {
+                            existing: enumerable( Object.create( prototypeNode ?
+                                prototypeNode.events.existing : null ) ),
+                        } ),
 
                         // Is this node patchable? Nodes are patchable if they were loaded from a
                         // component.
@@ -5123,13 +6481,9 @@ if ( ! childComponent.source ) {
                     this.existing[nodeID].initialized = true;
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
             /// Unregister a node as it is deleted.
@@ -5139,15 +6493,12 @@ if ( ! childComponent.source ) {
                 if ( this.existing[nodeID] ) {
 
                     delete this.existing[nodeID];
+                    delete this.globals[nodeID];
 
                     return true;
-
-                } else {
-
-                    return false;
-
                 }
 
+                return false;
             },
 
             /// Create a proxy node in the form of the nodes created by `nodes.create` to represent
@@ -5167,19 +6518,19 @@ if ( ! childComponent.source ) {
                         ),
                     },
 
-                    // methods: {
-                    //     existing: Object.create(
-                    //         prototypeNode ? prototypeNode.methods.existing : null,
-                    //         propertyDescriptorsFor( behaviorNode.methods.existing )
-                    //     ),
-                    // },
+                    methods: {
+                        existing: Object.create(
+                            prototypeNode ? prototypeNode.methods.existing : null,
+                            propertyDescriptorsFor( behaviorNode.methods.existing )
+                        ),
+                    },
 
-                    // events: {
-                    //     existing: Object.create(
-                    //         prototypeNode ? prototypeNode.events.existing : null,
-                    //         propertyDescriptorsFor( behaviorNode.events.existing )
-                    //     ),
-                    // },
+                    events: {
+                        existing: Object.create(
+                            prototypeNode ? prototypeNode.events.existing : null,
+                            propertyDescriptorsFor( behaviorNode.events.existing )
+                        ),
+                    },
 
                 };
 
@@ -5219,6 +6570,15 @@ if ( ! childComponent.source ) {
                 //     ...
                 // }
 
+            },
+
+            /// Global root nodes. Each of these is the root of a tree.
+            /// 
+            /// The `globals` object is a set: the keys are the data, and only existence on the
+            /// object is significant.
+
+            globals: {
+                // id: undefined,
             },
 
         };

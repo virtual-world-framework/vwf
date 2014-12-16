@@ -1,0 +1,13 @@
+# http://kineticjs.com/docs/Kinetic.Stage.html
+
+--- 
+extends: http://vwf.example.com/kinetic/container.vwf
+properties:
+  container:
+  enableEvents:
+events:
+  pointerDown:
+  pointerMove:
+  pointerClick:
+  pointerUp:
+

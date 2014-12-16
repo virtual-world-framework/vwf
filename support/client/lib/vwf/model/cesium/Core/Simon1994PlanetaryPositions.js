@@ -55,16 +55,16 @@ define([
     var J2000d = 2451545;
     function taiToTdb(date, result) {
         //Converts TAI to TT
-        result = date.addSeconds(TdtMinusTai, result);
+        result = JulianDate.addSeconds(date, TdtMinusTai, result);
 
         //Converts TT to TDB
-        var days = result.getTotalDays() - J2000d;
-        result = result.addSeconds(computeTdbMinusTtSpice(days), result);
+        var days = JulianDate.getTotalDays(result) - J2000d;
+        result = JulianDate.addSeconds(result, computeTdbMinusTtSpice(days), result);
 
         return result;
     }
 
-    var epoch = JulianDate.fromTotalDays(2451545.0, TimeStandard.TAI); //Actually TDB (not TAI)
+    var epoch = new JulianDate(2451545, 0, TimeStandard.TAI); //Actually TDB (not TAI)
     var GravitationalParameterOfEarth = 3.98600435e14;
     var GravitationalParameterOfSun = GravitationalParameterOfEarth * (1.0 + 0.012300034) * 328900.56;
     var MetersPerKilometer = 1000.0;
@@ -109,7 +109,7 @@ define([
             result.z = 0.0;
         }
 
-        return perifocalToEquatorial.multiplyByVector(result, result);
+        return Matrix3.multiplyByVector(perifocalToEquatorial, result, result);
     }
 
     function chooseOrbit(eccentricity, tolerance) {
@@ -307,7 +307,7 @@ define([
     var Sl7 = -112 * 1e-7;
     var Sl8 = -80 * 1e-7;
 
-    var scratchDate = new JulianDate();
+    var scratchDate = new JulianDate(0, 0.0, TimeStandard.TAI);
     /**
      * Gets a point describing the motion of the Earth-Moon barycenter according to the equations
      * described in section 6.
@@ -317,7 +317,7 @@ define([
 
         // t is thousands of years from J2000 TDB
         taiToTdb(date, scratchDate);
-        var x = (scratchDate.getJulianDayNumber() - epoch.getJulianDayNumber()) + ((scratchDate.getSecondsOfDay() - epoch.getSecondsOfDay())/TimeConstants.SECONDS_PER_DAY);
+        var x = (scratchDate.dayNumber - epoch.dayNumber) + ((scratchDate.secondsOfDay - epoch.secondsOfDay)/TimeConstants.SECONDS_PER_DAY);
         var t = x / (TimeConstants.DAYS_PER_JULIAN_CENTURY * 10.0);
 
         var u = 0.35953620 * t;
@@ -355,7 +355,7 @@ define([
      */
     function computeSimonMoon(date, result) {
         taiToTdb(date, scratchDate);
-        var x = (scratchDate.getJulianDayNumber() - epoch.getJulianDayNumber()) + ((scratchDate.getSecondsOfDay() - epoch.getSecondsOfDay())/TimeConstants.SECONDS_PER_DAY);
+        var x = (scratchDate.dayNumber - epoch.dayNumber) + ((scratchDate.secondsOfDay - epoch.secondsOfDay)/TimeConstants.SECONDS_PER_DAY);
         var t = x / (TimeConstants.DAYS_PER_JULIAN_CENTURY);
         var t2 = t * t;
         var t3 = t2 * t;
@@ -464,9 +464,8 @@ define([
     var moonEarthMassRatio = 0.012300034; // From 1992 mu value in Table 2
     var factor = moonEarthMassRatio / (moonEarthMassRatio + 1.0) * -1;
     function computeSimonEarth(date, result) {
-        var moon = computeSimonMoon(date);
-        result = moon.multiplyByScalar(factor, result);
-        return result;
+        result = computeSimonMoon(date, result);
+        return Cartesian3.multiplyByScalar(result, factor, result);
     }
 
     // Values for the <code>axesTransformation</code> needed for the rotation were found using the STK Components
@@ -483,19 +482,24 @@ define([
      * @param {Cartesian3} [result] The object onto which to store the result.
      * @returns {Cartesian3} Calculated sun position
      */
-    Simon1994PlanetaryPositions.ComputeSunPositionInEarthInertialFrame= function(date, result){
+    Simon1994PlanetaryPositions.computeSunPositionInEarthInertialFrame= function(date, result){
         if (!defined(date)) {
-            date = new JulianDate();
+            date = JulianDate.now();
         }
+
+        if (!defined(result)) {
+            result = new Cartesian3();
+        }
+
         //first forward transformation
         translation = computeSimonEarthMoonBarycenter(date, translation);
-        result = translation.negate(result);
+        result = Cartesian3.negate(translation, result);
 
         //second forward transformation
         computeSimonEarth(date, translation);
 
-        result.subtract(translation, result);
-        axesTransformation.multiplyByVector(result, result);
+        Cartesian3.subtract(result, translation, result);
+        Matrix3.multiplyByVector(axesTransformation, result, result);
 
         return result;
     };
@@ -507,12 +511,12 @@ define([
      * @param {Cartesian3} [result] The object onto which to store the result.
      * @returns {Cartesian3} Calculated moon position
      */
-    Simon1994PlanetaryPositions.ComputeMoonPositionInEarthInertialFrame = function(date, result){
+    Simon1994PlanetaryPositions.computeMoonPositionInEarthInertialFrame = function(date, result){
         if (!defined(date)) {
-            date = new JulianDate();
+            date = JulianDate.now();
         }
         result = computeSimonMoon(date, result);
-        axesTransformation.multiplyByVector(result, result);
+        Matrix3.multiplyByVector(axesTransformation, result, result);
 
         return result;
     };

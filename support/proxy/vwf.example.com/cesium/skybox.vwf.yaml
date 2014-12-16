@@ -20,4 +20,4 @@
 extends: http://vwf.example.com/cesium/node3.vwf
 properties:
   visible: true
-  texturePath: 
+  texturePath:

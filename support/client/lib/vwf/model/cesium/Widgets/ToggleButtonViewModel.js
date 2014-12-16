@@ -19,14 +19,16 @@ define([
      * @constructor
      *
      * @param {Command} command The command which will be executed when the button is toggled.
-     * @param {Object} [options] Options defining the button's properties.
-     * @param {Boolean|Observable} [options.toggled=false] A boolean, or observable, indicating whether the button should be initially toggled.
-     * @param {String|Observable} [options.tooltip=''] A string, or observable, containing the button's tooltip.
+     * @param {Object} [options] Object with the following properties:
+     * @param {Boolean} [options.toggled=false] A boolean indicating whether the button should be initially toggled.
+     * @param {String} [options.tooltip=''] A string containing the button's tooltip.
      */
     var ToggleButtonViewModel = function(command, options) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(command)) {
             throw new DeveloperError('command is required.');
         }
+        //>>includeEnd('debug');
 
         this._command = command;
 
