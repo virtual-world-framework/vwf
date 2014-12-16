@@ -598,6 +598,11 @@
 
             this.logger = require( "logger" ).for( "vwf", this );  // TODO: for( "vwf", ... ), and update existing calls
 
+            // Get the jQuery reference. This also happens in `loadConfiguration`, but the tests
+            // initialize using `initialize` and don't call `loadConfiguration` first.
+
+            jQuery = require("jquery");
+
             // Parse the function parameters. If the first parameter is not an array, then treat it
             // as the application specification. Otherwise, fall back to the "application" parameter
             // in the query string.
@@ -1165,6 +1170,7 @@
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
+                    this.tock();
                 }
 
                 // Perform the action.
@@ -1187,6 +1193,7 @@
                 this.sequence_ = undefined; // clear after the previous action
                 this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
+                this.tock();
             }
             
         };
@@ -1205,7 +1212,7 @@
 
         // -- tick ---------------------------------------------------------------------------------
 
-        /// Tick each tickable model, view, and node. Ticks are sent on each time change.
+        /// Tick each tickable model, view, and node. Ticks are sent on each reflector idle message.
         /// 
         /// @name module:vwf.tick
 
@@ -1230,6 +1237,24 @@
 
             this.tickable.nodeIDs.forEach( function( nodeID ) {
                 this.callMethod( nodeID, "tick", [ this.now ] );
+            }, this );
+
+        };
+
+        // -- tock ---------------------------------------------------------------------------------
+
+        /// Notify views of a kernel time change. Unlike `tick`, `tock` messages are sent each time
+        /// that time moves forward. Only view drivers are notified since the model state should be
+        /// independent of any particular sequence of idle messages.
+        /// 
+        /// @name module:vwf.tock
+
+        this.tock = function() {
+
+            // Call tocked() on each view.
+
+            this.views.forEach( function( view ) {
+                view.tocked && view.tocked( this.now );
             }, this );
 
         };
@@ -2658,7 +2683,7 @@ if ( ! childComponent.source ) {
                                 // Dismiss the loading spinner
                                 if ( childID === vwf.application() ) {
                                     var spinner = document.getElementById( "vwf-loading-spinner" );
-                                    spinner.classList.remove( "pace-active" );
+                                    spinner && spinner.classList.remove( "pace-active" );
                                 }
 
                                 series_callback_async( err, undefined );
