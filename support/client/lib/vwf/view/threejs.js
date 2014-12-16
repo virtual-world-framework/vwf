@@ -218,7 +218,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 if ( propertyName == "makeOwnAvatarVisible" ) {
                     makeOwnAvatarVisible = propertyValue;
                     if ( navObject ) {
-                        setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
+                        setVisibleRecursively( navObject.userControlledObject, makeOwnAvatarVisible );
                     }
                 } else if ( propertyName == "boundingBox" ) {
                     boundingBox = propertyValue;
@@ -332,7 +332,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 } else if ( propertyName == "makeOwnAvatarVisible" ) {
                     makeOwnAvatarVisible = propertyValue;
                     if ( navObject ) {
-                        setVisibleRecursively( navObject.threeObject, makeOwnAvatarVisible );
+                        setVisibleRecursively( navObject.userControlledObject, makeOwnAvatarVisible );
                     }
                 } else if ( propertyName == "boundingBox" ) {
                     boundingBox = propertyValue;
@@ -489,14 +489,14 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             // We will soon want to use the yawMatrix and pitchMatrix,
             // so let's update them
-            extractRotationAndTranslation( navObject.threeObject );
+            extractRotationAndTranslation( navObject.userControlledObject );
 
             if ( orbiting ) {
                 var pitchRadians = deltaY * rotationSpeedRadians;
                 var yawRadians = deltaX * rotationSpeedRadians;
                 orbit( pitchRadians, yawRadians );
             } else if ( mouseDown.right ) {
-                var navThreeObject = navObj.threeObject;
+                var navThreeObject = navObj.userControlledObject;
 
                 // --------------------
                 // Calculate new pitch
@@ -618,10 +618,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 // Put all components together and set the new pose
                 // -------------------------------------------------
                                     
-                var navObjectWorldMatrix = navObject.threeObject.matrixWorld;
+                var navObjectWorldMatrix = navObject.userControlledObject.matrixWorld;
                 navObjectWorldMatrix.multiplyMatrices( yawMatrix, pitchMatrix );
                 navObjectWorldMatrix.multiplyMatrices( translationMatrix, navObjectWorldMatrix );
-                if ( navObject.threeObject instanceof THREE.Camera ) {
+                if ( navObject.userControlledObject instanceof THREE.Camera ) {
                     var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
                     navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
                 }
@@ -640,7 +640,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 return;
             }
 
-            var navThreeObject = navObj.threeObject;
+            var navThreeObject = navObj.userControlledObject;
             
             // wheelDelta has a value of 3 for every click
             var numClicks = Math.abs( wheelDelta / 3 );
@@ -661,7 +661,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }
 
             // We are about to use the translationMatrix, so let's update it
-            extractRotationAndTranslation( navObject.threeObject );
+            extractRotationAndTranslation( navObject.userControlledObject );
 
             var translationArray = translationMatrix.elements;
             translationArray[ 12 ] += amountToMove * pickDirectionVector.x;
@@ -706,7 +706,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             // We will soon want to use the yawMatrix and pitchMatrix,
             // so let's update them
-            extractRotationAndTranslation( navObject.threeObject );
+            extractRotationAndTranslation( navObject.userControlledObject );
 
             if ( deltaX || deltaY ) {
                 var yawQuat = new THREE.Quaternion();
@@ -720,7 +720,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 } else if ( touchmode == "look" ) {
                     if ( navObject ) {
 
-                        var navThreeObject = navObject.threeObject;
+                        var navThreeObject = navObject.userControlledObject;
                         var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
                         // --------------------
@@ -791,7 +791,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                             var navObjWrldTrnsfmArr = navObjectWorldMatrix.elements;
                             navObjectWorldMatrix.elements = convertCameraTransformFromVWFtoThreejs( navObjWrldTrnsfmArr );
                         }
-                        setTransformFromWorldTransform( navObject.threeObject );
+                        setTransformFromWorldTransform( navObject.userControlledObject );
                         callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
                     } else {
                         self.logger.warnx( "handleTouchNavigation: There is no navigation object to move" );
@@ -1080,7 +1080,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 var objectIsControlledByUser = ( ( navmode !== "none" ) &&
                                                  ( ( navObject && ( nodeID === navObject.ID ) ) || 
                                                    ( cameraNode && ( nodeID === cameraNode.ID ) ) ) );
-                if ( !objectIsControlledByUser ) {             
+                if ( !objectIsControlledByUser || true ) {             
                     setTransform(nodeID, interp);    
                     self.nodes[nodeID].needTransformRestore = true;
                 }
@@ -2049,7 +2049,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         this.moveNavObject = function( x, y, navObj, navMode, rotationSpeed, translationSpeed, msSinceLastFrame ) {
 
-            var navThreeObject = navObj.threeObject;
+            var navThreeObject = navObj.userControlledObject;
 
             // Compute the distance traveled in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
@@ -2150,7 +2150,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 }
                 
                 // We are about to use the translationMatrix, so let's update it
-                extractRotationAndTranslation( navObject.threeObject );
+                extractRotationAndTranslation( navObject.userControlledObject );
 
                 // Insert the new navObject position into the translation array
                 var translationArray = translationMatrix.elements;
@@ -2168,7 +2168,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         this.rotateNavObjectByKey = function( direction, navObj, navMode, rotationSpeed, translationSpeed, msSinceLastFrame ) {
 
-            var navThreeObject = navObj.threeObject;
+            var navThreeObject = navObj.userControlledObject;
 
             // Compute the distance rotated in the elapsed time
             // Constrain the time to be less than 0.5 seconds, so that if a user has a very low frame rate, 
@@ -2186,7 +2186,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
                 // We will soon want to use the yawMatrix and pitchMatrix,
                 // so let's update them
-                extractRotationAndTranslation( navObject.threeObject );
+                extractRotationAndTranslation( navObject.userControlledObject );
 
                 var cos = Math.cos( theta );
                 var sin = Math.sin( theta );
@@ -3041,7 +3041,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         // If there is already a navObject, make that object opaque if we had made it transparent
         if ( navObject && !makeOwnAvatarVisible ) {
-            setVisibleRecursively( navObject.threeObject, true );
+            setVisibleRecursively( navObject.userControlledObject, true );
         }
 
         // Set the new navigation object
@@ -3049,7 +3049,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         
         // Set the 3D model transparent if requested
         if ( !makeOwnAvatarVisible ) {
-            setVisibleRecursively( navObject.threeObject, false );
+            setVisibleRecursively( navObject.userControlledObject, false );
         }
 
         // TODO: The model should keep track of a shared navObject, not just the shared camera that it tracks now. See Redmine #3145.
@@ -3112,7 +3112,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         if ( deltaX || deltaY ) {
             if ( navObject ) {
-                var navThreeObject = navObject.threeObject;
+                var navThreeObject = navObject.userControlledObject;
                 var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
                 self.handleMouseNavigation( deltaX, deltaY, navObject, navmode, 
@@ -3129,7 +3129,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     }
 
     function inputHandleScroll( wheelDelta, distanceToTarget ) {
-        var navThreeObject = navObject.threeObject;
+        var navThreeObject = navObject.userControlledObject;
         var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
         self.handleScroll( wheelDelta, navObject, navmode, rotationSpeed, translationSpeed, distanceToTarget );
         setTransformFromWorldTransform( navThreeObject );
@@ -3155,7 +3155,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             return;
 
         if ( navObject ) {
-            var navThreeObject = navObject.threeObject;
+            var navThreeObject = navObject.userControlledObject;
             var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
             self.moveNavObject( x, y, navObject, navmode, rotationSpeed, translationSpeed, msSinceLastFrame );
@@ -3182,7 +3182,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             return;
 
         if ( navObject ) {
-            var navThreeObject = navObject.threeObject;
+            var navThreeObject = navObject.userControlledObject;
             var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
             self.rotateNavObjectByKey( direction, navObject, navmode, 
@@ -3481,9 +3481,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
                 // We will soon want to use the yawMatrix and pitchMatrix,
                 // so let's update them
-                extractRotationAndTranslation( navObject.threeObject );
+                extractRotationAndTranslation( navObject.userControlledObject );
 
-                var navThreeObject = navObject.threeObject;
+                var navThreeObject = navObject.userControlledObject;
                 var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
 
                 var originalPitchMatrix = pitchMatrix.clone();
@@ -3629,7 +3629,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             // If the view is currently using the model's activeCamera, update it to the new activeCamera
             if ( usersShareView ) {
                 cameraNode = this.state.nodes[cameraID];
-                this.state.cameraInUse = cameraNode.threeObject;
+                this.state.cameraInUse = cameraNode.userControlledObject || cameraNode.threeObject;
                 var canvas = this.canvasQuery[ 0 ];
                 this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
             }

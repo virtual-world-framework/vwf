@@ -347,6 +347,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             
             }
 
+            // Check if object is navigable and insert a node between the object and its parent
+            // This node will be used to get transformation changes from the model that can be
+            // interpolated in the view. The object itself will be user controlled.
+            if ( childImplementsIDs.indexOf( "http-vwf-example-com-navigable-vwf" ) !== -1 ) {
+                node.userControlledObject = node.threeObject;
+                threeParent.remove( node.threeObject );
+                node.threeObject = new THREE.Object3D();
+                node.threeObject.add( node.userControlledObject );
+                threeParent.add( node.threeObject );
+            }
+
             if ( node && ( node.threeObject instanceof THREE.Object3D ) ) {
                 // Add a local model-side transform that can stay pure even if the view changes the
                 // transform on the threeObject - objects that don't yet have a threeObject because
