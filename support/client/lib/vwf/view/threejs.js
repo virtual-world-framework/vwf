@@ -1030,7 +1030,7 @@ define( [ "module",
                 list = [];
             for(var i =0; i<node.children.length; i++)
             {
-                if(node.children[i] instanceof THREE.ParticleSystem)
+                if(node.children[i] instanceof THREE.PointCloud)
                     list.push(node.children[i]);
                 list =  GetParticleSystems(node.children[i],list);
             }           
@@ -3200,7 +3200,7 @@ define( [ "module",
 
         if ( threeObject instanceof THREE.Camera ) {  
             transformMatrix = convertCameraTransformFromVWFtoThreejs( transformMatrix );
-        } else if( threeObject instanceof THREE.ParticleSystem ) {
+        } else if( threeObject instanceof THREE.PointCloud ) {
             // I don't see where this function is defined. Maybe a copy-paste bug from
             // GLGE driver? - Eric (5/13/13)
             threeObject.updateTransform( transformMatrix );

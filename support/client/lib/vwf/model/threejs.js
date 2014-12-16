@@ -208,7 +208,7 @@ define( [ "module",
                   
                     } else if ( node.threeObject ) {
                         sceneNode.camera.threeJScameras[ childID ] = node.threeObject;
-                        sceneNode.threeScene.add(cam); 
+                        sceneNode.threeScene.add( node.threeObject ); 
                     }
                 }               
             } else if(protos && isLightDefinition.call(this,protos)) {
@@ -672,7 +672,7 @@ define( [ "module",
 
                         //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transformMatrix = goog.vec.Mat4.createFromArray( propertyValue || [] );
-                        if(threeObject instanceof THREE.ParticleSystem)
+                        if( threeObject instanceof THREE.PointCloud )
                         {   
                             threeObject.updateTransform(propertyValue);
                         }
@@ -799,7 +799,7 @@ define( [ "module",
                         }
                     }
                 }
-                if(threeObject instanceof THREE.ParticleSystem)
+                if( threeObject instanceof THREE.PointCloud )
                 {
                     var ps = threeObject;
                     var particles = ps.geometry;
@@ -2754,7 +2754,10 @@ define( [ "module",
                 
                 } else {  // childType == "model/x-threejs-skinned+json"
 
-                    THREE.AnimationHandler.add( geometry.animation );   
+                    // THREE.AnimationHandler had a couple of methods
+                    // depricated, check THREE.UCSCharacter
+
+                    //  THREE.AnimationHandler.add( geometry.animation );   
                     var asset = new THREE.SkinnedMesh( geometry, meshMaterial );
                     var skinnedAnimation = new THREE.Animation( asset, geometry.animation.name ); 
                     skinnedAnimation.play();
@@ -2822,7 +2825,7 @@ define( [ "module",
             nodeCopy.threeObject.matrixAutoUpdate = false;
 
             if( keyframeAnimations ) {
-                var animHandler = THREE.AnimationHandler;
+                //var animHandler = THREE.AnimationHandler;
                 nodeCopy.threeObject.kfAnimations = [];
                 nodeCopy.threeObject.animations = keyframeAnimations;
 
@@ -2842,8 +2845,13 @@ define( [ "module",
                         animation.node.kfAnimations = [];
                     }
                     animation.node.animations.push( animation );
-                    animHandler.add( animation );
-                    var kfAnimation = new THREE.KeyFrameAnimation( animation.node, animation.name );
+                    
+                    // add has been depricated
+                    //animHandler.add( animation );
+                    //var kfAnimation = new THREE.KeyFrameAnimation( animation.node, animation.name );
+
+                    var kfAnimation = new THREE.KeyFrameAnimation( animation );
+
                     kfAnimation.timeScale = 1;
                     nodeCopy.threeObject.kfAnimations.push( kfAnimation );
                     animation.node.kfAnimations.push( kfAnimation );
@@ -3429,7 +3437,7 @@ define( [ "module",
             });
 
             // create the particle system
-            var particleSystem = new THREE.ParticleSystem(particles,shaderMaterial_default);
+            var particleSystem = new THREE.PointCloud( particles, shaderMaterial_default );
             
 			//keep track of the shaders
             particleSystem.shaderMaterial_analytic = shaderMaterial_analytic;
