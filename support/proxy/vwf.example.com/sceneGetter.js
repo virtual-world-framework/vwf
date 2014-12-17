@@ -12,7 +12,15 @@
 // See the License for the specific language governing permissions and 
 // limitations under the License.
 
-this.findInScene = function( objName ) {
+this.findInScene = function( objName, errorOnNotFound, warnOnTooMany ) {
+    if ( errorOnNotFound === undefined ) {
+        errorOnNotFound = true;
+    }
+
+    if ( warnOnTooMany === undefined ) {
+        warnOnTooMany = true;
+    }
+
     if ( !this.scene ) {
         this.logger.errorx( "findInScene", "Scene  is undefined!" );
         return undefined;
@@ -20,10 +28,10 @@ this.findInScene = function( objName ) {
 
     var results = this.scene.find( "//" + objName );
 
-    if ( results.length < 1 ) {
+    if ( errorOnNotFound && ( results.length < 1 ) ) {
         this.logger.errorx( "findInScene", "Object '" + objName + 
                             "' not found" );
-    } else if ( results.length > 1 ) {
+    } else if ( warnOnTooMany && ( results.length > 1 ) ) {
         this.logger.warnx( "findInScene", "Multiple objects named '" + 
                            objName + "' found.  Names should really " +
                            "be unique... but we'll return the first one." );
@@ -32,7 +40,16 @@ this.findInScene = function( objName ) {
     return results[ 0 ];
 }
 
-this.findTypeInScene = function( typeName ) {
+this.findTypeInScene = function( typeName, errorOnNotFound, 
+                                 warnOnTooMany ) {
+    if ( errorOnNotFound === undefined ) {
+        errorOnNotFound = true;
+    }
+
+    if ( warnOnTooMany === undefined ) {
+        warnOnTooMany = true;
+    }
+
     if (!this.scene) {
         this.logger.errorx( "findTypeInScene", "Scene  is undefined!" );
         return undefined;
@@ -40,10 +57,10 @@ this.findTypeInScene = function( typeName ) {
 
     var results = this.scene.find( ".//element(*,'" + typeName + "')" );
 
-    if ( results.length < 1 ) {
+    if ( errorOnNotFound && ( results.length < 1 ) ) {
         this.logger.errorx( "findTypeInScene", "Nothing found with type '" +
                             typeName + "'." );
-    } else if ( results.length > 1 ) {
+    } else if ( warnOnTooMany && ( results.length > 1 ) ) {
         this.logger.warnx( "findTypeInScene", "Multiple objects of type '" + 
                            typeName + "' found.  We'll return the first " +
                            "one." );
