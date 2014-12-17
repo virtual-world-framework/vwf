@@ -32,6 +32,8 @@ properties:
       } //@ sourceURL=inputMode.set
     value: draw
   nodesCreated: []
+  line:
+  pushpin:
   lineIndex: 1
   pushpinIndex: 1
   selectedColor: black
@@ -216,7 +218,7 @@ scripts:
   // Create object definitions for line and pushpin to be used to dynamically create these objects as the user
   // draws lines and places pushpins
 
-  var line = {
+  this.line = {
     "extends": "http://vwf.example.com/node3.vwf",
     "type": "definition/mesh",
     "properties": { 
@@ -224,7 +226,7 @@ scripts:
     }
   };
 
-  var pushpin = {
+  this.pushpin = {
     extends: "http://vwf.example.com/node3.vwf",
     source: "models/pushpinblack.dae",
     type: "model/vnd.collada+xml",
@@ -324,7 +326,7 @@ scripts:
         
         faces = [ 0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6 ];
         
-        var newLine = $.extend(true, {}, line);
+        var newLine = $.extend(true, {}, this.line);
         newLine.properties.meshDefinition.positions = pos;
         newLine.properties.meshDefinition.faces = faces;
         newLine.properties.meshDefinition.color = this.lineColor;
@@ -341,21 +343,21 @@ scripts:
 
   this.pindrop = function( pickInfo ) {
     if ( pickInfo && pickInfo.globalPosition ) {
-      pushpin.properties.translation = pickInfo.globalPosition;
+      this.pushpin.properties.translation = pickInfo.globalPosition;
       
       if ( this.lineColor[0] == 255 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
-        pushpin.source = "models/pushPinRed.dae";
+        this.pushpin.source = "models/pushPinRed.dae";
       else if ( this.lineColor[0] == 0 && this.lineColor[1] == 255 && this.lineColor[2] == 0 ) 
-        pushpin.source = "models/pushPinGreen.dae";
+        this.pushpin.source = "models/pushPinGreen.dae";
       else if ( this.lineColor[0] == 0 && this.lineColor[1] == 0 && this.lineColor[2] == 255 ) 
-        pushpin.source = "models/pushPinBlue.dae";
+        this.pushpin.source = "models/pushPinBlue.dae";
       else if ( this.lineColor[0] == 0 && this.lineColor[1] == 0 && this.lineColor[2] == 0 ) 
-        pushpin.source = "models/pushPinBlack.dae";
+        this.pushpin.source = "models/pushPinBlack.dae";
       else 
-        pushpin.source = "models/pushPinYellow.dae";
+        this.pushpin.source = "models/pushPinYellow.dae";
       
       var name = "pushpin"+this.pushpinIndex;
-      this.children.create( name, pushpin, function( newObj ) {
+      this.children.create( name, this.pushpin, function( newObj ) {
         this.nodesCreated.push( newObj.id );
         this.nodesCreated = this.nodesCreated;
       } );
