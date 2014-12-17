@@ -36,8 +36,8 @@ git submodule update
 bundle install
 bundle exec rake
 
-mkdir node
-cd node
-wget http://nodejs.org/dist/latest/node.exe
-wget http://nodejs.org/dist/npm/npm-1.3.25.zip
+# mkdir node
+# cd node
+# wget http://nodejs.org/dist/latest/node.exe
+# wget http://nodejs.org/dist/npm/npm-1.3.25.zip
 

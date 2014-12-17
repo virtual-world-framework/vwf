@@ -12,10 +12,10 @@ REM Start Build
 call bash "/cygdrive/c/cygwin/build.sh"
 
 REM Extract Node
-cd c:\vwf\node
-7z x -y c:\vwf\node\*.zip 
+REM cd c:\vwf\node
+REM 7z x -y c:\vwf\node\*.zip 
 cd c:\
-del c:\vwf\node\*.zip
+REM del c:\vwf\node\*.zip
 
 REM Packaging Section
 
