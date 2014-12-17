@@ -49,6 +49,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     var rotatingLeft = false;
     var rotatingRight = false;
     var startMousePosition;
+    var startTouchPosition;
 
     // HACK: This is to deal with an issue with webkitMovementX in Chrome:
     // https://code.google.com/p/chromium/issues/detail?id=386791&thanks=386791&ts=1403213097
@@ -694,14 +695,15 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         },
 
         handleTouchNavigation: function ( touchEventData ) {
+
             var currentMousePosition = touchEventData[ 0 ].position;
 
             var deltaX = 0;
             var deltaY = 0;
 
-            if ( touchPosition ) {
-                deltaX = currentMousePosition[ 0 ] - touchPosition [ 0 ];
-                deltaY = currentMousePosition[ 1 ] - touchPosition [ 1 ];
+            if ( startTouchPosition ) {
+                deltaX = currentMousePosition[ 0 ] - startTouchPosition [ 0 ];
+                deltaY = currentMousePosition[ 1 ] - startTouchPosition [ 1 ];
             }
 
             // We will soon want to use the yawMatrix and pitchMatrix,
@@ -799,114 +801,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
                 }
             } 
-            touchPosition = currentMousePosition;
-        },
-
-        handleHammer: function( ev ) {
-            // disable browser scrolling
-            ev.gesture.preventDefault();
-
-            var eData = getTouchEventData( ev, false );
-            touchID = touchPick ? getPickObjectID.call( sceneView, touchPick.object, false ) : sceneID;
-
-            switch(ev.type) {
-                case 'hold':
-                    sceneView.kernel.dispatchEvent( touchID, "touchHold", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'tap':
-                    sceneView.kernel.dispatchEvent( touchID, "touchTap", eData.eventData, eData.eventNodeData );
-                    // Emulate pointer events
-                    eData.eventData[0].button = "left"; 
-                    sceneView.kernel.dispatchEvent( touchID, "pointerClick", eData.eventData, eData.eventNodeData );
-                    sceneView.kernel.dispatchEvent( touchID, "pointerDown", eData.eventData, eData.eventNodeData );
-                    sceneView.kernel.dispatchEvent( touchID, "pointerUp", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'doubletap':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDoubleTap", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'drag': 
-                    // Fly or Orbit Navigation Behavior
-                    if ( touchmode != "none") {
-                        if ( prevGesture == "drag" || prevGesture == "dragleft" || prevGesture == "dragright") {
-                            self.handleTouchNavigation( eData.eventData );
-                        }
-                    }
-                    sceneView.kernel.dispatchEvent( touchID, "touchDrag", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragstart':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragStart", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragend':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragEnd", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragup':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragUp", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragdown':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragDown", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragleft':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragLeft", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'dragright':
-                    sceneView.kernel.dispatchEvent( touchID, "touchDragRight", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'swipe':
-                    sceneView.kernel.dispatchEvent( touchID, "touchSwipe", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'swipeup':
-                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeUp", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'swipedown':
-                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeDown", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'swipeleft':
-                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeLeft", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'swiperight':
-                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeRight", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'transform':
-                    sceneView.kernel.dispatchEvent( touchID, "touchTransform", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'transformstart':
-                    sceneView.kernel.dispatchEvent( touchID, "touchTransformStart", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'transformend':
-                    sceneView.kernel.dispatchEvent( touchID, "touchTransformEnd", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'rotate':
-                    sceneView.kernel.dispatchEvent( touchID, "touchRotate", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'pinch':
-                    sceneView.kernel.dispatchEvent( touchID, "touchPinch", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'pinchin':
-                    // Zoom Out
-                    if ( touchmode != "none" ) {
-                        inputHandleScroll( ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
-                    }
-                    sceneView.kernel.dispatchEvent( touchID, "touchPinchIn", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'pinchout':
-                    // Zoom In
-                    if ( touchmode != "none" ) {
-                        inputHandleScroll( -1 * ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
-                    }
-                    sceneView.kernel.dispatchEvent( touchID, "touchPinchOut", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'touch':
-                    touchGesture = true;
-                    sceneView.kernel.dispatchEvent( touchID, "touchStart", eData.eventData, eData.eventNodeData );
-                    break;
-                case 'release':
-                    touchGesture = false;
-                    sceneView.kernel.dispatchEvent( touchID, "touchRelease", eData.eventData, eData.eventNodeData );
-                    break;
-            }
-
-            // Set previous gesture (only perform drag if the previous is not a pinch gesture - causes jumpiness)
-            prevGesture = ev.type;
+            startTouchPosition = currentMousePosition;
         },
 
         appRequestsPointerLock: function( navmode, mouseDown ) {
@@ -1417,7 +1312,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         var touchID = undefined;
         var touchPick = undefined;
-        var touchPosition = undefined; 
 
         var pointerDownID = undefined;
         var pointerOverID = undefined;
@@ -1642,13 +1536,120 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         // Do not emulate mouse events on touch
         Hammer.NO_MOUSEEVENTS = true;
 
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("touch release", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("hold tap doubletap", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("drag dragstart dragend dragup dragdown dragleft dragright", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("swipe swipeup swipedown swipeleft,swiperight", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("transform transformstart transformend", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("rotate", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("pinch pinchin pinchout", self.handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("touch release", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("hold tap doubletap", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("drag dragstart dragend dragup dragdown dragleft dragright", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("swipe swipeup swipedown swipeleft,swiperight", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("transform transformstart transformend", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("rotate", handleHammer);
+        $(canvas).hammer({ drag_lock_to_axis: false }).on("pinch pinchin pinchout", handleHammer);
+
+        function handleHammer( ev ) {
+            // disable browser scrolling
+            ev.gesture.preventDefault();
+
+            var eData = getTouchEventData( ev, false );
+            touchID = touchPick ? getPickObjectID.call( sceneView, touchPick.object, false ) : sceneID;
+
+            switch(ev.type) {
+                case 'hold':
+                    sceneView.kernel.dispatchEvent( touchID, "touchHold", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'tap':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTap", eData.eventData, eData.eventNodeData );
+                    // Emulate pointer events
+                    eData.eventData[0].button = "left"; 
+                    sceneView.kernel.dispatchEvent( touchID, "pointerClick", eData.eventData, eData.eventNodeData );
+                    sceneView.kernel.dispatchEvent( touchID, "pointerDown", eData.eventData, eData.eventNodeData );
+                    sceneView.kernel.dispatchEvent( touchID, "pointerUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'doubletap':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDoubleTap", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'drag': 
+                    // Fly or Orbit Navigation Behavior
+                    if ( touchmode != "none") {
+                        if ( prevGesture == "drag" || prevGesture == "dragleft" || prevGesture == "dragright") {
+                            self.handleTouchNavigation( eData.eventData );
+                        }
+                    }
+                    sceneView.kernel.dispatchEvent( touchID, "touchDrag", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragstart':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragend':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragEnd", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragup':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragdown':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragDown", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragleft':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragLeft", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'dragright':
+                    sceneView.kernel.dispatchEvent( touchID, "touchDragRight", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipe':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipe", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipeup':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeUp", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipedown':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeDown", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swipeleft':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeLeft", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'swiperight':
+                    sceneView.kernel.dispatchEvent( touchID, "touchSwipeRight", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transform':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransform", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transformstart':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransformStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'transformend':
+                    sceneView.kernel.dispatchEvent( touchID, "touchTransformEnd", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'rotate':
+                    sceneView.kernel.dispatchEvent( touchID, "touchRotate", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinch':
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinch", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinchin':
+                    // Zoom Out
+                    if ( touchmode != "none" ) {
+                        inputHandleScroll( ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
+                    }
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinchIn", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'pinchout':
+                    // Zoom In
+                    if ( touchmode != "none" ) {
+                        inputHandleScroll( -1 * ev.gesture.scale, eData.eventNodeData[ "" ][ 0 ].distance );
+                    }
+                    sceneView.kernel.dispatchEvent( touchID, "touchPinchOut", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'touch':
+                    touchGesture = true;
+                    sceneView.kernel.dispatchEvent( touchID, "touchStart", eData.eventData, eData.eventNodeData );
+                    break;
+                case 'release':
+                    touchGesture = false;
+                    sceneView.kernel.dispatchEvent( touchID, "touchRelease", eData.eventData, eData.eventNodeData );
+                    break;
+            }
+
+            // Set previous gesture (only perform drag if the previous is not a pinch gesture - causes jumpiness)
+            prevGesture = ev.type;
+        }
 
         canvas.onmousedown = function( e ) {
 
