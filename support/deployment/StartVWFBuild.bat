@@ -61,4 +61,4 @@ move c:\VWF_Windows_Install.exe c:\%strinstaller%.exe
 ncftpput -f C:\login.txt .\archive c:\%strinstaller%.exe
 
 REM CLOSE SERVER WHEN COMPLETE
-REM SHUTDOWN /s /t 60 /c "Shutdown in progress, leave the vicinity immediately"
+SHUTDOWN /s /t 60 /c "Shutdown in progress, leave the vicinity immediately"
