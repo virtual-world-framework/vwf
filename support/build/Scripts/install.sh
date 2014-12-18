@@ -53,11 +53,11 @@ trap "echo Installation failed." EXIT
 [ -e "$HOME/.vwf" ] && rm -rf "$HOME/.vwf"
 if [ "$UNAME" = "Darwin" ] ; then
 	### OSX ###
-	TARBALL_URL="http://download.virtualworldframework.com/files/VWF_Mac_OS_X_latest.tar.gz"
+	TARBALL_URL="http://download.virtualworldframework.com/files/vwf-0.6.23.tar.gz"
 	NODEPACKAGE="node-v0.10.22-darwin-x64"
 elif [ "$UNAME" = "Linux" ] ; then
 	### Linux ###
-	TARBALL_URL="http://download.virtualworldframework.com/files/VWF_Linux_latest.tar.gz"
+	TARBALL_URL="http://download.virtualworldframework.com/files/vwf-0.6.23.tar.gz"
 fi
 
 
