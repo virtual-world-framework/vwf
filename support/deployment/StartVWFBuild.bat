@@ -26,21 +26,21 @@ for /F "delims=" %%i in (version.txt) do set content=%%i
 echo %content%
 set datetimef=%content%
 
-set str=VWF_Master_%datetimef%-windows-full
-set str2=VWF_Master_%datetimef%-source-code
-set strinstaller=VWF_Master_%datetimef%-windows-installer
+set strfull=vwf-%datetimef%-windows-full
+set strsource=vwf-%datetimef%-source-code
+set strinstaller=vwf-%datetimef%-windows-installer
 
 REM CREATE VWF FULL PACKAGE AND MOVE TO DOWNLOADS WEBSITE
 
-7za a -mx9 -tzip %str%.zip vwf
-ncftpput -f C:\login.txt .\archive c:\%str%.zip
-del c:\%str%.zip
+7za a -mx9 -tzip %strfull%.zip vwf
+ncftpput -f C:\login.txt .\archive c:\%strfull%.zip
+del c:\%strfull%.zip
 
 REM CREATE VWF SOURCE PACKAGE AND MOVE TO DOWNLOADS WEBSITE
 
-7za a -mx9 -tzip %str2%.zip vwfsource
-ncftpput -f C:\login.txt .\archive c:\%str2%.zip
-del c:\%str2%.zip
+7za a -mx9 -tzip %strsource%.zip vwfsource
+ncftpput -f C:\login.txt .\archive c:\%strsource%.zip
+del c:\%strsource%.zip
 
 
 REM CREATE VWF INSTALLER AND MOVE TO DOWNLOADS WEBSITE
