@@ -63,7 +63,7 @@ task :version do
   # Patch lib/version.js.
 
   if release || build
-    sh "sed", "-i", "",
+    sh "sed", "-i.bak",
       %Q{/version.*version-identifier/s/"[^"]*", "[^"]*"/"#{release}", "#{build}"/},
       "lib/version.js"
   end
