@@ -1586,7 +1586,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui",
         {
             $('#about_tab').append("<div class='header'>About</div>" + 
                 "<div class='about'><p style='font:bold 12pt Arial'>Virtual World Framework</p>" +
-                "<p><b>Version: </b>" + version.join(".") + "</p>" +
+                "<p><b>Version: </b>" + version.toString() + "</p>" +
                 "<p><b>Site: </b><a href='http://virtualworldframework.com' target='_blank'>http://virtualworldframework.com</a></p>" +
                 "<p><b>Source: </b><a href='https://github.com/virtual-world-framework' target='_blank'>https://github.com/virtual-world-framework</a></p></div>");
 

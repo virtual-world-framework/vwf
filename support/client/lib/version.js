@@ -1,6 +1,6 @@
 "use strict";
 
-// Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
+// Copyright 2012-14 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -16,5 +16,30 @@
 /// @module version
 
 define( function() {
-	return [ 0, 6, 23, 0 ]; // major, minor, patch, build
+
+    /// The version identifier has the following form:
+    /// 
+    ///   major, minor, patch, release, build
+    /// 
+    /// Fields are defined according to [SemVer](http://semver.org). The `release` and `build`
+    /// fields are optional, but they are given low-precedence values by default so that official
+    /// builds will always have a higher precedence than unofficial builds. The build tool removes
+    /// these fields when appropriate.
+    /// 
+    /// The build tool overwrites the version identifier on the following line, and it isn't
+    /// particuarly clever about it. Take care to keep the comment and formatting intact when
+    /// bumping the version number.
+
+    var version = [ 0, 6, 24, "development", "" ];  // version-identifier
+
+    /// Render the version identifier as a SemVer-style string.
+
+    version.toString = function() {
+        return this.slice( 0, 3 ).join( "." ) +
+            ( this[ 3 ] ? "-" + this[ 3 ] : "" ) +
+            ( this[ 4 ] ? "+" + this[ 4 ] : "" );
+    };
+
+    return version;
+
 } );

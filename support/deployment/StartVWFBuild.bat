@@ -12,10 +12,10 @@ REM Start Build
 call bash "/cygdrive/c/cygwin/build.sh"
 
 REM Extract Node
-cd c:\vwf\node
-7z x -y c:\vwf\node\*.zip 
+REM cd c:\vwf\node
+REM 7z x -y c:\vwf\node\*.zip 
 cd c:\
-del c:\vwf\node\*.zip
+REM del c:\vwf\node\*.zip
 
 REM Packaging Section
 
@@ -28,6 +28,7 @@ set datetimef=%content%
 
 set str=VWF_Master_%datetimef%-windows-full
 set str2=VWF_Master_%datetimef%-source-code
+set strinstaller=VWF_Master_%datetimef%-windows-installer
 
 REM CREATE VWF FULL PACKAGE AND MOVE TO DOWNLOADS WEBSITE
 
@@ -56,7 +57,8 @@ RMDir c:\vwf_temp /s /q
 
 echo d | xcopy vwf vwf_temp /e /f /s /d /y /EXCLUDE:Exclusion_List.txt
 makensis c:\vwf\support\build\Scripts\build_windows_installer.nsi
-ncftpput -f C:\login.txt . c:\VWF_Windows_Install.exe
+move c:\VWF_Windows_Install.exe c:\%strinstaller%.exe
+ncftpput -f C:\login.txt .\archive c:\%strinstaller%.exe
 
 REM CLOSE SERVER WHEN COMPLETE
-REM SHUTDOWN /s /t 60 /c "Shutdown in progress, leave the vicinity immediately"
+SHUTDOWN /s /t 60 /c "Shutdown in progress, leave the vicinity immediately"
