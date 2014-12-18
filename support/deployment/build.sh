@@ -14,17 +14,7 @@ rm -rf /cygdrive/c/vwf/.git
 rm -rf /cygdrive/c/vwfsource/.git
 
 # Get Version File Ready For Windows Zip File Naming
-cat /cygdrive/c/vwf/support/client/lib/version.js | while read line;
-do
-if [[ "$line" == *return* ]]
-then
-temp1=${line#*[*};
-temp2=${temp1%*]*};
-temp2=${temp2//[[:space:]]};
-temp2=${temp2//,/.};
-echo $temp2 > /cygdrive/c/version.txt;
-fi;
-done
+cat /cygdrive/c/vwf/support/client/lib/version.js | /cygdrive/c/vwf/support/deployment/version.sh > /cygdrive/c/version.txt
 
 
 
