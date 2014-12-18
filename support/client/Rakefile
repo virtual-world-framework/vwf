@@ -36,7 +36,40 @@ CLOBBER.include DESTINATION, DOCUMENTATION
 
 desc "Run the RequireJS optimizer."
 
-task :build => [ :clean, :compile, :compress, :documentation ]
+task :build => [ :clean, :version, :compile, :compress, :documentation ]
+
+
+desc "Stamp the version identifer in lib/version.js"
+
+task :version do
+
+  release = build = nil
+
+  # Locate the build data.
+
+  case
+    when ENV["JENKINS_HOME"]  # when built by Jenkins
+      release = ENV["JOB_NAME"].downcase
+      build = ENV["BUILD_NUMBER"]
+  end
+
+  # Release builds don't have a release label. Suppress the build number too.
+
+  if release == "master"
+    release = ""
+    build = ""
+  end
+
+  # Patch lib/version.js.
+
+  if release || build
+    sh "sed", "-i", "",
+      %Q{/version.*version-identifier/s/"[^"]*", "[^"]*"/"#{release}", "#{build}"/},
+      "lib/version.js"
+  end
+
+end
+
 
 desc "Generate the compilation script."
 
