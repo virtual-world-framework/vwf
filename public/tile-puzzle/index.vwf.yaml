@@ -35,7 +35,7 @@ properties:
   tileDistance: 12 
   tilePositions: 
 methods:
-  initializeCamera:
+  shuffle: 
   setPositions:
 children: 
   shuffleBtn: 
@@ -560,7 +560,6 @@ children:
 scripts:
 - |
     this.initialize = function() {
-
       this.tile1.translation = this.tilePosition1;
       this.tile2.translation = this.tilePosition2;
       this.tile3.translation = this.tilePosition3;
@@ -578,15 +577,10 @@ scripts:
       this.tile15.translation = this.tilePosition15;
       this.openTilePosition = this.tilePosition16;
 
-      this.tilePositions = [this.tilePosition1, this.tilePosition2, this.tilePosition3, this.tilePosition4, 
+      this.tilePositions = [ this.tilePosition1, this.tilePosition2, this.tilePosition3, this.tilePosition4, 
         this.tilePosition5, this.tilePosition6, this.tilePosition7, this.tilePosition8, 
         this.tilePosition9, this.tilePosition10, this.tilePosition11, this.tilePosition12, 
-        this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16];
-      
-      this.future( 0 ).initializeCamera();
-    }
-    
-    this.initializeCamera = function() {
+        this.tilePosition13, this.tilePosition14, this.tilePosition15, this.tilePosition16 ];
       
       this.camera.transform = [ -1,      0,      0,     0,
                                  0,     -0.5,   -0.866, 0,
@@ -606,6 +600,7 @@ scripts:
         this.tilePositions[current] = this.tilePositions[top];
         this.tilePositions[top] = tmp;
       }
+      this.tilePositions = this.tilePositions;
       this.setPositions();
     }
     
