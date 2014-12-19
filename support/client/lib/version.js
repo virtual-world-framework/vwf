@@ -30,7 +30,7 @@ define( function() {
     /// particuarly clever about it. Take care to keep the comment and formatting intact when
     /// bumping the version number.
 
-    var version = [ 0, 6, 23, "", "" ];  // version-identifier
+    var version = [ 0, 6, 23, "development", "" ];  // version-identifier
 
     /// Render the version identifier as a SemVer-style string.
 

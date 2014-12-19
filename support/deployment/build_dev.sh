@@ -24,7 +24,7 @@ cd vwf
 git submodule init
 git submodule update
 bundle install
-bundle exec rake
+JENKINS_HOME=1 JOB_NAME=development BUILD_NUMBER=0 bundle exec rake
 
 # mkdir node
 # cd node
