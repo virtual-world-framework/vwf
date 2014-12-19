@@ -41,6 +41,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.state.blocked = false;
         },
 
+        /// Indicate if kernel reentry is currently enabled.
+
+        enabled: function() {
+            return this.state.enabled;
+        },
+
+        /// Indicate if kernel reentry is currently disabled.
+
+        disabled: function() {
+            return ! this.state.enabled;
+        },
+
         /// Indicate if a driver attempted to call back into the kernel while reentry was disabled,
         /// and clear the *blocked* flag.
         
@@ -421,6 +433,44 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             // TODO: deleteMethod
 
+            case "setMethod":
+
+                return function( nodeID, methodName, methodHandler, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, methodName, methodHandler );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, methodName,
+                                [ methodHandler ], when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "getMethod":
+
+                return function( nodeID, methodName, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, methodName );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, methodName,
+                                undefined, when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
             case "callMethod":
 
                 return function( nodeID, methodName, methodParameters, when, callback ) {
@@ -460,6 +510,63 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 };
 
             // TODO: deleteEvent
+
+            case "addEventListener":
+
+                return function( nodeID, eventName, eventHandler, eventContextID, eventPhases, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventHandler, eventContextID, eventPhases );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
+                                [ eventHandler, eventContextID, eventPhases ], when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "removeEventListener":
+
+                return function( nodeID, eventName, eventListenerID, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventListenerID );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
+                                [ eventListenerID ], when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
+
+            case "flushEventListeners":
+
+                return function( nodeID, eventName, eventContextID, when, callback ) {
+
+                    if ( this.state.enabled ) {
+
+                        if ( when === undefined ) {
+                            return this.kernel[kernelFunctionName]( nodeID, eventName, eventContextID );
+                        } else {
+                            this.kernel.plan( nodeID, kernelFunctionName, eventName,
+                                [ eventContextID ], when, callback /* result */ );
+                        }
+
+                    } else {
+                        this.state.blocked = true;
+                    }
+
+                };
 
             case "fireEvent":
 

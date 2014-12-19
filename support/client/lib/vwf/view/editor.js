@@ -59,7 +59,18 @@ define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui",
             this.intervalTimer = 0;
             
             $('body').append(
-                "<div id='editor' class='relClass'><div class='uiContainer'><div class='editor-tabs' id='tabs'><img id='x' style='display:none' src='images/tab_X.png' alt='x' /><img id='hierarchy' src='images/tab_Application.png' alt='application' /><img id='userlist' src='images/tab_Users.png' alt='users' /><img id='timeline' src='images/tab_Time.png' alt='time' /><img id='models' src='images/tab_Models.png' alt='models' /><img id='about' src='images/tab_About.png' alt='about' /></div></div></div>" + 
+                "<div id='editor' class='relClass'>\n" +
+                "  <div class='uiContainer'>\n" +
+                "    <div class='editor-tabs' id='tabs'>\n" +
+                "      <img id='x' style='display:none' src='images/tab_X.png' alt='x' />\n" +
+                "      <img id='hierarchy' src='images/tab_Application.png' alt='application' />\n" +
+                "      <img id='userlist' src='images/tab_Users.png' alt='users' />\n" +
+                "      <img id='timeline' src='images/tab_Time.png' alt='time' />\n" + 
+                "      <img id='models' src='images/tab_Models.png' alt='models' />\n" +
+                "      <img id='about' src='images/tab_About.png' alt='about' />\n" +
+                "    </div>\n" +
+                "  </div>\n" + 
+                "</div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_a'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='topdown_b'></div></div></div>" + 
                 "<div class='relClass'><div class='uiContainer'><div class='vwf-tree' id='client_list'></div></div></div>" +
@@ -1575,7 +1586,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui",
         {
             $('#about_tab').append("<div class='header'>About</div>" + 
                 "<div class='about'><p style='font:bold 12pt Arial'>Virtual World Framework</p>" +
-                "<p><b>Version: </b>" + version.join(".") + "</p>" +
+                "<p><b>Version: </b>" + version.toString() + "</p>" +
                 "<p><b>Site: </b><a href='http://virtualworldframework.com' target='_blank'>http://virtualworldframework.com</a></p>" +
                 "<p><b>Source: </b><a href='https://github.com/virtual-world-framework' target='_blank'>https://github.com/virtual-world-framework</a></p></div>");
 

@@ -4,6 +4,7 @@ define([
         './defaultValue',
         './defined',
         './DeveloperError',
+        './FeatureDetection',
         './freezeObject',
         './Math',
         './Matrix3'
@@ -12,6 +13,7 @@ define([
         defaultValue,
         defined,
         DeveloperError,
+        FeatureDetection,
         freezeObject,
         CesiumMath,
         Matrix3) {
@@ -59,27 +61,25 @@ define([
         this.w = defaultValue(w, 0.0);
     };
 
-    var fromAxisAngleScratch;
+    var fromAxisAngleScratch = new Cartesian3();
 
     /**
      * Computes a quaternion representing a rotation around an axis.
-     * @memberof Quaternion
      *
      * @param {Cartesian3} axis The axis of rotation.
      * @param {Number} angle The angle in radians to rotate around the axis.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} axis is required.
-     * @exception {DeveloperError} angle is required and must be a number.
      */
     Quaternion.fromAxisAngle = function(axis, angle, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(axis)) {
             throw new DeveloperError('axis is required.');
         }
         if (typeof angle !== 'number') {
             throw new DeveloperError('angle is required and must be a number.');
         }
+        //>>includeEnd('debug');
 
         var halfAngle = angle / 2.0;
         var s = Math.sin(halfAngle);
@@ -103,20 +103,19 @@ define([
     var fromRotationMatrixQuat = new Array(3);
     /**
      * Computes a Quaternion from the provided Matrix3 instance.
-     * @memberof Quaternion
      *
      * @param {Matrix3} matrix The rotation matrix.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
      *
-     * @exception {DeveloperError} matrix is required.
-     *
      * @see Matrix3.fromQuaternion
      */
     Quaternion.fromRotationMatrix = function(matrix, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(matrix)) {
             throw new DeveloperError('matrix is required.');
         }
+        //>>includeEnd('debug');
 
         var root;
         var x;
@@ -135,9 +134,9 @@ define([
             w = 0.5 * root;
             root = 0.5 / root; // 1/(4w)
 
-            x = (matrix[Matrix3.COLUMN2ROW1] - matrix[Matrix3.COLUMN1ROW2]) * root;
-            y = (matrix[Matrix3.COLUMN0ROW2] - matrix[Matrix3.COLUMN2ROW0]) * root;
-            z = (matrix[Matrix3.COLUMN1ROW0] - matrix[Matrix3.COLUMN0ROW1]) * root;
+            x = (matrix[Matrix3.COLUMN1ROW2] - matrix[Matrix3.COLUMN2ROW1]) * root;
+            y = (matrix[Matrix3.COLUMN2ROW0] - matrix[Matrix3.COLUMN0ROW2]) * root;
+            z = (matrix[Matrix3.COLUMN0ROW1] - matrix[Matrix3.COLUMN1ROW0]) * root;
         } else {
             // |w| <= 1/2
             var next = fromRotationMatrixNext;
@@ -161,9 +160,9 @@ define([
             quat[j] = (matrix[Matrix3.getElementIndex(j, i)] + matrix[Matrix3.getElementIndex(i, j)]) * root;
             quat[k] = (matrix[Matrix3.getElementIndex(k, i)] + matrix[Matrix3.getElementIndex(i, k)]) * root;
 
-            x = quat[0];
-            y = quat[1];
-            z = quat[2];
+            x = -quat[0];
+            y = -quat[1];
+            z = -quat[2];
         }
 
         if (!defined(result)) {
@@ -184,22 +183,19 @@ define([
 
     /**
      * The number of elements used to pack the object into an array.
-     * @Type {Number}
+     * @type {Number}
      */
     Quaternion.packedLength = 4;
 
     /**
      * Stores the provided instance into the provided array.
-     * @memberof Quaternion
      *
      * @param {Quaternion} value The value to pack.
-     * @param {Array} array The array to pack into.
+     * @param {Number[]} array The array to pack into.
      * @param {Number} [startingIndex=0] The index into the array at which to start packing the elements.
-     *
-     * @exception {DeveloperError} value is required.
-     * @exception {DeveloperError} array is required.
      */
     Quaternion.pack = function(value, array, startingIndex) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(value)) {
             throw new DeveloperError('value is required');
         }
@@ -207,6 +203,7 @@ define([
         if (!defined(array)) {
             throw new DeveloperError('array is required');
         }
+        //>>includeEnd('debug');
 
         startingIndex = defaultValue(startingIndex, 0);
 
@@ -218,18 +215,17 @@ define([
 
     /**
      * Retrieves an instance from a packed array.
-     * @memberof Quaternion
      *
-     * @param {Array} array The packed array.
+     * @param {Number[]} array The packed array.
      * @param {Number} [startingIndex=0] The starting index of the element to be unpacked.
      * @param {Quaternion} [result] The object into which to store the result.
-     *
-     * @exception {DeveloperError} array is required.
      */
     Quaternion.unpack = function(array, startingIndex, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(array)) {
             throw new DeveloperError('array is required');
         }
+        //>>includeEnd('debug');
 
         startingIndex = defaultValue(startingIndex, 0);
 
@@ -245,37 +241,34 @@ define([
 
     /**
      * The number of elements used to store the object into an array in its interpolatable form.
-     * @Type {Number}
+     * @type {Number}
      */
     Quaternion.packedInterpolationLength = 3;
 
     /**
      * Converts a packed array into a form suitable for interpolation.
-     * @memberof Quaternion
      *
-     * @param {Array} packedArray The packed array.
+     * @param {Number[]} packedArray The packed array.
      * @param {Number} [startingIndex=0] The index of the first element to be converted.
      * @param {Number} [lastIndex=packedArray.length] The index of the last element to be converted.
-     * @param {Array} [result] The object into which to store the result.
-     *
-     * @exception {DeveloperError} packedArray is required.
+     * @param {Number[]} [result] The object into which to store the result.
      */
     Quaternion.convertPackedArrayForInterpolation = function(packedArray, startingIndex, lastIndex, result) {
         Quaternion.unpack(packedArray, lastIndex * 4, sampledQuaternionQuaternion0Conjugate);
-        sampledQuaternionQuaternion0Conjugate.conjugate(sampledQuaternionQuaternion0Conjugate);
+        Quaternion.conjugate(sampledQuaternionQuaternion0Conjugate, sampledQuaternionQuaternion0Conjugate);
 
-        for ( var i = 0, len = lastIndex - startingIndex + 1; i < len; i++) {
+        for (var i = 0, len = lastIndex - startingIndex + 1; i < len; i++) {
             var offset = i * 3;
             Quaternion.unpack(packedArray, (startingIndex + i) * 4, sampledQuaternionTempQuaternion);
 
-            sampledQuaternionTempQuaternion.multiply(sampledQuaternionQuaternion0Conjugate, sampledQuaternionTempQuaternion);
+            Quaternion.multiply(sampledQuaternionTempQuaternion, sampledQuaternionQuaternion0Conjugate, sampledQuaternionTempQuaternion);
 
             if (sampledQuaternionTempQuaternion.w < 0) {
-                sampledQuaternionTempQuaternion.negate(sampledQuaternionTempQuaternion);
+                Quaternion.negate(sampledQuaternionTempQuaternion, sampledQuaternionTempQuaternion);
             }
 
-            sampledQuaternionTempQuaternion.getAxis(sampledQuaternionAxis);
-            var angle = sampledQuaternionTempQuaternion.getAngle();
+            Quaternion.getAxis(sampledQuaternionTempQuaternion, sampledQuaternionAxis);
+            var angle = Quaternion.getAngle(sampledQuaternionTempQuaternion);
             result[offset] = sampledQuaternionAxis.x * angle;
             result[offset + 1] = sampledQuaternionAxis.y * angle;
             result[offset + 2] = sampledQuaternionAxis.z * angle;
@@ -284,25 +277,19 @@ define([
 
     /**
      * Retrieves an instance from a packed array converted with {@link convertPackedArrayForInterpolation}.
-     * @memberof Quaternion
      *
-     * @param {Array} array The original packed array.
-     * @param {Array} sourceArray The converted array.
+     * @param {Number[]} array The original packed array.
+     * @param {Number[]} sourceArray The converted array.
      * @param {Number} [startingIndex=0] The startingIndex used to convert the array.
      * @param {Number} [lastIndex=packedArray.length] The lastIndex used to convert the array.
      * @param {Quaternion} [result] The object into which to store the result.
-     *
-     * @exception {DeveloperError} array is required.
-     * @exception {DeveloperError} sourceArray is required.
      */
     Quaternion.unpackInterpolationResult = function(array, sourceArray, firstIndex, lastIndex, result) {
         if (!defined(result)) {
             result = new Quaternion();
         }
-        sampledQuaternionRotation.x = array[0];
-        sampledQuaternionRotation.y = array[1];
-        sampledQuaternionRotation.z = array[2];
-        var magnitude = sampledQuaternionRotation.magnitude();
+        Cartesian3.fromArray(array, 0, sampledQuaternionRotation);
+        var magnitude = Cartesian3.magnitude(sampledQuaternionRotation);
 
         Quaternion.unpack(sourceArray, lastIndex * 4, sampledQuaternionQuaternion0);
 
@@ -312,12 +299,11 @@ define([
             Quaternion.fromAxisAngle(sampledQuaternionRotation, magnitude, sampledQuaternionTempQuaternion);
         }
 
-        return sampledQuaternionTempQuaternion.multiply(sampledQuaternionQuaternion0, result);
+        return Quaternion.multiply(sampledQuaternionTempQuaternion, sampledQuaternionQuaternion0, result);
     };
 
     /**
      * Duplicates a Quaternion instance.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to duplicate.
      * @param {Quaternion} [result] The object onto which to store the result.
@@ -341,18 +327,18 @@ define([
 
     /**
      * Computes the conjugate of the provided quaternion.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to conjugate.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} quaternion is required.
      */
     Quaternion.conjugate = function(quaternion, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(quaternion)) {
             throw new DeveloperError('quaternion is required');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Quaternion(-quaternion.x, -quaternion.y, -quaternion.z, quaternion.w);
         }
@@ -365,45 +351,36 @@ define([
 
     /**
      * Computes magnitude squared for the provided quaternion.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to conjugate.
      * @returns {Number} The magnitude squared.
-     *
-     * @exception {DeveloperError} quaternion is required.
      */
     Quaternion.magnitudeSquared = function(quaternion) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(quaternion)) {
             throw new DeveloperError('quaternion is required');
         }
+        //>>includeEnd('debug');
+
         return quaternion.x * quaternion.x + quaternion.y * quaternion.y + quaternion.z * quaternion.z + quaternion.w * quaternion.w;
     };
 
     /**
      * Computes magnitude for the provided quaternion.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to conjugate.
      * @returns {Number} The magnitude.
-     *
-     * @exception {DeveloperError} quaternion is required.
      */
     Quaternion.magnitude = function(quaternion) {
-        if (!defined(quaternion)) {
-            throw new DeveloperError('quaternion is required');
-        }
         return Math.sqrt(Quaternion.magnitudeSquared(quaternion));
     };
 
     /**
      * Computes the normalized form of the provided quaternion.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to normalize.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} quaternion is required.
      */
     Quaternion.normalize = function(quaternion, result) {
         var inverseMagnitude = 1.0 / Quaternion.magnitude(quaternion);
@@ -424,13 +401,10 @@ define([
 
     /**
      * Computes the inverse of the provided quaternion.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to normalize.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} quaternion is required.
      */
     Quaternion.inverse = function(quaternion, result) {
         var magnitudeSquared = Quaternion.magnitudeSquared(quaternion);
@@ -440,23 +414,22 @@ define([
 
     /**
      * Computes the componentwise sum of two quaternions.
-     * @memberof Quaternion
      *
      * @param {Quaternion} left The first quaternion.
      * @param {Quaternion} right The second quaternion.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} left is required.
-     * @exception {DeveloperError} right is required.
      */
     Quaternion.add = function(left, right, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(left)) {
             throw new DeveloperError('left is required');
         }
         if (!defined(right)) {
             throw new DeveloperError('right is required');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Quaternion(left.x + right.x, left.y + right.y, left.z + right.z, left.w + right.w);
         }
@@ -469,23 +442,22 @@ define([
 
     /**
      * Computes the componentwise difference of two quaternions.
-     * @memberof Quaternion
      *
      * @param {Quaternion} left The first quaternion.
      * @param {Quaternion} right The second quaternion.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} left is required.
-     * @exception {DeveloperError} right is required.
      */
     Quaternion.subtract = function(left, right, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(left)) {
             throw new DeveloperError('left is required');
         }
         if (!defined(right)) {
             throw new DeveloperError('right is required');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Quaternion(left.x - right.x, left.y - right.y, left.z - right.z, left.w - right.w);
         }
@@ -498,18 +470,18 @@ define([
 
     /**
      * Negates the provided quaternion.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to be negated.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} quaternion is required.
      */
     Quaternion.negate = function(quaternion, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(quaternion)) {
             throw new DeveloperError('quaternion is required');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Quaternion(-quaternion.x, -quaternion.y, -quaternion.z, -quaternion.w);
         }
@@ -522,45 +494,42 @@ define([
 
     /**
      * Computes the dot (scalar) product of two quaternions.
-     * @memberof Quaternion
      *
      * @param {Quaternion} left The first quaternion.
      * @param {Quaternion} right The second quaternion.
      * @returns {Number} The dot product.
-     *
-     * @exception {DeveloperError} left is required.
-     * @exception {DeveloperError} right is required.
      */
     Quaternion.dot = function(left, right) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(left)) {
             throw new DeveloperError('left is required');
         }
         if (!defined(right)) {
             throw new DeveloperError('right is required');
         }
+        //>>includeEnd('debug');
+
         return left.x * right.x + left.y * right.y + left.z * right.z + left.w * right.w;
     };
 
-
     /**
      * Computes the product of two quaternions.
-     * @memberof Quaternion
      *
      * @param {Quaternion} left The first quaternion.
      * @param {Quaternion} right The second quaternion.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} left is required.
-     * @exception {DeveloperError} right is required.
      */
     Quaternion.multiply = function(left, right, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(left)) {
             throw new DeveloperError('left is required');
         }
         if (!defined(right)) {
             throw new DeveloperError('right is required');
         }
+        //>>includeEnd('debug');
+
         var leftX = left.x;
         var leftY = left.y;
         var leftZ = left.z;
@@ -588,25 +557,24 @@ define([
 
     /**
      * Multiplies the provided quaternion componentwise by the provided scalar.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to be scaled.
      * @param {Number} scalar The scalar to multiply with.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} quaternion is required.
-     * @exception {DeveloperError} scalar is required and must be a number.
      */
     Quaternion.multiplyByScalar = function(quaternion, scalar, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(quaternion)) {
             throw new DeveloperError('quaternion is required');
         }
         if (typeof scalar !== 'number') {
             throw new DeveloperError('scalar is required and must be a number.');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
-            return new Quaternion(quaternion.x * scalar,  quaternion.y * scalar, quaternion.z * scalar, quaternion.w * scalar);
+            return new Quaternion(quaternion.x * scalar, quaternion.y * scalar, quaternion.z * scalar, quaternion.w * scalar);
         }
         result.x = quaternion.x * scalar;
         result.y = quaternion.y * scalar;
@@ -617,23 +585,22 @@ define([
 
     /**
      * Divides the provided quaternion componentwise by the provided scalar.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to be divided.
      * @param {Number} scalar The scalar to divide by.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} quaternion is required.
-     * @exception {DeveloperError} scalar is required and must be a number.
      */
     Quaternion.divideByScalar = function(quaternion, scalar, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(quaternion)) {
             throw new DeveloperError('quaternion is required');
         }
         if (typeof scalar !== 'number') {
             throw new DeveloperError('scalar is required and must be a number.');
         }
+        //>>includeEnd('debug');
+
         if (!defined(result)) {
             return new Quaternion(quaternion.x / scalar, quaternion.y / scalar, quaternion.z / scalar, quaternion.w / scalar);
         }
@@ -646,18 +613,17 @@ define([
 
     /**
      * Computes the axis of rotation of the provided quaternion.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to use.
      * @param {Cartesian3} [result] The object onto which to store the result.
      * @returns {Cartesian3} The modified result parameter or a new Cartesian3 instance if one was not provided.
-     *
-     * @exception {DeveloperError} quaternion is required.
      */
     Quaternion.getAxis = function(quaternion, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(quaternion)) {
             throw new DeveloperError('quaternion is required');
         }
+        //>>includeEnd('debug');
 
         var w = quaternion.w;
         if (Math.abs(w - 1.0) < CesiumMath.EPSILON6) {
@@ -680,17 +646,16 @@ define([
 
     /**
      * Computes the angle of rotation of the provided quaternion.
-     * @memberof Quaternion
      *
      * @param {Quaternion} quaternion The quaternion to use.
      * @returns {Number} The angle of rotation.
-     *
-     * @exception {DeveloperError} quaternion is required.
      */
     Quaternion.getAngle = function(quaternion) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(quaternion)) {
             throw new DeveloperError('quaternion is required');
         }
+        //>>includeEnd('debug');
 
         if (Math.abs(quaternion.w - 1.0) < CesiumMath.EPSILON6) {
             return 0.0;
@@ -701,19 +666,15 @@ define([
     var lerpScratch;
     /**
      * Computes the linear interpolation or extrapolation at t using the provided quaternions.
-     * @memberof Quaternion
      *
-     * @param start The value corresponding to t at 0.0.
-     * @param end The value corresponding to t at 1.0.
-     * @param t The point along t at which to interpolate.
+     * @param {Quaternion} start The value corresponding to t at 0.0.
+     * @param {Quaternion} end The value corresponding to t at 1.0.
+     * @param {Number} t The point along t at which to interpolate.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} start is required.
-     * @exception {DeveloperError} end is required.
-     * @exception {DeveloperError} t is required and must be a number.
      */
     Quaternion.lerp = function(start, end, t, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(start)) {
             throw new DeveloperError('start is required.');
         }
@@ -723,6 +684,8 @@ define([
         if (typeof t !== 'number') {
             throw new DeveloperError('t is required and must be a number.');
         }
+        //>>includeEnd('debug');
+
         lerpScratch = Quaternion.multiplyByScalar(end, t, lerpScratch);
         result = Quaternion.multiplyByScalar(start, 1.0 - t, result);
         return Quaternion.add(lerpScratch, result, result);
@@ -733,19 +696,17 @@ define([
     var slerpScaledR;
     /**
      * Computes the spherical linear interpolation or extrapolation at t using the provided quaternions.
-     * @memberof Quaternion
      *
-     * @param start The value corresponding to t at 0.0.
-     * @param end The value corresponding to t at 1.0.
-     * @param t The point along t at which to interpolate.
+     * @param {Quaternion} start The value corresponding to t at 0.0.
+     * @param {Quaternion} end The value corresponding to t at 1.0.
+     * @param {Number} t The point along t at which to interpolate.
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
      *
-     * @exception {DeveloperError} start is required.
-     * @exception {DeveloperError} end is required.
-     * @exception {DeveloperError} t is required and must be a number.
+     * @see Quaternion#fastSlerp
      */
     Quaternion.slerp = function(start, end, t, result) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(start)) {
             throw new DeveloperError('start is required.');
         }
@@ -755,6 +716,7 @@ define([
         if (typeof t !== 'number') {
             throw new DeveloperError('t is required and must be a number.');
         }
+        //>>includeEnd('debug');
 
         var dot = Quaternion.dot(start, end);
 
@@ -769,7 +731,7 @@ define([
         // dot > 0, as the dot product approaches 1, the angle between the
         // quaternions vanishes. use linear interpolation.
         if (1.0 - dot < CesiumMath.EPSILON6) {
-            return Quaternion.lerp(start, r, t);
+            return Quaternion.lerp(start, r, t, result);
         }
 
         var theta = Math.acos(dot);
@@ -780,9 +742,257 @@ define([
     };
 
     /**
+     * The logarithmic quaternion function.
+     *
+     * @param {Quaternion} quaternion The unit quaternion.
+     * @param {Cartesian3} [result] The object onto which to store the result.
+     * @returns {Cartesian3} The modified result parameter or a new instance if one was not provided.
+     */
+    Quaternion.log = function(quaternion, result) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(quaternion)) {
+            throw new DeveloperError('quaternion is required.');
+        }
+        //>>includeEnd('debug');
+
+        var theta = CesiumMath.acosClamped(quaternion.w);
+        var thetaOverSinTheta = 0.0;
+
+        if (theta !== 0.0) {
+            thetaOverSinTheta = theta / Math.sin(theta);
+        }
+
+        if (!defined(result)) {
+            result = new Cartesian3();
+        }
+
+        return Cartesian3.multiplyByScalar(quaternion, thetaOverSinTheta, result);
+    };
+
+    /**
+     * The exponential quaternion function.
+     *
+     * @param {Cartesian3} cartesian The cartesian.
+     * @param {Quaternion} [result] The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new instance if one was not provided.
+     */
+    Quaternion.exp = function(cartesian, result) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(cartesian)) {
+            throw new DeveloperError('cartesian is required.');
+        }
+        //>>includeEnd('debug');
+
+        var theta = Cartesian3.magnitude(cartesian);
+        var sinThetaOverTheta = 0.0;
+
+        if (theta !== 0.0) {
+            sinThetaOverTheta = Math.sin(theta) / theta;
+        }
+
+        if (!defined(result)) {
+            result = new Quaternion();
+        }
+
+        result.x = cartesian.x * sinThetaOverTheta;
+        result.y = cartesian.y * sinThetaOverTheta;
+        result.z = cartesian.z * sinThetaOverTheta;
+        result.w = Math.cos(theta);
+
+        return result;
+    };
+
+    var squadScratchCartesian0 = new Cartesian3();
+    var squadScratchCartesian1 = new Cartesian3();
+    var squadScratchQuaternion0 = new Quaternion();
+    var squadScratchQuaternion1 = new Quaternion();
+
+    /**
+     * Computes an inner quadrangle point.
+     * <p>This will compute quaternions that ensure a squad curve is C<sup>1</sup>.</p>
+     *
+     * @param {Quaternion} q0 The first quaternion.
+     * @param {Quaternion} q1 The second quaternion.
+     * @param {Quaternion} q2 The third quaternion.
+     * @param {Quaternion} [result] The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new instance if none was provided.
+     *
+     * @see Quaternion#squad
+     */
+    Quaternion.innerQuadrangle = function(q0, q1, q2, result) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(q0) || !defined(q1) || !defined(q2)) {
+            throw new DeveloperError('q0, q1, and q2 are required.');
+        }
+        //>>includeEnd('debug');
+
+        var qInv = Quaternion.conjugate(q1, squadScratchQuaternion0);
+        Quaternion.multiply(qInv, q2, squadScratchQuaternion1);
+        var cart0 = Quaternion.log(squadScratchQuaternion1, squadScratchCartesian0);
+
+        Quaternion.multiply(qInv, q0, squadScratchQuaternion1);
+        var cart1 = Quaternion.log(squadScratchQuaternion1, squadScratchCartesian1);
+
+        Cartesian3.add(cart0, cart1, cart0);
+        Cartesian3.multiplyByScalar(cart0, 0.25, cart0);
+        Cartesian3.negate(cart0, cart0);
+        Quaternion.exp(cart0, squadScratchQuaternion0);
+
+        return Quaternion.multiply(q1, squadScratchQuaternion0, result);
+    };
+
+    /**
+     * Computes the spherical quadrangle interpolation between quaternions.
+     *
+     * @param {Quaternion} q0 The first quaternion.
+     * @param {Quaternion} q1 The second quaternion.
+     * @param {Quaternion} s0 The first inner quadrangle.
+     * @param {Quaternion} s1 The second inner quadrangle.
+     * @param {Number} t The time in [0,1] used to interpolate.
+     * @param {Quaternion} [result] The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new instance if none was provided.
+     *
+     * @see Quaternion#innerQuadrangle
+     *
+     * @example
+     * // 1. compute the squad interpolation between two quaternions on a curve
+     * var s0 = Cesium.Quaternion.innerQuadrangle(quaternions[i - 1], quaternions[i], quaternions[i + 1]);
+     * var s1 = Cesium.Quaternion.innerQuadrangle(quaternions[i], quaternions[i + 1], quaternions[i + 2]);
+     * var q = Cesium.Quaternion.squad(quaternions[i], quaternions[i + 1], s0, s1, t);
+     *
+     * // 2. compute the squad interpolation as above but where the first quaternion is a end point.
+     * var s1 = Cesium.Quaternion.innerQuadrangle(quaternions[0], quaternions[1], quaternions[2]);
+     * var q = Cesium.Quaternion.squad(quaternions[0], quaternions[1], quaternions[0], s1, t);
+     */
+    Quaternion.squad = function(q0, q1, s0, s1, t, result) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(q0) || !defined(q1) || !defined(s0) || !defined(s1)) {
+            throw new DeveloperError('q0, q1, s0, and s1 are required.');
+        }
+
+        if (typeof t !== 'number') {
+            throw new DeveloperError('t is required and must be a number.');
+        }
+        //>>includeEnd('debug');
+
+        var slerp0 = Quaternion.slerp(q0, q1, t, squadScratchQuaternion0);
+        var slerp1 = Quaternion.slerp(s0, s1, t, squadScratchQuaternion1);
+        return Quaternion.slerp(slerp0, slerp1, 2.0 * t * (1.0 - t), result);
+    };
+
+    var fastSlerpScratchQuaternion = new Quaternion();
+    var opmu = 1.90110745351730037;
+    var u = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
+    var v = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
+    var bT = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
+    var bD = FeatureDetection.supportsTypedArrays() ? new Float32Array(8) : [];
+
+    for (var i = 0; i < 7; ++i) {
+        var s = i + 1.0;
+        var t = 2.0 * s + 1.0;
+        u[i] = 1.0 / (s * t);
+        v[i] = s / t;
+    }
+
+    u[7] = opmu / (8.0 * 17.0);
+    v[7] = opmu * 8.0 / 17.0;
+
+    /**
+     * Computes the spherical linear interpolation or extrapolation at t using the provided quaternions.
+     * This implementation is faster than {@link Quaternion#slerp}, but is only accurate up to 10<sup>-6</sup>.
+     *
+     * @param {Quaternion} start The value corresponding to t at 0.0.
+     * @param {Quaternion} end The value corresponding to t at 1.0.
+     * @param {Number} t The point along t at which to interpolate.
+     * @param {Quaternion} [result] The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
+     *
+     * @see Quaternion#slerp
+     */
+    Quaternion.fastSlerp = function(start, end, t, result) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(start)) {
+            throw new DeveloperError('start is required.');
+        }
+
+        if (!defined(end)) {
+            throw new DeveloperError('end is required.');
+        }
+
+        if (typeof t !== 'number') {
+            throw new DeveloperError('t is required and must be a number.');
+        }
+        //>>includeEnd('debug');
+
+        if (!defined(result)) {
+            result = new Quaternion();
+        }
+
+        var x = Quaternion.dot(start, end);
+
+        var sign;
+        if (x >= 0) {
+            sign = 1.0;
+        } else {
+            sign = -1.0;
+            x = -x;
+        }
+
+        var xm1 = x - 1.0;
+        var d = 1.0 - t;
+        var sqrT = t * t;
+        var sqrD = d * d;
+
+        for (var i = 7; i >= 0; --i) {
+            bT[i] = (u[i] * sqrT - v[i]) * xm1;
+            bD[i] = (u[i] * sqrD - v[i]) * xm1;
+        }
+
+        var cT = sign * t * (
+            1.0 + bT[0] * (1.0 + bT[1] * (1.0 + bT[2] * (1.0 + bT[3] * (
+            1.0 + bT[4] * (1.0 + bT[5] * (1.0 + bT[6] * (1.0 + bT[7]))))))));
+        var cD = d * (
+            1.0 + bD[0] * (1.0 + bD[1] * (1.0 + bD[2] * (1.0 + bD[3] * (
+            1.0 + bD[4] * (1.0 + bD[5] * (1.0 + bD[6] * (1.0 + bD[7]))))))));
+
+        var temp = Quaternion.multiplyByScalar(start, cD, fastSlerpScratchQuaternion);
+        Quaternion.multiplyByScalar(end, cT, result);
+        return Quaternion.add(temp, result, result);
+    };
+
+    /**
+     * Computes the spherical quadrangle interpolation between quaternions.
+     * An implementation that is faster than {@link Quaternion#squad}, but less accurate.
+     *
+     * @param {Quaternion} q0 The first quaternion.
+     * @param {Quaternion} q1 The second quaternion.
+     * @param {Quaternion} s0 The first inner quadrangle.
+     * @param {Quaternion} s1 The second inner quadrangle.
+     * @param {Number} t The time in [0,1] used to interpolate.
+     * @param {Quaternion} [result] The object onto which to store the result.
+     * @returns {Quaternion} The modified result parameter or a new instance if none was provided.
+     *
+     * @see Quaternion#squad
+     */
+    Quaternion.fastSquad = function(q0, q1, s0, s1, t, result) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(q0) || !defined(q1) || !defined(s0) || !defined(s1)) {
+            throw new DeveloperError('q0, q1, s0, and s1 are required.');
+        }
+
+        if (typeof t !== 'number') {
+            throw new DeveloperError('t is required and must be a number.');
+        }
+        //>>includeEnd('debug');
+
+        var slerp0 = Quaternion.fastSlerp(q0, q1, t, squadScratchQuaternion0);
+        var slerp1 = Quaternion.fastSlerp(s0, s1, t, squadScratchQuaternion1);
+        return Quaternion.fastSlerp(slerp0, slerp1, 2.0 * t * (1.0 - t), result);
+    };
+
+    /**
      * Compares the provided quaternions componentwise and returns
      * <code>true</code> if they are equal, <code>false</code> otherwise.
-     * @memberof Quaternion
      *
      * @param {Quaternion} [left] The first quaternion.
      * @param {Quaternion} [right] The second quaternion.
@@ -802,19 +1012,19 @@ define([
      * Compares the provided quaternions componentwise and returns
      * <code>true</code> if they are within the provided epsilon,
      * <code>false</code> otherwise.
-     * @memberof Quaternion
      *
      * @param {Quaternion} [left] The first quaternion.
      * @param {Quaternion} [right] The second quaternion.
      * @param {Number} epsilon The epsilon to use for equality testing.
      * @returns {Boolean} <code>true</code> if left and right are within the provided epsilon, <code>false</code> otherwise.
-     *
-     * @exception {DeveloperError} epsilon is required and must be a number.
      */
     Quaternion.equalsEpsilon = function(left, right, epsilon) {
+        //>>includeStart('debug', pragmas.debug);
         if (typeof epsilon !== 'number') {
             throw new DeveloperError('epsilon is required and must be a number.');
         }
+        //>>includeEnd('debug');
+
         return (left === right) ||
                ((defined(left)) &&
                 (defined(right)) &&
@@ -826,19 +1036,22 @@ define([
 
     /**
      * An immutable Quaternion instance initialized to (0.0, 0.0, 0.0, 0.0).
-     * @memberof Quaternion
+     *
+     * @type {Quaternion}
+     * @constant
      */
     Quaternion.ZERO = freezeObject(new Quaternion(0.0, 0.0, 0.0, 0.0));
 
     /**
      * An immutable Quaternion instance initialized to (0.0, 0.0, 0.0, 1.0).
-     * @memberof Quaternion
+     *
+     * @type {Quaternion}
+     * @constant
      */
     Quaternion.IDENTITY = freezeObject(new Quaternion(0.0, 0.0, 0.0, 1.0));
 
     /**
      * Duplicates this Quaternion instance.
-     * @memberof Quaternion
      *
      * @param {Quaternion} [result] The object onto which to store the result.
      * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
@@ -848,212 +1061,8 @@ define([
     };
 
     /**
-     * Computes the conjugate of this quaternion.
-     * @memberof Quaternion
-     *
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     */
-    Quaternion.prototype.conjugate = function(result) {
-        return Quaternion.conjugate(this, result);
-    };
-
-    /**
-     * Computes magnitude squared for this quaternion.
-     * @memberof Quaternion
-     *
-     * @returns {Number} The magnitude squared.
-     */
-    Quaternion.prototype.magnitudeSquared = function() {
-        return Quaternion.magnitudeSquared(this);
-    };
-
-    /**
-     * Computes magnitude for this quaternion.
-     * @memberof Quaternion
-     *
-     * @returns {Number} The magnitude.
-     */
-    Quaternion.prototype.magnitude = function() {
-        return Quaternion.magnitude(this);
-    };
-
-    /**
-     * Computes the normalized form of this quaternion.
-     * @memberof Quaternion
-     *
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     */
-    Quaternion.prototype.normalize = function(result) {
-        return Quaternion.normalize(this, result);
-    };
-
-    /**
-     * Computes the inverse of the provided quaternion.
-     * @memberof Quaternion
-     *
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     */
-    Quaternion.prototype.inverse = function(result) {
-        return Quaternion.inverse(this, result);
-    };
-
-    /**
-     * Computes the componentwise sum of this and the provided quaternion.
-     * @memberof Quaternion
-     *
-     * @param {Quaternion} right The right hand side quaternion.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} right is required.
-     */
-    Quaternion.prototype.add = function(right, result) {
-        return Quaternion.add(this, right, result);
-    };
-
-    /**
-     * Computes the componentwise difference of this and the provided quaternion.
-     * @memberof Quaternion
-     *
-     * @param {Quaternion} right The right hand side quaternion.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-
-     * @exception {DeveloperError} right is required.
-     */
-    Quaternion.prototype.subtract = function(right, result) {
-        return Quaternion.subtract(this, right, result);
-    };
-
-    /**
-     * Negates this quaternion.
-     * @memberof Quaternion
-     *
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     */
-    Quaternion.prototype.negate = function(result) {
-        return Quaternion.negate(this, result);
-    };
-
-    /**
-     * Computes the dot (scalar) product of this and the provided quaternion.
-     * @memberof Quaternion
-     *
-     * @param {Quaternion} right The right hand side quaternion.
-     * @returns {Number} The dot product.
-     *
-     * @exception {DeveloperError} right is required.
-     */
-    Quaternion.prototype.dot = function(right) {
-        return Quaternion.dot(this, right);
-    };
-
-
-    /**
-     * Computes the product of this and the provided quaternion.
-     * @memberof Quaternion
-     *
-     * @param {Quaternion} right The right hande side quaternion.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} right is required.
-     */
-    Quaternion.prototype.multiply = function(right, result) {
-        return Quaternion.multiply(this, right, result);
-    };
-
-    /**
-     * Multiplies this quaternion componentwise by the provided scalar.
-     * @memberof Quaternion
-     *
-     * @param {Number} scalar The scalar to multiply with.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} scalar is required and must be a number.
-     */
-    Quaternion.prototype.multiplyByScalar = function(scalar, result) {
-        return Quaternion.multiplyByScalar(this, scalar, result);
-    };
-
-    /**
-     * Divides this quaternion componentwise by the provided scalar.
-     * @memberof Quaternion
-     *
-     * @param {Number} scalar The scalar to divide by.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} scalar is required and must be a number.
-     */
-    Quaternion.prototype.divideByScalar = function(scalar, result) {
-        return Quaternion.divideByScalar(this, scalar, result);
-    };
-
-    /**
-     * Computes the axis of rotation of this quaternion.
-     * @memberof Quaternion
-     *
-     * @param {Cartesian3} [result] The object onto which to store the result.
-     * @returns {Cartesian3} The modified result parameter or a new Cartesian3 instance if one was not provided.
-     */
-    Quaternion.prototype.getAxis = function(result) {
-        return Quaternion.getAxis(this, result);
-    };
-
-    /**
-     * Computes the angle of rotation of this quaternion.
-     * @memberof Quaternion
-     *
-     * @returns {Number} The angle of rotation.
-     */
-    Quaternion.prototype.getAngle = function() {
-        return Quaternion.getAngle(this);
-    };
-
-    /**
-     * Computes the linear interpolation or extrapolation at t using the provided quaternions.
-     * This quaternion is assumed to be t at 0.0.
-     * @memberof Quaternion
-     *
-     * @param end The value corresponding to t at 1.0.
-     * @param t The point along t at which to interpolate.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} end is required.
-     * @exception {DeveloperError} t is required and must be a number.
-     */
-    Quaternion.prototype.lerp = function(end, t, result) {
-        return Quaternion.lerp(this, end, t, result);
-    };
-
-    /**
-     * Computes the spherical linear interpolation or extrapolation at t using the provided quaternions.
-     * This quaternion is assumed to be t at 0.0.
-     * @memberof Quaternion
-     *
-     * @param end The value corresponding to t at 1.0.
-     * @param t The point along t at which to interpolate.
-     * @param {Quaternion} [result] The object onto which to store the result.
-     * @returns {Quaternion} The modified result parameter or a new Quaternion instance if one was not provided.
-     *
-     * @exception {DeveloperError} end is required.
-     * @exception {DeveloperError} t is required and must be a number.
-     */
-    Quaternion.prototype.slerp = function(end, t, result) {
-        return Quaternion.slerp(this, end, t, result);
-    };
-
-    /**
      * Compares this and the provided quaternion componentwise and returns
      * <code>true</code> if they are equal, <code>false</code> otherwise.
-     * @memberof Quaternion
      *
      * @param {Quaternion} [right] The right hand side quaternion.
      * @returns {Boolean} <code>true</code> if left and right are equal, <code>false</code> otherwise.
@@ -1066,13 +1075,10 @@ define([
      * Compares this and the provided quaternion componentwise and returns
      * <code>true</code> if they are within the provided epsilon,
      * <code>false</code> otherwise.
-     * @memberof Quaternion
      *
      * @param {Quaternion} [right] The right hand side quaternion.
      * @param {Number} epsilon The epsilon to use for equality testing.
      * @returns {Boolean} <code>true</code> if left and right are within the provided epsilon, <code>false</code> otherwise.
-     *
-     * @exception {DeveloperError} epsilon is required and must be a number.
      */
     Quaternion.prototype.equalsEpsilon = function(right, epsilon) {
         return Quaternion.equalsEpsilon(this, right, epsilon);
@@ -1080,7 +1086,6 @@ define([
 
     /**
      * Returns a string representing this quaternion in the format (x, y, z, w).
-     * @memberof Quaternion
      *
      * @returns {String} A string representing this Quaternion.
      */

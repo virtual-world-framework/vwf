@@ -1,6 +1,6 @@
 .relClass {
 	position:relative;
-	z-index: 64;
+	z-index: 2000;
 }
 
 .uiContainer {
@@ -48,7 +48,7 @@ td
 
 .input_text
 {
-	height:11px;
+	height:16px;
 	width:90px;
 	font:9pt Arial;
 	padding:3px;

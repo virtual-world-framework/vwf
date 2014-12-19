@@ -1,0 +1,10 @@
+# http://kineticjs.com/docs/Kinetic.Sprite.html
+
+--- 
+extends: http://vwf.example.com/kinetic/shape.vwf
+properties:
+  animation:
+  animations:
+  frameIndex:
+  image:
+  scaleOnLoad: false

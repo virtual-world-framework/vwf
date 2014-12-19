@@ -1,11 +1,11 @@
 /*global define*/
 define([
-        './defaultValue',
         './Cartesian3',
+        './defaultValue',
         './EllipsoidGeometry'
     ], function(
-        defaultValue,
         Cartesian3,
+        defaultValue,
         EllipsoidGeometry) {
     "use strict";
 
@@ -15,6 +15,7 @@ define([
      * @alias SphereGeometry
      * @constructor
      *
+     * @param {Object} [options] Object with the following properties:
      * @param {Number} [options.radius=1.0] The radius of the sphere.
      * @param {Number} [options.stackPartitions=64] The number of times to partition the ellipsoid into stacks.
      * @param {Number} [options.slicePartitions=64] The number of times to partition the ellipsoid into radial slices.
@@ -26,11 +27,11 @@ define([
      * @see SphereGeometry#createGeometry
      *
      * @example
-     * var sphere = new SphereGeometry({
+     * var sphere = new Cesium.SphereGeometry({
      *   radius : 100.0,
-     *   vertexFormat : VertexFormat.POSITION_ONLY
+     *   vertexFormat : Cesium.VertexFormat.POSITION_ONLY
      * });
-     * var geometry = SphereGeometry.createGeometry(sphere);
+     * var geometry = Cesium.SphereGeometry.createGeometry(sphere);
      */
     var SphereGeometry = function(options) {
         var radius = defaultValue(options.radius, 1.0);

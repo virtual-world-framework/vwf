@@ -3,3 +3,5 @@ model:
   nodriver:
 info:
   title: "Write Together"
+configuration:
+  preserve-script-closures: true

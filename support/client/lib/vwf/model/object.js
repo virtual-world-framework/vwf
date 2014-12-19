@@ -19,7 +19,8 @@
 /// @requires vwf/model
 /// @requires vwf/configuration
 
-define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model, configuration ) {
+define( [ "module", "vwf/model", "vwf/utility", "vwf/configuration" ],
+        function( module, model, utility, configuration ) {
 
     return model.load( module, {
 
@@ -67,6 +68,8 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                     name: childName,
 
                     properties: {},
+                    methods: {},
+                    events: {},
 
                     parent: undefined,
                     children: [],
@@ -89,7 +92,7 @@ define( [ "module", "vwf/model", "vwf/configuration" ], function( module, model,
                     //     // descendant: true,       // node is a descendant still within the component -- moved to kernel's node registry
                     //     internals: true,           // random, seed, or sequence has changed
                     //     // properties: true,       // placeholder for a property change list -- moved to kernel's node registry
-                    //     methods: [],               // array of method names for methods that changed
+                    //     // methods: [],            // array of method names for methods that changed -- moved to kernel's node registry
                     // },
 
                     // END TODO
@@ -243,6 +246,78 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
             return this.objects[nodeID].properties[propertyName];
         },
 
+        // -- creatingMethod -----------------------------------------------------------------------
+
+        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
+            return this.settingMethod( nodeID, methodName,
+                { parameters: methodParameters, body: methodBody } );
+        },
+
+        // -- settingMethod ------------------------------------------------------------------------
+
+        settingMethod: function( nodeID, methodName, methodHandler ) {
+            return this.objects[nodeID].methods[methodName] = methodHandler;
+        },
+
+        // -- gettingMethod ------------------------------------------------------------------------
+
+        gettingMethod: function( nodeID, methodName ) {
+            return this.objects[nodeID].methods[methodName];
+        },
+
+        // -- addingEventListener ------------------------------------------------------------------
+
+        addingEventListener: function( nodeID, eventName, eventListenerID, eventHandler, eventContextID, eventPhases ) {
+
+            if ( ! this.objects[ nodeID ].events[ eventName ] ) {
+                this.objects[ nodeID ].events[ eventName ] = {};
+            }
+
+            return this.settingEventListener( nodeID, eventName, eventListenerID,
+                utility.merge( eventHandler, { context: eventContextID, phases: eventPhases } ) ) ?
+                    true : undefined;
+        },
+
+        // -- removingEventListener ----------------------------------------------------------------
+
+        removingEventListener: function( nodeID, eventName, eventListenerID ) {
+
+            var listeners = this.objects[ nodeID ].events[ eventName ];
+
+            if ( listeners && listeners[ eventListenerID ] ) {
+                delete listeners[ eventListenerID ];
+                return true;
+            }
+
+            return undefined;
+        },
+
+        // -- settingEventListener -----------------------------------------------------------------
+
+        settingEventListener: function( nodeID, eventName, eventListenerID, eventListener ) {
+            return this.objects[ nodeID ].events[ eventName ][ eventListenerID ] = eventListener;
+        },
+
+        // -- gettingEventListener -----------------------------------------------------------------
+
+        gettingEventListener: function( nodeID, eventName, eventListenerID ) {
+            return this.objects[ nodeID ].events[ eventName ][ eventListenerID ];
+        },
+
+        // -- flushingEventListeners ---------------------------------------------------------------
+
+        flushingEventListeners: function( nodeID, eventName, eventContextID ) {
+
+            var listeners = this.objects[ nodeID ].events[ eventName ];
+
+            Object.keys( listeners ).forEach( function( eventListenerID ) {
+                if ( listeners[ eventListenerID ].context === eventContextID ) {
+                    delete listeners[ eventListenerID ];
+                }
+            } );
+
+        },
+
         // == Special Model API ====================================================================
 
         // The kernel delegates the corresponding API calls exclusively to vwf/model/object without
@@ -324,16 +399,17 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
             var object = this.objects[ nodeID ];
 
             if ( object ) {
-                return ( !initializedOnly || object.initialized ) ?
+                return ( ! initializedOnly || object.initialized ) ?
                     ( object.parent && object.parent.id || 0 ) : undefined;
             } else {
                 this.logger.error( "Cannot find node: '" + nodeID + "'" );
             }
+
         },
 
         // -- children -----------------------------------------------------------------------------
 
-        children: function( nodeID ) {
+        children: function( nodeID, initializedOnly ) {
 
             if ( nodeID === undefined ) {
                 this.logger.errorx( "children", "cannot retrieve children of nonexistent node");
@@ -342,12 +418,14 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
             var node = this.objects[ nodeID ];
 
-            if ( node )
+            if ( node ) {
                 return node.children.map( function( child ) {
-                    return child.id;
+                    return ( ! initializedOnly || child.initialized ) ?
+                        child.id : undefined;
                 } );
-            else
+            } else {
                 this.logger.error( "Cannot find node: " + nodeID );
+            }
 
         },
 
@@ -374,8 +452,14 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
             }
 
             if ( internals ) { // set
-                object.sequence = internals.sequence !== undefined ? internals.sequence : object.sequence;
-                merge( object.prng.state, internals.random || {} );
+                if ( internals.sequence !== undefined ) {
+                    object.sequence = internals.sequence;
+                    object.initialized && object.patches && ( object.patches.internals = true );
+                }
+                if ( internals.random !== undefined ) {
+                    merge( object.prng.state, internals.random );
+                    object.initialized && object.patches && ( object.patches.internals = true );
+                }
             } else { // get
                 internals = {};
                 internals.sequence = object.sequence;

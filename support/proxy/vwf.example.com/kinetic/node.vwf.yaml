@@ -1,0 +1,59 @@
+# http://kineticjs.com/docs/Kinetic.Node.html
+
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+  x:
+  y:
+  width:
+  height:
+  visible:
+  isVisible:
+  listening:
+  id:
+  name:
+  opacity:
+  scale:
+  scaleX:
+  scaleY:
+  position:
+  rotation:
+  transform:  
+  offset:
+  offsetX:
+  offsetY:
+  draggable:
+  dragDistance:
+  zIndex:
+  dragBoundFunc:
+  absolutePosition:
+  absoluteTransform:
+  absoluteOpacity:
+  absoluteZIndex:
+  uniqueInView:
+  dragProperty: "position"
+methods:
+  toggleVisibility:
+events:
+  pointerMove:
+  pointerOut:
+  pointerEnter:
+  pointerLeave:
+  pointerDown:
+  pointerUp:
+  pointerClick:
+  pointerDoubleClick:
+  touchStart:
+  touchMove:
+  touchEnd:
+  tap:
+  doubleTap:
+  dragStart:
+  dragMove:
+  dragEnd:
+  draggingFromView:
+scripts:
+- source: "http://vwf.example.com/kinetic/node.js"
+
+
+

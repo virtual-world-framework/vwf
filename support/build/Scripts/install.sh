@@ -53,11 +53,11 @@ trap "echo Installation failed." EXIT
 [ -e "$HOME/.vwf" ] && rm -rf "$HOME/.vwf"
 if [ "$UNAME" = "Darwin" ] ; then
 	### OSX ###
-	TARBALL_URL="http://download.virtualworldframework.com/files/VWF_Mac_OS_X_latest.tar.gz"
+	TARBALL_URL="http://download.virtualworldframework.com/files/vwf-0.6.23.tar.gz"
 	NODEPACKAGE="node-v0.10.22-darwin-x64"
 elif [ "$UNAME" = "Linux" ] ; then
 	### Linux ###
-	TARBALL_URL="http://download.virtualworldframework.com/files/VWF_Linux_latest.tar.gz"
+	TARBALL_URL="http://download.virtualworldframework.com/files/vwf-0.6.23.tar.gz"
 fi
 
 
@@ -158,9 +158,9 @@ if cp "$LAUNCHER" "$PREFIX/bin" >/dev/null 2>&1; then
 
   $ vwf 
 
-Or see the docs at:
+Or see the Getting Started guide at:
 
-  http://www.virtualworldframework.com/web/docs/introduction.html
+  https://virtual.wf/getting_started.html
 
 EOF
 elif type sudo >/dev/null 2>&1; then
@@ -182,9 +182,9 @@ To get started fast:
 
   $ vwf
 
-Or see the docs at:
+Or see the Getting Started guide at:
 
-  http://www.virtualworldframework.com/web/docs/introduction.html
+  https://virtual.wf/getting_started.html
 
 EOF
   else
@@ -197,7 +197,7 @@ Couldn't write the launcher script. Please either:
   (2) Add ~/.vwf to your path, or
   (3) Rerun this command to try again.
 
-Then to get started, take a look at http://www.virtualworldframework.com/web/docs/introduction.html
+Then to get started, take a look at https://virtual.wf/getting_started.html
 EOF
   fi
 else
@@ -209,7 +209,7 @@ Now you need to do one of the following:
   (2) Run this command as root:
         cp ~/.vwf/support/server/vwf /usr/local/bin/
 
-Then to get started, take a look at http://www.virtualworldframework.com/web/docs/introduction.html
+Then to get started, take a look at https://virtual.wf/getting_started.html
 EOF
 fi
 

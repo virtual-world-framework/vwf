@@ -176,6 +176,30 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} methodName
+        /// @param {Handler} methodHandler
+        /// 
+        /// @returns {}
+
+        satMethod: [ /* nodeID, methodName, methodHandler */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
+        /// @param {Handler} methodHandler
+        /// 
+        /// @returns {}
+
+        gotMethod: [ /* nodeID, methodName, methodHandler */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} methodName
         /// @param {String[]} methodParameters
         /// @param {Value} methodValue
         /// 
@@ -203,6 +227,71 @@ define( function() {
         /// 
         /// @param {ID} nodeID
         /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// @param {Handler} eventHandler
+        /// @param {ID} eventContextID
+        /// @param {String[]} eventPhases
+        /// 
+        /// @returns {}
+
+        addedEventListener: [ /* nodeID, eventName, eventListenerID, eventHandler, eventContextID, eventPhases */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// 
+        /// @returns {}
+
+        removedEventListener: [ /* nodeID, eventName, eventListenerID */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// @param {Listener} eventListener
+        /// 
+        /// @returns {}
+
+        satEventListener: [ /* nodeID, eventName, eventListenerID, eventListener */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ListenerID} eventListenerID
+        /// @param {Listener} eventListener
+        /// 
+        /// @returns {}
+
+        gotEventListener: [ /* nodeID, eventName, eventListenerID, eventListener */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
+        /// @param {ID} eventContextID
+        /// 
+        /// @returns {}
+
+        flushedEventListeners: [ /* nodeID, eventName, eventContextID */ ],
+
+        /// Description.
+        /// 
+        /// @function
+        /// 
+        /// @param {ID} nodeID
+        /// @param {String} eventName
         /// @param {String[]} eventParameters
         /// 
         /// @returns {}
@@ -221,7 +310,20 @@ define( function() {
 
         executed: [ /* nodeID, scriptText, scriptType */ ],
 
-        /// Description.
+        /// Time has changed, probably by about the same amount as last time.
+        /// 
+        /// `ticked` notifications are sent periodically as time moves forward. They are sent at
+        /// roughly consistent intervals in real time while the application is running. However,
+        /// application processing delays and network jitter will affect the specific interval.
+        /// 
+        /// Don't rely on `ticked` notifications to arrive at any particular rate. `ticked` is
+        /// currently derived from reflector idle messages. Future versions of the reflector may
+        /// vary the idle message interval based on network conditions and the application state.
+        /// 
+        /// Use {@link external:Window#requestAnimationFrame window.requestAnimationFrame} or
+        /// {@link external:WindowTimers#setInterval window.setInterval} for real-time
+        /// notifications. To receive notifications following application state changes, but not
+        /// necessarily periodically, listen for {@link module:vwf/api/view.tocked view.tocked}.
         /// 
         /// @function
         /// 
@@ -230,6 +332,22 @@ define( function() {
         /// @returns {}
 
         ticked: [ /* time */ ],
+
+        /// Time has changed.
+        /// 
+        /// Unlike {@link module:vwf/api/view.ticked view.ticked}, `tocked` notifications are sent
+        /// each time that time moves forward. Time changes may occur when previously scheduled
+        /// actions are executed or as regular idle progress. Since the application state only
+        /// changes when simulation time changes, `tocked` notifications may be used as an
+        /// application-wide change notification.
+        /// 
+        /// @function
+        /// 
+        /// @param {Number} time
+        /// 
+        /// @returns {}
+
+        tocked: [ /* time */ ],
 
         /// Description.
         /// 

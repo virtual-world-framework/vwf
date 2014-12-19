@@ -21,7 +21,7 @@ children:
   camera:
     extends: http://vwf.example.com/cesium/camera.vwf
   earth:
-    extends: http://vwf.example.com/cesium/centralBody.vwf 
+    extends: http://vwf.example.com/cesium/globe.vwf 
   sun: 
     extends: http://vwf.example.com/cesium/sun.vwf 
   atmosphere: 

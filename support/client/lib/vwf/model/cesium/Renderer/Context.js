@@ -1,105 +1,110 @@
 /*global define*/
 define([
-        '../Core/defaultValue',
-        '../Core/defined',
-        '../Core/DeveloperError',
-        '../Core/destroyObject',
+        '../Core/clone',
         '../Core/Color',
         '../Core/ComponentDatatype',
-        '../Core/IndexDatatype',
-        '../Core/RuntimeError',
-        '../Core/PrimitiveType',
-        '../Core/Geometry',
         '../Core/createGuid',
-        '../Core/Matrix4',
+        '../Core/defaultValue',
+        '../Core/defined',
+        '../Core/defineProperties',
+        '../Core/destroyObject',
+        '../Core/DeveloperError',
+        '../Core/Geometry',
+        '../Core/GeometryAttribute',
+        '../Core/IndexDatatype',
         '../Core/Math',
+        '../Core/Matrix4',
+        '../Core/PixelFormat',
+        '../Core/PrimitiveType',
+        '../Core/RuntimeError',
+        '../Shaders/ViewportQuadVS',
         './Buffer',
         './BufferUsage',
+        './ClearCommand',
         './CubeMap',
+        './DrawCommand',
         './Framebuffer',
-        './PixelDatatype',
-        './PixelFormat',
+        './PassState',
         './PickFramebuffer',
+        './PixelDatatype',
         './Renderbuffer',
         './RenderbufferFormat',
         './RenderState',
         './ShaderCache',
-        './ShaderProgram',
         './Texture',
-        './TextureAtlas',
         './TextureMagnificationFilter',
         './TextureMinificationFilter',
         './TextureWrap',
         './UniformState',
-        './VertexArray',
-        './VertexLayout',
-        './ClearCommand',
-        './PassState'
+        './VertexArray'
     ], function(
-        defaultValue,
-        defined,
-        DeveloperError,
-        destroyObject,
+        clone,
         Color,
         ComponentDatatype,
-        IndexDatatype,
-        RuntimeError,
-        PrimitiveType,
-        Geometry,
         createGuid,
-        Matrix4,
+        defaultValue,
+        defined,
+        defineProperties,
+        destroyObject,
+        DeveloperError,
+        Geometry,
+        GeometryAttribute,
+        IndexDatatype,
         CesiumMath,
+        Matrix4,
+        PixelFormat,
+        PrimitiveType,
+        RuntimeError,
+        ViewportQuadVS,
         Buffer,
         BufferUsage,
+        ClearCommand,
         CubeMap,
+        DrawCommand,
         Framebuffer,
-        PixelDatatype,
-        PixelFormat,
+        PassState,
         PickFramebuffer,
+        PixelDatatype,
         Renderbuffer,
         RenderbufferFormat,
         RenderState,
         ShaderCache,
-        ShaderProgram,
         Texture,
-        TextureAtlas,
         TextureMagnificationFilter,
         TextureMinificationFilter,
         TextureWrap,
         UniformState,
-        VertexArray,
-        VertexLayout,
-        ClearCommand,
-        PassState) {
+        VertexArray) {
     "use strict";
+    /*global WebGLRenderingContext*/
 
-    function _errorToString(gl, error) {
-        var message = 'OpenGL Error:  ';
+    function errorToString(gl, error) {
+        var message = 'WebGL Error:  ';
         switch (error) {
         case gl.INVALID_ENUM:
-            message += 'Invalid enumeration';
+            message += 'INVALID_ENUM';
             break;
         case gl.INVALID_VALUE:
-            message += 'Invalid value';
+            message += 'INVALID_VALUE';
             break;
         case gl.INVALID_OPERATION:
-            message += 'Invalid operation';
+            message += 'INVALID_OPERATION';
             break;
         case gl.OUT_OF_MEMORY:
-            message += 'Out of memory';
+            message += 'OUT_OF_MEMORY';
             break;
         case gl.CONTEXT_LOST_WEBGL:
-            message += 'Context lost';
+            message += 'CONTEXT_LOST_WEBGL lost';
             break;
         default:
-            message += 'Unknown';
+            message += 'Unknown (' + error + ')';
         }
 
         return message;
     }
 
-    function _createErrorMessage(gl, glFunc, glFuncArguments, error) {
-        var message = _errorToString(gl, error) + ': ' + glFunc.name + '(';
+    function createErrorMessage(gl, glFunc, glFuncArguments, error) {
+        var message = errorToString(gl, error) + ': ' + glFunc.name + '(';
 
         for ( var i = 0; i < glFuncArguments.length; ++i) {
             if (i !== 0) {
@@ -115,8 +120,22 @@ define([
     function throwOnError(gl, glFunc, glFuncArguments) {
         var error = gl.getError();
         if (error !== gl.NO_ERROR) {
-            throw new RuntimeError(_createErrorMessage(gl, glFunc, glFuncArguments, error));
+            throw new RuntimeError(createErrorMessage(gl, glFunc, glFuncArguments, error));
         }
+    }
+
+    function makeGetterSetter(gl, propertyName, logFunc) {
+        return {
+            get : function() {
+                var value = gl[propertyName];
+                logFunc(gl, 'get: ' + propertyName, value);
+                return gl[propertyName];
+            },
+            set : function(value) {
+                gl[propertyName] = value;
+                logFunc(gl, 'set: ' + propertyName, value);
+            }
+        };
     }
 
     function wrapGL(gl, logFunc) {
@@ -146,53 +165,66 @@ define([
             if (typeof property === 'function') {
                 glWrapper[propertyName] = wrapFunction(property);
             } else {
-                glWrapper[propertyName] = property;
+                Object.defineProperty(glWrapper, propertyName, makeGetterSetter(gl, propertyName, logFunc));
             }
         }
 
         return glWrapper;
     }
 
+    function getExtension(gl, names) {
+        var length = names.length;
+        for (var i = 0; i < length; ++i) {
+            var extension = gl.getExtension(names[i]);
+            if (extension) {
+                return extension;
+            }
+        }
+
+        return undefined;
+    }
+
     /**
-     * DOC_TBA
-     *
-     * @alias Context
-     * @constructor
-     *
-     * @exception {RuntimeError} The browser does not support WebGL.  Visit http://get.webgl.org.
-     * @exception {RuntimeError} The browser supports WebGL, but initialization failed.
-     * @exception {DeveloperError} canvas is required.
+     * @private
      */
     var Context = function(canvas, options) {
-        if (!window.WebGLRenderingContext) {
+        // this check must use typeof, not defined, because defined doesn't work with undeclared variables.
+        if (typeof WebGLRenderingContext === 'undefined') {
             throw new RuntimeError('The browser does not support WebGL.  Visit http://get.webgl.org.');
         }
 
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(canvas)) {
             throw new DeveloperError('canvas is required.');
         }
+        //>>includeEnd('debug');
 
         this._canvas = canvas;
 
-        if (!defined(options)) {
-            options = {};
-        }
-        if (!defined(options.alpha)) {
-            options.alpha = false;
-        }
+        options = clone(options, true);
+        options = defaultValue(options, {});
+        options.allowTextureFilterAnisotropic = defaultValue(options.allowTextureFilterAnisotropic, true);
+        var webglOptions = defaultValue(options.webgl, {});
 
-        this._originalGLContext = canvas.getContext('webgl', options) || canvas.getContext('experimental-webgl', options);
+        // Override select WebGL defaults
+        webglOptions.alpha = defaultValue(webglOptions.alpha, false); // WebGL default is true
+        // TODO: WebGL default is false. This works around a bug in Canary and can be removed when fixed: https://code.google.com/p/chromium/issues/detail?id=335273
+        webglOptions.stencil = defaultValue(webglOptions.stencil, false);
+        webglOptions.failIfMajorPerformanceCaveat = defaultValue(webglOptions.failIfMajorPerformanceCaveat, true); // WebGL default is false
 
-        if (!this._originalGLContext) {
+        this._originalGLContext = canvas.getContext('webgl', webglOptions) || canvas.getContext('experimental-webgl', webglOptions) || undefined;
+
+        if (!defined(this._originalGLContext)) {
             throw new RuntimeError('The browser supports WebGL, but initialization failed.');
         }
 
         this._id = createGuid();
 
         // Validation and logging disabled by default for speed.
-        this._validateFB = false;
-        this._validateSP = false;
-        this._logShaderCompilation = false;
+        this.validateFramebuffer = false;
+        this.validateShaderProgram = false;
+        this.logShaderCompilation = false;
+
         this._throwOnWebGLError = false;
 
         this._shaderCache = new ShaderCache(this);
@@ -226,14 +258,21 @@ define([
         this._antialias = gl.getContextAttributes().antialias;
 
         // Query and initialize extensions
-        this._standardDerivatives = gl.getExtension('OES_standard_derivatives');
-        this._elementIndexUint = gl.getExtension('OES_element_index_uint');
-        this._depthTexture = gl.getExtension('WEBKIT_WEBGL_depth_texture') || gl.getExtension('MOZ_WEBGL_depth_texture');
-        this._textureFloat = gl.getExtension('OES_texture_float');
-        var textureFilterAnisotropic = gl.getExtension('EXT_texture_filter_anisotropic') || gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic') || gl.getExtension('MOZ_EXT_texture_filter_anisotropic');
+        this._standardDerivatives = getExtension(gl, ['OES_standard_derivatives']);
+        this._elementIndexUint = getExtension(gl, ['OES_element_index_uint']);
+        this._depthTexture = getExtension(gl, ['WEBGL_depth_texture', 'WEBKIT_WEBGL_depth_texture']);
+        this._textureFloat = getExtension(gl, ['OES_texture_float']);
+
+        var textureFilterAnisotropic = options.allowTextureFilterAnisotropic ? getExtension(gl, ['EXT_texture_filter_anisotropic', 'WEBKIT_EXT_texture_filter_anisotropic']) : undefined;
         this._textureFilterAnisotropic = textureFilterAnisotropic;
-        this._maximumTextureFilterAnisotropy = textureFilterAnisotropic ? gl.getParameter(textureFilterAnisotropic.MAX_TEXTURE_MAX_ANISOTROPY_EXT) : 1.0;
-        this._vertexArrayObject = gl.getExtension('OES_vertex_array_object');
+        this._maximumTextureFilterAnisotropy = defined(textureFilterAnisotropic) ? gl.getParameter(textureFilterAnisotropic.MAX_TEXTURE_MAX_ANISOTROPY_EXT) : 1.0;
+
+        this._vertexArrayObject = getExtension(gl, ['OES_vertex_array_object']);
+        this._fragDepth = getExtension(gl, ['EXT_frag_depth']);
+
+        this._drawBuffers = getExtension(gl, ['WEBGL_draw_buffers']);
+        this._maximumDrawBuffers = defined(this._drawBuffers) ? gl.getParameter(this._drawBuffers.MAX_DRAW_BUFFERS_WEBGL) : 1;
+        this._maximumColorAttachments = defined(this._drawBuffers) ? gl.getParameter(this._drawBuffers.MAX_COLOR_ATTACHMENTS_WEBGL) : 1; // min when supported: 4
 
         var cc = gl.getParameter(gl.COLOR_CLEAR_VALUE);
         this._clearColor = new Color(cc[0], cc[1], cc[2], cc[3]);
@@ -250,12 +289,29 @@ define([
         this._defaultCubeMap = undefined;
 
         this._us = us;
-        this._currentFramebuffer = undefined;
-        this._currentSp = undefined;
         this._currentRenderState = rs;
+        this._currentFramebuffer = undefined;
+        this._maxFrameTextureUnitIndex = 0;
 
         this._pickObjects = {};
         this._nextPickColor = new Uint32Array(1);
+
+        /**
+         * @example
+         * {
+         *   webgl : {
+         *     alpha : false,
+         *     depth : true,
+         *     stencil : false,
+         *     antialias : true,
+         *     premultipliedAlpha : true,
+         *     preserveDrawingBuffer : false
+         *     failIfMajorPerformanceCaveat : true
+         *   },
+         *   allowTextureFilterAnisotropic : true
+         * }
+         */
+        this.options = options;
 
         /**
          * A cache of objects tied to this context.  Just before the Context is destroyed,
@@ -264,746 +320,620 @@ define([
          * be stored globally, except they're tied to a particular context, and to manage
          * their lifetime.
          *
-         * @private
          * @type {Object}
          */
         this.cache = {};
 
+
         RenderState.apply(gl, rs, ps);
     };
 
-    /**
-     * Returns a unique ID for this context.
-     *
-     * @memberof Context
-     *
-     * @returns {String} A unique ID for this context.
-     */
-    Context.prototype.getId = function() {
-        return this._id;
-    };
+    var defaultFramebufferMarker = {};
 
-    /**
-     * Returns the canvas assoicated with this context.
-     *
-     * @memberof Context
-     *
-     * @returns {HTMLCanvasElement} The canvas assoicated with this context.
-     */
-    Context.prototype.getCanvas = function() {
-        return this._canvas;
-    };
+    defineProperties(Context.prototype, {
+        id : {
+            get : function() {
+                return this._id;
+            }
+        },
+        canvas : {
+            get : function() {
+                return this._canvas;
+            }
+        },
+        shaderCache : {
+            get : function() {
+                return this._shaderCache;
+            }
+        },
+        uniformState : {
+            get : function() {
+                return this._us;
+            }
+        },
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @see Context#createShaderProgram
-     */
-    Context.prototype.getShaderCache = function() {
-        return this._shaderCache;
-    };
+        /**
+         * The WebGL version or release number of the form &lt;WebGL&gt;&lt;space&gt;&lt;version number&gt;&lt;space&gt;&lt;vendor-specific information&gt;.
+         * @memberof Context.prototype
+         * @type {String}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetString.xml|glGetString} with <code>VERSION</code>.
+         */
+        version : {
+            get : function() {
+                return this._version;
+            }
+        },
 
-    /**
-     * DOC_TBA
-     * @memberof Context
-     */
-    Context.prototype.getUniformState = function() {
-        return this._us;
-    };
+        /**
+         * The version or release number for the shading language of the form WebGL&lt;space&gt;GLSL&lt;space&gt;ES&lt;space&gt;&lt;version number&gt;&lt;space&gt;&lt;vendor-specific information&gt;.
+         * @memberof Context.prototype
+         * @type {String}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetString.xml|glGetString} with <code>SHADING_LANGUAGE_VERSION</code>.
+         */
+        shadingLanguageVersion : {
+            get : function() {
+                return this._shadingLanguageVersion;
+            }
+        },
 
-    /**
-     * Returns the WebGL version or release number of the form &lt;WebGL&gt;&lt;space&gt;&lt;version number&gt;&lt;space&gt;&lt;vendor-specific information&gt;.
-     *
-     * @memberof Context
-     *
-     * @returns {String} The WebGL version or release number.
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetString.xml'>glGetString</a> with <code>VERSION</code>.
-     */
-    Context.prototype.getVersion = function() {
-        return this._version;
-    };
+        /**
+         * The company responsible for the WebGL implementation.
+         * @memberof Context.prototype
+         * @type {String}
+         */
+        vendor : {
+            get : function() {
+                return this._vendor;
+            }
+        },
 
-    /**
-     * Returns the version or release number for the shading language of the form WebGL&lt;space&gt;GLSL&lt;space&gt;ES&lt;space&gt;&lt;version number&gt;&lt;space&gt;&lt;vendor-specific information&gt;.
-     *
-     * @memberof Context
-     *
-     * @returns {String} The version or release number for the shading language.
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetString.xml'>glGetString</a> with <code>SHADING_LANGUAGE_VERSION</code>.
-     */
-    Context.prototype.getShadingLanguageVersion = function() {
-        return this._shadingLanguageVersion;
-    };
+        /**
+         * The name of the renderer/configuration/hardware platform. For example, this may be the model of the
+         * video card, e.g., 'GeForce 8800 GTS/PCI/SSE2', or the browser-dependent name of the GL implementation, e.g.
+         * 'Mozilla' or 'ANGLE.'
+         * @memberof Context.prototype
+         * @type {String}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetString.xml|glGetString} with <code>RENDERER</code>.
+         * @see {@link http://code.google.com/p/angleproject/|ANGLE}
+         */
+        renderer : {
+            get : function() {
+                return this._renderer;
+            }
+        },
 
-    /**
-     * Returns the company responsible for the WebGL implementation.
-     *
-     * @memberof Context
-     *
-     * @returns {String} The company responsible for the WebGL implementation.
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetString.xml'>glGetString</a> with <code>VENDOR</code>.
-     */
-    Context.prototype.getVendor = function() {
-        return this._vendor;
-    };
+        /**
+         * The number of red bits per component in the default framebuffer's color buffer.  The minimum is eight.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>RED_BITS</code>.
+         */
+        redBits : {
+            get : function() {
+                return this._redBits;
+            }
+        },
 
-    /**
-     * Returns the name of the renderer/configuration/hardware platform. For example, this may be the model of the
-     * video card, e.g., 'GeForce 8800 GTS/PCI/SSE2', or the browser-dependent name of the GL implementation, e.g.
-     * 'Mozilla' or 'ANGLE.'
-     *
-     * @memberof Context
-     *
-     * @returns {String} The name of the renderer.
-     *
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetString.xml'>glGetString</a> with <code>RENDERER</code>.
-     * @see <a href='http://code.google.com/p/angleproject/'>ANGLE</a>
-     */
-    Context.prototype.getRenderer = function() {
-        return this._renderer;
-    };
+        /**
+         * The number of green bits per component in the default framebuffer's color buffer.  The minimum is eight.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>GREEN_BITS</code>.
+         */
+        greenBits : {
+            get : function() {
+                return this._greenBits;
+            }
+        },
 
-    /**
-     * Returns the number of red bits per component in the default framebuffer's color buffer.  The minimum is eight.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The number of red bits per component in the color buffer.
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>RED_BITS</code>.
-     */
-    Context.prototype.getRedBits = function() {
-        return this._redBits;
-    };
+        /**
+         * The number of blue bits per component in the default framebuffer's color buffer.  The minimum is eight.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>BLUE_BITS</code>.
+         */
+        blueBits : {
+            get : function() {
+                return this._blueBits;
+            }
+        },
 
-    /**
-     * Returns the number of green bits per component in the default framebuffer's color buffer.  The minimum is eight.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The number of green bits per component in the color buffer.
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>GREEN_BITS</code>.
-     */
-    Context.prototype.getGreenBits = function() {
-        return this._greenBits;
-    };
+        /**
+         * The number of alpha bits per component in the default framebuffer's color buffer.  The minimum is eight.
+         * <br /><br />
+         * The alpha channel is used for GL destination alpha operations and by the HTML compositor to combine the color buffer
+         * with the rest of the page.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>ALPHA_BITS</code>.
+         */
+        alphaBits : {
+            get : function() {
+                return this._alphaBits;
+            }
+        },
 
-    /**
-     * Returns the number of blue bits per component in the default framebuffer's color buffer.  The minimum is eight.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The number of blue bits per component in the color buffer.
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>BLUE_BITS</code>.
-     */
-    Context.prototype.getBlueBits = function() {
-        return this._blueBits;
-    };
+        /**
+         * The number of depth bits per pixel in the default bound framebuffer.  The minimum is 16 bits; most
+         * implementations will have 24 bits.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>DEPTH_BITS</code>.
+         */
+        depthBits : {
+            get : function() {
+                return this._depthBits;
+            }
+        },
 
-    /**
-     * Returns the number of alpha bits per component in the default framebuffer's color buffer.  The minimum is eight.
-     * <br /><br />
-     * The alpha channel is used for GL destination alpha operations and by the HTML compositor to combine the color buffer
-     * with the rest of the page.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The number of alpha bits per component in the color buffer.
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>ALPHA_BITS</code>.
-     */
-    Context.prototype.getAlphaBits = function() {
-        return this._alphaBits;
-    };
+        /**
+         * The number of stencil bits per pixel in the default bound framebuffer.  The minimum is eight bits.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>STENCIL_BITS</code>.
+         */
+        stencilBits : {
+            get : function() {
+                return this._stencilBits;
+            }
+        },
 
-    /**
-     * Returns the number of depth bits per pixel in the default bound framebuffer.  The minimum is 16 bits; most
-     * implementations will have 24 bits.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The number of depth bits per pixel in the default bound framebuffer.
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>DEPTH_BITS</code>.
-     */
-    Context.prototype.getDepthBits = function() {
-        return this._depthBits;
-    };
+        /**
+         * The maximum number of texture units that can be used from the vertex and fragment
+         * shader with this WebGL implementation.  The minimum is eight.  If both shaders access the
+         * same texture unit, this counts as two texture units.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_COMBINED_TEXTURE_IMAGE_UNITS</code>.
+         */
+        maximumCombinedTextureImageUnits : {
+            get : function() {
+                return this._maximumCombinedTextureImageUnits;
+            }
+        },
 
-    /**
-     * Returns the number of stencil bits per pixel in the default bound framebuffer.  The minimum is eight bits.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The number of stencil bits per pixel in the default bound framebuffer.
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>STENCIL_BITS</code>.
-     */
-    Context.prototype.getStencilBits = function() {
-        return this._stencilBits;
-    };
+        /**
+         * The approximate maximum cube mape width and height supported by this WebGL implementation.
+         * The minimum is 16, but most desktop and laptop implementations will support much larger sizes like 8,192.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_CUBE_MAP_TEXTURE_SIZE</code>.
+         */
+        maximumCubeMapSize : {
+            get : function() {
+                return this._maximumCubeMapSize;
+            }
+        },
 
-    /**
-     * Returns the maximum number of texture units that can be used from the vertex and fragment
-     * shader with this WebGL implementation.  The minimum is eight.  If both shaders access the
-     * same texture unit, this counts as two texture units.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum supported texture image units.
-     *
-     * @see Context#getMaximumTextureImageUnits
-     * @see Context#getMaximumVertexTextureImageUnits
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_COMBINED_TEXTURE_IMAGE_UNITS</code>.
-     */
-    Context.prototype.getMaximumCombinedTextureImageUnits = function() {
-        return this._maximumCombinedTextureImageUnits;
-    };
+        /**
+         * The maximum number of <code>vec4</code>, <code>ivec4</code>, and <code>bvec4</code>
+         * uniforms that can be used by a fragment shader with this WebGL implementation.  The minimum is 16.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_FRAGMENT_UNIFORM_VECTORS</code>.
+         */
+        maximumFragmentUniformVectors : {
+            get : function() {
+                return this._maximumFragmentUniformVectors;
+            }
+        },
 
-    /**
-     * Returns the approximate maximum cube mape width and height supported by this WebGL implementation.
-     * The minimum is 16, but most desktop and laptop implementations will support much larger sizes like 8,192.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The approximate maximum cube mape width and height.
-     *
-     * @see Context#createCubeMap
-     * @see Context#getMaximumTextureSize
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_CUBE_MAP_TEXTURE_SIZE</code>.
-     */
-    Context.prototype.getMaximumCubeMapSize = function() {
-        return this._maximumCubeMapSize;
-    };
+        /**
+         * The maximum number of texture units that can be used from the fragment shader with this WebGL implementation.  The minimum is eight.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_TEXTURE_IMAGE_UNITS</code>.
+         */
+        maximumTextureImageUnits : {
+            get : function() {
+                return this._maximumTextureImageUnits;
+            }
+        },
 
-    /**
-     * Returns the maximum number of <code>vec4</code>, <code>ivec4</code>, and <code>bvec4</code>
-     * uniforms that can be used by a fragment shader with this WebGL implementation.  The minimum is 16.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum number of <code>vec4</code>, <code>ivec4</code>, and <code>bvec4</code> uniforms that can be used by a fragment shader.
-     *
-     * @see Context#getMaximumVertexUniformVectors
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_FRAGMENT_UNIFORM_VECTORS</code>.
-     */
-    Context.prototype.getMaximumFragmentUniformVectors = function() {
-        return this._maximumFragmentUniformVectors;
-    };
+        /**
+         * The maximum renderbuffer width and height supported by this WebGL implementation.
+         * The minimum is 16, but most desktop and laptop implementations will support much larger sizes like 8,192.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_RENDERBUFFER_SIZE</code>.
+         */
+        maximumRenderbufferSize : {
+            get : function() {
+                return this._maximumRenderbufferSize;
+            }
+        },
 
-    /**
-     * Returns the maximum number of texture units that can be used from the fragment shader with this WebGL implementation.  The minimum is eight.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum number of texture units that can be used from the fragment shader.
-     *
-     * @see Context#getMaximumCombinedTextureImageUnits
-     * @see Context#getMaximumVertexTextureImageUnits
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_TEXTURE_IMAGE_UNITS</code>.
-     */
-    Context.prototype.getMaximumTextureImageUnits = function() {
-        return this._maximumTextureImageUnits;
-    };
+        /**
+         * The approximate maximum texture width and height supported by this WebGL implementation.
+         * The minimum is 64, but most desktop and laptop implementations will support much larger sizes like 8,192.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_TEXTURE_SIZE</code>.
+         */
+        maximumTextureSize : {
+            get : function() {
+                return this._maximumTextureSize;
+            }
+        },
 
-    /**
-     * Returns the maximum renderbuffer width and height supported by this WebGL implementation.
-     * The minimum is 16, but most desktop and laptop implementations will support much larger sizes like 8,192.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum renderbuffer width and height.
-     *
-     * @see Context#createRenderbuffer
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_RENDERBUFFER_SIZE</code>.
-     */
-    Context.prototype.getMaximumRenderbufferSize = function() {
-        return this._maximumRenderbufferSize;
-    };
+        /**
+         * The maximum number of <code>vec4</code> varying variables supported by this WebGL implementation.
+         * The minimum is eight.  Matrices and arrays count as multiple <code>vec4</code>s.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_VARYING_VECTORS</code>.
+         */
+        maximumVaryingVectors : {
+            get : function() {
+                return this._maximumVaryingVectors;
+            }
+        },
 
-    /**
-     * Returns the approximate maximum texture width and height supported by this WebGL implementation.
-     * The minimum is 64, but most desktop and laptop implementations will support much larger sizes like 8,192.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The approximate maximum texture width and height.
-     *
-     * @see Context#createTexture2D
-     * @see Context#getMaximumCubeMapSize
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_TEXTURE_SIZE</code>.
-     */
-    Context.prototype.getMaximumTextureSize = function() {
-        return this._maximumTextureSize;
-    };
+        /**
+         * The maximum number of <code>vec4</code> vertex attributes supported by this WebGL implementation.  The minimum is eight.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_VERTEX_ATTRIBS</code>.
+         */
+        maximumVertexAttributes : {
+            get : function() {
+                return this._maximumVertexAttributes;
+            }
+        },
 
-    /**
-     * Returns the maximum number of <code>vec4</code> varying variables supported by this WebGL implementation.
-     * The minimum is eight.  Matrices and arrays count as multiple <code>vec4</code>s.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} Returns the maximum number of <code>vec4</code> varying variables.
-     *
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_VARYING_VECTORS</code>.
-     */
-    Context.prototype.getMaximumVaryingVectors = function() {
-        return this._maximumVaryingVectors;
-    };
+        /**
+         * The maximum number of texture units that can be used from the vertex shader with this WebGL implementation.
+         * The minimum is zero, which means the GL does not support vertex texture fetch.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_VERTEX_TEXTURE_IMAGE_UNITS</code>.
+         */
+        maximumVertexTextureImageUnits : {
+            get : function() {
+                return this._maximumVertexTextureImageUnits;
+            }
+        },
 
-    /**
-     * Returns the maximum number of <code>vec4</code> vertex attributes supported by this WebGL implementation.  The minimum is eight.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum number of <code>vec4</code> vertex attributes.
-     *
-     * @see Context#createVertexArray
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_VERTEX_ATTRIBS</code>.
-     */
-    Context.prototype.getMaximumVertexAttributes = function() {
-        return this._maximumVertexAttributes;
-    };
+        /**
+         * The maximum number of <code>vec4</code>, <code>ivec4</code>, and <code>bvec4</code>
+         * uniforms that can be used by a vertex shader with this WebGL implementation.  The minimum is 16.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_VERTEX_UNIFORM_VECTORS</code>.
+         */
+        maximumVertexUniformVectors : {
+            get : function() {
+                return this._maximumVertexUniformVectors;
+            }
+        },
 
-    /**
-     * Returns the maximum number of texture units that can be used from the vertex shader with this WebGL implementation.
-     * The minimum is zero, which means the GL does not support vertex texture fetch.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum number of texture units that can be used from the vertex shader.
-     *
-     * @see Context#getMaximumCombinedTextureImageUnits
-     * @see Context#getMaximumTextureImageUnits
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_VERTEX_TEXTURE_IMAGE_UNITS</code>.
-     */
-    Context.prototype.getMaximumVertexTextureImageUnits = function() {
-        return this._maximumVertexTextureImageUnits;
-    };
+        /**
+         * The minimum aliased line width, in pixels, supported by this WebGL implementation.  It will be at most one.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>ALIASED_LINE_WIDTH_RANGE</code>.
+         */
+        minimumAliasedLineWidth : {
+            get :  function() {
+                return this._aliasedLineWidthRange[0];
+            }
+        },
 
-    /**
-     * Returns the maximum number of <code>vec4</code>, <code>ivec4</code>, and <code>bvec4</code>
-     * uniforms that can be used by a vertex shader with this WebGL implementation.  The minimum is 16.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum number of <code>vec4</code>, <code>ivec4</code>, and <code>bvec4</code> uniforms that can be used by a vertex shader.
-     *
-     * @see Context#getMaximumFragmentUniformVectors
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_VERTEX_UNIFORM_VECTORS</code>.
-     */
-    Context.prototype.getMaximumVertexUniformVectors = function() {
-        return this._maximumVertexUniformVectors;
-    };
+        /**
+         * The maximum aliased line width, in pixels, supported by this WebGL implementation.  It will be at least one.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>ALIASED_LINE_WIDTH_RANGE</code>.
+         */
+        maximumAliasedLineWidth : {
+            get : function() {
+                return this._aliasedLineWidthRange[1];
+            }
+        },
 
-    /**
-     * Returns the minimum aliased line width, in pixels, supported by this WebGL implementation.  It will be at most one.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The minimum aliased line in pixels.
-     *
-     * @see Context#getMaximumAliasedLineWidth
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>ALIASED_LINE_WIDTH_RANGE</code>.
-     */
-    Context.prototype.getMinimumAliasedLineWidth = function() {
-        return this._aliasedLineWidthRange[0];
-    };
+        /**
+         * The minimum aliased point size, in pixels, supported by this WebGL implementation.  It will be at most one.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>ALIASED_POINT_SIZE_RANGE</code>.
+         */
+        minimumAliasedPointSize : {
+            get : function() {
+                return this._aliasedPointSizeRange[0];
+            }
+        },
 
-    /**
-     * Returns the maximum aliased line width, in pixels, supported by this WebGL implementation.  It will be at least one.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum aliased line in pixels.
-     *
-     * @see Context#getMinimumAliasedLineWidth
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>ALIASED_LINE_WIDTH_RANGE</code>.
-     */
-    Context.prototype.getMaximumAliasedLineWidth = function() {
-        return this._aliasedLineWidthRange[1];
-    };
+        /**
+         * The maximum aliased point size, in pixels, supported by this WebGL implementation.  It will be at least one.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>ALIASED_POINT_SIZE_RANGE</code>.
+         */
+        maximumAliasedPointSize : {
+            get : function() {
+                return this._aliasedPointSizeRange[1];
+            }
+        },
 
-    /**
-     * Returns the minimum aliased point size, in pixels, supported by this WebGL implementation.  It will be at most one.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The minimum aliased point size in pixels.
-     *
-     * @see Context#getMaximumAliasedPointSize
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>ALIASED_POINT_SIZE_RANGE</code>.
-     */
-    Context.prototype.getMinimumAliasedPointSize = function() {
-        return this._aliasedPointSizeRange[0];
-    };
+        /**
+         * The maximum supported width of the viewport.  It will be at least as large as the visible width of the associated canvas.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_VIEWPORT_DIMS</code>.
+         */
+        maximumViewportWidth : {
+            get : function() {
+                return this._maximumViewportDimensions[0];
+            }
+        },
 
-    /**
-     * Returns the maximum aliased point size, in pixels, supported by this WebGL implementation.  It will be at least one.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum aliased point size in pixels.
-     *
-     * @see Context#getMinimumAliasedPointSize
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>ALIASED_POINT_SIZE_RANGE</code>.
-     */
-    Context.prototype.getMaximumAliasedPointSize = function() {
-        return this._aliasedPointSizeRange[1];
-    };
+        /**
+         * The maximum supported height of the viewport.  It will be at least as large as the visible height of the associated canvas.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>MAX_VIEWPORT_DIMS</code>.
+         */
+        maximumViewportHeight : {
+            get : function() {
+                return this._maximumViewportDimensions[1];
+            }
+        },
 
-    /**
-     * Returns the maximum supported width of the viewport.  It will be at least as large as the visible width of the associated canvas.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum supported width of the viewport.
-     *
-     * @see Context#getMaximumViewportHeight
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_VIEWPORT_DIMS</code>.
-     */
-    Context.prototype.getMaximumViewportWidth = function() {
-        return this._maximumViewportDimensions[0];
-    };
+        /**
+         * <code>true</code> if the WebGL context supports antialiasing.  By default
+         * antialiasing is requested, but it is not supported by all systems.
+         * @memberof Context.prototype
+         * @type {Boolean}
+         */
+        antialias : {
+            get : function() {
+                return this._antialias;
+            }
+        },
 
-    /**
-     * Returns the maximum supported height of the viewport.  It will be at least as large as the visible height of the associated canvas.
-     *
-     * @memberof Context
-     *
-     * @returns {Number} The maximum supported height of the viewport.
-     *
-     * @see Context#getMaximumViewportHeight
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml'>glGet</a> with <code>MAX_VIEWPORT_DIMS</code>.
-     */
-    Context.prototype.getMaximumViewportHeight = function() {
-        return this._maximumViewportDimensions[1];
-    };
+        /**
+         * <code>true</code> if the OES_standard_derivatives extension is supported.  This
+         * extension provides access to <code>dFdx<code>, <code>dFdy<code>, and <code>fwidth<code>
+         * functions from GLSL.  A shader using these functions still needs to explicitly enable the
+         * extension with <code>#extension GL_OES_standard_derivatives : enable</code>.
+         * @memberof Context.prototype
+         * @type {Boolean}
+         * @see {@link http://www.khronos.org/registry/gles/extensions/OES/OES_standard_derivatives.txt|OES_standard_derivatives}
+         */
+        standardDerivatives : {
+            get : function() {
+                return !!this._standardDerivatives;
+            }
+        },
 
-    /**
-     * Returns <code>true</code> if the WebGL context supports antialiasing.  By default
-     * antialiasing is requested, but it is not supported by all systems.
-     *
-     * @memberof Context
-     *
-     * @returns {Boolean} <code>true</code> if antialiasing is supported.
-     */
-    Context.prototype.getAntialias = function() {
-        return this._antialias;
-    };
+        /**
+         * <code>true</code> if the OES_element_index_uint extension is supported.  This
+         * extension allows the use of unsigned int indices, which can improve performance by
+         * eliminating batch breaking caused by unsigned short indices.
+         * @memberof Context.prototype
+         * @type {Boolean}
+         * @see {@link http://www.khronos.org/registry/webgl/extensions/OES_element_index_uint/|OES_element_index_uint}
+         */
+        elementIndexUint : {
+            get : function() {
+                return !!this._elementIndexUint;
+            }
+        },
 
-    /**
-     * Returns <code>true</code> if the OES_standard_derivatives extension is supported.  This
-     * extension provides access to <code>dFdx<code>, <code>dFdy<code>, and <code>fwidth<code>
-     * functions from GLSL.  A shader using these functions still needs to explicitly enable the
-     * extension with <code>#extension GL_OES_standard_derivatives : enable</code>.
-     *
-     * @memberof Context
-     *
-     * @returns {Boolean} <code>true</code> if OES_standard_derivatives is supported; otherwise, <code>false</code>.
-     *
-     * @see <a href='http://www.khronos.org/registry/gles/extensions/OES/OES_standard_derivatives.txt'>OES_standard_derivatives</a>
-     */
-    Context.prototype.getStandardDerivatives = function() {
-        return !!this._standardDerivatives;
-    };
+        /**
+         * <code>true</code> if WEBGL_depth_texture is supported.  This extension provides
+         * access to depth textures that, for example, can be attached to framebuffers for shadow mapping.
+         * @memberof Context.prototype
+         * @type {Boolean}
+         * @see {@link http://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/|WEBGL_depth_texture}
+         */
+        depthTexture : {
+            get : function() {
+                return !!this._depthTexture;
+            }
+        },
 
-    /**
-     * Returns <code>true</code> if the OES_element_index_uint extension is supported.  This
-     * extension allows the use of unsigned int indices, which can improve performance by
-     * eliminating batch breaking caused by unsigned short indices.
-     *
-     * @memberof Context
-     *
-     * @returns {Boolean} <code>true</code> if OES_element_index_uint is supported; otherwise, <code>false</code>.
-     *
-     * @see <a href='http://www.khronos.org/registry/webgl/extensions/OES_element_index_uint/'>OES_element_index_uint</a>
-     */
-    Context.prototype.getElementIndexUint = function() {
-        return !!this._elementIndexUint;
-    };
+        /**
+         * <code>true</code> if OES_texture_float is supported.  This extension provides
+         * access to floating point textures that, for example, can be attached to framebuffers for high dynamic range.
+         * @memberof Context.prototype
+         * @type {Boolean}
+         * @see {@link http://www.khronos.org/registry/gles/extensions/OES/OES_texture_float.txt|OES_texture_float}
+         */
+        floatingPointTexture : {
+            get : function() {
+                return !!this._textureFloat;
+            }
+        },
 
-    /**
-     * Returns <code>true</code> if WEBGL_depth_texture is supported.  This extension provides
-     * access to depth textures that, for example, can be attached to framebuffers for shadow mapping.
-     *
-     * @memberof Context
-     *
-     * @returns {Boolean} <code>true</code> if WEBGL_depth_texture is supported; otherwise, <code>false</code>.
-     *
-     * @see <a href='http://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/'>WEBGL_depth_texture</a>
-     */
-    Context.prototype.getDepthTexture = function() {
-        return !!this._depthTexture;
-    };
+        textureFilterAnisotropic : {
+            get : function() {
+                return !!this._textureFilterAnisotropic;
+            }
+        },
 
-    /**
-     * Returns <code>true</code> if OES_texture_float is supported.  This extension provides
-     * access to floating point textures that, for example, can be attached to framebuffers for high dynamic range.
-     *
-     * @memberof Context
-     *
-     * @returns {Boolean} <code>true</code> if OES_texture_float is supported; otherwise, <code>false</code>.
-     *
-     * @see <a href='http://www.khronos.org/registry/gles/extensions/OES/OES_texture_float.txt'>OES_texture_float</a>
-     */
-    Context.prototype.getFloatingPointTexture = function() {
-        return !!this._textureFloat;
-    };
+        maximumTextureFilterAnisotropy : {
+            get : function() {
+                return this._maximumTextureFilterAnisotropy;
+            }
+        },
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @returns {Boolean} <code>true</code> if EXT_texture_filter_anisotropic is supported; otherwise, <code>false</code>.
-     *
-     * @see <a href='http://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/'>EXT_texture_filter_anisotropic</a>
-     */
-    Context.prototype.getTextureFilterAnisotropic = function() {
-        return !!this._textureFilterAnisotropic;
-    };
+        /**
+         * <code>true</code> if the OES_vertex_array_object extension is supported.  This
+         * extension can improve performance by reducing the overhead of switching vertex arrays.
+         * When enabled, this extension is automatically used by {@link VertexArray}.
+         * @memberof Context.prototype
+         * @type {Boolean}
+         * @see {@link http://www.khronos.org/registry/webgl/extensions/OES_vertex_array_object/|OES_vertex_array_object}
+         */
+        vertexArrayObject : {
+            get : function() {
+                return !!this._vertexArrayObject;
+            }
+        },
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @see Context#getTextureFilterAnisotropic
-     */
-    Context.prototype.getMaximumTextureFilterAnisotropy = function() {
-        return this._maximumTextureFilterAnisotropy;
-    };
+        /**
+         * <code>true</code> if the EXT_frag_depth extension is supported.  This
+         * extension provides access to the <code>gl_FragDepthEXT<code> built-in output variable
+         * from GLSL fragment shaders.  A shader using these functions still needs to explicitly enable the
+         * extension with <code>#extension GL_EXT_frag_depth : enable</code>.
+         * @memberof Context.prototype
+         * @type {Boolean}
+         * @see {@link http://www.khronos.org/registry/webgl/extensions/EXT_frag_depth/|EXT_frag_depth}
+         */
+        fragmentDepth : {
+            get : function() {
+                return !!this._fragDepth;
+            }
+        },
 
-    /**
-     * Returns <code>true</code> if the OES_vertex_array_object extension is supported.  This
-     * extension can improve performance by reducing the overhead of switching vertex arrays.
-     * When enabled, this extension is automatically used by {@link VertexArray}.
-     *
-     * @memberof Context
-     *
-     * @returns {Boolean} <code>true</code> if OES_vertex_array_object is supported; otherwise, <code>false</code>.
-     *
-     * @see <a href='http://www.khronos.org/registry/webgl/extensions/OES_vertex_array_object/'>OES_vertex_array_object</a>
-     */
-    Context.prototype.getVertexArrayObject = function() {
-        return !!this._vertexArrayObject;
-    };
+        /**
+         * <code>true</code> if the WEBGL_draw_buffers extension is supported. This
+         * extensions provides support for multiple render targets. The framebuffer object can have mutiple
+         * color attachments and the GLSL fragment shader can write to the built-in output array <code>gl_FragData</code>.
+         * A shader using this feature needs to explicitly enable the extension with
+         * <code>#extension GL_EXT_draw_buffers : enable</code>.
+         * @memberof Context.prototype
+         * @type {Boolean}
+         * @see {@link http://www.khronos.org/registry/webgl/extensions/WEBGL_draw_buffers/|WEBGL_draw_buffers}
+         */
+        drawBuffers : {
+            get : function() {
+                return !!this._drawBuffers;
+            }
+        },
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @see Context#setValidateFramebuffer
-     */
-    Context.prototype.getValidateFramebuffer = function() {
-        return this._validateFB;
-    };
+        /**
+         * The maximum number of simultaneous outputs that may be written in a fragment shader.
+         * @memberof Context.prototype
+         * @type {Number}
+         */
+        maximumDrawBuffers : {
+            get : function() {
+                return this._maximumDrawBuffers;
+            }
+        },
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @performance DOC_TBA: slow.
-     *
-     * @see Context#setValidateShaderProgram
-     * @see Context#getValidateFramebuffer
-     */
-    Context.prototype.setValidateFramebuffer = function(value) {
-        this._validateFB = value;
-    };
+        /**
+         * The maximum number of color attachments supported.
+         * @memberof Context.prototype
+         * @type {Number}
+         */
+        maximumColorAttachments : {
+            get : function() {
+                return this._maximumColorAttachments;
+            }
+        },
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @see Context#setValidateShaderProgram
-     */
-    Context.prototype.getValidateShaderProgram = function() {
-        return this._validateSP;
-    };
+        throwOnWebGLError : {
+            get : function() {
+                return this._throwOnWebGLError;
+            },
+            set : function(value) {
+                this._throwOnWebGLError = value;
+                this._gl = wrapGL(this._originalGLContext, value ? throwOnError : null);
+            }
+        },
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @performance DOC_TBA: slow.
-     *
-     * @see Context#setValidateFramebuffer
-     * @see Context#getValidateShaderProgram
-     */
-    Context.prototype.setValidateShaderProgram = function(value) {
-        this._validateSP = value;
-    };
-
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @see Context#setThrowOnWebGLError
-     */
-    Context.prototype.getThrowOnWebGLError = function() {
-        return this._throwOnWebGLError;
-    };
-
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @performance DOC_TBA: slow.
-     *
-     * @see Context#setValidateFramebuffer
-     * @see Context#setValidateShaderProgram
-     * @see Context#getThrowOnWebGLError
-     */
-    Context.prototype.setThrowOnWebGLError = function(value) {
-        this._throwOnWebGLError = value;
-        this._gl = wrapGL(this._originalGLContext, value ? throwOnError : null);
-    };
-
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @see Context#setLogShaderCompilation
-     */
-    Context.prototype.getLogShaderCompilation = function() {
-        return this._logShaderCompilation;
-    };
-
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @see Context#getLogShaderCompilation
-     */
-    Context.prototype.setLogShaderCompilation = function(value) {
-        this._logShaderCompilation = value;
-    };
-
-    /**
-     * Returns a 1x1 RGBA texture initialized to [255, 255, 255, 255].  This can
-     * be used as a placeholder texture while other textures are downloaded.
-     *
-     * @returns {Texture}
-     *
-     * @memberof Context
-     */
-    Context.prototype.getDefaultTexture = function() {
-        if (this._defaultTexture === undefined) {
-            this._defaultTexture = this.createTexture2D({
-                source : {
-                    width : 1,
-                    height : 1,
-                    arrayBufferView : new Uint8Array([255, 255, 255, 255])
+        /**
+         * A 1x1 RGBA texture initialized to [255, 255, 255, 255].  This can
+         * be used as a placeholder texture while other textures are downloaded.
+         * @memberof Context.prototype
+         * @type {Texture}
+         */
+        defaultTexture : {
+            get : function() {
+                if (this._defaultTexture === undefined) {
+                    this._defaultTexture = this.createTexture2D({
+                        source : {
+                            width : 1,
+                            height : 1,
+                            arrayBufferView : new Uint8Array([255, 255, 255, 255])
+                        }
+                    });
                 }
-            });
-        }
 
-        return this._defaultTexture;
-    };
+                return this._defaultTexture;
+            }
+        },
 
-    /**
-     * Returns a cube map, where each face is a 1x1 RGBA texture initialized to
-     * [255, 255, 255, 255].  This can be used as a placeholder cube map while
-     * other cube maps are downloaded.
-     *
-     * @returns {CubeMap}
-     *
-     * @memberof Context
-     */
-    Context.prototype.getDefaultCubeMap = function() {
-        if (this._defaultCubeMap === undefined) {
-            var face = {
-                width : 1,
-                height : 1,
-                arrayBufferView : new Uint8Array([255, 255, 255, 255])
-            };
+        /**
+         * A cube map, where each face is a 1x1 RGBA texture initialized to
+         * [255, 255, 255, 255].  This can be used as a placeholder cube map while
+         * other cube maps are downloaded.
+         * @memberof Context.prototype
+         * @type {CubeMap}
+         */
+        defaultCubeMap : {
+            get : function() {
+                if (this._defaultCubeMap === undefined) {
+                    var face = {
+                        width : 1,
+                        height : 1,
+                        arrayBufferView : new Uint8Array([255, 255, 255, 255])
+                    };
 
-            this._defaultCubeMap = this.createCubeMap({
-                source : {
-                    positiveX : face,
-                    negativeX : face,
-                    positiveY : face,
-                    negativeY : face,
-                    positiveZ : face,
-                    negativeZ : face
+                    this._defaultCubeMap = this.createCubeMap({
+                        source : {
+                            positiveX : face,
+                            negativeX : face,
+                            positiveY : face,
+                            negativeY : face,
+                            positiveZ : face,
+                            negativeZ : face
+                        }
+                    });
                 }
-            });
-        }
 
-        return this._defaultCubeMap;
+                return this._defaultCubeMap;
+
+            }
+        },
+
+        /**
+         * The drawingBufferWidth of the underlying GL context.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link https://www.khronos.org/registry/webgl/specs/1.0/#DOM-WebGLRenderingContext-drawingBufferWidth|drawingBufferWidth}
+         */
+        drawingBufferHeight : {
+            get : function() {
+                return this._gl.drawingBufferHeight;
+            }
+        },
+
+        /**
+         * The drawingBufferHeight of the underlying GL context.
+         * @memberof Context.prototype
+         * @type {Number}
+         * @see {@link https://www.khronos.org/registry/webgl/specs/1.0/#DOM-WebGLRenderingContext-drawingBufferHeight|drawingBufferHeight}
+         */
+        drawingBufferWidth : {
+            get : function() {
+                return this._gl.drawingBufferWidth;
+            }
+        },
+
+        /**
+         * Gets an object representing the currently bound framebuffer.  While this instance is not an actual
+         * {@link Framebuffer}, it is used to represent the default framebuffer in calls to
+         * {@link Context.createTexture2DFromFramebuffer}.
+         * @memberof Context.prototype
+         * @type {Object}
+         */
+        defaultFramebuffer : {
+            get : function() {
+                return defaultFramebufferMarker;
+            }
+        }
+    });
+
+    Context.prototype.replaceShaderProgram = function(shaderProgram, vertexShaderSource, fragmentShaderSource, attributeLocations) {
+        return this.shaderCache.replaceShaderProgram(shaderProgram, vertexShaderSource, fragmentShaderSource, attributeLocations);
     };
 
-    /**
-     * Creates a shader program given the GLSL source for a vertex and fragment shader.
-     * <br /><br />
-     * The vertex and fragment shader are individually compiled, and then linked together
-     * to create a shader program.  An exception is thrown if any errors are encountered,
-     * as described below.
-     * <br /><br />
-     * The program's active uniforms and attributes are queried and can be accessed using
-     * the returned shader program.  The caller can explicitly define the vertex
-     * attribute indices using the optional <code>attributeLocations</code> argument as
-     * shown in example two below.
-     *
-     * @memberof Context
-     *
-     * @param {String} vertexShaderSource The GLSL source for the vertex shader.
-     * @param {String} fragmentShaderSource The GLSL source for the fragment shader.
-     * @param {Object} [attributeLocations=undefined] An optional object that maps vertex attribute names to indices for use with vertex arrays.
-     *
-     * @returns {ShaderProgram} The compiled and linked shader program, ready for use in a draw call.
-     *
-     * @exception {RuntimeError} Vertex shader failed to compile.
-     * @exception {RuntimeError} Fragment shader failed to compile.
-     * @exception {RuntimeError} Program failed to link.
-     *
-     * @see Context#draw
-     * @see Context#createVertexArray
-     * @see Context#getShaderCache
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glCreateShader.xml'>glCreateShader</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glShaderSource.xml'>glShaderSource</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glCompileShader.xml'>glCompileShader</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glCreateProgram.xml'>glCreateProgram</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glAttachShader.xml'>glAttachShader</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glLinkProgram.xml'>glLinkProgram</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetShaderiv.xml'>glGetShaderiv</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetActiveUniform.xml'>glGetActiveUniform</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetUniformLocation.xml'>glGetUniformLocation</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetUniform.xml'>glGetUniform</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glBindAttribLocation.xml'>glBindAttribLocation</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetActiveAttrib.xml'>glGetActiveAttrib</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGetAttribLocation.xml'>glGetAttribLocation</a>
-     *
-     * @example
-     * // Example 1. Create a shader program allowing the GL to determine
-     * // attribute indices.
-     * var vs = 'attribute vec4 position; void main() { gl_Position = position; }';
-     * var fs = 'void main() { gl_FragColor = vec4(1.0); }';
-     * var sp = context.createShaderProgram(vs, fs);
-     *
-     * ////////////////////////////////////////////////////////////////////////////////
-     *
-     * // Example 2. Create a shader program with explicit attribute indices.
-     * var vs = 'attribute vec4 position;' +
-     *          'attribute vec3 normal;' +
-     *          'void main() { ... }';
-     * var fs = 'void main() { gl_FragColor = vec4(1.0); }';
-     * var attributes = {
-     *     position : 0,
-     *     normal   : 1
-     * };
-     * sp = context.createShaderProgram(vs, fs, attributes);            *
-     */
     Context.prototype.createShaderProgram = function(vertexShaderSource, fragmentShaderSource, attributeLocations) {
-        return new ShaderProgram(this._gl, this._logShaderCompilation, vertexShaderSource, fragmentShaderSource, attributeLocations);
+        return this.shaderCache.getShaderProgram(vertexShaderSource, fragmentShaderSource, attributeLocations);
     };
 
     function createBuffer(gl, bufferTarget, typedArrayOrSizeInBytes, usage) {
@@ -1014,9 +944,12 @@ define([
         } else if (typeof typedArrayOrSizeInBytes === 'object' && typeof typedArrayOrSizeInBytes.byteLength === 'number') {
             sizeInBytes = typedArrayOrSizeInBytes.byteLength;
         } else {
+            //>>includeStart('debug', pragmas.debug);
             throw new DeveloperError('typedArrayOrSizeInBytes must be either a typed array or a number.');
+            //>>includeEnd('debug');
         }
 
+        //>>includeStart('debug', pragmas.debug);
         if (sizeInBytes <= 0) {
             throw new DeveloperError('typedArrayOrSizeInBytes must be greater than zero.');
         }
@@ -1024,6 +957,7 @@ define([
         if (!BufferUsage.validate(usage)) {
             throw new DeveloperError('usage is invalid.');
         }
+        //>>includeEnd('debug');
 
         var buffer = gl.createBuffer();
         gl.bindBuffer(bufferTarget, buffer);
@@ -1039,11 +973,8 @@ define([
      * A vertex array defines the actual makeup of a vertex, e.g., positions, normals, texture coordinates,
      * etc., by interpreting the raw data in one or more vertex buffers.
      *
-     * @memberof Context
-     *
      * @param {ArrayBufferView|Number} typedArrayOrSizeInBytes A typed array containing the data to copy to the buffer, or a <code>Number</code> defining the size of the buffer in bytes.
      * @param {BufferUsage} usage Specifies the expected usage pattern of the buffer.  On some GL implementations, this can significantly affect performance.  See {@link BufferUsage}.
-     *
      * @returns {VertexBuffer} The vertex buffer, ready to be attached to a vertex array.
      *
      * @exception {DeveloperError} The size in bytes must be greater than zero.
@@ -1051,16 +982,15 @@ define([
      *
      * @see Context#createVertexArray
      * @see Context#createIndexBuffer
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGenBuffer.xml'>glGenBuffer</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glBindBuffer.xml'>glBindBuffer</a> with <code>ARRAY_BUFFER</code>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glBufferData.xml'>glBufferData</a> with <code>ARRAY_BUFFER</code>
+     * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGenBuffer.xml|glGenBuffer}
+     * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glBindBuffer.xml|glBindBuffer} with <code>ARRAY_BUFFER</code>
+     * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glBufferData.xml|glBufferData} with <code>ARRAY_BUFFER</code>
      *
      * @example
      * // Example 1. Create a dynamic vertex buffer 16 bytes in size.
      * var buffer = context.createVertexBuffer(16, BufferUsage.DYNAMIC_DRAW);
      *
-     * ////////////////////////////////////////////////////////////////////////////////
-     *
+     * @example
      * // Example 2. Create a dynamic vertex buffer from three floating-point values.
      * // The data copied to the vertex buffer is considered raw bytes until it is
      * // interpreted as vertices using a vertex array.
@@ -1078,15 +1008,12 @@ define([
      * <code>Context.draw</code> can render using the entire index buffer or a subset
      * of the index buffer defined by an offset and count.
      *
-     * @memberof Context
-     *
      * @param {ArrayBufferView|Number} typedArrayOrSizeInBytes A typed array containing the data to copy to the buffer, or a <code>Number</code> defining the size of the buffer in bytes.
      * @param {BufferUsage} usage Specifies the expected usage pattern of the buffer.  On some GL implementations, this can significantly affect performance.  See {@link BufferUsage}.
      * @param {IndexDatatype} indexDatatype The datatype of indices in the buffer.
-     *
      * @returns {IndexBuffer} The index buffer, ready to be attached to a vertex array.
      *
-     * @exception {RuntimeError} IndexDatatype.UNSIGNED_INT requires OES_element_index_uint, which is not supported on this system.
+     * @exception {DeveloperError} IndexDatatype.UNSIGNED_INT requires OES_element_index_uint, which is not supported on this system.    Check context.elementIndexUint.
      * @exception {DeveloperError} The size in bytes must be greater than zero.
      * @exception {DeveloperError} Invalid <code>usage</code>.
      * @exception {DeveloperError} Invalid <code>indexDatatype</code>.
@@ -1095,9 +1022,9 @@ define([
      * @see Context#createVertexBuffer
      * @see Context#draw
      * @see VertexArray
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glGenBuffer.xml'>glGenBuffer</a>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glBindBuffer.xml'>glBindBuffer</a> with <code>ELEMENT_ARRAY_BUFFER</code>
-     * @see <a href='http://www.khronos.org/opengles/sdk/2.0/docs/man/glBufferData.xml'>glBufferData</a> with <code>ELEMENT_ARRAY_BUFFER</code>
+     * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGenBuffer.xml|glGenBuffer}
+     * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glBindBuffer.xml|glBindBuffer} with <code>ELEMENT_ARRAY_BUFFER</code>
+     * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glBufferData.xml|glBufferData} with <code>ELEMENT_ARRAY_BUFFER</code>
      *
      * @example
      * // Example 1. Create a stream index buffer of unsigned shorts that is
@@ -1105,38 +1032,45 @@ define([
      * var buffer = context.createIndexBuffer(16, BufferUsage.STREAM_DRAW,
      *     IndexDatatype.UNSIGNED_SHORT);
      *
-     * ////////////////////////////////////////////////////////////////////////////////
-     *
+     * @example
      * // Example 2. Create a static index buffer containing three unsigned shorts.
      * var buffer = context.createIndexBuffer(new Uint16Array([0, 1, 2]),
      *     BufferUsage.STATIC_DRAW, IndexDatatype.UNSIGNED_SHORT)
      */
     Context.prototype.createIndexBuffer = function(typedArrayOrSizeInBytes, usage, indexDatatype) {
+        //>>includeStart('debug', pragmas.debug);
         if (!IndexDatatype.validate(indexDatatype)) {
             throw new DeveloperError('Invalid indexDatatype.');
         }
+        //>>includeEnd('debug');
 
-        if ((indexDatatype.value === IndexDatatype.UNSIGNED_INT.value) && !this.getElementIndexUint()) {
-            throw new RuntimeError('IndexDatatype.UNSIGNED_INT requires OES_element_index_uint, which is not supported on this system.');
+        if ((indexDatatype === IndexDatatype.UNSIGNED_INT) && !this.elementIndexUint) {
+            throw new DeveloperError('IndexDatatype.UNSIGNED_INT requires OES_element_index_uint, which is not supported on this system.  Check context.elementIndexUint.');
         }
 
-        var bytesPerIndex = indexDatatype.sizeInBytes;
+        var bytesPerIndex = IndexDatatype.getSizeInBytes(indexDatatype);
 
         var gl = this._gl;
         var buffer = createBuffer(gl, gl.ELEMENT_ARRAY_BUFFER, typedArrayOrSizeInBytes, usage);
-        var numberOfIndices = buffer.getSizeInBytes() / bytesPerIndex;
+        var numberOfIndices = buffer.sizeInBytes / bytesPerIndex;
 
-        buffer.getIndexDatatype = function() {
-            return indexDatatype;
-        };
-
-        buffer.getBytesPerIndex = function() {
-            return bytesPerIndex;
-        };
-
-        buffer.getNumberOfIndices = function() {
-            return numberOfIndices;
-        };
+        defineProperties(buffer, {
+            indexDatatype: {
+                get : function() {
+                    return indexDatatype;
+                }
+            },
+            bytesPerIndex : {
+                get : function() {
+                    return bytesPerIndex;
+                }
+            },
+            numberOfIndices : {
+                get : function() {
+                    return numberOfIndices;
+                }
+            }
+        });
 
         return buffer;
     };
@@ -1145,10 +1079,8 @@ define([
      * Creates a vertex array, which defines the attributes making up a vertex, and contains an optional index buffer
      * to select vertices for rendering.  Attributes are defined using object literals as shown in Example 1 below.
      *
-     * @memberof Context
-     *
-     * @param {Array} [attributes=undefined] An optional array of attributes.
-     * @param {IndexBuffer} [indexBuffer=undefined] An optional index buffer.
+     * @param {Object[]} [attributes] An optional array of attributes.
+     * @param {IndexBuffer} [indexBuffer] An optional index buffer.
      *
      * @returns {VertexArray} The vertex array, ready for use with drawing.
      *
@@ -1181,8 +1113,7 @@ define([
      * ];
      * var va = context.createVertexArray(attributes);
      *
-     * ////////////////////////////////////////////////////////////////////////////////
-     *
+     * @example
      * // Example 2. Create a vertex array with vertices from two different vertex buffers.
      * // Each vertex has a three-component position and three-component normal.
      * var positionBuffer = context.createVertexBuffer(12, BufferUsage.STATIC_DRAW);
@@ -1203,8 +1134,7 @@ define([
      * ];
      * var va = context.createVertexArray(attributes);
      *
-     * ////////////////////////////////////////////////////////////////////////////////
-     *
+     * @example
      * // Example 3. Creates the same vertex layout as Example 2 using a single
      * // vertex buffer, instead of two.
      * var buffer = context.createVertexBuffer(24, BufferUsage.STATIC_DRAW);
@@ -1232,146 +1162,48 @@ define([
     };
 
     /**
-     * DOC_TBA.
+     * options.source can be {@link ImageData}, {@link Image}, {@link Canvas}, or {@link Video}.
      *
-     * description.source can be {ImageData}, {HTMLImageElement}, {HTMLCanvasElement}, or {HTMLVideoElement}.
-     *
-     * @memberof Context
-     *
-     * @returns {Texture} DOC_TBA.
-     *
-     * @exception {RuntimeError} When description.pixelFormat is DEPTH_COMPONENT or DEPTH_STENCIL, this WebGL implementation must support WEBGL_depth_texture.
-     * @exception {RuntimeError} When description.pixelDatatype is FLOAT, this WebGL implementation must support the OES_texture_float extension.
-     * @exception {DeveloperError} description is required.
-     * @exception {DeveloperError} description requires a source field to create an initialized texture or width and height fields to create a blank texture.
+     * @exception {RuntimeError} When options.pixelFormat is DEPTH_COMPONENT or DEPTH_STENCIL, this WebGL implementation must support WEBGL_depth_texture.  Check context.depthTexture.
+     * @exception {RuntimeError} When options.pixelDatatype is FLOAT, this WebGL implementation must support the OES_texture_float extension.  Check context.floatingPointTexture.
+     * @exception {DeveloperError} options requires a source field to create an initialized texture or width and height fields to create a blank texture.
      * @exception {DeveloperError} Width must be greater than zero.
      * @exception {DeveloperError} Width must be less than or equal to the maximum texture size.
      * @exception {DeveloperError} Height must be greater than zero.
      * @exception {DeveloperError} Height must be less than or equal to the maximum texture size.
-     * @exception {DeveloperError} Invalid description.pixelFormat.
-     * @exception {DeveloperError} Invalid description.pixelDatatype.
-     * @exception {DeveloperError} When description.pixelFormat is DEPTH_COMPONENT, description.pixelDatatype must be UNSIGNED_SHORT or UNSIGNED_INT.
-     * @exception {DeveloperError} When description.pixelFormat is DEPTH_STENCIL, description.pixelDatatype must be UNSIGNED_INT_24_8_WEBGL.
-     * @exception {DeveloperError} When description.pixelFormat is DEPTH_COMPONENT or DEPTH_STENCIL, source cannot be provided.
+     * @exception {DeveloperError} Invalid options.pixelFormat.
+     * @exception {DeveloperError} Invalid options.pixelDatatype.
+     * @exception {DeveloperError} When options.pixelFormat is DEPTH_COMPONENT, options.pixelDatatype must be UNSIGNED_SHORT or UNSIGNED_INT.
+     * @exception {DeveloperError} When options.pixelFormat is DEPTH_STENCIL, options.pixelDatatype must be UNSIGNED_INT_24_8_WEBGL.
+     * @exception {DeveloperError} When options.pixelFormat is DEPTH_COMPONENT or DEPTH_STENCIL, source cannot be provided.
      *
      * @see Context#createTexture2DFromFramebuffer
      * @see Context#createCubeMap
      * @see Context#createSampler
      */
-    Context.prototype.createTexture2D = function(description) {
-        if (!description) {
-            throw new DeveloperError('description is required.');
-        }
-
-        var source = description.source;
-        var width = defined(source) ? source.width : description.width;
-        var height = defined(source) ? source.height : description.height;
-
-        if (!defined(width) || !defined(height)) {
-            throw new DeveloperError('description requires a source field to create an initialized texture or width and height fields to create a blank texture.');
-        }
-
-        if (width <= 0) {
-            throw new DeveloperError('Width must be greater than zero.');
-        }
-
-        if (width > this._maximumTextureSize) {
-            throw new DeveloperError('Width must be less than or equal to the maximum texture size (' + this._maximumTextureSize + ').  Check getMaximumTextureSize().');
-        }
-
-        if (height <= 0) {
-            throw new DeveloperError('Height must be greater than zero.');
-        }
-
-        if (height > this._maximumTextureSize) {
-            throw new DeveloperError('Height must be less than or equal to the maximum texture size (' + this._maximumTextureSize + ').  Check getMaximumTextureSize().');
-        }
-
-        var pixelFormat = defaultValue(description.pixelFormat, PixelFormat.RGBA);
-        if (!PixelFormat.validate(pixelFormat)) {
-            throw new DeveloperError('Invalid description.pixelFormat.');
-        }
-
-        var pixelDatatype = defaultValue(description.pixelDatatype, PixelDatatype.UNSIGNED_BYTE);
-        if (!PixelDatatype.validate(pixelDatatype)) {
-            throw new DeveloperError('Invalid description.pixelDatatype.');
-        }
-
-        if ((pixelDatatype === PixelDatatype.FLOAT) && !this.getFloatingPointTexture()) {
-            throw new RuntimeError('When description.pixelDatatype is FLOAT, this WebGL implementation must support the OES_texture_float extension.');
-        }
-
-        if ((pixelFormat === PixelFormat.DEPTH_COMPONENT) &&
-            ((pixelDatatype !== PixelDatatype.UNSIGNED_SHORT) && (pixelDatatype !== PixelDatatype.UNSIGNED_INT))) {
-            throw new DeveloperError('When description.pixelFormat is DEPTH_COMPONENT, description.pixelDatatype must be UNSIGNED_SHORT or UNSIGNED_INT.');
-        }
-
-        if ((pixelFormat === PixelFormat.DEPTH_STENCIL) && (pixelDatatype !== PixelDatatype.UNSIGNED_INT_24_8_WEBGL)) {
-            throw new DeveloperError('When description.pixelFormat is DEPTH_STENCIL, description.pixelDatatype must be UNSIGNED_INT_24_8_WEBGL.');
-        }
-
-        if (PixelFormat.isDepthFormat(pixelFormat)) {
-            if (source) {
-                throw new DeveloperError('When description.pixelFormat is DEPTH_COMPONENT or DEPTH_STENCIL, source cannot be provided.');
-            }
-
-            if (!this.getDepthTexture()) {
-                throw new RuntimeError('When description.pixelFormat is DEPTH_COMPONENT or DEPTH_STENCIL, this WebGL implementation must support WEBGL_depth_texture.  Check getDepthTexture().');
-            }
-        }
-
-        // Use premultiplied alpha for opaque textures should perform better on Chrome:
-        // http://media.tojicode.com/webglCamp4/#20
-        var preMultiplyAlpha = description.preMultiplyAlpha || pixelFormat === PixelFormat.RGB || pixelFormat === PixelFormat.LUMINANCE;
-        var flipY = defaultValue(description.flipY, true);
-
-        var gl = this._gl;
-        var textureTarget = gl.TEXTURE_2D;
-        var texture = gl.createTexture();
-
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(textureTarget, texture);
-
-        if (source) {
-            // TODO: _gl.pixelStorei(_gl._UNPACK_ALIGNMENT, 4);
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, preMultiplyAlpha);
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
-
-            if (source.arrayBufferView) {
-                // Source: typed array
-                gl.texImage2D(textureTarget, 0, pixelFormat, width, height, 0, pixelFormat, pixelDatatype, source.arrayBufferView);
-            } else {
-                // Source: ImageData, HTMLImageElement, HTMLCanvasElement, or HTMLVideoElement
-                gl.texImage2D(textureTarget, 0, pixelFormat, pixelFormat, pixelDatatype, source);
-            }
-        } else {
-            gl.texImage2D(textureTarget, 0, pixelFormat, width, height, 0, pixelFormat, pixelDatatype, null);
-        }
-        gl.bindTexture(textureTarget, null);
-
-        return new Texture(gl, this._textureFilterAnisotropic, textureTarget, texture, pixelFormat, pixelDatatype, width, height, preMultiplyAlpha, flipY);
+    Context.prototype.createTexture2D = function(options) {
+        return new Texture(this, options);
     };
 
     /**
      * Creates a texture, and copies a subimage of the framebuffer to it.  When called without arguments,
      * the texture is the same width and height as the framebuffer and contains its contents.
      *
-     * @memberof Context
-     *
      * @param {PixelFormat} [pixelFormat=PixelFormat.RGB] The texture's internal pixel format.
-     * @param {PixelFormat} [framebufferXOffset=0] An offset in the x direction in the framebuffer where copying begins from.
-     * @param {PixelFormat} [framebufferYOffset=0] An offset in the y direction in the framebuffer where copying begins from.
-     * @param {PixelFormat} [width=canvas.clientWidth] The width of the texture in texels.
-     * @param {PixelFormat} [height=canvas.clientHeight] The height of the texture in texels.
-     *
+     * @param {Number} [framebufferXOffset=0] An offset in the x direction in the framebuffer where copying begins from.
+     * @param {Number} [framebufferYOffset=0] An offset in the y direction in the framebuffer where copying begins from.
+     * @param {Number} [width=canvas.clientWidth] The width of the texture in texels.
+     * @param {Number} [height=canvas.clientHeight] The height of the texture in texels.
+     * @param {Framebuffer} [framebuffer=defaultFramebuffer] The framebuffer from which to create the texture.  If this
+     *        parameter is not specified, the default framebuffer is used.
      * @returns {Texture} A texture with contents from the framebuffer.
      *
      * @exception {DeveloperError} Invalid pixelFormat.
      * @exception {DeveloperError} pixelFormat cannot be DEPTH_COMPONENT or DEPTH_STENCIL.
      * @exception {DeveloperError} framebufferXOffset must be greater than or equal to zero.
      * @exception {DeveloperError} framebufferYOffset must be greater than or equal to zero.
-     * @exception {DeveloperError} framebufferXOffset + width must be less than or equal to getCanvas().clientWidth.
-     * @exception {DeveloperError} framebufferYOffset + height must be less than or equal to getCanvas().clientHeight.
+     * @exception {DeveloperError} framebufferXOffset + width must be less than or equal to canvas.clientWidth.
+     * @exception {DeveloperError} framebufferYOffset + height must be less than or equal to canvas.clientHeight.
      *
      * @see Context#createTexture2D
      * @see Context#createCubeMap
@@ -1381,13 +1213,16 @@ define([
      * // Create a texture with the contents of the framebuffer.
      * var t = context.createTexture2DFromFramebuffer();
      */
-    Context.prototype.createTexture2DFromFramebuffer = function(pixelFormat, framebufferXOffset, framebufferYOffset, width, height) {
+    Context.prototype.createTexture2DFromFramebuffer = function(pixelFormat, framebufferXOffset, framebufferYOffset, width, height, framebuffer) {
+        var gl = this._gl;
+
         pixelFormat = defaultValue(pixelFormat, PixelFormat.RGB);
         framebufferXOffset = defaultValue(framebufferXOffset, 0);
         framebufferYOffset = defaultValue(framebufferYOffset, 0);
-        width = defaultValue(width, this._canvas.clientWidth);
-        height = defaultValue(height, this._canvas.clientHeight);
+        width = defaultValue(width, gl.drawingBufferWidth);
+        height = defaultValue(height, gl.drawingBufferHeight);
 
+        //>>includeStart('debug', pragmas.debug);
         if (!PixelFormat.validate(pixelFormat)) {
             throw new DeveloperError('Invalid pixelFormat.');
         }
@@ -1404,141 +1239,124 @@ define([
             throw new DeveloperError('framebufferYOffset must be greater than or equal to zero.');
         }
 
-        if (framebufferXOffset + width > this._canvas.clientWidth) {
-            throw new DeveloperError('framebufferXOffset + width must be less than or equal to getCanvas().clientWidth');
+        if (framebufferXOffset + width > gl.drawingBufferWidth) {
+            throw new DeveloperError('framebufferXOffset + width must be less than or equal to drawingBufferWidth');
         }
 
-        if (framebufferYOffset + height > this._canvas.clientHeight) {
-            throw new DeveloperError('framebufferYOffset + height must be less than or equal to getCanvas().clientHeight.');
+        if (framebufferYOffset + height > gl.drawingBufferHeight) {
+            throw new DeveloperError('framebufferYOffset + height must be less than or equal to drawingBufferHeight.');
         }
+        //>>includeEnd('debug');
 
-        var gl = this._gl;
-        var textureTarget = gl.TEXTURE_2D;
-        var texture = gl.createTexture();
+        var texture = new Texture(this, {
+            width : width,
+            height : height,
+            pixelFormat : pixelFormat,
+            source : {
+                framebuffer : defined(framebuffer) ? framebuffer : this.defaultFramebuffer,
+                xOffset : framebufferXOffset,
+                yOffset : framebufferYOffset,
+                width : width,
+                height : height
+            }
+        });
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(textureTarget, texture);
-        gl.copyTexImage2D(textureTarget, 0, pixelFormat, framebufferXOffset, framebufferYOffset, width, height, 0);
-        gl.bindTexture(textureTarget, null);
-
-        return new Texture(gl, this._textureFilterAnisotropic, textureTarget, texture, pixelFormat, undefined, width, height);
+        return texture;
     };
 
     /**
-     * Creates a new texture atlas with this context.
+     * options.source can be {@link ImageData}, {@link Image}, {@link Canvas}, or {@link Video}.
      *
-     * @memberof Context
+     * @returns {CubeMap} The newly created cube map.
      *
-     * @param {PixelFormat} [description.pixelFormat = PixelFormat.RGBA] The pixel format of the texture.
-     * @param {Number} [description.borderWidthInPixels = 1] The amount of spacing between adjacent images in pixels.
-     * @param {Cartesian2} [description.initialSize = new Cartesian2(16.0, 16.0)] The initial side lengths of the texture.
-     * @param {Array} [description.images=undefined] Array of {@link Image} to be added to the atlas. Same as calling addImages(images).
-     * @param {Image} [description.image=undefined] Single image to be added to the atlas. Same as calling addImage(image).
-     *
-     * @returns {TextureAtlas} The new texture atlas.
-     *
-     * @see TextureAtlas
-     */
-    Context.prototype.createTextureAtlas = function(description) {
-        description = description || {};
-        description.context = this;
-        return new TextureAtlas(description);
-    };
-
-    /**
-     * DOC_TBA.
-     *
-     * description.source can be {ImageData}, {HTMLImageElement}, {HTMLCanvasElement}, or {HTMLVideoElement}.
-     *
-     * @memberof Context
-     *
-     * @returns {CubeMap} DOC_TBA.
-     *
-     * @exception {RuntimeError} When description.pixelDatatype is FLOAT, this WebGL implementation must support the OES_texture_float extension.
-     * @exception {DeveloperError} description is required.
-     * @exception {DeveloperError} description.source requires positiveX, negativeX, positiveY, negativeY, positiveZ, and negativeZ faces.
-     * @exception {DeveloperError} Each face in description.sources must have the same width and height.
-     * @exception {DeveloperError} description requires a source field to create an initialized cube map or width and height fields to create a blank cube map.
+     * @exception {RuntimeError} When options.pixelDatatype is FLOAT, this WebGL implementation must support the OES_texture_float extension.  Check context.floatingPointTexture.
+     * @exception {DeveloperError} options.source requires positiveX, negativeX, positiveY, negativeY, positiveZ, and negativeZ faces.
+     * @exception {DeveloperError} Each face in options.sources must have the same width and height.
+     * @exception {DeveloperError} options requires a source field to create an initialized cube map or width and height fields to create a blank cube map.
      * @exception {DeveloperError} Width must equal height.
      * @exception {DeveloperError} Width and height must be greater than zero.
      * @exception {DeveloperError} Width and height must be less than or equal to the maximum cube map size.
-     * @exception {DeveloperError} Invalid description.pixelFormat.
-     * @exception {DeveloperError} description.pixelFormat cannot be DEPTH_COMPONENT or DEPTH_STENCIL.
-     * @exception {DeveloperError} Invalid description.pixelDatatype.
+     * @exception {DeveloperError} Invalid options.pixelFormat.
+     * @exception {DeveloperError} options.pixelFormat cannot be DEPTH_COMPONENT or DEPTH_STENCIL.
+     * @exception {DeveloperError} Invalid options.pixelDatatype.
      *
      * @see Context#createTexture2D
      * @see Context#createTexture2DFromFramebuffer
      * @see Context#createSampler
      */
-    Context.prototype.createCubeMap = function(description) {
-        if (!description) {
-            throw new DeveloperError('description is required.');
-        }
+    Context.prototype.createCubeMap = function(options) {
+        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
 
-        var source = description.source;
+        var source = options.source;
         var width;
         var height;
 
-        if (source) {
+        if (defined(source)) {
             var faces = [source.positiveX, source.negativeX, source.positiveY, source.negativeY, source.positiveZ, source.negativeZ];
 
+            //>>includeStart('debug', pragmas.debug);
             if (!faces[0] || !faces[1] || !faces[2] || !faces[3] || !faces[4] || !faces[5]) {
-                throw new DeveloperError('description.source requires positiveX, negativeX, positiveY, negativeY, positiveZ, and negativeZ faces.');
+                throw new DeveloperError('options.source requires positiveX, negativeX, positiveY, negativeY, positiveZ, and negativeZ faces.');
             }
+            //>>includeEnd('debug');
 
             width = faces[0].width;
             height = faces[0].height;
 
+            //>>includeStart('debug', pragmas.debug);
             for ( var i = 1; i < 6; ++i) {
                 if ((Number(faces[i].width) !== width) || (Number(faces[i].height) !== height)) {
-                    throw new DeveloperError('Each face in description.source must have the same width and height.');
+                    throw new DeveloperError('Each face in options.source must have the same width and height.');
                 }
             }
+            //>>includeEnd('debug');
         } else {
-            width = description.width;
-            height = description.height;
+            width = options.width;
+            height = options.height;
         }
 
+        var size = width;
+        var pixelFormat = defaultValue(options.pixelFormat, PixelFormat.RGBA);
+        var pixelDatatype = defaultValue(options.pixelDatatype, PixelDatatype.UNSIGNED_BYTE);
+
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(width) || !defined(height)) {
-            throw new DeveloperError('description requires a source field to create an initialized cube map or width and height fields to create a blank cube map.');
+            throw new DeveloperError('options requires a source field to create an initialized cube map or width and height fields to create a blank cube map.');
         }
 
         if (width !== height) {
             throw new DeveloperError('Width must equal height.');
         }
 
-        var size = width;
-
         if (size <= 0) {
             throw new DeveloperError('Width and height must be greater than zero.');
         }
 
         if (size > this._maximumCubeMapSize) {
-            throw new DeveloperError('Width and height must be less than or equal to the maximum cube map size (' + this._maximumCubeMapSize + ').  Check getMaximumCubeMapSize().');
+            throw new DeveloperError('Width and height must be less than or equal to the maximum cube map size (' + this._maximumCubeMapSize + ').  Check maximumCubeMapSize.');
         }
 
-        var pixelFormat = defaultValue(description.pixelFormat, PixelFormat.RGBA);
         if (!PixelFormat.validate(pixelFormat)) {
-            throw new DeveloperError('Invalid description.pixelFormat.');
+            throw new DeveloperError('Invalid options.pixelFormat.');
         }
 
         if (PixelFormat.isDepthFormat(pixelFormat)) {
-            throw new DeveloperError('description.pixelFormat cannot be DEPTH_COMPONENT or DEPTH_STENCIL.');
+            throw new DeveloperError('options.pixelFormat cannot be DEPTH_COMPONENT or DEPTH_STENCIL.');
         }
 
-        var pixelDatatype = defaultValue(description.pixelDatatype, PixelDatatype.UNSIGNED_BYTE);
         if (!PixelDatatype.validate(pixelDatatype)) {
-            throw new DeveloperError('Invalid description.pixelDatatype.');
+            throw new DeveloperError('Invalid options.pixelDatatype.');
         }
+        //>>includeEnd('debug');
 
-        if ((pixelDatatype === PixelDatatype.FLOAT) && !this.getFloatingPointTexture()) {
-            throw new RuntimeError('When description.pixelDatatype is FLOAT, this WebGL implementation must support the OES_texture_float extension.');
+        if ((pixelDatatype === PixelDatatype.FLOAT) && !this.floatingPointTexture) {
+            throw new DeveloperError('When options.pixelDatatype is FLOAT, this WebGL implementation must support the OES_texture_float extension.');
         }
 
         // Use premultiplied alpha for opaque textures should perform better on Chrome:
         // http://media.tojicode.com/webglCamp4/#20
-        var preMultiplyAlpha = description.preMultiplyAlpha || ((pixelFormat === PixelFormat.RGB) || (pixelFormat === PixelFormat.LUMINANCE));
-        var flipY = defaultValue(description.flipY, true);
+        var preMultiplyAlpha = options.preMultiplyAlpha || ((pixelFormat === PixelFormat.RGB) || (pixelFormat === PixelFormat.LUMINANCE));
+        var flipY = defaultValue(options.flipY, true);
 
         var gl = this._gl;
         var textureTarget = gl.TEXTURE_CUBE_MAP;
@@ -1555,7 +1373,7 @@ define([
             }
         }
 
-        if (source) {
+        if (defined(source)) {
             // TODO: _gl.pixelStorei(_gl._UNPACK_ALIGNMENT, 4);
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, preMultiplyAlpha);
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
@@ -1582,15 +1400,12 @@ define([
     /**
      * Creates a framebuffer with optional initial color, depth, and stencil attachments.
      * Framebuffers are used for render-to-texture effects; they allow us to render to
-     * a texture in one pass, and read from it in a later pass.
+     * textures in one pass, and read from it in a later pass.
      *
-     * @memberof Context
-     *
-     * @param {Object} [description] The initial framebuffer attachments as shown in Example 2.  The possible properties are <code>colorTexture</code>, <code>colorRenderbuffer</code>, <code>depthTexture</code>, <code>depthRenderbuffer</code>, <code>stencilRenderbuffer</code>, <code>depthStencilTexture</code>, and <code>depthStencilRenderbuffer</code>.
-     *
+     * @param {Object} [options] The initial framebuffer attachments as shown in the examplebelow.  The possible properties are <code>colorTextures</code>, <code>colorRenderbuffers</code>, <code>depthTexture</code>, <code>depthRenderbuffer</code>, <code>stencilRenderbuffer</code>, <code>depthStencilTexture</code>, and <code>depthStencilRenderbuffer</code>.
      * @returns {Framebuffer} The created framebuffer.
      *
-     * @exception {DeveloperError} Cannot have both a color texture and color renderbuffer attachment.
+     * @exception {DeveloperError} Cannot have both color texture and color renderbuffer attachments.
      * @exception {DeveloperError} Cannot have both a depth texture and depth renderbuffer attachment.
      * @exception {DeveloperError} Cannot have both a depth-stencil texture and depth-stencil renderbuffer attachment.
      * @exception {DeveloperError} Cannot have both a depth and depth-stencil renderbuffer.
@@ -1599,31 +1414,22 @@ define([
      * @exception {DeveloperError} The color-texture pixel-format must be a color format.
      * @exception {DeveloperError} The depth-texture pixel-format must be DEPTH_COMPONENT.
      * @exception {DeveloperError} The depth-stencil-texture pixel-format must be DEPTH_STENCIL.
+     * @exception {DeveloperError} The number of color attachments exceeds the number supported.
      *
      * @see Context#createTexture2D
      * @see Context#createCubeMap
      * @see Context#createRenderbuffer
      *
      * @example
-     * // Example 1. Create a framebuffer with no initial attachments,
-     * // and then add a color-texture attachment.
-     * var framebuffer = context.createFramebuffer();
-     * framebuffer.setColorTexture(context.createTexture2D({
-     *     width : 256,
-     *     height : 256,
-     * }));
-     *
-     * //////////////////////////////////////////////////////////////////
-     *
-     * // Example 2. Create a framebuffer with color and depth texture attachments.
-     * var width = context.getCanvas().clientWidth;
-     * var height = context.getCanvas().clientHeight;
+     * // Create a framebuffer with color and depth texture attachments.
+     * var width = context.canvas.clientWidth;
+     * var height = context.canvas.clientHeight;
      * var framebuffer = context.createFramebuffer({
-     *   colorTexture : context.createTexture2D({
+     *   colorTextures : [context.createTexture2D({
      *     width : width,
      *     height : height,
      *     pixelFormat : PixelFormat.RGBA
-     *   }),
+     *   })],
      *   depthTexture : context.createTexture2D({
      *     width : width,
      *     height : height,
@@ -1632,34 +1438,19 @@ define([
      *   })
      * });
      */
-    Context.prototype.createFramebuffer = function(description) {
-        return new Framebuffer(this._gl, description);
+    Context.prototype.createFramebuffer = function(options) {
+        return new Framebuffer(this._gl, this._maximumColorAttachments, options);
     };
 
-    /**
-     * DOC_TBA.
-     *
-     * @memberof Context
-     *
-     * @param {Object} [description] DOC_TBA.
-     *
-     * @returns {createRenderbuffer} DOC_TBA.
-     *
-     * @exception {DeveloperError} Invalid format.
-     * @exception {DeveloperError} Width must be greater than zero.
-     * @exception {DeveloperError} Width must be less than or equal to the maximum renderbuffer size.
-     * @exception {DeveloperError} Height must be greater than zero.
-     * @exception {DeveloperError} Height must be less than or equal to the maximum renderbuffer size.
-     *
-     * @see Context#createFramebuffer
-     */
-    Context.prototype.createRenderbuffer = function(description) {
-        description = defaultValue(description, defaultValue.EMPTY_OBJECT);
-        var format = defaultValue(description.format, RenderbufferFormat.RGBA4);
-        var width = defined(description.width) ? description.width : this._canvas.clientWidth;
-        var height = defined(description.height) ? description.height : this._canvas.clientHeight;
-
+    Context.prototype.createRenderbuffer = function(options) {
         var gl = this._gl;
+
+        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
+        var format = defaultValue(options.format, RenderbufferFormat.RGBA4);
+        var width = defined(options.width) ? options.width : gl.drawingBufferWidth;
+        var height = defined(options.height) ? options.height : gl.drawingBufferHeight;
+
+        //>>includeStart('debug', pragmas.debug);
         if (!RenderbufferFormat.validate(format)) {
             throw new DeveloperError('Invalid format.');
         }
@@ -1668,17 +1459,18 @@ define([
             throw new DeveloperError('Width must be greater than zero.');
         }
 
-        if (width > this.getMaximumRenderbufferSize()) {
-            throw new DeveloperError('Width must be less than or equal to the maximum renderbuffer size (' + this.getMaximumRenderbufferSize() + ').  Check getMaximumRenderbufferSize().');
+        if (width > this.maximumRenderbufferSize) {
+            throw new DeveloperError('Width must be less than or equal to the maximum renderbuffer size (' + this.maximumRenderbufferSize + ').  Check maximumRenderbufferSize.');
         }
 
         if (height <= 0) {
             throw new DeveloperError('Height must be greater than zero.');
         }
 
-        if (height > this.getMaximumRenderbufferSize()) {
-            throw new DeveloperError('Height must be less than or equal to the maximum renderbuffer size (' + this.getMaximumRenderbufferSize() + ').  Check getMaximumRenderbufferSize().');
+        if (height > this.maximumRenderbufferSize) {
+            throw new DeveloperError('Height must be less than or equal to the maximum renderbuffer size (' + this.maximumRenderbufferSize + ').  Check maximumRenderbufferSize.');
         }
+        //>>includeEnd('debug');
 
         return new Renderbuffer(gl, format, width, height);
     };
@@ -1691,9 +1483,7 @@ define([
      * state for a {@link DrawCommand} or {@link ClearCommand}.  All inputs states are optional.  Omitted states
      * use the defaults shown in the example below.
      *
-     * @memberof Context
-     *
-     * @param {Object} [renderState=undefined] The states defining the render state as shown in the example below.
+     * @param {Object} [renderState] The states defining the render state as shown in the example below.
      *
      * @exception {RuntimeError} renderState.lineWidth is out of range.
      * @exception {DeveloperError} Invalid renderState.frontFace.
@@ -1722,6 +1512,9 @@ define([
      * @exception {DeveloperError} renderState.viewport.width must be less than or equal to the maximum viewport width.
      * @exception {DeveloperError} renderState.viewport.height must be greater than or equal to zero.
      * @exception {DeveloperError} renderState.viewport.height must be less than or equal to the maximum viewport height.
+     *
+     * @see DrawCommand
+     * @see ClearCommand
      *
      * @example
      * var defaults = {
@@ -1797,15 +1590,11 @@ define([
      *         enabled : false,
      *         value : 1.0,
      *         invert : false
-     *      },
-     *     dither : true
+     *      }
      * };
      *
      * // Same as just context.createRenderState().
      * var rs = context.createRenderState(defaults);
-     *
-     * @see DrawCommand
-     * @see ClearCommand
      */
     Context.prototype.createRenderState = function(renderState) {
         var partialKey = JSON.stringify(renderState);
@@ -1833,28 +1622,16 @@ define([
         return cachedState;
     };
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @exception {DeveloperError} Invalid sampler.wrapS.
-     * @exception {DeveloperError} Invalid sampler.wrapT.
-     * @exception {DeveloperError} Invalid sampler.minificationFilter.
-     * @exception {DeveloperError} Invalid sampler.magnificationFilter.
-     *
-     * @see Context#createTexture2D
-     * @see Context#createCubeMap
-     */
     Context.prototype.createSampler = function(sampler) {
         var s = {
-            wrapS : sampler.wrapS || TextureWrap.CLAMP,
-            wrapT : sampler.wrapT || TextureWrap.CLAMP,
-            minificationFilter : sampler.minificationFilter || TextureMinificationFilter.LINEAR,
-            magnificationFilter : sampler.magnificationFilter || TextureMagnificationFilter.LINEAR,
+            wrapS : defaultValue(sampler.wrapS, TextureWrap.CLAMP_TO_EDGE),
+            wrapT : defaultValue(sampler.wrapT, TextureWrap.CLAMP_TO_EDGE),
+            minificationFilter : defaultValue(sampler.minificationFilter, TextureMinificationFilter.LINEAR),
+            magnificationFilter : defaultValue(sampler.magnificationFilter, TextureMagnificationFilter.LINEAR),
             maximumAnisotropy : (defined(sampler.maximumAnisotropy)) ? sampler.maximumAnisotropy : 1.0
         };
 
+        //>>includeStart('debug', pragmas.debug);
         if (!TextureWrap.validate(s.wrapS)) {
             throw new DeveloperError('Invalid sampler.wrapS.');
         }
@@ -1874,13 +1651,14 @@ define([
         if (s.maximumAnisotropy < 1.0) {
             throw new DeveloperError('sampler.maximumAnisotropy must be greater than or equal to one.');
         }
+        //>>includeEnd('debug');
 
         return s;
     };
 
-    Context.prototype._validateFramebuffer = function(framebuffer) {
-        if (this._validateFB) {
-            var gl = this._gl;
+    function validateFramebuffer(context, framebuffer) {
+        if (context.validateFramebuffer) {
+            var gl = context._gl;
             var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
 
             if (status !== gl.FRAMEBUFFER_COMPLETE) {
@@ -1904,7 +1682,7 @@ define([
                 throw new DeveloperError(message);
             }
         }
-    };
+    }
 
     function applyRenderState(context, renderState, passState) {
         var previousState = context._currentRenderState;
@@ -1915,20 +1693,36 @@ define([
          // else same render state as before so state is already applied.
     }
 
+    var scratchBackBufferArray;
+    // this check must use typeof, not defined, because defined doesn't work with undeclared variables.
+    if (typeof WebGLRenderingContext !== 'undefined') {
+        scratchBackBufferArray = [WebGLRenderingContext.BACK];
+    }
+
+    function bindFramebuffer(context, framebuffer) {
+        if (framebuffer !== context._currentFramebuffer) {
+            context._currentFramebuffer = framebuffer;
+            var buffers = scratchBackBufferArray;
+
+            if (defined(framebuffer)) {
+                framebuffer._bind();
+                validateFramebuffer(context, framebuffer);
+
+                // TODO: Need a way for a command to give what draw buffers are active.
+                buffers = framebuffer._getActiveColorAttachments();
+            } else {
+                var gl = context._gl;
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            }
+
+            if (context.drawBuffers) {
+                context._drawBuffers.drawBuffersWEBGL(buffers);
+            }
+        }
+    }
+
     var defaultClearCommand = new ClearCommand();
 
-    /**
-     * Executes the specified clear command.
-     *
-     * @memberof Context
-     *
-     * @param {ClearCommand} [clearCommand] The command with which to clear.
-     * @param {PassState} [passState] The state for the current rendering pass.
-     *
-     * @memberof Context
-     *
-     * @see ClearCommand
-     */
     Context.prototype.clear = function(clearCommand, passState) {
         clearCommand = defaultValue(clearCommand, defaultClearCommand);
         passState = defaultValue(passState, this._defaultPassState);
@@ -1969,198 +1763,129 @@ define([
 
         // The command's framebuffer takes presidence over the pass' framebuffer, e.g., for off-screen rendering.
         var framebuffer = defaultValue(clearCommand.framebuffer, passState.framebuffer);
-
-        if (defined(framebuffer)) {
-            framebuffer._bind();
-            this._validateFramebuffer(framebuffer);
-        }
+        bindFramebuffer(this, framebuffer);
 
         gl.clear(bitmask);
-
-        if (defined(framebuffer)) {
-            framebuffer._unBind();
-        }
     };
 
-    /**
-     * Executes the specified draw command.
-     *
-     * @memberof Context
-     *
-     * @param {DrawCommand} drawCommand The command with which to draw.
-     * @param {PassState} [passState] The state for the current rendering pass
-     *
-     * @memberof Context
-     *
-     * @exception {DeveloperError} drawCommand is required.
-     * @exception {DeveloperError} drawCommand.primitiveType is required and must be valid.
-     * @exception {DeveloperError} drawCommand.shaderProgram is required.
-     * @exception {DeveloperError} drawCommand.vertexArray is required.
-     * @exception {DeveloperError} drawCommand.offset must be omitted or greater than or equal to zero.
-     * @exception {DeveloperError} Program validation failed.
-     * @exception {DeveloperError} Framebuffer is not complete.
-     *
-     * @example
-     * // Example 1.  Draw a single triangle specifying only required arguments
-     * context.draw({
-     *     primitiveType : PrimitiveType.TRIANGLES,
-     *     shaderProgram : sp,
-     *     vertexArray   : va,
-     * });
-     *
-     * ////////////////////////////////////////////////////////////////////////////////
-     *
-     * // Example 2.  Draw a single triangle specifying every argument
-     * context.draw({
-     *     primitiveType : PrimitiveType.TRIANGLES,
-     *     offset        : 0,
-     *     count         : 3,
-     *     framebuffer   : fb,
-     *     shaderProgram : sp,
-     *     vertexArray   : va,
-     *     renderState   : rs
-     * });
-     *
-     * @see Context#createShaderProgram
-     * @see Context#createVertexArray
-     * @see Context#createFramebuffer
-     * @see Context#createRenderState
-     */
-    Context.prototype.draw = function(drawCommand, passState) {
-        passState = defaultValue(passState, this._defaultPassState);
-        this.beginDraw(drawCommand, passState);
-        this.continueDraw(drawCommand);
-        this.endDraw();
-    };
+    function beginDraw(context, framebuffer, drawCommand, passState, renderState, shaderProgram) {
+        var rs = defaultValue(defaultValue(renderState, drawCommand.renderState), context._defaultRenderState);
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     */
-    Context.prototype.beginDraw = function(command, passState) {
-        if (!defined(command)) {
-            throw new DeveloperError('command is required.');
-        }
-
-        if (!defined(command.shaderProgram)) {
-            throw new DeveloperError('command.shaderProgram is required.');
-        }
-
-        // The command's framebuffer takes presidence over the pass' framebuffer, e.g., for off-screen rendering.
-        var framebuffer = defaultValue(command.framebuffer, passState.framebuffer);
-        var sp = command.shaderProgram;
-        var rs = (defined(command.renderState)) ? command.renderState : this._defaultRenderState;
-
-        if ((defined(framebuffer)) && rs.depthTest) {
-            if (rs.depthTest.enabled && !framebuffer.hasDepthAttachment()) {
-                throw new DeveloperError('The depth test can not be enabled (command.renderState.depthTest.enabled) because the framebuffer (command.framebuffer) does not have a depth or depth-stencil renderbuffer.');
+        //>>includeStart('debug', pragmas.debug);
+        if (defined(framebuffer) && rs.depthTest) {
+            if (rs.depthTest.enabled && !framebuffer.hasDepthAttachment) {
+                throw new DeveloperError('The depth test can not be enabled (drawCommand.renderState.depthTest.enabled) because the framebuffer (drawCommand.framebuffer) does not have a depth or depth-stencil renderbuffer.');
             }
         }
+        //>>includeEnd('debug');
 
-        ///////////////////////////////////////////////////////////////////////
+        bindFramebuffer(context, framebuffer);
 
-        applyRenderState(this, rs, passState);
-
-        if (defined(framebuffer)) {
-            framebuffer._bind();
-            this._validateFramebuffer(framebuffer);
-        }
+        var sp = defaultValue(shaderProgram, drawCommand.shaderProgram);
         sp._bind();
+        context._maxFrameTextureUnitIndex = Math.max(context._maxFrameTextureUnitIndex, sp.maximumTextureUnitIndex);
 
-        this._currentFramebuffer = framebuffer;
-        this._currentSp = sp;
-    };
+        applyRenderState(context, rs, passState);
+    }
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     */
-    Context.prototype.continueDraw = function(command) {
-        var sp = this._currentSp;
-        if (!defined(sp)) {
-            throw new DeveloperError('beginDraw must be called before continueDraw.');
-        }
+    function continueDraw(context, drawCommand, shaderProgram) {
+        var primitiveType = drawCommand.primitiveType;
+        var va = drawCommand.vertexArray;
+        var offset = drawCommand.offset;
+        var count = drawCommand.count;
 
-        if (!defined(command)) {
-            throw new DeveloperError('command is required.');
-        }
-
-        var primitiveType = command.primitiveType;
+        //>>includeStart('debug', pragmas.debug);
         if (!PrimitiveType.validate(primitiveType)) {
-            throw new DeveloperError('command.primitiveType is required and must be valid.');
+            throw new DeveloperError('drawCommand.primitiveType is required and must be valid.');
         }
 
-        if (!defined(command.vertexArray)) {
-            throw new DeveloperError('command.vertexArray is required.');
-        }
-
-        var va = command.vertexArray;
-        var indexBuffer = va.getIndexBuffer();
-
-        var offset = command.offset;
-        var count = command.count;
-        var hasIndexBuffer = defined(indexBuffer);
-
-        if (hasIndexBuffer) {
-            offset = (offset || 0) * indexBuffer.getBytesPerIndex(); // in bytes
-            count = count || indexBuffer.getNumberOfIndices();
-        } else {
-            offset = offset || 0; // in vertices
-            count = count || va._getNumberOfVertices();
+        if (!defined(va)) {
+            throw new DeveloperError('drawCommand.vertexArray is required.');
         }
 
         if (offset < 0) {
-            throw new DeveloperError('command.offset must be omitted or greater than or equal to zero.');
+            throw new DeveloperError('drawCommand.offset must be omitted or greater than or equal to zero.');
         }
 
-        if (count > 0) {
-            this._us.setModel(defaultValue(command.modelMatrix, Matrix4.IDENTITY));
-            sp._setUniforms(command.uniformMap, this._us, this._validateSP);
+        if (count < 0) {
+            throw new DeveloperError('drawCommand.count must be omitted or greater than or equal to zero.');
+        }
+        //>>includeEnd('debug');
+
+        context._us.model = defaultValue(drawCommand.modelMatrix, Matrix4.IDENTITY);
+        var sp = defaultValue(shaderProgram, drawCommand.shaderProgram);
+        sp._setUniforms(drawCommand.uniformMap, context._us, context.validateShaderProgram);
+
+        var indexBuffer = va.indexBuffer;
+
+        if (defined(indexBuffer)) {
+            offset = offset * indexBuffer.bytesPerIndex; // offset in vertices to offset in bytes
+            count = defaultValue(count, indexBuffer.numberOfIndices);
 
             va._bind();
+            context._gl.drawElements(primitiveType, count, indexBuffer.indexDatatype, offset);
+            va._unBind();
+        } else {
+            count = defaultValue(count, va.numberOfVertices);
 
-            if (hasIndexBuffer) {
-                this._gl.drawElements(primitiveType.value, count, indexBuffer.getIndexDatatype().value, offset);
-            } else {
-                this._gl.drawArrays(primitiveType.value, offset, count);
-            }
-
+            va._bind();
+            context._gl.drawArrays(primitiveType, offset, count);
             va._unBind();
         }
-    };
+    }
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     */
-    Context.prototype.endDraw = function() {
-        if (defined(this._currentFramebuffer)) {
-            this._currentFramebuffer._unBind();
-            this._currentFramebuffer = undefined;
+    Context.prototype.draw = function(drawCommand, passState, renderState, shaderProgram) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(drawCommand)) {
+            throw new DeveloperError('drawCommand is required.');
         }
-        this._currentSp._unBind();
-        this._currentSp = undefined;
+
+        if (!defined(drawCommand.shaderProgram)) {
+            throw new DeveloperError('drawCommand.shaderProgram is required.');
+        }
+        //>>includeEnd('debug');
+
+        passState = defaultValue(passState, this._defaultPassState);
+        // The command's framebuffer takes presidence over the pass' framebuffer, e.g., for off-screen rendering.
+        var framebuffer = defaultValue(drawCommand.framebuffer, passState.framebuffer);
+
+        beginDraw(this, framebuffer, drawCommand, passState, renderState, shaderProgram);
+        continueDraw(this, drawCommand, shaderProgram);
     };
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @exception {DeveloperError} readState.width must be greater than zero.
-     * @exception {DeveloperError} readState.height must be greater than zero.
-     */
+    Context.prototype.endFrame = function() {
+        var gl = this._gl;
+        gl.useProgram(null);
+
+        this._currentFramebuffer = undefined;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        var buffers = scratchBackBufferArray;
+        if (this.drawBuffers) {
+            this._drawBuffers.drawBuffersWEBGL(scratchBackBufferArray);
+        }
+
+        var length = this._maxFrameTextureUnitIndex;
+        this._maxFrameTextureUnitIndex = 0;
+
+        for (var i = 0; i < length; ++i) {
+            gl.activeTexture(gl.TEXTURE0 + i);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+        }
+    };
+
     Context.prototype.readPixels = function(readState) {
+        var gl = this._gl;
+
         readState = readState || {};
         var x = Math.max(readState.x || 0, 0);
         var y = Math.max(readState.y || 0, 0);
-        var width = readState.width || this._canvas.clientWidth;
-        var height = readState.height || this._canvas.clientHeight;
-        var framebuffer = readState.framebuffer || null;
+        var width = readState.width || gl.drawingBufferWidth;
+        var height = readState.height || gl.drawingBufferHeight;
+        var framebuffer = readState.framebuffer;
 
+        //>>includeStart('debug', pragmas.debug);
         if (width <= 0) {
             throw new DeveloperError('readState.width must be greater than zero.');
         }
@@ -2168,20 +1893,13 @@ define([
         if (height <= 0) {
             throw new DeveloperError('readState.height must be greater than zero.');
         }
+        //>>includeEnd('debug');
 
         var pixels = new Uint8Array(4 * width * height);
 
-        if (framebuffer) {
-            framebuffer._bind();
-            this._validateFramebuffer(framebuffer);
-        }
+        bindFramebuffer(this, framebuffer);
 
-        var gl = this._gl;
         gl.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-
-        if (framebuffer) {
-            framebuffer._unBind();
-        }
 
         return pixels;
     };
@@ -2193,7 +1911,7 @@ define([
     }
 
     function computeAttributeSizeInBytes(attribute) {
-        return attribute.componentDatatype.sizeInBytes * attribute.componentsPerAttribute;
+        return ComponentDatatype.getSizeInBytes(attribute.componentDatatype) * attribute.componentsPerAttribute;
     }
 
     function interleaveAttributes(attributes) {
@@ -2210,7 +1928,7 @@ define([
                     defined(attributes[name].values)) {
                 names.push(name);
 
-                if (attributes[name].componentDatatype.value === ComponentDatatype.DOUBLE.value) {
+                if (attributes[name].componentDatatype === ComponentDatatype.DOUBLE) {
                     attributes[name].componentDatatype = ComponentDatatype.FLOAT;
                     attributes[name].values = ComponentDatatype.createTypedArray(ComponentDatatype.FLOAT, attributes[name].values);
                 }
@@ -2240,7 +1958,7 @@ define([
 
         // Sort attributes by the size of their components.  From left to right, a vertex stores floats, shorts, and then bytes.
         names.sort(function(left, right) {
-            return attributes[right].componentDatatype.sizeInBytes - attributes[left].componentDatatype.sizeInBytes;
+            return ComponentDatatype.getSizeInBytes(attributes[right].componentDatatype) - ComponentDatatype.getSizeInBytes(attributes[left].componentDatatype);
         });
 
         // Compute sizes and strides.
@@ -2258,7 +1976,7 @@ define([
         if (vertexSizeInBytes > 0) {
             // Pad each vertex to be a multiple of the largest component datatype so each
             // attribute can be addressed using typed arrays.
-            var maxComponentSizeInBytes = attributes[names[0]].componentDatatype.sizeInBytes; // Sorted large to small
+            var maxComponentSizeInBytes = ComponentDatatype.getSizeInBytes(attributes[names[0]].componentDatatype); // Sorted large to small
             var remainder = vertexSizeInBytes % maxComponentSizeInBytes;
             if (remainder !== 0) {
                 vertexSizeInBytes += (maxComponentSizeInBytes - remainder);
@@ -2273,7 +1991,7 @@ define([
 
             for (j = 0; j < namesLength; ++j) {
                 name = names[j];
-                var sizeInBytes = attributes[name].componentDatatype.sizeInBytes;
+                var sizeInBytes = ComponentDatatype.getSizeInBytes(attributes[name].componentDatatype);
 
                 views[name] = {
                     pointer : ComponentDatatype.createTypedArray(attributes[name].componentDatatype, buffer),
@@ -2319,19 +2037,17 @@ define([
      * <br /><br />
      * The <code>geometry</code> argument should use the standard layout like the geometry returned by {@link BoxGeometry}.
      * <br /><br />
-     * <code>creationArguments</code> can have four properties:
+     * <code>options</code> can have four properties:
      * <ul>
      *   <li><code>geometry</code>:  The source geometry containing data used to create the vertex array.</li>
-     *   <li><code>attributeIndices</code>:  An object that maps geometry attribute names to vertex shader attribute indices.</li>
+     *   <li><code>attributeLocations</code>:  An object that maps geometry attribute names to vertex shader attribute locations.</li>
      *   <li><code>bufferUsage</code>:  The expected usage pattern of the vertex array's buffers.  On some WebGL implementations, this can significantly affect performance.  See {@link BufferUsage}.  Default: <code>BufferUsage.DYNAMIC_DRAW</code>.</li>
-     *   <li><code>vertexLayout</code>:  Determines if all attributes are interleaved in a single vertex buffer or if each attribute is stored in a separate vertex buffer.  Default: <code>VertexLayout.SEPARATE</code>.</li>
+     *   <li><code>interleave</code>:  Determines if all attributes are interleaved in a single vertex buffer or if each attribute is stored in a separate vertex buffer.  Default: <code>false</code>.</li>
      * </ul>
      * <br />
-     * If <code>creationArguments</code> is not specified or the <code>geometry</code> contains no data, the returned vertex array is empty.
+     * If <code>options</code> is not specified or the <code>geometry</code> contains no data, the returned vertex array is empty.
      *
-     * @memberof Context
-     *
-     * @param {Object} [creationArguments=undefined] An object defining the geometry, attribute indices, buffer usage, and vertex layout used to create the vertex array.
+     * @param {Object} [options] An object defining the geometry, attribute indices, buffer usage, and vertex layout used to create the vertex array.
      *
      * @exception {RuntimeError} Each attribute list must have the same number of vertices.
      * @exception {DeveloperError} The geometry must have zero or one index lists.
@@ -2340,7 +2056,7 @@ define([
      * @see Context#createVertexArray
      * @see Context#createVertexBuffer
      * @see Context#createIndexBuffer
-     * @see GeometryPipeline.createAttributeIndices
+     * @see GeometryPipeline.createAttributeLocations
      * @see ShaderProgram
      *
      * @example
@@ -2349,36 +2065,34 @@ define([
      * // interleaved by default.
      * var geometry = new BoxGeometry();
      * var va = context.createVertexArrayFromGeometry({
-     *     geometry             : geometry,
-     *     attributeIndices : GeometryPipeline.createAttributeIndices(geometry),
+     *     geometry           : geometry,
+     *     attributeLocations : GeometryPipeline.createAttributeLocations(geometry),
      * });
      *
-     * ////////////////////////////////////////////////////////////////////////////////
-     *
+     * @example
      * // Example 2. Creates a vertex array with interleaved attributes in a
      * // single vertex buffer.  The vertex and index buffer have static draw usage.
      * var va = context.createVertexArrayFromGeometry({
-     *     geometry             : geometry,
-     *     attributeIndices : GeometryPipeline.createAttributeIndices(geometry),
-     *     bufferUsage      : BufferUsage.STATIC_DRAW,
-     *     vertexLayout     : VertexLayout.INTERLEAVED
+     *     geometry           : geometry,
+     *     attributeLocations : GeometryPipeline.createAttributeLocations(geometry),
+     *     bufferUsage        : BufferUsage.STATIC_DRAW,
+     *     interleave         : true
      * });
      *
-     * ////////////////////////////////////////////////////////////////////////////////
-     *
+     * @example
      * // Example 3.  When the caller destroys the vertex array, it also destroys the
      * // attached vertex buffer(s) and index buffer.
      * va = va.destroy();
      */
-    Context.prototype.createVertexArrayFromGeometry = function(creationArguments) {
-        var ca = defaultValue(creationArguments, defaultValue.EMPTY_OBJECT);
-        var geometry = defaultValue(ca.geometry, defaultValue.EMPTY_OBJECT);
+    Context.prototype.createVertexArrayFromGeometry = function(options) {
+        options = defaultValue(options, defaultValue.EMPTY_OBJECT);
+        var geometry = defaultValue(options.geometry, defaultValue.EMPTY_OBJECT);
 
-        var bufferUsage = defaultValue(ca.bufferUsage, BufferUsage.DYNAMIC_DRAW);
+        var bufferUsage = defaultValue(options.bufferUsage, BufferUsage.DYNAMIC_DRAW);
 
-        var attributeIndices = defaultValue(ca.attributeIndices, defaultValue.EMPTY_OBJECT);
-        var interleave = (defined(ca.vertexLayout)) && (ca.vertexLayout === VertexLayout.INTERLEAVED);
-        var createdVAAttributes = ca.vertexArrayAttributes;
+        var attributeLocations = defaultValue(options.attributeLocations, defaultValue.EMPTY_OBJECT);
+        var interleave = defaultValue(options.interleave, false);
+        var createdVAAttributes = options.vertexArrayAttributes;
 
         var name;
         var attribute;
@@ -2401,7 +2115,7 @@ define([
                         if (defined(attribute.values)) {
                             // Common case: per-vertex attributes
                             vaAttributes.push({
-                                index : attributeIndices[name],
+                                index : attributeLocations[name],
                                 vertexBuffer : vertexBuffer,
                                 componentDatatype : attribute.componentDatatype,
                                 componentsPerAttribute : attribute.componentsPerAttribute,
@@ -2412,7 +2126,7 @@ define([
                         } else {
                             // Constant attribute for all vertices
                             vaAttributes.push({
-                                index : attributeIndices[name],
+                                index : attributeLocations[name],
                                 value : attribute.value,
                                 componentDatatype : attribute.componentDatatype,
                                 normalize : attribute.normalize
@@ -2428,7 +2142,7 @@ define([
                     attribute = attributes[name];
 
                     var componentDatatype = attribute.componentDatatype;
-                    if (componentDatatype.value === ComponentDatatype.DOUBLE.value) {
+                    if (componentDatatype === ComponentDatatype.DOUBLE) {
                         componentDatatype = ComponentDatatype.FLOAT;
                     }
 
@@ -2438,7 +2152,7 @@ define([
                     }
 
                     vaAttributes.push({
-                        index : attributeIndices[name],
+                        index : attributeLocations[name],
                         vertexBuffer : vertexBuffer,
                         value : attribute.value,
                         componentDatatype : componentDatatype,
@@ -2452,7 +2166,7 @@ define([
         var indexBuffer;
         var indices = geometry.indices;
         if (defined(indices)) {
-            if ((Geometry.computeNumberOfVertices(geometry) > CesiumMath.SIXTY_FOUR_KILOBYTES) && this.getElementIndexUint()) {
+            if ((Geometry.computeNumberOfVertices(geometry) > CesiumMath.SIXTY_FOUR_KILOBYTES) && this.elementIndexUint) {
                 indexBuffer = this.createIndexBuffer(new Uint32Array(indices), bufferUsage, IndexDatatype.UNSIGNED_INT);
             } else{
                 indexBuffer = this.createIndexBuffer(new Uint16Array(indices), bufferUsage, IndexDatatype.UNSIGNED_SHORT);
@@ -2462,13 +2176,71 @@ define([
         return this.createVertexArray(vaAttributes, indexBuffer);
     };
 
-    /**
-     * DOC_TBA
-     *
-     * @memberof Context
-     *
-     * @see Context#pick
-     */
+    var viewportQuadAttributeLocations = {
+        position : 0,
+        textureCoordinates : 1
+    };
+
+    Context.prototype.createViewportQuadCommand = function(fragmentShaderSource, overrides) {
+        // Per-context cache for viewport quads
+        var vertexArray = this.cache.viewportQuad_vertexArray;
+
+        if (!defined(vertexArray)) {
+            var geometry = new Geometry({
+                attributes : {
+                    position : new GeometryAttribute({
+                        componentDatatype : ComponentDatatype.FLOAT,
+                        componentsPerAttribute : 2,
+                        values : [
+                           -1.0, -1.0,
+                            1.0, -1.0,
+                            1.0,  1.0,
+                           -1.0,  1.0
+                        ]
+                    }),
+
+                    textureCoordinates : new GeometryAttribute({
+                        componentDatatype : ComponentDatatype.FLOAT,
+                        componentsPerAttribute : 2,
+                        values : [
+                            0.0, 0.0,
+                            1.0, 0.0,
+                            1.0, 1.0,
+                            0.0, 1.0
+                        ]
+                    })
+                },
+                // Workaround Internet Explorer 11.0.8 lack of TRIANGLE_FAN
+                indices : new Uint16Array([0, 1, 2, 0, 2, 3]),
+                primitiveType : PrimitiveType.TRIANGLES
+            });
+
+            vertexArray = this.createVertexArrayFromGeometry({
+                geometry : geometry,
+                attributeLocations : {
+                    position : 0,
+                    textureCoordinates : 1
+                },
+                bufferUsage : BufferUsage.STATIC_DRAW,
+                interleave : true
+            });
+
+            this.cache.viewportQuad_vertexArray = vertexArray;
+        }
+
+        overrides = defaultValue(overrides, defaultValue.EMPTY_OBJECT);
+
+        return new DrawCommand({
+            vertexArray : vertexArray,
+            primitiveType : PrimitiveType.TRIANGLES,
+            renderState : overrides.renderState,
+            shaderProgram : this.createShaderProgram(ViewportQuadVS, fragmentShaderSource, viewportQuadAttributeLocations),
+            uniformMap : overrides.uniformMap,
+            owner : overrides.owner,
+            framebuffer : overrides.framebuffer
+        });
+    };
+
     Context.prototype.createPickFramebuffer = function() {
         return new PickFramebuffer(this);
     };
@@ -2476,23 +2248,20 @@ define([
     /**
      * Gets the object associated with a pick color.
      *
-     * @memberof Context
-     *
-     * @param {Color} The pick color.
-     *
+     * @param {Color} pickColor The pick color.
      * @returns {Object} The object associated with the pick color, or undefined if no object is associated with that color.
      *
-     * @exception {DeveloperError} pickColor is required.
+     * @see Context#createPickId
      *
      * @example
      * var object = context.getObjectByPickColor(pickColor);
-     *
-     * @see Context#createPickId
      */
     Context.prototype.getObjectByPickColor = function(pickColor) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(pickColor)) {
             throw new DeveloperError('pickColor is required.');
         }
+        //>>includeEnd('debug');
 
         return this._pickObjects[pickColor.toRgba()];
     };
@@ -2502,6 +2271,17 @@ define([
         this.key = key;
         this.color = color;
     }
+
+    defineProperties(PickId.prototype, {
+        object : {
+            get : function() {
+                return this._pickObjects[this.key];
+            },
+            set : function(value) {
+                this._pickObjects[this.key] = value;
+            }
+        }
+    });
 
     PickId.prototype.destroy = function() {
         delete this._pickObjects[this.key];
@@ -2513,24 +2293,25 @@ define([
      * The ID has an RGBA color value unique to this context.  You must call destroy()
      * on the pick ID when destroying the input object.
      *
-     * @memberof Context
-     *
      * @param {Object} object The object to associate with the pick ID.
-     *
      * @returns {Object} A PickId object with a <code>color</code> property.
      *
-     * @exception {DeveloperError} object is required.
      * @exception {RuntimeError} Out of unique Pick IDs.
      *
      * @see Context#getObjectByPickColor
      *
      * @example
-     * this._pickId = context.createPickId(this);
+     * this._pickId = context.createPickId({
+     *   primitive : this,
+     *   id : this.id
+     * });
      */
     Context.prototype.createPickId = function(object) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(object)) {
             throw new DeveloperError('object is required.');
         }
+        //>>includeEnd('debug');
 
         // the increment and assignment have to be separate statements to
         // actually detect overflow in the Uint32 value

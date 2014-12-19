@@ -37,6 +37,7 @@
     <script type="text/javascript" src="async.js"></script>
 
     <script type="text/javascript" src="closure/base.js"></script>
+    <script type="text/javascript">goog.require('goog.vec.Vec2')</script>
     <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
     <script type="text/javascript">goog.require('goog.vec.Quaternion')</script>
 
@@ -49,21 +50,6 @@
     <script type="text/javascript" src="Class.create.js"></script>
     <script type="text/javascript" src="rAF.js"></script>
     <script type="text/javascript" src="performance.now-polyfill.js"></script>
- 
-	<script type="text/javascript">
-        require(['pace.min'], function(pace){
-            pace.start({
-                ajax: false, // disabled
-                document: false, // disabled
-                eventLag: {
-                    minSamples: 50
-                },
-                elements: {
-                    selectors: ['#image']
-                }
-            });
-        });
-	</script>
 
     <!-- This is the main client library. vwf.js creates a framework manager and attaches it to  -->
     <!-- the global window object as window.vwf. All access to the framework is through that     -->
@@ -164,12 +150,16 @@
 
     <!-- The main content renders to "#vwf-root", the item with the id "vwf-root".               -->
 
+    <!-- The loading spinner -->
+    <div id="vwf-loading-spinner" class="pace pace-active"><div class="pace-activity"></div></div>
+
     <div id="incompatibleBrowser">
         <div>
             <span style="color:#3090C7;"><br/><br/>Your browser does not support Virtual World Framework. Please review our <a href='http://www.virtual.wf/documentation.html#requirements'>requirements</a> for supported browser versions.</span>
         </div>
     </div>
     <div id="vwf-root"></div>
+  
   </body>
 
 </html>

@@ -273,6 +273,62 @@ define( [ "module",
             return a.href;
         },
 
+        // -- merge --------------------------------------------------------------------------------
+
+        /// Merge fields from the `source` objects into `target`.
+
+        merge: function( target /* [, source1 [, source2 ... ] ] */ ) {
+
+            for ( var index = 1; index < arguments.length; index++ ) {
+                var source = arguments[index];
+
+                Object.keys( source ).forEach( function( key ) {
+                    if ( source[key] !== undefined ) {
+                        target[key] = source[key];
+                    }
+                } );
+            }
+
+            return target;
+        },
+
+        validObject: function( obj ) {
+            var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
+            return ( objType != 'null' && objType != 'undefined' );
+        },
+
+        hasFileType: function( value ) {
+            return ( this.fileType( value ) !== undefined )
+        },
+
+        fileType: function( filename ) {
+            var fileFormat = undefined;
+
+            var temp = filename.split( '.' );
+            if ( temp.length > 1 ) {
+                fileFormat = temp.pop();
+                if ( fileFormat.length > 5 ) {
+                    fileFormat = undefined;
+                }
+            }
+            return fileFormat;
+        },  
+
+        ifPrototypeGetId: function( appID, prototypes, nodeID, childID ) {
+            var prototypeID = undefined;
+            if ( ( nodeID == 0 && childID != appID ) || prototypes[ nodeID ] !== undefined ) {
+                if ( nodeID != 0 || childID != appID ) {
+                    prototypeID = nodeID ? nodeID : childID;
+                    if ( prototypes[ prototypeID ] !== undefined ) {
+                        prototypeID = childID;
+                    }
+                    return prototypeID;
+                } 
+            }
+            return undefined;
+        },
+
+
         // -- xpath --------------------------------------------------------------------------------
 
         /// XPath resolution functions.

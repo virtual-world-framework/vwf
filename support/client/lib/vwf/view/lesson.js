@@ -172,81 +172,135 @@ define( [ "module", "vwf/view", "jquery", "jquery-ui" ], function( module, view,
             $('body').append(instructionPanelDiv);
         },
         
-        createdProperty: function (nodeID, propertyName, propertyValue) {
-            return this.initializedProperty(nodeID, propertyName, propertyValue);   
+        createdProperty: function( nodeId, propertyName, propertyValue ) {
+            return this.satProperty( nodeId, propertyName, propertyValue );   
         },
 
-        initializedProperty: function (nodeID, propertyName, propertyValue) {
-            switch (propertyName) {
-              case "text": 
-                if(propertyValue) this.lessonSteps[nodeID] = propertyValue;
-                break;
-            }
+        initializedProperty: function (nodeId, propertyName, propertyValue) {
+            return this.satProperty( nodeId, propertyName, propertyValue );
         },
 
-        firedEvent: function (nodeId, eventName, eventParameters) {
-            if(nodeId == vwf_view.kernel.find('', '/lesson')[0])
-            {
-                switch (eventName) {
-                  case "entering":
-                    this.currentTaskName = vwf_view.kernel.name(nodeId);
-                    this.progressWidth = 10;
-                    $('#lessonProgressBar').css('display', 'block');
-                    $('#lessonProgressBar').css('width', '10px');
-                    $('#message').css('display', 'none');
-                    $('#startButton').css('display', 'none');
-                    $('#nextButton').css('display', 'inline-block');
-                    $('a').css('color', 'white');
-                    if($('#accordion').html() == '') updateLessonInstructions.call(self, this.lessonSteps);
+        satProperty: function( nodeId, propertyName, propertyValue ) {
+            switch ( propertyName ) {
+                case "status":
+                    var status = propertyValue;
+                    if ( nodeId === vwf_view.kernel.find( '', '/lesson' )[ 0 ] ) {
+                        switch ( status ) {
+                            case "entered":
+                                this.currentTaskName = vwf_view.kernel.name( nodeId );
+                                this.progressWidth = 10;
+                                $( '#lessonProgressBar' ).css( 'display', 'block' );
+                                $( '#lessonProgressBar' ).css( 'width', '10px' );
+                                $( '#message' ).css( 'display', 'none' );
+                                $( '#startButton' ).css( 'display', 'none' );
+                                $( '#nextButton' ).css( 'display', 'inline-block' );
+                                $( 'a' ).css( 'color', 'white' );
+                                if ( $( '#accordion' ).html() == '' ) {
+                                    updateLessonInstructions.call( self, this.lessonSteps );
+                                }
+                                break;
+                            case "completed":
+                                $('#lessonProgressBar').css('width', '100%');
+                                $('#nextButton').css('display', 'none');
+                                $('#completeButton').css('display', 'inline-block');
+                                break;
+                            case "inactive":
+                                $( '#lessonProgressBar' ).css( 'display', 'none' );
+                                $( '#completeButton' ).css( 'display', 'none' );
+                                $( '#message' ).css( 'display', 'inline-block' );
+                                $( '#startButton' ).css( 'display', 'inline-block' );
+                                break;
+                        }
+                    } else {
+                        var stepDivId = nodeId.replace( /\:/g, "_" ).replace( /\./g, "-" );
+                        switch ( status ) {
+                            case "entered":
+                                this.currentTaskName = vwf_view.kernel.name( nodeId );
+                                var $stepDiv = $( "#" + stepDivId );
+                                if ( $stepDiv.length ) {
+                                    var $accordion = $stepDiv.parent().parent();
+                                    if ( $accordion.length ) {
+                                        $accordion.accordion( "option", "active", 
+                                            Number( $stepDiv.attr( "data-index" ) ) );
+                                    }
+                                }
+                                break;
+                            case "completed":
+                                if ( $( '#div--' + stepDivId ) ) {
+                                    $( '#' + stepDivId ).css( 'color', 'green' );
+                                }
+                                var numTasks = 0;
+                                for ( var step in this.lessonSteps ) { 
+                                    numTasks++; 
+                                }
+                                var widthDelta = Math.ceil( 100 / numTasks );
+                                var pixelWidth = $( '#progress' ).css( 'width' );
+                                pixelWidth = pixelWidth.substring( 0, pixelWidth.length - 2 );
+                                this.progressWidth = this.progressWidth + 
+                                    ( pixelWidth * widthDelta * 0.01 );
+                                $( '#lessonProgressBar' ).css( 'width', this.progressWidth + 'px' );
+                                break;
+                            case "inactive":
+                                var $accordion = $( '#accordion--' + stepDivId );
+                                if ( $accordion.length ) {
+                                    $accordion.accordion( "option", "active", false );
+                                }
+                                break;
+                        }
+                    }
                     break;
-                  case "completed":
-                    $('#lessonProgressBar').css('width', '100%');
-                    $('#nextButton').css('display', 'none');
-                    $('#completeButton').css('display', 'inline-block');
+                case "text": 
+                    if ( propertyValue ) {
+                        this.lessonSteps[ nodeId ] = propertyValue;
+                    }
                     break;
-                  case "exiting":
-                    $('#lessonProgressBar').css('display', 'none');
-                    $('#completeButton').css('display', 'none');
-                    $('#message').css('display', 'inline-block');
-                    $('#startButton').css('display', 'inline-block');
-                }
             }
-            else
-            {
-                switch (eventName) {
-                  case "entering":
-                    this.currentTaskName = vwf_view.kernel.name(nodeId);
-                    var stepDivName = '#' + nodeId.replace(/\:/g, "_").replace(/\./g, "-");
-                    if($(stepDivName).length) $(stepDivName).trigger('click');
-                    break;
-                  case "completed":
-                    var htmlDiv = nodeId.replace(/\:/g, "_").replace(/\./g, "-");
-                    if( $('#div--' + htmlDiv) ) $('#' + htmlDiv).css('color', 'green');
-                    var numTasks = 0;
-                    for (var step in this.lessonSteps) { numTasks++; }
-                    var widthDelta = Math.ceil(100 / numTasks);
-                    var pixelWidth = $('#progress').css('width');
-                    pixelWidth = pixelWidth.substring(0, pixelWidth.length-2);
-                    this.progressWidth = this.progressWidth + (pixelWidth*widthDelta*0.01);
-                    $('#lessonProgressBar').css('width', this.progressWidth+'px');
-                    break;
-                  case "exiting":
-                    var accordionName = '#accordion--' + nodeId.replace(/\:/g, "_").replace(/\./g, "-");
-                    if($(accordionName).length) $(accordionName).accordion("option", "active", false);
-                    break;
-                }
-            }
-        },
-        
+        },        
     } );
 
     // -- updateLessonInstructions ----------------------------------------------------------
 
-    function updateLessonInstructions(lessonSteps) 
+    function updateLessonInstructions( lessonSteps ) 
     {
-        var lessonID = vwf_view.kernel.find('', '/lesson')[0];
+        var lessonID = vwf_view.kernel.find('', '/lesson')[ 0 ];
+        var stepIds = vwf_view.kernel.find( lessonID, "./*" );
+        var $accordion = $( "#accordion" );
+        for ( var i = 0; i < stepIds.length; i++ ) {
+            var step = stepIds[ i ];
+            var stepText = lessonSteps[ step ];
+            var stepSafeId = step.replace(/\:/g, "_").replace(/\./g, "-");
+            var $subAccordionDiv = [];
+            if ( stepText ) {
+                $subAccordionDiv = $( "<div/>", {
+                    id: "accordion--" + stepSafeId,
+                    "data-index": i
+                } );
+                $accordion.append( "<p class='lesson taskTitle'>" + stepText + "</p>" );
+                $accordion.append( $subAccordionDiv );
+                $accordion.append( "<br />" );
+            }
+            var substepIds = vwf_view.kernel.find( step, "./*" );
+            for ( var j = 0; j < substepIds.length; j++ ) {
+                var substep = substepIds[ j ];
+                var substepText = lessonSteps[ substep ];
+                if ( substepText ) {
+                    var substepSafeId = substep.replace(/\:/g, "_").replace(/\./g, "-");
+                    $subAccordionDiv.append( [
+                        "<h2>",
+                        "  <a id='" + substepSafeId + "' data-index='" + j + "' href='#'>" + substepText + "</a>",
+                        "</h2>"
+                    ].join( "\n" ) );
+                    $subAccordionDiv.append( "<div id='div--" + substepSafeId + "'></div>");
+                }
+                vwf_view.kernel.find( substep, "./*", function( subsubstep ) {
+                    processSubSubSteps( substep, subsubstep );
+                } );
+            }
+        }
 
-        var processSubSubSteps = function( parentStepID, childStepID ) {
+        $accordion.children('div').accordion({ active: false, collapsible: true });
+
+        function processSubSubSteps( parentStepID, childStepID ) {
             var text = lessonSteps[childStepID];
             if ( text ) {
                 var htmlParent = parentStepID.replace(/\:/g, "_").replace(/\./g, "-");
@@ -261,32 +315,6 @@ define( [ "module", "vwf/view", "jquery", "jquery-ui" ], function( module, view,
                 processSubSubSteps( childStepID, childSubStepID );
             } );
         };
-
-        vwf_view.kernel.find( lessonID, "./*", function( step ) {
-
-            var stepText = lessonSteps[step];
-            if ( stepText ) {
-                var subAccordionDiv = document.createElement('div');
-                subAccordionDiv.id = 'accordion--' + step.replace(/\:/g, "_").replace(/\./g, "-");
-
-                $('#accordion').append("<p class='lesson taskTitle'>" + stepText + "</p>");
-                $('#accordion').append(subAccordionDiv);
-                $('#accordion').append("<br />");
-            }
-
-            vwf_view.kernel.find( step, "./*", function( substep ) {
-                var substepText = lessonSteps[substep];
-                if ( substepText ) {
-                    $('#accordion--'+step.replace(/\:/g, "_").replace(/\./g, "-")).append("<h2><a id='" + substep.replace(/\:/g, "_").replace(/\./g, "-") + "' href='#'>" + substepText + "</a></h2>");
-                    $('#accordion--'+step.replace(/\:/g, "_").replace(/\./g, "-")).append("<div id='div--" + substep.replace(/\:/g, "_").replace(/\./g, "-") + "'></div>");
-                }
-                vwf_view.kernel.find( substep, "./*", function( subsubstep ) {
-                    processSubSubSteps( substep, subsubstep );
-                } );
-            } );
-        } );
-
-        $("#accordion").children('div').accordion({ active: false, collapsible: true });
     }
 
     // -- startLesson -----------------------------------------------------------------------

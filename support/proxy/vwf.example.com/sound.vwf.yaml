@@ -1,0 +1,25 @@
+## The component representation of a sound 
+## 
+## @name sound.vwf
+## @namespace
+
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+  url:
+  time: 
+  percent:
+  speed: 1
+  autoplay: false
+  muted: false
+  volume: 80
+  loop: false
+  playState: "unloaded"
+methods:
+  play:
+  pause:
+  stop:
+events:
+  soundReady:
+  soundPlaying:
+  soundEnded:

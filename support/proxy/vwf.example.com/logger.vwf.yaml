@@ -1,0 +1,83 @@
+--- 
+extends:
+  http://vwf.example.com/node2.vwf
+properties:
+  logger_logs:
+    set: |
+      //this.logger_logs = ( this.logger_logs === undefined ) ? value : this.logger_logs;
+      this.logger_logs = value;
+    value: []
+  logger_maxLogs: 10
+  logger_lifeTime:
+    set: |
+      if ( this.logger_lifeTime !== value ) {
+        if ( value !== -1 ) {
+          this.future( 0 ).updateLogs();
+        }
+        this.logger_lifeTime = value;
+      }
+    value: -1
+  logger_frequency: 1  
+  logger_logFormat: undefined
+events:
+  logRemoved:
+  logAdded:
+methods:
+  addLog:
+  removeLog:
+  updateLogs:
+scripts:
+- |
+    this.initialize = function() {
+      if ( this.logger_lifeTime !== -1 ) {
+        this.future( 0 ).updateLogs();
+      }
+    }
+
+    this.addLog = function( msg ){
+      var logCopy = this.logger_logs.slice( 0 );
+      while ( logCopy.length >= this.logger_maxLogs ) {
+        logCopy.shift();
+        this.logRemoved( 0 );
+      }
+      var newMsg = { "log": msg, "time": this.time };
+      if ( this.logger_logFormat ) {
+        var index = this.logger_logFormat.indexOf( '%s' );
+        if ( index !== -1 ) {
+          var str = this.logger_logFormat;
+          newMsg.log = str.substr( 0, index ) + newMsg.log + str.substr( index + 2 );
+        }
+      }
+      logCopy.push( newMsg );
+      this.logger_logs = logCopy;
+      this.logAdded( newMsg );
+    }
+
+    this.updateLogs = function() {
+
+      if ( this.logger_lifeTime !== -1 ) {
+        var logCopy = this.logger_logs.slice(0);
+        var timeOk = false;
+        var log;
+        var logsToDelete = 0;
+        for ( var i = 0; i < logCopy.length && !timeOk; i++ ) {
+          log = logCopy[ i ];
+          if ( this.time - log.time >= this.logger_lifeTime ) {
+            logsToDelete++;
+          } else {
+            timeOk = true;
+          }
+        }
+        if ( logsToDelete > 0 ) {
+          for ( var i = 0; i <= logsToDelete; i++ ) {
+            logCopy.shift();
+            this.logRemoved( 0 );            
+          }
+          this.logger_logs = logCopy;
+        }
+        this.future( this.logger_frequency ).updateLogs();
+      }
+
+    }
+    //@ sourceURL=logger.vwf
+

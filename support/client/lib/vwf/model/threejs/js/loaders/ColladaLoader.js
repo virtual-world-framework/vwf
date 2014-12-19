@@ -992,7 +992,7 @@ THREE.ColladaLoader = function () {
 
 						}
 
-						material3js.opacity = !material3js.opacity ? 1 : material3js.opacity;
+						material3js.opacity = ( material3js.opacity === undefined ) ? 1 : material3js.opacity;
 						used_materials[ instance_material.symbol ] = num_materials;
 						used_materials_array.push( material3js );
 						first_material = material3js;
@@ -1356,7 +1356,7 @@ THREE.ColladaLoader = function () {
 					for ( var j = 0, jl = input.length; j < jl; j++ ) {
 
 						var time = input[j],
-							data = sampler.getData( transform.type, j ),
+							data = sampler.getData( transform.type, j, member ),
 							key = findKey( keys, time );
 
 						if ( !key ) {
@@ -3406,10 +3406,33 @@ THREE.ColladaLoader = function () {
 				case 'emission':
 				case 'diffuse':
 				case 'specular':
+				case 'specularLevel':
 				case 'transparent':
-				case 'bump':
 
 					this[ child.nodeName ] = ( new ColorOrTexture() ).parse( child );
+					break;
+
+				case 'bump':
+
+					// If 'bumptype' is 'heightfield', create a 'bump' property
+					// Else if 'bumptype' is 'normalmap', create a 'normal' property
+					// (Default to 'bump')
+					var bumpType = child.getAttribute( 'bumptype' );
+					if ( bumpType ) {
+						if ( bumpType.toLowerCase() === "heightfield" ) {
+							this[ 'bump' ] = ( new ColorOrTexture() ).parse( child );
+						} else if ( bumpType.toLowerCase() === "normalmap" ) {
+							this[ 'normal' ] = ( new ColorOrTexture() ).parse( child );
+						} else {
+							console.error( "Shader.prototype.parse: Invalid value for attribute 'bumptype' (" + bumpType + 
+								           ") - valid bumptypes are 'HEIGHTFIELD' and 'NORMALMAP' - defaulting to 'HEIGHTFIELD'" );
+							this[ 'bump' ] = ( new ColorOrTexture() ).parse( child );
+						}
+					} else {
+						console.warn( "Shader.prototype.parse: Attribute 'bumptype' missing from bump node - defaulting to 'HEIGHTFIELD'" );
+						this[ 'bump' ] = ( new ColorOrTexture() ).parse( child );
+					}
+
 					break;
 
 				case 'shininess':
@@ -3422,10 +3445,6 @@ THREE.ColladaLoader = function () {
 					if ( f.length > 0 )
 						this[ child.nodeName ] = parseFloat( f[ 0 ].textContent );
 
-					break;
-
-				case "technique":
-					this.parse(child);
 					break;
 
 				default:
@@ -3441,38 +3460,50 @@ THREE.ColladaLoader = function () {
 	};
 
 	Shader.prototype.create = function() {
-
+		
 		var props = {};
-
-		var transparent = false;
 
 		if (this['transparency'] !== undefined && this['transparent'] !== undefined) {
 			// convert transparent color RBG to average value
 			var transparentColor = this['transparent'];
 			var transparencyLevel = 0;
-			
-			// Support both transparent modes
-			if(transparentColor.opaque == "A_ONE") {
+
+			// Determine transparency level based on opaque mode
+			if (transparentColor.opaque == "RGB_ONE") {
 				transparencyLevel = (3 - this.transparent.color.r -
 					this.transparent.color.g - 
 					this.transparent.color.b) / 
 					3 * this.transparency;
-			}
-			else if(transparentColor.opaque == "RGB_ZERO") {
+			} else if (transparentColor.opaque == "RGB_ZERO") {
 				transparencyLevel = (this.transparent.color.r +
 					this.transparent.color.g + 
 					this.transparent.color.b) / 
 					3 * this.transparency;
+			} else if (transparentColor.opaque == "A_ONE") {
+				transparencyLevel = ( 1 - this.transparent.color.a ) * this.transparency;
+			} else { // A_ZERO (default in collada 1.5.0) - http://www.khronos.org/files/collada_1_5_release_notes.pdf (pg 16)
+				transparencyLevel = this.transparent.color.a * this.transparency;
 			}
 			
-			if (transparencyLevel > 0) {
-				transparent = true;
+			// Assumes all texures in the 'transparent' field will have an alpha channel
+			if ( transparentColor.isTexture() || transparencyLevel > 0 ) {
 				props[ 'transparent' ] = true;
-				props[ 'opacity' ] = 1 - transparencyLevel;
-
+			} else {
+				props[ 'transparent' ] = false;
 			}
 
+			props[ 'opacity' ] = 1 - transparencyLevel;
 		}
+
+		var keys = {
+			'diffuse':'map', 
+			'ambient':'lightMap' ,
+			'specular':'specularMap',
+			'specularLevel':'specularMap',
+			'emission':'emissionMap',
+			'bump':'bumpMap',
+			'normal':'normalMap'
+			};
 		
 		for ( var prop in this ) {
 
@@ -3482,7 +3513,9 @@ THREE.ColladaLoader = function () {
 				case 'emission':
 				case 'diffuse':
 				case 'specular':
+				case 'specularLevel':
 				case 'bump':
+				case 'normal':
 
 					var cot = this[ prop ];
 
@@ -3500,26 +3533,24 @@ THREE.ColladaLoader = function () {
 
 								if (image) {
 
-									var texture = THREE.ImageUtils.loadTexture(baseUrl + image.init_from);
+									var texture;
+									if(image.init_from.indexOf('.dds') == image.init_from.length - 4)
+									{	
+										texture = THREE.ImageUtils.loadCompressedTexture(baseUrl + image.init_from); 
+									}else
+										texture = THREE.ImageUtils.loadTexture(baseUrl + image.init_from);
 									texture.texcoord = cot.texcoord;
 									texture.wrapS = cot.texOpts.wrapU ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 									texture.wrapT = cot.texOpts.wrapV ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
 									texture.offset.x = cot.texOpts.offsetU;
 									texture.offset.y = cot.texOpts.offsetV;
 									texture.repeat.x = cot.texOpts.repeatU;
-									texture.repeat.y = cot.texOpts.repeatV;
-									if(prop == "specular") {
-										props["specularMap"] = texture;
-									}
-									else if(prop == "bump") {
-										props["bumpMap"] = texture;
-									}
-									else if(prop == "emission") {
-										props["lightMap"] = texture;
-									}
-									else {
-										props['map'] = texture;
-									}
+
+									if(image.init_from.indexOf('.dds') == image.init_from.length - 4)
+										texture.repeat.y = -cot.texOpts.repeatV;
+									else
+										texture.repeat.y = cot.texOpts.repeatV;
+									props[keys[prop]] = texture;
 
 									// Texture with baked lighting?
 									if (prop === 'emission') props['emissive'] = 0xffffff;
@@ -3528,11 +3559,15 @@ THREE.ColladaLoader = function () {
 
 							}
 
-						} else if ( prop === 'diffuse' || !transparent ) {
+						} else {
 
 							if ( prop === 'emission' ) {
 
 								props[ 'emissive' ] = cot.color.getHex();
+
+							} else if ( prop === 'specularLevel' ) {
+
+								props[ 'specular' ] = cot.color.getHex();
 
 							} else {
 
@@ -3860,10 +3895,53 @@ THREE.ColladaLoader = function () {
 				case 'lambert':
 				case 'blinn':
 				case 'phong':
+
 					this.shader = ( new Shader( child.nodeName, this ) ).parse( child );
 					break;
 				case 'extra':
-					this.shader.parse( child );
+					this.parseExtra(child);	
+					break;
+				default:
+					break;
+
+			}
+
+		}
+
+	};
+	
+	Effect.prototype.parseExtra = function ( element ) {
+
+		for ( var i = 0; i < element.childNodes.length; i ++ ) {
+
+			var child = element.childNodes[i];
+			if ( child.nodeType != 1 ) continue;
+
+			switch ( child.nodeName ) {
+
+				case 'technique':
+					this.parseExtraTechnique( child );
+					break;
+				default:
+					break;
+
+			}
+
+		}
+
+	};
+	
+	Effect.prototype.parseExtraTechnique= function ( element ) {
+
+		for ( var i = 0; i < element.childNodes.length; i ++ ) {
+
+			var child = element.childNodes[i];
+			if ( child.nodeType != 1 ) continue;
+
+			switch ( child.nodeName ) {
+
+				case 'bump':
+					this.shader.parse( element );
 					break;
 				default:
 					break;
@@ -4124,7 +4202,7 @@ THREE.ColladaLoader = function () {
 
 	};
 
-	Sampler.prototype.getData = function ( type, ndx ) {
+	Sampler.prototype.getData = function ( type, ndx, member ) {
 
 		var data;
 
@@ -4170,6 +4248,10 @@ THREE.ColladaLoader = function () {
 
 			data = this.output[ ndx ];
 
+			if ( member && type == 'translate' ) {
+				data = getConvertedTranslation( member, data );
+			}
+			
 		}
 
 		return data;
@@ -4245,7 +4327,7 @@ THREE.ColladaLoader = function () {
 	// TODO: Currently only doing linear interpolation. Should support full COLLADA spec.
 	Key.prototype.interpolate = function ( nextKey, time ) {
 
-		for ( var i = 0; i < this.targets.length; ++i ) {
+		for ( var i = 0, l = this.targets.length; i < l; i ++ ) {
 
 			var target = this.targets[ i ],
 				nextTarget = nextKey.getTarget( target.sid ),
@@ -4257,14 +4339,8 @@ THREE.ColladaLoader = function () {
 					nextData = nextTarget.data,
 					prevData = target.data;
 
-				// check scale error
-
-				if ( scale < 0 || scale > 1 ) {
-
-					console.log( "Key.interpolate: Warning! Scale out of bounds:" + scale );
-					scale = scale < 0 ? 0 : 1;
-
-				}
+				if ( scale < 0 ) scale = 0;
+				if ( scale > 1 ) scale = 1;
 
 				if ( prevData.length ) {
 
@@ -4818,6 +4894,31 @@ THREE.ColladaLoader = function () {
 
 		}
 
+	};
+
+	function getConvertedTranslation( axis, data ) {
+
+		if ( !options.convertUpAxis || colladaUp === options.upAxis ) {
+
+			return;
+
+		}
+
+		switch ( axis ) {
+			case 'X':
+				data = upConversion == 'XtoY' ? data * -1 : data;
+				break;
+			case 'Y':
+				data = upConversion == 'YtoZ' || upConversion == 'YtoX' ? data * -1 : data;
+				break;
+			case 'Z':
+				data = upConversion == 'ZtoY' ? data * -1 : data ;
+				break;
+			default:
+				break;
+		}
+
+		return data;
 	};
 
 	function getConvertedVec3( data, offset ) {

@@ -1,10 +1,18 @@
 /*global define*/
 define([
         '../Core/defaultValue',
-        '../Core/defined'
-       ], function(
+        '../Core/defined',
+        '../Core/defineProperties',
+        '../Core/DeveloperError',
+        '../Core/Event',
+        './createDynamicPropertyDescriptor'
+    ], function(
         defaultValue,
-        defined) {
+        defined,
+        defineProperties,
+        DeveloperError,
+        Event,
+        createDynamicPropertyDescriptor) {
     "use strict";
 
     /**
@@ -13,106 +21,207 @@ define([
      * @constructor
      */
     var DynamicLabel = function() {
+        this._text = undefined;
+        this._textSubscription = undefined;
+        this._font = undefined;
+        this._fontSubscription = undefined;
+        this._style = undefined;
+        this._styleSubscription = undefined;
+        this._fillColor = undefined;
+        this._fillColorSubscription = undefined;
+        this._outlineColor = undefined;
+        this._outlineColorSubscription = undefined;
+        this._outlineWidth = undefined;
+        this._outlineWidthSubscription = undefined;
+        this._horizontalOrigin = undefined;
+        this._horizontalOriginSubscription = undefined;
+        this._verticalOrigin = undefined;
+        this._verticalOriginSubscription = undefined;
+        this._eyeOffset = undefined;
+        this._eyeOffsetSubscription = undefined;
+        this._pixelOffset = undefined;
+        this._pixelOffsetSubscription = undefined;
+        this._scale = undefined;
+        this._scaleSubscription = undefined;
+        this._show = undefined;
+        this._showSubscription = undefined;
+        this._translucencyByDistance = undefined;
+        this._translucencyByDistanceSubscription = undefined;
+        this._pixelOffsetScaleByDistance = undefined;
+        this._pixelOffsetScaleByDistanceSubscription = undefined;
+        this._definitionChanged = new Event();
+    };
+
+    defineProperties(DynamicLabel.prototype, {
+        /**
+         * Gets the event that is raised whenever a new property is assigned.
+         * @memberof DynamicLabel.prototype
+         *
+         * @type {Event}
+         * @readonly
+         */
+        definitionChanged : {
+            get : function() {
+                return this._definitionChanged;
+            }
+        },
+
         /**
          * Gets or sets the string {@link Property} specifying the the label's text.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.text = undefined;
+        text : createDynamicPropertyDescriptor('text'),
+
         /**
          * Gets or sets the string {@link Property} specifying the the label's font.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.font = undefined;
+        font : createDynamicPropertyDescriptor('font'),
+
         /**
          * Gets or sets the {@link LabelStyle} {@link Property} specifying the the label's style.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.style = undefined;
+        style : createDynamicPropertyDescriptor('style'),
+
         /**
          * Gets or sets the {@link Color} {@link Property} specifying the the label's fill color.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.fillColor = undefined;
+        fillColor : createDynamicPropertyDescriptor('fillColor'),
+
         /**
          * Gets or sets the {@link Color} {@link Property} specifying the the label's outline color.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.outlineColor = undefined;
+        outlineColor : createDynamicPropertyDescriptor('outlineColor'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the the label outline's width.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.outlineWidth = undefined;
+        outlineWidth : createDynamicPropertyDescriptor('outlineWidth'),
+
         /**
          * Gets or sets the {@link HorizontalOrigin} {@link Property} specifying the label's horizontal origin.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.horizontalOrigin = undefined;
+        horizontalOrigin : createDynamicPropertyDescriptor('horizontalOrigin'),
+
         /**
          * Gets or sets the {@link VerticalOrigin} {@link Property} specifying the label's vertical origin.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.verticalOrigin = undefined;
+        verticalOrigin : createDynamicPropertyDescriptor('verticalOrigin'),
+
         /**
          * Gets or sets the {@link Cartesian3} {@link Property} specifying the label's eye offset.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.eyeOffset = undefined;
+        eyeOffset : createDynamicPropertyDescriptor('eyeOffset'),
+
         /**
          * Gets or sets the {@link Cartesian2} {@link Property} specifying the label's pixel offset.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.pixelOffset = undefined;
+        pixelOffset : createDynamicPropertyDescriptor('pixelOffset'),
+
         /**
          * Gets or sets the numeric {@link Property} specifying the label's scale.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.scale = undefined;
+        scale : createDynamicPropertyDescriptor('scale'),
+
         /**
          * Gets or sets the boolean {@link Property} specifying the label's visibility.
+         * @memberof DynamicLabel.prototype
          * @type {Property}
          */
-        this.show = undefined;
-    };
+        show : createDynamicPropertyDescriptor('show'),
+
+        /**
+         * Gets or sets the {@link NearFarScalar} {@link Property} used to set translucency based on distance.
+         * If undefined, a constant size is used.
+         * @memberof DynamicLabel.prototype
+         * @type {Property}
+         */
+        translucencyByDistance : createDynamicPropertyDescriptor('translucencyByDistance'),
+
+        /**
+         * Gets or sets the {@link NearFarScalar} {@link Property} used to set pixel offset scaling based on distance.
+         * If undefined, no additional scale is applied to the pixel offset
+         * @memberof DynamicLabel.prototype
+         * @type {Property}
+         */
+        pixelOffsetScaleByDistance : createDynamicPropertyDescriptor('pixelOffsetScaleByDistance')
+
+    });
 
     /**
-     * Given two DynamicObjects, takes the label properties from the second
-     * and assigns them to the first, assuming such a property did not already exist.
+     * Duplicates a DynamicLabel instance.
      *
-     * @param {DynamicObject} targetObject The DynamicObject which will have properties merged onto it.
-     * @param {DynamicObject} objectToMerge The DynamicObject containing properties to be merged.
+     * @param {DynamicLabel} [result] The object onto which to store the result.
+     * @returns {DynamicLabel} The modified result parameter or a new instance if one was not provided.
      */
-    DynamicLabel.mergeProperties = function(targetObject, objectToMerge) {
-        var labelToMerge = objectToMerge.label;
-        if (defined(labelToMerge)) {
-
-            var targetLabel = targetObject.label;
-            if (!defined(targetLabel)) {
-                targetObject.label = targetLabel = new DynamicLabel();
-            }
-
-            targetLabel.text = defaultValue(targetLabel.text, labelToMerge.text);
-            targetLabel.font = defaultValue(targetLabel.font, labelToMerge.font);
-            targetLabel.show = defaultValue(targetLabel.show, labelToMerge.show);
-            targetLabel.style = defaultValue(targetLabel.style, labelToMerge.style);
-            targetLabel.fillColor = defaultValue(targetLabel.fillColor, labelToMerge.fillColor);
-            targetLabel.outlineColor = defaultValue(targetLabel.outlineColor, labelToMerge.outlineColor);
-            targetLabel.outlineWidth = defaultValue(targetLabel.outlineWidth, labelToMerge.outlineWidth);
-            targetLabel.scale = defaultValue(targetLabel.scale, labelToMerge.scale);
-            targetLabel.horizontalOrigin = defaultValue(targetLabel.horizontalOrigin, labelToMerge.horizontalOrigin);
-            targetLabel.verticalOrigin = defaultValue(targetLabel.verticalOrigin, labelToMerge.verticalOrigin);
-            targetLabel.eyeOffset = defaultValue(targetLabel.eyeOffset, labelToMerge.eyeOffset);
-            targetLabel.pixelOffset = defaultValue(targetLabel.pixelOffset, labelToMerge.pixelOffset);
+    DynamicLabel.prototype.clone = function(result) {
+        if (!defined(result)) {
+            result = new DynamicLabel();
         }
+        result.text = this.text;
+        result.font = this.font;
+        result.show = this.show;
+        result.style = this.style;
+        result.fillColor = this.fillColor;
+        result.outlineColor = this.outlineColor;
+        result.outlineWidth = this.outlineWidth;
+        result.scale = this.scale;
+        result.horizontalOrigin = this.horizontalOrigin;
+        result.verticalOrigin = this.verticalOrigin;
+        result.eyeOffset = this.eyeOffset;
+        result.pixelOffset = this.pixelOffset;
+        result.translucencyByDistance = this._translucencyByDistance;
+        result.pixelOffsetScaleByDistance = this._pixelOffsetScaleByDistance;
+        return result;
     };
 
     /**
-     * Given a DynamicObject, undefines the label associated with it.
+     * Assigns each unassigned property on this object to the value
+     * of the same property on the provided source object.
      *
-     * @param {DynamicObject} dynamicObject The DynamicObject to remove the label from.
+     * @param {DynamicLabel} source The object to be merged into this object.
      */
-    DynamicLabel.undefineProperties = function(dynamicObject) {
-        dynamicObject.label = undefined;
+    DynamicLabel.prototype.merge = function(source) {
+        //>>includeStart('debug', pragmas.debug);
+        if (!defined(source)) {
+            throw new DeveloperError('source is required.');
+        }
+        //>>includeEnd('debug');
+
+        this.text = defaultValue(this.text, source.text);
+        this.font = defaultValue(this.font, source.font);
+        this.show = defaultValue(this.show, source.show);
+        this.style = defaultValue(this.style, source.style);
+        this.fillColor = defaultValue(this.fillColor, source.fillColor);
+        this.outlineColor = defaultValue(this.outlineColor, source.outlineColor);
+        this.outlineWidth = defaultValue(this.outlineWidth, source.outlineWidth);
+        this.scale = defaultValue(this.scale, source.scale);
+        this.horizontalOrigin = defaultValue(this.horizontalOrigin, source.horizontalOrigin);
+        this.verticalOrigin = defaultValue(this.verticalOrigin, source.verticalOrigin);
+        this.eyeOffset = defaultValue(this.eyeOffset, source.eyeOffset);
+        this.pixelOffset = defaultValue(this.pixelOffset, source.pixelOffset);
+        this.translucencyByDistance = defaultValue(this._translucencyByDistance, source._translucencyByDistance);
+        this.pixelOffsetScaleByDistance = defaultValue(this._pixelOffsetScaleByDistance, source._pixelOffsetScaleByDistance);
     };
 
     return DynamicLabel;
