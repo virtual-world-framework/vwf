@@ -54,11 +54,11 @@ trap "echo Installation failed." EXIT
 VERSION=$(cat support/client/lib/version.js | support/deployment/version.sh)
 if [ "$UNAME" = "Darwin" ] ; then
   ### OSX ###
-  TARBALL_URL="http://download.virtualworldframework.com/files/vwf-"+$VERSION+".tar.gz"
+  TARBALL_URL="http://download.virtualworldframework.com/files/vwf-${VERSION}.tar.gz"
   NODEPACKAGE="node-v0.10.22-darwin-x64"
 elif [ "$UNAME" = "Linux" ] ; then
   ### Linux ###
-  TARBALL_URL="http://download.virtualworldframework.com/files/vwf-"+$VERSION+".tar.gz"
+  TARBALL_URL="http://download.virtualworldframework.com/files/vwf-${VERSION}.tar.gz"
 fi
 
 
