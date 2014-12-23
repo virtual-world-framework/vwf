@@ -257,6 +257,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             // Define the list of valid modifiers
             updatedUnit.validModifiers = [];
             
+            updatedUnit.validModifiers.push( "pixelSize" );
             var aliases = Object.keys( cws.aliasModifiers );
             for ( var i = 0; i < aliases.length; i++ ) {
 
