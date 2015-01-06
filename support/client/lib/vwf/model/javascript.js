@@ -1606,14 +1606,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     ///   `component` with node references replaced with kernel-style node references.
 
     function componentKernelFromJS( component ) {
-
-        var self = this;
-
-        return utility.transform( component, function( object, names ) {
-            return names[1] === "properties" ?
-                valueKernelFromJS.call( self, object ) : object;
-        } );
-
+        return valueKernelFromJS.call( this, component );
     }
 
     /// Convert a parameter array of values using `valueKernelFromJS`.
@@ -1626,15 +1619,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     /// @returns {Object}
 
     function parametersKernelFromJS( parameters ) {
-
-        if ( parameters && parameters.length ) {
-            return Array.prototype.slice.call( parameters ).map( function( value ) {
-                return valueKernelFromJS.call( this, value );
-            }, this );
-        } else {
-            return parameters;
-        }
-
+        return valueKernelFromJS.call( this, parameters );
     }
 
     /// Convert a parameter array of values using `valueJSFromKernel`.
@@ -1647,15 +1632,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     /// @returns {Object}
 
     function parametersJSFromKernel( parameters ) {
-
-        if ( parameters && parameters.length ) {
-            return Array.prototype.slice.call( parameters ).map( function( value ) {
-                return valueJSFromKernel.call( this, value );
-            }, this );
-        } else {
-            return parameters;
-        }
-
+        return valueJSFromKernel.call( this, parameters );
     }
 
     /// Convert node references into special values that can pass through the kernel. These values
@@ -1673,17 +1650,18 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     function valueKernelFromJS( value ) {
 
-        if ( typeof value === "object" && value !== null ) {
+        var self = this;
 
-            if ( valueIsNode.call( this, value ) ) {
-                return kutility.nodeReference( value.id );
+        return utility.transform( value, function( object, names, depth, finished ) {
+
+            if ( valueIsNode.call( self, object ) ) {
+                finished();
+                return kutility.nodeReference( object.id );
             } else {
-                return value;
+                return object;
             }
 
-        } else {
-            return value;
-        }
+        } );
 
     }
 
@@ -1699,17 +1677,18 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     function valueJSFromKernel( value ) {
 
-        if ( typeof value === "object" && value !== null ) {
+        var self = this;
 
-            if ( kutility.valueIsNodeReference( value ) ) {
-                return this.nodes[ value.id ];
+        return utility.transform( value, function( object, names, depth, finished ) {
+
+            if ( kutility.valueIsNodeReference( object ) ) {
+                finished();
+                return self.nodes[ object.id ];
             } else {
-                return value;
+                return object;
             }
 
-        } else {
-            return value;
-        }
+        } );
 
     }
 
