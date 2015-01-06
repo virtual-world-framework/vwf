@@ -55,7 +55,9 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
         playerNode = childID;
         $('#createUser').dialog("open");
     }
-    if ( nodeID == vwf_view.kernel.findClients( "", "/" ) ) {
+    var appID = vwf_view.kernel.application();
+    var clients = vwf_view.kernel.find( appID, "doc('http://vwf.example.com/clients.vwf')/*" );
+    if ( clients && clients.length > 0 && ( nodeID == clients[ clients.length - 1 ] ) ) {
         var player_nodes = vwf_view.kernel.find( "/", "/navobj_" + childName );
         if ( player_nodes.length > 0 ) {
             vwf_view.kernal.setProperty( player_nodes[ 0 ], "playerConnected", true );
@@ -67,8 +69,9 @@ vwf_view.deletedNode = function ( nodeID ) {
     if ( nodeID.slice(0, 33) == "http-vwf-example-com-clients-vwf:" ) {
         // There is currently no way to match the deleted client to its associated navigation object
         // so loop over all the navobjects and set the one without a client to disconnected
-        var players = vwf_view.kernel.find(vwf_view.kernel.find("","/")[0], "./element(*,'http://vwf.example.com/navigable.vwf')");
-        var clients = vwf_view.kernel.findClients("", "/*");
+        var appID = vwf_view.kernel.application();
+        var players = vwf_view.kernel.find( appID, "./element(*,'http://vwf.example.com/navigable.vwf')" );
+        var clients = vwf_view.kernel.find( appID, "doc('http://vwf.example.com/clients.vwf')/*" );
 
         for(var i = 0; i < players.length; i++) {
             var clientFound = false;
@@ -237,8 +240,8 @@ vwf_view.firedEvent = function (nodeId, eventName, eventParameters) {
               if ( $( '#createUser' ).dialog( "isOpen" ) == true ) {
                 if ( eventParameters[ 0 ] ) {
                   $( '#userName' ).html( playerName + ":&nbsp;" );
-	  			  	    preloadImages();
-		  		    	  $( '#createUser' ).dialog( "close" );
+                        preloadImages();
+                          $( '#createUser' ).dialog( "close" );
                 }
                 else {
                   alert( "This username is already in use!" );
