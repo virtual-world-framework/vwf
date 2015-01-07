@@ -22,6 +22,28 @@ properties:
   enableDrive: false
   mode: "normal"
 children:
+  Omni001:
+    extends: http://vwf.example.com/pointlight.vwf
+    properties:
+      intensity: 1.7
+      distance: 1000
+      position: [ 0, 0, 0 ]
+  Omni002:
+    extends: http://vwf.example.com/pointlight.vwf
+    properties:
+      intensity: 1.7
+      distance: 1000
+      position: [ 40, 0, 100 ]
+  dir:
+    extends: http://vwf.example.com/directionallight.vwf
+    properties:
+      intensity: 0.5
+      distance: 1000
+    scripts:
+    - |
+      this.initialize = function() {
+        this.position = [ -0.7, -0.7, 0.3 ];
+      }
   interiorCamera:
     extends: http://vwf.example.com/camera.vwf
     properties:
