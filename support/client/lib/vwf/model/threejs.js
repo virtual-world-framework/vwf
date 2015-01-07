@@ -117,7 +117,7 @@ define( [ "module",
             var childURI = ( nodeID === 0 ? childIndex : undefined );
             var appID = this.kernel.application();
 
-            if ( this.debug.creation ) {
+            if ( this.debug.creation  ) {
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             }
 
@@ -226,9 +226,8 @@ define( [ "module",
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                if( !node.threeObject )
-                {
-                    createLight.call(this,nodeID,childID,childName);
+                if( !node.threeObject ) {
+                    createLight.call( this, nodeID, childID, childExtendsID, childName );
                 }
             
             } else if ( protos && isMaterialDefinition.call( this, protos ) ) {
@@ -1358,6 +1357,7 @@ define( [ "module",
                             "shadowMapWidth": threeObject.shadowMapWidth,
                             "shadowBias": threeObject.shadowBias,
                             "target": threeObject.target,
+                            "position": threeObject.position,
                             "clone": function( newObj ) {
                                 newObj.name = this.name;
                                 newObj.distance = this.distance;
@@ -1378,7 +1378,10 @@ define( [ "module",
                                 newObj.shadowMapHeight = this.shadowMapHeight;
                                 newObj.shadowMapWidth = this.shadowMapWidth;
                                 newObj.shadowBias = this.shadowBias;
-                                newObj.target = this.target;
+                                if ( this.target ) {
+                                    newObj.target = this.target;
+                                }
+                                newObj.position.set( this.position.x, this.position.y, this.position.z );
                             }
                         };
 
@@ -1386,7 +1389,7 @@ define( [ "module",
                         {
                             newlight = new THREE.PointLight('FFFFFF',1,0);
                             currProps.clone( newlight );                            
-                            newlight.matrixAutoUpdate = false;
+                            //newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
                             parent.add( newlight );
                             node.threeObject = newlight;
@@ -1394,9 +1397,9 @@ define( [ "module",
                         }
                         if(propertyValue == 'directional' && !(threeObject instanceof THREE.DirectionalLight))
                         {
-                            newlight = new THREE.DirectionalLight('FFFFFF',1,0);
+                            newlight = new THREE.DirectionalLight( 'FFFFFF' );
                             currProps.clone( newlight );                            
-                            newlight.matrixAutoUpdate = false;
+                            //newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
                             parent.add( newlight );
                             node.threeObject = newlight;
@@ -1406,7 +1409,7 @@ define( [ "module",
                         {
                             newlight = new THREE.SpotLight('FFFFFF',1,0);
                             currProps.clone( newlight );
-                            newlight.matrixAutoUpdate = false;
+                            //newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
                             parent.add( newlight );
                             node.threeObject = newlight;
@@ -1416,7 +1419,7 @@ define( [ "module",
                         {
                             newlight = new THREE.HemisphereLight('FFFFFF','FFFFFF',1);
                             currProps.clone( newlight );                            
-                            newlight.matrixAutoUpdate = false;
+                            //newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
                             parent.add( newlight );
                             node.threeObject = newlight;
@@ -1432,7 +1435,7 @@ define( [ "module",
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
                     else if ( propertyName == 'position' ) {
-                        if ( threeObject.position !== null ) {
+                        if ( threeObject.position !== null && propertyValue.length ) {
                             threeObject.position.set( propertyValue[0], propertyValue[1], propertyValue[2] );  
                         }
                     }
@@ -1523,7 +1526,9 @@ define( [ "module",
                     else if ( propertyName == "target" ) {
                         if ( propertyValue instanceof Array ) {
                             value = propertyValue;
-                            threeObject.target.position.set( value[ 0 ], value[ 1 ], value[ 2 ] );
+                            if ( threeObject.target ) {
+                                threeObject.target.position.set( value[ 0 ], value[ 1 ], value[ 2 ] );    
+                            }
                         } else if ( this.state.nodes[ propertyValue ] ) {
                             value = propertyValue;
                             threeObject.target = this.state.nodes[ value ].threeObject;
@@ -1873,14 +1878,18 @@ define( [ "module",
                         //   The threeObjects of some nodes do not have a vwfID. This
                         //   will incorrectly return a position in those cases. This
                         //   needs to be fixed.
-                        if ( threeObject.target.vwfID !== undefined ) {
-                            value = threeObject.target.vwfID;
-                        } else {
-                            var targetPos = [ threeObject.target.position.x,
-                                              threeObject.target.position.y,
-                                              threeObject.target.position.z ];
-                            value = targetPos;
-                        }
+                        if ( threeObject.target !== undefined ) {
+
+                            if ( threeObject.target.vwfID !== undefined ) {
+                                value = threeObject.target.vwfID;
+                            } else {
+                                var targetPos = [ threeObject.target.position.x,
+                                                  threeObject.target.position.y,
+                                                  threeObject.target.position.z ];
+                                value = targetPos;
+                            }                            
+                        } 
+
                         break;
                 }
             }
@@ -3194,22 +3203,31 @@ define( [ "module",
 
         return foundLight;
     }
-    function createLight( nodeID, childID, childName ) {
+    function createLight( nodeID, childID, type, childName ) {
 
         var child = this.state.nodes[childID];
         if ( child ) {
-            child.threeObject = new THREE.DirectionalLight('FFFFFF',1,0);
-            //child.threeObject.shadowCameraRight     =  500;
-            //child.threeObject.shadowCameraLeft      = -500;
-            //child.threeObject.shadowCameraTop       =  500;
-            //child.threeObject.shadowCameraBottom    = -500;
-            
-            // these properties are now exposed as properties
-            //child.threeObject.distance = 100;
-            //child.threeObject.color.setRGB(1,1,1);
 
-            child.threeObject.matrixAutoUpdate = false;
-        
+            switch( type ) {
+                
+                case "http-vwf-example-com-directionallight-vwf":
+                    child.threeObject = new THREE.DirectionalLight( 'FFFFFF' );
+                    break;
+
+                case "http-vwf-example-com-spotlight-vwf":
+                    child.threeObject = new THREE.SpotLight( 'FFFFFF' );
+                    break;
+
+                case "http-vwf-example-com-hemispherelight-vwf":
+                    child.threeObject = new THREE.HemisphereLight('FFFFFF','FFFFFF',1);
+                    break;
+
+                case "http-vwf-example-com-pointlight-vwf":
+                default:
+                    child.threeObject = new THREE.PointLight( 'FFFFFF', 1, 1000 );
+                    break;    
+            }
+      
             child.threeObject.name = childName;
             child.name = childName;
             addThreeChild.call( this, nodeID, childID );
@@ -4078,12 +4096,11 @@ define( [ "module",
     }
 
     function createDefaultLighting( lights ) {
+
         var sceneID = this.kernel.application();
         var ambientCount = lights.ambientLights.length;
         var lightCount = lights.spotLights.length + lights.directionalLights.length + lights.pointLights.length;
         
-        //console.info( "ambientCount = " + ambientCount + "      lightCount = " + lightCount );
-          
         var scene = getThreeScene.call( this );
 
         if ( lightCount == 0 ) {
