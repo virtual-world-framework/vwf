@@ -229,19 +229,25 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         var newActiveNodeId = propertyValue;
                         var previousActiveNode = this.state.blockly.node;
                         var blocklyNode = this.state.nodes[ newActiveNodeId ];
+
+                        // If the new node is the same as the old - exit early to prevent 
+                        // breaking synchronization.
+
+                        if ( previousActiveNode === newActiveNodeId ) {
+                            break;
+                        }
+
                         if ( blocklyNode !== undefined ) {
                             var show = true;
 
-                            //HACK: REMOVED THIS CODE - CAUSED REPLICATED BLOCKLY WINDOW TO CLOSE
-
-                            // If there was already an active blockly node, deal with it before
-                            // activating the new one
-                            //if ( previousActiveNode !== undefined ) {
-                             //   getBlockXML( previousActiveNode );
-                             //   setBlocklyUIVisibility( previousActiveNode, false ); 
-                             //   show = ( previousActiveNode.ID !== newActiveNodeId );
-                             //   this.state.blockly.node = undefined;                           
-                            //}
+                            //If there was already an active blockly node, deal with it before
+                            //activating the new one
+                            if ( previousActiveNode !== undefined ) {
+                               getBlockXML( previousActiveNode );
+                               setBlocklyUIVisibility( previousActiveNode, false ); 
+                               show = ( previousActiveNode.ID !== newActiveNodeId );
+                               this.state.blockly.node = undefined;                           
+                            }
 
                             // If the new active node is different than the old,
                             // then we need to load its program into the toolbox
