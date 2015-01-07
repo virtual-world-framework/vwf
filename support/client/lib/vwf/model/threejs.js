@@ -4158,8 +4158,8 @@ define( [ "module",
             scene.add( light1 );
             scene.add( light2 );
 
-            light1.rotation.setFromQuaternion( new THREE.Quaternion( 0, 1, 0, 225 ) );
-            light2.rotation.setFromQuaternion( new THREE.Quaternion( 0, 1, 0, 45 ) );
+            light1.position.set( 0.7, -0.7, 0.3 );
+            light2.position.set( -0.7, 0.7, 0.3 );
         }
 
         if ( ambientCount == 0 ) {
