@@ -215,7 +215,8 @@ define( [ "module",
 
                     }
                 }               
-            } else if(protos && isLightDefinition.call(this,protos)) {
+            } else if(protos && isLightDefinition.call( this, protos )) {
+                
                 node = this.state.nodes[ childID ] = this.state.lights[ childID ] = {
                     name: childName,
                     threeObject: threeChild,
@@ -224,8 +225,52 @@ define( [ "module",
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                if( !node.threeObject ) {
+
+                if ( !node.threeObject ) {
                     createLight.call( this, nodeID, childID, childExtendsID, childName );
+                } else {
+                    if ( !( node.threeObject instanceof THREE.Light ) ) {
+
+                        if ( node.threeObject.children ) {
+                            var child = undefined;
+                            var light = undefined;
+                            for ( var j = 0; light === undefined && 
+                                  j < node.threeObject.children.length; j++ ) {
+                                
+                                child = node.threeObject.children[ j ];
+                                switch ( childExtendsID ) {
+                    
+                                    case "http-vwf-example-com-directionallight-vwf":
+                                        if ( child instanceof THREE.DirectionalLight ) {
+                                            light = child;    
+                                        }
+                                        break;
+
+                                    case "http-vwf-example-com-spotlight-vwf":
+                                        if ( child instanceof THREE.SpotLight ) {
+                                            light = child;    
+                                        }
+                                        break;
+
+                                    case "http-vwf-example-com-hemispherelight-vwf":
+                                        if ( child instanceof THREE.HemisphereLight ) {
+                                            light = child;    
+                                        }
+                                        break;
+
+                                    case "http-vwf-example-com-pointlight-vwf":
+                                    default:
+                                        if ( child instanceof THREE.PointLight ) {
+                                            light = child;    
+                                        }
+                                        break;    
+                                }                            
+                            }
+                            if ( light !== undefined ) {
+                                node.threeObject = light;    
+                            }
+                        }
+                    }
                 }
             
             } else if ( protos && isMaterialDefinition.call( this, protos ) ) {
