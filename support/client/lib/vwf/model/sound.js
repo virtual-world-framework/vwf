@@ -52,7 +52,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
 
             if ( !context ) {
-                return undefined;
+                return undefined; 
             }
 
             // variables that we'll need in the switch statement below.  These all have function
@@ -251,6 +251,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         allowMultiplay: false,
         soundDefinition: null,
         playOnLoad: false,
+        useTextToSpeech: false,
 
         subtitle: undefined,
 
@@ -281,6 +282,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if ( this.soundDefinition.playOnLoad !== undefined ) {
                 this.playOnLoad = soundDefinition.playOnLoad;
+            }
+
+            if (this.soundDefinition.useTextToSpeech !== undefined) {
+                this.useTextToSpeech = soundDefinition.useTextToSpeech;
             }
 
             this.subtitle = this.soundDefinition.subtitle;
@@ -317,34 +322,38 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
 
             // Create & send the request to load the sound asynchronously
-            var request = new XMLHttpRequest();
-            request.open( 'GET', soundDefinition.soundURL, true );
-            request.responseType = 'arraybuffer';
+            if( this.useTextToSpeech ){
+                    //use meSpeak to fill thisSoundDatum.buffer.
+            } else {
+                var request = new XMLHttpRequest();
+                request.open( 'GET', soundDefinition.soundURL, true );
+                request.responseType = 'arraybuffer';
 
-            var thisSoundDatum = this;
-            request.onload = function() {
-                context.decodeAudioData(
-                    request.response, 
-                    function( buffer ) {
-                        thisSoundDatum.buffer = buffer;
+                var thisSoundDatum = this;
+                request.onload = function() {
+                    context.decodeAudioData(
+                        request.response, 
+                        function( buffer ) {
+                            thisSoundDatum.buffer = buffer;
 
-                        if ( thisSoundDatum.playOnLoad === true ) {
-                            thisSoundDatum.playSound( null, true );
+                            if ( thisSoundDatum.playOnLoad === true ) {
+                                thisSoundDatum.playSound( null, true );
+                            }
+
+                            successCallback && successCallback();
+                        }, 
+                        function() {
+                            logger.warnx( "SoundDatum.initialize", "Failed to load sound: '" + 
+                                          thisSoundDatum.name + "'." );
+
+                            delete soundData[ thisSoundDatum.name ];
+
+                            failureCallback && failureCallback();
                         }
-
-                        successCallback && successCallback();
-                    }, 
-                    function() {
-                        logger.warnx( "SoundDatum.initialize", "Failed to load sound: '" + 
-                                      thisSoundDatum.name + "'." );
-
-                        delete soundData[ thisSoundDatum.name ];
-
-                        failureCallback && failureCallback();
-                    }
-                );
+                    );
+                }
+                request.send();
             }
-            request.send();
         },
 
         playSound: function( exitCallback ) {
