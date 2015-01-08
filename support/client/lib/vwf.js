@@ -4679,6 +4679,7 @@ if ( ! childComponent.source ) {
                     },
 
                     error: function( xhr, status, error ) /* async */ {
+                        vwf.logger.warnx( "loadComponent", "error loading", nodeURI + ":", error );
                         errback_async( error );
                         queue.resume( "after loading " + nodeURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
                     },
@@ -4719,6 +4720,7 @@ if ( ! childComponent.source ) {
                     },
 
                     error: function( xhr, status, error ) /* async */ {
+                        vwf.logger.warnx( "loadScript", "error loading", scriptURI + ":", error );
                         errback_async( error );
                         queue.resume( "after loading " + scriptURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
                     },
