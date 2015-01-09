@@ -56,19 +56,6 @@ vwf_view.createdNode = function(nodeID, childID, childExtendsID, childImplements
         playerNode = childID;
         $('#createUser').dialog("open");
     }
-
-    // This doesn't appear to do anything, so I'm going to comment this out
-    // Looks like 'playerConnected' is true by default and doesn't need to 
-    // be set to true
-
-    // var appID = vwf_view.kernel.application();
-    // var clients = vwf_view.kernel.find( appID, "doc('http://vwf.example.com/clients.vwf')/*" );
-    // if ( clients && clients.length > 0 && ( nodeID == clients[ clients.length - 1 ] ) ) {
-    //     var player_nodes = vwf_view.kernel.find( "/", "/navobj_" + childName );
-    //     if ( player_nodes.length > 0 ) {
-    //         vwf_view.kernel.setProperty( player_nodes[ 0 ], "playerConnected", true );
-    //     }
-    // }
 };
 
 vwf_view.deletedNode = function ( nodeID ) { 
