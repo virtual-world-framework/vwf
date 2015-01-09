@@ -356,7 +356,6 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 request.open( 'GET', soundDefinition.soundURL, true );
                 request.responseType = 'arraybuffer';
 
-                
                 request.onload = function() {
                     context.decodeAudioData(
                         request.response, 
