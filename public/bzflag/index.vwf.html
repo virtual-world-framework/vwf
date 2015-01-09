@@ -105,8 +105,9 @@
                     }
                 },
                 open: function() {
-                    var players = vwf_view.kernel.find(vwf.find("","/")[0], "./element(*,'http://vwf.example.com/navigable.vwf')");
-                    var clients = vwf_view.kernel.findClients("", "/*");
+                    var appID = vwf_view.kernel.application();
+                    var players = vwf_view.kernel.find( appID, "./element(*,'http://vwf.example.com/navigable.vwf')");
+                    var clients = vwf_view.kernel.find( appID, "doc('http://vwf.example.com/clients.vwf')/*" );
 
                     // Add existing player options
                     for(var i=0; i<players.length; i++)
