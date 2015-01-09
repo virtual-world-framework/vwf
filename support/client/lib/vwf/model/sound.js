@@ -30,6 +30,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             soundDriver = this;
             logger = this.logger;
 
+            meSpeak.loadConfig("mespeak/mespeak_config.json");
+            meSpeak.loadVoice("mespeak/en-us.json");
+
             try {
                 // I quote: "For WebKit- and Blink-based browsers, you 
                 // currently need to use the webkit prefix, i.e. 
@@ -321,6 +324,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             }
 
+            var thisSoundDatum = this;
+            var loadSoundBuf = function( buffer ) {
+                thisSoundDatum.buffer = buffer;
+
+                if ( thisSoundDatum.playOnLoad === true ) {
+                    thisSoundDatum.playSound( null, true );
+                }
+
+                successCallback && successCallback();
+            }
+
             // Create & send the request to load the sound asynchronously
             if( this.useTextToSpeech ){
                     //use meSpeak to fill thisSoundDatum.buffer.
@@ -329,19 +343,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 request.open( 'GET', soundDefinition.soundURL, true );
                 request.responseType = 'arraybuffer';
 
-                var thisSoundDatum = this;
+                
                 request.onload = function() {
                     context.decodeAudioData(
                         request.response, 
-                        function( buffer ) {
-                            thisSoundDatum.buffer = buffer;
-
-                            if ( thisSoundDatum.playOnLoad === true ) {
-                                thisSoundDatum.playSound( null, true );
-                            }
-
-                            successCallback && successCallback();
-                        }, 
+                        loadSoundBuf, 
                         function() {
                             logger.warnx( "SoundDatum.initialize", "Failed to load sound: '" + 
                                           thisSoundDatum.name + "'." );
