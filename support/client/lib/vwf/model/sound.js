@@ -343,15 +343,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                             failureCallback && failureCallback();
                         }
 
-            // Create & send the request to load the sound asynchronously
-            if( this.useTextToSpeech ){
+            
+            if( this.useTextToSpeech && this.subtitle ){
                 var rawSubtitle = this.subtitle;
                 if(rawSubtitle){
                     var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
                     var meSpeakBuf = meSpeak.speak(speechStr, { amplitude: 100, pitch: 50, speed: 175, rawdata : 'default' });
                     context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
                 }
-            } else {
+            } else { // Create & send the request to load the sound asynchronously
                 var request = new XMLHttpRequest();
                 request.open( 'GET', soundDefinition.soundURL, true );
                 request.responseType = 'arraybuffer';
