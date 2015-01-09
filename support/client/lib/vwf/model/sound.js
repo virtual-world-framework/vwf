@@ -334,10 +334,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                 successCallback && successCallback();
             }
+            var loadSoundFail = function() {
+                            logger.warnx( "SoundDatum.initialize", "Failed to load sound: '" + 
+                                          thisSoundDatum.name + "'." );
+
+                            delete soundData[ thisSoundDatum.name ];
+
+                            failureCallback && failureCallback();
+                        }
 
             // Create & send the request to load the sound asynchronously
             if( this.useTextToSpeech ){
-                    //use meSpeak to fill thisSoundDatum.buffer.
+                var meSpeakBuf = meSpeak.speak('You had me at hello world', { variant: 'm3', rawdata : 'default' });
+                context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
+                //playSound(meSpeakBuf);
+                //meSpeak.speak('You had me at hello world', { variant: 'm3'});
             } else {
                 var request = new XMLHttpRequest();
                 request.open( 'GET', soundDefinition.soundURL, true );
@@ -348,14 +359,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     context.decodeAudioData(
                         request.response, 
                         loadSoundBuf, 
-                        function() {
-                            logger.warnx( "SoundDatum.initialize", "Failed to load sound: '" + 
-                                          thisSoundDatum.name + "'." );
-
-                            delete soundData[ thisSoundDatum.name ];
-
-                            failureCallback && failureCallback();
-                        }
+                        loadSoundFail
                     );
                 }
                 request.send();
