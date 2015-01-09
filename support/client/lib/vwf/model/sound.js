@@ -31,7 +31,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             logger = this.logger;
 
             meSpeak.loadConfig("mespeak/mespeak_config.json");
-            meSpeak.loadVoice("mespeak/en-us.json");
+            meSpeak.loadVoice("mespeak/en.json");
 
             try {
                 // I quote: "For WebKit- and Blink-based browsers, you 
@@ -345,7 +345,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             // Create & send the request to load the sound asynchronously
             if( this.useTextToSpeech ){
-                var meSpeakBuf = meSpeak.speak('You had me at hello world', { variant: 'm3', rawdata : 'default' });
+                var meSpeakBuf = meSpeak.speak("Where am I? Who am I? I appear to be on Mars. I have wheels, a computer for a brain, and a battery. Hmm...if I had to guess I would say that I'm a rover!", { amplitude: 100, pitch: 50, speed: 175, rawdata : 'default' });
                 context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
                 //playSound(meSpeakBuf);
                 //meSpeak.speak('You had me at hello world', { variant: 'm3'});
