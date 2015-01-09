@@ -345,10 +345,12 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             // Create & send the request to load the sound asynchronously
             if( this.useTextToSpeech ){
-                var meSpeakBuf = meSpeak.speak("Where am I? Who am I? I appear to be on Mars. I have wheels, a computer for a brain, and a battery. Hmm...if I had to guess I would say that I'm a rover!", { amplitude: 100, pitch: 50, speed: 175, rawdata : 'default' });
-                context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
-                //playSound(meSpeakBuf);
-                //meSpeak.speak('You had me at hello world', { variant: 'm3'});
+                var rawSubtitle = this.subtitle;
+                if(rawSubtitle){
+                    var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
+                    var meSpeakBuf = meSpeak.speak(speechStr, { amplitude: 100, pitch: 50, speed: 175, rawdata : 'default' });
+                    context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
+                }
             } else {
                 var request = new XMLHttpRequest();
                 request.open( 'GET', soundDefinition.soundURL, true );
