@@ -90,6 +90,17 @@ define( [ "module",
                 }
             }
 
+            this.state.setGeometryPropertyRecursively = function( threeObject, propertyName, value ) {
+                if ( !threeObject ) {
+                    return;
+                }
+                threeObject[ propertyName ] = value;
+                var geoList = findAllGeometries( threeObject );
+                for ( var i = 0; i < geoList.length; i++ ) {
+                    geoList[ i ][ propertyName ] = value;
+                }
+            }
+
             // turns on logger debugger console messages 
             this.debug = {
                 "creation": false,
@@ -285,26 +296,71 @@ define( [ "module",
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                if ( !node.threeObject )
-                {   
-                    node.threeObject = new THREE.MeshPhongMaterial();
-                    SetMaterial( parentNode.threeObject, node.threeObject, childName );
+                if ( !node.threeObject ) {
+                    switch ( childType ) {
+                        case "MeshBasicMaterial":
+                            node.threeObject = new THREE.MeshBasicMaterial();
+                            break;                        
+                        case "MeshLambertMaterial":
+                            node.threeObject = new THREE.MeshLambertMaterial();
+                            break;
+                        default:
+                            node.threeObject = new THREE.MeshPhongMaterial();
+                            break;
+                    }   
+                    if ( node.threeObject ) {
+                        SetMaterial( parentNode.threeObject, node.threeObject, childName );                        
+                    }
                 }
             } else if ( protos && isShaderMaterialDefinition.call( this, protos ) ) {
 
-                node = this.state.nodes[childID] = {
+                node = this.state.nodes[ childID ] = {
                     name: childName,
-                    threeObject: GetMaterial(parentNode.threeObject, childName),
+                    //threeObject: GetMaterial( parentNode.threeObject, childName ),
+                    threeObject: undefined,
                     ID: childID,
                     parentID: nodeID,
                     type: childExtendsID,
                     sourceType: childType,
+                    threejsClass: typeof( THREE.ShaderMaterial )
                 };
-                if ( true )
-                {
-                    node.threeObject = new THREE.ShaderMaterial();
+
+                if ( childType !== undefined ) {
+                    
+                    if ( childType !== "shader/definition" ) {
+
+                        // define childType to be one of the preexisting shaderTypes
+                        // then the uniform properties and be set in the 
+                        // uniforms component as a child of this component
+                        node.threeObject = createShader( node, { "type": childType } );
+                    }
+
+                } else {
+                    node.threeObject = new THREE.ShaderMaterial();                   
+                }
+
+                if ( node.threeObject ) {
                     SetMaterial( parentNode.threeObject, node.threeObject, childName );
                 }
+
+            } else if ( protos && isShaderUniformsDefinition.call( this, protos ) ) {
+                
+                var mat = this.state.nodes[ nodeID ];
+
+                node = this.state.nodes[childID] = {
+                    name: childName,
+                    threeObject: undefined,
+                    ID: childID,
+                    parentID: nodeID,
+                    type: childExtendsID,
+                    sourceType: childType,
+                    isUniformObject: true
+                };
+
+                if ( mat ) {
+                    node.threeObject = mat.threeObject.uniforms;
+                }
+
             } else if ( protos && isParticleDefinition.call( this, protos ) ) {
                 
                 node = this.state.nodes[childID] = {
@@ -587,15 +643,31 @@ define( [ "module",
                 var node = this.state.nodes[ nodeID ];
                 if ( node === undefined ) node = this.state.scenes[ nodeID ];
                 if ( node !== undefined ) {
+                    
                     switch ( propertyName ) {
+                        
                         case "meshDefinition":
                             createMesh.call( this, node, propertyValue, true );
                             value = propertyValue; 
                             break;
+
+                        case "shaderDefinition":
+                            node.threeObject = createShader( node, propertyValue );
+                            value = propertyValue; 
+                            if ( node.threeObject ) {
+                                var parentNode = this.state.nodes[ node.parentID ];
+                                if ( parentNode.threeObject ) {
+                                    SetMaterial( parentNode.threeObject, node.threeObject, node.name );
+                                }    
+                            }
+                            break;
+
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  
                             break;
+
                     }
+
                 }
             }
 
@@ -1233,28 +1305,125 @@ define( [ "module",
                         value = Number( propertyValue );
                         threeObject.opacity = value;
                     }
+                    if ( propertyName === "side" ) {
+                        value = propertyValue;
+                        switch ( propertyValue ) {
+                            case "double":
+                                threeObject.side = THREE.DoubleSide;
+                                break;
+                            case "front":
+                                threeObject.side = THREE.FrontSide;
+                                break;
+                            case "back":
+                                threeObject.side = THREE.BackSide;
+                                break;
+                            default:
+                                value = undefined;
+                                break;
+                        }
+
+                        if ( value !== undefined ) {
+                            threeObject.needsUpdate = true; 
+                            // need to set geometry.uvsNeedUpdate?   
+                        }
+                    }
+                    if ( propertyName === "textureWrapT" ) {
+                        if ( threeObject.map ) {
+                            value = propertyValue;
+                            switch ( propertyValue ) {
+                                case "clamp":
+                                    threeObject.map.wrapT = THREE.ClampToEdgeWrapping;
+                                    break;
+                                case "repeat":
+                                    threeObject.map.wrapT = THREE.RepeatWrapping;
+                                    break;
+                                case "mirror":
+                                    threeObject.map.wrapT = THREE.MirroredRepeatWrapping;
+                                    break;
+                                default:
+                                    value = undefined;
+                                    break;
+                            }
+
+                            if ( value !== undefined ) {
+                                threeObject.map.needsUpdate;
+                                threeObject.needsUpdate = true; 
+                                if ( this.state.nodes[ node.parentID ] && this.state.nodes[ node.parentID ].threeObject ) {
+                                    var obj3 = this.state.nodes[ node.parentID ].threeObject;
+                                    this.state.setGeometryPropertyRecursively( obj3, "uvsNeedUpdate", true );
+                                }   
+                            }
+                        }
+                    }
+                    if ( propertyName === "textureWrapS" ) {
+                        if ( threeObject.map ) {
+                            value = propertyValue;
+                            switch ( propertyValue ) {
+                                case "clamp":
+                                    threeObject.map.wrapS = THREE.ClampToEdgeWrapping;
+                                    break;
+                                case "repeat":
+                                    threeObject.map.wrapS = THREE.RepeatWrapping;
+                                    break;
+                                case "mirror":
+                                    threeObject.map.wrapS = THREE.MirroredRepeatWrapping;
+                                    break;
+                                default:
+                                    value = undefined;
+                                    break;
+                            }
+
+                            if ( value !== undefined ) {
+                                threeObject.map.needsUpdate;
+                                threeObject.needsUpdate = true; 
+                                if ( this.state.nodes[ node.parentID ] && this.state.nodes[ node.parentID ].threeObject ) {
+                                    var obj3 = this.state.nodes[ node.parentID ].threeObject;
+                                    this.state.setGeometryPropertyRecursively( obj3, "uvsNeedUpdate", true );
+                                }   
+                            }                            
+                        }
+                    }
+                    if ( propertyName === "textureRepeat" ) {
+                        if ( threeObject.map ) {
+                            threeObject.map.repeat.set( propertyValue[0], propertyValue[1] );
+                            value = propertyValue;
+                            threeObject.map.needsUpdate;
+                            threeObject.needsUpdate = true; 
+                            if ( this.state.nodes[ node.parentID ] && this.state.nodes[ node.parentID ].threeObject ) {
+                                var obj3 = this.state.nodes[ node.parentID ].threeObject;
+                                this.state.setGeometryPropertyRecursively( obj3, "uvsNeedUpdate", true );
+                            } 
+                        }
+                    }
 
                 }
                 if ( threeObject instanceof THREE.ShaderMaterial ) {
-                    if ( propertyName === "uniforms" ) {
-                        value = propertyValue;
-                        threeObject.uniforms = value;
-                    }
-                    if ( propertyName === "vertexShader" ) {
-                        value = propertyValue;
-                        threeObject.vertexShader = value;
-                    }
-                    if ( propertyName === "fragmentShader" ) {
-                        value = propertyValue;
-                        threeObject.fragmentShader = value;
-                    }
-                    if ( propertyName === "updateFunction" ) {
-                        value = propertyValue;
-                        threeObject.updateFunction = value;
-                        threeObject.update = function() {
-                            eval( this.updateFunction );
+                    
+                    if ( utility.validObject( propertyValue ) ) {
+                        
+                        if ( propertyName === "uniforms" ) {
+                            value = propertyValue;
+                            threeObject.uniforms = value;
+                        }
+                        if ( propertyName === "vertexShader" ) {
+                            value = propertyValue;
+                            threeObject.vertexShader = value;
+                        }
+                        if ( propertyName === "fragmentShader" ) {
+                            value = propertyValue;
+                            threeObject.fragmentShader = value;
+                        }
+                        if ( propertyName === "updateFunction" ) {
+                            value = propertyValue;
+                            threeObject.updateFunction = value;
+                            threeObject.update = function() {
+                                eval( this.updateFunction );
+                            }
                         }
                     }
+                }
+                if ( node.isUniformObject ) {
+                    setUniformProperty( threeObject, propertyName, propertyValue.type, propertyValue.pValue );
                 }
                 if( threeObject instanceof THREE.Scene )
                 {
@@ -1724,9 +1893,11 @@ define( [ "module",
                     return value;    
                 }
                 if ( propertyName == "specColor" ) {
-                    var vwfColor = new utility.color( [ threeObject.specular.r*255, threeObject.specular.g*255, threeObject.specular.b*255 ] );
-                    value = vwfColor.toString();
-                    return value;
+                    if ( threeObject.specular !== undefined ) {
+                        var vwfColor = new utility.color( [ threeObject.specular.r*255, threeObject.specular.g*255, threeObject.specular.b*255 ] );
+                        value = vwfColor.toString();
+                        return value;
+                    }
                 }
                 if ( propertyName == "reflect" ) {
                     value = threeObject.reflectivity;
@@ -1737,14 +1908,18 @@ define( [ "module",
                     return value;
                 }
                 if ( propertyName == "emit" ) {
-                    var vwfColor = new utility.color( [ threeObject.emissive.r*255, threeObject.emissive.g*255, threeObject.emissive.b*255 ] );
-                    value = vwfColor.toString();
-                    return value;
+                    if ( threeObject.emissive ) {
+                        var vwfColor = new utility.color( [ threeObject.emissive.r*255, threeObject.emissive.g*255, threeObject.emissive.b*255 ] );
+                        value = vwfColor.toString();
+                        return value;
+                    }
                 }
                 if ( propertyName == "ambient" ) {
-                    var vwfColor = new utility.color( [ threeObject.ambient.r*255, threeObject.ambient.g*255, threeObject.ambient.b*255 ] );
-                    value = vwfColor.toString();
-                    return value;
+                    if ( threeObject.ambient ) {
+                        var vwfColor = new utility.color( [ threeObject.ambient.r*255, threeObject.ambient.g*255, threeObject.ambient.b*255 ] );
+                        value = vwfColor.toString();
+                        return value;
+                    }
                 }
                 if ( ( propertyName == "bumpScale" ) && ( threeObject.bumpMap ) ) {
                     value = threeObject.bumpScale;
@@ -1762,6 +1937,55 @@ define( [ "module",
                     value = threeObject.opacity;
                     return value;
                 }
+                if ( propertyName === "side" ) {
+                    switch ( threeObject.side ) {
+                        case THREE.DoubleSide:
+                            value = "double";
+                            break;
+                        case THREE.FrontSide:
+                            value = "front";
+                            break;
+                        case THREE.BackSide:
+                            value = "back";
+                            break;
+                    }
+                }
+                if ( propertyName === "textureWrapT" ) {
+                    if ( threeObject.map ) {
+                        switch ( threeObject.map.wrapT ) {
+                            case THREE.ClampToEdgeWrapping:
+                                value = "clamp";
+                                break;
+                            case THREE.RepeatWrapping:
+                                value = "repeat";
+                                break;
+                            case THREE.MirroredRepeatWrapping:
+                                value = "mirror";
+                                break;
+                        }
+                    }
+                }
+                if ( propertyName === "textureWrapS" ) {
+                    if ( threeObject.map ) {
+                        switch ( threeObject.map.wrapS ) {
+                            case THREE.ClampToEdgeWrapping:
+                                value = "clamp";
+                                break;
+                            case THREE.RepeatWrapping:
+                                value = "repeat";
+                                break;
+                            case THREE.MirroredRepeatWrapping:
+                                value = "mirror";
+                                break;
+                        }
+                    }
+                }
+                if ( propertyName === "textureRepeat" ) {
+                    if ( threeObject.map && threeObject.map.repeat ) {
+                        value = [ threeObject.map.repeat.x, threeObject.map.repeat.y ]
+                    }
+                }
+
             }
             if ( threeObject instanceof THREE.ShaderMaterial ) {
                 if ( propertyName === "uniforms" ) {
@@ -1780,6 +2004,25 @@ define( [ "module",
                     value = threeObject.updateFunction;
                     return value;
                 }
+            }
+            if ( node.isUniformObject ) {
+                value = {};
+                for ( var prop in threeObject ) {
+                    if ( ! threeObject[ prop ] instanceof Function ) {
+                        if ( threeObject[ prop ].type !== 't' ) {
+                            value[ prop ] = {
+                                "type": threeObject[ prop ].type,
+                                "pValue": threeObject[ prop ].value
+                            };
+                        } else {
+                            value[ prop ] = {
+                                "type": threeObject[ prop ].type,
+                                "pValue": threeObject[ prop ].src
+                            }; 
+                        }
+                    }
+                }
+                return value;
             }
             if( threeObject instanceof THREE.Camera ) {
                 switch ( propertyName ) {
@@ -2156,6 +2399,16 @@ define( [ "module",
 
         return foundMaterial;
     }
+    function isShaderUniformsDefinition( prototypes ) {
+        var found = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                found = ( prototypes[i] == "http-vwf-example-com-threejs-uniforms-vwf" );    
+            }
+        }
+
+        return found;
+    }
     function isCameraDefinition( prototypes ) {
         var foundCamera = false;
         if ( prototypes ) {
@@ -2189,6 +2442,15 @@ define( [ "module",
         return foundNode;
     }
 
+    function isStarFieldDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-starfield-vwf" );    
+            }
+        }
+        return foundNode;
+    }
     function isCubeDefinition( prototypes ) {
         var foundNode = false;
         if ( prototypes ) {
@@ -2292,9 +2554,11 @@ define( [ "module",
                 }
             }
         } else {
-            for( var i = 0; i < obj.children.length && child === undefined; i++ ) {
-                if ( nameTest.call( this, obj.children[i], childName ) ) {
-                    child = obj.children[i];
+            if ( obj.children ) {
+                for( var i = 0; i < obj.children.length && child === undefined; i++ ) {
+                    if ( nameTest.call( this, obj.children[i], childName ) ) {
+                        child = obj.children[i];
+                    }
                 }
             }
         }
@@ -2377,6 +2641,20 @@ define( [ "module",
 
         return threeObject;
     }
+
+    function findAllGeometries( threeObject, list ) {
+        
+        if( threeObject === undefined ) return;
+        if( list === undefined ) list = [];
+        if( threeObject instanceof THREE.Geometry )
+            list.push( threeObject );
+        if( threeObject.children ) {
+            for( var i = 0; i < threeObject.children.length; i++ ) {
+                findAllGeometries( threeObject.children[i], list );
+            }
+        }
+        return list;    
+    }    
     
     function findAllMeshes(threeObject,list)
     {
@@ -2598,7 +2876,7 @@ define( [ "module",
     //set the material on all the sub meshes of an object.
     //This could cause some strangeness in cases where an asset has multiple sub materials
     //best to only specify the material sub-node where an asset is a mesh leaf
-    function SetMaterial(threeObject,material,materialname)
+    function SetMaterial( threeObject, material, materialname )
     {
         
         //something must be pretty seriously wrong if no threeobject
@@ -2615,7 +2893,7 @@ define( [ "module",
             {
                 
                 meshes[i].material = material;
-                meshes.needsUpdate = true;
+                meshes[i].needsUpdate = true;
             }
         }else
         {
@@ -2624,10 +2902,58 @@ define( [ "module",
             {
                 
                 meshes[index].material = material;
-                meshes.needsUpdate = true;
+                meshes[index].needsUpdate = true;
                 window._dMesh =meshes[index];
             }
         }
+    }
+    function createShader( node, shaderDef ) {
+
+        var shaderMaterial = undefined;
+        if ( shaderDef && shaderDef.type ) {
+
+            if ( THREE.ShaderLib[ shaderDef.type ] !== undefined ) {
+ 
+                var shader = THREE.ShaderLib[ shaderDef.type ];
+                var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+                var mergedShader = { 
+                    fragmentShader: shader.fragmentShader, 
+                    vertexShader: shader.vertexShader, 
+                    uniforms: uniforms
+                    // uniforms: uniforms,
+                    // lights: true
+                }; 
+
+                for ( var prop in shaderDef ) {
+                    
+                    switch ( prop ) {
+                        
+                        case "type":
+                            break;
+
+                        case "uniforms":
+                            for ( var uProp in shaderDef.uniforms ) {
+                                var uniProp = shaderDef.uniforms[ uProp ];
+                                setUniformProperty( mergedShader.uniforms, uProp, uniProp.type, uniProp.pValue );
+                            }
+                            break;
+
+                        default:
+                            mergedShader[ prop ] = shaderDef[ prop ];
+                            break;                           
+                    }
+                }
+
+                shaderMaterial = new THREE.ShaderMaterial( mergedShader );
+                node.shaderType = shaderDef.type; 
+
+            } else {
+                this.logger.warnx( "createShader", "unknown shader type: " + shaderDef.type, childID );
+            }
+
+        }
+
+        return shaderMaterial;
     }
     function createMesh( node, meshDef, doubleSided ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
@@ -2710,6 +3036,8 @@ define( [ "module",
                 }   
             }
             if ( geo !== undefined ) {
+                geo.computeTangents && geo.computeTangents();
+
                 var mesh = new THREE.Mesh( geo, mat );
 
                 // The child mesh is created after the properties have been initialized, so copy
@@ -4709,6 +5037,34 @@ define( [ "module",
         }
 
     }
+    function setUniformProperty( obj, prop, type, value ) {
+        
+        switch ( type ) {
+            case 'i':
+                obj[ prop ].value = Number( value );
+                break
+            case 'f':
+                obj[ prop ].value = parseFloat( value );
+                break;
+            case 'c':
+                obj[ prop ].value = new THREE.Color( value );
+                break;
+            case 'v2':
+                obj[ prop ].value = new THREE.Vector2( value[0], value[1] );
+                break;
+            case 'v3':
+                obj[ prop ].value = new THREE.Vector3( value[0], value[1], value[2] );
+                break;
+            case 'v4':
+                obj[ prop ].value = new THREE.Vector4( value[0], value[1], value[2], value[3] );
+                break;
+            case 't':
+                obj[ prop ].src = value;
+                obj[ prop ].value = THREE.ImageUtils.loadTexture( value );
+                break;
+        } 
+    
+    }
     function decompress(dataencoded)
     {
         blobsfound = 0;
@@ -4720,4 +5076,5 @@ define( [ "module",
         data = decompressJsonStrings(data);
         return data;
     }
+
 });

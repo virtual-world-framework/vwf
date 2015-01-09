@@ -145,3 +145,47 @@ properties:
   alphaTest:
     set: |
       this.alphaTest = value;
+
+  ## side
+  ## 
+  ## @name material.vwf#side
+  ## @property
+
+  side:
+    set: |
+      if ( value === "front" || value === "back" || value === "double" ) {
+        this.side = value;  
+      }
+    value: front
+
+  ## textureWrapT
+  ## 
+  ## @name material.vwf#textureWrapT
+  ## @property
+
+  textureWrapT:
+    set: |
+      if ( value === "repeat" || value === "clamp" || value === "mirror" ) {
+        this.textureWrapT = value;  
+      }
+    value: clamp
+
+  ## textureWrapS
+  ## 
+  ## @name material.vwf#textureWrapS
+  ## @property
+
+  textureWrapS:
+    set: |
+      if ( value === "repeat" || value === "clamp" || value === "mirror" ) {
+        this.textureWrapS = value;  
+      }
+    value: clamp
+
+  ## textureRepeat
+  ## 
+  ## @name material.vwf#textureRepeat
+  ## @property
+
+  textureRepeat: [ 1, 1 ]
+
