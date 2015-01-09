@@ -348,7 +348,15 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 var rawSubtitle = this.subtitle;
                 if(rawSubtitle){
                     var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
-                    var meSpeakBuf = meSpeak.speak(speechStr, { amplitude: 100, pitch: 50, speed: 175, rawdata : 'default' });
+
+                    var meSpeakOpts = {};
+                    meSpeakOpts.amplitude = 100;
+                    meSpeakOpts.pitch = 50;
+                    meSpeakOpts.speed = 175;
+                    meSpeakOpts.rawdata = 'default';
+                    meSpeakOpts.variant = 'm1';
+
+                    var meSpeakBuf = meSpeak.speak(speechStr, meSpeakOpts);
                     context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
                 }
             } else { // Create & send the request to load the sound asynchronously
