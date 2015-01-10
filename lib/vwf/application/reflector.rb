@@ -38,7 +38,6 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     if clients.length == 1 # coming from 0
 
-
       # Initialize the client configuration from the runtime environment.
 
       logger.debug "VWF::Application::Reflector#connect #{id} " +
@@ -54,6 +53,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       end
 
       # TODO: check for file format not that json exists
+
       if  env["vwf.load"] and File.exists?(filename)
         contents = File.read(filename)
         json = JSON.parse("#{ contents }", :max_nesting => 100)
@@ -68,6 +68,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
           "parameters" => [
               json
             ]
+
       elsif( File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json"))
 
         contents = File.read("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json")
@@ -77,17 +78,18 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         
         # Start the timer on the first connection to this instance.
         
-        
         schedule_tick( startTime )
+
         send "time" => session[:transport].time,
           "action" => "setState",
           "parameters" => [
-              json
-            ]
+            json
+          ]
 
       else
       
         # Start the timer on the first connection to this instance.
+
         schedule_tick(0)
 
         send "time" => session[:transport].time,
