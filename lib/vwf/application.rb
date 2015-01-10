@@ -21,7 +21,7 @@ class VWF::Application
 
         run Rack::Cascade.new [
 
-          Reflector.new,                                                        # The WebSocket reflector  # TODO: not for instance==nil?  # debugging: Reflector.new( :debug => true, :backend => { :debug => true } ),
+          Reflector.new( File.join( root["vwf.root"], root["vwf.application"] ), root["vwf.instance"] ), # The WebSocket reflector  # TODO: not for instance==nil?  # debugging: Reflector.new( :debug => true, :backend => { :debug => true } ),
 
           Client.new( File.join( VWF.settings.support, "client/lib" ),          # Client files from ^/support/client/lib
             File.join( VWF.settings.support, "client/libz" ) ),                 #   or ^/support/client/libz (in production mode, if exists)

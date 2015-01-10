@@ -16,6 +16,20 @@ require "json"
 
 class VWF::Application::Reflector < Rack::SocketIO::Application
 
+  def initialize application, instance = nil, revision = nil
+
+    resource = revision ? File.join( application, instance, revision ) :
+      instance ? File.join( application, instance ) :
+        application
+
+    super resource
+
+    @application = application
+    @instance = instance
+    @revision = revision
+
+  end
+
   def call env
     if env["PATH_INFO"] =~ %r{^/(socket|websocket)(/|$)}  # TODO: configuration parameter for paths accepted; "websocket/session" is for socket.io
       super
@@ -41,7 +55,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       # Initialize the client configuration from the runtime environment.
 
       logger.debug "VWF::Application::Reflector#connect #{id} " +
-          "launching from #{ env["vwf.application"] }"
+          "launching from #{ @application }"
       
       if env["vwf.load"]
         filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState.vwf.json"
@@ -70,9 +84,9 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
               json
             ]
 
-      elsif( File.exists?("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json"))
+      elsif File.exists?("public#{ @application }.json")
 
-        contents = File.read("public#{ env["vwf.root"] }/#{ env["vwf.application"] }.json")
+        contents = File.read("public#{ @application }.json")
         json = JSON.parse("#{ contents }", :max_nesting => 100)
         startTime = 0
         startTime = json["queue"]["time"] unless json["queue"].nil?
@@ -109,7 +123,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         send "time" => session[:transport].time,
           "action" => "createNode",
           "parameters" => [
-            env["vwf.application"],
+            @application,
             "application"
           ]
 
@@ -380,7 +394,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       # Log to a directory under "log/" matching the application's location in "public/" plus
       # application/instance/client. Log messages for each unique time to a separate file.
 
-      path = File.join "log", env["vwf.root"][1..100], env["vwf.application"], env["vwf.instance"], id
+      path = File.join "log", @application[1..100], @instance, id
 
       FileUtils.mkpath path
 
