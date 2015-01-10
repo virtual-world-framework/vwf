@@ -16,13 +16,11 @@ require "json"
 
 class VWF::Application::Reflector < Rack::SocketIO::Application
 
-  def initialize application, instance = nil, revision = nil
-
-    resource = revision ? File.join( application, instance, revision ) :
-      instance ? File.join( application, instance ) :
-        application
+  def initialize resource, application, instance = nil, revision = nil
 
     super resource
+
+    @resource = resource
 
     @application = application
     @instance = instance

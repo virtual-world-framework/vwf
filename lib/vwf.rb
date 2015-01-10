@@ -146,19 +146,19 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
     def delegate_to_application public_path, application, instance, private_path
 
-      application_instance = instance ?
+      resource = instance ?
         File.join( public_path, application, instance ) :
         File.join( public_path, application )
 
       delegated_env = env.merge(
-        "SCRIPT_NAME" => application_instance,
+        "SCRIPT_NAME" => resource,
         "PATH_INFO" => "/" + ( private_path || "" ),  # TODO: escaped properly for PATH_INFO?
         "vwf.root" => public_path,
         "vwf.application" => application,
         "vwf.instance" => instance
       )
 
-      Application.new( delegated_env ).call delegated_env
+      Application.new( resource, delegated_env ).call delegated_env
 
     end
 

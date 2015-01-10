@@ -13,7 +13,7 @@
 
 class VWF::Application
 
-  def initialize root
+  def initialize resource, env
 
     @app = Rack::Builder.new do
 
@@ -21,14 +21,14 @@ class VWF::Application
 
         run Rack::Cascade.new [
 
-          Reflector.new( File.join( root["vwf.root"], root["vwf.application"] ), root["vwf.instance"] ), # The WebSocket reflector  # TODO: not for instance==nil?  # debugging: Reflector.new( :debug => true, :backend => { :debug => true } ),
+          Reflector.new( resource, env["vwf.root"] + "/" + env["vwf.application"], env["vwf.instance"] ), # The WebSocket reflector  # TODO: not for instance==nil?  # debugging: Reflector.new( :debug => true, :backend => { :debug => true } ),
 
           Client.new( File.join( VWF.settings.support, "client/lib" ),          # Client files from ^/support/client/lib
             File.join( VWF.settings.support, "client/libz" ) ),                 #   or ^/support/client/libz (in production mode, if exists)
 
-          Rack::File.new( File.join VWF.settings.public_folder, root["vwf.root"] ),         # Public content from ^/public/path/to/application
-          Component.new( File.join VWF.settings.public_folder, root["vwf.root"] ),          # A component descriptor, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
-          Persistence.new( File.join(VWF.settings.public_folder, root["vwf.root"]), root )         # EXPERIMENTAL: Save state to ^/public/path/to/application; DON'T ENABLE ON A PRODUCTION SERVER
+          Rack::File.new( File.join VWF.settings.public_folder, env["vwf.root"] ),         # Public content from ^/public/path/to/application
+          Component.new( File.join VWF.settings.public_folder, env["vwf.root"] ),          # A component descriptor, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
+          Persistence.new( File.join(VWF.settings.public_folder, env["vwf.root"]), env )         # EXPERIMENTAL: Save state to ^/public/path/to/application; DON'T ENABLE ON A PRODUCTION SERVER
 
         ]
 
