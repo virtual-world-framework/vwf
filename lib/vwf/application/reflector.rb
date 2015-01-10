@@ -55,6 +55,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       # TODO: check for file format not that json exists
 
       if  env["vwf.load"] and File.exists?(filename)
+
         contents = File.read(filename)
         json = JSON.parse("#{ contents }", :max_nesting => 100)
         startTime = 0
