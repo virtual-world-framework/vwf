@@ -965,7 +965,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var d = 1 - c;
         var s = Math.sin( angle );
 
-        mat = new THREE.Matrix3(
+        mat = new THREE.Matrix3();
+
+        mat.set(
             axis.x * axis.x * d + c,
             axis.x * axis.y * d + axis.z * s,
             axis.x * axis.z * d - axis.y * s,

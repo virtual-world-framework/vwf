@@ -2666,17 +2666,12 @@ THREE.ColladaLoader = function () {
 
 		}
 
-		this.geometry3js.computeCentroids();
-		this.geometry3js.computeFaceNormals();
-
 		if ( this.geometry3js.calcNormals ) {
 
 			this.geometry3js.computeVertexNormals();
 			delete this.geometry3js.calcNormals;
 
 		}
-
-		// this.geometry3js.computeBoundingBox();
 
 		return this;
 
@@ -3408,31 +3403,9 @@ THREE.ColladaLoader = function () {
 				case 'specular':
 				case 'specularLevel':
 				case 'transparent':
-
-					this[ child.nodeName ] = ( new ColorOrTexture() ).parse( child );
-					break;
-
 				case 'bump':
 
-					// If 'bumptype' is 'heightfield', create a 'bump' property
-					// Else if 'bumptype' is 'normalmap', create a 'normal' property
-					// (Default to 'bump')
-					var bumpType = child.getAttribute( 'bumptype' );
-					if ( bumpType ) {
-						if ( bumpType.toLowerCase() === "heightfield" ) {
-							this[ 'bump' ] = ( new ColorOrTexture() ).parse( child );
-						} else if ( bumpType.toLowerCase() === "normalmap" ) {
-							this[ 'normal' ] = ( new ColorOrTexture() ).parse( child );
-						} else {
-							console.error( "Shader.prototype.parse: Invalid value for attribute 'bumptype' (" + bumpType + 
-								           ") - valid bumptypes are 'HEIGHTFIELD' and 'NORMALMAP' - defaulting to 'HEIGHTFIELD'" );
-							this[ 'bump' ] = ( new ColorOrTexture() ).parse( child );
-						}
-					} else {
-						console.warn( "Shader.prototype.parse: Attribute 'bumptype' missing from bump node - defaulting to 'HEIGHTFIELD'" );
-						this[ 'bump' ] = ( new ColorOrTexture() ).parse( child );
-					}
-
+					this[ child.nodeName ] = ( new ColorOrTexture() ).parse( child );
 					break;
 
 				case 'shininess':
@@ -3460,7 +3433,7 @@ THREE.ColladaLoader = function () {
 	};
 
 	Shader.prototype.create = function() {
-		
+
 		var props = {};
 
 		if (this['transparency'] !== undefined && this['transparent'] !== undefined) {
@@ -3484,25 +3457,24 @@ THREE.ColladaLoader = function () {
 			} else { // A_ZERO (default in collada 1.5.0) - http://www.khronos.org/files/collada_1_5_release_notes.pdf (pg 16)
 				transparencyLevel = this.transparent.color.a * this.transparency;
 			}
-			
+
 			// Assumes all texures in the 'transparent' field will have an alpha channel
 			if ( transparentColor.isTexture() || transparencyLevel > 0 ) {
 				props[ 'transparent' ] = true;
-			} else {
-				props[ 'transparent' ] = false;
-			}
-
+ 			} else {
+ 				props[ 'transparent' ] = false;
+ 			}
+				
 			props[ 'opacity' ] = 1 - transparencyLevel;
 		}
-
+		
 		var keys = {
 			'diffuse':'map', 
-			'ambient':'lightMap' ,
+			'ambient':"lightMap" ,
 			'specular':'specularMap',
 			'specularLevel':'specularMap',
 			'emission':'emissionMap',
-			'bump':'bumpMap',
-			'normal':'normalMap'
+			'bump':'normalMap'
 			};
 		
 		for ( var prop in this ) {
@@ -3515,7 +3487,6 @@ THREE.ColladaLoader = function () {
 				case 'specular':
 				case 'specularLevel':
 				case 'bump':
-				case 'normal':
 
 					var cot = this[ prop ];
 
@@ -4977,7 +4948,7 @@ THREE.ColladaLoader = function () {
 
 		}
 
-		return new THREE.Matrix4(
+		return new THREE.Matrix4().set(
 			data[0], data[1], data[2], data[3],
 			data[4], data[5], data[6], data[7],
 			data[8], data[9], data[10], data[11],
