@@ -3663,8 +3663,17 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.uri}
 
-        this.uri = function( nodeID ) {
-            return this.models.object.uri( nodeID );
+        this.uri = function( nodeID, searchAncestors, initializedOnly ) {
+
+            var uri = this.models.object.uri( nodeID );
+
+            if ( searchAncestors ) {
+                while ( ! uri && ( nodeID = this.parent( nodeID, initializedOnly ) ) ) {
+                    uri = this.models.object.uri( nodeID );
+                }
+            }
+
+            return uri;
         };
 
         // -- name ---------------------------------------------------------------------------------

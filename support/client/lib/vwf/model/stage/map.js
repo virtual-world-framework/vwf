@@ -201,8 +201,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- uri ----------------------------------------------------------------------------------
 
-        uri: function( node ) {
-            return this.kernel.uri( this.model_to_kernel[this.object_id(node)] || node );
+        uri: function( node, searchAncestors, initializedOnly ) {
+            return this.kernel.uri( this.model_to_kernel[this.object_id(node)] || node, searchAncestors, initializedOnly );
         },
 
         // -- name ---------------------------------------------------------------------------------

@@ -468,10 +468,15 @@ define( function() {
         /// @function
         /// 
         /// @param {ID} nodeID
+        /// @param {Boolean} [searchAncestors]
+        ///   If set and the node doesn't have a URI, search the node's ancestors. Return the URI of
+        ///   the closest ancestor with a URI.
+        /// @param {Boolean} [initializedOnly]
+        ///   If set, only search ancestors through those that have completed initialization.
         /// 
         /// @returns {String}
 
-        uri: [ /* nodeID */ ],
+        uri: [ /* nodeID, searchAncestors, initializedOnly */ ],
 
         /// Name calls naming() on each model. The first model to return a non-undefined value dictates
         /// the return value.
