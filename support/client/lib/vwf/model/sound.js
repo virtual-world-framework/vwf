@@ -30,6 +30,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             soundDriver = this;
             logger = this.logger;
 
+            meSpeak.loadConfig("mespeak/mespeak_config.json");
+            meSpeak.loadVoice("mespeak/en.json");
+
             try {
                 // I quote: "For WebKit- and Blink-based browsers, you 
                 // currently need to use the webkit prefix, i.e. 
@@ -52,7 +55,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
 
             if ( !context ) {
-                return undefined;
+                return undefined; 
             }
 
             // variables that we'll need in the switch statement below.  These all have function
@@ -251,6 +254,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         allowMultiplay: false,
         soundDefinition: null,
         playOnLoad: false,
+        useTextToSpeech: false,
 
         subtitle: undefined,
 
@@ -281,6 +285,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if ( this.soundDefinition.playOnLoad !== undefined ) {
                 this.playOnLoad = soundDefinition.playOnLoad;
+            }
+
+            if (this.soundDefinition.useTextToSpeech !== undefined) {
+                this.useTextToSpeech = soundDefinition.useTextToSpeech;
             }
 
             this.subtitle = this.soundDefinition.subtitle;
@@ -316,35 +324,67 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             }
 
-            // Create & send the request to load the sound asynchronously
-            var request = new XMLHttpRequest();
-            request.open( 'GET', soundDefinition.soundURL, true );
-            request.responseType = 'arraybuffer';
-
             var thisSoundDatum = this;
-            request.onload = function() {
-                context.decodeAudioData(
-                    request.response, 
-                    function( buffer ) {
-                        thisSoundDatum.buffer = buffer;
+            var loadSoundBuf = function( buffer ) {
+                thisSoundDatum.buffer = buffer;
 
-                        if ( thisSoundDatum.playOnLoad === true ) {
-                            thisSoundDatum.playSound( null, true );
+                if ( thisSoundDatum.playOnLoad === true ) {
+                    thisSoundDatum.playSound( null, true );
+                }
+
+                successCallback && successCallback();
+            }
+            var loadSoundFail = function() {
+                            logger.warnx( "SoundDatum.initialize", "Failed to load sound: '" + 
+                                          thisSoundDatum.name + "'." );
+
+                            delete soundData[ thisSoundDatum.name ];
+
+                            failureCallback && failureCallback();
                         }
 
-                        successCallback && successCallback();
-                    }, 
-                    function() {
-                        logger.warnx( "SoundDatum.initialize", "Failed to load sound: '" + 
-                                      thisSoundDatum.name + "'." );
+            
+            if( this.useTextToSpeech && this.subtitle ){
+                var rawSubtitle = this.subtitle;
+                if(rawSubtitle){
+                    var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
 
-                        delete soundData[ thisSoundDatum.name ];
+                    var meSpeakOpts = {};
+                    if (this.soundDefinition.ttsAmplitude !== undefined) {
+                        meSpeakOpts.amplitude = this.soundDefinition.ttsAmplitude;
+                    } 
+                    if (this.soundDefinition.ttsVariant !== undefined) {
+                        meSpeakOpts.variant = this.soundDefinition.ttsVariant;
+                    } 
+                    if (this.soundDefinition.ttsWordGap !== undefined) {
+                        meSpeakOpts.wordGap = this.soundDefinition.ttsWordGap;
+                    } 
+                    if (this.soundDefinition.ttsSpeed !== undefined) {
+                        meSpeakOpts.speed = this.soundDefinition.ttsSpeed;
+                    } 
+                    if (this.soundDefinition.ttsPitch !== undefined) {
+                        meSpeakOpts.pitch = this.soundDefinition.ttsPitch;
+                    } 
+                    
+                    meSpeakOpts.rawdata = 'default';
 
-                        failureCallback && failureCallback();
-                    }
-                );
+                    var meSpeakBuf = meSpeak.speak(speechStr, meSpeakOpts);
+                    context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
+                }
+            } else { // Create & send the request to load the sound asynchronously
+                var request = new XMLHttpRequest();
+                request.open( 'GET', soundDefinition.soundURL, true );
+                request.responseType = 'arraybuffer';
+
+                request.onload = function() {
+                    context.decodeAudioData(
+                        request.response, 
+                        loadSoundBuf, 
+                        loadSoundFail
+                    );
+                }
+                request.send();
             }
-            request.send();
         },
 
         playSound: function( exitCallback ) {
