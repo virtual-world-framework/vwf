@@ -1662,6 +1662,9 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             if ( valueIsNode.call( self, object ) ) {
                 finished();
                 return kutility.nodeReference( object.id );
+            } else if ( object && object.buffer && object.buffer.toString() === "[object ArrayBuffer]" ) {
+                finished();
+                return object;
             } else if ( kutility.valueIsNodeReference( object ) ) {
                 finished();
                 self.logger.warnx( "valueKernelFromJS", "javascript-format value contains a kernel-format node reference" );
@@ -1693,6 +1696,9 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
             if ( kutility.valueIsNodeReference( object ) ) {
                 finished();
                 return self.nodes[ object.id ];
+            } else if ( object && object.buffer && object.buffer.toString() === "[object ArrayBuffer]" ) {
+                finished();
+                return object;
             } else if ( valueIsNode.call( self, object ) ) {
                 finished();
                 self.logger.warnx( "valueJSFromKernel", "kernel-format value contains a javascript-format node reference" );
