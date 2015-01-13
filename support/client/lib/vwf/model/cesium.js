@@ -177,7 +177,7 @@ define( [ "module",
                 sceneNode = findSceneNode.call( this, node );
                 parentNode = findParent.call( this, nodeID );
 
-                if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
+                if ( parentNode && parentNode.cesiumObj instanceof Cesium.Entity ) {
                     node.cesiumObj = parentNode.cesiumObj.billboard;
                 } else {
                     var canvas = document.createElement( 'canvas' );
@@ -216,7 +216,7 @@ define( [ "module",
                 sceneNode = findSceneNode.call( this, node );
                 parentNode = findParent.call( this, nodeID );
 
-                if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
+                if ( parentNode && parentNode.cesiumObj instanceof Cesium.Entity ) {
                     node.cesiumObj = parentNode.cesiumObj.label;
                 } else {
                     var labels = new Cesium.LabelCollection();
@@ -251,7 +251,7 @@ define( [ "module",
                 sceneNode = findSceneNode.call( this, node );
                 parentNode = findParent.call( this, nodeID );
 
-                if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
+                if ( parentNode && parentNode.cesiumObj instanceof Cesium.Entity ) {
                     node.cesiumObj = parentNode.cesiumObj.polyline;
                 } else { 
                     var primitives = sceneNode.scene.primitives;               
@@ -295,7 +295,7 @@ define( [ "module",
                 sceneNode = findSceneNode.call( this, node );
                 parentNode = findParent.call( this, nodeID );
 
-                if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
+                if ( parentNode && parentNode.cesiumObj instanceof Cesium.Entity ) {
                     node.cesiumObj = parentNode.cesiumObj.polygon;
                 } else {  
                     var primitives = sceneNode.scene.primitives;
@@ -1019,7 +1019,7 @@ define( [ "module",
                             break; 
 
                         case "availability":
-                            if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                            if ( node.cesiumObj instanceof Cesium.Entity ) {
                                 var start = propertyValue.start;
                                 var stop = propertyValue.stop;
                                 var startIncluded = propertyValue.isStartIncluded ? propertyValue.isStartIncluded : true;
@@ -1031,22 +1031,22 @@ define( [ "module",
                             }
                             break;
                         //case "orientation":
-                        //    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                        //    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         //    
                         //    }
                         //    break;
                         //case "point":
-                        //    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                        //    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         //    
                         //    }
                         //    break;
                         //case "vector":
-                        //    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                        //    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         //    
                         //    }
                         //    break;
                         //case "vertexPositions":
-                        //    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                        //    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         //    
                         //    }
                         //    break;
@@ -1054,7 +1054,7 @@ define( [ "module",
 
 
                         case "viewFrom":
-                            if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                            if ( node.cesiumObj instanceof Cesium.Entity ) {
                                node.cesiumObj.viewFrom = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
                             }
                             break;
@@ -1871,31 +1871,31 @@ define( [ "module",
                     break; 
 
                 case "orientation":
-                    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         value = node.cesiumObj.orientation.getValue();
                     }
                     break;
 
                 case "point":
-                    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         value = node.cesiumObj.point.getValue();
                     }
                     break;
 
                 case "vector":
-                    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         value = node.cesiumObj.vector.getValue();
                     }
                     break;
 
                 case "vertexPositions":
-                    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         value = node.cesiumObj.vertexPositions.getValue();
                     }
                     break;
 
                 case "viewFrom":
-                    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                    if ( node.cesiumObj instanceof Cesium.Entity ) {
                        value = node.cesiumObj.viewFrom;
                     }
                     break;   
