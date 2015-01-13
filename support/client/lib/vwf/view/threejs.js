@@ -182,10 +182,19 @@ define( [ "module",
                         sceneNode.stereo = {
                             "effect": new THREE.StereoEffect( sceneNode.renderer ),
                             "element": sceneNode.renderer.domElement,
-                            "controls": createControls( viewCam, sceneNode.renderer.domElement )
-                        }                    
+                            "controls": viewCam ? createControls( viewCam, sceneNode.renderer.domElement ) : undefined
+                        } 
+                        var effect = sceneNode.stereo.effect;
+                        
+                        effect.setSize( this.width, this.height ); 
+
+                        effect.separation = this.parameters.IPD ? this.parameters.IPD : 0.2;
+                        effect.offset = this.parameters.offset ? this.parameters.offset : -0.2;
+                        effect.delta = this.parameters.delta ? this.parameters.delta : 0.01;
+
                     }
                 }
+
             } else {
 
                 //TODO: This is a temporary workaround until the callback functionality is implemented for 
@@ -197,6 +206,18 @@ define( [ "module",
                 if ( initNode && ( initNode.name == navObjectName ) ) {
                     initNode.owner = this.kernel.moniker();
                     controlNavObject( initNode );
+                }
+
+                // in the case that camera was not defined when the scene was created
+                // we need to see if that camera is now defined, and set up the camera controls
+                if ( enableStereo ) {
+                    var sceneNode = this.state.scenes[ appID ];
+                    if ( sceneNode && sceneNode.stereo && sceneNode.stereo.controls === undefined ) {
+                        if ( this.state.cameraInUse !== undefined ) {
+                            sceneNode.stereo.controls = createControls( this.state.cameraInUse, sceneNode.renderer.domElement );    
+                        }
+                    }
+
                 }
             }
             //End TODO
@@ -1046,6 +1067,7 @@ define( [ "module",
     function initScene( sceneNode ) {
     
         var lastPickTime = 0;
+        var mobileDevice = isMobile();
         
         function GetParticleSystems(node,list)
         {
@@ -1120,6 +1142,7 @@ define( [ "module",
                         nodeLookAt( cameraNode );
                     }
                 }
+
             }
             
             // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
@@ -1170,6 +1193,10 @@ define( [ "module",
             }
 
             if ( enableStereo && sceneNode && sceneNode.stereo ) {
+                if ( mobileDevice && sceneNode.stereo.controls ) {
+                    sceneNode.stereo.controls.update( timepassed );
+                }
+
                 sceneNode.stereo.effect.render( scene, camera );
             } else {
                 self.render( renderer, scene, camera );    
@@ -1251,6 +1278,9 @@ define( [ "module",
                     }
 
                     sceneNode.renderer.setSize( self.width, self.height, true );
+                    if ( enableStereo && sceneNode.stereo && sceneNode.stereo.effect ) {
+                        sceneNode.stereo.effect.setSize( self.width, self.height );
+                    }
                 }
 
                 viewCam = view.state.cameraInUse;
@@ -1266,7 +1296,7 @@ define( [ "module",
                 sceneNode.renderer = new THREE.CanvasRenderer( { canvas: mycanvas, antialias: true } );
                 sceneNode.renderer.setSize( window.innerWidth,window.innerHeight );
             }
-            sceneNode.renderer.setSize(self.width,self.height,true);
+            sceneNode.renderer.setSize( self.width, self.height, true );
 
             // backgroundColor, enableShadows, shadowMapCullFace and shadowMapType are dependent on the renderer object, but if they are set in a prototype,
             // the renderer is not available yet, so set them now.
@@ -3628,34 +3658,28 @@ define( [ "module",
         }
     }
 
-    function createControls( viewCam, element ) {
+    function createControls( camera, element ) {
 
-        var controls = new THREE.OrbitControls( viewCam, element );
-        
-        controls.rotateUp( Math.PI / 4 );
-        controls.target.set(
+        var controls;
+        if ( !isMobile() ) {
+            controls = new THREE.OrbitControls( camera, element );
+            //controls.rotateUp(Math.PI / 4);
+            controls.target.set(
             camera.position.x + 0.1,
             camera.position.y,
             camera.position.z
-        );
-        controls.noZoom = true;
-        controls.noPan = true;
+            );
+            controls.noZoom = true;
+            controls.noPan = true;
+            controls.autoRotate = false;
+        } else {
+            controls = new THREE.DeviceOrientationControls( camera, true );
 
-        function setOrientationControls( e ) {
-            
-            if ( !e.alpha ) {
-                return;
-            }
-
-            controls = new THREE.DeviceOrientationControls( viewCam, true );
             controls.connect();
             controls.update();
 
             element.addEventListener( 'click', fullscreen, false );
-
-            window.removeEventListener( 'deviceorientation', setOrientationControls );
         }
-        window.addEventListener( 'deviceorientation', setOrientationControls, true );
 
         return controls;
     }
@@ -3674,5 +3698,25 @@ define( [ "module",
             }
         }
     }
+
+    function isMobileAndroid() {
+        return navigator.userAgent.match(/Android/i);
+    }
+    function isMobileBlackBerry() {
+        return navigator.userAgent.match(/BlackBerry/i);
+    }
+    function isMobileiOS() {
+        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+    }
+    function isMobileOpera() {
+        return navigator.userAgent.match(/Opera Mini/i);
+    }
+    function isMobileWindows() {
+        return navigator.userAgent.match(/IEMobile/i);
+    }
+    function isMobile(){
+        return (isMobileAndroid() || isMobileBlackBerry() || isMobileiOS() || isMobileOpera() || isMobileWindows());
+    }
+
 
 });
