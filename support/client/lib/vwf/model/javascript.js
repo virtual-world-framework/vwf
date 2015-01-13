@@ -50,8 +50,9 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility", "vwf/confi
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
-            this.nodes = {}; // maps id => new type()
-            this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
+            this.nodes = {};                    // maps id => new type()
+            this.protoNode = undefined;         // this.nodes[kutility.protoNodeURI] once it exists
+            this.creatingNode( undefined, 0 );  // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
 
         // == Model API ============================================================================
@@ -84,6 +85,10 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility", "vwf/confi
             // specific prototype if no behaviors are attached.
 
             var node = this.nodes[childID] = Object.create( prototype );
+
+            if ( childID === kutility.protoNodeURI ) {
+                this.protoNode = node;
+            }
 
             Object.defineProperty( node, "private", {
                 value: {} // for bookkeeping, not visible to scripts on the node  // TODO: well, ideally not visible; hide this better ("_private", "vwf_private", ?)
@@ -1703,10 +1708,8 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     function valueIsNode( value ) {
 
-        var protoNodeNode = this.nodes[ kutility.protoNodeURI ];  // our proxy for the node.vwf prototype
-
-        return protoNodeNode &&
-            ( protoNodeNode.isPrototypeOf( value ) || value === protoNodeNode );
+        return this.protoNode &&  // our proxy for the node.vwf prototype
+            ( this.protoNode.isPrototypeOf( value ) || value === this.protoNode );
     }
 
     return exports;
