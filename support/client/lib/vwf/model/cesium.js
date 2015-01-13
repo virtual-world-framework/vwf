@@ -194,15 +194,15 @@ define( [ "module",
                     // probably isn't exactly what we want, but without an
                     // idea of exactly how we'll be using billboards,
                     // I'm just going to leave this implementation as is
-                    var bbCollection = new Cesium.BillboardCollection();
+                    var bbCollection = sceneNode.scene.primitives.add( new Cesium.BillboardCollection() );
 
                     var bb = bbCollection.add( {
+                        "image": canvas,
+                        "imageId": childID,
                         "color" : Cesium.Color.RED,
                         "scale" : 1,
                         "imageIndex": 0
                     } );
-
-                    sceneNode.scene.primitives.add( bbCollection );
                     
                     node.bbCollection = bbCollection; 
                     node.cesiumObj = bb;
@@ -212,6 +212,7 @@ define( [ "module",
                 node.scene = sceneNode.scene;
 
             } else if ( isLabel.call( this, protos ) ) {
+
                 this.state.nodes[ childID ] = node = createNode();
                 sceneNode = findSceneNode.call( this, node );
                 parentNode = findParent.call( this, nodeID );
@@ -219,7 +220,7 @@ define( [ "module",
                 if ( parentNode && parentNode.cesiumObj instanceof Cesium.Entity ) {
                     node.cesiumObj = parentNode.cesiumObj.label;
                 } else {
-                    var labels = new Cesium.LabelCollection();
+                    var labels = sceneNode.scene.primitives.add( new Cesium.LabelCollection() );
                     var lbl = labels.add( {
                         "font"      : '10px Helvetica',
                         "fillColor" : { red : 0.0, blue : 1.0, green : 1.0, alpha : 1.0 },
@@ -227,7 +228,6 @@ define( [ "module",
                         "outlineWidth" : 2,
                         "style" : Cesium.LabelStyle.FILL_AND_OUTLINE
                     } );
-                    sceneNode.scene.primitives.add( labels ); 
 
                     node.labelCollection = labels; 
                     node.cesiumObj = lbl;
@@ -622,7 +622,7 @@ define( [ "module",
                     switch ( propertyName ) {
 
                         case "visible":
-                            if ( node.cesiumObj.hasOwnProperty( 'show' ) ) {
+                            if ( node.cesiumObj.show !== undefined ) {
                                 node.cesiumObj.show = Boolean( propertyValue );
                             } else if ( node.cesiumObj.setShow ) {
                                 node.cesiumObj.setShow( Boolean( propertyValue ) );
@@ -642,7 +642,7 @@ define( [ "module",
                             } else {
 
                                 //console.info( "dist = " + ( Math.sqrt( (propertyValue[0] * propertyValue[0]) + (propertyValue[1] * propertyValue[1]) + (propertyValue[2] * propertyValue[2]) )  ) )
-                                if ( node.cesiumObj.hasOwnProperty( propertyName ) ) {
+                                if ( node.cesiumObj.position !== undefined ) {
                                     node.cesiumObj.position = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );                                
                                     if ( node.cesiumObj instanceof Cesium.Camera ) {
                                         this.state.cameraInfo.position = node.cesiumObj.position;
@@ -819,20 +819,20 @@ define( [ "module",
                             break;
 
                         case "fovy":
-                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustrum ) {
-                                node.cesiumObj.frustrum.fovy = parseFloat( propertyValue );
+                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustum ) {
+                                node.cesiumObj.frustum.fovy = parseFloat( propertyValue );
                             }                    
                             break;
 
                         case "near":
-                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustrum ) {
-                                node.cesiumObj.frustrum.near = parseFloat( propertyValue );
+                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustum ) {
+                                node.cesiumObj.frustum.near = parseFloat( propertyValue );
                             }
                             break;
 
                         case "far":
-                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustrum ) {
-                                node.cesiumObj.frustrum.far = parseFloat( propertyValue );
+                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustum ) {
+                                node.cesiumObj.frustum.far = parseFloat( propertyValue );
                             }
                             break;
 
@@ -1396,7 +1396,7 @@ define( [ "module",
 
                         case "enableLook": 
                             if( node.scene ) {
-                                var controller = node.scene.getScreenSpaceCameraController();
+                                var controller = node.scene.screenSpaceCameraController;
                                 if ( controller ) {
                                     controller.enableLook = Boolean( propertyValue );
                                 }
@@ -1405,7 +1405,7 @@ define( [ "module",
 
                         case "enableRotate": 
                             if( node.scene ) {
-                                var controller = node.scene.getScreenSpaceCameraController();
+                                var controller = node.scene.screenSpaceCameraController;
                                 if ( controller ) {
                                     controller.enableRotate = Boolean( propertyValue );
                                 }
@@ -1414,7 +1414,7 @@ define( [ "module",
 
                         case "enableTilt":
                             if( node.scene ) {
-                                var controller = node.scene.getScreenSpaceCameraController();
+                                var controller = node.scene.screenSpaceCameraController;
                                 if ( controller ) {
                                     controller.enableTilt = Boolean( propertyValue );
                                 }
@@ -1423,7 +1423,7 @@ define( [ "module",
 
                         case "enableTranslate":
                             if( node.scene ) {
-                                var controller = node.scene.getScreenSpaceCameraController();
+                                var controller = node.scene.screenSpaceCameraController;
                                 if ( controller ) {
                                     controller.enableTranslate = Boolean( propertyValue );
                                 }
@@ -1432,7 +1432,7 @@ define( [ "module",
 
                         case "enableZoom": 
                             if( node.scene ) {
-                                var controller = node.scene.getScreenSpaceCameraController();
+                                var controller = node.scene.screenSpaceCameraController;
                                 if ( controller ) {
                                     controller.enableZoom = Boolean( propertyValue );
                                 }
@@ -1619,7 +1619,7 @@ define( [ "module",
 
                 case "outlineColor":
                     if( node.cesiumObj ) {
-                        var clr = node.cesiumObj.outLineColor;
+                        var clr = node.cesiumObj.outlineColor;
                         if ( clr.alpha == 1 ) {
                             value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
                         } else {
@@ -1753,19 +1753,19 @@ define( [ "module",
 
                 case "fovy":
                     if ( node.cesiumObj instanceof Cesium.Camera ) {
-                        value = node.cesiumObj.frustrum.fovy;
+                        value = node.cesiumObj.frustum.fovy;
                     }                    
                     break;
 
                 case "near":
                     if ( node.cesiumObj instanceof Cesium.Camera ) {
-                        value = node.cesiumObj.frustrum.near;
+                        value = node.cesiumObj.frustum.near;
                     }
                     break;
 
                 case "far":
                     if ( node.cesiumObj instanceof Cesium.Camera ) {
-                        value = node.cesiumObj.frustrum.far;
+                        value = node.cesiumObj.frustum.far;
                     }
                     break;
 
@@ -1902,7 +1902,7 @@ define( [ "module",
 
                 case "enableLook": 
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceCameraController();
+                        var controller = node.scene.screenSpaceCameraController;
                         if ( controller ) {
                             value = controller.enableLook;
                         }
@@ -1910,7 +1910,7 @@ define( [ "module",
                     break;
                 case "enableRotate": 
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceCameraController();
+                        var controller = node.scene.screenSpaceCameraController;
                         if ( controller ) {
                             value = controller.enableRotate;
                         }
@@ -1918,7 +1918,7 @@ define( [ "module",
                     break;
                 case "enableTilt":
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceCameraController();
+                        var controller = node.scene.screenSpaceCameraController;
                         if ( controller ) {
                             value = controller.enableTilt;
                         }
@@ -1926,7 +1926,7 @@ define( [ "module",
                     break; 
                 case "enableTranslate":
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceCameraController();
+                        var controller = node.scene.screenSpaceCameraController;
                         if ( controller ) {
                             value = controller.enableTranslate;
                         }
@@ -1934,7 +1934,7 @@ define( [ "module",
                     break;
                 case "enableZoom": 
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceCameraController();
+                        var controller = node.scene.screenSpaceCameraController;
                         if ( controller ) {
                             value = controller.enableZoom;
                         }
