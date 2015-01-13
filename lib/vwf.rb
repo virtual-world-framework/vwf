@@ -95,6 +95,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
   get "/proxy/:host/*" do |host, path|
 
     delegated_env = env.merge(
+      "SCRIPT_NAME" => "/proxy/" + host,
       "PATH_INFO" => "/" + path
     )
 
