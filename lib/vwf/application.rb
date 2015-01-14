@@ -11,44 +11,93 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-class VWF::Application
+class VWF::Application < Sinatra::Base
 
-  def initialize resource, env
+  def initialize application, env
+    super nil
+    @application = application
+  end
 
-    @app = Rack::Builder.new do
+  configure do
 
-      map "/" do
+    enable :logging
 
-        run Rack::Cascade.new [
+    # Condition to detect browser requests, as opposed to XHR requests. Browser requests for
+    # application resources should bootstrap the client, and singular application resources should
+    # redirect to directory resources.
 
-          Reflector.new( resource, env["vwf.root"] + "/" + env["vwf.application"], env["vwf.instance"] ), # The WebSocket reflector  # TODO: not for instance==nil?  # debugging: Reflector.new( :debug => true, :backend => { :debug => true } ),
-
-          Client.new( File.join( VWF.settings.support, "client/lib" ),          # Client files from ^/support/client/lib
-            File.join( VWF.settings.support, "client/libz" ) ),                 #   or ^/support/client/libz (in production mode, if exists)
-
-          Rack::File.new( File.join VWF.settings.public_folder, env["vwf.root"] ),         # Public content from ^/public/path/to/application
-          Component.new( File.join VWF.settings.public_folder, env["vwf.root"] ),          # A component descriptor, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
-          Persistence.new( File.join(VWF.settings.public_folder, env["vwf.root"]), env )         # EXPERIMENTAL: Save state to ^/public/path/to/application; DON'T ENABLE ON A PRODUCTION SERVER
-
-        ]
-
+    set( :browser ) do |want_browser|
+      condition do
+        is_browser = !! request.accept?( "text/html" )
+        want_browser == is_browser
       end
-
-      map "/admin" do
-        run Admin
-      end
-
     end
 
   end
-  
-  def call env
-    @app.call env
+
+  # Redirect singular application resources to directory resources. For example, from:
+  # 
+  #   /path/to/application => /path/to/application/
+  #   /path/to/application.vwf => /path/to/application.vwf/
+  # 
+
+  get "", :browser => true do
+    redirect to request.path_info + "/"
   end
 
-  def self.call env
-    new.call env
+  # Redirect singular application resources to directory resources. For example, from:
+  # 
+  #   /path/to/application/0123456789ABCDEF => /path/to/application/0123456789ABCDEF/
+  #   /path/to/application.vwf/0123456789ABCDEF => /path/to/application.vwf/0123456789ABCDEF/
+  # 
+
+  get %r{^/[0-9A-Za-z]{16}$}, :browser => true do
+    redirect to request.path_info + "/"
   end
+
+  # Redirect from the application to an instance.
+
+  get "/", :browser => true do
+    redirect to "/" + random_instance_id + "/"
+  end
+
+  # Serve the reflector from "/0123456789ABCDEF/websocket"
+
+  get %r{^/([0-9A-Za-z]{16})/(websocket/?.*)$} do |instance, path_info|
+    logger.debug "VWF::Application#get 5 #{request.script_name} #{request.path_info} => reflector #{ request.path_info = "/" + path_info }"
+    request.path_info = "/" + path_info
+    result = Reflector.new( @application + "/" + instance, @application, instance ).call env
+    pass if result[0] == 404
+    result
+  end
+
+  # Bootstrap the client from "/0123456789ABCDEF/" and serve the client files.
+
+  get %r{^/([0-9A-Za-z]{16})/(.*)$} do |instance, path_info|
+    result = Client.new( File.join( VWF.settings.support, "client/lib" ),
+      File.join( VWF.settings.support, "client/libz" ) ).call( env.merge "PATH_INFO" => "/" + path_info )
+    pass if result[0] == 404
+    result
+  end
+
+  helpers do
+  end
+
+  # Generate a random string to be used as an instance id.
+
+  def random_instance_id
+    "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
+  end
+
+
+
+
+
+
+
+
+
+
 
   # Wrap Rack::File to serve "/" as "/index.html".
 

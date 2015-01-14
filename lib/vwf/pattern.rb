@@ -55,39 +55,43 @@ class VWF::Pattern
 
   def match path
 
-    public_path = "/"
+    script_name = ""
+
+    # Split into segments. The first segment is empty since `path` has a leading slash. A trailing
+    # slash does not create an empty last segment.
 
     segments = path.split "/"
-    segments.shift # the first segment is empty since path has a leading slash
+    segments.shift  # empty since `path` has a leading slash
 
-    while segment = segments.first and directory? File.join( public_path, segment )
-      public_path = File.join public_path, segments.shift
+    has_trailing_slash = path[-1] == "/"
+
+    # Follow segments into the `public` directory.
+
+    while segments.first and directory?( script_name + "/" + segments.first )
+      script_name = script_name + "/" + segments.shift
     end
 
-    if segment = segments.first and extension = component?( File.join( public_path, segment ) )
-      application = segment
-      segments.shift
-    elsif extension = component?( File.join( public_path, "index.vwf" ) )  # TODO: configuration parameter for default application name
-      application = "index.vwf"  # TODO: configuration parameter for default application name
-    elsif extension = component?( File.join( public_path, "index.dae" ) )  # TODO: delegate list of supported types to #component  # TODO: configuration parameter for default application name
-      application = "index.dae"  # TODO: configuration parameter for default application name
-    elsif extension = component?( File.join( public_path, "index.unity3d" ) )  # TODO: delegate list of supported types to #component  # TODO: configuration parameter for default application name
-      application = "index.unity3d"  # TODO: configuration parameter for default application name
+    # Is a component there? Which type?
+
+    if segments.first and extension = component?( script_name + "/" + segments.first )
+      application = script_name = script_name + "/" + segments.shift
+    elsif extension = component?( script_name + "/index.vwf" )  # TODO: configuration parameter for default application name
+      application = script_name + "/" + "index.vwf"  # TODO: configuration parameter for default application name
+    elsif extension = component?( script_name + "/index.dae" )  # TODO: delegate list of supported types to #component  # TODO: configuration parameter for default application name
+      application = script_name + "/" + "index.dae"  # TODO: configuration parameter for default application name
+    elsif extension = component?( script_name + "/index.unity3d" )  # TODO: delegate list of supported types to #component  # TODO: configuration parameter for default application name
+      application = script_name + "/" + "index.unity3d"  # TODO: configuration parameter for default application name
     end
+
+    # If we found a component, return a successful match. Split the path at the component into
+    # `script_name` and `path_info`. Identify the component as the application. The application will
+    # be different from `script_name` if an implicit `index.*` component was used.
 
     if extension
-
-      instance = segments.shift if instance?( segments.first )
-
-      private_path = File.join( segments.shift segments.length ) unless segments.empty?      
-
-        
-
-      Match.new [ public_path, application, instance, private_path ]
-
+      path_info = segments.shift( segments.length ).map { |segment| "/" + segment } .join( "" )
+      path_info += "/" if has_trailing_slash
+      Match.new [ script_name, path_info, application ]
     end
-
-    # TODO: which parts are URL paths and which are filesystem paths? don't use File.join on URL paths
 
   end
 
@@ -127,10 +131,6 @@ private
         ""
       end
     end
-  end
-
-  def instance? segment
-    segment =~ /^[0-9A-Za-z]{16}$/
   end
 
 end

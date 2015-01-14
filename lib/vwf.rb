@@ -45,47 +45,46 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   end
 
-  get Pattern.new do |public_path, application, instance, private_path|
-  
-    logger.debug "VWF#get #{public_path} - #{application} - #{instance} - #{private_path}"
-    # Redirect "/path/to/application" to "/path/to/application/", and
-    # "/path/to/application/instance" to "/path/to/application/instance/". But XHR calls to
-    # "/path/to/application" get the component data.
+  # Delegate application GETs to the application. Pass requests not handled by the application to
+  # other routes here.
 
-    if request.path_info[-1,1] != "/" && private_path.nil?
+  get Pattern.new do |script_name, path_info, application|
 
-      if ! request.env["HTTP_USER_AGENT"].nil? && request.env["HTTP_USER_AGENT"].include?( "MSIE 8.0" ) # Redirect to unsupported browser page if using IE8.
-        redirect to "/web/unsupported.html"
-      elsif instance.nil? && ! request.accept.include?( mime_type :html )  # TODO: pass component request through to normal delegation below?
-        Application::Component.new( settings.public_folder ).call env # A component, possibly from a template or as JSONP  # TODO: we already know the template file name with extension, but now Component has to figure it out again
-      else
-        redirect to request.path_info + "/" + ( request.query_string.length > 0 ? "?" + request.query_string : "" )
-      end
+    logger.debug "VWF#get #{script_name} - #{path_info} - #{application}"
 
-    # For "/path/to/application/", create an instance and redirect to
-    # "/path/to/application/instance/".
-
-    elsif instance.nil? && private_path.nil?
-
-      redirect to request.path_info + random_instance_id + "/" + ( request.query_string.length > 0 ? "?" + request.query_string : "" )
-
-    # Delegate everything else to the application.
-
-    else
-
-      delegate_to_application public_path, application, instance, private_path
-
+    delegate_to_application( script_name, path_info, application ).tap do |result|
+      pass if result[0] == 404
     end
 
   end
 
-  # Delegate all posts to the application.
+  # Delegate application POSTs to the application.
 
-  post Pattern.new do |public_path, application, instance, private_path|
+  post Pattern.new do |script_name, path_info, application|
 
-    logger.debug "VWF#post #{public_path} - #{application} - #{instance} - #{private_path}"
+    logger.debug "VWF#post #{script_name} - #{path_info} - #{application}"
 
-    delegate_to_application public_path, application, instance, private_path
+    delegate_to_application( script_name, path_info, application )
+
+  end
+
+  # Delegate application DELETEs to the application.
+
+  delete Pattern.new do |script_name, path_info, application|
+
+    logger.debug "VWF#delete #{script_name} - #{path_info} - #{application}"
+
+    delegate_to_application( script_name, path_info, application )
+
+  end
+
+  # Delegate application PUTs to the application.
+
+  put Pattern.new do |script_name, path_info, application|
+
+    logger.debug "VWF#put #{script_name} - #{path_info} - #{application}"
+
+    delegate_to_application( script_name, path_info, application )
 
   end
 
@@ -120,7 +119,12 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
       "PATH_INFO" => "/" + path
     )
 
-    response = Rack::File.new( VWF.settings.public_folder ).call delegated_env
+    cascade = Rack::Cascade.new [
+      Rack::File.new( VWF.settings.public_folder ),
+      Application::Component.new( settings.public_folder )
+    ]
+
+    response = cascade.call delegated_env
 
     # index.html is normally rendered from a template during the build. As a special case for
     # development mode, when index.html is missing, render from the template with null content.
@@ -145,28 +149,15 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   helpers do
 
-    def delegate_to_application public_path, application, instance, private_path
-
-      resource = instance ?
-        File.join( public_path, application, instance ) :
-        File.join( public_path, application )
+    def delegate_to_application script_name, path_info, application
 
       delegated_env = env.merge(
-        "SCRIPT_NAME" => resource,
-        "PATH_INFO" => "/" + ( private_path || "" ),  # TODO: escaped properly for PATH_INFO?
-        "vwf.root" => public_path,
-        "vwf.application" => application,
-        "vwf.instance" => instance
+        "SCRIPT_NAME" => script_name,
+        "PATH_INFO" => path_info
       )
 
-      Application.new( resource, delegated_env ).call delegated_env
+      Application.new( application, delegated_env ).call delegated_env
 
-    end
-
-    # Generate a random string to be used as an instance id.
-
-    def random_instance_id  # TODO: don't count on this for security; migrate to a proper instance id, in a cookie, at least twice as long, and with verified randomness
-      "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
     end
 
   end
