@@ -262,6 +262,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         voice: null,
 
         subtitle: undefined,
+        textToSpeechInput: undefined,
 
         soundGroup: undefined,
         groupReplacementMethod: undefined,
@@ -281,6 +282,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
 
             this.subtitle = this.soundDefinition.subtitle;
+            this.textToSpeechInput = this.soundDefinition.textToSpeechInput;
 
             var soundGroupName = this.soundDefinition.soundGroup;
             if ( soundGroupName ) {
@@ -333,11 +335,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
 
             
-            if( this.voice && this.subtitle ){
+            if( this.voice && this.textToSpeechInput ){
                 console.log("Voice: " + this.voice);
-                var rawSubtitle = this.subtitle;
-                if(rawSubtitle){
-                    var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
+                var speechStr = this.textToSpeechInput;
+                if(speechStr){
+                    //var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
 
                     var meSpeakOpts = {};
                     if ( voices[this.voice].ttsAmplitude !== undefined ) {
