@@ -15,7 +15,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     // TODO: should these be stored in this.state so that the view can access them?
     var context;
-    var voices = null;
+    var voiceSet = null;
     var soundData = {};
     var soundGroups = {};
     var masterVolume = 1.0;
@@ -96,8 +96,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
                     return;
 
-                case "setVoices":
-                    voices = params[0];
+                case "setVoiceSet":
+                    voiceSet = params[0];
                     return;
 
                 // arguments: soundName 
@@ -336,30 +336,30 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             
             if( this.voice && this.textToSpeechInput ){
-                console.log("Voice: " + this.voice);
+                //console.log("Voice object: " + voiceSet[this.voice].ttsPitch);
                 var speechStr = this.textToSpeechInput;
                 if(speechStr){
                     //var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
 
                     var meSpeakOpts = {};
-                    if ( voices[this.voice].ttsAmplitude !== undefined ) {
-                        meSpeakOpts.amplitude = voices[this.voice].ttsAmplitude;
+                    if ( voiceSet[this.voice].ttsAmplitude !== undefined ) {
+                        meSpeakOpts.amplitude = voiceSet[this.voice].ttsAmplitude;
                     } 
-                    if ( voices[this.voice].ttsVariant !== undefined ) {
-                        meSpeakOpts.variant = voices[this.voice].ttsVariant;
+                    if ( voiceSet[this.voice].ttsVariant !== undefined ) {
+                        meSpeakOpts.variant = voiceSet[this.voice].ttsVariant;
                     } 
-                    if ( voices[this.voice].ttsWordGap !== undefined ) {
-                        meSpeakOpts.wordgap = voices[this.voice].ttsWordGap;
+                    if ( voiceSet[this.voice].ttsWordGap !== undefined ) {
+                        meSpeakOpts.wordgap = voiceSet[this.voice].ttsWordGap;
                     } 
-                    if ( voices[this.voice].ttsSpeed !== undefined ) {
-                        meSpeakOpts.speed = voices[this.voice].ttsSpeed;
+                    if ( voiceSet[this.voice].ttsSpeed !== undefined ) {
+                        meSpeakOpts.speed = voiceSet[this.voice].ttsSpeed;
                     } 
-                    if ( voices[this.voice].ttsPitch !== undefined ) {
-                        meSpeakOpts.pitch = voices[this.voice].ttsPitch;
+                    if ( voiceSet[this.voice].ttsPitch !== undefined ) {
+                        meSpeakOpts.pitch = voiceSet[this.voice].ttsPitch;
                     } 
                     
                     meSpeakOpts.rawdata = 'default';
-                    console.log("Pitch: " + meSpeakOpts.ttsPitch);
+                    //console.log("Pitch: " + meSpeakOpts.pitch);
                     var meSpeakBuf = meSpeak.speak(speechStr, meSpeakOpts);
                     context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
                 }
