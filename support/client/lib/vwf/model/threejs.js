@@ -2906,6 +2906,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 node.loader = new THREE.ColladaLoader();
                 node.loader.options.convertUpAxis = true;
                 node.loader.options.upAxis = "Z";
+                node.loader.options.headers[ "VWF-Suppress-Loader" ] = 1;
                 node.loader.load(node.source,node.assetLoaded.bind( this ));
             }
           

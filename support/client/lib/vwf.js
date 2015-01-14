@@ -4070,6 +4070,10 @@ if ( ! childComponent.source ) {
                     url: remappedURI( nodeURI ),
                     dataType: "jsonp",
 
+                    headers: {
+                        "VWF-Suppress-Loader": 1
+                    },
+
                     success: function( nodeDescriptor ) /* async */ {
                         callback_async( nodeDescriptor );
                         queue.resume( "after loading " + nodeURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
@@ -4102,10 +4106,24 @@ if ( ! childComponent.source ) {
 
                 queue.suspend( "while loading " + scriptURI ); // suspend the queue
 
-                jQuery.get( remappedURI( scriptURI ), function( scriptText ) /* async */ {
-                    callback_async( scriptText );
-                    queue.resume( "after loading " + scriptURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
-                }, "text" );
+                jQuery.ajax( {
+
+                    url: remappedURI( scriptURI ),
+                    dataType: "text",
+
+                    headers: {
+                        "VWF-Suppress-Loader": 1
+                    },
+
+                    success: function( scriptText ) /* async */ {
+                        callback_async( scriptText );
+                        queue.resume( "after loading " + scriptURI ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                    },
+
+                    // error: function() {  // TODO
+                    // },
+
+                } );
 
             }
 

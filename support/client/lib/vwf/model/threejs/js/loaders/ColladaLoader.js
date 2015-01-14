@@ -44,7 +44,10 @@ THREE.ColladaLoader = function () {
 		upAxis: 'Y',
 
 		// For reflective or refractive materials we'll use this cubemap
-		defaultEnvMap: null
+		defaultEnvMap: null,
+
+		// Extra headers to add to requests.
+		headers: {}
 
 	};
 
@@ -106,6 +109,14 @@ THREE.ColladaLoader = function () {
 			}
 
 			request.open( "GET", url, true );
+
+			Object.keys( options.headers ).forEach( function( key ) {
+				var value = options.headers[ key ];
+
+				request.setRequestHeader( key, value );
+
+			} );
+
 			request.send( null );
 
 		} else {

@@ -24,6 +24,13 @@ class VWF < Sinatra::Base
 
 set :component_template_types, [ :json, :yaml ]  # get from Component?
 
+    set( :may_send_to_application ) do |should_send|
+      condition do
+        may_send = env[ "HTTP_VWF_SUPPRESS_LOADER" ].to_i == 0  # not suppressed or not specified
+        should_send == may_send
+      end
+    end
+
   end
 
   configure :production do
@@ -48,7 +55,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
   # Delegate application GETs to the application. Pass requests not handled by the application to
   # other routes here.
 
-  get Pattern.new do |script_name, path_info, application|
+  get Pattern.new, :may_send_to_application => true do |script_name, path_info, application|
 
     logger.debug "VWF#get #{script_name} - #{path_info} - #{application}"
 
@@ -60,7 +67,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   # Delegate application POSTs to the application.
 
-  post Pattern.new do |script_name, path_info, application|
+  post Pattern.new, :may_send_to_application => true do |script_name, path_info, application|
 
     logger.debug "VWF#post #{script_name} - #{path_info} - #{application}"
 
@@ -70,7 +77,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   # Delegate application DELETEs to the application.
 
-  delete Pattern.new do |script_name, path_info, application|
+  delete Pattern.new, :may_send_to_application => true do |script_name, path_info, application|
 
     logger.debug "VWF#delete #{script_name} - #{path_info} - #{application}"
 
@@ -80,7 +87,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   # Delegate application PUTs to the application.
 
-  put Pattern.new do |script_name, path_info, application|
+  put Pattern.new, :may_send_to_application => true do |script_name, path_info, application|
 
     logger.debug "VWF#put #{script_name} - #{path_info} - #{application}"
 
