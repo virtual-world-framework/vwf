@@ -114,6 +114,16 @@ define( [ "module",
                     this.disableInputs = options[ "experimental-disable-inputs" ];
                 }
                 enableStereo = ( options.stereo !== undefined ) ? options.stereo : false;
+
+                if ( options.shaders ) {
+                    var scriptEle = undefined;
+                    // jQuery.getScript()
+                    for ( var i = 0; i < options.shaders.length; i++ ) {
+                        var scriptEle = document.createElement( 'script' );
+                        scriptEle.setAttribute( "type", "text/javascript" );
+                        scriptEle.setAttribute( "src", options.shaders[ i ] );
+                    }
+                }
             }
             else {
                 this.rootSelector = options;
@@ -185,13 +195,12 @@ define( [ "module",
                             "controls": viewCam ? createControls( viewCam, sceneNode.renderer.domElement ) : undefined
                         } 
                         var effect = sceneNode.stereo.effect;
-                        
-                        effect.setSize( this.width, this.height ); 
 
                         effect.separation = this.parameters.IPD ? this.parameters.IPD : 0.2;
                         effect.offset = this.parameters.offset ? this.parameters.offset : -0.2;
                         effect.delta = this.parameters.delta ? this.parameters.delta : 0.01;
 
+                        effect.setSize( this.width, this.height ); 
                     }
                 }
 
