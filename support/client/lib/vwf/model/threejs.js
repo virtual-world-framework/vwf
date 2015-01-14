@@ -2586,12 +2586,12 @@ define( [ "module",
                     colorValue = vwfColor._decimal;
                 }
             }
-            var mat = new THREE.MeshLambertMaterial( { "color": colorValue, "ambient": colorValue } );
+            var mat = new THREE.MeshLambertMaterial( { "color": colorValue, "ambient": colorValue, side: THREE.DoubleSide } );
            
             if ( isCubeDefinition.call( this, node.prototypes ) ) {
                 // materials = ??
                 sides = meshDef.sides || { px: true, nx: true, py: true, ny: true, pz: true, nz: true };
-                geo = new THREE.CubeGeometry( meshDef.width || 10, meshDef.height || 10, meshDef.depth || 10, 
+                geo = new THREE.BoxGeometry( meshDef.width || 10, meshDef.height || 10, meshDef.depth || 10, 
                     meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1, meshDef.segmentsDepth || 1,
                     materials, sides );
             } else if ( isPlaneDefinition.call( this, node.prototypes ) ) {
