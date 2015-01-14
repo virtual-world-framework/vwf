@@ -15,6 +15,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     // TODO: should these be stored in this.state so that the view can access them?
     var context;
+    var voices = null;
     var soundData = {};
     var soundGroups = {};
     var masterVolume = 1.0;
@@ -93,6 +94,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                                                              successCallback, 
                                                              failureCallback );
 
+                    return;
+
+                case "setVoices":
+                    voices = params[0];
                     return;
 
                 // arguments: soundName 
@@ -254,7 +259,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         allowMultiplay: false,
         soundDefinition: null,
         playOnLoad: false,
-        useTextToSpeech: false,
+        voice: null,
 
         subtitle: undefined,
 
@@ -271,24 +276,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.playingInstances = {};
             this.soundDefinition = soundDefinition;
 
-            if ( this.soundDefinition.isLooping !== undefined ) {
-                this.isLooping = soundDefinition.isLooping;
-            }
-
-            if ( this.soundDefinition.allowMultiplay !== undefined ) {
-                this.allowMultiplay = soundDefinition.allowMultiplay;
-            }
-
-            if (this.soundDefinition.initialVolume !== undefined ) {
-                this.initialVolume = soundDefinition.initialVolume;
-            }
-
-            if ( this.soundDefinition.playOnLoad !== undefined ) {
-                this.playOnLoad = soundDefinition.playOnLoad;
-            }
-
-            if (this.soundDefinition.useTextToSpeech !== undefined) {
-                this.useTextToSpeech = soundDefinition.useTextToSpeech;
+            if ( this.soundDefinition.voice!== undefined ) {
+                this.voice = soundDefinition.voice;
             }
 
             this.subtitle = this.soundDefinition.subtitle;
@@ -344,30 +333,31 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
 
             
-            if( this.useTextToSpeech && this.subtitle ){
+            if( this.voice && this.subtitle ){
+                console.log("Voice: " + this.voice);
                 var rawSubtitle = this.subtitle;
                 if(rawSubtitle){
                     var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
 
                     var meSpeakOpts = {};
-                    if (this.soundDefinition.ttsAmplitude !== undefined) {
-                        meSpeakOpts.amplitude = this.soundDefinition.ttsAmplitude;
+                    if ( voices[this.voice].ttsAmplitude !== undefined ) {
+                        meSpeakOpts.amplitude = voices[this.voice].ttsAmplitude;
                     } 
-                    if (this.soundDefinition.ttsVariant !== undefined) {
-                        meSpeakOpts.variant = this.soundDefinition.ttsVariant;
+                    if ( voices[this.voice].ttsVariant !== undefined ) {
+                        meSpeakOpts.variant = voices[this.voice].ttsVariant;
                     } 
-                    if (this.soundDefinition.ttsWordGap !== undefined) {
-                        meSpeakOpts.wordGap = this.soundDefinition.ttsWordGap;
+                    if ( voices[this.voice].ttsWordGap !== undefined ) {
+                        meSpeakOpts.wordgap = voices[this.voice].ttsWordGap;
                     } 
-                    if (this.soundDefinition.ttsSpeed !== undefined) {
-                        meSpeakOpts.speed = this.soundDefinition.ttsSpeed;
+                    if ( voices[this.voice].ttsSpeed !== undefined ) {
+                        meSpeakOpts.speed = voices[this.voice].ttsSpeed;
                     } 
-                    if (this.soundDefinition.ttsPitch !== undefined) {
-                        meSpeakOpts.pitch = this.soundDefinition.ttsPitch;
+                    if ( voices[this.voice].ttsPitch !== undefined ) {
+                        meSpeakOpts.pitch = voices[this.voice].ttsPitch;
                     } 
                     
                     meSpeakOpts.rawdata = 'default';
-
+                    console.log("Pitch: " + meSpeakOpts.ttsPitch);
                     var meSpeakBuf = meSpeak.speak(speechStr, meSpeakOpts);
                     context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
                 }

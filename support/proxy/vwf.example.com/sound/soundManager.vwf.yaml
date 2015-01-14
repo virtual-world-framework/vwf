@@ -1,6 +1,7 @@
 --- 
 extends: http://vwf.example.com/node.vwf
 methods:
+  setVoices:
   loadSound:
   clearAllSounds:
   isReady:
