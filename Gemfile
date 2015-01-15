@@ -52,3 +52,5 @@ end
 # 1.0.0.beta.4 won't build successfully with RubyInstaller and MinGW.
 
 gem "eventmachine", ">= 1.0.0.beta", "!= 1.0.0.beta.4"
+
+gem "slim"
