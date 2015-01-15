@@ -36,40 +36,49 @@ define( [ "module",
         /// objects are not modified. Unchanged objects will be referenced directly in the result.
         /// 
         /// @param {Object} object
-        ///   The object to transform. Object and Array contents are recursively transformed using
-        ///   the same transformation function.
+        ///   The object to transform. `Object` and `Array` contents are recursively transformed
+        ///   using the same transformation function.
         /// @param {Function} transformation
-        ///   The transformation function: function( object, names, depth ) { return object }
+        ///   The transformation function: `function( object, names, depth, finished ) { return object }`
+        ///   Call `finished()` from the transformation function to stop recursion for the current
+        ///   object.
         /// @param {(Number|String)[]} [names]
-        ///   Array of names or indexes to Object in its ancestors, parent first (recursive calls
-        ///   only).
+        ///   Array of the names or indexes that refer to `object` in its container and in its
+        ///   containers' containers, parent first (recursive calls only).
         /// @param {Number} [depth]
         ///   Recursion depth (recursive calls only).
         /// 
         /// @returns {Object}
         ///   The transformed object.
 
-        transform: function( object, transformation /* ( object, names, depth ) */, names, depth ) {
+        transform: function( object, transformation /* ( object, names, depth, finished ) */, names, depth ) {
 
             names = names || [];
             depth = depth || 0;
 
-            var result = object = transformation( object, names, depth );  // TODO: transform scalars always? sometimes? ... transform whole objects and arrays before generic recursion ... separate functions?
+            var finished = false, item;
 
-            var item;
+            var result = object = transformation( object, names, depth, function() { finished = true } );
 
-            if ( typeof object == "object" && object != null ) {
+            if ( typeof object === "object" && object !== null && ! finished ) {
 
                 if ( object instanceof Array ) {
 
+                    // Recursively transform the elements if the object is an Array.
+
                     for ( var index = 0; index < object.length; index++ ) {
 
-                        if ( ( item = this.transform( object[index], transformation, [ index ].concat( names ), depth + 1 ) ) !==
-                                object[index] ) {
+                        if ( ( item = this.transform( object[index], transformation,
+                                [ index ].concat( names ), depth + 1 ) ) !== object[index] ) {
+
+                            // If the item changed, and it's the first change in the array, then
+                            // duplicate the array.
 
                             if ( result === object ) {
-                                result = [].concat( object ); // shallow copy into a new Array
+                                result = [].concat( object );  // shallow copy into a new Array
                             }
+
+                            // Assign the transformed item.
 
                             result[index] = item;
                         }
@@ -77,15 +86,36 @@ define( [ "module",
 
                 } else {
 
+                    // Recursively transform the properties if the object is an Object.
+
                     Object.keys( object ).forEach( function( key ) {
 
-                        if ( ( item = this.transform( object[key], transformation, [ key ].concat( names ), depth + 1 ) ) !==
-                                object[key] ) {
+                        if ( ( item = this.transform( object[key], transformation,
+                                [ key ].concat( names ), depth + 1 ) ) !== object[key] ) {
+
+                            // If the item changed, and it's the first change in the object, then
+                            // duplicate the object.
 
                             if ( result === object ) {
+
                                 result = {};
-                                Object.keys( object ).forEach( function( k ) { result[k] = object[k] } ); // shallow copy into a new Object
+
+                                Object.keys( object ).forEach( function( k ) {
+                                    result[ k ] = object[ k ];  // shallow copy into a new Object
+                                } );
+
+                                // Also copy the non-enumerable `length` property for an `arguments`
+                                // object.
+
+                                var lengthDescriptor = Object.getOwnPropertyDescriptor( object, "length" );
+
+                                if (  lengthDescriptor && ! lengthDescriptor.enumerable ) {
+                                    Object.defineProperty( result, "length", lengthDescriptor );
+                                }
+
                             }
+
+                            // Assign the transformed item.
 
                             result[key] = item;
                         }
