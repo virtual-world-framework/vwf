@@ -157,35 +157,3 @@ properties:
         this.side = value;  
       }
     value: front
-
-  ## textureWrapT
-  ## 
-  ## @name material.vwf#textureWrapT
-  ## @property
-
-  textureWrapT:
-    set: |
-      if ( value === "repeat" || value === "clamp" || value === "mirror" ) {
-        this.textureWrapT = value;  
-      }
-    value: clamp
-
-  ## textureWrapS
-  ## 
-  ## @name material.vwf#textureWrapS
-  ## @property
-
-  textureWrapS:
-    set: |
-      if ( value === "repeat" || value === "clamp" || value === "mirror" ) {
-        this.textureWrapS = value;  
-      }
-    value: clamp
-
-  ## textureRepeat
-  ## 
-  ## @name material.vwf#textureRepeat
-  ## @property
-
-  textureRepeat: [ 1, 1 ]
-
