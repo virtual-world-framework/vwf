@@ -13,8 +13,10 @@ properties:
       this.updateUniforms();
   deltaTime:
     set: |
-      this.uniforms.deltaTime.value = value;
-      this.deltaTime = value;
+      if ( this.uniforms !== undefined ) {
+        this.uniforms.deltaTime.value = value;
+        this.deltaTime = value;
+      }
       //this.updateUniforms();
   uniforms:
     texture1:
