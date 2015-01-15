@@ -64,7 +64,7 @@ class VWF::Application < Sinatra::Base
   # Serve the reflector from "/0123456789ABCDEF/websocket"
 
   get %r{^/([0-9A-Za-z]{16})/(websocket/?.*)$} do |instance, path_info|
-    logger.debug "VWF::Application#get 5 #{request.script_name} #{request.path_info} => reflector #{ request.path_info = "/" + path_info }"
+    request.script_name += "/" + instance
     request.path_info = "/" + path_info
     result = Reflector.new( @application + "/" + instance, @application, instance ).call env
     pass if result[0] == 404
@@ -74,8 +74,9 @@ class VWF::Application < Sinatra::Base
   # Bootstrap the client from "/0123456789ABCDEF/" and serve the client files.
 
   get %r{^/([0-9A-Za-z]{16})/(.*)$} do |instance, path_info|
-    result = Client.new( File.join( VWF.settings.support, "client/lib" ),
-      File.join( VWF.settings.support, "client/libz" ) ).call( env.merge "PATH_INFO" => "/" + path_info )
+    request.script_name += "/" + instance
+    request.path_info = "/" + path_info
+    result = Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
     pass if result[0] == 404
     result
   end
