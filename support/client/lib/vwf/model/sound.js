@@ -261,6 +261,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         playOnLoad: false,
         voice: null,
 
+        meSpeakOpts: undefined,
         subtitle: undefined,
         textToSpeechInput: undefined,
 
@@ -277,7 +278,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.playingInstances = {};
             this.soundDefinition = soundDefinition;
 
-            if ( this.soundDefinition.voice!== undefined ) {
+            if ( this.soundDefinition.voice !== undefined ) {
                 this.voice = soundDefinition.voice;
             }
 
@@ -341,27 +342,27 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 if(speechStr){
                     //var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
 
-                    var meSpeakOpts = {};
+                    this.meSpeakOpts = {};
                     if ( voiceSet[this.voice].ttsAmplitude !== undefined ) {
-                        meSpeakOpts.amplitude = voiceSet[this.voice].ttsAmplitude;
+                        this.meSpeakOpts.amplitude = voiceSet[this.voice].ttsAmplitude;
                     } 
                     if ( voiceSet[this.voice].ttsVariant !== undefined ) {
-                        meSpeakOpts.variant = voiceSet[this.voice].ttsVariant;
+                        this.meSpeakOpts.variant = voiceSet[this.voice].ttsVariant;
                     } 
                     if ( voiceSet[this.voice].ttsWordGap !== undefined ) {
-                        meSpeakOpts.wordgap = voiceSet[this.voice].ttsWordGap;
+                        this.meSpeakOpts.wordgap = voiceSet[this.voice].ttsWordGap;
                     } 
                     if ( voiceSet[this.voice].ttsSpeed !== undefined ) {
-                        meSpeakOpts.speed = voiceSet[this.voice].ttsSpeed;
+                        this.meSpeakOpts.speed = voiceSet[this.voice].ttsSpeed;
                     } 
                     if ( voiceSet[this.voice].ttsPitch !== undefined ) {
-                        meSpeakOpts.pitch = voiceSet[this.voice].ttsPitch;
+                        this.meSpeakOpts.pitch = voiceSet[this.voice].ttsPitch;
                     } 
                     
-                    meSpeakOpts.rawdata = 'default';
-                    //console.log("Pitch: " + meSpeakOpts.pitch);
-                    var meSpeakBuf = meSpeak.speak(speechStr, meSpeakOpts);
-                    context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
+                    this.meSpeakOpts.rawdata = 'default';
+                    //console.log("Pitch: " + this.meSpeakOpts.pitch);
+                    //var meSpeakBuf = meSpeak.speak(speechStr, this.meSpeakOpts);
+                    //context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
                 }
             } else { // Create & send the request to load the sound asynchronously
                 var request = new XMLHttpRequest();
@@ -381,7 +382,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         playSound: function( exitCallback ) {
 
-            if ( !this.buffer ) {
+            if ( !this.buffer && !this.meSpeakOpts ) {
                 logger.errorx( "SoundDatum.playSound", "Sound '" + this.name + "' hasn't finished " +
                                "loading, or loaded improperly." );
                 return { soundName: this.name, instanceID: -1 };
@@ -477,10 +478,24 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.playStatus = "stopped";
 
             this.sourceNode = context.createBufferSource();
-            this.sourceNode.buffer = this.soundDatum.buffer;
+
+            //TODO: if we're using text-to-speech, get the buffer from meSpeak as opposed to the source node.
+            if( soundDatum.meSpeakOpts !== undefined ){
+                var speechStr = soundDatum.textToSpeechInput;
+                var meSpeakBuf = meSpeak.speak(speechStr, soundDatum.meSpeakOpts);     
+                var currSourceNode = this.sourceNode;          
+                context.decodeAudioData(meSpeakBuf, function(decodedBuffer){
+                    currSourceNode.buffer = decodedBuffer;
+                },
+                function(e){"Could not load text-to-speech sound " + soundDatum.name + ", " + e.err});
+            } else {
+                this.sourceNode.buffer = this.soundDatum.buffer;
+            }
+            
             this.sourceNode.loop = this.soundDatum.isLooping;
 
-            this.localVolume$ = this.soundDatum.initialVolume;
+            this.localVolume$ = this.soundDatum.initialVolume; 
+
             this.gainNode = context.createGain();
             this.sourceNode.connect( this.gainNode );
             this.gainNode.connect( context.destination );
