@@ -15,6 +15,14 @@ class VWF < Sinatra::Base
 
   require "vwf/pattern"
 
+  # A stand-in for the persistence database.
+
+  @@storage = {}
+
+  def self.storage
+    @@storage
+  end
+
   configure do
 
     set :root, File.expand_path( File.join( File.dirname(__FILE__), ".." ) )

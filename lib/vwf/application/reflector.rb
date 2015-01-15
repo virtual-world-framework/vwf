@@ -16,11 +16,12 @@ require "json"
 
 class VWF::Application::Reflector < Rack::SocketIO::Application
 
-  def initialize resource, application, instance = nil, revision = nil
+  def initialize resource, storage, application, instance = nil, revision = nil
 
     super resource
 
     @resource = resource
+    @storage = storage
 
     @application = application
     @instance = instance
@@ -105,25 +106,15 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
         schedule_tick(0)
 
-        send "time" => session[:transport].time,
-          "action" => "setState",
-          "parameters" => [ {
-            "configuration" =>
-              { "environment" => ENV['RACK_ENV'] || "development" }
-          } ]
+        if @storage[ :state ]
+          send "time" => session[:transport].time,
+            "action" => "setState",
+            "parameters" => [ @storage[ :state ] ]
+        end
 
-        send "time" => session[:transport].time,
-          "action" => "createNode",
-          "parameters" => [
-            "http://vwf.example.com/clients.vwf"
-          ]
-
-        send "time" => session[:transport].time,
-          "action" => "createNode",
-          "parameters" => [
-            @application,
-            "application"
-          ]
+        @storage[ :actions ].each do |action|
+          send action.merge "time" => session[:transport].time
+        end
 
       end
 

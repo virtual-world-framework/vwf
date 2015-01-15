@@ -35,6 +35,16 @@ class VWF::Application < Sinatra::Base
 
   end
 
+  before "/*" do
+    @application_state = VWF.storage[ @application ] ||=
+      application_state_and_actions( env ).merge( :instances => {} )
+  end
+
+  before %r{^/([0-9A-Za-z]{16})/?.*$} do |instance|
+    @instance_state = VWF.storage[ @application ][ :instances ][ instance ] ||=
+      instance_state_and_actions
+  end
+
   # Redirect singular application resources to directory resources. For example, from:
   # 
   #   /path/to/application => /path/to/application/
@@ -66,7 +76,7 @@ class VWF::Application < Sinatra::Base
   get %r{^/([0-9A-Za-z]{16})/(websocket/?.*)$} do |instance, path_info|
     request.script_name += "/" + instance
     request.path_info = "/" + path_info
-    result = Reflector.new( @application + "/" + instance, @application, instance ).call env
+    result = Reflector.new( @application + "/" + instance, VWF.storage[ @application ][ :instances ][ instance ], @application, instance ).call env
     pass if result[0] == 404
     result
   end
@@ -82,6 +92,41 @@ class VWF::Application < Sinatra::Base
   end
 
   helpers do
+  end
+
+  def application_state_and_actions env
+
+    Hash[
+
+      :state => JSON.parse(
+        Component.new( VWF.settings.public_folder ).call( env.merge "PATH_INFO" => @application )[ 2 ].join( "" )
+      ),
+
+      :actions => []
+
+    ]
+
+  end
+
+  def instance_state_and_actions
+
+    Hash[
+
+      :state => {
+        "configuration" =>
+          { "environment" => ENV['RACK_ENV'] || "development" }
+      },
+
+      :actions => [ {
+        "action" => "createNode",
+        "parameters" => [ "http://vwf.example.com/clients.vwf" ]
+      }, {
+        "action" => "createNode",
+        "parameters" => [ @application, "application" ]
+      } ]
+
+    ]
+
   end
 
   # Generate a random string to be used as an instance id.
