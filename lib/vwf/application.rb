@@ -35,7 +35,7 @@ class VWF::Application < Sinatra::Base
 
   end
 
-  before "/*" do
+  before "/?*" do
     @application_state = VWF.storage[ @application ] ||=
       application_state_and_actions( env ).merge( :instances => {} )
   end
@@ -71,6 +71,28 @@ class VWF::Application < Sinatra::Base
     redirect to "/" + random_instance_id + "/"
   end
 
+  # Bootstrap the client from "/0123456789ABCDEF/".
+
+  get %r{^/([0-9A-Za-z]{16})/$}, :browser => true do |instance|
+    request.script_name += "/" + instance
+    request.path_info = "/"
+    Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
+  end
+
+  # Application state.
+
+  get "/?" do
+    content_type :json
+    @application_state[ :state ].to_json
+  end
+
+  # Instance state.
+
+  get %r{^/[0-9A-Za-z]{16}/?$} do
+    content_type :json
+    @instance_state[ :state ].to_json
+  end
+
   # Serve the reflector from "/0123456789ABCDEF/websocket"
 
   get %r{^/([0-9A-Za-z]{16})/(websocket/?.*)$} do |instance, path_info|
@@ -81,7 +103,7 @@ class VWF::Application < Sinatra::Base
     result
   end
 
-  # Bootstrap the client from "/0123456789ABCDEF/" and serve the client files.
+  # Serve the client files from "/0123456789ABCDEF/*".
 
   get %r{^/([0-9A-Za-z]{16})/(.*)$} do |instance, path_info|
     request.script_name += "/" + instance
