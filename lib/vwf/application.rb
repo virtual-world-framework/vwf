@@ -28,7 +28,7 @@ class VWF::Application < Sinatra::Base
 
     set( :browser ) do |want_browser|
       condition do
-        is_browser = !! request.accept?( "text/html" )
+        is_browser = !! request.accept.include?( "text/html" )  # `accept.include?`, not `accept?`; want explict `text/html`
         want_browser == is_browser
       end
     end
