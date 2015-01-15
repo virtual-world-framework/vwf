@@ -23,14 +23,21 @@ children:
     type: mesh/definition
     properties:
       meshDefinition: { "width": 1000, "height": 1000, "widthSegments": 100, "heightSegments": 100 }
+      properties:
+        translation: [ 0, 0, 0 ]
     children:
       material:
         extends: http://vwf.example.com/material.vwf
+        type: material/definition
         properties:
-          texture: 'images/checkerboard.jpg'
-          textureWrapT: repeat
-          textureWrapS: repeat
-          textureRepeat: [ 5, 5 ]
+          materialDefinition:
+            type: MeshBasicMaterial
+            side: 2
+            texture: 
+              url: 'images/checkerboard.jpg'
+              repeat: [ 5, 5 ]
+              wrapT: repeat
+              wrapS: repeat
   planeTest:
     extends: http://vwf.example.com/threejs/plane.vwf
     implements:
@@ -69,7 +76,7 @@ scripts:
     }
     this.initializeScene = function() {
         //this.camera.position = [ 0, 10, 0 ];
-        this.camera.translation = [ 0, -500, 0 ];
+        this.camera.translation = [ 0, -500, 100 ];
         this.camera.near = 1;  
         this.camera.far = 100000;
 

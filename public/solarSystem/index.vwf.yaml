@@ -391,7 +391,6 @@ children:
         this.initialize = function() {
           this.future( 0.05 ).spin();
         }
-
   stars:
     extends: http://vwf.example.com/node3.vwf
     properties:
@@ -407,12 +406,14 @@ children:
           translation: [ 0, 0, 0 ]  
         children:
           material:
-            #type: MeshBasicMaterial
             extends: http://vwf.example.com/material.vwf
+            type: material/definition
             properties:
-              #texture: "images/night-sky.jpeg"
-              texture: images/field_of_stars_full.jpg
-              side: back
-              textureRepeat: [ 16, 16 ]
-              textureWrapT: repeat
-              textureWrapS: repeat
+              materialDefinition:
+                type: MeshBasicMaterial
+                side: 1
+                texture: 
+                  url: images/field_of_stars_full.jpg
+                  repeat: [ 16, 16 ]
+                  wrapT: repeat
+                  wrapS: repeat
