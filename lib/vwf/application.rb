@@ -13,7 +13,7 @@
 
 class VWF::Application < Sinatra::Base
 
-  def initialize application, env
+  def initialize application
     super nil
     @application = application
   end
@@ -76,7 +76,7 @@ class VWF::Application < Sinatra::Base
   get %r{^/([0-9A-Za-z]{16})/(websocket/?.*)$} do |instance, path_info|
     request.script_name += "/" + instance
     request.path_info = "/" + path_info
-    result = Reflector.new( @application + "/" + instance, VWF.storage[ @application ][ :instances ][ instance ], @application, instance ).call env
+    result = Reflector.new( @application + "/" + instance, VWF.storage[ @application ][ :instances ][ instance ] ).call env
     pass if result[0] == 404
     result
   end

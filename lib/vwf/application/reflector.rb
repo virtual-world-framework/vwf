@@ -16,16 +16,12 @@ require "json"
 
 class VWF::Application::Reflector < Rack::SocketIO::Application
 
-  def initialize resource, storage, application, instance = nil, revision = nil
+  def initialize resource, storage
 
     super resource
 
     @resource = resource
     @storage = storage
-
-    @application = application
-    @instance = instance
-    @revision = revision
 
   end
 
@@ -54,53 +50,53 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       # Initialize the client configuration from the runtime environment.
 
       logger.debug "VWF::Application::Reflector#connect #{id} " +
-          "launching from #{ @application }"
+          "launching"
       
-      if env["vwf.load"]
-        filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState.vwf.json"
-        if env["vwf.loadrevision"]
-          if File.exists?(VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState_"+env["vwf.loadrevision"]+".vwf.json")
-            filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState_"+env["vwf.loadrevision"]+".vwf.json"
-          end
-        end
-      end
+      # if env["vwf.load"]
+      #   filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState.vwf.json"
+      #   if env["vwf.loadrevision"]
+      #     if File.exists?(VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState_"+env["vwf.loadrevision"]+".vwf.json")
+      #       filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState_"+env["vwf.loadrevision"]+".vwf.json"
+      #     end
+      #   end
+      # end
 
       # TODO: check for file format not that json exists
 
-      if  env["vwf.load"] and File.exists?(filename)
+      # if  env["vwf.load"] and File.exists?(filename)
 
-        contents = File.read(filename)
-        json = JSON.parse("#{ contents }", :max_nesting => 100)
-        startTime = 0
-        startTime = json["queue"]["time"] unless json["queue"].nil?
+      #   contents = File.read(filename)
+      #   json = JSON.parse("#{ contents }", :max_nesting => 100)
+      #   startTime = 0
+      #   startTime = json["queue"]["time"] unless json["queue"].nil?
 
-        # Start the timer on the first connection to this instance.
+      #   # Start the timer on the first connection to this instance.
 
-        schedule_tick( startTime )
-        send "time" => session[:transport].time,
-          "action" => "setState",
-          "parameters" => [
-              json
-            ]
+      #   schedule_tick( startTime )
+      #   send "time" => session[:transport].time,
+      #     "action" => "setState",
+      #     "parameters" => [
+      #         json
+      #       ]
 
-      elsif File.exists?("public#{ @application }.json")
+      # elsif File.exists?("public#{ @application }.json")
 
-        contents = File.read("public#{ @application }.json")
-        json = JSON.parse("#{ contents }", :max_nesting => 100)
-        startTime = 0
-        startTime = json["queue"]["time"] unless json["queue"].nil?
+      #   contents = File.read("public#{ @application }.json")
+      #   json = JSON.parse("#{ contents }", :max_nesting => 100)
+      #   startTime = 0
+      #   startTime = json["queue"]["time"] unless json["queue"].nil?
         
-        # Start the timer on the first connection to this instance.
+      #   # Start the timer on the first connection to this instance.
         
-        schedule_tick( startTime )
+      #   schedule_tick( startTime )
 
-        send "time" => session[:transport].time,
-          "action" => "setState",
-          "parameters" => [
-            json
-          ]
+      #   send "time" => session[:transport].time,
+      #     "action" => "setState",
+      #     "parameters" => [
+      #       json
+      #     ]
 
-      else
+      # else
       
         # Start the timer on the first connection to this instance.
 
@@ -116,7 +112,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
           send action.merge "time" => session[:transport].time
         end
 
-      end
+      # end
 
     # The second client to join the instance, or the next client to join after earlier clients have
     # fully connected.
@@ -383,7 +379,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       # Log to a directory under "log/" matching the application's location in "public/" plus
       # application/instance/client. Log messages for each unique time to a separate file.
 
-      path = File.join "log", @application[1..100], @instance, id
+      path = File.join "log", @resource, id
 
       FileUtils.mkpath path
 

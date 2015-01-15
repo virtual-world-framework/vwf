@@ -171,7 +171,7 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
         "PATH_INFO" => path_info
       )
 
-      Application.new( application, delegated_env ).call delegated_env
+      Application.new( application ).call delegated_env
 
     end
 
