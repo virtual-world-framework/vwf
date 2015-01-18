@@ -37,6 +37,8 @@ define( [ "module", "vwf/model", "vwf/model/mespeak/mespeak" ], function( module
                 // arguments: soundDefinition, successCallback, failureCallback
                 case "speak":
                 	return meSpeak.speak(params[0], params[1]);
+                case: "transmogrify":
+                    console.log("Henshin a go-go!");
             	break;
             }
         }

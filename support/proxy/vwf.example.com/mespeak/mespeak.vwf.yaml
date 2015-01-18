@@ -1,0 +1,6 @@
+## @namespace
+--- 
+extends: http://vwf.example.com/node.vwf
+methods:
+  speak:
+  transmogrify:
