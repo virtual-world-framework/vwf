@@ -1,4 +1,4 @@
-/ Copyright 2015 United States Government, as represented by the Secretary of Defense, Under
+// Copyright 2015 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -37,8 +37,6 @@ define( [ "module", "vwf/model", "vwf/model/mespeak/mespeak" ], function( module
                 // arguments: soundDefinition, successCallback, failureCallback
                 case "speak":
                 	return meSpeak.speak(params[0], params[1]);
-                case: "transmogrify":
-                    console.log("Henshin a go-go!");
             	break;
             }
         }

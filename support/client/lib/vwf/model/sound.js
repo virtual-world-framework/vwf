@@ -111,6 +111,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 //   { soundName: value, instanceID: value }
                 //   instanceID is -1 on failure  
                 case "playSound":
+                    console.log("Playing sound!");
                     soundName = params[ 0 ];
                     soundDatum = getSoundDatum( soundName );
                     exitCallback = params[ 1 ];

@@ -304,6 +304,9 @@
                         deps: [ "vwf/model/threejs/three" ],
                        
                     },
+                    "vwf/model/mespeak/mespeak": {
+                        exports: "meSpeak"
+                    },
                     "vwf/model/blockly/blockly_compressed": {
                         exports: "Blockly"
                     },
@@ -339,6 +342,7 @@
                 { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
                 { library: "vwf/model/scenejs", active: false },
                 { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
+                { library: "vwf/model/mespeak", linkedLibraries: [ "vwf/model/mespeak/mespeak" ],  active: false },
                 { library: "vwf/model/graphtool", active: false },
                 { library: "vwf/model/eventManager", active: false },
                 { library: "vwf/model/sound", active: false },
@@ -377,6 +381,7 @@
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
                 { library: "vwf/model/blockly/JS-Interpreter/interpreter.js", active: false },
+                { library: "vwf/model/mespeak/mespeak", active: false },
                 { library: "vwf/model/kinetic/kinetic.min", active: false },                
                 { library: "vwf/model/mil-sym/sm-bc.min", active: false }, 
                 { library: "vwf/model/buzz/buzz.min", active: false }, 
@@ -392,6 +397,7 @@
                     { library: "vwf/model/threejs", active: false },
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/blockly", active: false },
+                    { library: "vwf/model/mespeak", active: false },
                     { library: "vwf/model/graphtool", active: false },
                     { library: "vwf/model/eventManager", active: false },
                     { library: "vwf/model/sound", active: false },
