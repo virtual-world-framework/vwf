@@ -17,7 +17,6 @@ methods:
   stopSoundInstance:
   stopSoundGroup:
   stopAllSoundInstances:
-  transmogrify:
 events:
   soundFinished:
   soundStarted:
