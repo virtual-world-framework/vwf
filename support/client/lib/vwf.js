@@ -302,7 +302,6 @@
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTFAnimation": {
                         deps: [ "vwf/model/threejs/three" ],
-                       
                     },
                     "vwf/model/mespeak/mespeak": {
                         exports: "meSpeak"

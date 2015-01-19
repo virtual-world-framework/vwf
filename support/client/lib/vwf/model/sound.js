@@ -112,7 +112,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 //   instanceID is -1 on failure  
                 case "transmogrify":
                     console.log("Still the wrong transmogrify, but we're getting closer!");
-                    return;
+                    return undefined;
                     
                 case "playSound":
                     console.log("Playing sound!");
