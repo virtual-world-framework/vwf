@@ -16,7 +16,6 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   counter: 0
 methods:
-  initializeCamera:
   update:  
 children:
   duck:
@@ -50,37 +49,27 @@ children:
       color: [ 255, 255, 255 ]
       glge-constantAttenuation: 0.3
       glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
+      glge-quadraticAttenuation: 0.0000001
       rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      translation: [ 0, -100, 0 ]
 scripts:
 - | 
-    this.initialize = function()
-    {
-        this.dir1.translation =[0,-100,0];
-        this.duck.translation =[0,0,0];
-        this.duck.childduck.translation =[200,0,50];
-        this.duck.childduck.scale =[.5,.5,.5];
-        this.duck.childduck.childchildduck.translation =[200,0,50];
-        this.duck.childduck.childchildduck.scale =[.5,.5,.5];
-        this.duck.childduck.childchildduck.childchildchildduck.translation =[200,0,50];
-        this.duck.childduck.childchildduck.childchildchildduck.scale =[.5,.5,.5];
-        this.future(0).initializeCamera();
-        this.future(0.2).update();
+    this.initialize = function() {
+      this.duck.childduck.translation = [ 200, 0, 50 ];
+      this.duck.childduck.scale =[ 0.5, 0.5, 0.5 ];
+      this.duck.childduck.childchildduck.translation = [ 200, 0, 50 ];
+      this.duck.childduck.childchildduck.scale =[ 0.5, 0.5, 0.5 ];
+      this.duck.childduck.childchildduck.childchildchildduck.translation = [ 200, 0, 50 ];
+      this.duck.childduck.childchildduck.childchildchildduck.scale =[ 0.5, 0.5, 0.5 ];
+      this.camera.translation = [ 0, -600, 50 ];
+      this.camera.navmode = "none";
+      this.future(0.2).update();
     }
-
-    this.initializeCamera = function() {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.camera.navmode = "none";
-    }
-
-    this.update = function()
-    {
-       this.duck.rotation=[0,0,1,this.counter];
-        this.duck.childduck.rotation=[0,0,1,this.counter*4];
-        this.duck.childduck.childchildduck.rotation=[0,0,1,this.counter*8];
-        this.duck.childduck.childchildduck.childchildchildduck.rotation=[0,1,0,this.counter*16];
-        this.counter++;
-        this.future(0.04).update();
+    this.update = function() {
+      this.duck.rotation = [ 0, 0, 1, this.counter ];
+      this.duck.childduck.rotation = [ 0, 0, 1, this.counter*4 ];
+      this.duck.childduck.childchildduck.rotation = [ 0, 0, 1, this.counter*8 ];
+      this.duck.childduck.childchildduck.childchildchildduck.rotation = [ 0, 1, 0, this.counter*16 ];
+      this.counter++;
+      this.future(0.04).update();
     }

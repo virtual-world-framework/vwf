@@ -19,7 +19,6 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   counter: 0
 methods:
-  initializeCamera:
   update:  
 children:
   assetbox01:
@@ -51,26 +50,17 @@ children:
       castShadows: false
       glge-constantAttenuation: 0
       rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      translation: [ 0, 100, 100 ]
 scripts:
 - | 
-    this.initialize = function()
-    {
-        this.dir1.translation = [0,100,100];
-        this.future(0).initializeCamera();
-        this.future(0.2).update();
+    this.initialize = function() {
+      this.camera.translation = [ 0, -600, 50 ];
+      this.camera.navmode = "none";
+      this.future(0.2).update();
     }
-
-    this.initializeCamera = function() {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.camera.navmode = "none";
-    }
-
-    this.update = function()
-    {
-        var p = this.assetbox01.Scene_Root.Box01.Box02.Box03.translation;
-        p[0] += .1;
-        this.assetbox01.Scene_Root.Box01.Box02.Box03.translation = p;
-        this.future(0.2).update();
+    this.update = function() {
+      var p = this.assetbox01.Scene_Root.Box01.Box02.Box03.translation;
+      p[0] += 1;
+      this.assetbox01.Scene_Root.Box01.Box02.Box03.translation = p;
+      this.future(0.2).update();
     }

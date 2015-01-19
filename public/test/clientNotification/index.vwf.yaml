@@ -14,8 +14,6 @@
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties:
-methods:
-  initializeCamera:
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
@@ -42,10 +40,6 @@ children:
 scripts:
 - |
     this.initialize = function(){
-      this.future( 0 ).initializeCamera();
-    }
-
-    this.initializeCamera = function() {
       this.camera.transform = [ -1,   0,  0, 0, 
                                  0,  -1,  0, 0, 
                                  0,   0,  1, 0, 

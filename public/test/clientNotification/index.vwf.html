@@ -18,7 +18,7 @@
     <script type="text/javascript">
       vwf_view.createdNode = function ( nodeID, childID, childExtendsID, childImplementsIDs,
         childSource, childType, childIndex, childName, callback ) {
-        if ( nodeID == vwf_view.kernel.findClients("", "/") ) {
+        if ( nodeID == vwf_view.kernel.find( vwf_view.kernel.application(), "doc('http://vwf.example.com/clients.vwf')" ) ) {
           this.logger.info("Client Joined: ", childID, childName);
         }
       }
