@@ -110,6 +110,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 // returns: an instance handle, which is an object: 
                 //   { soundName: value, instanceID: value }
                 //   instanceID is -1 on failure  
+                case "transmogrify":
+                    console.log("Still the wrong transmogrify, but we're getting closer!");
+                    return;
+                    
                 case "playSound":
                     console.log("Playing sound!");
                     soundName = params[ 0 ];
