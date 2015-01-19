@@ -33,9 +33,6 @@ children:
       distance: 2000
       intensity: 1.2
       color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001
       rotation: [ 1, 0, 0, -45 ]
       translation: [ 0, -300, 0 ]
 scripts:

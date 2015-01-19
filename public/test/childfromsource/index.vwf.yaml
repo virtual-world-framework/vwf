@@ -47,8 +47,7 @@ children:
       distance: 1000
       intensity: 1
       color: [ 255, 255, 255 ]
-      castShadows: false      
-      glge-constantAttenuation: 0
+      castShadows: false
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
