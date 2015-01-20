@@ -31,8 +31,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             soundDriver = this;
             logger = this.logger;
 
-            meSpeak.loadConfig("mespeak/mespeak_config.json");
-            meSpeak.loadVoice("mespeak/en.json");
+            // meSpeak.loadConfig("mespeak/mespeak_config.json");
+            // meSpeak.loadVoice("mespeak/en.json");
 
             try {
                 // I quote: "For WebKit- and Blink-based browsers, you 
@@ -61,7 +61,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             // variables that we'll need in the switch statement below.  These all have function
             // scope, might as well declare them here.
-            var soundDefinition, successCallback, failureCallback, exitCallback;
+            var soundDefinition, successCallback, failureCallback, exitCallback, soundBuffer;
             var soundName, soundNames, soundDatum, soundDefinition, soundInstance;
             var instanceIDs, instanceID, i, volume, fadeTime, fadeMethod, instanceHandle;
             var soundGroup, groupName;
@@ -72,6 +72,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     soundDefinition = params[ 0 ];
                     successCallback = params[ 1 ];
                     failureCallback = params[ 2 ];
+                    soundBuffer = params[3];
 
                     if ( soundDefinition === undefined ) {
                         logger.errorx( "loadSound", "The 'loadSound' method requires " +
@@ -90,10 +91,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         return undefined;
                     }
 
-                    soundData[ soundName ] = new SoundDatum( soundDefinition, 
+                    var currSoundDatum = new SoundDatum( soundDefinition, 
                                                              successCallback, 
-                                                             failureCallback );
-
+                                                             failureCallback,
+                                                             soundBuffer);
+                    soundData[ soundName ] = currSoundDatum;
                     return;
 
                 case "setVoiceSet":
@@ -241,8 +243,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     } );
 
-    function SoundDatum( soundDefinition, successCallback, failureCallback ) {
-        this.initialize( soundDefinition, successCallback, failureCallback );
+    function SoundDatum( soundDefinition, successCallback, failureCallback, soundBuffer ) {
+        this.initialize( soundDefinition, successCallback, failureCallback, soundBuffer );
         return this;
     }
 
@@ -266,9 +268,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         playOnLoad: false,
         voice: null,
 
-        meSpeakOpts: undefined,
+        // meSpeakOpts: undefined,
         subtitle: undefined,
-        textToSpeechInput: undefined,
+        //textToSpeechInput: undefined,
 
         soundGroup: undefined,
         groupReplacementMethod: undefined,
@@ -277,18 +279,18 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // a counter for creating instance IDs
         instanceIDCounter: 0,
 
-        initialize: function( soundDefinition, successCallback, failureCallback ) {
+        initialize: function( soundDefinition, successCallback, failureCallback, soundBuffer ) {
 
             this.name = soundDefinition.soundName;
             this.playingInstances = {};
             this.soundDefinition = soundDefinition;
 
-            if ( this.soundDefinition.voice !== undefined ) {
-                this.voice = soundDefinition.voice;
-            }
+            if ( this.soundDefinition.playOnLoad !== undefined ) {
+                 this.playOnLoad = soundDefinition.playOnLoad;
+             }
 
             this.subtitle = this.soundDefinition.subtitle;
-            this.textToSpeechInput = this.soundDefinition.textToSpeechInput;
+            // this.textToSpeechInput = this.soundDefinition.textToSpeechInput;
 
             var soundGroupName = this.soundDefinition.soundGroup;
             if ( soundGroupName ) {
@@ -323,6 +325,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             var thisSoundDatum = this;
             var loadSoundBuf = function( buffer ) {
+                console.log("Sound decoded!");
                 thisSoundDatum.buffer = buffer;
 
                 if ( thisSoundDatum.playOnLoad === true ) {
@@ -341,34 +344,38 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                         }
 
             
-            if( this.voice && this.textToSpeechInput ){
-                //console.log("Voice object: " + voiceSet[this.voice].ttsPitch);
-                var speechStr = this.textToSpeechInput;
-                if(speechStr){
-                    //var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
+            // if( this.voice && this.textToSpeechInput ){
+            //     //console.log("Voice object: " + voiceSet[this.voice].ttsPitch);
+            //     var speechStr = this.textToSpeechInput;
+            //     if(speechStr){
+            //         //var speechStr = rawSubtitle.replace(/\[.*\]: /, ""); //Get rid of "[Rover]: ", "[MC]:", etc.
 
-                    this.meSpeakOpts = {};
-                    if ( voiceSet[this.voice].ttsAmplitude !== undefined ) {
-                        this.meSpeakOpts.amplitude = voiceSet[this.voice].ttsAmplitude;
-                    } 
-                    if ( voiceSet[this.voice].ttsVariant !== undefined ) {
-                        this.meSpeakOpts.variant = voiceSet[this.voice].ttsVariant;
-                    } 
-                    if ( voiceSet[this.voice].ttsWordGap !== undefined ) {
-                        this.meSpeakOpts.wordgap = voiceSet[this.voice].ttsWordGap;
-                    } 
-                    if ( voiceSet[this.voice].ttsSpeed !== undefined ) {
-                        this.meSpeakOpts.speed = voiceSet[this.voice].ttsSpeed;
-                    } 
-                    if ( voiceSet[this.voice].ttsPitch !== undefined ) {
-                        this.meSpeakOpts.pitch = voiceSet[this.voice].ttsPitch;
-                    } 
+            //         this.meSpeakOpts = {};
+            //         if ( voiceSet[this.voice].ttsAmplitude !== undefined ) {
+            //             this.meSpeakOpts.amplitude = voiceSet[this.voice].ttsAmplitude;
+            //         } 
+            //         if ( voiceSet[this.voice].ttsVariant !== undefined ) {
+            //             this.meSpeakOpts.variant = voiceSet[this.voice].ttsVariant;
+            //         } 
+            //         if ( voiceSet[this.voice].ttsWordGap !== undefined ) {
+            //             this.meSpeakOpts.wordgap = voiceSet[this.voice].ttsWordGap;
+            //         } 
+            //         if ( voiceSet[this.voice].ttsSpeed !== undefined ) {
+            //             this.meSpeakOpts.speed = voiceSet[this.voice].ttsSpeed;
+            //         } 
+            //         if ( voiceSet[this.voice].ttsPitch !== undefined ) {
+            //             this.meSpeakOpts.pitch = voiceSet[this.voice].ttsPitch;
+            //         } 
                     
-                    this.meSpeakOpts.rawdata = 'default';
-                    //console.log("Pitch: " + this.meSpeakOpts.pitch);
-                    //var meSpeakBuf = meSpeak.speak(speechStr, this.meSpeakOpts);
-                    //context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
-                }
+            //         this.meSpeakOpts.rawdata = 'default';
+            //         //console.log("Pitch: " + this.meSpeakOpts.pitch);
+            //         //var meSpeakBuf = meSpeak.speak(speechStr, this.meSpeakOpts);
+            //         //context.decodeAudioData(meSpeakBuf, loadSoundBuf, loadSoundFail);
+            //     }
+            if( soundBuffer ){
+                context.decodeAudioData(soundBuffer,
+                                        loadSoundBuf,
+                                        loadSoundFail);
             } else { // Create & send the request to load the sound asynchronously
                 var request = new XMLHttpRequest();
                 request.open( 'GET', soundDefinition.soundURL, true );
@@ -387,7 +394,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         playSound: function( exitCallback ) {
 
-            if ( !this.buffer && !this.meSpeakOpts ) {
+            if ( !this.buffer ) {
                 logger.errorx( "SoundDatum.playSound", "Sound '" + this.name + "' hasn't finished " +
                                "loading, or loaded improperly." );
                 return { soundName: this.name, instanceID: -1 };
