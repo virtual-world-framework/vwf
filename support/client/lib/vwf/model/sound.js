@@ -492,17 +492,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             this.sourceNode = context.createBufferSource();
 
             //TODO: if we're using text-to-speech, get the buffer from meSpeak as opposed to the source node.
-            if( soundDatum.meSpeakOpts !== undefined ){
-                var speechStr = soundDatum.textToSpeechInput;
-                var meSpeakBuf = meSpeak.speak(speechStr, soundDatum.meSpeakOpts);     
-                var currSourceNode = this.sourceNode;          
-                context.decodeAudioData(meSpeakBuf, function(decodedBuffer){
-                    currSourceNode.buffer = decodedBuffer;
-                },
-                function(e){"Could not load text-to-speech sound " + soundDatum.name + ", " + e.err});
-            } else {
+            // if( soundDatum.meSpeakOpts !== undefined ){
+            //     var speechStr = soundDatum.textToSpeechInput;
+            //     var meSpeakBuf = meSpeak.speak(speechStr, soundDatum.meSpeakOpts);     
+            //     var currSourceNode = this.sourceNode;          
+            //     context.decodeAudioData(meSpeakBuf, function(decodedBuffer){
+            //         currSourceNode.buffer = decodedBuffer;
+            //     },
+            //     function(e){"Could not load text-to-speech sound " + soundDatum.name + ", " + e.err});
+            // } else {
                 this.sourceNode.buffer = this.soundDatum.buffer;
-            }
+            // }
             
             this.sourceNode.loop = this.soundDatum.isLooping;
 
