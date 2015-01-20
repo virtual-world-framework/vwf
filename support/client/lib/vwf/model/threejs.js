@@ -47,11 +47,17 @@
     }
     
     
-define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ], function( module, model, utility, Color, $ ) {
+define( [ "module", 
+          "vwf/model", 
+          "vwf/utility", 
+          "vwf/utility/color", 
+          "jquery" 
+    ], function( module, model, utility, Color, $ ) {
 
     var self;
 
     var checkLights = true;
+    var sceneCreated = false;
 
     return model.load( module, {
 
@@ -82,6 +88,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 }
             }
 
+            this.state.setGeometryPropertyRecursively = function( threeObject, propertyName, value ) {
+                if ( !threeObject ) {
+                    return;
+                }
+                threeObject[ propertyName ] = value;
+                var geoList = findAllGeometries( threeObject );
+                for ( var i = 0; i < geoList.length; i++ ) {
+                    geoList[ i ][ propertyName ] = value;
+                }
+            }
+
             // turns on logger debugger console messages 
             this.debug = {
                 "creation": false,
@@ -109,7 +126,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             var childURI = ( nodeID === 0 ? childIndex : undefined );
             var appID = this.kernel.application();
 
-            if ( this.debug.creation ) {
+            if ( this.debug.creation  ) {
                 this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             }
 
@@ -166,10 +183,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 this.state.sceneRootID = childID;
 
                 var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
-                this.state.scenes[childID] = sceneNode;
+                this.state.scenes[childID] = sceneNode
+                sceneCreated = true;
             }
-            
-            
             
             if ( protos && isCameraDefinition.call( this, protos ) ) {
 
@@ -203,10 +219,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                   
                     } else if ( node.threeObject ) {
                         sceneNode.camera.threeJScameras[ childID ] = node.threeObject;
-                        sceneNode.threeScene.add(cam); 
+                        if ( !node.threeObject.parent ) {
+                            this.logger.warnx( "creatingNode", "adding camera to the scene: parent(id:"+nodeID+") not found", childID );
+                            sceneNode.threeScene.add( node.threeObject );                             
+                        }
+
                     }
                 }               
-            } else if(protos && isLightDefinition.call(this,protos)) {
+            } else if(protos && isLightDefinition.call( this, protos )) {
+                
                 node = this.state.nodes[ childID ] = this.state.lights[ childID ] = {
                     name: childName,
                     threeObject: threeChild,
@@ -215,9 +236,52 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                if( !node.threeObject )
-                {
-                    createLight.call(this,nodeID,childID,childName);
+
+                if ( !node.threeObject ) {
+                    createLight.call( this, nodeID, childID, childExtendsID, childName );
+                } else {
+                    if ( !( node.threeObject instanceof THREE.Light ) ) {
+
+                        if ( node.threeObject.children ) {
+                            var child = undefined;
+                            var light = undefined;
+                            for ( var j = 0; light === undefined && 
+                                  j < node.threeObject.children.length; j++ ) {
+                                
+                                child = node.threeObject.children[ j ];
+                                switch ( childExtendsID ) {
+                    
+                                    case "http-vwf-example-com-directionallight-vwf":
+                                        if ( child instanceof THREE.DirectionalLight ) {
+                                            light = child;    
+                                        }
+                                        break;
+
+                                    case "http-vwf-example-com-spotlight-vwf":
+                                        if ( child instanceof THREE.SpotLight ) {
+                                            light = child;    
+                                        }
+                                        break;
+
+                                    case "http-vwf-example-com-hemispherelight-vwf":
+                                        if ( child instanceof THREE.HemisphereLight ) {
+                                            light = child;    
+                                        }
+                                        break;
+
+                                    case "http-vwf-example-com-pointlight-vwf":
+                                    default:
+                                        if ( child instanceof THREE.PointLight ) {
+                                            light = child;    
+                                        }
+                                        break;    
+                                }                            
+                            }
+                            if ( light !== undefined ) {
+                                node.threeObject = light;    
+                            }
+                        }
+                    }
                 }
             
             } else if ( protos && isMaterialDefinition.call( this, protos ) ) {
@@ -230,26 +294,71 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     type: childExtendsID,
                     sourceType: childType,
                 };
-                if ( !node.threeObject )
-                {   
-                    node.threeObject = new THREE.MeshPhongMaterial();
-                    SetMaterial( parentNode.threeObject, node.threeObject, childName );
+                if ( !node.threeObject ) {
+                    switch ( childType ) {
+                        case "MeshBasicMaterial":
+                            node.threeObject = new THREE.MeshBasicMaterial();
+                            break;                        
+                        case "MeshLambertMaterial":
+                            node.threeObject = new THREE.MeshLambertMaterial();
+                            break;
+                        default:
+                            node.threeObject = new THREE.MeshPhongMaterial();
+                            break;
+                    }   
+                    if ( node.threeObject ) {
+                        SetMaterial( parentNode.threeObject, node.threeObject, childName );                        
+                    }
                 }
             } else if ( protos && isShaderMaterialDefinition.call( this, protos ) ) {
 
-                node = this.state.nodes[childID] = {
+                node = this.state.nodes[ childID ] = {
                     name: childName,
-                    threeObject: GetMaterial(parentNode.threeObject, childName),
+                    //threeObject: GetMaterial( parentNode.threeObject, childName ),
+                    threeObject: undefined,
                     ID: childID,
                     parentID: nodeID,
                     type: childExtendsID,
                     sourceType: childType,
+                    threejsClass: typeof( THREE.ShaderMaterial )
                 };
-                if ( true )
-                {
-                    node.threeObject = new THREE.ShaderMaterial();
+
+                if ( childType !== undefined ) {
+                    
+                    if ( childType !== "shader/definition" ) {
+
+                        // define childType to be one of the preexisting shaderTypes
+                        // then the uniform properties and be set in the 
+                        // uniforms component as a child of this component
+                        node.threeObject = createShader( node, { "type": childType } );
+                    }
+
+                } else {
+                    node.threeObject = new THREE.ShaderMaterial();                   
+                }
+
+                if ( node.threeObject ) {
                     SetMaterial( parentNode.threeObject, node.threeObject, childName );
                 }
+
+            } else if ( protos && isShaderUniformsDefinition.call( this, protos ) ) {
+                
+                var mat = this.state.nodes[ nodeID ];
+
+                node = this.state.nodes[childID] = {
+                    name: childName,
+                    threeObject: undefined,
+                    ID: childID,
+                    parentID: nodeID,
+                    type: childExtendsID,
+                    sourceType: childType,
+                    isUniformObject: true
+                };
+
+                if ( mat ) {
+                    node.threeObject = mat.threeObject.uniforms;
+                }
+
             } else if ( protos && isParticleDefinition.call( this, protos ) ) {
                 
                 node = this.state.nodes[childID] = {
@@ -532,15 +641,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 var node = this.state.nodes[ nodeID ];
                 if ( node === undefined ) node = this.state.scenes[ nodeID ];
                 if ( node !== undefined ) {
+                    
                     switch ( propertyName ) {
+                        
                         case "meshDefinition":
                             createMesh.call( this, node, propertyValue, true );
                             value = propertyValue; 
                             break;
+
+                        case "shaderDefinition":
+                            node.threeObject = createShader( node, propertyValue );
+                            value = propertyValue; 
+                            if ( node.threeObject ) {
+                                var parentNode = this.state.nodes[ node.parentID ];
+                                if ( parentNode.threeObject ) {
+                                    SetMaterial( parentNode.threeObject, node.threeObject, node.name );
+                                }    
+                            }
+                            break;
+
                         default:
                             value = this.settingProperty( nodeID, propertyName, propertyValue );                  
                             break;
+
                     }
+
                 }
             }
 
@@ -667,7 +792,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
                         //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
                         var transformMatrix = goog.vec.Mat4.createFromArray( propertyValue || [] );
-                        if(threeObject instanceof THREE.ParticleSystem)
+                        if( threeObject instanceof THREE.PointCloud )
                         {   
                             threeObject.updateTransform(propertyValue);
                         }
@@ -794,7 +919,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         }
                     }
                 }
-                if(threeObject instanceof THREE.ParticleSystem)
+                if( threeObject instanceof THREE.PointCloud )
                 {
                     var ps = threeObject;
                     var particles = ps.geometry;
@@ -1085,7 +1210,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     //console.log(["setting material property: ",nodeID,propertyName,propertyValue]);
                     if(propertyName == "texture")
                     {
-                        if(propertyValue !== "")
+                        if ( propertyValue !== "" && utility.validObject( propertyValue ) )
                         {
                             THREE.ImageUtils.loadTexture( propertyValue, undefined, function( texture ) { 
                                     threeObject.map = texture;
@@ -1178,28 +1303,125 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         value = Number( propertyValue );
                         threeObject.opacity = value;
                     }
+                    if ( propertyName === "side" ) {
+                        value = propertyValue;
+                        switch ( propertyValue ) {
+                            case "double":
+                                threeObject.side = THREE.DoubleSide;
+                                break;
+                            case "front":
+                                threeObject.side = THREE.FrontSide;
+                                break;
+                            case "back":
+                                threeObject.side = THREE.BackSide;
+                                break;
+                            default:
+                                value = undefined;
+                                break;
+                        }
+
+                        if ( value !== undefined ) {
+                            threeObject.needsUpdate = true; 
+                            // need to set geometry.uvsNeedUpdate?   
+                        }
+                    }
+                    if ( propertyName === "textureWrapT" ) {
+                        if ( threeObject.map ) {
+                            value = propertyValue;
+                            switch ( propertyValue ) {
+                                case "clamp":
+                                    threeObject.map.wrapT = THREE.ClampToEdgeWrapping;
+                                    break;
+                                case "repeat":
+                                    threeObject.map.wrapT = THREE.RepeatWrapping;
+                                    break;
+                                case "mirror":
+                                    threeObject.map.wrapT = THREE.MirroredRepeatWrapping;
+                                    break;
+                                default:
+                                    value = undefined;
+                                    break;
+                            }
+
+                            if ( value !== undefined ) {
+                                threeObject.map.needsUpdate;
+                                threeObject.needsUpdate = true; 
+                                if ( this.state.nodes[ node.parentID ] && this.state.nodes[ node.parentID ].threeObject ) {
+                                    var obj3 = this.state.nodes[ node.parentID ].threeObject;
+                                    this.state.setGeometryPropertyRecursively( obj3, "uvsNeedUpdate", true );
+                                }   
+                            }
+                        }
+                    }
+                    if ( propertyName === "textureWrapS" ) {
+                        if ( threeObject.map ) {
+                            value = propertyValue;
+                            switch ( propertyValue ) {
+                                case "clamp":
+                                    threeObject.map.wrapS = THREE.ClampToEdgeWrapping;
+                                    break;
+                                case "repeat":
+                                    threeObject.map.wrapS = THREE.RepeatWrapping;
+                                    break;
+                                case "mirror":
+                                    threeObject.map.wrapS = THREE.MirroredRepeatWrapping;
+                                    break;
+                                default:
+                                    value = undefined;
+                                    break;
+                            }
+
+                            if ( value !== undefined ) {
+                                threeObject.map.needsUpdate;
+                                threeObject.needsUpdate = true; 
+                                if ( this.state.nodes[ node.parentID ] && this.state.nodes[ node.parentID ].threeObject ) {
+                                    var obj3 = this.state.nodes[ node.parentID ].threeObject;
+                                    this.state.setGeometryPropertyRecursively( obj3, "uvsNeedUpdate", true );
+                                }   
+                            }                            
+                        }
+                    }
+                    if ( propertyName === "textureRepeat" ) {
+                        if ( threeObject.map ) {
+                            threeObject.map.repeat.set( propertyValue[0], propertyValue[1] );
+                            value = propertyValue;
+                            threeObject.map.needsUpdate;
+                            threeObject.needsUpdate = true; 
+                            if ( this.state.nodes[ node.parentID ] && this.state.nodes[ node.parentID ].threeObject ) {
+                                var obj3 = this.state.nodes[ node.parentID ].threeObject;
+                                this.state.setGeometryPropertyRecursively( obj3, "uvsNeedUpdate", true );
+                            } 
+                        }
+                    }
 
                 }
                 if ( threeObject instanceof THREE.ShaderMaterial ) {
-                    if ( propertyName === "uniforms" ) {
-                        value = propertyValue;
-                        threeObject.uniforms = value;
-                    }
-                    if ( propertyName === "vertexShader" ) {
-                        value = propertyValue;
-                        threeObject.vertexShader = value;
-                    }
-                    if ( propertyName === "fragmentShader" ) {
-                        value = propertyValue;
-                        threeObject.fragmentShader = value;
-                    }
-                    if ( propertyName === "updateFunction" ) {
-                        value = propertyValue;
-                        threeObject.updateFunction = value;
-                        threeObject.update = function() {
-                            eval( this.updateFunction );
+                    
+                    if ( utility.validObject( propertyValue ) ) {
+                        
+                        if ( propertyName === "uniforms" ) {
+                            value = propertyValue;
+                            threeObject.uniforms = value;
+                        }
+                        if ( propertyName === "vertexShader" ) {
+                            value = propertyValue;
+                            threeObject.vertexShader = value;
+                        }
+                        if ( propertyName === "fragmentShader" ) {
+                            value = propertyValue;
+                            threeObject.fragmentShader = value;
+                        }
+                        if ( propertyName === "updateFunction" ) {
+                            value = propertyValue;
+                            threeObject.updateFunction = value;
+                            threeObject.update = function() {
+                                eval( this.updateFunction );
+                            }
                         }
                     }
+                }
+                if ( node.isUniformObject ) {
+                    setUniformProperty( threeObject, propertyName, propertyValue.type, propertyValue.pValue );
                 }
                 if( threeObject instanceof THREE.Scene )
                 {
@@ -1347,6 +1569,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                             "shadowMapWidth": threeObject.shadowMapWidth,
                             "shadowBias": threeObject.shadowBias,
                             "target": threeObject.target,
+                            "position": threeObject.position,
                             "clone": function( newObj ) {
                                 newObj.name = this.name;
                                 newObj.distance = this.distance;
@@ -1367,7 +1590,10 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                                 newObj.shadowMapHeight = this.shadowMapHeight;
                                 newObj.shadowMapWidth = this.shadowMapWidth;
                                 newObj.shadowBias = this.shadowBias;
-                                newObj.target = this.target;
+                                if ( this.target ) {
+                                    newObj.target = this.target;
+                                }
+                                newObj.position.set( this.position.x, this.position.y, this.position.z );
                             }
                         };
 
@@ -1375,7 +1601,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         {
                             newlight = new THREE.PointLight('FFFFFF',1,0);
                             currProps.clone( newlight );                            
-                            newlight.matrixAutoUpdate = false;
+                            //newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
                             parent.add( newlight );
                             node.threeObject = newlight;
@@ -1383,9 +1609,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         }
                         if(propertyValue == 'directional' && !(threeObject instanceof THREE.DirectionalLight))
                         {
-                            newlight = new THREE.DirectionalLight('FFFFFF',1,0);
+                            newlight = new THREE.DirectionalLight( 'FFFFFF' );
                             currProps.clone( newlight );                            
-                            newlight.matrixAutoUpdate = false;
+                            //newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
                             parent.add( newlight );
                             node.threeObject = newlight;
@@ -1395,7 +1621,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         {
                             newlight = new THREE.SpotLight('FFFFFF',1,0);
                             currProps.clone( newlight );
-                            newlight.matrixAutoUpdate = false;
+                            //newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
                             parent.add( newlight );
                             node.threeObject = newlight;
@@ -1405,7 +1631,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         {
                             newlight = new THREE.HemisphereLight('FFFFFF','FFFFFF',1);
                             currProps.clone( newlight );                            
-                            newlight.matrixAutoUpdate = false;
+                            //newlight.matrixAutoUpdate = false;
                             parent.remove( node.threeObject );
                             parent.add( newlight );
                             node.threeObject = newlight;
@@ -1420,6 +1646,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     //{
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
+                    else if ( propertyName == 'position' ) {
+                        if ( threeObject.position !== null && propertyValue.length ) {
+                            threeObject.position.set( propertyValue[0], propertyValue[1], propertyValue[2] );  
+                        }
+                    }
                     else if ( propertyName == 'distance' ) {
                         value = Number( propertyValue );
                         threeObject.distance = value;
@@ -1507,7 +1738,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     else if ( propertyName == "target" ) {
                         if ( propertyValue instanceof Array ) {
                             value = propertyValue;
-                            threeObject.target.position.set( value[ 0 ], value[ 1 ], value[ 2 ] );
+                            if ( threeObject.target ) {
+                                threeObject.target.position.set( value[ 0 ], value[ 1 ], value[ 2 ] );    
+                            }
                         } else if ( this.state.nodes[ propertyValue ] ) {
                             value = propertyValue;
                             threeObject.target = this.state.nodes[ value ].threeObject;
@@ -1658,9 +1891,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     return value;    
                 }
                 if ( propertyName == "specColor" ) {
-                    var vwfColor = new utility.color( [ threeObject.specular.r*255, threeObject.specular.g*255, threeObject.specular.b*255 ] );
-                    value = vwfColor.toString();
-                    return value;
+                    if ( threeObject.specular !== undefined ) {
+                        var vwfColor = new utility.color( [ threeObject.specular.r*255, threeObject.specular.g*255, threeObject.specular.b*255 ] );
+                        value = vwfColor.toString();
+                        return value;
+                    }
                 }
                 if ( propertyName == "reflect" ) {
                     value = threeObject.reflectivity;
@@ -1671,14 +1906,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     return value;
                 }
                 if ( propertyName == "emit" ) {
-                    var vwfColor = new utility.color( [ threeObject.emissive.r*255, threeObject.emissive.g*255, threeObject.emissive.b*255 ] );
-                    value = vwfColor.toString();
-                    return value;
+                    if ( threeObject.emissive ) {
+                        var vwfColor = new utility.color( [ threeObject.emissive.r*255, threeObject.emissive.g*255, threeObject.emissive.b*255 ] );
+                        value = vwfColor.toString();
+                        return value;
+                    }
                 }
                 if ( propertyName == "ambient" ) {
-                    var vwfColor = new utility.color( [ threeObject.ambient.r*255, threeObject.ambient.g*255, threeObject.ambient.b*255 ] );
-                    value = vwfColor.toString();
-                    return value;
+                    if ( threeObject.ambient ) {
+                        var vwfColor = new utility.color( [ threeObject.ambient.r*255, threeObject.ambient.g*255, threeObject.ambient.b*255 ] );
+                        value = vwfColor.toString();
+                        return value;
+                    }
                 }
                 if ( ( propertyName == "bumpScale" ) && ( threeObject.bumpMap ) ) {
                     value = threeObject.bumpScale;
@@ -1696,6 +1935,55 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     value = threeObject.opacity;
                     return value;
                 }
+                if ( propertyName === "side" ) {
+                    switch ( threeObject.side ) {
+                        case THREE.DoubleSide:
+                            value = "double";
+                            break;
+                        case THREE.FrontSide:
+                            value = "front";
+                            break;
+                        case THREE.BackSide:
+                            value = "back";
+                            break;
+                    }
+                }
+                if ( propertyName === "textureWrapT" ) {
+                    if ( threeObject.map ) {
+                        switch ( threeObject.map.wrapT ) {
+                            case THREE.ClampToEdgeWrapping:
+                                value = "clamp";
+                                break;
+                            case THREE.RepeatWrapping:
+                                value = "repeat";
+                                break;
+                            case THREE.MirroredRepeatWrapping:
+                                value = "mirror";
+                                break;
+                        }
+                    }
+                }
+                if ( propertyName === "textureWrapS" ) {
+                    if ( threeObject.map ) {
+                        switch ( threeObject.map.wrapS ) {
+                            case THREE.ClampToEdgeWrapping:
+                                value = "clamp";
+                                break;
+                            case THREE.RepeatWrapping:
+                                value = "repeat";
+                                break;
+                            case THREE.MirroredRepeatWrapping:
+                                value = "mirror";
+                                break;
+                        }
+                    }
+                }
+                if ( propertyName === "textureRepeat" ) {
+                    if ( threeObject.map && threeObject.map.repeat ) {
+                        value = [ threeObject.map.repeat.x, threeObject.map.repeat.y ]
+                    }
+                }
+
             }
             if ( threeObject instanceof THREE.ShaderMaterial ) {
                 if ( propertyName === "uniforms" ) {
@@ -1714,6 +2002,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                     value = threeObject.updateFunction;
                     return value;
                 }
+            }
+            if ( node.isUniformObject ) {
+                value = {};
+                for ( var prop in threeObject ) {
+                    if ( ! threeObject[ prop ] instanceof Function ) {
+                        if ( threeObject[ prop ].type !== 't' ) {
+                            value[ prop ] = {
+                                "type": threeObject[ prop ].type,
+                                "pValue": threeObject[ prop ].value
+                            };
+                        } else {
+                            value[ prop ] = {
+                                "type": threeObject[ prop ].type,
+                                "pValue": threeObject[ prop ].src
+                            }; 
+                        }
+                    }
+                }
+                return value;
             }
             if( threeObject instanceof THREE.Camera ) {
                 switch ( propertyName ) {
@@ -1797,6 +2104,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                             value = 'point';
                         }
                         break;
+                    case "position":
+                        if ( threeObject.position !== null ) {
+                            value = [ threeObject.position.x, threeObject.position.y, threeObject.position.z ];  
+                        }
+                        break;
+
                     case "distance":
                         value = threeObject.distance;
                         break;
@@ -1851,14 +2164,18 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         //   The threeObjects of some nodes do not have a vwfID. This
                         //   will incorrectly return a position in those cases. This
                         //   needs to be fixed.
-                        if ( threeObject.target.vwfID !== undefined ) {
-                            value = threeObject.target.vwfID;
-                        } else {
-                            var targetPos = [ threeObject.target.position.x,
-                                              threeObject.target.position.y,
-                                              threeObject.target.position.z ];
-                            value = targetPos;
-                        }
+                        if ( threeObject.target !== undefined ) {
+
+                            if ( threeObject.target.vwfID !== undefined ) {
+                                value = threeObject.target.vwfID;
+                            } else {
+                                var targetPos = [ threeObject.target.position.x,
+                                                  threeObject.target.position.y,
+                                                  threeObject.target.position.z ];
+                                value = targetPos;
+                            }                            
+                        } 
+
                         break;
                 }
             }
@@ -1997,7 +2314,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         ticking: function( vwfTime ) {
             
-            if ( this.state.appInitialized && checkLights ) {
+            if ( checkLights && this.state.appInitialized && sceneCreated ) {
                 
                 var lightsInScene = sceneLights.call( this );
 
@@ -2080,6 +2397,16 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         return foundMaterial;
     }
+    function isShaderUniformsDefinition( prototypes ) {
+        var found = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                found = ( prototypes[i] == "http-vwf-example-com-threejs-uniforms-vwf" );    
+            }
+        }
+
+        return found;
+    }
     function isCameraDefinition( prototypes ) {
         var foundCamera = false;
         if ( prototypes ) {
@@ -2113,6 +2440,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         return foundNode;
     }
 
+    function isStarFieldDefinition( prototypes ) {
+        var foundNode = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
+                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-starfield-vwf" );    
+            }
+        }
+        return foundNode;
+    }
     function isCubeDefinition( prototypes ) {
         var foundNode = false;
         if ( prototypes ) {
@@ -2216,9 +2552,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 }
             }
         } else {
-            for( var i = 0; i < obj.children.length && child === undefined; i++ ) {
-                if ( nameTest.call( this, obj.children[i], childName ) ) {
-                    child = obj.children[i];
+            if ( obj.children ) {
+                for( var i = 0; i < obj.children.length && child === undefined; i++ ) {
+                    if ( nameTest.call( this, obj.children[i], childName ) ) {
+                        child = obj.children[i];
+                    }
                 }
             }
         }
@@ -2301,6 +2639,20 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         return threeObject;
     }
+
+    function findAllGeometries( threeObject, list ) {
+        
+        if( threeObject === undefined ) return;
+        if( list === undefined ) list = [];
+        if( threeObject instanceof THREE.Geometry )
+            list.push( threeObject );
+        if( threeObject.children ) {
+            for( var i = 0; i < threeObject.children.length; i++ ) {
+                findAllGeometries( threeObject.children[i], list );
+            }
+        }
+        return list;    
+    }    
     
     function findAllMeshes(threeObject,list)
     {
@@ -2491,35 +2843,38 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         if ( mesh.geometry instanceof THREE.BufferGeometry ) {
             return;
         }
-        if ( !mesh.geometry.faceVertexUvs[ 0 ] ) {
-            mesh.geometry.faceVertexUvs[ 0 ] = [];
+        var geometry = mesh.geometry;
+        if ( !geometry.faceVertexUvs[ 0 ] ) {
+            geometry.faceVertexUvs[ 0 ] = [];
         }
-        if ( mesh.geometry.faceVertexUvs[ 0 ].length === 0 ) {
-            for ( var i = 0; i < mesh.geometry.faces.length; i++ ) {
-                var face = mesh.geometry.faces[ i ];
+        if ( geometry.faceVertexUvs[ 0 ].length === 0 ) {
+            for ( var i = 0; i < geometry.faces.length; i++ ) {
+                var face = geometry.faces[ i ];
                 if ( face instanceof THREE.Face4 ) {
-                    mesh.geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ),
-                                                           new THREE.Vector2( 0, 1 ),
-                                                           new THREE.Vector2( 0, 1 ), 
-                                                           new THREE.Vector2( 0, 1 ) ] );
+                    geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ),
+                                                      new THREE.Vector2( 0, 1 ),
+                                                      new THREE.Vector2( 0, 1 ), 
+                                                      new THREE.Vector2( 0, 1 ) 
+                                                    ] );
                 } else if ( face instanceof THREE.Face3 ) {
-                    mesh.geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ), 
-                                                           new THREE.Vector2( 0, 1 ),
-                                                           new THREE.Vector2( 0, 1 ) ] );
+                    geometry.faceVertexUvs[0].push( [ new THREE.Vector2( 0, 1 ), 
+                                                      new THREE.Vector2( 0, 1 ),
+                                                      new THREE.Vector2( 0, 1 ) 
+                                                    ] );
                 }
             }
         }
          
-        mesh.geometry.computeCentroids();
-        mesh.geometry.computeFaceNormals();
-        mesh.geometry.computeVertexNormals();
-        mesh.geometry.uvsNeedUpdate = true;
+        geometry.computeCentroids && geometry.computeCentroids();
+        geometry.computeFaceNormals && geometry.computeFaceNormals();
+        geometry.computeVertexNormals && geometry.computeVertexNormals();
+        geometry.uvsNeedUpdate = true;
 
     }
     //set the material on all the sub meshes of an object.
     //This could cause some strangeness in cases where an asset has multiple sub materials
     //best to only specify the material sub-node where an asset is a mesh leaf
-    function SetMaterial(threeObject,material,materialname)
+    function SetMaterial( threeObject, material, materialname )
     {
         
         //something must be pretty seriously wrong if no threeobject
@@ -2536,7 +2891,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             {
                 
                 meshes[i].material = material;
-                meshes.needsUpdate = true;
+                meshes[i].needsUpdate = true;
             }
         }else
         {
@@ -2545,10 +2900,58 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             {
                 
                 meshes[index].material = material;
-                meshes.needsUpdate = true;
+                meshes[index].needsUpdate = true;
                 window._dMesh =meshes[index];
             }
         }
+    }
+    function createShader( node, shaderDef ) {
+
+        var shaderMaterial = undefined;
+        if ( shaderDef && shaderDef.type ) {
+
+            if ( THREE.ShaderLib[ shaderDef.type ] !== undefined ) {
+ 
+                var shader = THREE.ShaderLib[ shaderDef.type ];
+                var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+                var mergedShader = { 
+                    fragmentShader: shader.fragmentShader, 
+                    vertexShader: shader.vertexShader, 
+                    uniforms: uniforms
+                    // uniforms: uniforms,
+                    // lights: true
+                }; 
+
+                for ( var prop in shaderDef ) {
+                    
+                    switch ( prop ) {
+                        
+                        case "type":
+                            break;
+
+                        case "uniforms":
+                            for ( var uProp in shaderDef.uniforms ) {
+                                var uniProp = shaderDef.uniforms[ uProp ];
+                                setUniformProperty( mergedShader.uniforms, uProp, uniProp.type, uniProp.pValue );
+                            }
+                            break;
+
+                        default:
+                            mergedShader[ prop ] = shaderDef[ prop ];
+                            break;                           
+                    }
+                }
+
+                shaderMaterial = new THREE.ShaderMaterial( mergedShader );
+                node.shaderType = shaderDef.type; 
+
+            } else {
+                this.logger.warnx( "createShader", "unknown shader type: " + shaderDef.type, childID );
+            }
+
+        }
+
+        return shaderMaterial;
     }
     function createMesh( node, meshDef, doubleSided ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
@@ -2631,6 +3034,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 }   
             }
             if ( geo !== undefined ) {
+                geo.computeTangents && geo.computeTangents();
+
                 var mesh = new THREE.Mesh( geo, mat );
 
                 // The child mesh is created after the properties have been initialized, so copy
@@ -2639,9 +3044,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 mesh.receiveShadow = node.threeObject.receiveShadow;
 
                 node.threeObject.add( mesh ); 
+
+                node.threeObject.vwfID = node.ID;
+                node.threeObject.name = node.name;
+
+                mesh.vwfID = node.ID;
+                mesh.name = node.name;
                 
-                geo.computeCentroids();
-                geo.computeFaceNormals();                
+                //geo.computeCentroids();
+                geo.computeFaceNormals && geo.computeFaceNormals();                
             }
 
         }         
@@ -2746,9 +3157,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                 
                 } else {  // childType == "model/x-threejs-skinned+json"
 
-                    THREE.AnimationHandler.add( geometry.animation );   
+                    // THREE.AnimationHandler had a couple of methods
+                    // depricated, check THREE.UCSCharacter
+
+                    //  THREE.AnimationHandler.add( geometry.animation );   
                     var asset = new THREE.SkinnedMesh( geometry, meshMaterial );
-                    var skinnedAnimation = new THREE.Animation( asset, geometry.animation.name ); 
+                    var skinnedAnimation = new THREE.Animation( asset, geometry.animation ); 
                     skinnedAnimation.play();
                 }
 
@@ -2814,7 +3228,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             nodeCopy.threeObject.matrixAutoUpdate = false;
 
             if( keyframeAnimations ) {
-                var animHandler = THREE.AnimationHandler;
+                //var animHandler = THREE.AnimationHandler;
                 nodeCopy.threeObject.kfAnimations = [];
                 nodeCopy.threeObject.animations = keyframeAnimations;
 
@@ -2834,8 +3248,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
                         animation.node.kfAnimations = [];
                     }
                     animation.node.animations.push( animation );
-                    animHandler.add( animation );
-                    var kfAnimation = new THREE.KeyFrameAnimation( animation.node, animation.name );
+                    
+                    // add has been depricated
+                    //animHandler.add( animation );
+                    //var kfAnimation = new THREE.KeyFrameAnimation( animation.node, animation.name );
+
+                    var kfAnimation = new THREE.KeyFrameAnimation( animation );
+
                     kfAnimation.timeScale = 1;
                     nodeCopy.threeObject.kfAnimations.push( kfAnimation );
                     animation.node.kfAnimations.push( kfAnimation );
@@ -3155,22 +3574,31 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
 
         return foundLight;
     }
-    function createLight( nodeID, childID, childName ) {
+    function createLight( nodeID, childID, type, childName ) {
 
         var child = this.state.nodes[childID];
         if ( child ) {
-            child.threeObject = new THREE.DirectionalLight('FFFFFF',1,0);
-            //child.threeObject.shadowCameraRight     =  500;
-            //child.threeObject.shadowCameraLeft      = -500;
-            //child.threeObject.shadowCameraTop       =  500;
-            //child.threeObject.shadowCameraBottom    = -500;
-            
-            // these properties are now exposed as properties
-            //child.threeObject.distance = 100;
-            //child.threeObject.color.setRGB(1,1,1);
 
-            child.threeObject.matrixAutoUpdate = false;
-        
+            switch( type ) {
+                
+                case "http-vwf-example-com-directionallight-vwf":
+                    child.threeObject = new THREE.DirectionalLight( 'FFFFFF' );
+                    break;
+
+                case "http-vwf-example-com-spotlight-vwf":
+                    child.threeObject = new THREE.SpotLight( 'FFFFFF' );
+                    break;
+
+                case "http-vwf-example-com-hemispherelight-vwf":
+                    child.threeObject = new THREE.HemisphereLight('FFFFFF','FFFFFF',1);
+                    break;
+
+                case "http-vwf-example-com-pointlight-vwf":
+                default:
+                    child.threeObject = new THREE.PointLight( 'FFFFFF', 1, 1000 );
+                    break;    
+            }
+      
             child.threeObject.name = childName;
             child.name = childName;
             addThreeChild.call( this, nodeID, childID );
@@ -3421,7 +3849,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             });
 
             // create the particle system
-            var particleSystem = new THREE.ParticleSystem(particles,shaderMaterial_default);
+            var particleSystem = new THREE.PointCloud( particles, shaderMaterial_default );
             
 			//keep track of the shaders
             particleSystem.shaderMaterial_analytic = shaderMaterial_analytic;
@@ -4039,12 +4467,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
     }
 
     function createDefaultLighting( lights ) {
+
         var sceneID = this.kernel.application();
         var ambientCount = lights.ambientLights.length;
         var lightCount = lights.spotLights.length + lights.directionalLights.length + lights.pointLights.length;
         
-        //console.info( "ambientCount = " + ambientCount + "      lightCount = " + lightCount );
-          
         var scene = getThreeScene.call( this );
 
         if ( lightCount == 0 ) {
@@ -4057,8 +4484,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
             scene.add( light1 );
             scene.add( light2 );
 
-            light1.rotation.setFromQuaternion( new THREE.Quaternion( 0, 1, 0, 225 ) );
-            light2.rotation.setFromQuaternion( new THREE.Quaternion( 0, 1, 0, 45 ) );
+            light1.position.set( 0.7, -0.7, 0.3 );
+            light2.position.set( -0.7, 0.7, 0.3 );
         }
 
         if ( ambientCount == 0 ) {
@@ -4608,6 +5035,34 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         }
 
     }
+    function setUniformProperty( obj, prop, type, value ) {
+        
+        switch ( type ) {
+            case 'i':
+                obj[ prop ].value = Number( value );
+                break
+            case 'f':
+                obj[ prop ].value = parseFloat( value );
+                break;
+            case 'c':
+                obj[ prop ].value = new THREE.Color( value );
+                break;
+            case 'v2':
+                obj[ prop ].value = new THREE.Vector2( value[0], value[1] );
+                break;
+            case 'v3':
+                obj[ prop ].value = new THREE.Vector3( value[0], value[1], value[2] );
+                break;
+            case 'v4':
+                obj[ prop ].value = new THREE.Vector4( value[0], value[1], value[2], value[3] );
+                break;
+            case 't':
+                obj[ prop ].src = value;
+                obj[ prop ].value = THREE.ImageUtils.loadTexture( value );
+                break;
+        } 
+    
+    }
     function decompress(dataencoded)
     {
         blobsfound = 0;
@@ -4619,4 +5074,5 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/utility/color", "jquery" ],
         data = decompressJsonStrings(data);
         return data;
     }
+
 });

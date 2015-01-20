@@ -16,7 +16,7 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   usersShareView: false
   enableShadows: true
-  ambientColor: [ 100, 100, 100 ]
+  ambientColor: "#808080"
   backgroundColor: [ 0, 0, 0 ]
   boundingBox: [ [ -10.2, 10.2 ], [ -11, 11 ], [ 0.2, 2.8 ] ]
   userObject:
@@ -365,12 +365,11 @@ children:
             properties:
               bumpScale: 0.002
   light_1:
-    extends: http://vwf.example.com/light.vwf
+    extends: http://vwf.example.com/directionallight.vwf
     properties:
-      lightType: "directional"
-      translation: [ 0, -10.0, 4.0 ]
+      position: [ 0.7, -0.7, 0.3 ]
       intensity: 0.8
-      distance: 24
+      distance: 1000
       color: "#999999"
       castShadows: true
       shadowCameraBottom: -12
@@ -380,42 +379,11 @@ children:
       shadowCameraFar: 100
       shadowDarkness: 0.2
   light_2:
-    extends: http://vwf.example.com/light.vwf
+    extends: http://vwf.example.com/directionallight.vwf
     properties:
-      lightType: "directional"
-      translation: [ 0, 10.0, 4.0 ]
+      position: [ -0.7, 0.7, 0.3 ]
       intensity: 0.8
-      distance: 24
-      color: "#999999"
-      castShadows: true
-      shadowCameraBottom: -12
-      shadowCameraLeft: -12
-      shadowCameraRight: 12
-      shadowCameraTop: 12
-      shadowCameraFar: 100
-      shadowDarkness: 0.2
-  light_3:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "directional"
-      translation: [ -10, 0.0, 4.0 ]
-      intensity: 0.8
-      distance: 24
-      color: "#999999"
-      castShadows: true
-      shadowCameraBottom: -12
-      shadowCameraLeft: -12
-      shadowCameraRight: 12
-      shadowCameraTop: 12
-      shadowCameraFar: 100
-      shadowDarkness: 0.2
-  light_4:
-    extends: http://vwf.example.com/light.vwf
-    properties:
-      lightType: "directional"
-      translation: [ 10, 0.0, 4.0 ]
-      intensity: 0.8
-      distance: 24
+      distance: 1000
       color: "#999999"
       castShadows: true
       shadowCameraBottom: -12

@@ -14,26 +14,24 @@
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties:
-  ambientColor: [ 183, 183, 183 ]
+  ambientColor: [ 0, 0, 0 ]
   navmode: none
 methods:
   initializeCamera:
 children:
   Omni01:
-    extends: http://vwf.example.com/light.vwf
+    extends: http://vwf.example.com/pointlight.vwf
     properties:
-      lightType: "point"
       enable: true
       distance: 2000
-      intensity: 0.3
+      intensity: 0.8
       color: [ 255, 255, 255 ]
-      translation: [ 0, -30, 8 ]
+      position: [ 0, -30, 8 ]
   dir2:
-    extends: http://vwf.example.com/light.vwf
+    extends: http://vwf.example.com/directionallight.vwf
     properties:
-      lightType: "directional"
       distance: 2000
-      intensity: 0.3
+      intensity: 1.2
       color: [ 255, 255, 255 ]
   sceneCenter:
     extends: http://vwf.example.com/node3.vwf
@@ -54,4 +52,7 @@ scripts:
                                 -3.814, -7.036,  3.154, 1 ];
       this.camera.lookAt = this.children.sceneCenter.id;
       this.camera.navmode = "none";
+
+      this.dir2.target = this.radio.id;
+      this.dir2.position = [ -0.7, -0.7, 0.3 ];      
     }//@ sourceURL=index.vwf
