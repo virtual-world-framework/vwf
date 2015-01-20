@@ -2361,7 +2361,34 @@ define( [ "module",
 
                 var raycaster = new THREE.Raycaster( origin, direction, near, far );
                 var intersects = raycaster.intersectObjects( objects, recursive );
-                return intersects;
+
+                // clean up results before passing back to applications
+                var results = [];
+                var result, intersectedNode;
+                for ( var i = 0; i < intersects.length; i++ ) {
+                    result = {};
+                    result[ "distance" ] = intersects[ i ].distance;
+                    result[ "point" ] = [
+                        intersects[ i ].point.x,
+                        intersects[ i ].point.y,
+                        intersects[ i ].point.z ];
+                    intersectedNode = intersects[ i ].object;
+                    while ( !intersectedNode.vwfID ) {
+                        intersectedNode = intersectedNode.parent;
+                    }
+                    result[ "node" ] = this.state.kernel.kutility.nodeReference( intersectedNode.vwfID );
+                    result[ "normal" ] = [
+                        intersects[ i ].face.normal.x,
+                        intersects[ i ].face.normal.y,
+                        intersects[ i ].face.normal.z ];
+                    result[ "centroid" ] = [
+                        intersects[ i ].face.centroid.x,
+                        intersects[ i ].face.centroid.y,
+                        intersects[ i ].face.centroid.z ];
+                    results[ i ] = result;
+                }
+
+                return results;
 
             }
 
