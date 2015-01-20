@@ -14,10 +14,9 @@
 --- 
 extends: http://vwf.example.com/scene.vwf
 properties:
-  backgroundColor: [200, 200, 200]
-  ambientColor: [200, 200, 200]
+  backgroundColor: [ 200, 200, 200 ]
+  ambientColor: [ 200, 200, 200 ]
 methods:
-  initializeCamera:
   log:
   toleranceTest:
 children:
@@ -26,7 +25,7 @@ children:
     properties:
       translation: [ 3.097, 7.634, 0.090 ]
       rotation: [ 1, 0, 0, 0 ]
-      scale: [ 1, 1, 1]
+      scale: [ 1, 1, 1 ]
     children:
       parent1:
         extends: http://vwf.example.com/node3.vwf
@@ -113,7 +112,10 @@ scripts:
 - |
   this.initialize = function() {
     
-    this.future(0).initializeCamera();
+    this.camera.transform = [ -0.834, -0.550, 0,     0,
+                               0.550, -0.834, 0,     0,
+                               0,      0,     1,     0,
+                              -7.478, 20.066, 2.690, 1 ];
     
     // Perform transforms that will get all cubes back to an identity tranform.  Matrix math for the following was
     // computed using these sites:
@@ -209,13 +211,6 @@ scripts:
 
     this.in( 5 ).toleranceTest();
   } 
-
-  this.initializeCamera = function() {
-    this.camera.transform = [ -0.834, -0.550, 0,     0,
-                               0.550, -0.834, 0,     0,
-                               0,      0,     1,     0,
-                              -7.478, 20.066, 2.690, 1 ];
-  }
 
   this.printWorldTransform = function( node3 ) {
     if ( !node3 ) {
