@@ -98,6 +98,11 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                     soundData[ soundName ] = currSoundDatum;
                     return;
 
+                case "unloadSound":
+                    soundName = params[ 0 ];
+                    delete soundData[ soundName ];
+                    return;
+
                 case "setVoiceSet":
                     voiceSet = params[0];
                     return;
@@ -266,6 +271,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         allowMultiplay: false,
         soundDefinition: null,
         playOnLoad: false,
+        deleteAfterPlay: false,
         voice: null,
 
         // meSpeakOpts: undefined,
@@ -287,6 +293,10 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if ( this.soundDefinition.playOnLoad !== undefined ) {
                  this.playOnLoad = soundDefinition.playOnLoad;
+             }
+
+            if ( this.soundDefinition.deleteAfterPlay !== undefined ) {
+                 this.deleteAfterPlay = soundDefinition.deleteAfterPlay;
              }
 
             this.subtitle = this.soundDefinition.subtitle;
@@ -548,6 +558,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
                 }
 
                 delete soundDatum.playingInstances[ id ];
+                if(soundDatum.deleteAfterPlay){
+                    delete soundData[ soundDatum.soundName ];
+                }
                 exitCallback && exitCallback();
             }
 
