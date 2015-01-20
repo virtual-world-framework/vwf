@@ -14,7 +14,6 @@
 --- 
 extends: http://vwf.example.com/scene.vwf
 methods:
-  initializeCamera:
   update:
 children:
   system:
@@ -36,7 +35,7 @@ children:
       depthTest: false
       maxRate: 1000
       particleCount: 1200
-      damping: .22
+      damping: 0.22
       translation: [ 0, 0, 0]
       emitterType: 'point'
       emitterSize: [ 110 , 0 , 0]
@@ -51,31 +50,19 @@ children:
       distance: 2000
       intensity: 1.2
       color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
 - | 
-    this.initialize = function()
-    {
-        this.dir1.translation = [0,-100,0];
-        this.system.translation = [0,0,0];
-        this.counter = 0;
-        this.future(0).initializeCamera();
-        this.future(.05).update();
-    }
-
-    this.initializeCamera = function() {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
+    this.initialize = function() {
+        this.camera.translation = [ 0, -600, 50 ];
         this.camera.navmode = "none";
-    }
-
-    this.update = function()
-    {
-        this.counter++;
-        //this.system.particleCount = (Math.sin(this.counter/100)+1) * 1000;
         this.future(.05).update();
+    }
+    this.update = function() {
+        this.system.damping+=0.01;
+        if ( this.system.damping == 1.00 ) {
+          this.system.damping = 0;
+        }
+        this.future(1).update();
     } //@ sourceURL=index.vwf

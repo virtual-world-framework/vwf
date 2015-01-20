@@ -13,82 +13,79 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-methods:
-  initializeCamera:
-  update:
 children:
   system2:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ 0.0, 0.0, 20]
-      maxVelocity: [ 1, 1, 20]
+      minVelocity: [ 0.0, 0.0, 20 ]
+      maxVelocity: [ 1, 1, 20 ]
       velocityMode: 'spherical'
-      maxAcceleration: [ .03, 0, -0.20]
-      minAcceleration: [ 0, 0, -0.32]
+      maxAcceleration: [ .03, 0, -0.20 ]
+      minAcceleration: [ 0, 0, -0.32 ]
       startSize: 50
       endSize: 10
       maxLifeTime: 120
       minLifeTime: 120
-      startColor: [ 1, 1, 1, .5]
-      endColor: [ 0, 0, 0, 0.5]
+      startColor: [ 1, 1, 1, .5 ]
+      endColor: [ 0, 0, 0, 0.5 ]
       additive: true
       depthTest: false
       maxRate: 10000
       particleCount: 1200
       damping: .22
-      translation: [ 0, 0, 150]
+      translation: [ 0, 0, 150 ]
       emitterType: 'point'
-      emitterSize: [ 1 , 1 , 100]
+      emitterSize: [ 1, 1, 100 ]
       image: spark.jpg
       solver: 'Euler'
   system3:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ 0.0, 0.0, 16]
-      maxVelocity: [ 1, 1, 16]
+      minVelocity: [ 0.0, 0.0, 16 ]
+      maxVelocity: [ 1, 1, 16 ]
       velocityMode: 'spherical'
-      maxAcceleration: [ .03, 0, -0.20]
-      minAcceleration: [ 0, 0, -0.32]
+      maxAcceleration: [ .03, 0, -0.20 ]
+      minAcceleration: [ 0, 0, -0.32 ]
       startSize: 50
       endSize: 10
       maxLifeTime: 100
       minLifeTime: 100
-      startColor: [ 1, 2, 1, 0.5]
-      endColor: [ 0, 0, 0, 0.5]
+      startColor: [ 1, 2, 1, 0.5 ]
+      endColor: [ 0, 0, 0, 0.5 ]
       additive: true
       opacity: .5
       depthTest: false
       maxRate: 10000
       particleCount: 1200
       damping: .22
-      translation: [ 100, 0, 15]
+      translation: [ 100, 0, 15 ]
       emitterType: 'point'
-      emitterSize: [ 1 , 1 , 100]
+      emitterSize: [ 1, 1, 100 ]
       image: spark.jpg
       solver: 'Euler'
   system4:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ 0.0, 0.0, 32]
-      maxVelocity: [ 1, 1, 32]
+      minVelocity: [ 0.0, 0.0, 32 ]
+      maxVelocity: [ 1, 1, 32 ]
       velocityMode: 'spherical'
-      maxAcceleration: [ .03, 0, -0.20]
-      minAcceleration: [ 0, 0, -0.32]
+      maxAcceleration: [ .03, 0, -0.20 ]
+      minAcceleration: [ 0, 0, -0.32 ]
       startSize: 50
       endSize: 10
       maxLifeTime: 150
       minLifeTime: 150
-      startColor: [ 2, 1, 1, 0.5]
-      endColor: [ 0, 0, 0, 0.5]
+      startColor: [ 2, 1, 1, 0.5 ]
+      endColor: [ 0, 0, 0, 0.5 ]
       additive: true
       opacity: .5
       depthTest: false
       maxRate: 10000
       particleCount: 1200
       damping: .22
-      translation: [ -100, 0, -15]
+      translation: [ -100, 0, -15 ]
       emitterType: 'point'
-      emitterSize: [ 1 , 1 , 100]
+      emitterSize: [ 1 , 1 , 100 ]
       image: spark.jpg     
       solver: 'Euler'      
   dir1:
@@ -101,33 +98,11 @@ children:
       distance: 2000
       intensity: 1.2
       color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      translation: [ 0, -100, 0 ]
 scripts:
 - | 
-    this.initialize = function()
-    {
-        this.dir1.translation = [0,-100,0];
-        this.counter = 0;
-        this.future(0).initializeCamera();
-        this.future(.05).update();
-    }
-
-    this.initializeCamera = function() {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.camera.navmode = "none";
-    }
-
-    this.update = function()
-    {
-        this.counter++;
-      //  console.log(this.system2.translation)
-      //  this.system2.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
-      //  this.system3.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
-      //  this.system4.translation = [(Math.random() -.5) * 300,0,(Math.random() -.5) * 300];
-      //  this.future(2).update();
+    this.initialize = function() {
+      this.camera.translation = [ 0, -600, 50 ];
+      this.camera.navmode = "none";
     } //@ sourceURL=index.vwf
