@@ -83,17 +83,9 @@ class VWF
     end
 
     class Revisions < Storage::Revisions
-
       include Enumerable
       include Types
       include Collection
-
-      def current  # TODO: base class
-        if key = @revisions.keys[-1]  # TODO
-          @revisions[key]
-        end
-      end
-
     end
 
     class Revision < Storage::Revision

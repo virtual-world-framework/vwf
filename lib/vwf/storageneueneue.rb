@@ -30,14 +30,30 @@ module VWF::Storage
   end
 
   class Instance < Item
+
     include Types
+
+    def get
+      if revision = revisions.current  # TODO: most recent revision (better: current captive state or from client)
+        revision.get
+      end
+    end
+
+    def set value
+      revisions.create value  # TODO: @storage.queue.flush to revision
+    end
+
     def revisions ; @revisions ||= self.Revisions.new self ; end
     def actions ; @actions ||= self.Actions.new self ; end
     def tags ; @tags ||= self.Tags.new self ; end
+
   end
 
   class Revisions < Collection
+
     include Types
+    def type ; self.Revision ; end
+
     def create id, value
       super.tap do |revision|
         if ! revision.id && revision.get  # TODO: don't do a database read for value since we just had it
@@ -45,8 +61,13 @@ module VWF::Storage
         end
       end
     end
-    def type ; self.Revision ; end
-    def current ; end
+
+    def current
+      if last = to_a.last  # TODO optimize for non-hash storage
+        last[1]
+      end
+    end
+
   end
 
   class Revision < Item

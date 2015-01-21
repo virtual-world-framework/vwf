@@ -106,22 +106,7 @@ class VWF < Sinatra::Base
     end
 
     class Instance < Storage::Instance
-
       include Types
-
-      def get
-        if revision = revisions.current  # TODO: most recent revision (better: current captive state or from client)
-          revision.get
-        end
-      end
-
-      def set value
-        revisions.create value
-
-          # @storage.queue.flush to revision  TODO
-
-      end
-
     end
 
     class Revisions < Storage::Revisions
@@ -157,12 +142,6 @@ class VWF < Sinatra::Base
 
       def each &block
         @revisions.each &block
-      end
-
-      def current  # TODO: base class
-        if key = @revisions.keys[-1]
-          @revisions[key]
-        end
       end
 
     end
