@@ -249,7 +249,7 @@ module Rack
       # The session data for the resource that this client connects to.
 
       def session
-        @@sessions[@resource]
+        @@sessions[@resource] ||= {}
       end
 
       # Session data for the instances derived from the given resource.
@@ -294,6 +294,7 @@ module Rack
       
       def self.resource env
         unless env.kind_of? String
+debugger  # TODO: can't work with instance variables
           env["vwf.instance"] ?
             ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.instance"] ) :
             ::File.join( env["vwf.root"], env["vwf.application"] )  # TODO: shouldn't use File.join, but URI.join only works from an absolute url
@@ -310,7 +311,7 @@ module Rack
           ::File.join( env["vwf.root"], env["vwf.application"] )  # TODO: shouldn't use File.join, but URI.join only works from an absolute url
       end
 
-      MESSAGE_LOG_LENGTH = 100
+      MESSAGE_LOG_LENGTH = 1000
 
       def message_for_log message
         message = message.to_s

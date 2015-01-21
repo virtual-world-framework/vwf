@@ -13,11 +13,14 @@
 
 class VWF < Sinatra::Base
 
+  require "vwf/storageneue"
+  require "vwf/storage/couch_db"
   require "vwf/pattern"
 
   # A stand-in for the persistence database.
 
-  @@storage = {}
+  # @@storage ||= Storage::Volatile::Applications.new
+  @@storage ||= Storage::CouchDB::Applications.new
 
   def self.storage
     @@storage
@@ -70,6 +73,8 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
     delegate_to_application( script_name, path_info, application ).tap do |result|
       pass if result[0] == 404
     end
+
+    # anything not in /vwf:instance/*, /vwf:revision/*, /vwf:client/*, /vwf:reflector/* pass to cascade below
 
   end
 

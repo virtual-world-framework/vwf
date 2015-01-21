@@ -53,4 +53,7 @@ end
 
 gem "eventmachine", ">= 1.0.0.beta", "!= 1.0.0.beta.4"
 
+gem "couchrest"
 gem "slim"
+
+gem "debugger"

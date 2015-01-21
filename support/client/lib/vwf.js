@@ -990,6 +990,7 @@
 
             var fields = {
                 // sequence: undefined,  // TODO: use to identify on return from reflector?
+                sequence: vwf.reflector_sequence,
                 time: this.now,
                 node: nodeID,
                 action: actionName,
@@ -1078,6 +1079,7 @@
                 // Advance time to the message time.
 
                 if ( this.now != fields.time ) {
+this.reflector_sequence = undefined;
                     this.sequence_ = undefined; // clear after the previous action
                     this.client_ = undefined;   // clear after the previous action
                     this.now = fields.time;
@@ -1086,6 +1088,7 @@
                 // Perform the action.
 
                 if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+this.reflector_sequence = fields.sequence;
                     this.sequence_ = fields.sequence; // note the message's queue sequence number for the duration of the action
                     this.client_ = fields.client;     // ... and note the originating client
                     this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
@@ -1100,6 +1103,7 @@
             // changed.
 
             if ( queue.ready() && this.now != queue.time ) {
+this.reflector_sequence = undefined;
                 this.sequence_ = undefined; // clear after the previous action
                 this.client_ = undefined;   // clear after the previous action
                 this.now = queue.time;
@@ -1219,6 +1223,7 @@
                 // Set the queue time and add the incoming items to the queue.
 
                 if ( applicationState.queue ) {
+                    vwf.reflector_sequence = queue.sequence;
                     queue.time = applicationState.queue.time;
                     queue.insert( applicationState.queue.queue || [] );
                 }
@@ -1271,6 +1276,7 @@
                 // Message queue.
 
                 queue: {  // TODO: move to the queue object
+                    sequence: this.reflector_sequence,
                     time: queue.time,
                     queue: require( "vwf/utility" ).transform( queue.queue, queueTransitTransformation ),
                 },

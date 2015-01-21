@@ -28,8 +28,6 @@ class VWF::Application < Sinatra::Base
 
   configure do
 
-    enable :logging
-
     # Condition to detect browser requests, as opposed to XHR requests. Browser requests for
     # application resources should bootstrap the client, and singular application resources should
     # redirect to directory resources.
@@ -40,6 +38,21 @@ class VWF::Application < Sinatra::Base
         want_browser == is_browser
       end
     end
+
+  end
+
+  configure :production do
+
+    enable :logging
+
+  end
+
+  configure :development do
+
+    register Sinatra::Reloader
+
+    require "logger"
+    set :logging, ::Logger::DEBUG
 
   end
 
@@ -83,20 +96,17 @@ class VWF::Application < Sinatra::Base
   ### Validate the application, instance, and revision. ############################################
 
   before "/?*" do
-    # @application = VWF.storage[ @application_id ] || VWF.storage.create( @application_id )
-    @application = VWF.storage[ @application_id ] ||= application_state_and_actions( env ).merge( :instances => {} )
+    @application = VWF.storage[ @application_id ] || VWF.storage.create( @application_id, application_state )
     halt 404 unless @application
   end
 
   before "/instance/:instance_id/?*" do |instance_id, _|
-    # @instance = @application.instances[ instance_id ]
-    @instance = @application[ :instances ][ instance_id ] ||= instance_state_and_actions.merge( :revisions => {} )
+    @instance = @application.instances[ instance_id ] || @application.instances.create( instance_id, instance_state )  # TODO: remove second clause to stop auto-creating arbitrary instances
     halt 404 unless @instance
   end
 
   before "/instance/:instance_id/revision/:revision_id/?*" do |_, revision_id, _|
-    # @revision = @instance.revisions[ revision_id ]
-    @revision = @instance[ :revisions ][ revision_id ] ||= revision_state_and_actions
+    @revision = @instance.revisions[ revision_id ]
     halt 404 unless @revision
   end
 
@@ -120,7 +130,8 @@ class VWF::Application < Sinatra::Base
   # Redirect the application to a new instance. ####################################################
 
   get "/", :browser => true do
-    redirect to "/instance/" + random_instance_id + "/"
+    @instance = @application.instances.create( instance_state )
+    redirect to "/instance/" + @instance.id + "/"
   end
 
   # Bootstrap the client from an instance.
@@ -149,19 +160,24 @@ class VWF::Application < Sinatra::Base
 
   ### Serve the client files. ######################################################################
 
+# "/*" blocks all the api calls below, but these will go to "/client/*"
+
   get "/instance/:instance_id/revision/:revision_id/*" do |instance_id, revision_id, path_info|
+pass if @type
     request.script_name += "/instance/#{instance_id}/revision/#{revision_id}"
     request.path_info = "/#{path_info}"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
   get "/instance/:instance_id/*" do |instance_id, path_info|
+pass if @type
     request.script_name += "/#{instance_id}"
     request.path_info = "/#{path_info}"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
   get "/*" do |path_info|
+pass if @type
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
@@ -172,12 +188,10 @@ class VWF::Application < Sinatra::Base
     case @type || request.preferred_type( @@api_types )
       when "application/json"
         content_type :json
-        # @application.get.to_json
-        @application[ :state ].to_json
+        @application.get.to_json
       when "text/yaml"
         content_type :yaml
-        # @application.get.to_yaml
-        @application[ :state ].to_yaml
+        @application.get.to_yaml
       when "text/html"
         # slim :application  # TODO
     end
@@ -204,12 +218,10 @@ class VWF::Application < Sinatra::Base
     case @type || request.preferred_type( @@api_types )
       when "application/json"
         content_type :json
-        # @instance.get.to_json
-        @instance[ :state ].to_json
+        @instance.get.to_json
       when "text/yaml"
         content_type :yaml
-        # @instance.get.to_yaml
-        @instance[ :state ].to_yaml
+        @instance.get.to_yaml
       when "text/html"
         slim :instance
     end
@@ -236,19 +248,15 @@ class VWF::Application < Sinatra::Base
     case @type || request.preferred_type( @@api_types )
       when "application/json"
         content_type :json
-        # @revision.get.to_json
-        @revision[ :state ].to_json
+        @revision.get.to_json
       when "text/yaml"
         content_type :yaml
-        # @revision.get.to_yaml
-        @revision[ :state ].to_yaml
+        @revision.get.to_yaml
       when "text/html"
         slim :revision
     end
 
   end
-
-
 
   helpers do
 
@@ -278,66 +286,33 @@ class VWF::Application < Sinatra::Base
 
   end
 
-  def application_state_and_actions env
-
-    Hash[
-
-      :state => JSON.parse(
-        Component.new( VWF.settings.public_folder ).call( env.merge "PATH_INFO" => @application_id )[ 2 ].join( "" )
-      ),
-
-      :actions => []
-
-    ]
-
+  def application_state
+    @application_id
   end
 
-  def instance_state_and_actions
+  def instance_state
 
     Hash[
-
-      :state => {
-        "configuration" =>
-          { "environment" => ENV['RACK_ENV'] || "development" }
+      "kernel" => {
+        "time" => 0      # TODO: this time doesn't (shouldn't) matter
       },
-
-      :actions => [ {
-        "action" => "createNode",
-        "parameters" => [ "http://vwf.example.com/clients.vwf" ]
-      }, {
-        "action" => "createNode",
-        "parameters" => [ @application_id, "application" ]
-      } ]
-
-    ]
-
-  end
-
-  def revision_state_and_actions
-
-    Hash[
-
-      :state => {
-        "configuration" =>
-          { "environment" => ENV['RACK_ENV'] || "development" }
+      "nodes" => [
+        "http://vwf.example.com/clients.vwf",
+        @application.get,
+      ],
+      "annotations" => {
+        "1" => "application"
       },
-
-      :actions => [ {
-        "action" => "createNode",
-        "parameters" => [ "http://vwf.example.com/clients.vwf" ]
-      }, {
-        "action" => "createNode",
-        "parameters" => [ @application_id, "application" ]
-      } ]
-
+      "queue" => {
+        "sequence" => 0,  # TODO: simplify state: remove existing kernel.time, move queue.{sequence.time} to kernel.{...}, move queue.queue[] to queue[]
+        "time" => 0
+      }
     ]
 
   end
 
-  # Generate a random string to be used as an instance id.
-
-  def random_instance_id
-    "%08x" % rand( 1 << 32 )
+  def revision_state
+    instance_state
   end
 
 

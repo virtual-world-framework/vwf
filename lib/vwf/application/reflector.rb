@@ -20,8 +20,10 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     super resource
 
-    @resource = resource
+    @resource = resource  # vwf app resource: application+instance+revision; script_name =~ resource + "/reflector"
     @storage = storage
+
+    session[ :something ] ||= SomethingAboutSharedInstanceState.new @storage  # TODO: rename session to instance
 
   end
 
@@ -43,126 +45,28 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
   def connect
 
+    if state = session[ :something ].state
+
+      send \
+        "sequence" => session[ :something ].sequence,  # TODO: note: autoincrements
+        "time" => session[ :something ].time,
+        "action" => "setState",
+        "parameters" => [ state ]
+    end
+
+    if actions = session[ :something ].actions
+      actions.each { |action| send action }
+    end
+
     # The first client to join the instance.
 
-    if clients.length == 1 # coming from 0
-
-      # Initialize the client configuration from the runtime environment.
-
-      logger.debug "VWF::Application::Reflector#connect #{id} " +
-          "launching"
-      
-      # if env["vwf.load"]
-      #   filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState.vwf.json"
-      #   if env["vwf.loadrevision"]
-      #     if File.exists?(VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState_"+env["vwf.loadrevision"]+".vwf.json")
-      #       filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState_"+env["vwf.loadrevision"]+".vwf.json"
-      #     end
-      #   end
-      # end
-
-      # TODO: check for file format not that json exists
-
-      # if  env["vwf.load"] and File.exists?(filename)
-
-      #   contents = File.read(filename)
-      #   json = JSON.parse("#{ contents }", :max_nesting => 100)
-      #   startTime = 0
-      #   startTime = json["queue"]["time"] unless json["queue"].nil?
-
-      #   # Start the timer on the first connection to this instance.
-
-      #   schedule_tick( startTime )
-      #   send "time" => session[:transport].time,
-      #     "action" => "setState",
-      #     "parameters" => [
-      #         json
-      #       ]
-
-      # elsif File.exists?("public#{ @application }.json")
-
-      #   contents = File.read("public#{ @application }.json")
-      #   json = JSON.parse("#{ contents }", :max_nesting => 100)
-      #   startTime = 0
-      #   startTime = json["queue"]["time"] unless json["queue"].nil?
-        
-      #   # Start the timer on the first connection to this instance.
-        
-      #   schedule_tick( startTime )
-
-      #   send "time" => session[:transport].time,
-      #     "action" => "setState",
-      #     "parameters" => [
-      #       json
-      #     ]
-
-      # else
-      
-        # Start the timer on the first connection to this instance.
-
-        schedule_tick(0)
-
-        if @storage[ :state ]
-          send "time" => session[:transport].time,
-            "action" => "setState",
-            "parameters" => [ @storage[ :state ] ]
-        end
-
-        @storage[ :actions ].each do |action|
-          send action.merge "time" => session[:transport].time
-        end
-
-      # end
-
-    # The second client to join the instance, or the next client to join after earlier clients have
-    # fully connected.
-
-    elsif session[:pending].nil?
-
-      # Create space to store clients waiting for replication and any messages that we receive
-      # before they are fully connected.
-
-      logger.debug "VWF::Application::Reflector#connect #{id} " +
-          "connecting and suspending (1 suspended)"
-
-      session[:pending] = {
-        :time => session[:transport].time,
-        :source => clients.reject { |client| client == self } .first,
-        :clients => [ self ],
-        :messages => []
-      }
-
-      # Request the current state from a synchronized client.
-
-      source = session[:pending][:source]
-      time = session[:pending][:time]
-
-      # source.send "time" => time, "action" => "hashState", "respond" => true
-
-      logger.debug "VWF::Application::Reflector#connect #{id} " +
-          "requesting state from #{source.id}"
-
-      source.send "time" => time,
-        "action" => "getState",
-        "respond" => true
-
-    # Additional clients that join the instance when at least one earlier client is waiting for
-    # replication.
-
-    else
-
-      # Save this client with the others waiting for replication.
-
-      logger.debug "VWF::Application::Reflector#connect #{id} " +
-          "connecting and suspending (#{ session[:pending][:clients].length + 1 } suspended)"
-
-      session[:pending][:clients].push self
-
+    if clients.length == 1  # from 0 to 1
+      schedule_tick  # start the timer on the first connection to this instance.
     end
 
     # Create a child in the application's `clients.vwf` global to represent this client.
 
-    broadcast "time" => session[:transport].time,
+    broadcast \
       "action" => "createChild",
       "parameters" => [ "http-vwf-example-com-clients-vwf", id, {} ]
 
@@ -174,19 +78,13 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     fields = JSON.parse message, :max_nesting => 100
 
-    # For a normal message, stamp it with the curent time and originating client, and send it to
-    # each client.
-
-    unless fields["result"]
-
-      broadcast fields.merge "time" => session[:transport].time, "client" => id  # TODO: allow future times on incoming fields["time"] and queue until needed
-        
-    # Handle messages where the client returned a result to the server.
-
+    unless fields[ "result" ]
+      # For a normal message, stamp it with the curent time and originating client, and send it to
+      # each client.
+      broadcast fields.merge "client" => id  # TODO: allow future times on incoming fields["time"] and queue until needed
     else
-
+      # Handle messages where the client returned a result to the server.
       receive fields
-
     end
 
   end
@@ -199,46 +97,9 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
     # current state. Refresh the synchronized clients as well since the get/set operation may be
     # lossy, and this ensures that every client resumes from the same state.
 
-    if fields["action"] == "getState" && session[:pending] && session[:pending][:source] == self
-
+    if fields[ "action" ] == "getState"
       logger.debug "VWF::Application::Reflector#receive #{id} received state"
-
-      fields_setState = {
-        "time" => session[:pending][:time],
-        "action" => "setState",
-        "parameters" => [ fields["result"] ]
-      }
-
-      # Send the setState message to each of the new clients
-
-      session[:pending][:clients].each do |client|
-
-        # Set the state in the new client.
-
-        logger.debug "VWF::Application::Reflector#receive #{id} " +
-          "setting state in #{client.id}"
-
-        client.send fields_setState
-
-        # Deliver any messages that arrived after the client joined but before we received the
-        # state from the reference client.
-
-        session[:pending][:messages].each do |fields_pending|
-          client.send fields_pending
-        end
-
-        # client.send "time" => time, "action" => "hashState", "respond" => true
-        # client.send "time" => time, "action" => "getState", "parameters" => [ true, true ], "respond" => true
-
-      end
-
-      session[:pending][:clients].each do |client|
-        logger.debug "VWF::Application::Reflector#receive #{id} " +
-          "resuming #{client.id} (#{ session[:pending][:clients].length } suspended)"
-      end
-
-      session.delete :pending
-
+      session[ :something ].state = fields[ "result" ]
     end
 
   end
@@ -268,48 +129,12 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     # Delete the child representing this client in the application's `clients.vwf` global.
 
-    broadcast "time" => session[:transport].time,
+    broadcast \
       "action" => "deleteChild",
       "parameters" => [ "http-vwf-example-com-clients-vwf", id ]
 
-    # Just log the disconnection if no clients are waiting for replication.
-
-    if ! session[:pending]
-
-      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
-          "disconnecting"
-
-    # If the disconnecting client was waiting for replication, remove it from the `pending` list.
-    # Completely remove the `pending` object if no other clients are waiting.
-
-    elsif session[:pending][:clients].include? self
-
-      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
-        "disconnecting (suspended) (#{ session[:pending][:clients].length } suspended)"
-
-      session[:pending][:clients].delete self
-      session.delete :pending if session[:pending][:clients].empty?
-
-    # If the disconnecting client was the replication source for other clients waiting for
-    # replication, put the pending clients aside so that we can replay their connections and choose
-    # a new source.
-
-    elsif session[:pending][:source] == self
-
-      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
-        "disconnecting (source) (#{ session[:pending][:clients].length } suspended)"
-
-      session[:stasis] = session[:pending][:clients]
-      session.delete :pending
-
-    # Otherwise, just log the disconnection.
-
-    else
-
-      logger.debug "VWF::Application::Reflector#disconnect #{id} " +
-        "disconnecting (#{ session[:pending][:clients].length } suspended)"
-
-    end
+    logger.debug "VWF::Application::Reflector#disconnect #{id} " +
+        "disconnecting"
 
     # Stop the timer after the last disconnection from this instance.
 
@@ -342,30 +167,34 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
   # each client when enabled, and to store messages for pending clients to be delivered once the
   # client is ready.
 
-  def broadcast message, log = true
+  def broadcast action, log = true
 
-    if Hash === message # magic when passed a fields Hash
+    if action[ "action" ]
 
-      fields = message
-      message = JSON.generate fields, :max_nesting => 100
+      fields = Hash[
+        "sequence" => session[ :something ].sequence,  # TODO: note: autoincrements
+        "time" => session[ :something ].time
+      ] .merge action
 
-      logger.debug "VWF::Application::Reflector#broadcast #{id} " +
-          "#{ message_for_log message }" if log
+      session[ :something ].actionPush fields
 
-      clients.each do |client| # established clients: same as in super
-        next if client.closing
-        client.log fields, :send if log
-        client.send message, false
-      end
+    else
 
-      if session[:pending] # pending clients: save until "setState" sent
-        session[:pending][:messages].push fields
-      end
+      fields = Hash[
+        "time" => session[ :something ].time
+      ] .merge action
 
-    else # otherwise do the socket.io default
+    end
 
-      super
+    message = JSON.generate fields, :max_nesting => 100
 
+    logger.debug "VWF::Application::Reflector#broadcast #{id} " +
+        "#{ message_for_log message }" if log
+
+    clients.each do |client| # established clients: same as in super
+      next if client.closing
+      client.log fields, :send if log
+      client.send message, false
     end
 
   end
@@ -460,17 +289,15 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
 private
 
-  def schedule_tick( initial_time )
+  def schedule_tick
 
     logger.debug "VWF::Application::Reflector#schedule_tick #{id}"
 
-    transport = session[:transport] = Transport.new
+    # transport = session[:transport] = Transport.new  TODO -- exists only when needed (also remove entire session)
 
     session[:timer] = EventMachine::PeriodicTimer.new( 0.05 ) do  # TODO: configuration parameter for update rate
-      transport.playing and broadcast( { "time" => transport.time }, false )
+      session[ :something ].transport.playing and broadcast( {}, false )
     end
-
-    transport.time = initial_time
  
   end
   
@@ -481,8 +308,8 @@ private
     session[:timer].cancel
     session.delete :timer
 
-    session[:transport].stop
-    session.delete :transport
+    session[ :something ].transport.stop
+    # session.delete :transport  TODO -- exists only when needed (also remove entire session)
     
   end
 
@@ -503,6 +330,132 @@ private
   end
 
 public
+
+  class SomethingAboutSharedInstanceState
+
+    def initialize storage
+
+      @storage = storage
+      @transport = Transport.new
+
+      if action = actions.last
+        @sequence = action[ "sequence" ]     || 0
+        @transport.time = action[ "time" ] || state[ "queue" ][ "time" ]    || 0
+      elsif state
+        @sequence = state[ "queue" ][ "sequence" ]   || 0
+        @transport.time = state[ "queue" ][ "time" ]    || 0 # TODO: don't calculate state twice
+      else
+        @sequence = 0
+        @transport.time = 0
+      end
+
+    end
+
+    # dasdasasdsd
+
+    def state
+
+      case @storage
+        when VWF::Storage::Application
+          state_from_component @storage.get
+        when VWF::Storage::Instance
+          @storage.get
+        when VWF::Storage::Revision
+          @storage.get
+      end
+
+    end
+
+    # dasdasasdsd
+
+    def state= state
+
+      case @storage
+        when VWF::Storage::Application
+          # ? TODO
+        when VWF::Storage::Instance
+          @storage.set state
+        when VWF::Storage::Revision
+          # ? TODO
+      end
+
+    end
+
+    # dasdasasdsd
+
+    def actions
+
+if @storage.respond_to?( :actions )
+  $stderr.puts "actions #{@storage.dbid} #{@storage.actions.inspect}"
+end
+
+      @storage.respond_to?( :actions ) ?
+        @storage.actions.map { |action| action.get } : []
+
+    end
+
+    # dasdasasdsd
+
+    def actionPush action
+
+      if @storage.respond_to?( :actions )
+        @storage.actions.create( action[ "sequence" ].to_s, action )
+      end
+
+    end
+
+    # dasdasasdsd
+
+    def time
+      @transport.time
+    end
+
+    # dasdasasdsd
+
+    def time= time
+      @transport.time = time
+    end
+
+    # dasdasasdsd
+
+    def sequence
+      @sequence += 1
+    end
+
+
+def transport
+  @transport
+end
+
+
+# TODO: ["kernel"]["time"] doesn't (shouldn't) matter
+# TODO: simplify state: remove existing kernel.time, move queue.{sequence.time} to kernel.{...}, move queue.queue[] to queue[]
+
+
+
+# client uses default configuration, sequence = 0, time = 0; to set configuration? add clients.vwf? init seq + time t 0; next message should be 1, +dt
+
+
+  private
+
+    def state_from_component
+
+      Hash[
+        "configuration" =>
+          { "environment" => ENV['RACK_ENV'] || "development" },
+        "kernel" =>
+          { "time" => 0 },
+        "nodes" =>
+          [ "http://vwf.example.com/clients.vwf", @storage.get ],
+        "annotations" =>
+          { "1" => "application" },
+        "queue" =>
+          { "sequence" => 0, "time" => 0 }
+      ]
+
+    end
+
+  end
   
   class Transport
 
