@@ -156,7 +156,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
                                 // Set the appropriate model properties based on this change
                                 var xmlDom = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
-                                console.log (xmlDom);
                                 if ( xmlDom ) {
                                     var newXmlText = Blockly.Xml.domToText( xmlDom );
                                     self.kernel.setProperty( self.state.blockly.node.ID, "blockly_xml", 
