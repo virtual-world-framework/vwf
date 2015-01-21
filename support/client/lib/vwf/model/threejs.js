@@ -185,8 +185,23 @@ define( [ "module",
                 this.state.sceneRootID = childID;
 
                 var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
-                this.state.scenes[childID] = sceneNode
+                this.state.scenes[childID] = sceneNode;
                 sceneCreated = true;
+
+                if ( childImplementsIDs && childImplementsIDs.length > 0 ) {
+                    for ( var i = 0; i < childImplementsIDs.length; i++ ) {
+                        switch ( childImplementsIDs[ i ] ) {
+                            case "http-vwf-example-com-threejs-fogExp2-vwf":
+                                sceneNode.threeScene.fog = new THREE.FogExp2( 0x000000 );
+                                break;
+
+                            case "http-vwf-example-com-threejs-fog-vwf":
+                                sceneNode.threeScene.fog = new THREE.Fog( 0x000000 );
+                                break;
+
+                        }
+                    }
+                }
             }
             
             if ( protos && isCameraDefinition.call( this, protos ) ) {
@@ -1453,6 +1468,37 @@ define( [ "module",
                             node.rendererProperties["shadowMapType"] = shadowMapType;
                         }
                     }
+                    if ( propertyName === 'fogexp_color' ) {
+                        if ( threeObject.fog && threeObject.fog instanceof THREE.FogExp2 ) {
+                            var vwfColor = new utility.color( propertyValue );
+                            if ( vwfColor ) {
+                                threeObject.fog.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
+                            }                            
+                        }
+                    }
+                    if ( propertyName === 'fogexp_density' ) {
+                        if ( threeObject.fog && threeObject.fog instanceof THREE.FogExp2 ) {
+                            threeObject.fog.density = parseFloat( propertyValue );    
+                        }
+                    }
+                    if ( propertyName === 'fog_color' ) {
+                        if ( threeObject.fog && threeObject.fog instanceof THREE.Fog ) {
+                            var vwfColor = new utility.color( propertyValue );
+                            if ( vwfColor ) {
+                                threeObject.fog.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
+                            }      
+                        }
+                    }
+                    if ( propertyName === 'fog_near' ) {
+                        if ( threeObject.fog && threeObject.fog instanceof THREE.Fog ) {
+                            threeObject.fog.fog_near = parseFloat( propertyValue );    
+                        }
+                    }
+                    if ( propertyName === 'fog_far' ) {
+                        if ( threeObject.fog && threeObject.fog instanceof THREE.Fog ) {
+                            threeObject.fog.fog_far = parseFloat( propertyValue );    
+                        }
+                    }
                 }   
                 if(threeObject instanceof THREE.PointLight || threeObject instanceof THREE.DirectionalLight 
                     || threeObject instanceof THREE.SpotLight || threeObject instanceof THREE.HemisphereLight )
@@ -2072,7 +2118,7 @@ define( [ "module",
                         break;
                     case "backgroundColor":
                         if ( node.renderer ) {
-                            var color = node.renderer.getClearColor();
+                            color = node.renderer.getClearColor();
                             var alpha = node.renderer.getClearAlpha();
                             if ( alpha !== undefined && alpha != 1 ){
                                 vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255, alpha ] );
@@ -2098,6 +2144,35 @@ define( [ "module",
                     case "shadowMapType":
                         if ( node.renderer ) {
                             value = node.renderer.shadowMapType;
+                        }
+                        break;
+                    case "fogexp_color":
+                        if ( threeObject.fog && threeObject.fog instanceof THREE.FogExp2 ) {
+                            color = threeObject.fog.color;    
+                            vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255 ] );
+                            value = vwfColor.toString();
+                        }
+                        break;
+                    case "fogexp_density":
+                        if ( threeObject.fog && threeObject.fog instanceof THREE.FogExp2 ) {
+                            value = threeObject.fog.density;    
+                        }
+                        break;
+                    case "fog_color":
+                        if ( threeObject.fog && threeObject.fog instanceof THREE.Fog ) {
+                            color = threeObject.fog.color;    
+                            vwfColor = new utility.color( [ color.r*255, color.g*255, color.b*255 ] );
+                            value = vwfColor.toString();  
+                        }
+                        break;
+                    case "fog_near":
+                        if ( threeObject.fog && threeObject.fog instanceof THREE.Fog ) {
+                            value = threeObject.fog.near;    
+                        }
+                        break;
+                    case "fog_far":
+                        if ( threeObject.fog && threeObject.fog instanceof THREE.Fog ) {
+                            value = threeObject.fog.far;    
                         }
                         break;
                 }
@@ -2974,10 +3049,80 @@ define( [ "module",
 
         return shaderMaterial;
     }
+    function createGeometry( node, meshDef, doubleSided ) {
+        var geo = undefined;
+        var i, face, sides;
+        if ( ( node && isCubeDefinition.call( this, node.prototypes ) ) || meshDef.type === "box" ) {
+            sides = meshDef.sides || { px: true, nx: true, py: true, ny: true, pz: true, nz: true };
+            geo = new THREE.BoxGeometry( meshDef.width || 10, meshDef.height || 10, meshDef.depth || 10, 
+                meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1, meshDef.segmentsDepth || 1 );
+        } else if ( ( node && isPlaneDefinition.call( this, node.prototypes ) ) || meshDef.type === "plane" ) {
+            geo = new THREE.PlaneGeometry( meshDef.width || 1, meshDef.height || 1,
+                meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1 );
+        } else if ( ( node && isCircleDefinition.call( this, node.prototypes ) ) || meshDef.type === "circle" ) {
+            geo = new THREE.CircleGeometry( meshDef.radius || 10, 
+                meshDef.segments || 8, meshDef.thetaStart || 0, 
+                meshDef.thetaLength || Math.PI * 2 );
+        } else if ( ( node && isSphereDefinition.call( this, node.prototypes ) ) || meshDef.type === "sphere" ) {
+            geo = new THREE.SphereGeometry( meshDef.radius || 10, meshDef.segmentsWidth || 8,
+                meshDef.segmentsHeight || 6, meshDef.phiStart || 0,
+                meshDef.phiLength || Math.PI * 2, meshDef.thetaStart || 0, 
+                meshDef.thetaLength || Math.PI );
+        } else if ( ( node && isCylinderDefinition.call( this, node.prototypes ) ) || meshDef.type === "cylinder" ) {
+            geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10,
+                 meshDef.height || 10, meshDef.segmentsRadius || 8, 
+                 meshDef.segmentsHeight || 1, meshDef.openEnded );
+        } else if ( ( node && isTextDefinition.call( this, node.prototypes ) ) || meshDef.type === "text" ) {
+            if ( meshDef.text != "" ) {
+                var parms = meshDef.parameters || {};
+                geo = new THREE.TextGeometry( meshDef.text, { "size": parms.size || 100,
+                    "curveSegments": parms.curveSegments || 4, "font": parms.font || "helvetiker",
+                    "weight": parms.weight || "normal", "style": parms.style || "normal",
+                    "amount": parms.amount || 50, "height": parms.height || 50, 
+                    "bevelThickness": parms.bevelThickness || 10, "bevelSize": parms.bevelSize || 8,
+                    "bevelEnabled": Boolean( parms.bevelEnabled ),
+                } );
+                // geo = new THREE.TextGeometry( meshDef.text, {
+                //     size: 80,
+                //     height: 20,
+                //     curveSegments: 2,
+                //     font: "helvetiker"
+                // } );
+            }
+        } else {
+            geo = new THREE.Geometry();
+
+            for ( i = 0; geo.vertices && meshDef.positions && ((i*3) < meshDef.positions.length); i++ ) {
+                //console.info( "     adding vertices: [" + (meshDef.positions[i*3]) + ", " + (meshDef.positions[i*3+1]) + ", "+ (meshDef.positions[i*3+2]) + " ]" )
+                geo.vertices.push( new THREE.Vector3( meshDef.positions[i*3], meshDef.positions[i*3+1],meshDef.positions[i*3+2] ) );   
+            }
+            for ( i = 0; geo.faces && meshDef.faces && ( (i*3) < meshDef.faces.length ); i++ ) {
+                //console.info( "     adding face: [" + (meshDef.faces[i*3]) + ", " + (meshDef.faces[i*3+1]) + ", "+ (meshDef.faces[i*3+2]) + " ]" );
+                face = new THREE.Face3( meshDef.faces[i*3], meshDef.faces[i*3+1],meshDef.faces[i*3+2] );
+                geo.faces.push( face );
+                if ( doubleSided ) {
+                    //console.info( "     adding face: [" + (meshDef.faces[i*3+2]) + ", " + (meshDef.faces[i*3+1]) + ", "+ (meshDef.faces[i*3]) + " ]" );
+                    face = new THREE.Face3( meshDef.faces[i*3+2], meshDef.faces[i*3+1],meshDef.faces[i*3] );
+                    geo.faces.push( face );
+                }
+            } 
+            // TODO: needed doubleSided support for normals
+            for ( i = 0 ; geo.faces && meshDef.normals && i < geo.faces.length; i++ ) {
+                face = geo.faces[ i ];
+                //console.info( "     adding face normal: [" + (meshDef.normals[i*3]) + ", " + (meshDef.normals[i*3+1]) + ", "+ (meshDef.normals[i*3+2]) + " ]" );
+                face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
+            }
+            for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
+                //console.info( "     adding face vertex uv: [" + (meshDef.uv1[i*2]) + ", " + (meshDef.uv1[i*2+1]) + " ]" );
+                geo.faceVertexUvs.push( new THREE.Vector2( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
+            }   
+        }
+        return geo;
+    }
+
     function createMesh( node, meshDef, doubleSided ) {
         if ( node.threeObject && node.threeObject instanceof THREE.Object3D ) {
-            var i, face, geo, sides;
-            var materials = undefined;
+            
             var vwfColor, colorValue = 0xFFFFFF;    
             if ( meshDef.color !== undefined ) {
                 vwfColor = new utility.color( meshDef.color );
@@ -2986,76 +3131,26 @@ define( [ "module",
                 }
             }
             var mat = new THREE.MeshLambertMaterial( { "color": colorValue, "ambient": colorValue, side: THREE.DoubleSide } );
-           
-            if ( isCubeDefinition.call( this, node.prototypes ) ) {
-                // materials = ??
-                sides = meshDef.sides || { px: true, nx: true, py: true, ny: true, pz: true, nz: true };
-                geo = new THREE.BoxGeometry( meshDef.width || 10, meshDef.height || 10, meshDef.depth || 10, 
-                    meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1, meshDef.segmentsDepth || 1,
-                    materials, sides );
-            } else if ( isPlaneDefinition.call( this, node.prototypes ) ) {
-                geo = new THREE.PlaneGeometry( meshDef.width || 1, meshDef.height || 1,
-                    meshDef.segmentsWidth || 1, meshDef.segmentsHeight || 1 );
-            } else if ( isCircleDefinition.call( this, node.prototypes ) ) {
-                geo = new THREE.CircleGeometry( meshDef.radius || 10, 
-                    meshDef.segments || 8, meshDef.thetaStart || 0, 
-                    meshDef.thetaLength || Math.PI * 2 );
-            } else if ( isSphereDefinition.call( this, node.prototypes ) ) {
-                geo = new THREE.SphereGeometry( meshDef.radius || 10, meshDef.segmentsWidth || 8,
-                    meshDef.segmentsHeight || 6, meshDef.phiStart || 0,
-                    meshDef.phiLength || Math.PI * 2, meshDef.thetaStart || 0, 
-                    meshDef.thetaLength || Math.PI );
-            } else if ( isCylinderDefinition.call( this, node.prototypes ) ) {
-                geo = new THREE.CylinderGeometry( meshDef.radiusTop || 10, meshDef.radiusBottom || 10,
-                     meshDef.height || 10, meshDef.segmentsRadius || 8, 
-                     meshDef.segmentsHeight || 1, meshDef.openEnded );
-            } else if ( isTextDefinition.call( this, node.prototypes ) ) {
-                if ( meshDef.text != "" ) {
-                    var parms = meshDef.parameters || {};
-                    geo = new THREE.TextGeometry( meshDef.text, { "size": parms.size || 100,
-                        "curveSegments": parms.curveSegments || 4, "font": parms.font || "helvetiker",
-                        "weight": parms.weight || "normal", "style": parms.style || "normal",
-                        "amount": parms.amount || 50, "height": parms.height || 50, 
-                        "bevelThickness": parms.bevelThickness || 10, "bevelSize": parms.bevelSize || 8,
-                        "bevelEnabled": Boolean( parms.bevelEnabled ),
-                    } );
-                    // geo = new THREE.TextGeometry( meshDef.text, {
-                    //     size: 80,
-                    //     height: 20,
-                    //     curveSegments: 2,
-                    //     font: "helvetiker"
-                    // } );
-                }
-            } else {
-                geo = new THREE.Geometry();
 
-                for ( i = 0; geo.vertices && meshDef.positions && ((i*3) < meshDef.positions.length); i++ ) {
-                    //console.info( "     adding vertices: [" + (meshDef.positions[i*3]) + ", " + (meshDef.positions[i*3+1]) + ", "+ (meshDef.positions[i*3+2]) + " ]" )
-                    geo.vertices.push( new THREE.Vector3( meshDef.positions[i*3], meshDef.positions[i*3+1],meshDef.positions[i*3+2] ) );   
-                }
-                for ( i = 0; geo.faces && meshDef.faces && ( (i*3) < meshDef.faces.length ); i++ ) {
-                    //console.info( "     adding face: [" + (meshDef.faces[i*3]) + ", " + (meshDef.faces[i*3+1]) + ", "+ (meshDef.faces[i*3+2]) + " ]" );
-                    face = new THREE.Face3( meshDef.faces[i*3], meshDef.faces[i*3+1],meshDef.faces[i*3+2] );
-                    geo.faces.push( face );
-                    if ( doubleSided ) {
-                        //console.info( "     adding face: [" + (meshDef.faces[i*3+2]) + ", " + (meshDef.faces[i*3+1]) + ", "+ (meshDef.faces[i*3]) + " ]" );
-                        face = new THREE.Face3( meshDef.faces[i*3+2], meshDef.faces[i*3+1],meshDef.faces[i*3] );
-                        geo.faces.push( face );
+            var geo = createGeometry( node, meshDef, doubleSided );
+            if ( meshDef.children ) {
+                var childGeo = undefined;
+                var matrix = new THREE.Matrix4();
+                var trans = [];
+                for ( var child in meshDef.children ) {
+                    childGeo = createGeometry( undefined, meshDef.children[ child ], doubleSided );
+                    if ( childGeo ) {
+                        trans[ 0 ] = meshDef.children[ child ].properties.translation[ 0 ] || 0;
+                        trans[ 1 ] = meshDef.children[ child ].properties.translation[ 1 ] || 0;
+                        trans[ 2 ] = meshDef.children[ child ].properties.translation[ 2 ] || 0;
+                        geo.merge( childGeo, matrix.makeTranslation( trans[ 0 ], trans[ 1 ], trans[ 2 ] ) );                        
                     }
-                } 
-                // TODO: needed doubleSided support for normals
-                for ( i = 0 ; geo.faces && meshDef.normals && i < geo.faces.length; i++ ) {
-                    face = geo.faces[ i ];
-                    //console.info( "     adding face normal: [" + (meshDef.normals[i*3]) + ", " + (meshDef.normals[i*3+1]) + ", "+ (meshDef.normals[i*3+2]) + " ]" );
-                    face.vertexNormals.push( new THREE.Vector3( meshDef.normals[i*3], meshDef.normals[i*3+1],meshDef.normals[i*3+2] ) );   
                 }
-                for ( i = 0; geo.faceVertexUvs && meshDef.uv1 && i < meshDef.uv1.length; i++ ) {
-                    //console.info( "     adding face vertex uv: [" + (meshDef.uv1[i*2]) + ", " + (meshDef.uv1[i*2+1]) + " ]" );
-                    geo.faceVertexUvs.push( new THREE.Vector2( meshDef.uv1[i*2], meshDef.uv1[i*2+1] ) );   
-                }   
-            }
+                geo.computeBoundingBoxSphere && geo.computeBoundingBoxSphere();
+            }           
+
             if ( geo !== undefined ) {
-                geo.computeTangents && geo.computeTangents();
+                //geo.computeTangents && geo.computeTangents();
 
                 var mesh = new THREE.Mesh( geo, mat );
 
@@ -5128,11 +5223,13 @@ define( [ "module",
 
         if ( matDef.texture !== undefined ) {
             text = loadTexture( undefined, matDef.texture ); 
-            for ( var prop in matDef.texture ) {
-                if ( prop !== 'url' && prop !== 'mapping' ) {
-                    setTextureProperty( text, prop, matDef.texture[ prop ] );
-                }
-            } 
+            if ( !matDef.texture instanceof String ) {
+                for ( var prop in matDef.texture ) {
+                    if ( prop !== 'url' && prop !== 'mapping' ) {
+                        setTextureProperty( text, prop, matDef.texture[ prop ] );
+                    }
+                } 
+            }
         }
 
         if ( matDef.type !== undefined ) {
