@@ -385,12 +385,8 @@ public
 
     def actions
 
-if @storage.respond_to?( :actions )
-  $stderr.puts "actions #{@storage.dbid} #{@storage.actions.inspect}"
-end
-
       @storage.respond_to?( :actions ) ?
-        @storage.actions.map { |action| action.get } : []
+        @storage.actions.map { |id, action| action.get } : []
 
     end
 

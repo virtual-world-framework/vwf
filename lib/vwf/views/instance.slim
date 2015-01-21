@@ -1,0 +1,13 @@
+h1 Instance
+
+pre: code == @instance.get.to_yaml
+
+h2 Actions
+
+- @instance.actions.each do |id, action|
+    p: a href=( to action_url @instance.id, action.id, "html" ) = action.id
+
+h2 Revisions
+
+- @instance.revisions.each do |id, revision|
+    p: a href=( to revision_url @instance.id, revision.id, "html" ) = revision.id

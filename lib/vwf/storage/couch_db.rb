@@ -108,7 +108,7 @@ class VWF
 # TODO: put name in documents?
 id = row[ "id" ]
 id[ /^.*\// ] = ""
-            yield type.new( self, id )   # undefined local variable or method `id' for #<VWF::Storage::CouchDB::Actions:0x007ff4d996bab0>:
+            yield [ id, type.new( self, id ) ]
           end
         end
 
