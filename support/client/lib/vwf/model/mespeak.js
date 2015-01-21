@@ -16,7 +16,7 @@
 /// @module vwf/model/mespeak
 /// @requires vwf/model
 
-define( [ "module", "vwf/model", "vwf/model/mespeak/mespeak", "vwf/model/sound" ], function( module, model, meSpeak, sound ) {
+define( [ "module", "vwf/model", "vwf/model/mespeak/mespeak" ], function( module, model, meSpeak ) {
 
     return model.load( module, {
 
@@ -29,7 +29,6 @@ define( [ "module", "vwf/model", "vwf/model/mespeak/mespeak", "vwf/model/sound" 
             //this.arguments = Array.prototype.slice.call( arguments );
             meSpeak.loadConfig("mespeak/mespeak_config.json");
         	meSpeak.loadVoice("mespeak/en.json");
-            var foo = sound.masterVolume;
         },
 
         //== Model API ============================================================================
