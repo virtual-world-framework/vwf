@@ -24,7 +24,7 @@ children:
     properties:
       meshDefinition: { "width": 1000, "height": 1000, "widthSegments": 100, "heightSegments": 100 }
       properties:
-        translation: [ 0, 0, 0 ]
+        translation: [ 0, 0, -0.5 ]
     children:
       material:
         extends: http://vwf.example.com/material.vwf
@@ -38,27 +38,6 @@ children:
               repeat: [ 5, 5 ]
               wrapT: repeat
               wrapS: repeat
-  planeTest:
-    extends: http://vwf.example.com/threejs/plane.vwf
-    implements:
-    - http://vwf.example.com/spin-on-click.vwf 
-    - http://vwf.example.com/sway-on-click.vwf 
-    properties:
-      meshDefinition: { "width": 1000, "height": 1000, "color": "lightgoldenrodyellow" }
-      translation: [ 200, 0, 0 ]
-      rotation: [ 1, 0, 0, -90 ]
-      sway-swaying: false
-      spin-spinning: false
-      spin-axis: [ 0, 0, 1 ]
-    children:
-      material:
-        extends: http://vwf.example.com/material.vwf
-    scripts:
-    - |
-      this.initialize = function() {
-        this['sway-swaying'] = true;
-        this['spin-spinning'] = true;
-      }
   hemi1:
     extends: http://vwf.example.com/light.vwf
     properties:
@@ -75,8 +54,8 @@ scripts:
       this.future(1.0).initializeScene();
     }
     this.initializeScene = function() {
-        //this.camera.position = [ 0, 10, 0 ];
-        this.camera.translation = [ 0, -500, 100 ];
+        this.camera.translation = [ 0, 0, 10 ];
+        //this.camera.translation = [ 0, -500, 100 ];
         this.camera.near = 1;  
         this.camera.far = 100000;
 
@@ -84,7 +63,7 @@ scripts:
           "extends": 'http://vwf.example.com/threejs/cube.vwf',
           "type": 'mesh/definition',
           "properties": {
-            "meshDefinition": { "width": 5, "height": 5, "depth": 5, "widthSegments": 5, "heightSegments": 5, "depthSegments": 5 }, 
+            "meshDefinition": { "width": 5, "height": 5, "depth": 5, "widthSegments": 1, "heightSegments": 1, "depthSegments": 1 }, 
             "translation": [ 0, 0, 0 ]
           },
           "children": {
@@ -97,14 +76,24 @@ scripts:
           }
         };
 
-        //var boxCount = 1;
-        //for( var i = 0; i < 10; i++ ) {
-        //    for( var j = 0; j < 10; j++ ) {
+        var i, j, k;
+        i = j = k = 0;
+        var boxCount = 1; 
+
+        boxDef.properties.translation = [ 0, 30, 10 ];
+        this.children.create( "box"+boxCount, boxDef );         
+
+
+        //for( i = 0; i < 10; i++ ) {
+        //    for( j = 0; j < 10; j++ ) {
         //        for( var k = 0; k < 10; k++ ) {
-        //            boxDef.properties.translation = [ 7+20*(5-i), 10+20*j, 7+20*(5-k) ];
+        //            boxDef.properties.translation = [ 7+20*(5-i), 7+20*(5-j), 10+20*k ];
         //            this.children.create( "box"+boxCount, boxDef ); 
         //            boxCount++;
         //        }
         //    }
         //}
+
+        // [0.8431670665740967,-0.5376511812210083,8.762983227939003e-9,0,0.5376242399215698,0.8431246876716614,-0.010019084438681602,0,0.00538675207644701,0.008447757922112942,0.9999498128890991,0,-479.1357116699219,-661.0462036132812,100.25996398925781,1]
+
     }    
