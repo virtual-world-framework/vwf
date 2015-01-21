@@ -1,10 +1,13 @@
 --- 
 extends: http://vwf.example.com/node.vwf
 methods:
+  setVoiceSet:
   loadSound:
+  unloadSound:
   clearAllSounds:
   isReady:
   playSound:
+  playSoundWrapper:
   playSequence:
   isSoundPlaying:
   isInstancePlaying:
