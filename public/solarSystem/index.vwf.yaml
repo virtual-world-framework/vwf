@@ -161,19 +161,6 @@ children:
                       enableSpecular: { type: 'i', pValue: true }
                       enableDiffuse: { type: 'i', pValue: true }
                     lights: true            
-
-                # working
-                # type: normalmap
-                # children:
-                #   shaderUniforms:
-                #     extends: http://vwf.example.com/threejs/uniforms.vwf
-                #     properties:
-                #       tNormal: { type: 't', pValue: 'images/earth_normal_2048.jpg' }
-                #       tDiffuse: { type: 't', pValue: 'images/earth_surface_2048.jpg' }
-                #       tSpecular: { type: 't', pValue: 'images/earth_specular_2048.jpg' }
-                #       enableSpecular: { type: 'i', pValue: true }
-                #       enableDiffuse: { type: 'i', pValue: true }  
-                # working
             methods:
               spin: |
                 this.rotateBy( [ 0, 1, 0, 1, 0 ] );          
