@@ -1359,9 +1359,6 @@ define( [ "module",
                     if( propertyName == 'ambientColor' )
                     {
                         var lightsFound = 0;
-                        if ( propertyValue instanceof String ) {
-                            propertyValue = propertyValue.replace( /\s/g, '' );
-                        }
                         var vwfColor = new utility.color( propertyValue );
                         
                         if ( vwfColor ) {
@@ -1392,9 +1389,6 @@ define( [ "module",
                     if ( propertyName == 'backgroundColor' )
                     {
                         if ( node && node.renderer ) {
-                            if ( propertyValue instanceof String ) {
-                                propertyValue = propertyValue.replace( /\s/g, '' );
-                            }
                             var vwfColor = new utility.color( propertyValue );
                             if ( vwfColor ) {
                                 node.renderer.setClearColor( vwfColor.getHex(), vwfColor.alpha() );
@@ -1627,9 +1621,6 @@ define( [ "module",
                         threeObject.distance = value;
                     }
                     else if ( propertyName == 'color' ) {
-                        if ( propertyValue instanceof String ) {
-                            propertyValue = propertyValue.replace( /\s/g, '' );
-                        }
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             threeObject.color.setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
@@ -1637,9 +1628,6 @@ define( [ "module",
                         value = vwfColor.toString();
                     }
                     else if ( propertyName == 'groundColor' ) {
-                        if ( propertyValue instanceof String ) {
-                            propertyValue = propertyValue.replace( /\s/g, '' );
-                        }
                         var vwfColor = new utility.color( propertyValue );
                         if ( vwfColor ) {
                             threeObject.groundColor = new THREE.Color().setRGB( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255 );
