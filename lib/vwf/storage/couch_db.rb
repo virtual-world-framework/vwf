@@ -1,3 +1,5 @@
+require "vwf/storage"
+
 class VWF
 
 
