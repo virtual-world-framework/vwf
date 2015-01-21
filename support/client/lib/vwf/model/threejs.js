@@ -760,6 +760,10 @@ define( [ "module",
             //this driver has no representation of this node, so there is nothing to do.
             if(!node) return;
 
+            var parentNode = this.state.nodes[ node.parentID ];
+            if ( parentNode === undefined ) {
+                parentNode = this.state.scenes[ node.parentID ];    
+            }
             var threeObject = node.threeObject;
             if ( !threeObject )
                 threeObject = node.threeScene;
@@ -1552,7 +1556,22 @@ define( [ "module",
                     //{
                     //    threeObject.color.setRGB(propertyValue[0]/255,propertyValue[1]/255,propertyValue[2]/255);
                     //}
-                    else if ( propertyName == 'position' ) {
+                    else if ( propertyName == 'enable' ) {
+                        if ( parentNode !== undefined ) {
+                            var threeParent = ( parentNode.threeObject !== undefined ) ? parentNode.threeObject : parentNode.threeScene;
+                            if ( threeParent !== undefined ) {
+                                if ( Boolean( propertyValue ) ) {
+                                    if ( threeObject.parent === undefined ) {
+                                        threeParent.add( threeObject );    
+                                    }    
+                                } else {
+                                    if ( threeObject.parent !== undefined ) {
+                                        threeParent.remove( threeObject );    
+                                    } 
+                                } 
+                            }                           
+                        }
+                    } else if ( propertyName == 'position' ) {
                         if ( threeObject.position !== null && propertyValue.length ) {
                             threeObject.position.set( propertyValue[0], propertyValue[1], propertyValue[2] );  
                         }
@@ -2095,6 +2114,9 @@ define( [ "module",
                         } else {
                             value = 'point';
                         }
+                        break;
+                    case "enable":
+                        value = ( threeObject.parent !== undefined );
                         break;
                     case "position":
                         if ( threeObject.position !== null ) {
@@ -5106,7 +5128,6 @@ define( [ "module",
 
         if ( matDef.texture !== undefined ) {
             text = loadTexture( undefined, matDef.texture ); 
-            console.info( "loadTexture returned: " + text ); 
             for ( var prop in matDef.texture ) {
                 if ( prop !== 'url' && prop !== 'mapping' ) {
                     setTextureProperty( text, prop, matDef.texture[ prop ] );
@@ -5331,7 +5352,7 @@ define( [ "module",
             return undefined;
         }
 
-        console.log( [ "setTextureProperty: ", propertyName, propertyValue ] );
+        //console.log( [ "setTextureProperty: ", propertyName, propertyValue ] );
 
         switch ( propertyName ) {
             
