@@ -20,7 +20,7 @@ properties:
   rotationSpeed: 2
   translationSpeed: 10
   fogexp_color: 0x000000
-  fogexp_destiny: 0.0025
+  fogexp_density: 0.0025
 children:
   floor:
     extends: http://vwf.example.com/threejs/plane.vwf
