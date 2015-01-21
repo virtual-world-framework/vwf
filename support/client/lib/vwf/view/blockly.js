@@ -500,7 +500,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             }
         }
         if ( xmlDom ) {
-            console.log (xmlDom);
             clearBeforeSet && Blockly.mainWorkspace.clear();
             domCopyToWorkspace( Blockly.mainWorkspace, xmlDom );
         }
