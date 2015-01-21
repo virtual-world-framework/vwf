@@ -16,7 +16,6 @@ info:
   title: "Stereo Application"
 model:
   vwf/model/threejs:
-  vwf/model/buzz:
 view:
   vwf/view/editor:
   vwf/view/threejs: { "application-root": "#vwf-root", "stereo": true }
