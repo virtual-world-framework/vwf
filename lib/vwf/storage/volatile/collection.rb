@@ -1,6 +1,6 @@
 require_relative "item"
 
-module VWF::Storage::CouchDB
+module VWF::Storage::Volatile
 
   module Collection
 

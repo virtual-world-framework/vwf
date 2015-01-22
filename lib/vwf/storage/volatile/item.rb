@@ -1,4 +1,4 @@
-module VWF::Storage::CouchDB
+module VWF::Storage::Volatile
 
   module Item
 
