@@ -496,31 +496,7 @@ define( [ "module",
             
             }
 
-            if ( node && ( node.threeObject instanceof THREE.Object3D ) ) {
-                // Add a local model-side transform that can stay pure even if the view changes the
-                // transform on the threeObject - objects that don't yet have a threeObject because
-                // a file needs to load create this transform in assetLoaded
-                node.transform = new THREE.Matrix4();
-                node.transform.elements = matCpy( node.threeObject.matrix.elements );
-
-                // If this threeObject is a camera, it has a 90-degree rotation on it to account for the 
-                // different coordinate systems of VWF and three.js.  We need to undo that rotation before 
-                // setting the VWF property.
-                if ( node.threeObject instanceof THREE.Camera ) {
-                                        
-                    var transformArray = node.transform.elements;
-
-                    // Get column y and z out of the matrix
-                    var columny = goog.vec.Vec4.create();
-                    goog.vec.Mat4.getColumn( transformArray, 1, columny );
-                    var columnz = goog.vec.Vec4.create();
-                    goog.vec.Mat4.getColumn( transformArray, 2, columnz );
-
-                    // Swap the two columns, negating columny
-                    goog.vec.Mat4.setColumn( transformArray, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-                    goog.vec.Mat4.setColumn( transformArray, 2, columny );
-                }
-            }
+            updateStoredTransform( node );
 
             // If we do not have a load a model for this node, then we are almost done, so we can update all
             // the driver properties w/ the stop-gap function below.
@@ -991,6 +967,18 @@ define( [ "module",
                                 }
                             }
                         }
+
+                        // the transform is being stored locally which is probably the 
+                        // main source of the problem( animated transforms are incorrect while 
+                        // being animated ), I'm not sure why this has been done
+                        
+                        //updateStoredTransform( node );
+
+                        // calling updateStoredTransform here seemed to be
+                        // too big of a performance hit, so setting a flag
+                        // to be checked in the getter before getting the transform 
+                        node.storedTransformDirty = true;
+
                     }
 
                     else if ( propertyName == "animationDuration" ) {
@@ -1734,6 +1722,9 @@ define( [ "module",
             {
                 if(propertyName == 'transform' && node.transform)
                 {
+                    if ( node.storedTransformDirty ) {
+                        updateStoredTransform( node );
+                    }
                     value = matCpy( node.transform.elements );
                     return value;
                 }
@@ -3397,33 +3388,7 @@ define( [ "module",
                 }
             } 
 
-            if ( node.threeObject )
-            {
-
-                // Add a local model-side transform that can stay pure even if the view changes the
-                // transform on the threeObject - this already happened in creatingNode for those nodes that
-                // didn't need to load a model
-                node.transform = new THREE.Matrix4();
-                node.transform.elements = matCpy( node.threeObject.matrix.elements );
-
-                // If this threeObject is a camera, it has a 90-degree rotation on it to account for the 
-                // different coordinate systems of VWF and three.js.  We need to undo that rotation before 
-                // setting the VWF property.
-                if ( node.threeObject instanceof THREE.Camera ) {
-                    
-                    var transformArray = node.transform.elements;
-
-                    // Get column y and z out of the matrix
-                    var columny = goog.vec.Vec4.create();
-                    goog.vec.Mat4.getColumn( transformArray, 1, columny );
-                    var columnz = goog.vec.Vec4.create();
-                    goog.vec.Mat4.getColumn( transformArray, 2, columnz );
-
-                    // Swap the two columns, negating columny
-                    goog.vec.Mat4.setColumn( transformArray, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-                    goog.vec.Mat4.setColumn( transformArray, 2, columny );
-                }
-            }
+            updateStoredTransform( node );
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
             // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
@@ -4632,6 +4597,38 @@ define( [ "module",
             node.transform = worldTransform;
         }
     }
+
+    function updateStoredTransform( node ) {
+        
+        if ( node && node.threeObject && ( node.threeObject instanceof THREE.Object3D ) ) {
+            // Add a local model-side transform that can stay pure even if the view changes the
+            // transform on the threeObject - this already happened in creatingNode for those nodes that
+            // didn't need to load a model
+            node.transform = new THREE.Matrix4();
+            node.transform.elements = matCpy( node.threeObject.matrix.elements );
+
+            // If this threeObject is a camera, it has a 90-degree rotation on it to account for the 
+            // different coordinate systems of VWF and three.js.  We need to undo that rotation before 
+            // setting the VWF property.
+            if ( node.threeObject instanceof THREE.Camera ) {
+                
+                var transformArray = node.transform.elements;
+
+                // Get column y and z out of the matrix
+                var columny = goog.vec.Vec4.create();
+                goog.vec.Mat4.getColumn( transformArray, 1, columny );
+                var columnz = goog.vec.Vec4.create();
+                goog.vec.Mat4.getColumn( transformArray, 2, columnz );
+
+                // Swap the two columns, negating columny
+                goog.vec.Mat4.setColumn( transformArray, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+                goog.vec.Mat4.setColumn( transformArray, 2, columny );
+            } 
+
+            node.storedTransformDirty = false;             
+        }
+      
+    }    
 
    // -- getBoundingBox ------------------------------------------------------------------------------
 
