@@ -18,4 +18,9 @@ model:
   vwf/model/threejs:
 view:
   vwf/view/editor:
-  vwf/view/threejs: { "application-root": "#vwf-root", "stereo": true }
+  vwf/view/threejs: 
+    application-root: "#vwf-root"
+    stereo: true
+    IPD: 0.2
+    offset: -0.2
+    delta: 0.01
