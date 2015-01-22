@@ -3,7 +3,7 @@ module VWF::Storage::CouchDB
   module Item
 
     def get
-      load
+      load unless document.rev
       document[ "value" ]
     end
 
