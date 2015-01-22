@@ -295,15 +295,21 @@
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTF-parser": {
                         deps: [ "vwf/model/threejs/three" ],
-                      
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils": {
                         deps: [ "vwf/model/threejs/three" ],
-                       
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTFAnimation": {
                         deps: [ "vwf/model/threejs/three" ],
-                       
+                    },
+                    "vwf/model/threejs/js/stereo/DeviceOrientationControls": {
+                        deps: [ "vwf/model/threejs/three" ],
+                    },
+                    "vwf/model/threejs/js/stereo/OrbitControls": {
+                        deps: [ "vwf/model/threejs/three" ],
+                    },
+                    "vwf/model/threejs/js/stereo/StereoEffect": {
+                        deps: [ "vwf/model/threejs/three" ],
                     },
                     "vwf/model/blockly/blockly_compressed": {
                         exports: "Blockly"
@@ -327,35 +333,72 @@
                 { library: "vwf/configuration", active: true },
                 { library: "vwf/kernel/model", active: true },
                 { library: "vwf/model/javascript", active: true },
-                { library: "vwf/model/jiglib", linkedLibraries: ["vwf/model/jiglib/jiglib"], active: false },
-                { library: "vwf/model/glge", linkedLibraries: ["vwf/model/glge/glge-compiled"], disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
+                { library: "vwf/model/jiglib", 
+                    linkedLibraries: ["vwf/model/jiglib/jiglib"], 
+                    active: false 
+                },
+                { library: "vwf/model/glge", 
+                    linkedLibraries: ["vwf/model/glge/glge-compiled"], 
+                    disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], 
+                    active: false 
+                },
                 { library: "vwf/model/threejs", linkedLibraries: [
                     "vwf/model/threejs/three",
                     "vwf/model/threejs/js/loaders/ColladaLoader",
                     "vwf/model/threejs/js/loaders/gltf/glTF-parser",
                     "vwf/model/threejs/js/loaders/gltf/glTFLoader",
                     "vwf/model/threejs/js/loaders/gltf/glTFAnimation",
-                    "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"
+                    "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils",
+                    "vwf/model/threejs/js/stereo/DeviceOrientationControls",
+                    "vwf/model/threejs/js/stereo/OrbitControls",
+                    "vwf/model/threejs/js/stereo/StereoEffect"
                 ], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
-                { library: "vwf/model/cesium", linkedLibraries: ["vwf/model/cesium/Cesium"], active: false },
+                { library: "vwf/model/cesium", 
+                    linkedLibraries: ["vwf/model/cesium/Cesium"], 
+                    active: false 
+                },
                 { library: "vwf/model/scenejs", active: false },
-                { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
+                { library: "vwf/model/blockly", 
+                    linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  
+                    active: false 
+                },
                 { library: "vwf/model/graphtool", active: false },
                 { library: "vwf/model/sound", active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
-                { library: "vwf/model/kineticjs", linkedLibraries: [ "vwf/model/kinetic/kinetic.min" ],  active: false },
-                { library: "vwf/model/mil-sym", linkedLibraries: [ "vwf/model/mil-sym/sm-bc.min" ],  active: false },
+                { library: "vwf/model/kineticjs", 
+                    linkedLibraries: [ "vwf/model/kinetic/kinetic.min" ], 
+                    active: false 
+                },
+                { library: "vwf/model/mil-sym", 
+                    linkedLibraries: [ "vwf/model/mil-sym/sm-bc.min" ], 
+                    active: false 
+                },
                 { library: "vwf/model/heightmap", active: false },
-                { library: "vwf/model/buzz", linkedLibraries: ["vwf/model/buzz/buzz.min"], active: false },
-                { library: "vwf/model/jPlayer", linkedLibraries: ["vwf/model/jPlayer.2.7.1/jquery.jplayer.min"], active: false },
+                { library: "vwf/model/buzz", 
+                    linkedLibraries: ["vwf/model/buzz/buzz.min"], 
+                    active: false 
+                },
+                { library: "vwf/model/jPlayer", 
+                    linkedLibraries: ["vwf/model/jPlayer.2.7.1/jquery.jplayer.min"], 
+                    active: false 
+                },
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
             	{ library: "vwf/view/editor", active: false },
-                { library: "vwf/view/glge", disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], active: false },
+                { library: "vwf/view/glge", 
+                    disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], 
+                    active: false 
+                },
                 { library: "vwf/view/lesson", active: false},
-                { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
-                { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
+                { library: "vwf/view/threejs", 
+                    disabledBy: ["vwf/model/glge", "vwf/view/glge"], 
+                    active: false 
+                },
+                { library: "vwf/view/webrtc", 
+                    linkedLibraries: ["vwf/view/webrtc/adapter"],  
+                    active: false 
+                },
                 { library: "vwf/view/blockly", active: false },
                 { library: "vwf/view/sound", active: false },
                 { library: "vwf/view/touch", active: false },
@@ -372,6 +415,9 @@
                 { library: "vwf/model/threejs/js/loaders/gltf/glTFLoader", active: false },
                 { library: "vwf/model/threejs/js/loaders/gltf/glTFAnimation", active: false },
                 { library: "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils", active: false },
+                { library: "vwf/model/threejs/js/stereo/DeviceOrientationControls", active: false },
+                { library: "vwf/model/threejs/js/stereo/OrbitControls", active: false },
+                { library: "vwf/model/threejs/js/stereo/StereoEffect", active: false },
                 { library: "vwf/model/jiglib/jiglib", active: false },
                 { library: "vwf/view/webrtc/adapter", active: false },
                 { library: "vwf/view/google-earth", active: false },
@@ -521,6 +567,9 @@
                     requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoader"].active = true;
                     requireArray["vwf/model/threejs/js/loaders/gltf/glTFAnimation"].active = true;
                     requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils"].active = true;
+                    requireArray["vwf/model/threejs/js/stereo/DeviceOrientationControls"].active = true;
+                    requireArray["vwf/model/threejs/js/stereo/OrbitControls"].active = true;
+                    requireArray["vwf/model/threejs/js/stereo/StereoEffect"].active = true;
                     initializers["model"]["vwf/model/threejs"].active = true;
                     initializers["view"]["vwf/view/threejs"].active = true;
                 }

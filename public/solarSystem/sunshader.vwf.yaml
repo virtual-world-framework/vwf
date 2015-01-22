@@ -1,0 +1,65 @@
+---
+extends: http://vwf.example.com/shaderMaterial.vwf
+properties:
+  texture1Src:
+    set: |
+      this.uniforms.texture1.value = this.newTexture( value );
+      this.texture1Src = value;
+      this.updateUniforms();
+  texture2Src:
+    set: |
+      this.uniforms.texture2.value = this.newTexture( value );
+      this.texture2Src = value;
+      this.updateUniforms();
+  deltaTime:
+    set: |
+      if ( this.uniforms !== undefined ) {
+        this.uniforms.deltaTime.value = value;
+        this.deltaTime = value;
+      }
+      //this.updateUniforms();
+  uniforms:
+    texture1:
+      type: "t"
+      value: 0
+    texture2:
+      type: "t"
+      value: 0
+    deltaTime:
+      type: "f"
+      value: 0
+  vertexShader: |
+      varying vec2 texCoord;
+      void main() {
+        texCoord = uv;
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+        gl_Position = projectionMatrix * mvPosition;
+      }
+  fragmentShader: |
+      uniform float deltaTime;
+      uniform sampler2D texture1;
+      uniform sampler2D texture2;
+      varying vec2 texCoord;
+      void main() {
+        vec4 noise = texture2D( texture1, texCoord );
+        vec2 T1 = texCoord + vec2( 1.5, -1.5 ) * deltaTime  * 0.01;
+        vec2 T2 = texCoord + vec2( -0.5, 2.0 ) * deltaTime *  0.01;
+        T1.x -= noise.r * 2.0;
+        T1.y += noise.g * 4.0;
+        T2.x += noise.g * 0.2;
+        T2.y += noise.b * 0.2;
+        float p = texture2D( texture1, T1 * 2.0 ).a + 0.25;
+        vec4 color = texture2D( texture2, T2 );
+        vec4 temp = color * 2.0 * ( vec4( p, p, p, p ) ) + ( color * color );
+        gl_FragColor = temp;
+      }
+methods:
+  updateUniforms: |
+    this.uniforms = this.uniforms;
+  newTexture:
+    parameters:
+      - value
+    body: |
+      var tex = THREE.ImageUtils.loadTexture( value );
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      return tex;

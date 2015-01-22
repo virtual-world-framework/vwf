@@ -22,31 +22,31 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*
- The Abstract Loader has two modes:
- #1: [static] load all the JSON at once [as of now]
- #2: [stream] stream and parse JSON progressively [not yet supported]
+    The Abstract Loader has two modes:
+        #1: [static] load all the JSON at once [as of now]
+        #2: [stream] stream and parse JSON progressively [not yet supported]
 
- Whatever is the mechanism used to parse the JSON (#1 or #2),
- The loader starts by resolving the paths to binaries and referenced json files (by replace the value of the path property with an absolute path if it was relative).
+    Whatever is the mechanism used to parse the JSON (#1 or #2),
+    The loader starts by resolving the paths to binaries and referenced json files (by replace the value of the path property with an absolute path if it was relative).
 
- In case #1: it is guaranteed to call the concrete loader implementation methods in a order that solves the dependencies between the entries.
- only the nodes requires an extra pass to set up the hirerarchy.
- In case #2: the concrete implementation will have to solve the dependencies. no order is guaranteed.
+    In case #1: it is guaranteed to call the concrete loader implementation methods in a order that solves the dependencies between the entries.
+    only the nodes requires an extra pass to set up the hirerarchy.
+    In case #2: the concrete implementation will have to solve the dependencies. no order is guaranteed.
 
- When case #1 is used the followed dependency order is:
+    When case #1 is used the followed dependency order is:
 
- scenes -> nodes -> meshes -> materials -> techniques -> shaders
- -> buffers
- -> cameras
- -> lights
+    scenes -> nodes -> meshes -> materials -> techniques -> shaders
+                    -> buffers
+                    -> cameras
+                    -> lights
 
- The readers starts with the leafs, i.e:
- shaders, techniques, materials, meshes, buffers, cameras, lights, nodes, scenes
+    The readers starts with the leafs, i.e:
+        shaders, techniques, materials, meshes, buffers, cameras, lights, nodes, scenes
 
- For each called handle method called the client should return true if the next handle can be call right after returning,
- or false if a callback on client side will notify the loader that the next handle method can be called.
+    For each called handle method called the client should return true if the next handle can be call right after returning,
+    or false if a callback on client side will notify the loader that the next handle method can be called.
 
- */
+*/
 var global = window;
 (function (root, factory) {
     if (typeof exports === 'object') {
@@ -198,7 +198,7 @@ var global = window;
                 var methodForType = {
                     "buffers" : this.handleBuffer,
                     "bufferViews" : this.handleBufferView,
-                    
+                    "shaders" : this.handleShader,
                     "programs" : this.handleProgram,
                     "techniques" : this.handleTechnique,
                     "materials" : this.handleMaterial,
@@ -272,21 +272,14 @@ var global = window;
                     this.baseURL = (i !== 0) ? jsonPath.substring(0, i + 1) : '';
                     var jsonfile = new XMLHttpRequest();
                     jsonfile.open("GET", jsonPath, true);
-					// this is required to avoid problems with loading large scenes
-					jsonfile.setRequestHeader("If-Modified-Since", "Sat, 01 Jan 1970 00:00:00 GMT");
                     jsonfile.addEventListener( 'load', function ( event ) {
-                        console.log('loaded json for ', jsonPath);
                         self.json = JSON.parse(jsonfile.responseText);
                         if (callback) {
                             callback(self.json);
                         }
                     }, false );
-                    jsonfile.addEventListener( 'error', function ( event ) {
-                        console.log('error loading json for ', jsonPath);
-                        
-                    }, false );
                     jsonfile.send(null);
-                } else {
+               } else {
                     if (callback) {
                         callback(this.json);
                     }
@@ -343,9 +336,9 @@ var global = window;
                     var startCategory = self.getNextCategoryIndex.call(self,0);
                     if (startCategory !== -1) {
                         self._state = { "userInfo" : userInfo,
-                            "options" : options,
-                            "categoryIndex" : startCategory,
-                            "categoryState" : { "index" : "0" } };
+                                        "options" : options,
+                                        "categoryIndex" : startCategory,
+                                        "categoryState" : { "index" : "0" } };
                         self._handleState();
                     }
                 });

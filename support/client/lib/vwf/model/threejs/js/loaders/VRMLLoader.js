@@ -8,19 +8,19 @@ THREE.VRMLLoader.prototype = {
 
 	constructor: THREE.VRMLLoader,
 
-    // for IndexedFaceSet support
-    isRecordingPoints: false,
-    isRecordingFaces: false,
-    points: [],
-    indexes : [],
+	// for IndexedFaceSet support
+	isRecordingPoints: false,
+	isRecordingFaces: false,
+	points: [],
+	indexes : [],
 
-    // for Background support
-    isRecordingAngles: false,
-    isRecordingColors: false,
-    angles: [],
-    colors: [],
+	// for Background support
+	isRecordingAngles: false,
+	isRecordingColors: false,
+	angles: [],
+	colors: [],
 
-    recordingFieldname: null,
+	recordingFieldname: null,
 
 	load: function ( url, callback ) {
 
@@ -32,6 +32,8 @@ THREE.VRMLLoader.prototype = {
 			var object = scope.parse( event.target.responseText );
 
 			scope.dispatchEvent( { type: 'load', content: object } );
+
+			if ( callback ) callback( object );
 
 		}, false );
 
@@ -61,425 +63,421 @@ THREE.VRMLLoader.prototype = {
 		};
 
 		var parseV2 = function ( lines, scene ) {
-            var defines = {};
-            var float_pattern = /(\b|\-|\+)([\d\.e]+)/;
-            var float3_pattern = /([\d\.\+\-e]+),?\s+([\d\.\+\-e]+),?\s+([\d\.\+\-e]+)/;
 
-            /**
-            * Interpolates colors a and b following their relative distance
-            * expressed by t.
-            *
-            * @param float a
-            * @param float b
-            * @param float t
-            * @returns {Color}
-            */
-            var interpolateColors = function(a, b, t) {
-               var deltaR = a.r - b.r;
-               var deltaG = a.g - b.g;
-               var deltaB = a.b - b.b;
+			var defines = {};
+			var float_pattern = /(\b|\-|\+)([\d\.e]+)/;
+			var float3_pattern = /([\d\.\+\-e]+)\s+([\d\.\+\-e]+)\s+([\d\.\+\-e]+)/g;
 
-               var c = new THREE.Color();
+			/**
+			* Interpolates colors a and b following their relative distance
+			* expressed by t.
+			*
+			* @param float a
+			* @param float b
+			* @param float t
+			* @returns {Color}
+			*/
+			var interpolateColors = function(a, b, t) {
+				var deltaR = a.r - b.r;
+				var deltaG = a.g - b.g;
+				var deltaB = a.b - b.b;
 
-               c.r = a.r - t * deltaR;
-               c.g = a.g - t * deltaG;
-               c.b = a.b - t * deltaB;
+				var c = new THREE.Color();
 
-               return c;
-            };
+				c.r = a.r - t * deltaR;
+				c.g = a.g - t * deltaG;
+				c.b = a.b - t * deltaB;
 
-            /**
-             * Vertically paints the faces interpolating between the
-             * specified colors at the specified angels. This is used for the Background
-             * node, but could be applied to other nodes with multiple faces as well.
-             *
-             * When used with the Background node, default is directionIsDown is true if
-             * interpolating the skyColor down from the Zenith. When interpolationg up from
-             * the Nadir i.e. interpolating the groundColor, the directionIsDown is false.
-             *
-             * The first angle is never specified, it is the Zenith (0 rad). Angles are specified
-             * in radians. The geometry is thought a sphere, but could be anything. The color interpolation
-             * is linear along the Y axis in any case.
-             *
-             * You must specify one more color than you have angles at the beginning of the colors array.
-             * This is the color of the Zenith (the top of the shape).
-             *
-             * @param geometry
-             * @param radius
-             * @param angles
-             * @param colors
-             * @param boolean directionIsDown Whether to work bottom up or top down.
-             */
-            var paintFaces = function (geometry, radius, angles, colors, directionIsDown) {
+				return c;
+			};
 
-                var f, n, p, vertexIndex, color;
+			/**
+			 * Vertically paints the faces interpolating between the
+			 * specified colors at the specified angels. This is used for the Background
+			 * node, but could be applied to other nodes with multiple faces as well.
+			 *
+			 * When used with the Background node, default is directionIsDown is true if
+			 * interpolating the skyColor down from the Zenith. When interpolationg up from
+			 * the Nadir i.e. interpolating the groundColor, the directionIsDown is false.
+			 *
+			 * The first angle is never specified, it is the Zenith (0 rad). Angles are specified
+			 * in radians. The geometry is thought a sphere, but could be anything. The color interpolation
+			 * is linear along the Y axis in any case.
+			 *
+			 * You must specify one more color than you have angles at the beginning of the colors array.
+			 * This is the color of the Zenith (the top of the shape).
+			 *
+			 * @param geometry
+			 * @param radius
+			 * @param angles
+			 * @param colors
+			 * @param boolean directionIsDown Whether to work bottom up or top down.
+			 */
+			var paintFaces = function (geometry, radius, angles, colors, directionIsDown) {
 
-                var direction = directionIsDown ? 1 : -1;
+				var f, n, p, vertexIndex, color;
 
-                var faceIndices = [ 'a', 'b', 'c', 'd' ];
+				var direction = directionIsDown ? 1 : -1;
 
-                var coord = [ ], aColor, bColor, t = 1, A = {}, B = {}, applyColor = false, colorIndex;
+				var faceIndices = [ 'a', 'b', 'c', 'd' ];
 
-                for ( var k = 0; k < angles.length; k++ ) {
+				var coord = [ ], aColor, bColor, t = 1, A = {}, B = {}, applyColor = false, colorIndex;
 
-                    var vec = { };
+				for ( var k = 0; k < angles.length; k++ ) {
 
-                    // push the vector at which the color changes
-                    vec.y = direction * ( Math.cos( angles[k] ) * radius);
+					var vec = { };
 
-                    vec.x = direction * ( Math.sin( angles[k] ) * radius);
+					// push the vector at which the color changes
+					vec.y = direction * ( Math.cos( angles[k] ) * radius);
 
-                    coord.push( vec );
+					vec.x = direction * ( Math.sin( angles[k] ) * radius);
 
-                }
+					coord.push( vec );
 
-                // painting the colors on the faces
-                for ( var i = 0; i < geometry.faces.length ; i++ ) {
+				}
 
-                    f  = geometry.faces[ i ];
+				// painting the colors on the faces
+				for ( var i = 0; i < geometry.faces.length ; i++ ) {
 
-                    n = ( f instanceof THREE.Face3 ) ? 3 : 4;
+					f  = geometry.faces[ i ];
 
-                    for ( var j = 0; j < n; j++ ) {
+					n = ( f instanceof THREE.Face3 ) ? 3 : 4;
 
-                        vertexIndex = f[ faceIndices[ j ] ];
+					for ( var j = 0; j < n; j++ ) {
 
-                        p = geometry.vertices[ vertexIndex ];
+						vertexIndex = f[ faceIndices[ j ] ];
 
-                        for ( var index = 0; index < colors.length; index++ ) {
+						p = geometry.vertices[ vertexIndex ];
 
-                            // linear interpolation between aColor and bColor, calculate proportion
-                            // A is previous point (angle)
-                            if ( index === 0 ) {
+						for ( var index = 0; index < colors.length; index++ ) {
 
-                                A.x = 0;
-                                A.y = directionIsDown ? radius : -1 * radius;
+							// linear interpolation between aColor and bColor, calculate proportion
+							// A is previous point (angle)
+							if ( index === 0 ) {
 
-                            } else {
+								A.x = 0;
+								A.y = directionIsDown ? radius : -1 * radius;
 
-                                A.x = coord[ index-1 ].x;
-                                A.y = coord[ index-1 ].y;
+							} else {
 
-                            }
+								A.x = coord[ index-1 ].x;
+								A.y = coord[ index-1 ].y;
 
-                            // B is current point (angle)
-                            B = coord[index];
+							}
 
-                            if ( undefined !== B ) {
-                                // p has to be between the points A and B which we interpolate
-                                applyColor = directionIsDown ? p.y <= A.y && p.y > B.y : p.y >= A.y && p.y < B.y;
+							// B is current point (angle)
+							B = coord[index];
 
-                                if (applyColor) {
+							if ( undefined !== B ) {
+								// p has to be between the points A and B which we interpolate
+								applyColor = directionIsDown ? p.y <= A.y && p.y > B.y : p.y >= A.y && p.y < B.y;
 
-                                    bColor = colors[ index + 1 ];
+								if (applyColor) {
 
-                                    aColor = colors[ index ];
-
-                                    // below is simple linear interpolation
-                                    t = Math.abs( p.y - A.y ) / ( A.y - B.y );
+									bColor = colors[ index + 1 ];
 
-                                    // to make it faster, you can only calculate this if the y coord changes, the color is the same for points with the same y
-                                    color = interpolateColors( aColor, bColor, t );
+									aColor = colors[ index ];
+
+									// below is simple linear interpolation
+									t = Math.abs( p.y - A.y ) / ( A.y - B.y );
 
-                                    f.vertexColors[ j ] = color;
-                                }
+									// to make it faster, you can only calculate this if the y coord changes, the color is the same for points with the same y
+									color = interpolateColors( aColor, bColor, t );
 
-                            } else if ( undefined === f.vertexColors[ j ] ) {
-                                colorIndex = directionIsDown ? colors.length -1 : 0;
-                                f.vertexColors[ j ] = colors[ colorIndex ];
+									f.vertexColors[ j ] = color;
+								}
+
+							} else if ( undefined === f.vertexColors[ j ] ) {
+								colorIndex = directionIsDown ? colors.length -1 : 0;
+								f.vertexColors[ j ] = colors[ colorIndex ];
 
-                            }
-                        }
+							}
+						}
+
+					}
+
+				}
+			};
 
-                    }
+			var parseProperty = function (node, line) {
+
+				var parts = [], part, property = {}, fieldName;
 
-                }
-            };
-
-            var parseProperty = function (node, line) {
+				/**
+				 * Expression for matching relevant information, such as a name or value, but not the separators
+				 * @type {RegExp}
+				 */
+				var regex = /[^\s,\[\]]+/g;
 
-                var parts = [], part, property = {}, fieldName;
+				var point, index, angles, colors;
 
-                /**
-                 * Expression for matching relevant information, such as a name or value, but not the separators
-                 * @type {RegExp}
-                 */
-                var regex = /[^\s,\[\]]+/g;
+				while (null != ( part = regex.exec(line) ) ) {
+					parts.push(part[0]);
+				}
 
-                var point, index, angles, colors;
+				fieldName = parts[0];
 
-                while (null != ( part = regex.exec(line) ) ) {
-                    parts.push(part[0]);
-                }
 
-                fieldName = parts[0];
+				// trigger several recorders
+				switch (fieldName) {
+					case 'skyAngle':
+					case 'groundAngle':
+						this.recordingFieldname = fieldName;
+						this.isRecordingAngles = true;
+						this.angles = [];
+						break;
+					case 'skyColor':
+					case 'groundColor':
+						this.recordingFieldname = fieldName;
+						this.isRecordingColors = true;
+						this.colors = [];
+						break;
+					case 'point':
+						this.recordingFieldname = fieldName;
+						this.isRecordingPoints = true;
+						this.points = [];
+						break;
+					case 'coordIndex':
+						this.recordingFieldname = fieldName;
+						this.isRecordingFaces = true;
+						this.indexes = [];
+						break;
+				}
 
+				if (this.isRecordingFaces) {
 
-                // trigger several recorders
-                switch (fieldName) {
-                    case 'skyAngle':
-                    case 'groundAngle':
-                        this.recordingFieldname = fieldName;
-                        this.isRecordingAngles = true;
-                        this.angles = [];
-                        break;
-                    case 'skyColor':
-                    case 'groundColor':
-                        this.recordingFieldname = fieldName;
-                        this.isRecordingColors = true;
-                        this.colors = [];
-                        break;
-                    case 'point':
-                        this.recordingFieldname = fieldName;
-                        this.isRecordingPoints = true;
-                        this.points = [];
-                        break;
-                    case 'coordIndex':
-                        this.recordingFieldname = fieldName;
-                        this.isRecordingFaces = true;
-                        this.indexes = [];
-                        break;
-                }
+					// the parts hold the indexes as strings
+					if (parts.length > 0) {
+						index = [];
 
-                if (this.isRecordingFaces) {
+						for (var ind = 0;ind < parts.length; ind++) {
 
-                    // the parts hold the indexes as strings
-                    if (parts.length > 0) {
-                        index = [];
+							// the part should either be positive integer or -1
+							if (!/(-?\d+)/.test( parts[ind]) ) {
+								continue;
+							}
 
-                        for (var ind = 0;ind < parts.length; ind++) {
+							// end of current face
+							if (parts[ind] === "-1") {
+								if (index.length > 0) {
+								   this.indexes.push(index);
+								}
 
-                            // the part should either be positive integer or -1
-                            if (!/(-?\d+)/.test( parts[ind]) ) {
-                                continue;
-                            }
+								// start new one
+								index = [];
+							} else {
+								index.push(parseInt( parts[ind]) );
+							}
+						}
 
-                            // end of current face
-                            if (parts[ind] === "-1") {
-                                if (index.length > 0) {
-                                   this.indexes.push(index);
-                                }
+					}
 
-                                // start new one
-                                index = [];
-                            } else {
-                                index.push(parseInt( parts[ind]) );
-                            }
-                        }
+					// end
+					if (/]/.exec(line)) {
+						this.isRecordingFaces = false;
+						node.coordIndex = this.indexes;
+					}
 
-                    }
+				} else if (this.isRecordingPoints) {
 
-                    // end
-                    if (/]/.exec(line)) {
-                        this.isRecordingFaces = false;
-                        node.coordIndex = this.indexes;
-                    }
+					while ( null !== ( parts = float3_pattern.exec(line) ) ) {
+						point = {
+							x: parseFloat(parts[1]),
+							y: parseFloat(parts[2]),
+							z: parseFloat(parts[3])
+						};
+
+						this.points.push(point);
+					}
+
+					// end
+					if ( /]/.exec(line) ) {
+						this.isRecordingPoints = false;
+						node.points = this.points;
+					}
 
-                } else if (this.isRecordingPoints) {
-
-                    parts = float3_pattern.exec(line);
-
-                    // parts may be empty on first and last line
-                    if (null != parts) {
-                        point = {
-                            x: parseFloat(parts[1]),
-                            y: parseFloat(parts[2]),
-                            z: parseFloat(parts[3])
-                        };
-
-                        this.points.push(point);
-                    }
-
-                    // end
-                    if ( /]/.exec(line) ) {
-                        this.isRecordingPoints = false;
-                        node.points = this.points;
-                    }
-
-                } else if ( this.isRecordingAngles ) {
-
-                    // the parts hold the angles as strings
-                    if ( parts.length > 0 ) {
-
-                        for ( var ind = 0;ind < parts.length; ind++ ) {
-
-                            // the part should be a float
-                            if ( ! float_pattern.test( parts[ind] ) ) {
-                                continue;
-                            }
-
-                            this.angles.push( parseFloat( parts[ind] ) );
-                        }
-
-                    }
-
-                    // end
-                    if ( /]/.exec(line) ) {
-                        this.isRecordingAngles = false;
-                        node[this.recordingFieldname] = this.angles;
-                    }
-
-                } else if (this.isRecordingColors) {
-                    // this is the float3 regex with the g modifier added, you could also explode the line by comma first (faster probably)
-                    var float3_repeatable = /([\d\.\+\-e]+),?\s+([\d\.\+\-e]+),?\s+([\d\.\+\-e]+)/g;
-
-                    while( null !== (parts = float3_repeatable.exec(line) ) ) {
-
-                        color = {
-                            r: parseFloat(parts[1]),
-                            g: parseFloat(parts[2]),
-                            b: parseFloat(parts[3])
-                        };
-
-                        this.colors.push(color);
-
-                    }
-
-                    // end
-                    if (/]/.exec(line)) {
-                        this.isRecordingColors = false;
-                        node[this.recordingFieldname] = this.colors;
-                    }
-
-                } else if ( parts[parts.length -1] !== 'NULL' && fieldName !== 'children') {
-
-                    switch (fieldName) {
-
-                        case 'diffuseColor':
-                        case 'emissiveColor':
-                        case 'specularColor':
-                        case 'color':
-
-                            if (parts.length != 4) {
-                                console.warn('Invalid color format detected for ' + fieldName );
-                                break;
-                            }
-
-                            property = {
-                                'r'         : parseFloat(parts[1]),
-                                'g'         : parseFloat(parts[2]),
-                                'b'         : parseFloat(parts[3])
-                            }
-
-                            break;
-
-                        case 'translation':
-                        case 'scale':
-                        case 'size':
-                            if (parts.length != 4) {
-                                console.warn('Invalid vector format detected for ' + fieldName);
-                                break;
-                            }
-
-                            property = {
-                                'x'         : parseFloat(parts[1]),
-                                'y'         : parseFloat(parts[2]),
-                                'z'         : parseFloat(parts[3])
-                            }
-
-                            break;
-
-                        case 'radius':
-                        case 'topRadius':
-                        case 'bottomRadius':
-                        case 'height':
-                        case 'transparency':
-                        case 'shininess':
-                        case 'ambientIntensity':
-                            if (parts.length != 2) {
-                                console.warn('Invalid single float value specification detected for ' + fieldName);
-                                break;
-                            }
-
-                            property = parseFloat(parts[1]);
-
-                            break;
-
-                        case 'rotation':
-                            if (parts.length != 5) {
-                                console.warn('Invalid quaternion format detected for ' + fieldName);
-                                break;
-                            }
-
-                            property = {
-                                'x'         : parseFloat(parts[1]),
-                                'y'         : parseFloat(parts[2]),
-                                'z'         : parseFloat(parts[3]),
-                                'w'         : parseFloat(parts[4])
-                            }
-
-                            break;
-
-                        case 'ccw':
-                        case 'solid':
-                        case 'colorPerVertex':
-                        case 'convex':
-                            if (parts.length != 2) {
-                                console.warn('Invalid format detected for ' + fieldName);
-                                break;
-                            }
-
-                            property = parts[1] === 'TRUE' ? true : false;
-
-                            break;
-                    }
-
-                    node[fieldName] = property;
-                }
-
-                return property;
-            };
+				} else if ( this.isRecordingAngles ) {
+
+					// the parts hold the angles as strings
+					if ( parts.length > 0 ) {
+
+						for ( var ind = 0;ind < parts.length; ind++ ) {
+
+							// the part should be a float
+							if ( ! float_pattern.test( parts[ind] ) ) {
+								continue;
+							}
+
+							this.angles.push( parseFloat( parts[ind] ) );
+						}
+
+					}
+
+					// end
+					if ( /]/.exec(line) ) {
+						this.isRecordingAngles = false;
+						node[this.recordingFieldname] = this.angles;
+					}
+
+				} else if (this.isRecordingColors) {
+
+					while( null !== ( parts = float3_pattern.exec(line) ) ) {
+
+						color = {
+							r: parseFloat(parts[1]),
+							g: parseFloat(parts[2]),
+							b: parseFloat(parts[3])
+						};
+
+						this.colors.push(color);
+
+					}
+
+					// end
+					if (/]/.exec(line)) {
+						this.isRecordingColors = false;
+						node[this.recordingFieldname] = this.colors;
+					}
+
+				} else if ( parts[parts.length -1] !== 'NULL' && fieldName !== 'children') {
+
+					switch (fieldName) {
+
+						case 'diffuseColor':
+						case 'emissiveColor':
+						case 'specularColor':
+						case 'color':
+
+							if (parts.length != 4) {
+								console.warn('Invalid color format detected for ' + fieldName );
+								break;
+							}
+
+							property = {
+								r: parseFloat(parts[1]),
+								g: parseFloat(parts[2]),
+								b: parseFloat(parts[3])
+							}
+
+							break;
+
+						case 'translation':
+						case 'scale':
+						case 'size':
+							if (parts.length != 4) {
+								console.warn('Invalid vector format detected for ' + fieldName);
+								break;
+							}
+
+							property = {
+								x: parseFloat(parts[1]),
+								y: parseFloat(parts[2]),
+								z: parseFloat(parts[3])
+							}
+
+							break;
+
+						case 'radius':
+						case 'topRadius':
+						case 'bottomRadius':
+						case 'height':
+						case 'transparency':
+						case 'shininess':
+						case 'ambientIntensity':
+							if (parts.length != 2) {
+								console.warn('Invalid single float value specification detected for ' + fieldName);
+								break;
+							}
+
+							property = parseFloat(parts[1]);
+
+							break;
+
+						case 'rotation':
+							if (parts.length != 5) {
+								console.warn('Invalid quaternion format detected for ' + fieldName);
+								break;
+							}
+
+							property = {
+								x: parseFloat(parts[1]),
+								y: parseFloat(parts[2]),
+								z: parseFloat(parts[3]),
+								w: parseFloat(parts[4])
+							}
+
+							break;
+
+						case 'ccw':
+						case 'solid':
+						case 'colorPerVertex':
+						case 'convex':
+							if (parts.length != 2) {
+								console.warn('Invalid format detected for ' + fieldName);
+								break;
+							}
+
+							property = parts[1] === 'TRUE' ? true : false;
+
+							break;
+					}
+
+					node[fieldName] = property;
+				}
+
+				return property;
+			};
 
 			var getTree = function ( lines ) {
 
 				var tree = { 'string': 'Scene', children: [] };
 				var current = tree;
-                var matches;
-                var specification;
+				var matches;
+				var specification;
 
 				for ( var i = 0; i < lines.length; i ++ ) {
 
-                    var comment = '';
+					var comment = '';
 
 					var line = lines[ i ];
 
-                    // omit whitespace only lines
-                    if ( null !== ( result = /^\s+?$/g.exec( line ) ) ) {
-                        continue;
-                    }
+					// omit whitespace only lines
+					if ( null !== ( result = /^\s+?$/g.exec( line ) ) ) {
+						continue;
+					}
 
-                    line = line.trim();
+					line = line.trim();
 
-                    // skip empty lines
-                    if (line === '') {
-                        continue;
-                    }
+					// skip empty lines
+					if (line === '') {
+						continue;
+					}
 
 					if ( /#/.exec( line ) ) {
 
-                        var parts = line.split('#');
+						var parts = line.split('#');
 
-                        // discard everything after the #, it is a comment
-                        line = parts[0];
+						// discard everything after the #, it is a comment
+						line = parts[0];
 
-                        // well, let's also keep the comment
-                        comment = parts[1];
+						// well, let's also keep the comment
+						comment = parts[1];
 					}
 
-                    if ( matches = /([^\s]*){1}\s?{/.exec( line ) ) { // first subpattern should match the Node name
+					if ( matches = /([^\s]*){1}\s?{/.exec( line ) ) { // first subpattern should match the Node name
 
 						var block = { 'nodeType' : matches[1], 'string': line, 'parent': current, 'children': [],'comment' : comment};
 						current.children.push( block );
 						current = block;
 
 						if ( /}/.exec( line ) ) {
-                            // example: geometry Box { size 1 1 1 } # all on the same line
-                            specification = /{(.*)}/.exec( line )[ 1 ];
+							// example: geometry Box { size 1 1 1 } # all on the same line
+							specification = /{(.*)}/.exec( line )[ 1 ];
 
-                            // todo: remove once new parsing is complete?
+							// todo: remove once new parsing is complete?
 							block.children.push( specification );
 
-                            parseProperty(current, specification);
+							parseProperty(current, specification);
 
 							current = current.parent;
 
@@ -491,15 +489,15 @@ THREE.VRMLLoader.prototype = {
 
 					} else if ( line !== '' ) {
 
-                        parseProperty(current, line);
-                        // todo: remove once new parsing is complete? we still do not parse geometry and appearance the new way
-                        current.children.push( line );
+						parseProperty(current, line);
+						// todo: remove once new parsing is complete? we still do not parse geometry and appearance the new way
+						current.children.push( line );
 
 					}
 
 				}
 
-                return tree;
+				return tree;
 			}
 
 			var parseNode = function ( data, parent ) {
@@ -510,34 +508,34 @@ THREE.VRMLLoader.prototype = {
 
 					if ( /USE/.exec( data ) ) {
 
-                        var defineKey = /USE\s+?(\w+)/.exec( data )[ 1 ];
+						var defineKey = /USE\s+?(\w+)/.exec( data )[ 1 ];
 
-                        if (undefined == defines[defineKey]) {
-                            console.warn(defineKey + ' is not defined.');
-                        } else {
+						if (undefined == defines[defineKey]) {
+							console.warn(defineKey + ' is not defined.');
+						} else {
 
-                            if ( /appearance/.exec( data ) && defineKey ) {
+							if ( /appearance/.exec( data ) && defineKey ) {
 
-                                parent.material = defines[ defineKey ].clone();
+								parent.material = defines[ defineKey ].clone();
 
-                            } else if ( /geometry/.exec( data ) && defineKey ) {
+							} else if ( /geometry/.exec( data ) && defineKey ) {
 
-                                parent.geometry = defines[ defineKey ].clone();
+								parent.geometry = defines[ defineKey ].clone();
 
-                                // the solid property is not cloned with clone(), is only needed for VRML loading, so we need to transfer it
-                                if (undefined !== defines[ defineKey ].solid && defines[ defineKey ].solid === false) {
-                                    parent.geometry.solid = false;
-                                    parent.material.side = THREE.DoubleSide;
-                                }
+								// the solid property is not cloned with clone(), is only needed for VRML loading, so we need to transfer it
+								if (undefined !== defines[ defineKey ].solid && defines[ defineKey ].solid === false) {
+									parent.geometry.solid = false;
+									parent.material.side = THREE.DoubleSide;
+								}
 
-                            } else if (defineKey){
+							} else if (defineKey){
 
-                                var object = defines[ defineKey ].clone();
-                                parent.add( object );
+								var object = defines[ defineKey ].clone();
+								parent.add( object );
 
-                            }
+							}
 
-                        }
+						}
 
 					}
 
@@ -556,29 +554,29 @@ THREE.VRMLLoader.prototype = {
 						defines[ object.name ] = object;
 					}
 
-                    if ( undefined !== data['translation'] ) {
+					if ( undefined !== data['translation'] ) {
 
-                        var t = data.translation;
+						var t = data.translation;
 
-                        object.position.set(t.x, t.y, t.z);
+						object.position.set(t.x, t.y, t.z);
 
-                    }
+					}
 
-                    if ( undefined !== data.rotation ) {
+					if ( undefined !== data.rotation ) {
 
-                        var r = data.rotation;
+						var r = data.rotation;
 
-                        object.quaternion.setFromAxisAngle( new THREE.Vector3( r.x, r.y, r.z ), r.w );
+						object.quaternion.setFromAxisAngle( new THREE.Vector3( r.x, r.y, r.z ), r.w );
 
-                    }
+					}
 
-                    if ( undefined !== data.scale ) {
+					if ( undefined !== data.scale ) {
 
-                        var s = data.scale;
+						var s = data.scale;
 
-                        object.scale.set( s.x, s.y, s.z );
+						object.scale.set( s.x, s.y, s.z );
 
-                    }
+					}
 
 					parent.add( object );
 
@@ -597,54 +595,52 @@ THREE.VRMLLoader.prototype = {
 
 				} else if ( 'Background' === data.nodeType ) {
 
-                    var segments = 20;
+					var segments = 20;
 
-                    // sky (full sphere):
-                    var radius = 2e4;
+					// sky (full sphere):
 
-                    var skyGeometry = new THREE.SphereGeometry( radius, segments, segments );
+					var radius = 2e4;
 
-                    var skyMaterial = new THREE.MeshBasicMaterial( { color: 'white', vertexColors: THREE.VertexColors, shading: THREE.NoShading } );
+					var skyGeometry = new THREE.SphereGeometry( radius, segments, segments );
+					var skyMaterial = new THREE.MeshBasicMaterial( { fog: false, side: THREE.BackSide } );
 
-                    skyMaterial.side = THREE.BackSide;
+					if ( data.skyColor.length > 1 ) {
 
-                    skyMaterial.fog = false;
+						paintFaces( skyGeometry, radius, data.skyAngle, data.skyColor, true );
 
-                    skyMaterial.color = new THREE.Color();
+						skyMaterial.vertexColors = THREE.VertexColors
 
-                    paintFaces( skyGeometry, radius, data.skyAngle, data.skyColor, true );
+					} else {
 
-                    var sky = new THREE.Mesh( skyGeometry, skyMaterial );
+						var color = data.skyColor[ 0 ];
+						skyMaterial.color.setRGB( color.r, color.b, color.g );
 
-                    scene.add( sky );
+					}
 
-                    // ground (half sphere):
+					scene.add( new THREE.Mesh( skyGeometry, skyMaterial ) );
 
-                    radius = 1.2e4;
+					// ground (half sphere):
 
-                    var groundGeometry = new THREE.SphereGeometry( radius, segments, segments, 0, 2 * Math.PI, 0.5 * Math.PI, 1.5 * Math.PI );
+					if ( data.groundColor !== undefined ) {
 
-                    var groundMaterial = new THREE.MeshBasicMaterial( { color: 'white', vertexColors: THREE.VertexColors, shading: THREE.NoShading } );
+						radius = 1.2e4;
 
-                    groundMaterial.side = THREE.BackSide;
+						var groundGeometry = new THREE.SphereGeometry( radius, segments, segments, 0, 2 * Math.PI, 0.5 * Math.PI, 1.5 * Math.PI );
+						var groundMaterial = new THREE.MeshBasicMaterial( { fog: false, side: THREE.BackSide, vertexColors: THREE.VertexColors } );
 
-                    groundMaterial.fog = false;
+						paintFaces( groundGeometry, radius, data.groundAngle, data.groundColor, false );
 
-                    groundMaterial.color = new THREE.Color();
+						scene.add( new THREE.Mesh( groundGeometry, groundMaterial ) );
 
-                    paintFaces( groundGeometry, radius, data.groundAngle, data.groundColor, false );
-
-                    var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-
-                    scene.add( ground );
+					}
 
 				} else if ( /geometry/.exec( data.string ) ) {
 
 					if ( 'Box' === data.nodeType ) {
 
-                        var s = data.size;
+						var s = data.size;
 
-						parent.geometry = new THREE.CubeGeometry( s.x, s.y, s.z );
+						parent.geometry = new THREE.BoxGeometry( s.x, s.y, s.z );
 
 					} else if ( 'Cylinder' === data.nodeType ) {
 
@@ -660,81 +656,81 @@ THREE.VRMLLoader.prototype = {
 
 					} else if ( 'IndexedFaceSet' === data.nodeType ) {
 
-                        var geometry = new THREE.Geometry();
+						var geometry = new THREE.Geometry();
 
-                        var indexes;
+						var indexes;
 
-                        for ( var i = 0, j = data.children.length; i < j; i++ ) {
+						for ( var i = 0, j = data.children.length; i < j; i++ ) {
 
-                            var child = data.children[ i ];
+							var child = data.children[ i ];
 
-                            var vec;
+							var vec;
 
-                            if ( 'Coordinate' === child.nodeType ) {
+							if ( 'Coordinate' === child.nodeType ) {
 
-                                for ( var k = 0, l = child.points.length; k < l; k++ ) {
+								for ( var k = 0, l = child.points.length; k < l; k++ ) {
 
-                                    var point = child.points[ k ];
+									var point = child.points[ k ];
 
-                                    vec = new THREE.Vector3( point.x, point.y, point.z );
+									vec = new THREE.Vector3( point.x, point.y, point.z );
 
-                                    geometry.vertices.push( vec );
-                                }
+									geometry.vertices.push( vec );
+								}
 
-                                break;
-                            }
-                        }
+								break;
+							}
+						}
 
-                        var skip = 0;
+						var skip = 0;
 
-                        // read this: http://math.hws.edu/eck/cs424/notes2013/16_Threejs_Advanced.html
-                        for ( var i = 0, j = data.coordIndex.length; i < j; i++ ) {
+						// read this: http://math.hws.edu/eck/cs424/notes2013/16_Threejs_Advanced.html
+						for ( var i = 0, j = data.coordIndex.length; i < j; i++ ) {
 
-                            indexes = data.coordIndex[i];
+							indexes = data.coordIndex[i];
 
-                            // vrml support multipoint indexed face sets (more then 3 vertices). You must calculate the composing triangles here
-                            skip = 0;
+							// vrml support multipoint indexed face sets (more then 3 vertices). You must calculate the composing triangles here
+							skip = 0;
 
-                            // todo: this is the time to check if the faces are ordered ccw or not (cw)
+							// todo: this is the time to check if the faces are ordered ccw or not (cw)
 
-                            // Face3 only works with triangles, but IndexedFaceSet allows shapes with more then three vertices, build them of triangles
-                            while ( indexes.length >= 3 && skip < ( indexes.length -2 ) ) {
+							// Face3 only works with triangles, but IndexedFaceSet allows shapes with more then three vertices, build them of triangles
+							while ( indexes.length >= 3 && skip < ( indexes.length -2 ) ) {
 
-                                var face = new THREE.Face3(
-                                    indexes[0],
-                                    indexes[skip + 1],
-                                    indexes[skip + 2],
-                                    null // normal, will be added later
-                                    // todo: pass in the color, if a color index is present
-                                );
+								var face = new THREE.Face3(
+									indexes[0],
+									indexes[skip + 1],
+									indexes[skip + 2],
+									null // normal, will be added later
+									// todo: pass in the color, if a color index is present
+								);
 
-                                skip++;
+								skip++;
 
-                                geometry.faces.push( face );
+								geometry.faces.push( face );
 
-                            }
+							}
 
 
-                        }
+						}
 
-                        if ( false === data.solid ) {
-                            parent.material.side = THREE.DoubleSide;
-                        }
+						if ( false === data.solid ) {
+							parent.material.side = THREE.DoubleSide;
+						}
 
-                        // we need to store it on the geometry for use with defines
-                        geometry.solid = data.solid;
+						// we need to store it on the geometry for use with defines
+						geometry.solid = data.solid;
 
-                        geometry.computeFaceNormals();
-                        //geometry.computeVertexNormals(); // does not show
-                        geometry.computeBoundingSphere();
+						geometry.computeFaceNormals();
+						//geometry.computeVertexNormals(); // does not show
+						geometry.computeBoundingSphere();
 
-                        // see if it's a define
-                        if ( /DEF/.exec( data.string ) ) {
-                            geometry.name = /DEF (\w+)/.exec( data.string )[ 1 ];
-                            defines[ geometry.name ] = geometry;
-                        }
+						// see if it's a define
+						if ( /DEF/.exec( data.string ) ) {
+							geometry.name = /DEF (\w+)/.exec( data.string )[ 1 ];
+							defines[ geometry.name ] = geometry;
+						}
 
-                        parent.geometry = geometry;
+						parent.geometry = geometry;
 					}
 
 					return;
@@ -748,40 +744,40 @@ THREE.VRMLLoader.prototype = {
 						if ( 'Material' === child.nodeType ) {
 							var material = new THREE.MeshPhongMaterial();
 
-                            if ( undefined !== child.diffuseColor ) {
+							if ( undefined !== child.diffuseColor ) {
 
-                                var d = child.diffuseColor;
+								var d = child.diffuseColor;
 
-                                material.color.setRGB( d.r, d.g, d.b );
+								material.color.setRGB( d.r, d.g, d.b );
 
-                            }
+							}
 
-                            if ( undefined !== child.emissiveColor ) {
+							if ( undefined !== child.emissiveColor ) {
 
-                                var e = child.emissiveColor;
+								var e = child.emissiveColor;
 
-                                material.emissive.setRGB( e.r, e.g, e.b );
+								material.emissive.setRGB( e.r, e.g, e.b );
 
-                            }
+							}
 
-                            if ( undefined !== child.specularColor ) {
+							if ( undefined !== child.specularColor ) {
 
-                                var s = child.specularColor;
+								var s = child.specularColor;
 
-                                material.specular.setRGB( s.r, s.g, s.b );
+								material.specular.setRGB( s.r, s.g, s.b );
 
-                            }
+							}
 
-                            if ( undefined !== child.transparency ) {
+							if ( undefined !== child.transparency ) {
 
-                                var t = child.transparency;
+								var t = child.transparency;
 
-                                // transparency is opposite of opacity
-                                material.opacity = Math.abs( 1 - t );
+								// transparency is opposite of opacity
+								material.opacity = Math.abs( 1 - t );
 
-                                material.transparent = true;
+								material.transparent = true;
 
-                            }
+							}
 
 							if ( /DEF/.exec( data.string ) ) {
 
@@ -793,8 +789,8 @@ THREE.VRMLLoader.prototype = {
 
 							parent.material = material;
 
-                            // material found, stop looping
-                            break;
+							// material found, stop looping
+							break;
 						}
 
 					}
