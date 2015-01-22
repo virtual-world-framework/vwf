@@ -111,13 +111,3 @@ class VWF
   end
 
 end
-
-
-        # @value = revisions.last && revisions.last.get  # TODO: instance vs. revisison
-        # revisions.create @value  # TODO: instance vs. revisison
-
-
-
-    
-
-

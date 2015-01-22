@@ -35,7 +35,7 @@ class VWF
 
     class Instance < Storage::Instance
       include Types
-      # include Item -- no direct storage; Storage::Instance delegates to revisions
+      include Item
     end
 
     class Revisions < Storage::Revisions

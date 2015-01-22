@@ -30,23 +30,10 @@ module VWF::Storage
   end
 
   class Instance < Item
-
     include Types
-
-    def get
-      if revision = revisions.current  # TODO: most recent revision (better: current captive state or from client)
-        revision.get
-      end
-    end
-
-    def set value
-      revisions.create value  # TODO: @storage.queue.flush to revision
-    end
-
     def revisions ; @revisions ||= self.Revisions.new self ; end
     def actions ; @actions ||= self.Actions.new self ; end
     def tags ; @tags ||= self.Tags.new self ; end
-
   end
 
   class Revisions < Collection
