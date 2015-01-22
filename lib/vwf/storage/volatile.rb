@@ -1,5 +1,5 @@
-require "vwf/storage"
-require_relative "couch_db/collection"
+require "vwf/storageneueneue"
+require_relative "volatile/collection"
 
 class VWF
 
