@@ -49,6 +49,28 @@ class VWF
       include Item
     end
 
+    class States < Storage::States
+      include Enumerable
+      include Types
+      include Collection
+    end
+
+    class State < Storage::State
+      include Types
+      include Item
+    end
+
+    class Actions < Storage::Actions
+      include Enumerable
+      include Types
+      include Collection
+    end
+
+    class Action < Storage::Action
+      include Types
+      include Item
+    end
+
   end
 
 end

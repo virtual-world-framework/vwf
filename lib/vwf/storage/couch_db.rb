@@ -95,6 +95,19 @@ class VWF
       def self.template ; { "type" => "revision" } ; end
     end
 
+    class States < Storage::States
+      include Enumerable
+      include Types
+      include Collection
+    end
+
+    class State < Storage::State
+      include Types
+      include Item
+      def template ; self.class.template.merge "instance" => collection.container.dbid ; end
+      def self.template ; { "type" => "state" } ; end
+    end
+
     class Actions < Storage::Actions
       include Enumerable
       include Types

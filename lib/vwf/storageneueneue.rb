@@ -32,6 +32,7 @@ module VWF::Storage
   class Instance < Item
     include Types
     def revisions ; @revisions ||= self.Revisions.new self ; end
+    def states ; @states ||= self.States.new self ; end
     def actions ; @actions ||= self.Actions.new self ; end
     def tags ; @tags ||= self.Tags.new self ; end
   end
@@ -60,6 +61,15 @@ module VWF::Storage
   class Revision < Item
     include Types
     def tags ; @tags ||= self.Tags.new self ; end
+  end
+
+  class States < Collection
+    include Types
+    def type ; self.State ; end
+  end
+
+  class State < Item
+    include Types
   end
 
   class Actions < Collection
