@@ -2260,66 +2260,144 @@ define( [ "module",
         return Cesium.Matrix4.fromRowMajorArray( arry );
     }
 
-    function getCentralBody( sceneNode, node ) {
-        if ( sceneNode.centralBody ) {
-            return sceneNode.centralBody;
-        }
-    }
-
 
     function createGeometry( node ) {
 
         var sceneNode = findSceneNode.call( this, node );
 
-        if ( sceneNode === undefined ) {
-            return;
-        }
-
-        var centralBody = getCentralBody.call( this, sceneNode, node );
-
-        if ( centralBody === undefined ) {
+        if ( sceneNode === undefined && sceneNode.scene !== undefined ) {
             return;
         }
 
         var primitives = sceneNode.scene.primitives;
-        var ellipsoid = centralBody.getEllipsoid();
 
-        var dimensions;
-        var modelMatrix;
-        var posOnEllipsoid;
-        var dim = node.properties[ 'dimensions' ];
-        var pos = node.properties[ 'position' ];
-        var color = node.properties[ 'color' ] !== undefined ? cesuimColor.call( this, node.properties[ 'color' ] ) : new Cesium.Color( 1.0, 1.0, 1.0, 1.0 );
+        var dimensions, modelMatrix, posOnEllipsoid, dim, radius, extrudeHeight, height, flat;
+        var lineWidth, vertLines, rotation, followSurface;
+        var pos = node.properties.position;
+        var closed = node.properties.closed ? node.properties.closed : true;
+        var color = node.properties.color !== undefined ? cesuimColor.call( this, node.properties[ 'color' ] ) : new Cesium.Color( 1.0, 1.0, 1.0, 1.0 );
+        var translucent = node.properties.translucent ? node.properties.translucent : false;
 
+        dim = node.properties.dimensions || [ 1, 1, 1 ];
         dimensions = new Cesium.Cartesian3( dim[0], dim[1], dim[2] );
-        posOnEllipsoid = ellipsoid.cartographicToCartesian( Cesium.Cartographic.fromDegrees( pos[0], pos[1] ) );
-        modelMatrix = Cesium.Matrix4.multiplyByTranslation(
-            Cesium.Transforms.eastNorthUpToFixedFrame( posOnEllipsoid ),
-            new Cesium.Cartesian3( 0.0, 0.0, dimensions.z * 0.5 ) );
+        posOnEllipsoid = Cesium.Cartesian3.fromDegrees( pos[0], pos[1] );
+        
+        var trans = Cesium.Transforms.eastNorthUpToFixedFrame( posOnEllipsoid );
+        var cartVec3 = new Cesium.Cartesian3( 0.0, 0.0, dimensions.z * 0.5 );
+        var identityMat = new Cesium.Matrix4();
 
+        modelMatrix = undefined;
 
         switch ( node.geometryType ) {
+            
             case "box":
+                modelMatrix = Cesium.Matrix4.multiplyByTranslation( trans, cartVec3, identityMat );
                 node.geometry = Cesium.BoxGeometry.fromDimensions( {
                     "vertexFormat" : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
                     "dimensions" : dimensions
                 } );
+                break;
 
+            case "circle":
+                radius = node.properties.radius || 100.0;
+                extrudeHeight = node.properties.extrudeHeight || 0;
+                height = node.properties.height || 0;
+                node.geometry = new Cesium.CircleGeometry( {
+                    "center" : posOnEllipsoid,
+                    "radius" : radius,
+                    "extrudedHeight": extrudeHeight,
+                    "height": height,
+                    "vertexFormat" : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
+                } );  
+                break;  
+
+            case "circleOutline":
+                radius = node.properties.radius || 100.0;
+                extrudeHeight = node.properties.extrudeHeight || 0;
+                height = node.properties.height || 0;
+                vertLines = node.properties.verticleLines || 0;
+                node.geometry = new Cesium.CircleOutlineGeometry( {
+                    "center" : posOnEllipsoid,
+                    "radius" : radius,
+                    "extrudedHeight": extrudeHeight,
+                    "height": height,
+                    "numberOfVerticalLines": vertLines
+                } );  
+                break;
+
+            case "sphere":
+                modelMatrix = Cesium.Matrix4.multiplyByTranslation( trans, cartVec3, identityMat );
+                radius = node.properties.radius || 100.0;
+                node.geometry = new Cesium.SphereGeometry({
+                    vertexFormat : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
+                    radius : radius
+                });
+                break;
+
+            case "rectangle":
+                extrudeHeight = node.properties.extrudeHeight || 0;
+                height = node.properties.height || 0;
+                points = node.properties.points || [ 0, 100.0, -100.0, 50.0 ];
+                rotation = node.properties.rotation || 0; 
+                node.geometry = new Cesium.RectangleGeometry( {
+                    "rectangle" : Cesium.Rectangle.fromDegrees( points[0], points[1], points[2], points[3] ),
+                    "rotation" : Cesium.Math.toRadians( rotation ),
+                    "extrudedHeight" : extrudeHeight,
+                    "height" : height,
+                    "vertexFormat" : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
+                } )
+                break;
+
+            case "rectangleOutline":
+                points = node.properties.points || [ 0, 100.0, -100.0, 50.0 ];
+                node.geometry = new Cesium.RectangleOutlineGeometry({
+                    "rectangle" : Cesium.Rectangle.fromDegrees( points[0], points[1], points[2], points[3] )
+                } );
+                break;
+
+            case "polyline":
+                if ( node.properties.points && node.properties.points instanceof Array ) {
+                    followSurface = node.properties.followSurface || true;
+                    geometry : new Cesium.SimplePolylineGeometry( {
+                        "positions" : Cesium.Cartesian3.fromDegreesArray( node.properties.points ),
+                        "followSurface": followSurface
+                    } );
+                }
+
+
+
+
+        }
+
+        if ( node.geometry !== undefined ) {
+
+            if ( modelMatrix !== undefined ) {
                 node.geometryInstance = new Cesium.GeometryInstance( {
                     "geometry" : node.geometry,
                     "modelMatrix" : modelMatrix,
                     "attributes" : {
                         "color" : Cesium.ColorGeometryInstanceAttribute.fromColor( color )
                     }
-                } );
+                } );                
+            } else {
+                node.geometryInstance = new Cesium.GeometryInstance( {
+                    "geometry" : node.geometry,
+                    "attributes" : {
+                        "color" : Cesium.ColorGeometryInstanceAttribute.fromColor( color )
+                    }
+                } );                 
+            }                
 
-                node.primitive = new Cesium.Primitive( {
-                    "geometryInstances" : node.geometryInstance,
-                    "appearance" : new Cesium.PerInstanceColorAppearance( { "closed": true } )
-                } );
-                primitives.add( node.primitive );            
-                break;
+            node.primitive = new Cesium.Primitive( {
+                "geometryInstances" : node.geometryInstance,
+                "appearance" : new Cesium.PerInstanceColorAppearance( {
+                    "closed": closed,
+                    "translucent": translucent
+                } )
+            } );
+            primitives.add( node.primitive );              
         }
+
 
         node.properties = undefined;
     }
