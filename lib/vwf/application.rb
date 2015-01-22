@@ -130,7 +130,7 @@ class VWF::Application < Sinatra::Base
   # Redirect the application to a new instance. ####################################################
 
   get "/", :browser => true do
-    @instance = @application.instances.create( instance_state )
+    @instance = @application.instances.create( nil, instance_state )
     redirect to "/instance/" + @instance.id + "/"
   end
 

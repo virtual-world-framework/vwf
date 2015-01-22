@@ -8,35 +8,34 @@ module VWF::Storage::CouchDB
     end
 
     def set value
-      document[ "value" ] = value
-      save
-      value
+      value.tap do |value|
+        document[ "value" ] = value
+        save
+      end
     end
 
     def load
-      if dbid  # TODO: else?
-        @document = db.get( dbid )  # TODO: note: throws if missing  # TODO: use document= (isn't working)
-      end
+      self.document = db.get dbid  # TODO: note: throws if missing  # TODO: use document= (isn't working)
     end
 
     def save
-      unless dbid
-        document.save
-        @id = document.id
-        document.copy( dbid )
-        document.destroy
-      else
-        document.id = dbid
-        document.save
-      end
+      document.id ||= dbid
+      document.save
     end
 
     def document
-      @document ||= CouchRest::Document.new.tap { |document|
+      @document ||= CouchRest::Document.new.tap do |document|
         document.database = db
         document.merge! template
-        # document.merge! self.class.template
-      }
+      end
+    end
+
+    def document= value
+      @document = value
+    end
+
+    def template
+      {}
     end
 
     def dbid
@@ -49,9 +48,14 @@ module VWF::Storage::CouchDB
       end
     end
 
-    # def id= value
-    #   @id = value
-    # end
+    def newid
+      tempdoc = CouchRest::Document.new
+      tempdoc.database = db
+      tempdoc.save
+      id = tempdoc.id
+      tempdoc.destroy
+      id
+    end
 
   end
 
