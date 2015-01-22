@@ -30,8 +30,6 @@ children:
       restitution: 0.10
   dir1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
       distance: 1000

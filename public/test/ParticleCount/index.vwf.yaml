@@ -52,8 +52,6 @@ children:
       translation: [ 0, 0, 200]
   dir1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
       enable: true
