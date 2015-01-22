@@ -4,7 +4,6 @@ module VWF::Storage::CouchDB
 
   module Collection
 
-    # def create id = rand( 1000 ).to_s, value = nil  # TODO: actual id calculation, test for uniqueness if provided
     def create id = nil, value = nil  # TODO: actual id calculation, test for uniqueness if provided
       super
     end

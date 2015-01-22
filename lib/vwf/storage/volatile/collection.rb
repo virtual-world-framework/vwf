@@ -4,9 +4,9 @@ module VWF::Storage::Volatile
 
   module Collection
 
-    def create id = rand( 1000 ).to_s, value = nil  # TODO: actual id calculation, test for uniqueness if provided
+    def create id = nil, value = nil  # TODO: actual id calculation, test for uniqueness if provided
       super.tap do |item|
-        storage[ id ] = item
+        storage[ item.id ] = item
       end
     end
 
