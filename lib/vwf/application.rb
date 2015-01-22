@@ -93,20 +93,6 @@ class VWF::Application < Sinatra::Base
     end
   end
 
-  before "/instance/:instance_id/actions.:format" do |_, format|
-    if type = Rack::Mime.mime_type( "." + format ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape "." + format }$/, "" )
-    end
-  end
-
-  before "/instance/:instance_id/action/:action_id.:format" do |_, _, format|
-    if type = Rack::Mime.mime_type( "." + format ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape "." + format }$/, "" )
-    end
-  end
-
   ### Validate the application, instance, and revision. ############################################
 
   before "/?*" do
@@ -122,11 +108,6 @@ class VWF::Application < Sinatra::Base
   before "/instance/:instance_id/revision/:revision_id/?*" do |_, revision_id, _|
     @revision = @instance.revisions[ revision_id ]
     halt 404 unless @revision
-  end
-
-  before "/instance/:instance_id/action/:action_id/?*" do |_, action_id, _|
-    @action = @instance.actions[ action_id ]
-    halt 404 unless @action
   end
 
   ### Redirect singular resources to directory resources. ##########################################
@@ -190,7 +171,7 @@ pass if @type
 
   get "/instance/:instance_id/*" do |instance_id, path_info|
 pass if @type
-pass if path_info.match /^action/
+pass if path_info.match /^revision/
     request.script_name += "/#{instance_id}"
     request.path_info = "/#{path_info}"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
@@ -279,42 +260,6 @@ pass if path_info.match /^instance/
 
   end
 
-  get "/instance/:instance_id/actions" do
-
-    case @type || request.preferred_type( @@api_types )
-      when "application/json"
-        content_type :json
-        @instance.actions.map { |id, action| to action_url @instance.id, action.id } .to_json
-      when "text/yaml"
-        content_type :yaml
-        @instance.actions.map { |id, action| to action_url @instance.id, action.id } .to_yaml
-      when "text/html"
-        slim :actions
-    end
-
-  end
-
-  get "/instance/:instance_id/action/:action_id" do
-
-    case @type || request.preferred_type( @@api_types )
-      when "application/json"
-        content_type :json
-        @action.get.to_json
-      when "text/yaml"
-        content_type :yaml
-        @action.get.to_yaml
-      when "text/html"
-        slim :action
-    end
-
-  end
-
-
-
-
-
-
-
   helpers do
 
     def application_url format = nil
@@ -335,14 +280,6 @@ pass if path_info.match /^instance/
 
     def revision_url instance_id, revision_id, format = nil
       "/instance/" + instance_id + "/revision/" + revision_id + extension( format )
-    end
-
-    def actions_url instance_id, format = nil
-      "/instance/" + instance_id + "/actions" + extension( format )
-    end
-
-    def action_url instance_id, action_id, format = nil
-      "/instance/" + instance_id + "/action/" + action_id + extension( format )
     end
 
     def extension format = nil
