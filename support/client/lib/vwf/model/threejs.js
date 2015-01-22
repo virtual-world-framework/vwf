@@ -420,11 +420,8 @@ define( [ "module",
             } else if ( protos && isNodeDefinition.call( this, protos ) && childName !== undefined ) {
                 
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                if ( childType == "model/vnd.collada+xml" || 
-                    childType == "model/vnd.osgjs+json+compressed" ||
-                    childType == "model/x-threejs-morphanim+json" ||
-                    childType == "model/vnd.gltf+json" ||
-                    childType == "model/x-threejs-skinned+json" ) {
+                
+                if ( supportedFileType( childType ) ) {
                     
                     // Most often this callback is used to suspend the queue until the load is complete
                     callback( false );
@@ -528,11 +525,9 @@ define( [ "module",
             // If we do not have a load a model for this node, then we are almost done, so we can update all
             // the driver properties w/ the stop-gap function below.
             // Else, it will be called at the end of the assetLoaded callback
-            if ( ! ( childType == "model/vnd.collada+xml" || 
-                     childType == "model/vnd.osgjs+json+compressed" ||
-                     childType == "model/x-threejs-morphanim+json" ||
-                     childType == "model/x-threejs-skinned+json" ) )
+            if ( ! supportedFileType( childType ) ) {
                 notifyDriverOfPrototypeAndBehaviorProps();
+            }
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
             // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
@@ -2590,6 +2585,13 @@ define( [ "module",
         }
         return foundNode;
     }
+    function supportedFileType( type ) {
+        return ( type == "model/vnd.collada+xml" || 
+                 type == "model/vnd.osgjs+json+compressed" ||
+                 type == "model/x-threejs-morphanim+json" ||
+                 type == "model/vnd.gltf+json" ||
+                 type == "model/x-threejs-skinned+json" );
+    }
     function CreateThreeJSSceneNode(parentID,thisID,extendsID)
     {
         var node = {};
@@ -3494,54 +3496,60 @@ define( [ "module",
             //node.threeObject.vwfID = nodeID;
             sceneNode.pendingLoads++;
           
-            //call up the correct loader/parser
-            if( childType == "model/vnd.collada+xml" ) {
-                node.parse = true;
-                node.loader = new THREE.ColladaLoader();
-                node.loader.options.convertUpAxis = true;
-                node.loader.options.upAxis = "Z";
-                node.loader.load(node.source,node.assetLoaded.bind( this ));
-            }
-          
-            if( childType == "model/vnd.osgjs+json+compressed" ) {
-                node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
-            }
+            switch ( childType ) {
+                
+                case "model/vnd.collada+xml":
+                    node.parse = true;
+                    node.loader = new THREE.ColladaLoader();
+                    node.loader.options.convertUpAxis = true;
+                    node.loader.options.upAxis = "Z";
+                    node.loader.load(node.source,node.assetLoaded.bind( this ));
+                    break;
 
-            if( childType == "model/x-threejs-morphanim+json" || childType == "model/x-threejs-skinned+json" ) {
-                node.loader = new THREE.JSONLoader()
-                node.loader.load( node.source, node.assetLoaded.bind( this ) );
-            }
-                                    
-            if( childType == "model/vnd.gltf+json" )
-            {
-             
-                //create a queue to hold requests to the loader, since the loader cannot be re-entered for parallel loads
-                if ( !THREE.glTFLoader.queue )
-                {
-                    //task is an object that holds the info about what to load
-                    //nextTask is supplied by async to trigger the next in the queue
-                    THREE.glTFLoader.queue = new async.queue( function( task, nextTask ) {
-                        var node = task.node;
-                        var cb = task.cb;
-                        //call the actual load function
-                        //signature of callback dictated by loader
-                        node.loader.load( node.source, function( geometry , materials ) {
-                            //ok, this model loaded, we can start the next load
-                            nextTask();
-                            //do whatever it was (asset loaded) that this load was going to do when complete
-                            cb( geometry , materials );
-                        } );
+                case "model/vnd.osgjs+json+compressed":
+                    node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
+                    break;
 
-                    }, 1 );
-                }
-                node.loader = new THREE.glTFLoader();
-                node.loader.useBufferGeometry = true;
-                //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it 
-                //is an async function, it cannot be entered again before it completes
-                THREE.glTFLoader.queue.push( { 
-                    node: node,
-                    cb: node.assetLoaded.bind( this ) 
-                } );
+                case "model/x-threejs-morphanim+json":
+                case "model/x-threejs-skinned+json":
+                    node.loader = new THREE.JSONLoader()
+                    node.loader.load( node.source, node.assetLoaded.bind( this ) );
+                    break;
+
+                case "model/vnd.gltf+json":
+                    //create a queue to hold requests to the loader, since the loader cannot be re-entered for parallel loads
+                    if ( !THREE.glTFLoader.queue )
+                    {
+                        //task is an object that holds the info about what to load
+                        //nextTask is supplied by async to trigger the next in the queue
+                        THREE.glTFLoader.queue = new async.queue( function( task, nextTask ) {
+                            var node = task.node;
+                            var cb = task.cb;
+                            //call the actual load function
+                            //signature of callback dictated by loader
+                            node.loader.load( node.source, function( geometry , materials ) {
+                                //ok, this model loaded, we can start the next load
+                                nextTask();
+                                //do whatever it was (asset loaded) that this load was going to do when complete
+                                cb( geometry , materials );
+                            } );
+
+                        }, 1 );
+                    }
+                    node.loader = new THREE.glTFLoader();
+                    node.loader.useBufferGeometry = true;
+                    //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it 
+                    //is an async function, it cannot be entered again before it completes
+                    THREE.glTFLoader.queue.push( { 
+                        node: node,
+                        cb: node.assetLoaded.bind( this ) 
+                    } );
+                    break;
+
+                default:
+                    self.logger.warnx( "Unable to import " + node.source + ".  Unsupported file type: " + childType );
+                    break;
+
             }
         }
 
