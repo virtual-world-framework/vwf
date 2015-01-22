@@ -57,9 +57,9 @@ class VWF
     end
 
     class Applications < Storage::Applications
-      include Enumerable
       include Types
       include Collection
+      include Enumerable
     end
 
     class Application < Storage::Application
@@ -70,9 +70,9 @@ class VWF
     end
 
     class Instances < Storage::Instances
-      include Enumerable
       include Types
       include Collection
+      include Enumerable
     end
 
     class Instance < Storage::Instance
@@ -83,9 +83,9 @@ class VWF
     end
 
     class Revisions < Storage::Revisions
-      include Enumerable
       include Types
       include Collection
+      include Enumerable
     end
 
     class Revision < Storage::Revision
@@ -96,9 +96,9 @@ class VWF
     end
 
     class States < Storage::States
-      include Enumerable
       include Types
       include Collection
+      include Enumerable
     end
 
     class State < Storage::State
@@ -109,9 +109,9 @@ class VWF
     end
 
     class Actions < Storage::Actions
-      include Enumerable
       include Types
       include Collection
+      include Enumerable
     end
 
     class Action < Storage::Action
