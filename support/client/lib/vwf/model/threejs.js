@@ -878,7 +878,11 @@ define( [ "module",
                     else if ( propertyName == 'visible' )
                     {
                         value = Boolean( propertyValue );
-                        self.state.setMeshPropertyRecursively( threeObject, "visible", value );
+                        // this was the old style of recursively setting visible
+                        // self.state.setMeshPropertyRecursively( threeObject, "visible", value );
+                        SetVisible( threeObject, value );
+                        // SetVisible will only set visible on the children
+                        // that the driver has NOT binding to, bad/good, was the old way better?
                     }
                     else if ( propertyName == 'castShadows' )
                     {
@@ -4568,6 +4572,20 @@ define( [ "module",
         if ( ambientCount == 0 ) {
             createAmbientLight.call( this, scene, [ 0.20, 0.20, 0.20 ] );
         }            
+    }
+
+    function SetVisible( node, state ) {
+        if ( node ) {
+            node.visible = state;
+        }
+        if ( node && node.children ) {
+            for( var i = 0; i < node.children.length; i++ ) {
+                var child = node.children[i];
+                if( !child.vwfID ) {
+                    SetVisible( child, state );
+                }
+            }
+        }
     }
 
     function getWorldTransform( node ) {

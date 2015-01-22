@@ -321,11 +321,9 @@ properties:
   visible: 
     set: |
       this.visible = value;
-      if(this.children) {
-        for(var i in this.children) {
-          this.children[i].visible = value;
-        }
-      }
+      this.children.forEach( function( child ) {
+        child.visible = value;
+      } );
     value: true
 
 events:
