@@ -49,8 +49,12 @@ class VWF
       def Instance ; Instance ; end
       def Revisions ; Revisions ; end
       def Revision ; Revision ; end
+      def States ; States ; end
+      def State ; State ; end
       def Actions ; Actions ; end
       def Action ; Action ; end
+      def Tags ; Tags ; end
+      def Tag ; Tag ; end
 
       def db ; @@db ; end
 
