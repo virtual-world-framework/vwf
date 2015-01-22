@@ -1,10 +1,8 @@
 ---
 extends: http://vwf.example.com/navscene.vwf
 properties:
-  backgroundColor: [ 35,35,35 ]
-  ambientColor: [255, 255, 255]
-methods:
-  initializeCamera:
+  backgroundColor: [ 35, 35, 35 ]
+  ambientColor: [ 255, 255, 255 ]
 children:
   Omni01:
     extends: http://vwf.example.com/light.vwf
@@ -13,15 +11,15 @@ children:
       enable: true
       distance: 30
       intensity: 5
-      color: [255 , 68 , 0]
+      color: [ 255 , 68 , 0 ]
       translation: [ 5, 0, 0 ]
   Monster:
     extends: http://vwf.example.com/node3.vwf
     source: monster.js
     type: model/x-threejs-morphanim+json
     properties:
-      scale: [0.00075, 0.00075, 0.00075]
-      rotation: [-100,-100,-100,-100]
+      scale: [ 0.00075, 0.00075, 0.00075 ]
+      rotation: [ -100,-100,-100,-100 ]
       animationLoop: true
       animationRate: 1
   Avatar: 
@@ -29,7 +27,7 @@ children:
     source: JumpSuitMale_wLadder.js
     type: model/x-threejs-morphanim+json
     properties:
-      translation: [0,-0.3,0]    
+      translation: [ 0, -0.3, 0 ]
       rotation: [ 0, 1, 1, 180 ]
       animationRate: 1
       animationType: -1
@@ -38,7 +36,7 @@ children:
     source: AirForceAll.dae
     type: model/vnd.collada+xml
     properties:
-      translation: [ 0, -1, 0 ]    
+      translation: [ 0, -1, 0 ]
       rotation: [ 0, 1, 1, 90 ]
       animationLoop: true
       scale: [ 0.01, 0.01, 0.01 ]
@@ -49,7 +47,7 @@ children:
     source: knight.js
     type: model/x-threejs-skinned+json
     properties:
-      translation: [ 0, -2, 0 ]    
+      translation: [ 0, -2, 0 ]
       rotation: [ 0, 1, 1, 180 ]
       animationLoop: true
       scale: [ 0.1, 0.1, 0.1 ]
@@ -60,7 +58,7 @@ children:
     source: horse.js
     type: model/x-threejs-morphanim+json
     properties:
-      translation: [ 0, -4, 0 ]    
+      translation: [ 0, -4, 0 ]
       rotation: [ 0, 1, 1, 180 ]
       animationLoop: true
       scale: [ 0.01, 0.01, 0.01 ]
@@ -73,11 +71,13 @@ scripts:
     this.Horse.animationPlay();
     this.VCTE.animationPlay();
     //this.Avatar.animationPlay();
-    this.future( 0 ).initializeCamera();
+
+    this.camera.translation = [10.48534870147705,1.0754132270812988,0]; 
+    this.camera.rotation = [0,0,1,103.94998168945312];
   }
   this.pointerDown = function( pointerInfo, pickInfo ) {
-    if (++this.Avatar.animationType > 1) this.Avatar.animationType = 0;
-    switch (this.Avatar.animationType) {
+    if ( ++this.Avatar.animationType > 1 ) this.Avatar.animationType = 0;
+    switch ( this.Avatar.animationType ) {
       case 0:
         //this.Avatar.animationTime = 0;
         //this.Avatar.animationStartTime = 0;
@@ -90,10 +90,5 @@ scripts:
         this.Avatar.animationPlay(5,8.25);
         break;
     }
-  }  
-  this.initializeCamera = function() {
-    //this.camera.near = 1;
-    this.camera.translation = [10.48534870147705,1.0754132270812988,0]; 
-    this.camera.rotation = [0,0,1,103.94998168945312];
   }//@ sourceURL=index.vwf
 

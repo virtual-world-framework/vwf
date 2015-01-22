@@ -13,67 +13,52 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
+properties:
+  counter: 0
 methods:
-  initializeCamera:
   update:
 children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ -0.2, -0.2, -0.13]
-      maxVelocity: [ 0.2, 0.2, -0.33]
-      maxAcceleration: [ 0, 0, -0.04]
-      minAcceleration: [ 0, 0, -0.05]
+      minVelocity: [ -0.2, -0.2, -0.13 ]
+      maxVelocity: [ 0.2, 0.2, -0.33 ]
+      maxAcceleration: [ 0, 0, -0.04 ]
+      minAcceleration: [ 0, 0, -0.05 ]
       startSize: 80
       endSize: 80
       maxLifeTime: 130
       minLifeTime: 30
-      startColor: [ 2, 2, 2, 1]
-      endColor: [ 1, 1, 1, 1]
+      startColor: [ 2, 2, 2, 1 ]
+      endColor: [ 1, 1, 1, 1 ]
       image: rain.png
       additive: false
       opacity: 1
       depthTest: false
       emitterType: sphere
-      emitterSize: [ 1, 1, 50]
-      translation: [ 0, 0, 100]
+      emitterSize: [ 1, 1, 50 ]
+      translation: [ 0, 0, 100 ]
       particleCount: 3200
       maxRate: 2
   dir1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
       enable: true
       distance: 2000
       intensity: 1.2
       color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      translation: [ 0, 100, 0 ]
 scripts:
 - | 
-    this.initialize = function()
-    {
-        this.dir1.translation = [0,100,0];
-        this.counter = 0;
-        this.future(0).initializeCamera();
-        this.future(.05).update();
+    this.initialize = function() {
+      this.camera.translation = [0,-600,50];
+      this.camera.navmode = "none";
+      this.future(.05).update();
     }
-
-    this.initializeCamera = function() {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.camera.navmode = "none";
-    }
-
-    this.update = function()
-    {
-        this.counter++;
-        this.system.translation = [Math.sin(this.counter/100)*100 + 50,0,200];
-     //   this.system.rotation = [0,1,0,this.counter*4];
-        this.future(.05).update();
+    this.update = function() {
+      this.counter++;
+      this.system.translation = [ Math.sin(this.counter/100)*100 + 50, 0, 200 ];
+      this.future(.05).update();
     } //@ sourceURL=index.vwf

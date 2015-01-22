@@ -32,31 +32,17 @@ children:
       intensity: 1.4
       color: [ 255, 255, 255 ]
       rotation: [ 1, 0, 0, -45 ]
-      translation: [0, -100, 0]
+      translation: [ 0, -100, 0 ]
 scripts:
 - | 
-    this.initialize = function()
-    {
-        this.dir1.translation = [0,-100,0];
-        this.zup.translation = [0,0,0];
-        this.zup.translation = [0,0,0];
-        this.counter = 0;
-        this.future(0).initializeCamera();
-        this.future(0.053).move();
+    this.initialize = function() {
+      this.camera.translation = [ 0, -600, 50 ];
+      this.camera.navmode = "none";
+      this.future(0.053).move();
     }
-
-    this.initializeCamera = function() {
-        //this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.camera.navmode = "none";
-    }
-
-    this.move = function()
-    {
-        this.zup.translation = [0,0,Math.sin(this.time/1.6)];
-        this.counter ++;
-        this.zup.rotation = [1,0,0,0];
-        //this.camera.rotation = [0,0,1,(Math.sin(this.time/1.6)-.5)*9];
-        this.future(0.053).move();
+    this.move = function() {
+      this.zup.translation = [ 0, 0, Math.sin(this.counter/1.6) ];
+      this.counter ++;
+      this.future(0.053).move();
     }
     

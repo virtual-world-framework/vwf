@@ -75,14 +75,11 @@ children:
     type: model/vnd.collada+xml
   dir1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
       distance: 2000
       intensity: 0.3
       color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 1
 # Camera fix
 scripts:
 - |

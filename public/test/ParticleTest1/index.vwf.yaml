@@ -13,63 +13,37 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-methods:
-  initializeCamera:
-  update:
 children:
   system:
     extends: http://vwf.example.com/particlesystem.vwf
     properties:
-      minVelocity: [ -1, -1, 8]
-      maxVelocity: [ 1, 1, 8.5]
-      maxAcceleration: [ 0, 0, -0.29]
-      minAcceleration: [ 0, 0, -0.21]
+      minVelocity: [ -1, -1, 8 ]
+      maxVelocity: [ 1, 1, 8.5 ]
+      maxAcceleration: [ 0, 0, -0.29 ]
+      minAcceleration: [ 0, 0, -0.21 ]
       startSize: 30
       endSize: 10
       maxLifeTime: 40
       minLifeTime: 40
-      startColor: [ 0.5, 0.5, 1, 1]
-      endColor: [ 1, 1, 1 , .5]
+      startColor: [ 0.5, 0.5, 1, 1 ]
+      endColor: [ 1, 1, 1 , .5 ]
       image: smoke.png
       additive: false
       maxRate: 1
       depthTest: false
   dir1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
       enable: true
       distance: 2000
       intensity: 1.2
       color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
       rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      translation: [ 0, -100, 0 ]
 scripts:
 - | 
-    this.initialize = function()
-    {
-        this.dir1.translation = [0,-100,0];
-        this.system.translation = [0,0,0];
-        this.counter = 0;
-        this.future(0).initializeCamera();
-        this.future(.05).update();
-    }
-
-    this.initializeCamera = function() {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.camera.navmode = "none";
-    }
-
-    this.update = function()
-    {
-        this.counter++;
-    //    this.system.translation = [Math.sin(this.counter/100)*300 - 150,0,0];
-    //    this.system.rotation = [0,1,0,this.counter*4];
-        this.future(.05).update();
+    this.initialize = function() {
+      this.camera.translation = [ 0, -600, 50 ];
+      this.camera.navmode = "none";
     } //@ sourceURL=index.vwf

@@ -13,15 +13,13 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-methods:
-  initializeCamera:
 children:
   duck:
     extends: http://vwf.example.com/node3.vwf
     source: duck.dae
     type: model/vnd.collada+xml
     properties:
-      rotation: [ 0, 0, 1, 0]
+      rotation: [ 0, 0, 1, 0 ]
       counter: 0
     children:
       material:
@@ -62,27 +60,21 @@ children:
           }
           this.future(0.1).update();    
        } //@ sourceURL=index.duck.vwf
-  dir1:
+  directional1:
     extends: http://vwf.example.com/light.vwf
     properties:
-      lightType: "point"
+      lightType: "directional"
       enable: true
-      distance: 2000
-      intensity: 1.4
+      intensity: 0.75
       color: [ 255, 255, 255 ]
-      rotation: [ 1, 0, 0, -45 ]
-      translation: [0,-100,0]
+      translation: [ 400, 400, 100 ]
 scripts:
-- | 
-    this.initialize = function()
-    {
-        this.dir1.translation = [0,-100,0];
-        this.duck.translation = [0,0,0];
-        this.future(0).initializeCamera();
-    }
-
-    this.initializeCamera = function() {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.camera.navmode = "none";
+- |
+    this.initialize = function(){
+      this.camera.transform = [ -1,   0,  0, 0, 
+                                 0,  -1,  0, 0, 
+                                 0,   0,  1, 0, 
+                                16, 600, 90, 1 ];
+      this.camera.far *= 4;
+      this.camera.navmode = "none";
     }

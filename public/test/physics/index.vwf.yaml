@@ -13,27 +13,23 @@
 
 --- 
 extends: http://vwf.example.com/scene.vwf
-methods:
-  initializeCamera:
 children:
   box:
     extends: http://vwf.example.com/physics3.vwf
     source: cube.dae
     type: model/vnd.collada+xml
     properties:
+      translation: [ 0, 18, 0 ]
       rotation: [ .747, .747, 0, 45]
       rotVelocityDamping: [ 0.05, 0.05, 0.05 ]
       # whats going on here? It seems like we can't set the rotation
-      transform: [0.4080820679664612, 0, -0.9129452705383301, 0, 0, 1, 0, 0, 0.9129452705383301, 0, 0.4080820679664612, 0, 0, 10, 0, 1]
-      physics: [ "box", 1.0 , 1.0 , 1.0] 
+      physics: [ "box", 1.0 , 1.0 , 1.0 ]
       friction: 0.5 
       mass: 400 
-      linVelocityDamping: [ 1, 1, 1, 0 ] 
+      linVelocityDamping: [ 1, 1, 1, 0 ]
       restitution: 0.10
   dir1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
       distance: 1000
@@ -54,14 +50,8 @@ children:
       mass: 0       
 scripts:
 - | 
-    this.initialize = function()
-    {
-      this.future(0).initializeCamera();
-    }
-
-    this.initializeCamera = function() {
-      //this.camera.rotation = [0,100,100];
-      this.camera.translation = [0,0,100];
-      this.camera.rotation = [1,0,0,-90];
+    this.initialize = function() { 
+      this.camera.translation = [ 0, 0, 100 ];
+      this.camera.rotation = [ 1, 0, 0, -90 ];
       this.camera.navmode = "none"; 
     }

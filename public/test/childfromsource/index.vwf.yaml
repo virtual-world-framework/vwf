@@ -19,7 +19,6 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   counter: 0
 methods:
-  initializeCamera:
   update:  
 children:
   box01:
@@ -41,47 +40,35 @@ children:
                     children:
   dir1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
       distance: 1000
       intensity: 1
       color: [ 255, 255, 255 ]
-      castShadows: false      
-      glge-constantAttenuation: 0
+      castShadows: false
       rotation: [ 1, 0, 0, -45 ]
       translation: [0,-100,0]
 scripts:
 - | 
-    this.initialize = function()
-    {
+    this.initialize = function() {
       this.root = this.box01.children['Scene_Root']; 
       this.box1 = this.root.children['Box01'];
       this.box2 = this.box1.children['Box02'];
       this.box3 = this.box2.children['Box03'];
 
-      this.dir1.translation = [0,100,100];
-      this.box1.translation = [0,0,0];
-      this.box2.translation = [0,-20,0];
-      this.box3.translation = [0,-20,0];
+      this.dir1.translation = [ 0, 100, 100 ];
+      this.box1.translation = [ 0, 0, 0 ];
+      this.box2.translation = [ 0, -20, 0 ];
+      this.box3.translation = [ 0, -20, 0 ];
       
-      this.future(0).initializeCamera();
-      this.future(0.2).update();
-
-    }
-
-    this.initializeCamera = function() {
-      this.camera.rotation = [0,1,0,0];
-      this.camera.translation = [0,-600,50];
+      this.camera.translation = [ 0, -600, 50 ];
       this.camera.navmode = "none";
+      this.future(0.2).update();
     }
-
-    this.update = function()
-    {
-        this.box1.rotation = [0,1,0,this.counter];
-        this.box2.rotation = [0,1,0,this.counter*4];
-        this.box3.rotation = [0,1,0,this.counter*8];
+    this.update = function() {
+        this.box1.rotation = [ 0, 1, 0, this.counter ];
+        this.box2.rotation = [ 0, 1, 0, this.counter*4 ];
+        this.box3.rotation = [ 0, 1, 0, this.counter*8 ];
         this.counter++;
         this.future(0.05).update();
     } //@ sourceURL=index.vwf

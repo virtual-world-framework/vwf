@@ -77,31 +77,21 @@ children:
       translation: [ 0, 0, 0 ]
   dir1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
       enable: true
       distance: 2000
       intensity: 2
       color: [ 128, 128, 128 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
       translation: [ -400, 400, -900 ]
   dir2:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "point"
       enable: true
       distance: 2000
       intensity: 2
       color: [ 128, 128, 128 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
       translation: [ 400, 400, 900 ]
 scripts:
 - |

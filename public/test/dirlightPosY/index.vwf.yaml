@@ -16,7 +16,6 @@ extends: http://vwf.example.com/scene.vwf
 properties:
   counter: 0
 methods:
-  initializeCamera:
   update:   
 children:
   duck:
@@ -25,39 +24,23 @@ children:
     type: model/vnd.collada+xml
   dir1:
     extends: http://vwf.example.com/light.vwf
-    implements:
-    - http://vwf.example.com/glgeLight.vwf
     properties:
       lightType: "directional"
       enable: true
       distance: 2000
       intensity: 1.4
       color: [ 255, 255, 255 ]
-      glge-constantAttenuation: 0.3
-      glge-linearAttenuation: 0.00000001
-      glge-quadraticAttenuation: 0.0000001  
       rotation: [ 0, 0, 1, 90 ]
-      translation: [0,-300,0]   
+      translation: [ 0, -300, 0 ]
 scripts:
 - | 
-    this.initialize = function()
-    {
-        this.dir1.translation = [0,-100,0];
-        this.duck.translation = [0,0,0];
-        this.counter = 0;
-        this.future(0).initializeCamera();
-        this.future(0.2).update();
+    this.initialize = function() {
+      this.camera.translation = [0,-600,50];
+      this.camera.navmode = "none";
+      this.future(0.2).update();
     }
-
-    this.initializeCamera = function () {
-        this.camera.rotation = [0,1,0,0];
-        this.camera.translation = [0,-600,50];
-        this.camera.navmode = "none";
-    }
-
-    this.update = function()
-    {
-        this.counter++;
-        this.dir1.translation = [.1,Math.sin(this.counter/10)*1,.1];
-        this.future(0.06).update();
+    this.update = function() {
+      this.counter++;
+      this.dir1.translation = [ 0.1, Math.sin(this.counter/10)*1, 0.1 ];
+      this.future(0.06).update();
     }

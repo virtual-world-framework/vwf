@@ -21,6 +21,15 @@ children:
     properties:
       translation: [ 15, 616, -90 ]
       rotation: [ 0, 0, 1, 180 ]
+  dir1:
+    extends: http://vwf.example.com/light.vwf
+    properties:
+      lightType: "point"
+      enable: true
+      distance: 2000
+      intensity: 1.4
+      color: [ 255, 255, 255 ]
+      translation: [ 0, -300, 0 ]
   lesson:
     extends: http://vwf.example.com/lesson/task.vwf
     properties:
