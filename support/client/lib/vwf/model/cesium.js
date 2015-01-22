@@ -177,7 +177,7 @@ define( [ "module",
                 sceneNode = findSceneNode.call( this, node );
                 parentNode = findParent.call( this, nodeID );
 
-                if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
+                if ( parentNode && parentNode.cesiumObj instanceof Cesium.Entity ) {
                     node.cesiumObj = parentNode.cesiumObj.billboard;
                 } else {
                     var canvas = document.createElement( 'canvas' );
@@ -194,15 +194,15 @@ define( [ "module",
                     // probably isn't exactly what we want, but without an
                     // idea of exactly how we'll be using billboards,
                     // I'm just going to leave this implementation as is
-                    var bbCollection = new Cesium.BillboardCollection();
+                    var bbCollection = sceneNode.scene.primitives.add( new Cesium.BillboardCollection() );
 
                     var bb = bbCollection.add( {
+                        "image": canvas,
+                        "imageId": childID,
                         "color" : Cesium.Color.RED,
                         "scale" : 1,
                         "imageIndex": 0
                     } );
-
-                    sceneNode.scene.primitives.add( bbCollection );
                     
                     node.bbCollection = bbCollection; 
                     node.cesiumObj = bb;
@@ -212,14 +212,15 @@ define( [ "module",
                 node.scene = sceneNode.scene;
 
             } else if ( isLabel.call( this, protos ) ) {
+
                 this.state.nodes[ childID ] = node = createNode();
                 sceneNode = findSceneNode.call( this, node );
                 parentNode = findParent.call( this, nodeID );
 
-                if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
+                if ( parentNode && parentNode.cesiumObj instanceof Cesium.Entity ) {
                     node.cesiumObj = parentNode.cesiumObj.label;
                 } else {
-                    var labels = new Cesium.LabelCollection();
+                    var labels = sceneNode.scene.primitives.add( new Cesium.LabelCollection() );
                     var lbl = labels.add( {
                         "font"      : '10px Helvetica',
                         "fillColor" : { red : 0.0, blue : 1.0, green : 1.0, alpha : 1.0 },
@@ -227,7 +228,6 @@ define( [ "module",
                         "outlineWidth" : 2,
                         "style" : Cesium.LabelStyle.FILL_AND_OUTLINE
                     } );
-                    sceneNode.scene.primitives.add( labels ); 
 
                     node.labelCollection = labels; 
                     node.cesiumObj = lbl;
@@ -251,7 +251,7 @@ define( [ "module",
                 sceneNode = findSceneNode.call( this, node );
                 parentNode = findParent.call( this, nodeID );
 
-                if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
+                if ( parentNode && parentNode.cesiumObj instanceof Cesium.Entity ) {
                     node.cesiumObj = parentNode.cesiumObj.polyline;
                 } else { 
                     var primitives = sceneNode.scene.primitives;               
@@ -295,7 +295,7 @@ define( [ "module",
                 sceneNode = findSceneNode.call( this, node );
                 parentNode = findParent.call( this, nodeID );
 
-                if ( parentNode && parentNode.cesiumObj instanceof Cesium.DynamicObject ) {
+                if ( parentNode && parentNode.cesiumObj instanceof Cesium.Entity ) {
                     node.cesiumObj = parentNode.cesiumObj.polygon;
                 } else {  
                     var primitives = sceneNode.scene.primitives;
@@ -622,7 +622,7 @@ define( [ "module",
                     switch ( propertyName ) {
 
                         case "visible":
-                            if ( node.cesiumObj.hasOwnProperty( 'show' ) ) {
+                            if ( node.cesiumObj.show !== undefined ) {
                                 node.cesiumObj.show = Boolean( propertyValue );
                             } else if ( node.cesiumObj.setShow ) {
                                 node.cesiumObj.setShow( Boolean( propertyValue ) );
@@ -642,7 +642,7 @@ define( [ "module",
                             } else {
 
                                 //console.info( "dist = " + ( Math.sqrt( (propertyValue[0] * propertyValue[0]) + (propertyValue[1] * propertyValue[1]) + (propertyValue[2] * propertyValue[2]) )  ) )
-                                if ( node.cesiumObj.hasOwnProperty( propertyName ) ) {
+                                if ( node.cesiumObj.position !== undefined ) {
                                     node.cesiumObj.position = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );                                
                                     if ( node.cesiumObj instanceof Cesium.Camera ) {
                                         this.state.cameraInfo.position = node.cesiumObj.position;
@@ -819,20 +819,20 @@ define( [ "module",
                             break;
 
                         case "fovy":
-                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustrum ) {
-                                node.cesiumObj.frustrum.fovy = parseFloat( propertyValue );
+                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustum ) {
+                                node.cesiumObj.frustum.fovy = parseFloat( propertyValue );
                             }                    
                             break;
 
                         case "near":
-                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustrum ) {
-                                node.cesiumObj.frustrum.near = parseFloat( propertyValue );
+                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustum ) {
+                                node.cesiumObj.frustum.near = parseFloat( propertyValue );
                             }
                             break;
 
                         case "far":
-                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustrum ) {
-                                node.cesiumObj.frustrum.far = parseFloat( propertyValue );
+                            if ( node.cesiumObj instanceof Cesium.Camera && node.cesiumObj.frustum ) {
+                                node.cesiumObj.frustum.far = parseFloat( propertyValue );
                             }
                             break;
 
@@ -1019,7 +1019,7 @@ define( [ "module",
                             break; 
 
                         case "availability":
-                            if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                            if ( node.cesiumObj instanceof Cesium.Entity ) {
                                 var start = propertyValue.start;
                                 var stop = propertyValue.stop;
                                 var startIncluded = propertyValue.isStartIncluded ? propertyValue.isStartIncluded : true;
@@ -1031,22 +1031,22 @@ define( [ "module",
                             }
                             break;
                         //case "orientation":
-                        //    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                        //    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         //    
                         //    }
                         //    break;
                         //case "point":
-                        //    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                        //    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         //    
                         //    }
                         //    break;
                         //case "vector":
-                        //    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                        //    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         //    
                         //    }
                         //    break;
                         //case "vertexPositions":
-                        //    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                        //    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         //    
                         //    }
                         //    break;
@@ -1054,7 +1054,7 @@ define( [ "module",
 
 
                         case "viewFrom":
-                            if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                            if ( node.cesiumObj instanceof Cesium.Entity ) {
                                node.cesiumObj.viewFrom = new Cesium.Cartesian3( propertyValue[0], propertyValue[1], propertyValue[2] );
                             }
                             break;
@@ -1396,7 +1396,7 @@ define( [ "module",
 
                         case "enableLook": 
                             if( node.scene ) {
-                                var controller = node.scene.getScreenSpaceCameraController();
+                                var controller = node.scene.screenSpaceCameraController;
                                 if ( controller ) {
                                     controller.enableLook = Boolean( propertyValue );
                                 }
@@ -1405,7 +1405,7 @@ define( [ "module",
 
                         case "enableRotate": 
                             if( node.scene ) {
-                                var controller = node.scene.getScreenSpaceCameraController();
+                                var controller = node.scene.screenSpaceCameraController;
                                 if ( controller ) {
                                     controller.enableRotate = Boolean( propertyValue );
                                 }
@@ -1414,7 +1414,7 @@ define( [ "module",
 
                         case "enableTilt":
                             if( node.scene ) {
-                                var controller = node.scene.getScreenSpaceCameraController();
+                                var controller = node.scene.screenSpaceCameraController;
                                 if ( controller ) {
                                     controller.enableTilt = Boolean( propertyValue );
                                 }
@@ -1423,7 +1423,7 @@ define( [ "module",
 
                         case "enableTranslate":
                             if( node.scene ) {
-                                var controller = node.scene.getScreenSpaceCameraController();
+                                var controller = node.scene.screenSpaceCameraController;
                                 if ( controller ) {
                                     controller.enableTranslate = Boolean( propertyValue );
                                 }
@@ -1432,7 +1432,7 @@ define( [ "module",
 
                         case "enableZoom": 
                             if( node.scene ) {
-                                var controller = node.scene.getScreenSpaceCameraController();
+                                var controller = node.scene.screenSpaceCameraController;
                                 if ( controller ) {
                                     controller.enableZoom = Boolean( propertyValue );
                                 }
@@ -1619,7 +1619,7 @@ define( [ "module",
 
                 case "outlineColor":
                     if( node.cesiumObj ) {
-                        var clr = node.cesiumObj.outLineColor;
+                        var clr = node.cesiumObj.outlineColor;
                         if ( clr.alpha == 1 ) {
                             value = "rgb("+(clr.red*255)+","+(clr.green*255)+","+(clr.blue*255)+")";
                         } else {
@@ -1753,19 +1753,19 @@ define( [ "module",
 
                 case "fovy":
                     if ( node.cesiumObj instanceof Cesium.Camera ) {
-                        value = node.cesiumObj.frustrum.fovy;
+                        value = node.cesiumObj.frustum.fovy;
                     }                    
                     break;
 
                 case "near":
                     if ( node.cesiumObj instanceof Cesium.Camera ) {
-                        value = node.cesiumObj.frustrum.near;
+                        value = node.cesiumObj.frustum.near;
                     }
                     break;
 
                 case "far":
                     if ( node.cesiumObj instanceof Cesium.Camera ) {
-                        value = node.cesiumObj.frustrum.far;
+                        value = node.cesiumObj.frustum.far;
                     }
                     break;
 
@@ -1871,38 +1871,38 @@ define( [ "module",
                     break; 
 
                 case "orientation":
-                    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         value = node.cesiumObj.orientation.getValue();
                     }
                     break;
 
                 case "point":
-                    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         value = node.cesiumObj.point.getValue();
                     }
                     break;
 
                 case "vector":
-                    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         value = node.cesiumObj.vector.getValue();
                     }
                     break;
 
                 case "vertexPositions":
-                    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                    if ( node.cesiumObj instanceof Cesium.Entity ) {
                         value = node.cesiumObj.vertexPositions.getValue();
                     }
                     break;
 
                 case "viewFrom":
-                    if ( node.cesiumObj instanceof Cesium.DynamicObject ) {
+                    if ( node.cesiumObj instanceof Cesium.Entity ) {
                        value = node.cesiumObj.viewFrom;
                     }
                     break;   
 
                 case "enableLook": 
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceCameraController();
+                        var controller = node.scene.screenSpaceCameraController;
                         if ( controller ) {
                             value = controller.enableLook;
                         }
@@ -1910,7 +1910,7 @@ define( [ "module",
                     break;
                 case "enableRotate": 
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceCameraController();
+                        var controller = node.scene.screenSpaceCameraController;
                         if ( controller ) {
                             value = controller.enableRotate;
                         }
@@ -1918,7 +1918,7 @@ define( [ "module",
                     break;
                 case "enableTilt":
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceCameraController();
+                        var controller = node.scene.screenSpaceCameraController;
                         if ( controller ) {
                             value = controller.enableTilt;
                         }
@@ -1926,7 +1926,7 @@ define( [ "module",
                     break; 
                 case "enableTranslate":
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceCameraController();
+                        var controller = node.scene.screenSpaceCameraController;
                         if ( controller ) {
                             value = controller.enableTranslate;
                         }
@@ -1934,7 +1934,7 @@ define( [ "module",
                     break;
                 case "enableZoom": 
                     if( node.scene ) {
-                        var controller = node.scene.getScreenSpaceCameraController();
+                        var controller = node.scene.screenSpaceCameraController;
                         if ( controller ) {
                             value = controller.enableZoom;
                         }
@@ -2238,66 +2238,144 @@ define( [ "module",
         return Cesium.Matrix4.fromRowMajorArray( arry );
     }
 
-    function getCentralBody( sceneNode, node ) {
-        if ( sceneNode.centralBody ) {
-            return sceneNode.centralBody;
-        }
-    }
-
 
     function createGeometry( node ) {
 
         var sceneNode = findSceneNode.call( this, node );
 
-        if ( sceneNode === undefined ) {
-            return;
-        }
-
-        var centralBody = getCentralBody.call( this, sceneNode, node );
-
-        if ( centralBody === undefined ) {
+        if ( sceneNode === undefined && sceneNode.scene !== undefined ) {
             return;
         }
 
         var primitives = sceneNode.scene.primitives;
-        var ellipsoid = centralBody.getEllipsoid();
 
-        var dimensions;
-        var modelMatrix;
-        var posOnEllipsoid;
-        var dim = node.properties[ 'dimensions' ];
-        var pos = node.properties[ 'position' ];
-        var color = node.properties[ 'color' ] !== undefined ? cesuimColor.call( this, node.properties[ 'color' ] ) : new Cesium.Color( 1.0, 1.0, 1.0, 1.0 );
+        var dimensions, modelMatrix, posOnEllipsoid, dim, radius, extrudeHeight, height, flat;
+        var lineWidth, vertLines, rotation, followSurface;
+        var pos = node.properties.position;
+        var closed = node.properties.closed ? node.properties.closed : true;
+        var color = node.properties.color !== undefined ? cesuimColor.call( this, node.properties[ 'color' ] ) : new Cesium.Color( 1.0, 1.0, 1.0, 1.0 );
+        var translucent = node.properties.translucent ? node.properties.translucent : false;
 
+        dim = node.properties.dimensions || [ 1, 1, 1 ];
         dimensions = new Cesium.Cartesian3( dim[0], dim[1], dim[2] );
-        posOnEllipsoid = ellipsoid.cartographicToCartesian( Cesium.Cartographic.fromDegrees( pos[0], pos[1] ) );
-        modelMatrix = Cesium.Matrix4.multiplyByTranslation(
-            Cesium.Transforms.eastNorthUpToFixedFrame( posOnEllipsoid ),
-            new Cesium.Cartesian3( 0.0, 0.0, dimensions.z * 0.5 ) );
+        posOnEllipsoid = Cesium.Cartesian3.fromDegrees( pos[0], pos[1] );
+        
+        var trans = Cesium.Transforms.eastNorthUpToFixedFrame( posOnEllipsoid );
+        var cartVec3 = new Cesium.Cartesian3( 0.0, 0.0, dimensions.z * 0.5 );
+        var identityMat = new Cesium.Matrix4();
 
+        modelMatrix = undefined;
 
         switch ( node.geometryType ) {
+            
             case "box":
+                modelMatrix = Cesium.Matrix4.multiplyByTranslation( trans, cartVec3, identityMat );
                 node.geometry = Cesium.BoxGeometry.fromDimensions( {
                     "vertexFormat" : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
                     "dimensions" : dimensions
                 } );
+                break;
 
+            case "circle":
+                radius = node.properties.radius || 100.0;
+                extrudeHeight = node.properties.extrudeHeight || 0;
+                height = node.properties.height || 0;
+                node.geometry = new Cesium.CircleGeometry( {
+                    "center" : posOnEllipsoid,
+                    "radius" : radius,
+                    "extrudedHeight": extrudeHeight,
+                    "height": height,
+                    "vertexFormat" : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
+                } );  
+                break;  
+
+            case "circleOutline":
+                radius = node.properties.radius || 100.0;
+                extrudeHeight = node.properties.extrudeHeight || 0;
+                height = node.properties.height || 0;
+                vertLines = node.properties.verticleLines || 0;
+                node.geometry = new Cesium.CircleOutlineGeometry( {
+                    "center" : posOnEllipsoid,
+                    "radius" : radius,
+                    "extrudedHeight": extrudeHeight,
+                    "height": height,
+                    "numberOfVerticalLines": vertLines
+                } );  
+                break;
+
+            case "sphere":
+                modelMatrix = Cesium.Matrix4.multiplyByTranslation( trans, cartVec3, identityMat );
+                radius = node.properties.radius || 100.0;
+                node.geometry = new Cesium.SphereGeometry({
+                    vertexFormat : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT,
+                    radius : radius
+                });
+                break;
+
+            case "rectangle":
+                extrudeHeight = node.properties.extrudeHeight || 0;
+                height = node.properties.height || 0;
+                points = node.properties.points || [ 0, 100.0, -100.0, 50.0 ];
+                rotation = node.properties.rotation || 0; 
+                node.geometry = new Cesium.RectangleGeometry( {
+                    "rectangle" : Cesium.Rectangle.fromDegrees( points[0], points[1], points[2], points[3] ),
+                    "rotation" : Cesium.Math.toRadians( rotation ),
+                    "extrudedHeight" : extrudeHeight,
+                    "height" : height,
+                    "vertexFormat" : Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
+                } )
+                break;
+
+            case "rectangleOutline":
+                points = node.properties.points || [ 0, 100.0, -100.0, 50.0 ];
+                node.geometry = new Cesium.RectangleOutlineGeometry({
+                    "rectangle" : Cesium.Rectangle.fromDegrees( points[0], points[1], points[2], points[3] )
+                } );
+                break;
+
+            case "polyline":
+                if ( node.properties.points && node.properties.points instanceof Array ) {
+                    followSurface = node.properties.followSurface || true;
+                    geometry : new Cesium.SimplePolylineGeometry( {
+                        "positions" : Cesium.Cartesian3.fromDegreesArray( node.properties.points ),
+                        "followSurface": followSurface
+                    } );
+                }
+
+
+
+
+        }
+
+        if ( node.geometry !== undefined ) {
+
+            if ( modelMatrix !== undefined ) {
                 node.geometryInstance = new Cesium.GeometryInstance( {
                     "geometry" : node.geometry,
                     "modelMatrix" : modelMatrix,
                     "attributes" : {
                         "color" : Cesium.ColorGeometryInstanceAttribute.fromColor( color )
                     }
-                } );
+                } );                
+            } else {
+                node.geometryInstance = new Cesium.GeometryInstance( {
+                    "geometry" : node.geometry,
+                    "attributes" : {
+                        "color" : Cesium.ColorGeometryInstanceAttribute.fromColor( color )
+                    }
+                } );                 
+            }                
 
-                node.primitive = new Cesium.Primitive( {
-                    "geometryInstances" : node.geometryInstance,
-                    "appearance" : new Cesium.PerInstanceColorAppearance( { "closed": true } )
-                } );
-                primitives.add( node.primitive );            
-                break;
+            node.primitive = new Cesium.Primitive( {
+                "geometryInstances" : node.geometryInstance,
+                "appearance" : new Cesium.PerInstanceColorAppearance( {
+                    "closed": closed,
+                    "translucent": translucent
+                } )
+            } );
+            primitives.add( node.primitive );              
         }
+
 
         node.properties = undefined;
     }

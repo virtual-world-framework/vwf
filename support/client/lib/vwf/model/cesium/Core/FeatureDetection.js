@@ -115,7 +115,8 @@ define([
      * A set of functions to detect whether the current browser supports
      * various features.
      *
-     * @exports FeatureDetection
+     * @namespace
+     * @alias FeatureDetection
      */
     var FeatureDetection = {
         isChrome : isChrome,
@@ -150,6 +151,17 @@ define([
      */
     FeatureDetection.supportsTypedArrays = function() {
         return typeof ArrayBuffer !== 'undefined';
+    };
+
+    /**
+     * Detects whether the current browser supports Web Workers.
+     *
+     * @returns true if the browsers supports Web Workers, false if not.
+     *
+     * @see {@link http://www.w3.org/TR/workers/}
+     */
+    FeatureDetection.supportsWebWorkers = function() {
+        return typeof Worker !== 'undefined';
     };
 
     return FeatureDetection;

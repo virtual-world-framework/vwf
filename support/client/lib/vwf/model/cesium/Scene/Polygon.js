@@ -40,7 +40,7 @@ define([
      * @param {Cartesian3[]} [options.positions] The cartesian positions of the polygon.
      * @param {Object} [options.polygonHierarchy] An object defining the vertex positions of each nested polygon as defined in {@link Polygon#configureFromPolygonHierarchy}.
      * @param {Number} [options.granularity=CesiumMath.RADIANS_PER_DEGREE] The distance, in radians, between each latitude and longitude in the underlying geometry.
-     * @param {Number} [options.height=0.0] The height, in meters, that the rectangle is raised above the {@link RectanglePrimitive#ellipsoid}.
+     * @param {Number} [options.height=0.0] The height, in meters, that the rectangle is raised above the {@link Polygon#ellipsoid}.
      * @param {Number} [options.textureRotationAngle=0.0] The rotation of the texture coordinates, in radians. A positive rotation is counter-clockwise.
      * @param {Boolean} [options.show=true] Determines if this primitive will be shown.
      * @param {Material} [options.material] The surface appearance of the primitive.
@@ -56,10 +56,10 @@ define([
      * @example
      * // Example 1
      * var polygon = new Cesium.Polygon({
-     *   positions : [
-     *     ellipsoid.cartographicToCartesian(new Cesium.Cartographic(...)),
-     *     ellipsoid.cartographicToCartesian(new Cesium.Cartographic(...)),
-     *     ellipsoid.cartographicToCartesian(new Cesium.Cartographic(...))
+     *   positions : Cartesian3.fromDegreesArray([
+     *     0.0, 0.0,
+     *     10.0, 0.0,
+     *     0.0, 10.0
      *   ]
      * });
      *
@@ -72,9 +72,11 @@ define([
      *   blue  : 0.0,
      *   alpha : 1.0
      * };
-     * polygon.positions = [ellipsoid.cartographicToCartesian(new Cesium.Cartographic(...)),
-     *   ellipsoid.cartographicToCartesian(new Cesium.Cartographic(...)),
-     *   ellipsoid.cartographicToCartesian(new Cesium.Cartographic(...))];
+     * polygon.positions = Cesium.Cartesian3.fromDegreesArray([
+     *     0.0, 0.0,
+     *     10.0, 0.0,
+     *     0.0, 10.0
+     * ]);
      */
     var Polygon = function(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
@@ -180,7 +182,7 @@ define([
         /**
          * This property is for debugging only; it is not for production use nor is it optimized.
          * <p>
-         * Draws the bounding sphere for each {@link DrawCommand} in the primitive.
+         * Draws the bounding sphere for each draw command in the primitive.
          * </p>
          *
          * @type {Boolean}
@@ -209,15 +211,15 @@ define([
 
     defineProperties(Polygon.prototype, {
         /**
-         * Gets and sets positions that define the boundary of the polygon.
+         * Gets or sets positions that define the boundary of the polygon.
          * @memberof Polygon.prototype
          * @type {Cartesian3[]}
          * @example
-         * polygon.positions = [
-         *   ellipsoid.cartographicToCartesian(new Cesium.Cartographic(...)),
-         *   ellipsoid.cartographicToCartesian(new Cesium.Cartographic(...)),
-         *   ellipsoid.cartographicToCartesian(new Cesium.Cartographic(...))
-         * ];
+         * polygon.positions = Cesium.Cartesian3.fromDegreesArray([
+         *     0.0, 0.0,
+         *     10.0, 0.0,
+         *     0.0, 10.0
+         * ]);
          */
         positions: {
             get : function() {
