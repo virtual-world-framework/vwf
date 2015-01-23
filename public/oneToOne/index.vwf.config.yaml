@@ -15,5 +15,15 @@
 model:
   vwf/model/cesium:
 view:
-  vwf/view/cesium: { cesium: 'widget', parentDiv: 'cesium-main', invertMouse: { x: true }, canvasOptions: { contextOptions: { alpha: true }, } }
-  vwf/view/webrtc: { videoProperties: { create: false }, debug: false }
+  vwf/view/cesium: 
+    cesium: 'widget'
+    parentDiv: 'cesium-main'
+    invertMouse: 
+      x: true
+    widget: 
+      contextOptions: 
+        alpha: true
+  vwf/view/webrtc: 
+    videoProperties: 
+      create: false
+    debug: false
