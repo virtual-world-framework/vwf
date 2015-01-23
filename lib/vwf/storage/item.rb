@@ -1,3 +1,5 @@
+require "securerandom"
+
 module VWF::Storage
 
   class Item
@@ -18,7 +20,7 @@ module VWF::Storage
     end
 
     def newid
-      rand( 1000 ).to_s  # TODO: actual id calculation, test for uniqueness if provided
+      SecureRandom.hex
     end
 
   end
