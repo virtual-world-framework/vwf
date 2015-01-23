@@ -1339,7 +1339,7 @@ define( [ "module",
                                     "terrainProvider": propertyValue
                                 } );
                                
-                                node.cesiumObj.depthTestAgainstTerrain = ( terrainProvider !== undefined );
+                                node.cesiumObj.depthTestAgainstTerrain = ( node.terrainProvider !== undefined );
 
                                 if ( node.terrainProvider !== undefined ) {
                                     node.terrainProviderValue = requestedType;
