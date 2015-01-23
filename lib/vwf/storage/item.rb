@@ -9,6 +9,7 @@ module VWF::Storage
     def initialize collection, id = nil, value = nil
       @collection = collection
       @id = id
+      yield if block_given?
       set value if value
     end
 
