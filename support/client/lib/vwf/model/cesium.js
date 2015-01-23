@@ -40,6 +40,220 @@ define( [ "module",
             this.state.scenes = {}; // id => { scene: Cesium.Scene }
             this.state.nodes = {}; // id => { name: string, cesiumObj:  }
             this.state.prototypes = {}; 
+            
+            this.state.createImageryProvider = function( options ) {
+                var imageProvider = undefined;
+                if ( options && options.imageryProvider ) {
+                    var url, ext, credit, type, mapStyle, params, layers;
+
+                    if ( !options instanceof String ) {
+                        url = options.imageryProvider.url;
+                        ext = options.imageryProvider.fileExtension;
+                        mapStyle = options.imageryProvider.mapStyle;
+                        credit = options.imageryProvider.credit;
+                        type = options.imageryProvider.type;
+                        params = options.imageryProvider.params;
+                        layers = options.imageryProvider.layers;
+                    } else {
+                        type = options.imageryProvider;     
+                    }
+
+                    switch ( type ) {
+                        
+                        case "bingAerial":
+                            imageProvider = new Cesium.BingMapsImageryProvider({
+                                "url" : url || '//dev.virtualearth.net',
+                                "mapStyle" : mapStyle || Cesium.BingMapsStyle.AERIAL
+                            });
+                            break;
+
+                        case "bingAerialLabel":
+                            imageProvider = new Cesium.BingMapsImageryProvider({
+                                "url" : url || '//dev.virtualearth.net',
+                                "mapStyle" : mapStyle || Cesium.BingMapsStyle.AERIAL_WITH_LABELS
+                            });
+                            break;
+
+                        case "bingRoad":
+                            imageProvider = new Cesium.BingMapsImageryProvider( {
+                                "url": url || '//dev.virtualearth.net',
+                                "mapStyle": mapStyle || Cesium.BingMapsStyle.ROAD
+                            } );                        
+                            break;
+
+                        case "esriWorld":
+                            imageProvider = new Cesium.ArcGisMapServerImageryProvider({
+                                "url" : url || '//services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+                            });                      
+                            break;
+
+                        case "esriStreet":
+                            imageProvider = new Cesium.ArcGisMapServerImageryProvider({
+                                "url" : url || '//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
+                            } );                       
+                            break;
+
+                        case "esriGeo":
+                            imageProvider = new Cesium.ArcGisMapServerImageryProvider({
+                                "url" : url || '//services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/',
+                                "proxy" : new Cesium.DefaultProxy('/proxy/')
+                            });                      
+                            break;
+
+                        case "openStreet":
+                            imageProvider = new Cesium.OpenStreetMapImageryProvider({});
+                            break;
+
+                        case "mapQuestStreet":
+                            imageProvider = new Cesium.OpenStreetMapImageryProvider({
+                                "url": url || '//otile1.mqcdn.com/tiles/1.0.0/osm/'
+                            });
+                            break;
+
+                        case "stamen":
+                            imageProvider = new Cesium.OpenStreetMapImageryProvider({
+                                "url": url || '//stamen-tiles.a.ssl.fastly.net/watercolor/',
+                                "fileExtension": fileExtension || 'jpg',
+                                "credit": credit || 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.'
+                            });
+                            break;
+
+                        case "naturalEarth":
+                            imageProvider = new Cesium.TileMapServiceImageryProvider({
+                                "url" : url ||  require.toUrl('Assets/Textures/NaturalEarthII')
+                            });
+                            break;
+
+                        case "single":
+                            imageProvider = new Cesium.SingleTileImageryProvider({
+                                "url" : url || require.toUrl('Assets/Textures/NE2_LR_LC_SR_W_DR_2048.jpg')
+                            } );
+                            break;
+
+                        case "usInfrared":
+                            imageProvider = new Cesium.WebMapServiceImageryProvider({
+                                "url" : url || '//mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?',
+                                "layers" : layers || 'goes_conus_ir',
+                                "credit" : credit || 'Infrared data courtesy Iowa Environmental Mesonet',
+                                "parameters" : params || {
+                                    "transparent" : 'true',
+                                    "format" : 'image/png'
+                                },
+                                "proxy": new Cesium.DefaultProxy('/proxy/')
+                            });
+                            break;
+
+                        case "usWeather":
+                            imageProvider = new Cesium.WebMapServiceImageryProvider({
+                                "url" : url || '//mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?',
+                                "layers" : layers || 'nexrad-n0r',
+                                "credit" : credit || 'Radar data courtesy Iowa Environmental Mesonet',
+                                "parameters" : params || {
+                                    "transparent" : 'true',
+                                    "format" : 'image/png'
+                                },
+                                "proxy" : new Cesium.DefaultProxy('/proxy/')
+                            });
+               
+                            break;
+
+                        case "tms":
+                            imageProvider = new Cesium.TileMapServiceImageryProvider({
+                                "url" : url || '../images/cesium_maptiler/Cesium_Logo_Color'
+                            });
+                            break;
+
+                        case "image":
+                            imageProvider = new Cesium.SingleTileImageryProvider({
+                                "url" : url || '../images/Cesium_Logo_overlay.png',
+                                "rectangle" : Cesium.Rectangle.fromDegrees(-115.0, 38.0, -107, 39.75)
+                            });
+                            break;
+
+                        case "grid":
+                            imageProvider = new Cesium.GridImageryProvider();
+                            break;
+
+                        case "tile":
+                            imageProvider = new Cesium.TileCoordinatesImageryProvider();
+                            break;
+
+                    }
+                    options.imageryProvider = imageProvider;
+                }
+                return imageProvider;
+
+            };
+            
+            this.state.creataTerrainProvider = function( options ) {
+                var terrainProvider = undefined;
+                if ( options && options.terrainProvider ) {
+                    var url, ext, type, credit;
+
+                    if ( !options instanceof String ) {
+                        url = options.terrainProvider.url;
+                        ext = options.terrainProvider.fileExtension;
+                        credit = options.terrainProvider.credit;
+                        type = options.terrainProvider.type;
+                    } else {
+                        type = options.terrainProvider;     
+                    }
+
+                    switch ( type ) {
+                        
+                        case "cesium":   // remove if all refences can be found
+                        case "CesiumTerrainProvider":
+                            terrainProvider = new Cesium.CesiumTerrainProvider({
+                                url : url || '//cesiumjs.org/smallterrain',
+                                credit : credit || 'Terrain data courtesy Analytical Graphics, Inc.'
+                            });  
+                            break;
+
+                        case "NaturalEarthII":
+                        case "TileMapServiceImageryProvider":
+                            terrainProvider = new Cesium.TileMapServiceImageryProvider({
+                                url: url || '../vwf/model/Assets/Textures/NaturalEarthII',
+                                fileExtension: ext || 'jpg'
+                            });
+                            break;
+
+                        case "cesiumMesh":
+                            terrainProvider = new Cesium.CesiumTerrainProvider({
+                                url : url || '//cesiumjs.org/stk-terrain/tilesets/world/tiles'
+                            });  
+                            break;
+
+                        case "ArcGisImageServerTerrainProvider":
+                            terrainProvider = new Cesium.ArcGisImageServerTerrainProvider({
+                                url : url || '//elevation.arcgisonline.com/ArcGIS/rest/services/WorldElevation/DTMEllipsoidal/ImageServer',
+                                // sample token : 'KED1aF_I4UzXOHy3BnhwyBHU4l5oY6rO6walkmHoYqGp4XyIWUd5YZUC1ZrLAzvV40pR6gBXQayh0eFA8m6vPg..',
+                                proxy : new Cesium.DefaultProxy('/terrain/')
+                            }); 
+                            break;
+
+                        default:
+                            // tilingScheme - parm 1
+                            // ellipsoid - parm 2
+                            terrainProvider = new Cesium.EllipsoidTerrainProvider();
+                            break;
+
+                    }
+                    options.terrainProvider = terrainProvider;
+                }
+                return terrainProvider;
+            };
+            this.state.createClock = function( options ) {
+
+            };
+            this.state.createSkyBox = function( options ) {
+
+            };
+            this.state.setSceneMode = function( options ) {
+
+            };
+            this.state.createMapProjection = function( options ) {
+
+            };
 
 
             // turns on logger debugger console messages 
@@ -53,6 +267,8 @@ define( [ "module",
                 "getting": false,
                 "prototypes": false
             };
+
+
        
         },
 
@@ -124,6 +340,8 @@ define( [ "module",
                 if ( parentNode && parentNode.globe ) {
                     node.cesiumObj = parentNode.globe;
                     node.cesiumObj.vwfID = childID;
+                    node.terrainProviderValue = "";
+                    node.imageryProviderValue = "";
                 }                
 
             } else if ( isAtmosphere.call( this, protos ) ) {
@@ -1111,50 +1329,23 @@ define( [ "module",
 
                         case "terrainProvider":
                             if ( node.cesiumObj instanceof Cesium.Globe ) {
-                                if ( node.terrainProvider && node.terrainProvider == propertyValue ) {
+                                
+                                var requestedType = propertyValue.type || propertyValue.terrainProvider;
+                                if ( requestedType === node.terrainProviderValue ) {
                                     break;
                                 }
 
-                                var terrainProvider = undefined;
-                                switch ( propertyValue ) {
-                                    
-                                    case "cesium":
-                                        node.terrainProvider = propertyValue;
-                                        terrainProvider = new Cesium.CesiumTerrainProvider({
-                                            url : '//cesiumjs.org/smallterrain',
-                                            credit : 'Terrain data courtesy Analytical Graphics, Inc.'
-                                        });  
-                                        break;
+                                node.terrainProvider = this.state.creataTerrainProvider ( { 
+                                    "terrainProvider": propertyValue
+                                } );
+                               
+                                node.cesiumObj.depthTestAgainstTerrain = ( terrainProvider !== undefined );
 
-                                    case "cesiumMesh":
-                                        node.terrainProvider = propertyValue;
-                                        terrainProvider = new Cesium.CesiumTerrainProvider({
-                                            url : '//cesiumjs.org/stk-terrain/tilesets/world/tiles'
-                                        });  
-                                        break;
-
-                                    case "vr":
-                                        node.terrainProvider = propertyValue;
-                                        terrainProvider = new Cesium.VRTheWorldTerrainProvider({
-                                            url : '//www.vr-theworld.com/vr-theworld/tiles1.0.0/73/',
-                                            credit : 'Terrain data courtesy VT MÄK'
-                                        }); 
-                                        break;
-
-                                    default:
-                                        terrainProvider = new Cesium.EllipsoidTerrainProvider();
-                                        node.terrainProvider = "ellipsoid";
-                                        break;
-
-                                }
-
-                                node.cesiumObj.depthTestAgainstTerrain = true;
-
-                                if ( terrainProvider !== undefined ) {
-                                    node.cesiumObj.terrainProvider = terrainProvider;
+                                if ( node.terrainProvider !== undefined ) {
+                                    node.terrainProviderValue = requestedType;
+                                    node.cesiumObj.terrainProvider = node.terrainProvider;
                                 }
                             }
-                            
                             value = undefined;
                             break;
 
@@ -1175,7 +1366,7 @@ define( [ "module",
                 node = this.state.scenes[ nodeID ]; 
                 var scene = node.scene;
 
-                if ( ( node.cesiumWidget !== undefined || node.globe !== undefined ) && utility.validObject( propertyValue ) ) {
+                if ( ( node.cesiumWidget !== undefined || scene.globe !== undefined ) && utility.validObject( propertyValue ) ) {
 
                     switch ( propertyName ) {
 
@@ -1202,153 +1393,22 @@ define( [ "module",
                             }
                             break;
 
-
-
                         case "imageryProvider":
-                            
-                            if ( node.imageryProvider && node.imageryProvider == propertyValue ) {
-                                //we need to probably remember which image providers have been loaded and 
-                                //then just switch the current if the requested has already been loaded
+                            var requestedType = propertyValue.type || propertyValue.terrainProvider;
+                            if ( node.imageryProviderValue === requestedType ) {
                                 return;
                             }
-
-                            var imageProvider = undefined;
-                            var proxy = new Cesium.DefaultProxy('/proxy/');
                 
-                            
-                            switch ( propertyValue ) {
-                                case "bingAerial":
-                                    imageProvider = new Cesium.BingMapsImageryProvider({
-                                        url : '//dev.virtualearth.net',
-                                        mapStyle : Cesium.BingMapsStyle.AERIAL
-                                    });
-                                    break;
+                            node.imageProvider = this.state.createImageryProvider ( { 
+                                "imageryProvider": propertyValue
+                            } );                            
 
-                                case "bingAerialLabel":
-                                    imageProvider = new Cesium.BingMapsImageryProvider({
-                                        url : '//dev.virtualearth.net',
-                                        mapStyle : Cesium.BingMapsStyle.AERIAL_WITH_LABELS
-                                    });
-                                    break;
-
-                                case "bingRoad":
-                                    imageProvider = new Cesium.BingMapsImageryProvider( {
-                                        url: '//dev.virtualearth.net',
-                                        mapStyle: Cesium.BingMapsStyle.ROAD
-                                    } );                        
-                                    break;
-
-                                case "esriWorld":
-                                    imageProvider = new Cesium.ArcGisMapServerImageryProvider({
-                                        url : '//services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
-                                    });                      
-                                    break;
-
-                                case "esriStreet":
-                                    imageProvider = new Cesium.ArcGisMapServerImageryProvider({
-                                        url : '//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
-                                    } );                       
-                                    break;
-
-                                case "esriGeo":
-                                    imageProvider = new Cesium.ArcGisMapServerImageryProvider({
-                                        url : '//services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/',
-                                        proxy : proxy
-                                    });                      
-                                    break;
-
-                                case "openStreet":
-                                    imageProvider = new Cesium.OpenStreetMapImageryProvider({});
-                                    break;
-
-                                case "mapQuestStreet":
-                                    imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                        url: '//otile1.mqcdn.com/tiles/1.0.0/osm/'
-                                    });
-                                    break;
-
-                                case "stamen":
-                                    imageProvider = new Cesium.OpenStreetMapImageryProvider({
-                                        url: '//stamen-tiles.a.ssl.fastly.net/watercolor/',
-                                        fileExtension: 'jpg',
-                                        credit: 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.'
-                                    });
-                                    break;
-
-                                case "naturalEarth":
-                                    imageProvider = new Cesium.TileMapServiceImageryProvider({
-                                        url : require.toUrl('Assets/Textures/NaturalEarthII')
-                                    });
-                                    break;
-
-                                case "single":
-                                    imageProvider = new Cesium.SingleTileImageryProvider({
-                                        url : require.toUrl('Assets/Textures/NE2_LR_LC_SR_W_DR_2048.jpg')
-                                    } );
-                                    break;
-
-                                case "usInfrared":
-                                    imageProvider = new Cesium.WebMapServiceImageryProvider({
-                                        url : '//mesonet.agron.iastate.edu/cgi-bin/wms/goes/conus_ir.cgi?',
-                                        layers : 'goes_conus_ir',
-                                        credit : 'Infrared data courtesy Iowa Environmental Mesonet',
-                                        parameters : {
-                                            transparent : 'true',
-                                            format : 'image/png'
-                                        },
-                                        proxy : new Cesium.DefaultProxy('/proxy/')
-                                    });
-                                    break;
-
-                                case "usWeather":
-                                    imageProvider = new Cesium.WebMapServiceImageryProvider({
-                                        url : '//mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi?',
-                                        layers : 'nexrad-n0r',
-                                        credit : 'Radar data courtesy Iowa Environmental Mesonet',
-                                        parameters : {
-                                            transparent : 'true',
-                                            format : 'image/png'
-                                        },
-                                        proxy : new Cesium.DefaultProxy('/proxy/')
-                                    });
-                       
-                                    break;
-
-                                case "tms":
-                                    imageProvider = new Cesium.TileMapServiceImageryProvider({
-                                        url : '../images/cesium_maptiler/Cesium_Logo_Color'
-                                    });
-                                    break;
-
-                                case "image":
-                                    imageProvider = new Cesium.SingleTileImageryProvider({
-                                        url : '../images/Cesium_Logo_overlay.png',
-                                        rectangle : Cesium.Rectangle.fromDegrees(-115.0, 38.0, -107, 39.75)
-                                    });
-                                    break;
-
-                                case "grid":
-                                    imageProvider = new Cesium.GridImageryProvider();
-                                    break;
-
-                                case "tile":
-                                    imageProvider = new Cesium.TileCoordinatesImageryProvider();
-                                    break;
-
-                            }
-
-                            if ( imageProvider !== undefined ) {
-                                // if ( node && node.cesiumWidget !== undefined ) {
-                                //     // how does the widget add an image layer
-                                //     node.cesiumWidget._globe.getImageryLayers().addImageryProvider( imageProvider );
-                                // } else if ( node.globe !== undefined ) {
-                                //     node.globe.getImageryLayers().addImageryProvider( imageProvider );
-                                // }
-                                node.imageryProvider = propertyValue;
+                            if ( node.imageProvider !== undefined ) {
+                                scene.globe.imageryLayers().addImageryProvider( node.imageProvider );
+                                node.imageryProviderValue = requestedType;
                             }
                             value = undefined;
                             break;
-
 
                         case "renderStyle":
                             // using the Cesium.Widget

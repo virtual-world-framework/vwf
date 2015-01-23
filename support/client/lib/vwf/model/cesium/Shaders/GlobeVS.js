@@ -97,8 +97,7 @@ void main() \n\
 #elif defined(ENABLE_VERTEX_LIGHTING)\n\
     v_positionEC = (czm_modelView3D * vec4(position3DWC, 1.0)).xyz;\n\
     v_positionMC = position3DWC;                                 // position in model coordinates\n\
-    vec2 encodedNormal = textureCoordAndEncodedNormals.zw;\n\
-    encodedNormal = encodedNormal / 255.0 * 2.0 - 1.0;\n\
+    float encodedNormal = textureCoordAndEncodedNormals.z;\n\
     v_normalMC = czm_octDecode(encodedNormal);\n\
     v_normalEC = czm_normal3D * v_normalMC;\n\
 #endif\n\
