@@ -420,11 +420,8 @@ define( [ "module",
             } else if ( protos && isNodeDefinition.call( this, protos ) && childName !== undefined ) {
                 
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                if ( childType == "model/vnd.collada+xml" || 
-                    childType == "model/vnd.osgjs+json+compressed" ||
-                    childType == "model/x-threejs-morphanim+json" ||
-                    childType == "model/vnd.gltf+json" ||
-                    childType == "model/x-threejs-skinned+json" ) {
+                
+                if ( supportedFileType( childType ) ) {
                     
                     // Most often this callback is used to suspend the queue until the load is complete
                     callback( false );
@@ -499,40 +496,14 @@ define( [ "module",
             
             }
 
-            if ( node && ( node.threeObject instanceof THREE.Object3D ) ) {
-                // Add a local model-side transform that can stay pure even if the view changes the
-                // transform on the threeObject - objects that don't yet have a threeObject because
-                // a file needs to load create this transform in assetLoaded
-                node.transform = new THREE.Matrix4();
-                node.transform.elements = matCpy( node.threeObject.matrix.elements );
-
-                // If this threeObject is a camera, it has a 90-degree rotation on it to account for the 
-                // different coordinate systems of VWF and three.js.  We need to undo that rotation before 
-                // setting the VWF property.
-                if ( node.threeObject instanceof THREE.Camera ) {
-                                        
-                    var transformArray = node.transform.elements;
-
-                    // Get column y and z out of the matrix
-                    var columny = goog.vec.Vec4.create();
-                    goog.vec.Mat4.getColumn( transformArray, 1, columny );
-                    var columnz = goog.vec.Vec4.create();
-                    goog.vec.Mat4.getColumn( transformArray, 2, columnz );
-
-                    // Swap the two columns, negating columny
-                    goog.vec.Mat4.setColumn( transformArray, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-                    goog.vec.Mat4.setColumn( transformArray, 2, columny );
-                }
-            }
+            updateStoredTransform( node );
 
             // If we do not have a load a model for this node, then we are almost done, so we can update all
             // the driver properties w/ the stop-gap function below.
             // Else, it will be called at the end of the assetLoaded callback
-            if ( ! ( childType == "model/vnd.collada+xml" || 
-                     childType == "model/vnd.osgjs+json+compressed" ||
-                     childType == "model/x-threejs-morphanim+json" ||
-                     childType == "model/x-threejs-skinned+json" ) )
+            if ( ! supportedFileType( childType ) ) {
                 notifyDriverOfPrototypeAndBehaviorProps();
+            }
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
             // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
@@ -907,7 +878,11 @@ define( [ "module",
                     else if ( propertyName == 'visible' )
                     {
                         value = Boolean( propertyValue );
-                        self.state.setMeshPropertyRecursively( threeObject, "visible", value );
+                        // this was the old style of recursively setting visible
+                        // self.state.setMeshPropertyRecursively( threeObject, "visible", value );
+                        SetVisible( threeObject, value );
+                        // SetVisible will only set visible on the children
+                        // that the driver has NOT binding to, bad/good, was the old way better?
                     }
                     else if ( propertyName == 'castShadows' )
                     {
@@ -996,6 +971,18 @@ define( [ "module",
                                 }
                             }
                         }
+
+                        // the transform is being stored locally which is probably the 
+                        // main source of the problem( animated transforms are incorrect while 
+                        // being animated ), I'm not sure why this has been done
+                        
+                        //updateStoredTransform( node );
+
+                        // calling updateStoredTransform here seemed to be
+                        // too big of a performance hit, so setting a flag
+                        // to be checked in the getter before getting the transform 
+                        node.storedTransformDirty = true;
+
                     }
 
                     else if ( propertyName == "animationDuration" ) {
@@ -1739,6 +1726,9 @@ define( [ "module",
             {
                 if(propertyName == 'transform' && node.transform)
                 {
+                    if ( node.storedTransformDirty ) {
+                        updateStoredTransform( node );
+                    }
                     value = matCpy( node.transform.elements );
                     return value;
                 }
@@ -2590,6 +2580,13 @@ define( [ "module",
         }
         return foundNode;
     }
+    function supportedFileType( type ) {
+        return ( type == "model/vnd.collada+xml" || 
+                 type == "model/vnd.osgjs+json+compressed" ||
+                 type == "model/x-threejs-morphanim+json" ||
+                 type == "model/vnd.gltf+json" ||
+                 type == "model/x-threejs-skinned+json" );
+    }
     function CreateThreeJSSceneNode(parentID,thisID,extendsID)
     {
         var node = {};
@@ -3395,33 +3392,7 @@ define( [ "module",
                 }
             } 
 
-            if ( node.threeObject )
-            {
-
-                // Add a local model-side transform that can stay pure even if the view changes the
-                // transform on the threeObject - this already happened in creatingNode for those nodes that
-                // didn't need to load a model
-                node.transform = new THREE.Matrix4();
-                node.transform.elements = matCpy( node.threeObject.matrix.elements );
-
-                // If this threeObject is a camera, it has a 90-degree rotation on it to account for the 
-                // different coordinate systems of VWF and three.js.  We need to undo that rotation before 
-                // setting the VWF property.
-                if ( node.threeObject instanceof THREE.Camera ) {
-                    
-                    var transformArray = node.transform.elements;
-
-                    // Get column y and z out of the matrix
-                    var columny = goog.vec.Vec4.create();
-                    goog.vec.Mat4.getColumn( transformArray, 1, columny );
-                    var columnz = goog.vec.Vec4.create();
-                    goog.vec.Mat4.getColumn( transformArray, 2, columnz );
-
-                    // Swap the two columns, negating columny
-                    goog.vec.Mat4.setColumn( transformArray, 1, goog.vec.Vec4.negate( columnz, columnz ) );
-                    goog.vec.Mat4.setColumn( transformArray, 2, columny );
-                }
-            }
+            updateStoredTransform( node );
 
             // Since prototypes are created before the object, it does not get "setProperty" updates for
             // its prototype (and behavior) properties.  Therefore, we cycle through those properties to
@@ -3494,54 +3465,60 @@ define( [ "module",
             //node.threeObject.vwfID = nodeID;
             sceneNode.pendingLoads++;
           
-            //call up the correct loader/parser
-            if( childType == "model/vnd.collada+xml" ) {
-                node.parse = true;
-                node.loader = new THREE.ColladaLoader();
-                node.loader.options.convertUpAxis = true;
-                node.loader.options.upAxis = "Z";
-                node.loader.load(node.source,node.assetLoaded.bind( this ));
-            }
-          
-            if( childType == "model/vnd.osgjs+json+compressed" ) {
-                node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
-            }
+            switch ( childType ) {
+                
+                case "model/vnd.collada+xml":
+                    node.parse = true;
+                    node.loader = new THREE.ColladaLoader();
+                    node.loader.options.convertUpAxis = true;
+                    node.loader.options.upAxis = "Z";
+                    node.loader.load(node.source,node.assetLoaded.bind( this ));
+                    break;
 
-            if( childType == "model/x-threejs-morphanim+json" || childType == "model/x-threejs-skinned+json" ) {
-                node.loader = new THREE.JSONLoader()
-                node.loader.load( node.source, node.assetLoaded.bind( this ) );
-            }
-                                    
-            if( childType == "model/vnd.gltf+json" )
-            {
-             
-                //create a queue to hold requests to the loader, since the loader cannot be re-entered for parallel loads
-                if ( !THREE.glTFLoader.queue )
-                {
-                    //task is an object that holds the info about what to load
-                    //nextTask is supplied by async to trigger the next in the queue
-                    THREE.glTFLoader.queue = new async.queue( function( task, nextTask ) {
-                        var node = task.node;
-                        var cb = task.cb;
-                        //call the actual load function
-                        //signature of callback dictated by loader
-                        node.loader.load( node.source, function( geometry , materials ) {
-                            //ok, this model loaded, we can start the next load
-                            nextTask();
-                            //do whatever it was (asset loaded) that this load was going to do when complete
-                            cb( geometry , materials );
-                        } );
+                case "model/vnd.osgjs+json+compressed":
+                    node.loader = new UTF8JsonLoader( node,node.assetLoaded.bind( this ) );
+                    break;
 
-                    }, 1 );
-                }
-                node.loader = new THREE.glTFLoader();
-                node.loader.useBufferGeometry = true;
-                //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it 
-                //is an async function, it cannot be entered again before it completes
-                THREE.glTFLoader.queue.push( { 
-                    node: node,
-                    cb: node.assetLoaded.bind( this ) 
-                } );
+                case "model/x-threejs-morphanim+json":
+                case "model/x-threejs-skinned+json":
+                    node.loader = new THREE.JSONLoader()
+                    node.loader.load( node.source, node.assetLoaded.bind( this ) );
+                    break;
+
+                case "model/vnd.gltf+json":
+                    //create a queue to hold requests to the loader, since the loader cannot be re-entered for parallel loads
+                    if ( !THREE.glTFLoader.queue )
+                    {
+                        //task is an object that holds the info about what to load
+                        //nextTask is supplied by async to trigger the next in the queue
+                        THREE.glTFLoader.queue = new async.queue( function( task, nextTask ) {
+                            var node = task.node;
+                            var cb = task.cb;
+                            //call the actual load function
+                            //signature of callback dictated by loader
+                            node.loader.load( node.source, function( geometry , materials ) {
+                                //ok, this model loaded, we can start the next load
+                                nextTask();
+                                //do whatever it was (asset loaded) that this load was going to do when complete
+                                cb( geometry , materials );
+                            } );
+
+                        }, 1 );
+                    }
+                    node.loader = new THREE.glTFLoader();
+                    node.loader.useBufferGeometry = true;
+                    //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it 
+                    //is an async function, it cannot be entered again before it completes
+                    THREE.glTFLoader.queue.push( { 
+                        node: node,
+                        cb: node.assetLoaded.bind( this ) 
+                    } );
+                    break;
+
+                default:
+                    self.logger.warnx( "Unable to import " + node.source + ".  Unsupported file type: " + childType );
+                    break;
+
             }
         }
 
@@ -4597,6 +4574,20 @@ define( [ "module",
         }            
     }
 
+    function SetVisible( node, state ) {
+        if ( node ) {
+            node.visible = state;
+        }
+        if ( node && node.children ) {
+            for( var i = 0; i < node.children.length; i++ ) {
+                var child = node.children[i];
+                if( !child.vwfID ) {
+                    SetVisible( child, state );
+                }
+            }
+        }
+    }
+
     function getWorldTransform( node ) {
         var parent = self.state.nodes[ node.parentID ];
         if ( parent ) {
@@ -4624,6 +4615,38 @@ define( [ "module",
             node.transform = worldTransform;
         }
     }
+
+    function updateStoredTransform( node ) {
+        
+        if ( node && node.threeObject && ( node.threeObject instanceof THREE.Object3D ) ) {
+            // Add a local model-side transform that can stay pure even if the view changes the
+            // transform on the threeObject - this already happened in creatingNode for those nodes that
+            // didn't need to load a model
+            node.transform = new THREE.Matrix4();
+            node.transform.elements = matCpy( node.threeObject.matrix.elements );
+
+            // If this threeObject is a camera, it has a 90-degree rotation on it to account for the 
+            // different coordinate systems of VWF and three.js.  We need to undo that rotation before 
+            // setting the VWF property.
+            if ( node.threeObject instanceof THREE.Camera ) {
+                
+                var transformArray = node.transform.elements;
+
+                // Get column y and z out of the matrix
+                var columny = goog.vec.Vec4.create();
+                goog.vec.Mat4.getColumn( transformArray, 1, columny );
+                var columnz = goog.vec.Vec4.create();
+                goog.vec.Mat4.getColumn( transformArray, 2, columnz );
+
+                // Swap the two columns, negating columny
+                goog.vec.Mat4.setColumn( transformArray, 1, goog.vec.Vec4.negate( columnz, columnz ) );
+                goog.vec.Mat4.setColumn( transformArray, 2, columny );
+            } 
+
+            node.storedTransformDirty = false;             
+        }
+      
+    }    
 
    // -- getBoundingBox ------------------------------------------------------------------------------
 
