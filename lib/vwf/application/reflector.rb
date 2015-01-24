@@ -386,7 +386,7 @@ public
     def actions
 
       @storage.respond_to?( :actions ) ?
-        @storage.actions.map { |id, action| action.get } : []
+        @storage.actions.each.map { |id, action| action.get } : []
 
     end
 

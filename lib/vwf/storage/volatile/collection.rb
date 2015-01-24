@@ -26,8 +26,24 @@ module VWF::Storage::Volatile
       storage[ id ]
     end
 
-    def each &block
-      storage.each &block
+    def each
+      if block_given?
+        storage.each { |item| yield item }
+      else
+        storage.each
+      end
+    end
+
+    def reverse_each
+      if block_given?
+        storage.reverse_each { |item| yield item }
+      else
+        storage.reverse_each
+      end
+    end
+
+    def size
+      storage.size
     end
 
   private
