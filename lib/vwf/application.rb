@@ -205,10 +205,10 @@ pass if path_info.match /^instance/
     case @type || request.preferred_type( @@api_types )
       when "application/json"
         content_type :json
-        @application.instances.map { |id, instance| to instance_url instance.id } .to_json
+        @application.instances.each.map { |id, instance| to instance_url instance.id } .to_json
       when "text/yaml"
         content_type :yaml
-        @application.instances.map { |id, instance| to instance_url instance.id } .to_yaml
+        @application.instances.each.map { |id, instance| to instance_url instance.id } .to_yaml
       when "text/html"
         slim :instances
     end
@@ -235,10 +235,10 @@ pass if path_info.match /^instance/
     case @type || request.preferred_type( @@api_types )
       when "application/json"
         content_type :json
-        @instance.revisions.map { |id, revision| to revision_url @instance.id, revision.id } .to_json
+        @instance.revisions.each.map { |id, revision| to revision_url @instance.id, revision.id } .to_json
       when "text/yaml"
         content_type :yaml
-        @instance.revisions.map { |id, revision| to revision_url @instance.id, revision.id } .to_yaml
+        @instance.revisions.each.map { |id, revision| to revision_url @instance.id, revision.id } .to_yaml
       when "text/html"
         slim :revisions
     end
