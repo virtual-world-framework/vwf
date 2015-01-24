@@ -45,17 +45,25 @@ module VWF::Storage::CouchDB
     end
 
     def template
-      {}
+      unless collection.container
+        { "type" => type( self ) }
+      else
+        { "type" => type( self ), type( collection.container ) => collection.container.dbid }
+      end
     end
 
     def dbid
       if id
-        if collection.container
-          collection.container.dbid + "/" + id
-        else
+        unless collection.container
           id
+        else
+          collection.container.dbid + "/" + id
         end
       end
+    end
+
+    def type item
+      item.class.name.split( "::" ).last.downcase
     end
 
     def newid

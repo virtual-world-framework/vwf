@@ -111,8 +111,6 @@ class VWF
     class Application < Storage::Application
       include Types
       include Item
-      def self.template ; { "type" => "application" } ; end
-      def template ; self.class.template ; end
     end
 
     class Instances < Storage::Instances
@@ -123,8 +121,6 @@ class VWF
     class Instance < Storage::Instance
       include Types
       include Item
-      def self.template ; { "type" => "instance" } ; end
-      def template ; self.class.template.merge "application" => collection.container.dbid ; end
     end
 
     class Revisions < Storage::Revisions
@@ -135,8 +131,6 @@ class VWF
     class Revision < Storage::Revision
       include Types
       include Item
-      def self.template ; { "type" => "revision" } ; end
-      def template ; self.class.template.merge "instance" => collection.container.dbid ; end
     end
 
     class States < Storage::States
@@ -147,8 +141,6 @@ class VWF
     class State < Storage::State
       include Types
       include Item
-      def self.template ; { "type" => "state" } ; end
-      def template ; self.class.template.merge "instance" => collection.container.dbid ; end
     end
 
     class Actions < Storage::Actions
@@ -159,8 +151,6 @@ class VWF
     class Action < Storage::Action
       include Types
       include Item
-      def self.template ; { "type" => "action" } ; end
-      def template ; self.class.template.merge "instance" => collection.container.dbid ; end
     end
 
   end
