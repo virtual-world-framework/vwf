@@ -4,7 +4,7 @@ module VWF::Storage::Volatile
 
   module Collection
 
-    def create id = nil, value = nil  # TODO: actual id calculation, test for uniqueness if provided
+    def create id = nil, value = nil
       super.tap do |item|
         storage[ item.id ] = item
       end

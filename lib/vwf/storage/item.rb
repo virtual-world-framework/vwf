@@ -13,8 +13,8 @@ module VWF::Storage
       set value if value
     end
 
-    def get ; end  # => value             # GET /instances/:instance
-    def set value ; end                   # PUT /instances/:instance
+    def get ; end  # => value                                   # GET /instances/:instance
+    def set value ; end                                         # PUT /instances/:instance
 
     def id
       @id ||= newid

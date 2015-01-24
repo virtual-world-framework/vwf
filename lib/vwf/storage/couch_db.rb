@@ -3,40 +3,6 @@ require_relative "couch_db/collection"
 
 class VWF
 
-
-  # @@db ||= CouchRest.database!( "http://127.0.0.1:5984/vwf" )
-
-  # @@db
-
-
-  # # create
-  # response = @db.save_doc({:key => 'value', 'another key' => 'another value'})                    # => {"ok"=>true, "id"=>"e0d70033da0fad3707fed320bd5e5de2", "rev"=>"1-cbb61d1f90f7c01b273737702265b6c8"}
-
-  # # fetch by id
-  # doc = @db.get(response['id'])                                                                   # => #<CouchRest::Document _id: "e0d70033da0fad3707fed320bd5e5de2", _rev: "1-cbb61d1f90f7c01b273737702265b6c8", key: "value", another key: "another value">
-
-  # # update
-  # doc["boogie"] = true ; @db.save_doc(doc)                                                        # => {"ok"=>true, "id"=>"e0d70033da0fad3707fed320bd5e5de2", "rev"=>"2-3b067cc9f01fdf25814445088403382c"}
-
-  # doc["_rev"]                                                                                     # => "2-3b067cc9f01fdf25814445088403382c" <- notice it modified the doc _rev
-
-
-      # #delete_doc(doc, bulk = false) ⇒ Object
-      # DELETE the document from CouchDB that has the given _id and _rev.
-
-      # #all_docs(params = {}, payload = {}, &block) ⇒ Object (also: #documents)
-      # Query the _all_docs view.
-
-      # #get(id, params = {}) ⇒ Object
-      # GET a document from CouchDB, by id.
-
-      # #save_doc(doc, bulk = false, batch = false) ⇒ Object
-      # Save a document to CouchDB.
-
-
-
-
-
   module Storage::CouchDB
 
     def self.unindent heredoc
