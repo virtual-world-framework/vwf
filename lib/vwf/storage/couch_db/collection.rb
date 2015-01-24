@@ -4,11 +4,20 @@ module VWF::Storage::CouchDB
 
   module Collection
 
-    def create id = nil, value = nil  # TODO: actual id calculation, test for uniqueness if provided
+    def create id = nil, value = nil
       super
     end
 
     def delete id
+      self[ id ].delete
+    end
+
+    def to_a
+      each.map { |item| item[ 1 ] }
+    end
+
+    def to_h
+      each.map { |item| item }
     end
 
     def [] id

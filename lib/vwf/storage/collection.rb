@@ -12,16 +12,15 @@ module VWF::Storage
 
     def create id = nil, value = nil
       id, value = nil, id unless value || String === id
-      type.new self, id, value            # POST /instances
+      type.new self, id, value                                  # POST /collection
     end
 
-    def delete id ; end                   # DELETE  /instances/:instance
+    def delete id ; end                                         # DELETE  /collection/:item
 
-    def to_a ; [] ; end  # => Item[]      # GET /instances
+    def to_a ; [] ; end  # => [ Item, Item, ... ]               # GET /collection
+    def to_h ; {} ; end  # => { id: Item, id: Item, ... }       # GET /collection
 
-    def [] id ; type.new self, id ; end  # => Item
-
-    # TODO: []= ? and remove assignments within subclass taps?
+    def [] id ; end  # => Item                                  # GET /collection/:item
 
     def type ; Item ; end
 

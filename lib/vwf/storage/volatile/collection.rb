@@ -14,12 +14,13 @@ module VWF::Storage::Volatile
       storage.delete id
     end
 
-    # def to_a
-    #   storage # .to_a
-    #   # storage.map do |id, item|
-    #   #   { id, item.id } .merge item.get
-    #   # end
-    # end
+    def to_a
+      storage.to_a
+    end
+
+    def to_h
+      storage.to_h
+    end
 
     def [] id
       storage[ id ]

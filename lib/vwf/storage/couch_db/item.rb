@@ -23,6 +23,10 @@ module VWF::Storage::CouchDB
       document.save
     end
 
+    def delete
+      document.destroy
+    end
+
     def document
       @document ||= CouchRest::Document.new.tap do |document|
         document.database = db
