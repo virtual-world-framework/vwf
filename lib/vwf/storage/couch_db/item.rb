@@ -2,6 +2,12 @@ module VWF::Storage::CouchDB
 
   module Item
 
+    def initialize collection, id = nil, value = nil, rev = nil
+      super collection, id, value do
+        document[ "_rev" ] = rev if rev
+      end
+    end
+
     def get
       load unless document.rev
       document[ "value" ]
@@ -10,7 +16,7 @@ module VWF::Storage::CouchDB
     def set value
       value.tap do |value|
         document[ "value" ] = value
-        save
+        save unless document.rev
       end
     end
 
