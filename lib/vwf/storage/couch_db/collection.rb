@@ -30,16 +30,6 @@ module VWF::Storage::CouchDB
       end
     end
 
-    def []= id, value
-      begin
-        type.new( self, id ).tap do |item|
-          item.set value  # throws if missing
-        end
-      rescue
-        nil
-      end
-    end
-
     def each
       if block_given?
         query( :descending => false ) { |item| yield item }
