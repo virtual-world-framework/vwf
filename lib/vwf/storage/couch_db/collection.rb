@@ -65,7 +65,7 @@ module VWF::Storage::CouchDB
 
       key = [
         container ? container.dbid : "",
-        type.template[ "type" ]
+        type.dbtype
       ]
 
       if query_options[ :descending ]

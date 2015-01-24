@@ -46,9 +46,9 @@ module VWF::Storage::CouchDB
 
     def template
       unless collection.container
-        { "type" => type( self ) }
+        { "type" => dbtype }
       else
-        { "type" => type( self ), type( collection.container ) => collection.container.dbid }
+        { "type" => dbtype, collection.container.dbtype => collection.container.dbid }
       end
     end
 
@@ -57,13 +57,29 @@ module VWF::Storage::CouchDB
         unless collection.container
           id
         else
-          collection.container.dbid + "/" + id
+          collection.container.dbid + "/" + dbtype + "/" + id
         end
       end
     end
 
-    def type item
-      item.class.name.split( "::" ).last.downcase
+    def dbtype
+      self.class.dbtype
+    end
+
+    module ClassMethods
+      def dbtype
+        name.split( "::" ).last.downcase
+      end
+    end
+
+    # Define `Item.dbtype`.
+
+    self.extend ClassMethods
+
+    # Define `dbtype` in the classes that `include Item`: `Application.dbtype`, etc.
+
+    def self.included base
+      base.extend ClassMethods
     end
 
     def newid
