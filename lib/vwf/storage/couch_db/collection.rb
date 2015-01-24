@@ -62,8 +62,6 @@ module VWF::Storage::CouchDB
 
   private
 
-    VIEW = "_design/collection/_view/members"
-
     def query options = {}
 
       reduction = nil
@@ -90,7 +88,7 @@ module VWF::Storage::CouchDB
 
       query_options.merge! :startkey => startkey, :endkey => endkey
 
-      db.view VIEW, query_options do |row|
+      db.view "#{DESIGN_DOCUMENT_ID}/_view/members", query_options do |row|
 
         if query_options[ :reduce ]
 

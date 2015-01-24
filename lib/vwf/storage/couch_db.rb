@@ -39,9 +39,38 @@ class VWF
 
   module Storage::CouchDB
 
-    module Types
+    def self.unindent heredoc
+      heredoc.gsub /^#{ heredoc.match /^\s*/ }/, ""
+    end
 
-      @@db = CouchRest.database!( "http://127.0.0.1:5984/vwf" )  # TODO: configuration option
+    DESIGN_DOCUMENT_ID = "_design/collection"
+
+    DESIGN_DOCUMENT_VALUE = {
+      "language" => "javascript",
+      "views" => {
+        "members" => {
+          "map" => unindent( <<-EOF ),
+            function( doc ) {
+              switch( doc.type ) {
+                case "application":
+                  emit( [ "", doc.type, doc._id ], doc ); break;
+                case "instance":
+                  emit( [ doc.application, doc.type, doc._id ], doc ); break;
+                case "revision":
+                  emit( [ doc.instance, doc.type, doc.value.queue.time ], doc ); break;
+                case "action":
+                  emit( [ doc.instance, doc.type, doc.value.sequence ], doc ); break;
+                case "tag":
+                  emit( [ doc.instance, doc.type, doc._id ], doc ); break;
+              }
+            }
+          EOF
+          "reduce" => "_count"
+        }
+      }
+    }
+
+    module Types
 
       def Applications ; Applications ; end
       def Application ; Application ; end
@@ -56,7 +85,21 @@ class VWF
       def Tags ; Tags ; end
       def Tag ; Tag ; end
 
-      def db ; @@db ; end
+      def db
+        @@db ||= CouchRest.database!( "http://127.0.0.1:5984/vwf" ).tap do |db|  # TODO: configuration option for url
+          create_design_documents db
+        end
+      end
+
+    private
+
+      def create_design_documents db
+        begin
+          db.get DESIGN_DOCUMENT_ID
+        rescue RestClient::ResourceNotFound
+          db.save_doc DESIGN_DOCUMENT_VALUE.merge "_id" => DESIGN_DOCUMENT_ID
+        end
+      end
 
     end
 
