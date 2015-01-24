@@ -66,7 +66,7 @@ module VWF::Storage::CouchDB
 
     def query options = {}
 
-      result = nil
+      reduction = nil
 
       query_options = {
         :descending => false,
@@ -99,7 +99,7 @@ module VWF::Storage::CouchDB
           #   "value" => 10                                             # Reduction result = count
           # }
 
-          result = row[ "value" ]
+          reduction = row[ "value" ]
 
         else
 
@@ -115,16 +115,14 @@ module VWF::Storage::CouchDB
           #   }
           # }
 
-          unless row[ "total_rows" ]
 id = row[ "id" ] ; id[ /^.*\// ] = ""  # TODO: put name in documents?  # TODO: instance sort as id, not dbid
-            yield [ id, type.new( self, id, row[ "value" ][ "value" ], row[ "value" ][ "_rev" ] ) ]
-          end
+          yield [ id, type.new( self, id, row[ "value" ][ "value" ], row[ "value" ][ "_rev" ] ) ]
 
         end
 
       end
 
-      result
+      reduction
 
     end
 
