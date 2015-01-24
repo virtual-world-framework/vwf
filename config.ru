@@ -13,19 +13,6 @@
 
 require File.expand_path File.join File.dirname( __FILE__ ), "init"
 
-
-require 'ruby-debug'
-class RestClient::ResourceNotFound
-  alias original_initalize initialize
-  def initialize(*args)
-    original_initalize(*args)
-    debugger
-  end
-end
-
-
-
-
 map "/" do
   run VWF
 end
