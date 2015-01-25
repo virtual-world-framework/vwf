@@ -92,14 +92,14 @@ module VWF::Storage::CouchDB
         else
 
           # {
-          #   "id" => "/duck/index.vwf/1234",                           # CouchDB document id
-          #   "key" => [ "/duck/index.vwf", "instance", "1234" ],       # Query key mapping to document
-          #   "value" => {                                              # Query value = the document
-          #     "_id" => "/duck/index.vwf/1234",
+          #   "id" => "/duck/index.vwf/instance/1234",                  # CouchDB document id
+          #   "key" => [ "/duck/index.vwf", "instance", 1234 ],         # Query key mapping to document: container-id, type, item-id
+          #   "value" => {                                              # Query `value` = the document
+          #     "_id" => "/duck/index.vwf/instance/1234",
           #     "_rev" => "1-abcd",
           #     "type" => "instance",
           #     "application" => "/duck/index.vwf",
-          #     "value" => { ... }                                      # The document's item value
+          #     "value" => { ... }                                      # Document `value` = the item
           #   }
           # }
 

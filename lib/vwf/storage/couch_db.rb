@@ -21,13 +21,18 @@ class VWF
                 case "application":
                   emit( [ "", doc.type, doc._id ], doc ); break;
                 case "instance":
-                  emit( [ doc.application, doc.type, doc._id ], doc ); break;
+                  emit( [ doc.application, doc.type, localid( doc ) ], doc ); break;
                 case "revision":
-                  emit( [ doc.instance, doc.type, doc.value.queue.time ], doc ); break;
+                  emit( [ doc.instance, doc.type, +localid( doc ) ], doc ); break;
+                case "state":
+                  emit( [ doc.instance, doc.type, +localid( doc ) ], doc ); break;
                 case "action":
-                  emit( [ doc.instance, doc.type, doc.value.sequence ], doc ); break;
+                  emit( [ doc.instance, doc.type, +localid( doc ) ], doc ); break;
                 case "tag":
-                  emit( [ doc.instance, doc.type, doc._id ], doc ); break;
+                  emit( [ doc.instance, doc.type, localid( doc ) ], doc ); break;
+              }
+              function localid( doc ) {
+                return doc._id.replace( RegExp( "^.*/" + doc.type + "/" ), "" )
               }
             }
           EOF
