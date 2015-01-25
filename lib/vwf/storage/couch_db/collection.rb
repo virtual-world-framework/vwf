@@ -103,8 +103,12 @@ module VWF::Storage::CouchDB
           #   }
           # }
 
-id = row[ "id" ] ; id[ /^.*\// ] = ""  # TODO: put name in documents?  # TODO: instance sort as id, not dbid
-          yield [ id, type.new( self, id, row[ "value" ][ "value" ], row[ "value" ][ "_rev" ] ) ]
+          item = type.new self,
+            row[ "key" ].last.to_s,
+            row[ "value" ][ "value" ],
+            row[ "value" ][ "_rev" ]
+
+          yield [ item.id, item ]
 
         end
 
