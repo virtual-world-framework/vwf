@@ -11,6 +11,8 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+require "securerandom"
+
 module Rack
 
   module SocketIO
@@ -271,7 +273,7 @@ module Rack
       # This client's id. Generate it when first accessed.
 
       def id
-        @id ||= "%08x" % rand( 1 << 32 ) + "%08x" % rand( 1 << 32 ) # rand has 52 bits of randomness; call twice to get 64 bits
+        @id ||= SecureRandom.hex
       end
 
       attr_writer :id
