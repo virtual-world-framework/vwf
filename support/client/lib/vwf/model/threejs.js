@@ -2384,10 +2384,6 @@ define( [ "module",
                         intersects[ i ].face.normal.x,
                         intersects[ i ].face.normal.y,
                         intersects[ i ].face.normal.z ];
-                    result[ "centroid" ] = [
-                        intersects[ i ].face.centroid.x,
-                        intersects[ i ].face.centroid.y,
-                        intersects[ i ].face.centroid.z ];
                     results[ i ] = result;
                 }
 
