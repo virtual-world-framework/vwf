@@ -20,7 +20,7 @@ children:
     extends: http://vwf.example.com/node3.vwf
     implements:
     - http://vwf.example.com/spin-on-click.vwf
-    source: duck.dae
+    source: duck/duck.dae
     type: model/vnd.collada+xml
     properties:
       spin-axis: [ 0, 0, 1 ]
