@@ -193,58 +193,6 @@ body {
     width: 300px;
 }
 
-.overlay {
-  position:absolute;
-  top:30%;
-  width:99%;
-  pointer-events:none;
-}
-
-.overlay p {
-  padding:0px;
-  margin:0px;
-}
-
-.overlay a:link {
-  color:#888888;
-}
-
-.overlay a:visited {
-  color:#888888;
-}
-
-.overlay a:hover {
-  color:#CCCCCC;
-}
-
-.loading {
-  margin:auto auto;
-  color:#FFF;
-  width:600px;
-  height:400px;
-  background:#050505;
-  -moz-border-radius: 20px;
-  -webkit-border-radius: 20px;
-  -khtml-border-radius: 20px;
-  border-radius: 20px;
-  font:18px Arial;
-  /*visibility: hidden;*/
-}
-
-.loadText {
-}
-
-
-.requirements {
-	margin-left: 100px;
-}
-
-.req {
-  font-size:14px;
-  position:relative;
-  left:20px;
-}
-
 .pace {
   -webkit-pointer-events: none;
   pointer-events: none;
