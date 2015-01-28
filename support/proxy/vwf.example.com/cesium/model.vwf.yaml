@@ -1,3 +1,4 @@
+
 # Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 # Secretary of Defense (Personnel & Readiness).
 # 
@@ -11,13 +12,16 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-## Cesium base geometry object component
+## Cesium base 3d object component
 ## 
 ## @name cesium.vwf
 ## @namespace
 
 --- 
 extends: http://vwf.example.com/cesium/node3.vwf
+#type: model/vnd.gltf+json
+#source: { url: "The object for the glTF JSON", basepath: "(optional)The base path that paths in the glTF JSON are relative to." }
 properties:
-  geometryDefinition:
-
+  pick: true
+  scale: 1.0
+  minimumPixelSize: 128
