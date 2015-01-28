@@ -96,12 +96,12 @@ class VWF::Application < Sinatra::Base
   ### Validate the application, instance, and revision. ############################################
 
   before "/?*" do
-    @application = VWF.storage[ @application_id ] || VWF.storage.create( @application_id, application_state )
+    @application = VWF.storage[ @application_id ] || VWF.storage.create( @application_id, @application_id )
     halt 404 unless @application
   end
 
   before "/instance/:instance_id/?*" do |instance_id, _|
-    @instance = @application.instances[ instance_id ] || @application.instances.create( instance_id, instance_state )  # TODO: remove second clause to stop auto-creating arbitrary instances
+    @instance = @application.instances[ instance_id ] || @application.instances.create( instance_id, @application.state )  # TODO: remove second clause to stop auto-creating arbitrary instances
     halt 404 unless @instance
   end
 
@@ -130,7 +130,7 @@ class VWF::Application < Sinatra::Base
   # Redirect the application to a new instance. ####################################################
 
   get "/", :browser => true do
-    @instance = @application.instances.create( nil, instance_state )
+    @instance = @application.instances.create( @application.state )
     redirect to "/instance/" + @instance.id + "/"
   end
 
@@ -288,34 +288,7 @@ pass if path_info.match /^instance/
 
   end
 
-  def application_state
-    @application_id
-  end
 
-  def instance_state
-
-    Hash[
-      "kernel" => {
-        "time" => 0      # TODO: this time doesn't (shouldn't) matter
-      },
-      "nodes" => [
-        "http://vwf.example.com/clients.vwf",
-        @application.get,
-      ],
-      "annotations" => {
-        "1" => "application"
-      },
-      "queue" => {
-        "sequence" => 0,  # TODO: simplify state: remove existing kernel.time, move queue.{sequence.time} to kernel.{...}, move queue.queue[] to queue[]
-        "time" => 0
-      }
-    ]
-
-  end
-
-  def revision_state
-    instance_state
-  end
 
 
 

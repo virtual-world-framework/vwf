@@ -13,7 +13,7 @@
 
 class VWF < Sinatra::Base
 
-  # require "vwf/storageneue"
+  # require "vwf/storage/volatile"
   require "vwf/storage/couch_db"
   require "vwf/pattern"
 

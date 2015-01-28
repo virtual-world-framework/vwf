@@ -297,9 +297,6 @@ module Rack
       def self.resource env
         unless env.kind_of? String
 debugger  # TODO: can't work with instance variables
-          env["vwf.instance"] ?
-            ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.instance"] ) :
-            ::File.join( env["vwf.root"], env["vwf.application"] )  # TODO: shouldn't use File.join, but URI.join only works from an absolute url
         else
           env # pass through if the parameter is already a resource
         end
@@ -308,9 +305,7 @@ debugger  # TODO: can't work with instance variables
       # The socket.io resource this client connects to.
   
       def resource
-        env["vwf.instance"] ?
-          ::File.join( env["vwf.root"], env["vwf.application"], env["vwf.instance"] ) :
-          ::File.join( env["vwf.root"], env["vwf.application"] )  # TODO: shouldn't use File.join, but URI.join only works from an absolute url
+        @resource
       end
 
       MESSAGE_LOG_LENGTH = 1000

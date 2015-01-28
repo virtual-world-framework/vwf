@@ -20,16 +20,16 @@ module VWF::Storage::CouchDB
       end
     end
 
-    def load
+    def load  # TODO private
       self.document = db.get dbid  # TODO: note: throws if missing  # TODO: use document= (isn't working)
     end
 
-    def save
+    def save  # TODO private
       document.id ||= dbid
       document.save
     end
 
-    def delete
+    def delete  # TODO private
       document.destroy
     end
 
