@@ -1,4 +1,5 @@
 require_relative "storage/collection"
+require "securerandom"
 
 module VWF::Storage
 
@@ -32,9 +33,10 @@ module VWF::Storage
     def state
       Hash[
         "configuration" =>
-          { "environment" => ENV["RACK_ENV"] || "development" },  # TODO: ENV['RACK_ENV'], ugh
+          { "environment" => ENV["RACK_ENV"] || "development",  # TODO: ENV['RACK_ENV'], ugh
+              "random-seed" => SecureRandom.hex },
         "kernel" =>
-          { "time" => 0 },  # TODO: this time doesn't (shouldn't) matter  # TODO: simplify state: remove existing kernel.time, move queue.{sequence.time} to kernel.{...}, move queue.queue[] to queue[]
+          { "time" => 0 },
         "nodes" =>
           [ "http://vwf.example.com/clients.vwf", get ],
         "annotations" =>
@@ -66,9 +68,60 @@ module VWF::Storage
     def tags ; @tags ||= self.Tags.new self ; end
 
     def state
-      if state_pair = states.reverse_each.first
-        state_pair[ 1 ].get  # TODO: actions too
+
+      result = nil
+
+      states.reverse_each do |id, state|
+
+        sequence = id.to_i
+        result = state.get
+
+        result[ "kernel" ] ||= {}
+        result[ "queue" ] ||= {}
+
+        queue = result[ "queue" ][ "queue" ] ||= []
+
+        action_queue = actions.reverse_each.map do |id, action|
+          if id.to_i > sequence
+            action.get.merge "origin" => "reflector"
+          else
+            break
+          end
+        end .reverse
+
+        unless action_queue.empty?
+          result[ "queue" ][ "time" ] =
+            [ result[ "queue" ][ "time" ] || 0, action_queue.last[ "time" ] || 0 ].max
+        end
+
+        queue.concat action_queue
+
+        queue.each_with_index do |action, index|
+          action[ "sequence" ] = index
+        end
+
+        queue.sort! do |a, b|
+          if a[ "time" ] != b[ "time" ]
+            a[ "time" ] - b[ "time" ]
+          elsif a[ "origin" ] != "reflector" && b[ "origin" ] == "reflector"
+            -1
+          elsif a[ "origin" ] == "reflector" && b[ "origin" ] != "reflector"
+            1
+          else
+            a[ "sequence" ] - b[ "sequence" ]
+          end
+        end
+
+        queue.each do |action|
+          action.delete "sequence"
+        end
+
+        break
+
       end
+
+      result
+
     end
 
   end

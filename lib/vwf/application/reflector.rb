@@ -42,7 +42,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       send "time" => time, "action" => "setState", "parameters" => [ state ]  # TODO: ... actions too ...
 
       session[ :thing ].transport.stop
-      session[ :thing ].transport.time = time
+      session[ :thing ].transport.time = state[ "queue" ][ "time" ] || time
 
     else
 
@@ -399,9 +399,6 @@ private
 
 public
 
-
-# TODO: ["kernel"]["time"] doesn't (shouldn't) matter
-# TODO: simplify state: remove existing kernel.time, move queue.{sequence.time} to kernel.{...}, move queue.queue[] to queue[]
 
 # client uses default configuration, sequence = 0, time = 0; to set configuration? add clients.vwf? init seq + time t 0; next message should be 1, +dt
 

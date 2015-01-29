@@ -1177,23 +1177,26 @@
                 // Clear the message queue, except for reflector messages that arrived after the
                 // current action.
 
-                queue.filter( function( fields ) {
-
-                    if ( fields.origin === "reflector" && fields.sequence > vwf.sequence_ ) {
-                        return true;
-                    } else {
-                        vwf.logger.debugx( "setState", function() {
-                            return [ "removing", JSON.stringify( loggableFields( fields ) ), "from queue" ];
-                        } );
-                    }
-
+                var reflector_actions = queue.queue.filter( function( fields ) {
+                    return fields.origin === "reflector" && fields.sequence > vwf.sequence_;
                 } );
+
+                queue.clear();
 
                 // Set the queue time and add the incoming items to the queue.
 
                 if ( applicationState.queue ) {
-                    queue.time = applicationState.queue.time;
                     queue.insert( applicationState.queue.queue || [] );
+                    queue.time = applicationState.queue.time;
+                }
+
+                // Restore the reflector messages that arrived after this `setState` action. Since
+                // those actions moved the authorized time forward, update the queue time to the
+                // time of the last restored action.
+
+                if ( reflector_actions.length ) {
+                    queue.insert( reflector_actions );
+                    queue.time = reflector_actions[ reflector_actions.length - 1 ].time;
                 }
 
                 callback_async && callback_async();
@@ -5742,18 +5745,13 @@ if ( ! childComponent.source ) {
 
             },
 
-            /// Update the queue to include only the messages selected by a filtering function.
+            /// Remove all actions from the queue.
             /// 
-            /// @name module:vwf~queue.filter
-            /// 
-            /// @param {Function} callback
-            ///   `filter` calls `callback( fields )` once for each message in the queue. If
-            ///   `callback` returns a truthy value, the message will be retained. Otherwise it will
-            ///   be removed from the queue.
+            /// @name module:vwf~queue.clear
 
-            filter: function( callback /* fields */ ) {
+            clear: function() {
 
-                this.queue = this.queue.filter( callback );
+                this.queue.splice( 0, this.queue.length );
 
             },
 
