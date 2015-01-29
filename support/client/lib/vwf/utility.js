@@ -358,6 +358,10 @@ define( [ "module",
             return undefined;
         },
 
+        isString: function( s ) {
+            return ( typeof( s ) === 'string' || s instanceof String );
+        },
+
 
         // -- xpath --------------------------------------------------------------------------------
 
