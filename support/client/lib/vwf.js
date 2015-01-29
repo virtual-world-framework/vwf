@@ -951,7 +951,7 @@
                         // Update the queue.  Messages in the queue are ordered by time, then by order of arrival.
                         // Time is only advanced if the message has no action, meaning it is a tick.
 
-                        queue.insert( fields, !fields.action ); // may invoke dispatch(), so call last before returning to the host
+                        queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -1238,20 +1238,7 @@
                     this.client_ = fields.client;     // ... and note the originating client
                     this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
                 }
-                else {
-                    this.tick();
-                }
 
-            }
-
-            // Advance time to the most recent time received from the server. Tick if the time
-            // changed.
-
-            if ( queue.ready() && this.now != queue.time ) {
-                this.sequence_ = undefined; // clear after the previous action
-                this.client_ = undefined;   // clear after the previous action
-                this.now = queue.time;
-                this.tock();
             }
             
         };
@@ -6867,6 +6854,10 @@ if ( ! childComponent.source ) {
                     }
 
                 } );
+
+                if ( ! fields.action ) {
+                    vwf.tick();
+                }
 
                 // Execute the simulation through the new time.
 
