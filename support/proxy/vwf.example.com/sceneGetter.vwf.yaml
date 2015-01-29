@@ -18,7 +18,11 @@ properties:
   scene:
     get: |
       if ( !this.scene ) {
-        this.scene = this.find( this.scenePath || "/" )[ 0 ];
+        var sp = this.scenePath || "/";
+        this.scene = this.find( sp )[ 0 ];
+        if ( !this.scene ) {
+          this.logger.errorx( "scene.get", "Could not find scene node: '", sp, "'" );
+        }
       }
       return this.scene;
       //@ sourceURL=sceneGetter.scene.get
