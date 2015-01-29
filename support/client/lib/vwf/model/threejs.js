@@ -1685,7 +1685,8 @@ define( [ "module",
                         if ( propertyValue instanceof Array ) {
                             value = propertyValue;
                             if ( threeObject.target ) {
-                                threeObject.target.position.set( value[ 0 ], value[ 1 ], value[ 2 ] );    
+                                threeObject.target.position.set( value[ 0 ], value[ 1 ], value[ 2 ] );
+                                threeObject.target.updateMatrixWorld();
                             }
                         } else if ( this.state.nodes[ propertyValue ] ) {
                             value = propertyValue;
