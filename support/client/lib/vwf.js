@@ -194,18 +194,6 @@
 
         this.moniker_ = undefined;
 
-        /// Nodes that are receiving ticks.
-        /// 
-        /// @name module:vwf.tickable
-        /// 
-        /// @private
-
-        this.tickable = {
-            // models: [],
-            // views: [],
-            nodeIDs: [],
-        };
-
         // == Private variables ====================================================================
 
         /// @name module:vwf.private
@@ -843,10 +831,11 @@
 
                         fields.origin = "reflector";
 
-                        // Update the queue.  Messages in the queue are ordered by time, then by order of arrival.
-                        // Time is only advanced if the message has no action, meaning it is a tick.
+                        // Update the queue. Insert the message (unless it is only a time tick), and
+                        // advance the queue's record of the current time. Messages in the queue are
+                        // ordered by time, then by order of arrival.
 
-                        queue.insert( fields, !fields.action ); // may invoke dispatch(), so call last before returning to the host
+                        queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
 
                         // Each message from the server allows us to move time forward. Parse the
                         // timestamp from the message and call dispatch() to execute all queued
@@ -1086,32 +1075,19 @@
 
                 // Advance time to the message time.
 
-                if ( this.now != fields.time ) {
-                    this.sequence_ = undefined; // clear after the previous action
-                    this.client_ = undefined;   // clear after the previous action
+                if ( this.now !== fields.time ) {
                     this.now = fields.time;
                 }
 
+                // Set the per-action kernel globals.
+
+                this.sequence_ = fields.sequence; // note the message's queue sequence number for the duration of the action
+                this.client_ = fields.client;     // ... and note the originating client
+
                 // Perform the action.
 
-                if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
-                    this.sequence_ = fields.sequence; // note the message's queue sequence number for the duration of the action
-                    this.client_ = fields.client;     // ... and note the originating client
-                    this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
-                }
-                else {
-                    this.tick();
-                }
+                this.receive( fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin );
 
-            }
-
-            // Advance time to the most recent time received from the server. Tick if the time
-            // changed.
-
-            if ( queue.ready() && this.now != queue.time ) {
-                this.sequence_ = undefined; // clear after the previous action
-                this.client_ = undefined;   // clear after the previous action
-                this.now = queue.time;
             }
             
         };
@@ -1139,22 +1115,10 @@
 
         this.tick = function() {
 
-            // Call ticking() on each model.
-
-            this.models.forEach( function( model ) {
-                model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
-            }, this );
-
             // Call ticked() on each view.
 
             this.views.forEach( function( view ) {
                 view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
-            }, this );
-
-            // Call tick() on each tickable node.
-
-            this.tickable.nodeIDs.forEach( function( nodeID ) {
-                this.callMethod( nodeID, "tick", [ this.now ] );
             }, this );
 
         };
@@ -2448,13 +2412,8 @@ if ( ! childComponent.source ) {
                                 vwf.setProperty( childID, propertyName, deferredInitializations[propertyName] );
                             } );
 
-                            // TODO: Adding the node to the tickable list here if it contains a tick() function in JavaScript at initialization time. Replace with better control of ticks on/off and the interval by the node.
-
-                            if ( vwf.execute( childID, "Boolean( this.tick )" ) ) {
-                                vwf.tickable.nodeIDs.push( childID );
-                            }
-
                             // Restore kernel reentry.
+
                             replicating && vwf.models.kernel.enable();
 
                         }, function() {
@@ -4667,7 +4626,7 @@ if ( ! childComponent.source ) {
                 // reinserted.
 
                 return object.filter( function( fields ) {
-                    return ! ( fields.origin === "reflector" && fields.sequence > vwf.sequence_ ) && fields.action;  // TODO: fields.action is here to filter out tick messages  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
+                    return ! ( fields.origin === "reflector" && fields.sequence > vwf.sequence_ );
                 } ).sort( function( fieldsA, fieldsB ) {
                     return fieldsA.sequence - fieldsB.sequence;
                 } );
@@ -4675,8 +4634,8 @@ if ( ! childComponent.source ) {
             } else if ( depth == 1 ) {
 
                 // Remove the sequence fields since they're just local annotations used to keep
-                // messages ordered by insertion order and aren't directly meaniful outside of this
-                // client.
+                // messages ordered by insertion order. They aren't directly meaningful outside of
+                // this client.
 
                 var filtered = {};
 
@@ -5709,12 +5668,10 @@ if ( ! childComponent.source ) {
 
                 messages.forEach( function( fields ) {
 
-                    // if ( fields.action ) {  // TODO: don't put ticks on the queue but just use them to fast-forward to the current time (requires removing support for passing ticks to the drivers and nodes)
-
+                    if ( fields.action ) {
                         fields.sequence = ++this.sequence; // track the insertion order for use as a sort key
                         this.queue.push( fields );
-
-                    // }
+                    }
 
                     if ( chronic ) {
                         this.time = Math.max( this.time, fields.time ); // save the latest allowed time for suspend/resume
@@ -5744,6 +5701,21 @@ if ( ! childComponent.source ) {
                     }
 
                 } );
+
+                // Tick the views on each idle message.
+
+                if ( chronic && ! fields.action ) {
+
+                    // Clear the per-action kernel globals. `tick` isn't an action.
+
+                    vwf.sequence_ = undefined;
+                    vwf.client_ = undefined;
+
+                    // Tick the views.
+
+                    vwf.tick();
+
+                }
 
                 // Execute the simulation through the new time.
 
