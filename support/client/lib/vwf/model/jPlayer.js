@@ -403,15 +403,15 @@ define( [
                     }
                     break;
                 case "video":
-                    if ( url.search( "data:video/mp4" ) === 0 ) {
+                    // if ( url.search( "data:video/mp4" ) === 0 ) {
                         mediaObject = {
                             m4v: url,
                             poster: node.posterImageUrl
                         };
-                    } else {
-                        modelDriver.logger.errorx( "setUrl", 
-                            "Unsupported video type for '", url, "'" );
-                    }
+                    // } else {
+                    //     modelDriver.logger.errorx( "setUrl", 
+                    //         "Unsupported video type for '", url, "'" );
+                    // }
                     break;
                 default:
                     modelDriver.logger.errorx( "setUrl",
