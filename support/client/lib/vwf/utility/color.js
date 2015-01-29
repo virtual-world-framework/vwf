@@ -57,6 +57,9 @@ define(function(){
 	var isHSL = /^hsla?\((\d{1,3}?),\s*(\d{1,3}%),\s*(\d{1,3}%)(,\s*[01]?\.?\d*)?\)$/;
 	var isRGB = /^rgba?\((\d{1,3}%?),\s*(\d{1,3}%?),\s*(\d{1,3}%?)(,\s*[01]?\.?\d*)?\)$/;
 	var isPercent = /^\d+(\.\d+)*%$/;
+	var isString = function( s ) {
+        return ( typeof( s ) === 'string' || s instanceof String );
+    }
 
 	var hexBit = /([0-9a-f])/gi;
 	var leadHex = /^#/;
