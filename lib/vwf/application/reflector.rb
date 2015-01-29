@@ -109,7 +109,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
     # For a normal message, stamp it with the curent time and originating client, and send it to
     # each client.
 
-    broadcast fields.merge "client" => id  # TODO: allow future times on incoming fields["time"] and queue until needed
+    broadcast fields.reject { |key, value| key == "time" } .merge "client" => id  # TODO: allow future times on incoming fields["time"] and queue until needed
 
   end
 
@@ -123,12 +123,9 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
     # Delete the child representing this client in the application's `clients.vwf` global.
 
-    broadcast \
-      "action" => "deleteChild",
-      "parameters" => [ "http-vwf-example-com-clients-vwf", id ]
+    broadcast "action" => "deleteChild", "parameters" => [ "http-vwf-example-com-clients-vwf", id ]
 
-    logger.debug "VWF::Application::Reflector#disconnect #{id} " +
-        "disconnecting"
+    logger.debug "VWF::Application::Reflector#disconnect #{id} disconnecting"
 
     super
 
@@ -147,14 +144,16 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
       message = JSON.generate fields, :max_nesting => 100
 
-      logger.debug "VWF::Application::Reflector#send #{id} " +
-        "#{ message_for_log message }" if log
+      logger.debug "VWF::Application::Reflector#send #{id} #{ message_for_log message }" if log
 
       log fields, :send if log
+
       super message, log
 
     else # otherwise the socket.io default
+
       super
+
     end
 
   end
@@ -169,7 +168,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
       "time" => session[ :thing ].transport.time
     ] .merge action
 
-    if action[ "action" ]
+    if fields[ "action" ]
       if session[ :thing ].storage.respond_to? :actions
         session[ :thing ].storage.actions.create session[ :thing ].sequencenext.to_s, fields
       end
@@ -177,8 +176,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
     message = JSON.generate fields, :max_nesting => 100
 
-    logger.debug "VWF::Application::Reflector#broadcast #{id} " +
-        "#{ message_for_log message }" if log
+    logger.debug "VWF::Application::Reflector#broadcast #{id} #{ message_for_log message }" if log
 
     active_clients.each do |client| # established clients: same as in super
       next if client.closing
@@ -238,8 +236,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
   def receive fields
 
-    logger.debug "VWF::Application::Reflector#receive #{id} " +
-        "#{ message_for_log fields }"
+    logger.debug "VWF::Application::Reflector#receive #{id} #{ message_for_log fields }"
 
     log fields, :receive
 
