@@ -46,7 +46,7 @@ define( [ "module",
                 if ( options && options.imageryProvider ) {
                     var url, ext, credit, type, mapStyle, params, layers;
 
-                    if ( !options instanceof String ) {
+                    if ( !utility.isString( options ) ) {
                         url = options.imageryProvider.url;
                         ext = options.imageryProvider.fileExtension;
                         mapStyle = options.imageryProvider.mapStyle;
@@ -190,7 +190,7 @@ define( [ "module",
                 if ( options && options.terrainProvider ) {
                     var url, ext, type, credit;
 
-                    if ( !options instanceof String ) {
+                    if ( !utility.isString( options ) ) {
                         url = options.terrainProvider.url;
                         ext = options.terrainProvider.fileExtension;
                         credit = options.terrainProvider.credit;
@@ -948,7 +948,7 @@ define( [ "module",
                                     //if ( node.geometryInstance === undefined ) {
                                     //    node.properties[ propertyName ] = propertyValue;
                                     //} else {
-                                    //    var cColor = cesuimColor.call( this, propertyValue );
+                                    //    var cColor = cesiumColor.call( this, propertyValue );
                                     //    // set the property in the geometrylistance.attributes
                                     //}
                                 }
@@ -1147,7 +1147,7 @@ define( [ "module",
                                             switch( prop ) {
                                                 
                                                 case "color":
-                                                    uni.color = cesuimColor( propertyValue[ prop ] )
+                                                    uni.color = cesiumColor( propertyValue[ prop ] )
                                                     break;
 
                                                 default:
@@ -2266,7 +2266,7 @@ define( [ "module",
         return vwfColor;        
     }
 
-    function cesuimColor( color ) {
+    function cesiumColor( color ) {
         var vwfColor = new utility.color( color );
         if ( vwfColor ) { 
             return new Cesium.Color( 
@@ -2325,6 +2325,17 @@ define( [ "module",
             return new Cesium.Cartesian4( value.x, value.y, value.z, value.w );
         }
         return new Cesium.Cartesian4( 0, 0, 0, 0 );
+    }
+
+    function toRectangle( value ) {
+        if ( value instanceof Array ) {
+            if ( value.length > 3 ) {
+                return new Cesium.Rectangle( value[ 0 ], value[ 1 ], value[ 2 ], value[ 3 ] );
+            }
+        } else if ( value.west !== undefined && value.south !== undefined && value.east !== undefined && value.north !== undefined) {
+            return new Cesium.Rectangle( value.west, value.south, value.east, value.north );
+        }
+        return new Cesium.Rectangle( 0, 0, 0, 0 );
     }
 
     function vwfColorToCartesian3( vwfColor ) {
@@ -2457,18 +2468,25 @@ define( [ "module",
         var geometry = undefined;
         var geometryInstance = undefined;
 
+        debugger;
         console.info( "createGeometryPrimitive( "+id+", "+JSON.stringify(options)+" )" );
 
         geometry = createGeometry( options );
 
         if ( geometry !== undefined ) {
-
-            geometryInstance = new Cesium.GeometryInstance( {
-                "id": id,
-                "geometry" : geometry
-            } ); 
-
-
+            
+            if ( options.attributes !== undefined ) {
+                geometryInstance = new Cesium.GeometryInstance( {
+                    "id": id,
+                    "geometry" : geometry,
+                    "attributes": cesiumifyOptions( options.attributes )
+                } );
+            } else  {
+                geometryInstance = new Cesium.GeometryInstance( {
+                    "id": id,
+                    "geometry" : geometry
+                } );
+            } 
 
             primitive = new Cesium.Primitive( {
                 "geometryInstances" : geometryInstance,
@@ -2495,24 +2513,29 @@ define( [ "module",
 
             switch ( appearanceType.toLowerCase() ) {
 
+                case "ellipsoidsurface":
                 case "ellipsoidsurfaceappearance":
-                    appearance = new EllipsoidSurfaceAppearance( options );
+                    appearance = new Cesium.EllipsoidSurfaceAppearance( options );
                     break;
 
+                case "perinstancecolor":
                 case "perinstancecolorappearance":
-                    appearance = new PerInstanceColorAppearance( options );
+                    appearance = new Cesium.PerInstanceColorAppearance( options );
                     break;
 
+                case "debug":
                 case "debugappearance":
-                    appearance = new DebugAppearance( options );
+                    appearance = new Cesium.DebugAppearance( options );
                     break;
 
+                case "polylinecolor":
                 case "polylinecolorappearance":
-                    appearance = new PolylineColorAppearance( options );
+                    appearance = new Cesium.PolylineColorAppearance( options );
                     break;
 
+                case "polylinematerial":
                 case "polylinematerialappearance":
-                    appearance = new PolylineMaterialAppearance( options );
+                    appearance = new Cesium.PolylineMaterialAppearance( options );
                     break;
 
                 case "material":
@@ -2535,7 +2558,7 @@ define( [ "module",
         var primitives = scene.primitives;
         var src = node.source;
 
-        if ( !node.source instanceof String ) {
+        if ( !utility.isString( node.source ) ) {
             src = node.source.url;
         }
 
@@ -2580,10 +2603,10 @@ define( [ "module",
         
         if ( options !== undefined ) {
             if ( options.color !== undefined ) {
-                options.color = cesuimColor( options.color );    
+                options.color = cesiumColor( options.color );    
             }
             if ( options.translucent !== undefined ) {
-                if ( options.translucent instanceof String && ( 
+                if ( utility.isString( options.translucent ) && ( 
                     options.translucent !== "true" || 
                     options.translucent !== "false" ||
                     options.translucent !== "0" ||
@@ -2634,6 +2657,28 @@ define( [ "module",
                     options.positions = positions;    
                 }
             }
+            if ( options.rectangle !== undefined ) {
+                options.rectangle = toRectangle( options.rectangle );    
+            }
+            if ( options.vertexFormat !== undefined ) {
+                if ( utility.isString( options.vertexFormat ) ) {
+                    switch ( options.vertexFormat.toLowerCase() ) {
+                        case "ellipsoidsurface":
+                            options.vertexFormat = new Cesium.EllipsoidSurfaceAppearance();
+                            break;
+                    }
+                } else if ( options.vertexFormat.vertexFormatType !== undefined ) {
+                    if ( options.vertexFormat.material !== undefined ) {
+                        options.vertexFormat.material = createMaterial( options.vertexFormat.material );
+                    }
+
+                    switch ( options.vertexFormat.vertexFormatType.toLowerCase() ) {
+                        case "ellipsoidsurface":
+                            options.vertexFormat = new Cesium.EllipsoidSurfaceAppearance( options.vertexFormat );
+                            break;
+                    }
+                }
+            }
         }
     }
 
@@ -2642,9 +2687,11 @@ define( [ "module",
 
         console.info( "createMaterial( "+JSON.stringify(options)+" )" );
 
-        if ( options ) {
+        if ( options !== undefined ) {
             
-            if ( options.type !== undefined ) {
+            if ( utility.isString( options ) ) {
+                material = new Cesium.Material.fromType( options );
+            } else if ( options.type !== undefined ) {
                 material = new Cesium.Material.fromType( options.type, cesiumifyOptions( options.uniforms ) );    
             } else {
                 if ( options.fabric !== undefined && options.fabric.uniforms !== undefined ) {

@@ -26,21 +26,30 @@ children:
     extends: http://vwf.example.com/cesium/atmosphere.vwf 
   skybox: 
     extends: http://vwf.example.com/cesium/skybox.vwf 
-  poly1:
+  rect:
     extends: http://vwf.example.com/cesium/geometry.vwf
     properties:
       geometryDefinition: 
-        geometryType: polygon
-        polygonHierarchy:
-          positions: [ [ 1511930, -4653241, 4077986 ], [ 1788911, -4914994, 3637867 ], [ 1430818, -5339886, 3170374 ], [ 1890776, -5194862, 3170374 ], [ 1832841, -4536439, 4077986 ] ]
-  poly2:
-    extends: http://vwf.example.com/cesium/geometry.vwf
-    properties:
-      geometryDefinition: 
-        geometryType: polygon
-        polygonHierarchy:
-          positions: [ [ 0, -5528256, 3170373 ], [ 959971, -5444270, 3170374 ], [ 849610, -4818376, 4077986 ], [ 0, -4892708, 4077986 ]  ]
-        appearance: 
-          type: material
-          material: 
-            type: Checkerboard
+        geometryType: rectangle
+        rectangle: 
+          east: -1.501
+          west: -1.605
+          north: 0.47124
+          south: 0.34907
+        vertexFormat: ellipsoidsurface
+        stRotation: 0.78540
+        appearance:
+          type: ellipsoidSurface
+          material: Stripe 
+  # rectOutline:
+  #   extends: http://vwf.example.com/cesium/geometry.vwf
+  #   properties:
+  #     geometryDefinition: 
+  #       geometryType: rectangleOutline
+  #       rectangle: 
+  #         east: -1.501
+  #         west: -1.605
+  #         north: 0.47124
+  #         south: 0.34907
+  #       attributes: 
+  #         color: [ 255, 255, 255, 1 ]
