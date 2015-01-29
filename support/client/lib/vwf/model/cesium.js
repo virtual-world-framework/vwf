@@ -2664,7 +2664,7 @@ define( [ "module",
                 if ( utility.isString( options.vertexFormat ) ) {
                     switch ( options.vertexFormat.toLowerCase() ) {
                         case "ellipsoidsurface":
-                            options.vertexFormat = new Cesium.EllipsoidSurfaceAppearance();
+                            options.vertexFormat = Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT;
                             break;
                     }
                 } else if ( options.vertexFormat.vertexFormatType !== undefined ) {
@@ -2674,7 +2674,7 @@ define( [ "module",
 
                     switch ( options.vertexFormat.vertexFormatType.toLowerCase() ) {
                         case "ellipsoidsurface":
-                            options.vertexFormat = new Cesium.EllipsoidSurfaceAppearance( options.vertexFormat );
+                            options.vertexFormat = Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT;
                             break;
                     }
                 }
