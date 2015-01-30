@@ -30,29 +30,29 @@ module VWF::Storage::CouchDB
       end
     end
 
-    def each
+    def each minid = nil, maxid = nil
       if block_given?
-        query( :descending => false ) { |item| yield item }
+        query( minid, maxid, :descending => false ) { |item| yield item }
       else
-        return enum_for :each
+        super
       end
     end
 
-    def reverse_each
+    def reverse_each minid = nil, maxid = nil
       if block_given?
-        query( :descending => true ) { |item| yield item }
+        query( minid, maxid, :descending => true ) { |item| yield item }
       else
-        return enum_for :reverse_each
+        super
       end
     end
 
-    def size
-      query( :reduce => true )
+    def size minid = nil, maxid = nil
+      query( minid, maxid, :reduce => true )
     end
 
   private
 
-    def query options = {}
+    def query minid = nil, maxid = nil, options = {}
 
       reduction = nil
 
@@ -63,20 +63,23 @@ module VWF::Storage::CouchDB
 
       query_options.merge! options
 
-      key = [
+      minkey = [
         container ? container.dbid : "",
-        type.dbtype
+        type.dbtype,
+        minid ? sortid( minid ) : nil
+      ]
+
+      maxkey = [
+        container ? container.dbid : "",
+        type.dbtype,
+        maxid ? sortid( maxid ) : "\uFFFF"
       ]
 
       if query_options[ :descending ]
-        startkey = key + [ {} ]
-        endkey = key
+        query_options.merge! :startkey => maxkey, :endkey => minkey
       else
-        startkey = key
-        endkey = key + [ {} ]
+        query_options.merge! :startkey => minkey, :endkey => maxkey
       end
-
-      query_options.merge! :startkey => startkey, :endkey => endkey
 
       db.view "#{DESIGN_DOCUMENT_ID}/_view/members", query_options do |row|
 

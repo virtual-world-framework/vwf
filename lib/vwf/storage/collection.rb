@@ -22,7 +22,21 @@ module VWF::Storage
 
     def [] id ; end  # => Item                                  # GET /collection/:item
 
+    def each minid = nil, maxid = nil
+      enum_for :each, minid, maxid
+    end
+
+    def reverse_each minid = nil, maxid = nil
+      enum_for :reverse_each, minid, maxid
+    end
+
+    def size minid = nil, maxid = nil ; end
+
     def type ; Item ; end
+
+  private
+
+    def sortid id ; id ; end
 
   end
 

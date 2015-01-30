@@ -129,6 +129,7 @@ module VWF::Storage
   class Revisions < Collection
     include Types
     def type ; self.Revision ; end
+    def sortid id ; id.to_i ; end
   end
 
   class Revision < Item
@@ -151,6 +152,7 @@ module VWF::Storage
 
     include Types
     def type ; self.State ; end
+    def sortid id ; id.to_i ; end
 
     def create id, value
 
@@ -185,6 +187,7 @@ module VWF::Storage
   class Actions < Collection
     include Types
     def type ; self.Action ; end
+    def sortid id ; id.to_i ; end
   end
 
   class Action < Item

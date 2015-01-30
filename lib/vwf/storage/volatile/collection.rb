@@ -26,30 +26,42 @@ module VWF::Storage::Volatile
       storage[ id ]
     end
 
-    def each
+    def each minid = nil, maxid = nil
       if block_given?
-        storage.each { |item| yield item }
+        selection( minid, maxid ).each { |item| yield item }
       else
-        storage.each
+        super
       end
     end
 
-    def reverse_each
+    def reverse_each minid = nil, maxid = nil
       if block_given?
-        storage.reverse_each { |item| yield item }
+        selection( minid, maxid ).reverse_each { |item| yield item }
       else
-        storage.reverse_each
+        super
       end
     end
 
-    def size
-      storage.size
+    def size minid = nil, maxid = nil
+      selection( minid, maxid ).size
     end
 
   private
 
     def storage
       @storage ||= {}
+    end
+
+    def selection minid = nil, maxid = nil
+      if minid || maxid
+        range = ( minid ? sortid( minid ) : -Float::INFINITY ) ..
+          ( maxid ? sortid( maxid ) : Float::INFINITY )
+        storage.select do |id, item|
+          range === sortid( id )
+        end
+      else
+        storage
+      end
     end
 
   end
