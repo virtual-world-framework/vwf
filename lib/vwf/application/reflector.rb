@@ -125,7 +125,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
     broadcast "action" => "deleteChild", "parameters" => [ "http-vwf-example-com-clients-vwf", id ]
 
-    logger.debug "VWF::Application::Reflector#disconnect #{id} disconnecting"
+    logger.debug "VWF::Application::Reflector#disconnect #{resource} #{id} disconnecting"
 
     super
 
@@ -144,7 +144,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
       message = JSON.generate fields, :max_nesting => 100
 
-      logger.debug "VWF::Application::Reflector#send #{id} #{ message_for_log message }" if log
+      logger.debug "VWF::Application::Reflector#send #{resource} #{id} #{ message_for_log message }" if log
 
       log fields, :send if log
 
@@ -176,7 +176,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
     message = JSON.generate fields, :max_nesting => 100
 
-    logger.debug "VWF::Application::Reflector#broadcast #{id} #{ message_for_log message }" if log
+    logger.debug "VWF::Application::Reflector#broadcast #{resource} #{id} #{ message_for_log message }" if log
 
     active_clients.each do |client| # established clients: same as in super
       next if client.closing
@@ -236,7 +236,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
   def receive fields
 
-    logger.debug "VWF::Application::Reflector#receive #{id} #{ message_for_log fields }"
+    logger.debug "VWF::Application::Reflector#receive #{resource} #{id} #{ message_for_log fields }"
 
     log fields, :receive
 
@@ -359,7 +359,7 @@ private
 
   def schedule_tick
 
-    logger.debug "VWF::Application::Reflector#schedule_tick #{id}"
+    logger.debug "VWF::Application::Reflector#schedule_tick #{resource} #{id}"
 
     session[ :timer ] = EventMachine::PeriodicTimer.new( 0.05 ) do  # TODO: configuration parameter for update rate
       yield
@@ -369,7 +369,7 @@ private
   
   def cancel_tick
 
-    logger.debug "VWF::Application::Reflector#cancel_tick #{id}"
+    logger.debug "VWF::Application::Reflector#cancel_tick #{resource} #{id}"
 
     session[ :timer ].cancel
     session.delete :timer
