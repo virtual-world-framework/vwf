@@ -5234,7 +5234,7 @@ define( [ "module",
 
         if ( matDef.texture !== undefined ) {
             text = loadTexture( undefined, matDef.texture ); 
-            if ( !matDef.texture instanceof String ) {
+            if ( !utility.isString( matDef.texture ) ) {
                 for ( var prop in matDef.texture ) {
                     if ( prop !== 'url' && prop !== 'mapping' ) {
                         setTextureProperty( text, prop, matDef.texture[ prop ] );
