@@ -27,10 +27,23 @@ children:
   skybox: 
     extends: http://vwf.example.com/cesium/skybox.vwf 
   box:
-    extends: http://vwf.example.com/cesium/boxGeometry.vwf
+    extends: http://vwf.example.com/cesium/geometry.vwf
     properties:
-      color: [ 255, 0, 0, 0.5 ] 
-      position: [ -105.0, 45.0 ]
-      dimensions: [ 400000.0, 300000.0, 500000.0 ]
+      modelMatrix: [ 0.9659, -0.25882, 0, 0, 0.183012, 0.683013, 0.70711, 0, -0.183013, -0.6830127, 0.70711, 0, -1214991, -4534411, 4664126, 1]
+      geometryDefinition: 
+        geometry:
+          type: boxGeometry
+          vertexFormat: PerInstanceColor
+          dimensions: [ 400000.0, 300000.0, 500000.0 ]
+        instance:
+          modelMatrix: [ 0.9659, -0.25882, 0, 0, 0.183012, 0.683013, 0.70711, 0, -0.183013, -0.6830127, 0.70711, 0, -1214991, -4534411, 4664126, 1]
+          attributes: 
+            color: [ 255, 0, 0, 0.5 ]
+            convertColorToInstance: true
+        primitive:
+          appearance:
+            type: PerInstanceColor
+            closed: true
+
 
   
