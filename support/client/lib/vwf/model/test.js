@@ -18,6 +18,7 @@
 
 define( [ "module", "vwf/model" ], function( module, model ) {
 
+	var foo = 0;
     return model.load( module, {
 
         // == Module Definition ====================================================================
@@ -27,6 +28,17 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         initialize: function() {
             this.arguments = Array.prototype.slice.call( arguments );
         },
+
+		callingMethod: function( nodeID, methodName, params ){
+			
+			switch( methodName ){
+                case "bar":
+                    foo = foo + 1;
+                    return foo;
+            }
+
+            return undefined;
+		}
 
     } );
 
