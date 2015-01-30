@@ -30,4 +30,4 @@ children:
   scenario:
     extends: http://vwf.example.com/cesium/node3.vwf 
     type: model/vnd.cesium.czml+xml
-    source: lotsOfSensors.czml
+    source: simple.czml
