@@ -55,3 +55,13 @@ properties:
   ## @property
 
   owner: 
+
+  ## A navigable object is broken up into two parts: The navigable node and a parent object
+  ## that is interpolated by the view. Setting the transform value changes the transform of
+  ## the parent while setting the navTransform property sets the transform that is normally
+  ## controlled through user input.
+  ## 
+  ## @name navigable.vwf#navTransform
+  ## @property
+
+  navTransform: [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ]
