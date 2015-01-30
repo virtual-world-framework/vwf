@@ -17,11 +17,7 @@ module VWF::Storage
     def set value ; end                                         # PUT /instances/:instance
 
     def id
-      @id ||= newid
-    end
-
-    def newid
-      SecureRandom.hex
+      @id ||= collection.send :newid
     end
 
   end

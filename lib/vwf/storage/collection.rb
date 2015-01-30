@@ -32,10 +32,11 @@ module VWF::Storage
 
     def size minid = nil, maxid = nil ; end
 
-    def type ; Item ; end
-
   private
 
+    def type ; Item ; end
+
+    def newid ; SecureRandom.hex ; end
     def sortid id ; id ; end
 
   end

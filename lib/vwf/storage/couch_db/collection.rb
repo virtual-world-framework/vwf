@@ -121,6 +121,15 @@ module VWF::Storage::CouchDB
 
     end
 
+    def newid
+      tempdoc = CouchRest::Document.new
+      tempdoc.database = db
+      tempdoc.save
+      id = tempdoc.id
+      tempdoc.destroy
+      id
+    end
+
   end
 
 end
