@@ -67,13 +67,12 @@ module VWF::Storage
     def actions ; @actions ||= self.Actions.new self ; end
     def tags ; @tags ||= self.Tags.new self ; end
 
-    def state
+    def state sequence_id = nil
 
       result = nil
 
-      states.reverse_each do |id, state|
+      states.reverse_each( nil, sequence_id ) do |state_id, state|
 
-        sequence = id.to_i
         result = state.get
 
         result[ "kernel" ] ||= {}
@@ -81,13 +80,13 @@ module VWF::Storage
 
         queue = result[ "queue" ][ "queue" ] ||= []
 
-        action_queue = actions.reverse_each.map do |id, action|
-          if id.to_i > sequence
-            action.get.merge "origin" => "reflector"
+        action_queue = actions.each( state_id, sequence_id ).map do |action_id, action|
+          if action_id == state_id
+            next
           else
-            break
+            action.get.merge "origin" => "reflector"
           end
-        end .reverse
+        end .compact
 
         unless action_queue.empty?
           result[ "queue" ][ "time" ] =
@@ -139,10 +138,8 @@ module VWF::Storage
     def tags ; @tags ||= self.Tags.new self ; end
 
     def state
-      if collection.container && collection.container.respond_to?( :states )
-        if state = collection.container.states[ id ]
-          state.get  # TODO: actions too
-        end
+      if collection.container
+        collection.container.state id
       end
     end
 
