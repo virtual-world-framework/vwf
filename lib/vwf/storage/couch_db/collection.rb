@@ -64,14 +64,14 @@ module VWF::Storage::CouchDB
       query_options.merge! options
 
       minkey = [
-        container ? container.dbid : "",
-        type.dbtype,
+        container ? container.send( :dbid ) : "",
+        dbtype,
         minid ? sortid( minid ) : nil
       ]
 
       maxkey = [
-        container ? container.dbid : "",
-        type.dbtype,
+        container ? container.send( :dbid ) : "",
+        dbtype,
         maxid ? sortid( maxid ) : "\uFFFF"
       ]
 
@@ -119,6 +119,24 @@ module VWF::Storage::CouchDB
 
       reduction
 
+    end
+
+    def dbtemplate
+      if container
+        { container.send( :dbtype ) => container.send( :dbid ), "type" => dbtype }
+      else
+        { "type" => dbtype }
+      end
+    end
+
+    def dbtype
+      type.name.split( "::" ).last.downcase
+    end
+
+    def dbid
+      if container
+        container.send( :dbid ) + "/" + dbtype
+      end
     end
 
     def newid

@@ -20,23 +20,25 @@ module VWF::Storage::CouchDB
       end
     end
 
-    def load  # TODO private
-      self.document = db.get dbid  # TODO: note: throws if missing  # TODO: use document= (isn't working)
+  private
+
+    def load
+      self.document = db.get dbid  # TODO: note: throws if missing
     end
 
-    def save  # TODO private
+    def save
       document.id ||= dbid
       document.save
     end
 
-    def delete  # TODO private
+    def delete
       document.destroy
     end
 
     def document
       @document ||= CouchRest::Document.new.tap do |document|
         document.database = db
-        document.merge! template
+        document.merge! collection.send( :dbtemplate )
       end
     end
 
@@ -44,42 +46,13 @@ module VWF::Storage::CouchDB
       @document = value
     end
 
-    def template
-      unless collection.container
-        { "type" => dbtype }
-      else
-        { "type" => dbtype, collection.container.dbtype => collection.container.dbid }
-      end
+    def dbtype
+      collection.send( :dbtype )
     end
 
     def dbid
-      if id
-        unless collection.container
-          id
-        else
-          collection.container.dbid + "/" + dbtype + "/" + id
-        end
-      end
-    end
-
-    def dbtype
-      self.class.dbtype
-    end
-
-    module ClassMethods
-      def dbtype
-        name.split( "::" ).last.downcase
-      end
-    end
-
-    # Define `Item.dbtype`.
-
-    self.extend ClassMethods
-
-    # Define `dbtype` in the classes that `include Item`: `Application.dbtype`, etc.
-
-    def self.included base
-      base.extend ClassMethods
+      dbid = collection.send( :dbid )
+      dbid ? dbid + "/" + id : id
     end
 
   end
