@@ -106,7 +106,7 @@ class VWF::Application < Sinatra::Base
   end
 
   before "/instance/:instance_id/revision/:revision_id/?*" do |_, revision_id, _|
-    @revision = @instance.revisions[ revision_id ]
+    @revision = @instance.revisions[ revision_id ] || @instance.revisions.create( revision_id )  # TODO: remove second clause to stop auto-creating arbitrary revisions; verify against existing states/actions
     halt 404 unless @revision
   end
 
@@ -142,12 +142,11 @@ class VWF::Application < Sinatra::Base
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
-  # Bootstrap the client from a revision.  TODO: duplicate and redirect to a new instance
+  # Copy a revision to a new instance and redirect.
 
   get "/instance/:instance_id/revision/:revision_id/", :browser => true do |instance_id, revision_id|
-    request.script_name += "/instance/#{instance_id}/revision/#{revision_id}"
-    request.path_info = "/"
-    Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
+    @instance = @application.instances.create( @revision.state )
+    redirect to "/instance/" + @instance.id + "/"
   end
 
   ### Serve the reflector ##########################################################################
