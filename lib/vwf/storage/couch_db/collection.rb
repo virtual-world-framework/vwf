@@ -82,7 +82,7 @@ module VWF::Storage::CouchDB
 
           # {
           #   "key" => nil,
-          #   "value" => 10                                             # Reduction result = count
+          #   "value" => 10                                     # Reduction result = count
           # }
 
           reduction = row[ "value" ]
@@ -90,14 +90,14 @@ module VWF::Storage::CouchDB
         else
 
           # {
-          #   "id" => "/duck/index.vwf/instance/1234",                  # CouchDB document id
-          #   "key" => [ "/duck/index.vwf", "instance", 1234 ],         # Query key mapping to document: container-id, type, item-id
-          #   "value" => {                                              # Query `value` = the document
+          #   "id" => "/duck/index.vwf/instance/1234",          # CouchDB document id
+          #   "key" => [ "/duck/index.vwf", "instance", 1234 ], # Query key mapping to document: container-id, type, item-id
+          #   "value" => {                                      # Query `value` = the document
           #     "_id" => "/duck/index.vwf/instance/1234",
           #     "_rev" => "1-abcd",
           #     "type" => "instance",
           #     "application" => "/duck/index.vwf",
-          #     "value" => { ... }                                      # Document `value` = the item
+          #     "value" => { ... }                              # Document `value` = the item
           #   }
           # }
 
