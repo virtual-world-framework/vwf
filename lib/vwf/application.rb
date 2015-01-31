@@ -220,10 +220,10 @@ pass if path_info.match /^instance/
     case @type || request.preferred_type( @@api_types )
       when "application/json"
         content_type :json
-        @instance.get.to_json
+        @instance.state.to_json
       when "text/yaml"
         content_type :yaml
-        @instance.get.to_yaml
+        @instance.state.to_yaml
       when "text/html"
         slim :instance
     end
@@ -250,10 +250,10 @@ pass if path_info.match /^instance/
     case @type || request.preferred_type( @@api_types )
       when "application/json"
         content_type :json
-        @revision.get.to_json
+        @revision.state.to_json
       when "text/yaml"
         content_type :yaml
-        @revision.get.to_yaml
+        @revision.state.to_yaml
       when "text/html"
         slim :revision
     end
