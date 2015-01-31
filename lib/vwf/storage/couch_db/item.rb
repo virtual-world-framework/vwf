@@ -23,7 +23,11 @@ module VWF::Storage::CouchDB
   private
 
     def load
-      self.document = db.get dbid  # TODO: note: throws if missing
+      begin
+        self.document = db.get dbid
+      rescue
+        document.delete "value"
+      end
     end
 
     def save

@@ -21,13 +21,8 @@ module VWF::Storage::CouchDB
     end
 
     def [] id
-      begin
-        type.new( self, id ).tap do |item|
-          item.get  # throws if missing
-        end
-      rescue
-        nil
-      end
+      item = type.new( self, id )
+      item.get ? item : nil
     end
 
     def each minid = nil, maxid = nil
