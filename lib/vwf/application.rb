@@ -96,7 +96,7 @@ class VWF::Application < Sinatra::Base
   ### Validate the application, instance, and revision. ############################################
 
   before "/?*" do
-    @application = VWF.storage[ @application_id ] || VWF.storage.create( @application_id, @application_id )
+    @application = VWF.storage[ @application_id ]
     halt 404 unless @application
   end
 

@@ -11,6 +11,9 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
+# `VWF::Pattern` is a `Regexp`-compatible class to detect paths that refer to VWF applications.
+# Successful matches return `script_name` and `path_info` as captures.
+
 class VWF::Pattern
 
   Match = Struct.new :captures
@@ -27,43 +30,64 @@ class VWF::Pattern
 
   end
 
-  # incoming path                                       public_path             application     instance        private_path            
-
-  # /path/to/component                                  "/path/to/component"    "index.vwf"     nil             nil                     
-  # /path/to/component/                                 "/path/to/component"    "index.vwf"     nil             nil                     
-  # /path/to/component/path/to/client/file              "/path/to/component"    "index.vwf"     nil             "path/to/client/file"   
-  # /path/to/component/path/to/component/file           "/path/to/component"    "index.vwf"     nil             "path/to/component/file"
-  # /path/to/component/socket/path                      "/path/to/component"    "index.vwf"     nil             "socket/path"           
-
-  # /path/to/component.vwf                              "/path/to"              "component.vwf" nil             nil                     
-  # /path/to/component.vwf/                             "/path/to"              "component.vwf" nil             nil                     
-  # /path/to/component.vwf/path/to/client/file          "/path/to"              "component.vwf" nil             "path/to/client/file"   
-  # /path/to/component.vwf/path/to/component/file       "/path/to"              "component.vwf" nil             "path/to/component/file"
-  # /path/to/component.vwf/socket/path                  "/path/to"              "component.vwf" nil             "socket/path"           
-
-  # /path/to/component/instance                         "/path/to/component"    "index.vwf"     "instance"      nil                     
-  # /path/to/component/instance/                        "/path/to/component"    "index.vwf"     "instance"      nil                     
-  # /path/to/component/instance/path/to/client/file     "/path/to/component"    "index.vwf"     "instance"      "path/to/client/file"   
-  # /path/to/component/instance/path/to/component/file  "/path/to/component"    "index.vwf"     "instance"      "path/to/component/file"
-  # /path/to/component/instance/socket/path             "/path/to/component"    "index.vwf"     "instance"      "socket/path"           
-
-  # /path/to/component.vwf/instance                     "/path/to"              "component.vwf" "instance"      nil                     
-  # /path/to/component.vwf/instance/                    "/path/to"              "component.vwf" "instance"      nil                     
-  # /path/to/component.vwf/instance/path/to/client/file "/path/to"              "component.vwf" "instance"      "path/to/client/file"   
-  # /path/to/component.vwf/instance/path/to/component/file "/path/to"           "component.vwf" "instance"      "path/to/component/file"
-  # /path/to/component.vwf/instance/socket/path         "/path/to"              "component.vwf" "instance"      "socket/path"           
+  # Test `path` for a match. Return `script_name` and `path_info` as captures on a successful match.
 
   def match path
 
+    # Search storage for an application matching the path.
+
+    script_name = application_in_storage? path
+
+    # If not found, search the filesystem for a matching component. An application for the component
+    # is created in storage if found.
+
+    script_name = application_in_filesystem? path unless script_name
+
+    # If the path matches an application, split the path at the application and return `script_name`
+    # (the application) and `path_info` (the resource inside the application).
+
+    if script_name
+      path_info = path[ script_name.length, path.length ]
+      Match.new [ script_name, path_info, script_name ]
+    end
+
+  end
+
+private
+
+  # Determine if `path` refers an to application in the storage database. Return the application
+  # path if so.
+
+  def application_in_storage? path
+
+    # Find the longest application path that matches the first part of `path`. The reverse sort
+    # ensures that longer, deeper paths are encountered earlier so that applications may refer to
+    # components inside of components.
+
+    script_name, _ = VWF.storage.reverse_each.find do |id, _|
+      path.start_with?( id ) && ( path.length == id.length || path[ id.length ] == "/" )
+    end
+
+    # Return the application path found, if any.
+
+    script_name
+
+  end
+
+  # Determine if `path` refers to a component or other launchable resource in the public directory.
+  # If so, create an application in storage for that resource and return the application path.
+
+  def application_in_filesystem? path
+
+    # Build the potential application path in `script_name`.
+
     script_name = ""
 
-    # Split into segments. The first segment is empty since `path` has a leading slash. A trailing
-    # slash does not create an empty last segment.
+    # Split `path` into segments. The first segment is empty since `path` has a leading slash. A
+    # trailing slash does not create an empty last segment.
 
     segments = path.split "/"
     segments.shift  # empty since `path` has a leading slash
-
-    has_trailing_slash = path[-1] == "/"
 
     # Follow segments into the `public` directory.
 
@@ -73,29 +97,44 @@ class VWF::Pattern
 
     # Is a component there? Which type?
 
-    if segments.first and extension = component?( script_name + "/" + segments.first )
+    if segments.first && component?( script_name + "/" + segments.first )
       application = script_name = script_name + "/" + segments.shift
-    elsif extension = component?( script_name + "/index.vwf" )  # TODO: configuration parameter for default application name
+    elsif component?( script_name + "/index.vwf" )  # TODO: configuration parameter for default application name
       application = script_name + "/" + "index.vwf"  # TODO: configuration parameter for default application name
-    elsif extension = component?( script_name + "/index.dae" )  # TODO: delegate list of supported types to #component  # TODO: configuration parameter for default application name
+    elsif component?( script_name + "/index.dae" )  # TODO: delegate list of supported types to #component  # TODO: configuration parameter for default application name
       application = script_name + "/" + "index.dae"  # TODO: configuration parameter for default application name
-    elsif extension = component?( script_name + "/index.unity3d" )  # TODO: delegate list of supported types to #component  # TODO: configuration parameter for default application name
+    elsif component?( script_name + "/index.unity3d" )  # TODO: delegate list of supported types to #component  # TODO: configuration parameter for default application name
       application = script_name + "/" + "index.unity3d"  # TODO: configuration parameter for default application name
     end
 
-    # If we found a component, return a successful match. Split the path at the component into
-    # `script_name` and `path_info`. Identify the component as the application. The application will
-    # be different from `script_name` if an implicit `index.*` component was used.
+    # Create an application in storage if we found a component.
+    # 
+    # When `path` refers to an alias, create applications under both the canonical name and the
+    # alias. For example, if `path` contains `/path/to/application/...`, create:
+    # 
+    #   `/path/to/application/index.vwf` => `/path/to/application/index.vwf`
+    #   `/path/to/application` => `/path/to/application/index.vwf`
+    # 
+    # The alias would hide references using the canonical name, otherwise.
 
-    if extension
-      path_info = segments.shift( segments.length ).map { |segment| "/" + segment } .join( "" )
-      path_info += "/" if has_trailing_slash
-      Match.new [ script_name, path_info, application ]
+    if application
+      if script_name == application
+        VWF.storage.create application, application
+      else
+        VWF.storage.create script_name, application
+        VWF.storage.create application, application unless VWF.storage[ application ]
+      end
+    else
+      script_name = nil
     end
+
+    # Return the application path created, if any.
+
+    script_name
 
   end
 
-private
+  # Determine if `path` refers to a directory in the public directory.
 
   def directory? path
     if @mock_filesystem
@@ -106,6 +145,8 @@ private
       File.directory? File.join( VWF.settings.public_folder, path )
     end
   end
+
+  # Determine if `path` refers to a file in the public directory.
 
   def file? path
     if @mock_filesystem
@@ -118,6 +159,8 @@ private
       File.file? File.join( VWF.settings.public_folder, path )
     end
   end
+
+  # Determine if `path` refers to a component or other launchable resource in the public directory.
 
   def component? path
     if path =~ /\.vwf$/
