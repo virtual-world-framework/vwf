@@ -160,26 +160,21 @@ class VWF::Application < Sinatra::Base
 
   ### Serve the client files. ######################################################################
 
-# "/*" blocks all the api calls below, but these will go to "/client/*"
-
-  get "/instance/:instance_id/revision/:revision_id/*" do |instance_id, revision_id, path_info|
-pass if @type
-    request.script_name += "/instance/#{instance_id}/revision/#{revision_id}"
+  get "/client/?*" do |path_info|
+    request.script_name += "/client"
     request.path_info = "/#{path_info}"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
-  get "/instance/:instance_id/*" do |instance_id, path_info|
-pass if @type
-pass if path_info.match /^revision/
-    request.script_name += "/#{instance_id}"
+  get "/instance/:instance_id/client/?*" do |instance_id, path_info|
+    request.script_name += "/instance/#{instance_id}/client"
     request.path_info = "/#{path_info}"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
-  get "/*" do |path_info|
-pass if @type
-pass if path_info.match /^instance/
+  get "/instance/:instance_id/revision/:revision_id/client/?*" do |instance_id, revision_id, path_info|
+    request.script_name += "/instance/#{instance_id}/revision/#{revision_id}/client"
+    request.path_info = "/#{path_info}"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
