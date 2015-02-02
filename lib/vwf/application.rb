@@ -27,10 +27,24 @@ class VWF::Application < Sinatra::Base
     # application resources should bootstrap the client, and singular application resources should
     # redirect to directory resources.
 
-    set( :browser ) do |want_browser|
+    set :browser do |wants_browser|
       condition do
         is_browser = !! request.accept.include?( "text/html" )  # `accept.include?`, not `accept?`; want explict `text/html`
-        want_browser == is_browser
+        wants_browser == is_browser
+      end
+    end
+
+    set :instance do |requires_instance|
+      condition do
+        is_instance = !! @instance
+        requires_instance == is_instance
+      end
+    end
+
+    set :revision do |requires_revision|
+      condition do
+        is_revision = !! @revision
+        requires_revision == is_revision
       end
     end
 
@@ -91,18 +105,27 @@ class VWF::Application < Sinatra::Base
   ### Validate the application, instance, and revision. ############################################
 
   before "/?*" do
-    @application = VWF.storage[ request.script_name ]
-    halt 404 unless @application
+    if @application = VWF.storage[ request.script_name ]
+      @script_name = request.script_name
+    else
+      halt 404
+    end
   end
 
   before "/instance/:instance_id/?*" do |instance_id, _|
-    @instance = @application.instances[ instance_id ] || @application.instances.create( instance_id, @application.state )  # TODO: remove second clause to stop auto-creating arbitrary instances
-    halt 404 unless @instance
+    if @instance = @application.instances[ instance_id ] || @application.instances.create( instance_id, @application.state )  # TODO: remove second clause to stop auto-creating arbitrary instances
+      route_as "/instance/#{instance_id}"
+    else
+      halt 404
+    end
   end
 
-  before "/instance/:instance_id/revision/:revision_id/?*" do |_, revision_id, _|
-    @revision = @instance.revisions[ revision_id ] || @instance.revisions.create( revision_id )  # TODO: remove second clause to stop auto-creating arbitrary revisions; verify against existing states/actions
-    halt 404 unless @revision
+  before "/revision/:revision_id/?*", :instance => true do |revision_id, _|
+    if @revision = @instance.revisions[ revision_id ] || @instance.revisions.create( revision_id )  # TODO: remove second clause to stop auto-creating arbitrary revisions; verify against existing states/actions
+      route_as "/revision/#{revision_id}"
+    else
+      halt 404
+    end
   end
 
   ### Redirect singular resources to directory resources. ##########################################
@@ -112,59 +135,59 @@ class VWF::Application < Sinatra::Base
     redirect to "#{request.path_info}/"
   end
 
-  get "/instance/:instance_id", :browser => true do
+  get "", :instance => true, :browser => true do
     pass if @type
     redirect to "#{request.path_info}/"
   end
 
-  get "/instance/:instance_id/revision/:revision_id", :browser => true do
+  get "", :instance => true, :revision => true, :browser => true do
     pass if @type
     redirect to "#{request.path_info}/"
   end
 
   # Redirect the application to a new instance. ####################################################
 
-  get "/", :browser => true do
+  get "/", :instance => false, :browser => true do
     @instance = @application.instances.create( @application.state )
     redirect to "/instance/#{@instance.id}/"
   end
 
   # Bootstrap the client from an instance.
 
-  get "/instance/:instance_id/", :browser => true do |instance_id|
-    delegate_to "/instance/#{instance_id}"
+  get "/", :instance => true, :revision => false, :browser => true do
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
   # Copy a revision to a new instance and redirect.
 
-  get "/instance/:instance_id/revision/:revision_id/", :browser => true do |instance_id, revision_id|
+  get "/", :instance => true, :revision => true, :browser => true do
     @instance = @application.instances.create( @revision.state )
+    unroute_as
     redirect to "/instance/#{@instance.id}/"
   end
 
   ### Serve the reflector ##########################################################################
 
-  get "/instance/:instance_id/reflector/?*" do |instance_id, _|
-    resource = "#{request.script_name}/instance/#{instance_id}"
-    delegate_to "/instance/#{instance_id}/reflector"
+  get "/reflector/?*", :instance => true do
+    resource = request.script_name
+    route_as "/reflector"
     Reflector.new( resource, @instance ).call env
   end
 
   ### Serve the client files. ######################################################################
 
-  get "/client/?*" do |_|
-    delegate_to "/client"
+  get "/client/?*" do
+    route_as "/client"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
-  get "/instance/:instance_id/client/?*" do |instance_id, _|
-    delegate_to "/instance/#{instance_id}/client"
+  get "/client/?*", :instance => true do
+    route_as "/client"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
-  get "/instance/:instance_id/revision/:revision_id/client/?*" do |instance_id, revision_id, _|
-    delegate_to "/instance/#{instance_id}/revision/#{revision_id}/client"
+  get "/client/?*", :instance => true, :revision => true do
+    route_as "/client"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
@@ -200,7 +223,7 @@ class VWF::Application < Sinatra::Base
 
   end
 
-  get "/instance/:instance_id" do
+  get "", :instance => true do
 
     case @type || request.preferred_type( @@api_types )
       when "application/json"
@@ -215,7 +238,7 @@ class VWF::Application < Sinatra::Base
 
   end
 
-  get "/instance/:instance_id/revisions" do
+  get "/revisions", :instance => true do
 
     case @type || request.preferred_type( @@api_types )
       when "application/json"
@@ -230,7 +253,7 @@ class VWF::Application < Sinatra::Base
 
   end
 
-  get "/instance/:instance_id/revision/:revision_id" do
+  get "", :instance => true, :revision => true do
 
     case @type || request.preferred_type( @@api_types )
       when "application/json"
@@ -247,11 +270,15 @@ class VWF::Application < Sinatra::Base
 
   helpers do
 
-    def delegate_to migrating_segments
+    def route_as migrating_segments
       if request.path_info.start_with? migrating_segments
         request.script_name += migrating_segments
         request.path_info = request.path_info[ migrating_segments.length .. -1 ]
       end
+    end
+
+    def unroute_as
+      request.script_name = @script_name
     end
 
     def application_url format = nil
