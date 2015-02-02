@@ -22,14 +22,6 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
     @requests = []
   end
 
-  def call env
-    if env["PATH_INFO"] =~ %r{^/(socket|websocket)(/|$)}  # TODO: configuration parameter for paths accepted; "websocket/session" is for socket.io
-      super
-    else
-      [ 404, {}, [] ]
-    end
-  end
-
   def onconnect
 
     super

@@ -723,7 +723,7 @@
                     // The socket is relative to the application path.
 
                     resource: window.location.pathname.slice( 1,
-                        window.location.pathname.lastIndexOf("/") ),
+                        window.location.pathname.lastIndexOf("/") ) + "/reflector",
 
                     // Use a secure connection when the application comes from https.
 

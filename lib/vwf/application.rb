@@ -151,10 +151,11 @@ class VWF::Application < Sinatra::Base
 
   ### Serve the reflector ##########################################################################
 
-  get "/instance/:instance_id/websocket/?*" do |instance_id, _|
-    request.script_name += "/instance/#{instance_id}"
-    request.path_info = "/websocket"  # TODO: plus rest
-    Reflector.new( "#{@application_id}/#{instance_id}", @instance ).call env
+  get "/instance/:instance_id/reflector/?*" do |instance_id, path_info|
+    resource = request.script_name + "/instance/#{instance_id}"
+    request.script_name += "/instance/#{instance_id}/reflector"
+    request.path_info = "/#{path_info}"
+    Reflector.new( resource, @instance ).call env
   end
 
   ### Serve the client files. ######################################################################
