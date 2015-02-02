@@ -21,11 +21,6 @@ class VWF::Application < Sinatra::Base
     "text/html"
   ]
 
-  def initialize application
-    super nil
-    @application_id = application
-  end
-
   configure do
 
     # Condition to detect browser requests, as opposed to XHR requests. Browser requests for
@@ -96,7 +91,7 @@ class VWF::Application < Sinatra::Base
   ### Validate the application, instance, and revision. ############################################
 
   before "/?*" do
-    @application = VWF.storage[ @application_id ]
+    @application = VWF.storage[ request.script_name ]
     halt 404 unless @application
   end
 

@@ -66,11 +66,11 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
   # Delegate application GETs to the application. Pass requests not handled by the application to
   # other routes here.
 
-  get Pattern.new, :may_send_to_application => true do |script_name, path_info, application|
+  get Pattern.new, :may_send_to_application => true do |script_name, path_info|
 
-    logger.debug "VWF#get #{script_name} - #{path_info} - #{application}"
+    logger.debug "VWF#get #{script_name} - #{path_info}"
 
-    delegate_to_application( script_name, path_info, application ).tap do |result|
+    delegate_to_application( script_name, path_info ).tap do |result|
       pass if result[0] == 404
     end
 
@@ -80,31 +80,31 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   # Delegate application POSTs to the application.
 
-  post Pattern.new, :may_send_to_application => true do |script_name, path_info, application|
+  post Pattern.new, :may_send_to_application => true do |script_name, path_info|
 
-    logger.debug "VWF#post #{script_name} - #{path_info} - #{application}"
+    logger.debug "VWF#post #{script_name} - #{path_info}"
 
-    delegate_to_application( script_name, path_info, application )
+    delegate_to_application( script_name, path_info )
 
   end
 
   # Delegate application DELETEs to the application.
 
-  delete Pattern.new, :may_send_to_application => true do |script_name, path_info, application|
+  delete Pattern.new, :may_send_to_application => true do |script_name, path_info|
 
-    logger.debug "VWF#delete #{script_name} - #{path_info} - #{application}"
+    logger.debug "VWF#delete #{script_name} - #{path_info}"
 
-    delegate_to_application( script_name, path_info, application )
+    delegate_to_application( script_name, path_info )
 
   end
 
   # Delegate application PUTs to the application.
 
-  put Pattern.new, :may_send_to_application => true do |script_name, path_info, application|
+  put Pattern.new, :may_send_to_application => true do |script_name, path_info|
 
-    logger.debug "VWF#put #{script_name} - #{path_info} - #{application}"
+    logger.debug "VWF#put #{script_name} - #{path_info}"
 
-    delegate_to_application( script_name, path_info, application )
+    delegate_to_application( script_name, path_info )
 
   end
 
@@ -169,14 +169,14 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   helpers do
 
-    def delegate_to_application script_name, path_info, application
+    def delegate_to_application script_name, path_info
 
       delegated_env = env.merge(
         "SCRIPT_NAME" => script_name,
         "PATH_INFO" => path_info
       )
 
-      Application.new( application ).call delegated_env
+      Application.new.call delegated_env
 
     end
 

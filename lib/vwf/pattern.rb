@@ -48,7 +48,7 @@ class VWF::Pattern
 
     if script_name
       path_info = path[ script_name.length, path.length ]
-      Match.new [ script_name, path_info, script_name ]
+      Match.new [ script_name, path_info ]
     end
 
   end
