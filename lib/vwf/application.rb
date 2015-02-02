@@ -132,8 +132,7 @@ class VWF::Application < Sinatra::Base
   # Bootstrap the client from an instance.
 
   get "/instance/:instance_id/", :browser => true do |instance_id|
-    request.script_name += "/instance/#{instance_id}"
-    request.path_info = "/"
+    delegate_to "/instance/#{instance_id}"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
@@ -146,30 +145,26 @@ class VWF::Application < Sinatra::Base
 
   ### Serve the reflector ##########################################################################
 
-  get "/instance/:instance_id/reflector/?*" do |instance_id, path_info|
+  get "/instance/:instance_id/reflector/?*" do |instance_id, _|
     resource = "#{request.script_name}/instance/#{instance_id}"
-    request.script_name += "/instance/#{instance_id}/reflector"
-    request.path_info = "/#{path_info}"
+    delegate_to "/instance/#{instance_id}/reflector"
     Reflector.new( resource, @instance ).call env
   end
 
   ### Serve the client files. ######################################################################
 
-  get "/client/?*" do |path_info|
-    request.script_name += "/client"
-    request.path_info = "/#{path_info}"
+  get "/client/?*" do |_|
+    delegate_to "/client"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
-  get "/instance/:instance_id/client/?*" do |instance_id, path_info|
-    request.script_name += "/instance/#{instance_id}/client"
-    request.path_info = "/#{path_info}"
+  get "/instance/:instance_id/client/?*" do |instance_id, _|
+    delegate_to "/instance/#{instance_id}/client"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
-  get "/instance/:instance_id/revision/:revision_id/client/?*" do |instance_id, revision_id, path_info|
-    request.script_name += "/instance/#{instance_id}/revision/#{revision_id}/client"
-    request.path_info = "/#{path_info}"
+  get "/instance/:instance_id/revision/:revision_id/client/?*" do |instance_id, revision_id, _|
+    delegate_to "/instance/#{instance_id}/revision/#{revision_id}/client"
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
@@ -251,6 +246,13 @@ class VWF::Application < Sinatra::Base
   end
 
   helpers do
+
+    def delegate_to migrating_segments
+      if request.path_info.start_with? migrating_segments
+        request.script_name += migrating_segments
+        request.path_info = request.path_info[ migrating_segments.length .. -1 ]
+      end
+    end
 
     def application_url format = nil
       "#{extension format}"
