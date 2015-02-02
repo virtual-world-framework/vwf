@@ -9,4 +9,4 @@ properties:
 methods:
   play:
   pause:
-  stop:
+  stop: 
