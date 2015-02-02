@@ -54,37 +54,37 @@ class VWF::Application < Sinatra::Base
   ### Detect and remove `.:format`. ################################################################
 
   before ".:format" do |format|
-    if type = Rack::Mime.mime_type( "." + format ) and @@api_types.include?( type )
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
       @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape "." + format }$/, "" )
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
     end
   end
 
   before "/instances.:format" do |format|
-    if type = Rack::Mime.mime_type( "." + format ) and @@api_types.include?( type )
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
       @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape "." + format }$/, "" )
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
     end
   end
 
   before "/instance/:instance_id.:format" do |_, format|
-    if type = Rack::Mime.mime_type( "." + format ) and @@api_types.include?( type )
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
       @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape "." + format }$/, "" )
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
     end
   end
 
   before "/instance/:instance_id/revisions.:format" do |_, format|
-    if type = Rack::Mime.mime_type( "." + format ) and @@api_types.include?( type )
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
       @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape "." + format }$/, "" )
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
     end
   end
 
   before "/instance/:instance_id/revision/:revision_id.:format" do |_, _, format|
-    if type = Rack::Mime.mime_type( "." + format ) and @@api_types.include?( type )
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
       @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape "." + format }$/, "" )
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
     end
   end
 
@@ -109,24 +109,24 @@ class VWF::Application < Sinatra::Base
 
   get "", :browser => true do
     pass if @type
-    redirect to request.path_info + "/"
+    redirect to "#{request.path_info}/"
   end
 
   get "/instance/:instance_id", :browser => true do
     pass if @type
-    redirect to request.path_info + "/"
+    redirect to "#{request.path_info}/"
   end
 
   get "/instance/:instance_id/revision/:revision_id", :browser => true do
     pass if @type
-    redirect to request.path_info + "/"
+    redirect to "#{request.path_info}/"
   end
 
   # Redirect the application to a new instance. ####################################################
 
   get "/", :browser => true do
     @instance = @application.instances.create( @application.state )
-    redirect to "/instance/" + @instance.id + "/"
+    redirect to "/instance/#{@instance.id}/"
   end
 
   # Bootstrap the client from an instance.
@@ -141,13 +141,13 @@ class VWF::Application < Sinatra::Base
 
   get "/instance/:instance_id/revision/:revision_id/", :browser => true do |instance_id, revision_id|
     @instance = @application.instances.create( @revision.state )
-    redirect to "/instance/" + @instance.id + "/"
+    redirect to "/instance/#{@instance.id}/"
   end
 
   ### Serve the reflector ##########################################################################
 
   get "/instance/:instance_id/reflector/?*" do |instance_id, path_info|
-    resource = request.script_name + "/instance/#{instance_id}"
+    resource = "#{request.script_name}/instance/#{instance_id}"
     request.script_name += "/instance/#{instance_id}/reflector"
     request.path_info = "/#{path_info}"
     Reflector.new( resource, @instance ).call env
@@ -253,27 +253,27 @@ class VWF::Application < Sinatra::Base
   helpers do
 
     def application_url format = nil
-      "" + extension( format )
+      "#{extension format}"
     end
 
     def instances_url format = nil
-      "/instances" + extension( format )
+      "/instances#{extension format}"
     end
 
     def instance_url instance_id, format = nil
-      "/instance/" + instance_id + extension( format )
+      "/instance/#{instance_id}#{extension format}"
     end
 
     def revisions_url instance_id, format = nil
-      "/instance/" + instance_id + "/revisions" + extension( format )
+      "/instance/#{instance_id}/revisions#{extension format}"
     end
 
     def revision_url instance_id, revision_id, format = nil
-      "/instance/" + instance_id + "/revision/" + revision_id + extension( format )
+      "/instance/#{instance_id}/revision/#{revision_id}#{extension format}"
     end
 
     def extension format = nil
-      format ? "." + format : ""
+      format ? ".#{format}" : ""
     end
 
   end
