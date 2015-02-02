@@ -575,7 +575,6 @@ define( [ "module",
                         break;
 
                     case "model/vnd.cesium.czml+xml":
-                        debugger;
                         if ( sceneNode && sceneNode.cesiumViewer ) {
                             
                             var viewer = sceneNode.cesiumViewer;
