@@ -143,7 +143,7 @@ class VWF::Application < Sinatra::Base
         @instance = @application.instances.create( @application.state )
         redirect to "/instance/#{@instance.id}/"
       when "instance"  # bootstrap the client from an instance
-        Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
+        Client.new.call env
       when "revision"  # redirect a revision to a copy in a new instance
         @instance = @application.instances.create( @revision.state )
         unroute_as
@@ -172,7 +172,7 @@ class VWF::Application < Sinatra::Base
 
   get "/client/?*" do
     route_as "/client"
-    Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
+    Client.new.call env
   end
 
   # Application state. #############################################################################
@@ -308,15 +308,25 @@ class VWF::Application < Sinatra::Base
 
 
 
-  # Wrap Rack::File to serve "/" as "/index.html".
+  # Wrap Rack::File to serve "/" as "/index.html". Serve client files from the client support
+  # directory.
 
   class Client
 
-    def initialize root, rootz
-      if ENV['RACK_ENV'] == "production" && File.directory?( rootz )
-        @file = Rack::File.new rootz
+    # Root directory for the client files.
+
+    ROOT = File.join VWF.settings.support, "client/lib"
+
+    # Root directory for the minified client. The minified client is used in `production` mode if
+    # this directory exists. Otherwise the unminified client is used.
+
+    ROOTZ = File.join VWF.settings.support, "client/libz"
+
+    def initialize
+      if ENV['RACK_ENV'] == "production" && File.directory?( ROOTZ )
+        @file = Rack::File.new ROOTZ
       else
-        @file = Rack::File.new root
+        @file = Rack::File.new ROOT
       end
     end
 
