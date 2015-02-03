@@ -154,9 +154,8 @@ class VWF::Application < Sinatra::Base
   ### Serve the reflector ##########################################################################
 
   get "/reflector/?*", :instance => true do
-    resource = request.script_name
     route_as "/reflector"
-    Reflector.new( resource, @instance ).call env
+    Reflector.new( @instance, request.script_name ).call env
   end
 
   ### Serve the client files. ######################################################################

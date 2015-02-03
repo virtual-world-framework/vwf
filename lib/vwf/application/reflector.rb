@@ -16,15 +16,18 @@ require "json"
 
 class VWF::Application::Reflector < Rack::SocketIO::Application
 
-  def initialize resource, storage
+  def initialize storage, resource = nil
     super resource
-    session[ :thing ] ||= Thing.new storage
+    @storage = storage
     @requests = []
   end
 
   def onconnect
 
     super
+
+    session[ :thing ] ||= Thing.new @storage
+    @storage = nil
 
     state = session[ :thing ].storage.state
     time = state[ "kernel" ][ "time" ] || 0

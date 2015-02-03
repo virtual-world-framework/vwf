@@ -25,13 +25,13 @@ module Rack
       @@clients = {}  # TODO: threading issues? use mutex on access?
       @@sessions = {}  # TODO: threading issues? use mutex on access?
 
-      def initialize resource
+      def initialize resource = nil
         super Hash.new
         @resource = resource
       end
 
       def _call env
-        @env = env  # TODO: env only needed for logger call; do another way & omit this override?
+        @env = env
         super
       end
 
@@ -39,10 +39,10 @@ module Rack
 
         logger.info "Rack::SocketIO::Application#onconnect #{id}"
 
-        @@clients[@resource] ||= []
-        @@clients[@resource] << self
+        @@clients[ resource ] ||= []
+        @@clients[ resource ] << self
 
-        @@sessions[@resource] ||= {}
+        @@sessions[ resource ] ||= {}
 
       end
 
@@ -56,11 +56,11 @@ module Rack
 
         logger.info "Rack::SocketIO::Application#ondisconnect #{id}"
 
-        @@clients[@resource].delete self
+        @@clients[ resource ].delete self
         
-        if @@clients[@resource].empty?
-          @@clients.delete @resource
-          @@sessions.delete @resource
+        if @@clients[ resource ].empty?
+          @@clients.delete resource
+          @@sessions.delete resource
         end
 
       end
@@ -251,7 +251,7 @@ module Rack
       # The session data for the resource that this client connects to.
 
       def session
-        @@sessions[@resource] ||= {}
+        @@sessions[ resource ] ||= {}
       end
 
       # Session data for the instances derived from the given resource.
@@ -289,7 +289,7 @@ module Rack
       # The clients connected to the resource that this client connects to.
 
       def clients
-        @@clients[@resource]
+        @@clients[ resource ]
       end
   
       # The socket.io resource for a given environment.
@@ -305,7 +305,7 @@ debugger  # TODO: can't work with instance variables
       # The socket.io resource this client connects to.
   
       def resource
-        @resource
+        @resource || env[ "SCRIPT_NAME" ]
       end
 
       MESSAGE_LOG_LENGTH = 1000
