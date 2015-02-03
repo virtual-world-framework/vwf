@@ -135,35 +135,20 @@ class VWF::Application < Sinatra::Base
     redirect to "#{request.path_info}/"
   end
 
-  get "", :instance => true, :browser => true do
-    pass if @type
-    redirect to "#{request.path_info}/"
-  end
-
-  get "", :instance => true, :revision => true, :browser => true do
-    pass if @type
-    redirect to "#{request.path_info}/"
-  end
-
   # Redirect the application to a new instance. ####################################################
 
-  get "/", :instance => false, :browser => true do
-    @instance = @application.instances.create( @application.state )
-    redirect to "/instance/#{@instance.id}/"
-  end
-
-  # Bootstrap the client from an instance.
-
-  get "/", :instance => true, :revision => false, :browser => true do
-    Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
-  end
-
-  # Copy a revision to a new instance and redirect.
-
-  get "/", :instance => true, :revision => true, :browser => true do
-    @instance = @application.instances.create( @revision.state )
-    unroute_as
-    redirect to "/instance/#{@instance.id}/"
+  get "/", :browser => true do
+    case mode
+      when "application"  # redirect an application to a new instance
+        @instance = @application.instances.create( @application.state )
+        redirect to "/instance/#{@instance.id}/"
+      when "instance"  # bootstrap the client from an instance
+        Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
+      when "revision"  # redirect a revision to a copy in a new instance
+        @instance = @application.instances.create( @revision.state )
+        unroute_as
+        redirect to "/instance/#{@instance.id}/"
+    end
   end
 
   ### Serve the reflector ##########################################################################
@@ -181,91 +166,32 @@ class VWF::Application < Sinatra::Base
     Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
   end
 
-  get "/client/?*", :instance => true do
-    route_as "/client"
-    Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
-  end
-
-  get "/client/?*", :instance => true, :revision => true do
-    route_as "/client"
-    Client.new( File.join( VWF.settings.support, "client/lib" ), File.join( VWF.settings.support, "client/libz" ) ).call env
-  end
-
   # Application state. #############################################################################
 
   get "" do
-
     case @type || request.preferred_type( @@api_types )
       when "application/json"
         content_type :json
-        @application.get.to_json
+        item_value.to_json
       when "text/yaml"
         content_type :yaml
-        @application.get.to_yaml
+        item_value.to_yaml
       when "text/html"
-        # slim :application  # TODO
+        slim item_template
     end
-
   end
 
-  get "/instances" do
-
+  get %r{^/(instances|revisions)$} do
     case @type || request.preferred_type( @@api_types )
       when "application/json"
         content_type :json
-        @application.instances.each.map { |id, instance| to instance_url instance.id } .to_json
+        collection_value.to_json
       when "text/yaml"
         content_type :yaml
-        @application.instances.each.map { |id, instance| to instance_url instance.id } .to_yaml
+        collection_value.to_yaml
       when "text/html"
-        slim :instances
+        slim collection_template
     end
-
-  end
-
-  get "", :instance => true do
-
-    case @type || request.preferred_type( @@api_types )
-      when "application/json"
-        content_type :json
-        @instance.state.to_json
-      when "text/yaml"
-        content_type :yaml
-        @instance.state.to_yaml
-      when "text/html"
-        slim :instance
-    end
-
-  end
-
-  get "/revisions", :instance => true do
-
-    case @type || request.preferred_type( @@api_types )
-      when "application/json"
-        content_type :json
-        @instance.revisions.each.map { |id, revision| to revision_url @instance.id, revision.id } .to_json
-      when "text/yaml"
-        content_type :yaml
-        @instance.revisions.each.map { |id, revision| to revision_url @instance.id, revision.id } .to_yaml
-      when "text/html"
-        slim :revisions
-    end
-
-  end
-
-  get "", :instance => true, :revision => true do
-
-    case @type || request.preferred_type( @@api_types )
-      when "application/json"
-        content_type :json
-        @revision.state.to_json
-      when "text/yaml"
-        content_type :yaml
-        @revision.state.to_yaml
-      when "text/html"
-        slim :revision
-    end
-
   end
 
   helpers do
@@ -279,6 +205,60 @@ class VWF::Application < Sinatra::Base
 
     def unroute_as
       request.script_name = @script_name
+    end
+
+    def mode
+      if @revision
+        "revision"
+      elsif @instance
+        "instance"
+      elsif @application
+        "application"
+      end
+    end
+
+    def item_value
+      case mode
+        when "application"
+          @application.get
+        when "instance"
+          @instance.state
+        when "revision"
+          @revision.state
+      end
+    end
+
+    def collection_value
+      case mode
+        when "application"  # assumes `/instances`
+          @application.instances.each.map do |id, instance|
+            to instance_url instance.id
+          end
+        when "instance"  # assumes `/revisions`
+          @instance.revisions.each.map do |id, revision|
+            to revision_url @instance.id, revision.id
+          end
+      end
+    end
+
+    def item_template
+      case mode
+        when "application"
+          :application
+        when "instance"
+          :instance
+        when "revision"
+          :revision
+      end
+    end
+
+    def collection_template
+      case mode
+        when "application"  # assumes `/instances`
+          :instances
+        when "instance"  # assumes `/revisions`
+          :revisions
+      end
     end
 
     def application_url format = nil
