@@ -29,7 +29,7 @@ class VWF
                 case "action":
                   emit( [ doc.instance, doc.type, +localid( doc ) ], doc ); break;
                 case "tag":
-                  emit( [ doc.instance, doc.type, localid( doc ) ], doc ); break;
+                  emit( [ doc.application || doc.instance || doc.revision, doc.type, localid( doc ) ], doc ); break;
               }
               function localid( doc ) {
                 return doc._id.replace( RegExp( "^.*/" + doc.type + "/" ), "" )
@@ -120,6 +120,16 @@ class VWF
     end
 
     class Action < Storage::Action
+      include Types
+      include Item
+    end
+
+    class Tags < Storage::Tags
+      include Types
+      include Collection
+    end
+
+    class Tag < Storage::Tag
       include Types
       include Item
     end

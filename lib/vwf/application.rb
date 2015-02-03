@@ -18,6 +18,7 @@ class VWF::Application < Sinatra::Base
   SPAWN_INSTANCES = true                # create new instances on application references
   SPAWN_ADHOC_INSTANCES = false         # create unknown instances when referenced
   SPAWN_ADHOC_REVISIONS = true          # create temporary revisions when referenced
+  SPAWN_ADHOC_TAGS = true               # create unknown tags when referenced
 
   ## Types supported by the API resources, in order of preference.
 
@@ -94,6 +95,48 @@ class VWF::Application < Sinatra::Base
     end
   end
 
+  before "/tags.:format" do |format|
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
+      @type = type
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
+    end
+  end
+
+  before "/tag/:tag_id.:format" do |_, format|
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
+      @type = type
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
+    end
+  end
+
+  before "/instance/:instance_id/tags.:format" do |_, format|
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
+      @type = type
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
+    end
+  end
+
+  before "/instance/:instance_id/tag/:tag_id.:format" do |_, _, format|
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
+      @type = type
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
+    end
+  end
+
+  before "/instance/:instance_id/revision/:revision_id/tags.:format" do |_, _, format|
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
+      @type = type
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
+    end
+  end
+
+  before "/instance/:instance_id/revision/:revision_id/tag/:tag_id.:format" do |_, _, _, format|
+    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
+      @type = type
+      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
+    end
+  end
+
   ### Validate the application, instance, and revision. ############################################
 
   before "/?*" do
@@ -112,11 +155,25 @@ class VWF::Application < Sinatra::Base
     end
   end
 
+  before "/:tag/?*" do |tag, _|
+    if storage = storage_tagged( @storage, tag )
+      @storage = storage
+      route_as "/#{tag}"
+    end
+  end
+
   before "/revision/:id/?*" do |id, _|
     if @storage = storage_revision( @storage, id, browser? && SPAWN_ADHOC_REVISIONS )
       route_as "/revision/#{id}"
     else
       halt 404
+    end
+  end
+
+  before "/:tag/?*" do |tag, _|
+    if storage = storage_tagged( @storage, tag )
+      @storage = storage
+      route_as "/#{tag}"
     end
   end
 
@@ -192,6 +249,26 @@ class VWF::Application < Sinatra::Base
     end
   end
 
+  get "/tags" do
+    generate :tags do
+      @storage.tags.each.map do |id, tag|
+        Hash[ tag.id => ( to tag_url tag.id ) ]
+      end
+    end
+  end
+
+  get "/tag/:id" do |id|
+    if tag = @storage.tags[ id ]
+      generate :tag, "", :tag => tag
+    elsif browser?
+      @storage.set( {} ) unless @storage.get  # reify ad hoc revisions
+      @storage.tags.create( id, {} )
+      redirect to "../../#{id}"
+    else
+      halt 404
+    end
+  end
+
   helpers do
 
     # Is this request from a browser--an interactive sesssion, not an API request?
@@ -225,6 +302,22 @@ class VWF::Application < Sinatra::Base
       end
     end
 
+    def storage_tagged item, tag
+      if item.respond_to? :instances
+        item.instances.each.find do |id, instance|
+          if instance.tags[ tag ]
+            break instance
+          end
+        end
+      elsif item.respond_to? :revisions
+        item.revisions.each.find do |id, revision|
+          if revision.tags[ tag ]
+            break revision
+          end
+        end
+      end
+    end
+
     def route_as migrating_segments
       if request.path_info.start_with? migrating_segments
         request.script_name += migrating_segments
@@ -238,16 +331,16 @@ class VWF::Application < Sinatra::Base
 
     # Generate a JSON or YAML result, or render a template to HTML.
 
-    def generate template
+    def generate template, value = nil, locals = nil
       case @type || request.preferred_type( @@api_types )
         when "application/json"
           content_type :json
-          yield.to_json
+          ( value || yield ).to_json
         when "text/yaml"
           content_type :yaml
-          yield.to_yaml
+          ( value || yield ).to_yaml
         when "text/html"
-          slim template
+          slim template, :locals => locals
       end
     end
 
@@ -269,6 +362,14 @@ class VWF::Application < Sinatra::Base
 
     def revision_url id, format = nil
       "/revision/#{id}#{extension format}"
+    end
+
+    def tags_url format = nil
+      "/tags#{extension format}"
+    end
+
+    def tag_url tag, format = nil
+      "/tag/#{tag}#{extension format}"
     end
 
     def extension format = nil
