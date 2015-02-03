@@ -11,8 +11,6 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 
-require "securerandom"
-
 class VWF::Application < Sinatra::Base
 
   ## Types supported by the API resources, in order of preference.
@@ -161,11 +159,11 @@ class VWF::Application < Sinatra::Base
 
     case mode
       when "application"
-        Reflector.new( @application, request.script_name + SecureRandom.hex ).call env
+        Reflector.new( @application, true ).call env
       when "instance"
         Reflector.new( @instance ).call env
       when "revision"
-        Reflector.new( @revision, request.script_name + SecureRandom.hex ).call env
+        Reflector.new( @revision, true ).call env
     end
 
   end

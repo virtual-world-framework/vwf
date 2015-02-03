@@ -16,8 +16,8 @@ require "json"
 
 class VWF::Application::Reflector < Rack::SocketIO::Application
 
-  def initialize storage, resource = nil
-    super resource
+  def initialize storage, randomize_resource = false
+    super randomize_resource
     @storage = storage
     @requests = []
   end

@@ -25,9 +25,9 @@ module Rack
       @@clients = {}  # TODO: threading issues? use mutex on access?
       @@sessions = {}  # TODO: threading issues? use mutex on access?
 
-      def initialize resource = nil
+      def initialize randomize_resource = false
         super Hash.new
-        @resource = resource
+        @resource_suffix = randomize_resource ? SecureRandom.hex : ""
       end
 
       def _call env
@@ -305,7 +305,7 @@ debugger  # TODO: can't work with instance variables
       # The socket.io resource this client connects to.
   
       def resource
-        @resource || env[ "SCRIPT_NAME" ]
+        env[ "SCRIPT_NAME" ] + @resource_suffix
       end
 
       MESSAGE_LOG_LENGTH = 1000
