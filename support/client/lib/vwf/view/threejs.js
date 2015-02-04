@@ -1788,7 +1788,6 @@ define( [ "module",
         // a document lost focus and force a mouse up as well. Rare occasion, but it's possible to lose focus 
         // while the mouse is down
         document.onmouseup = function( e ) {
-
             // Set appropriate button / key states
             var ctrlDown = e.ctrlKey;
             var atlDown = e.altKey;
@@ -1882,7 +1881,6 @@ define( [ "module",
         }
 
         canvas.onmouseover = function( e ) {
-            //console.info( "mouseOver +++++++++++++++++++++++" );
             if ( !self.mouseOverCanvas ) {
                 self.mouseJustEnteredCanvas = true;
                 self.mouseOverCanvas = true;
@@ -1896,7 +1894,7 @@ define( [ "module",
             e.preventDefault();
         }
 
-        canvas.onmousemove = function( e ) {
+        document.onmousemove = function( e ) {
 
             // HACK: This is to deal with an issue with webkitMovementX in Chrome:
             if ( nextMouseMoveIsErroneous ) {
@@ -1951,7 +1949,6 @@ define( [ "module",
         }
 
         canvas.onmouseout = function( e ) {
-            //console.info( "mouseOut  --------------------------" );
             if ( pointerOverID ) {
                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerOut" );
                 pointerOverID = undefined;
