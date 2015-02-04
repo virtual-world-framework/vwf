@@ -9,18 +9,11 @@ properties:
   yAxisVisible: undefined
   zAxisVisible: undefined
   gridVisible: undefined
+  graphVisible: undefined
   axisOpacity: undefined
   gridOpacity: undefined
   renderTop: undefined
-  graphIsVisible$: true
 methods:
-  setGraphVisibility:
-    parameters:
-      - visible
-    body: |
-      this.graphIsVisible$ = visible;
-  toggleGraphVisibility: |
-    this.setGraphVisibility( !this.graphIsVisible$ );
   graphLine:
     parameters:
       - axis
