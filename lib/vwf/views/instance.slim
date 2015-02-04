@@ -1,18 +1,18 @@
 h1 Instance
 
-pre: code == @instance.state.to_yaml
+pre: code == @storage.state.to_yaml
 
 h2 Revisions
 
-- @instance.revisions.each do |id, revision|
-    p: a href=( to revision_url @instance.id, revision.id, "html" ) = revision.id
+- @storage.revisions.each do |id, revision|
+    p: a href=( to revision_url revision.id, "html" ) = revision.id
 
 h2 States
 
-- @instance.states.each do |id, state|
-    p: a href=( to revision_url @instance.id, state.id, "html" ) = state.id
+- @storage.states.each do |id, state|
+    p: a href=( to revision_url state.id, "html" ) = state.id
 
 h2 Actions
 
-- @instance.actions.each do |id, action|
-    p: a href=( to revision_url @instance.id, action.id, "html" ) = action.id
+- @storage.actions.each do |id, action|
+    p: a href=( to revision_url action.id, "html" ) = action.id

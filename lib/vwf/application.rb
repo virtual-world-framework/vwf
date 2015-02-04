@@ -15,6 +15,10 @@ class VWF::Application < Sinatra::Base
 
   require_relative "application/client"
 
+  SPAWN_INSTANCES = true                # create new instances on application references
+  SPAWN_ADHOC_INSTANCES = false         # create unknown instances when referenced
+  SPAWN_ADHOC_REVISIONS = true          # create temporary revisions when referenced
+
   ## Types supported by the API resources, in order of preference.
 
   @@api_types = [
@@ -33,20 +37,6 @@ class VWF::Application < Sinatra::Base
       condition do
         is_browser = !! request.accept.include?( "text/html" )  # `accept.include?`, not `accept?`; want explict `text/html`
         wants_browser == is_browser
-      end
-    end
-
-    set :instance do |requires_instance|
-      condition do
-        is_instance = !! @instance
-        requires_instance == is_instance
-      end
-    end
-
-    set :revision do |requires_revision|
-      condition do
-        is_revision = !! @revision
-        requires_revision == is_revision
       end
     end
 
@@ -107,24 +97,24 @@ class VWF::Application < Sinatra::Base
   ### Validate the application, instance, and revision. ############################################
 
   before "/?*" do
-    if @application = VWF.storage[ request.script_name ]
+    if @storage = VWF.storage[ request.script_name ]
       @script_name = request.script_name
     else
       halt 404
     end
   end
 
-  before "/instance/:instance_id/?*" do |instance_id, _|
-    if @instance = @application.instances[ instance_id ] || @application.instances.create( instance_id, @application.state )  # TODO: remove second clause to stop auto-creating arbitrary instances
-      route_as "/instance/#{instance_id}"
+  before "/instance/:id/?*" do |id, _|
+    if @storage = storage_instance( @storage, id, SPAWN_ADHOC_INSTANCES )
+      route_as "/instance/#{id}"
     else
       halt 404
     end
   end
 
-  before "/revision/:revision_id/?*", :instance => true do |revision_id, _|
-    if @revision = @instance.revisions[ revision_id ] || @instance.revisions.create( revision_id )  # TODO: remove second clause to stop auto-creating arbitrary revisions; verify against existing states/actions
-      route_as "/revision/#{revision_id}"
+  before "/revision/:id/?*" do |id, _|
+    if @storage = storage_revision( @storage, id, SPAWN_ADHOC_REVISIONS )
+      route_as "/revision/#{id}"
     else
       halt 404
     end
@@ -140,34 +130,27 @@ class VWF::Application < Sinatra::Base
   # Redirect the application to a new instance. ####################################################
 
   get "/", :browser => true do
-    case mode
-      when "application"  # redirect an application to a new instance
-        @instance = @application.instances.create( @application.state )
-        redirect to "/instance/#{@instance.id}/"
-      when "instance"  # bootstrap the client from an instance
-        Client.new.call env
-      when "revision"  # redirect a revision to a copy in a new instance
-        @instance = @application.instances.create( @revision.state )
-        unroute_as
-        redirect to "/instance/#{@instance.id}/"
+
+    unless @storage.respond_to?( :revisions ) || ! SPAWN_INSTANCES
+      spawner = @storage
+      spawner = spawner.collection.container until spawner.respond_to?( :instances ) || ! spawner
     end
+
+    if spawner
+      instance = spawner.instances.create( @storage.state )
+      unroute_as ; redirect to "/instance/#{instance.id}/"
+    else
+      Client.new.call env
+    end
+
   end
 
   ### Serve the reflector ##########################################################################
 
   get "/reflector/?*" do
-
     route_as "/reflector"
-
-    case mode
-      when "application"
-        Reflector.new( @application, true ).call env
-      when "instance"
-        Reflector.new( @instance ).call env
-      when "revision"
-        Reflector.new( @revision, true ).call env
-    end
-
+    randomize_resource = ! @storage.respond_to?( :revisions )
+    Reflector.new( @storage, randomize_resource ).call env
   end
 
   ### Serve the client files. ######################################################################
@@ -207,6 +190,31 @@ class VWF::Application < Sinatra::Base
 
   helpers do
 
+    # Get an instance from a `VWF::Storage` item. With `spawn`, create a new instance if the
+    # identified instance doesn't exist. New instances are initialized with the current `item` state.
+    # Return `nil` if `item` doesn't contain instances or if the instance wasn't found or created.
+
+    def storage_instance item, id, spawn = false
+      if item.respond_to? :instances
+        result = item.instances[ id ]
+        result = item.instances.create( id, item.state ) unless result || ! spawn
+        result
+      end
+    end
+
+    # Get a revision from a `VWF::Storage` item. If the identified revision doesn't exist but a state
+    # or actions do, and if `spawn` is set, create a new, temporary revision. New revisions are not
+    # saved to storage, but they may be used to retrive the state at that point. Return `nil` if
+    # `item` doesn't contain revisions or if the revision wasn't found or created.
+
+    def storage_revision item, id, spawn = false
+      if item.respond_to? :revisions
+        result = item.revisions[ id ]
+        result = item.revisions.create( id ) unless result || ! spawn
+        result
+      end
+    end
+
     def route_as migrating_segments
       if request.path_info.start_with? migrating_segments
         request.script_name += migrating_segments
@@ -218,57 +226,31 @@ class VWF::Application < Sinatra::Base
       request.script_name = @script_name
     end
 
-    def mode
-      if @revision
-        "revision"
-      elsif @instance
-        "instance"
-      elsif @application
-        "application"
-      end
-    end
-
     def item_value
-      case mode
-        when "application"
-          @application.get
-        when "instance"
-          @instance.state
-        when "revision"
-          @revision.state
+      if @storage.respond_to? :instances
+        @storage.get
+      else
+        @storage.state
       end
     end
 
     def collection_value
-      case mode
-        when "application"  # assumes `/instances`
-          @application.instances.each.map do |id, instance|
-            to instance_url instance.id
-          end
-        when "instance"  # assumes `/revisions`
-          @instance.revisions.each.map do |id, revision|
-            to revision_url @instance.id, revision.id
-          end
+      if @storage.respond_to? :instances
+        @storage.instances.each.map { |id, instance| to instance_url instance.id }
+      elsif @storage.respond_to? :revisions
+        @storage.revisions.each.map { |id, revision| to revision_url revision.id }
       end
     end
 
     def item_template
-      case mode
-        when "application"
-          :application
-        when "instance"
-          :instance
-        when "revision"
-          :revision
-      end
+      @storage.class.name.split( "::" ).last.downcase.to_sym
     end
 
     def collection_template
-      case mode
-        when "application"  # assumes `/instances`
-          :instances
-        when "instance"  # assumes `/revisions`
-          :revisions
+      if @storage.respond_to? :instances
+        :instances
+      elsif @storage.respond_to? :revisions
+        :revisions
       end
     end
 
@@ -280,16 +262,16 @@ class VWF::Application < Sinatra::Base
       "/instances#{extension format}"
     end
 
-    def instance_url instance_id, format = nil
-      "/instance/#{instance_id}#{extension format}"
+    def instance_url id, format = nil
+      "/instance/#{id}#{extension format}"
     end
 
-    def revisions_url instance_id, format = nil
-      "/instance/#{instance_id}/revisions#{extension format}"
+    def revisions_url format = nil
+      "/revisions#{extension format}"
     end
 
-    def revision_url instance_id, revision_id, format = nil
-      "/instance/#{instance_id}/revision/#{revision_id}#{extension format}"
+    def revision_url id, format = nil
+      "/revision/#{id}#{extension format}"
     end
 
     def extension format = nil
