@@ -1882,7 +1882,7 @@ define( [ "module",
         }
 
         canvas.onmouseover = function( e ) {
-            console.info( "mouseOver +++++++++++++++++++++++" );
+            //console.info( "mouseOver +++++++++++++++++++++++" );
             if ( !self.mouseOverCanvas ) {
                 self.mouseJustEnteredCanvas = true;
                 self.mouseOverCanvas = true;
@@ -1951,7 +1951,7 @@ define( [ "module",
         }
 
         canvas.onmouseout = function( e ) {
-            console.info( "mouseOut  --------------------------" );
+            //console.info( "mouseOut  --------------------------" );
             if ( pointerOverID ) {
                 sceneView.kernel.dispatchEvent( pointerOverID, "pointerOut" );
                 pointerOverID = undefined;
