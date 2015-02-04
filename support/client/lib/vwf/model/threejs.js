@@ -871,6 +871,8 @@ define( [ "module",
                         if ( node.lookatval ) {
                             lookAt( node.lookatval );
                         }
+
+                        setTransformsDirty( threeObject );
                     }
                     else if ( propertyName == 'lookAt' ) {
                         value = lookAt( propertyValue );
@@ -981,7 +983,8 @@ define( [ "module",
                         // calling updateStoredTransform here seemed to be
                         // too big of a performance hit, so setting a flag
                         // to be checked in the getter before getting the transform 
-                        node.storedTransformDirty = true;
+                        // node.storedTransformDirty = true;
+                        setTransformsDirty( node.threeObject );
 
                     }
 
@@ -4574,6 +4577,19 @@ define( [ "module",
         }            
     }
 
+    function findVwfChildren( threeObj, children ) {
+        if ( threeObj !== undefined ) {
+            if ( threeObj.vwfID !== undefined ) {
+                children.push( threeObj.vwfID );
+            }
+            if ( threeObj && threeObj.children ) {
+                for ( var i = 0; i < threeObj.children.length; i++ ) {
+                    findVwfChildren( threeObj.children[ i ], children );
+                }
+            }             
+        }
+    }
+ 
     function SetVisible( node, state ) {
         if ( node ) {
             node.visible = state;
@@ -4588,8 +4604,24 @@ define( [ "module",
         }
     }
 
+    function setTransformsDirty( threeObject ) {
+        var vwfChildren = [];
+        var childNode;
+        findVwfChildren( threeObject, vwfChildren );
+        for ( var i = 0; i < vwfChildren.length; i++ ) {
+            console.info( "updating transform dirty on: " + vwfChildren[ i ] );
+            childNode = self.state.nodes[ vwfChildren[ i ] ];
+            if ( childNode && childNode.transform !== undefined ) {
+                childNode.storedTransformDirty = true;    
+            }    
+        }
+    }
+
     function getWorldTransform( node ) {
         var parent = self.state.nodes[ node.parentID ];
+        if ( parent === undefined ) {
+            parent = self.state.scenes[ node.parentID ];
+        }
         if ( parent ) {
             var worldTransform = new THREE.Matrix4();
             if ( node.transform === undefined ) {
@@ -4597,7 +4629,7 @@ define( [ "module",
             }
             return worldTransform.multiplyMatrices( getWorldTransform( parent ), node.transform );
         } else {
-            return node.transform;
+            return node.transform || new THREE.Matrix4();
         }
     }
 
