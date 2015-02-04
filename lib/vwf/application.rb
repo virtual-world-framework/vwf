@@ -163,28 +163,32 @@ class VWF::Application < Sinatra::Base
   # Application state. #############################################################################
 
   get "" do
-    case @type || request.preferred_type( @@api_types )
-      when "application/json"
-        content_type :json
-        item_value.to_json
-      when "text/yaml"
-        content_type :yaml
-        item_value.to_yaml
-      when "text/html"
-        slim item_template
+    generate @storage.class.name.split( "::" ).last.downcase.to_sym do
+      @storage.respond_to?( :instances ) ? @storage.get : @storage.state
     end
   end
 
-  get %r{^/(instances|revisions)$} do
-    case @type || request.preferred_type( @@api_types )
-      when "application/json"
-        content_type :json
-        collection_value.to_json
-      when "text/yaml"
-        content_type :yaml
-        collection_value.to_yaml
-      when "text/html"
-        slim collection_template
+  get "/instances" do
+    if @storage.respond_to? :instances
+      generate :instances do
+        @storage.instances.each.map do |id, instance|
+          Hash[ instance.id => ( to instance_url instance.id ) ]
+        end
+      end
+    else
+      halt 404
+    end
+  end
+
+  get "/revisions" do
+    if @storage.respond_to? :revisions
+      generate :revisions do
+        @storage.revisions.each.map do |id, revision|
+          Hash[ revision.id => ( to revision_url revision.id ) ]
+        end
+      end
+    else
+      halt 404
     end
   end
 
@@ -226,31 +230,18 @@ class VWF::Application < Sinatra::Base
       request.script_name = @script_name
     end
 
-    def item_value
-      if @storage.respond_to? :instances
-        @storage.get
-      else
-        @storage.state
-      end
-    end
+    # Generate a JSON or YAML result, or render a template to HTML.
 
-    def collection_value
-      if @storage.respond_to? :instances
-        @storage.instances.each.map { |id, instance| to instance_url instance.id }
-      elsif @storage.respond_to? :revisions
-        @storage.revisions.each.map { |id, revision| to revision_url revision.id }
-      end
-    end
-
-    def item_template
-      @storage.class.name.split( "::" ).last.downcase.to_sym
-    end
-
-    def collection_template
-      if @storage.respond_to? :instances
-        :instances
-      elsif @storage.respond_to? :revisions
-        :revisions
+    def generate template
+      case @type || request.preferred_type( @@api_types )
+        when "application/json"
+          content_type :json
+          yield.to_json
+        when "text/yaml"
+          content_type :yaml
+          yield.to_yaml
+        when "text/html"
+          slim template
       end
     end
 
