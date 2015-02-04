@@ -1,2 +1,0 @@
-description:
-  The VWF's take on the class Minesweeper game. Click tiles to turn them over. The number that appears is representative of the number of neighboring mines. Unveiling all numbers wins the game - select the wrong tile and it's game over. 
