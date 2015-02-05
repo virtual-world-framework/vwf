@@ -1,3 +1,13 @@
-h1 Revision
+h1 Revision #{ @storage.id }
 
-pre: code == @storage.state.to_yaml
+p: a href=( to "../#{@storage.id}" ) Launch
+
+h2: a href=( to tags_url "html" ) Tags
+
+p
+  - @storage.tags.each do |id, tag|
+    a< href=( to tag_url tag.id, "html" ) = tag.id
+
+h2 State
+
+pre: code = @storage.state.to_yaml

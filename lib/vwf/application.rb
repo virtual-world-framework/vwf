@@ -376,6 +376,29 @@ class VWF::Application < Sinatra::Base
       format ? ".#{format}" : ""
     end
 
+    def revisions_by_states_actions &block
+
+      revisions = @storage.revisions.each.to_h
+
+      next_state_id = nil
+
+      @storage.states.reverse_each do |state_id, state|
+        revision = revisions[ state_id ]
+        tags = revision && revision.tags
+        block.call state, tags do |&block|
+          @storage.actions.each( state_id, next_state_id ) do |action_id, action|
+            revision = revisions[ action_id ]
+            tags = revision && revision.tags
+            block.call action, tags unless action_id == state_id || action_id == next_state_id
+          end
+        end
+
+        next_state_id = state_id
+
+      end
+
+    end
+
   end
 
 end

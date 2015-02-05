@@ -1,3 +1,18 @@
-h1 Application
+h1 Application #{ @storage.id }
 
-pre: code == @storage.get.to_yaml
+p: a href=( to "../#{@storage.id}" ) Launch
+
+h2: a href=( to tags_url "html" ) Tags
+
+p
+  - @storage.tags.each do |id, tag|
+    a< href=( to tag_url tag.id, "html" ) = tag.id
+
+h2: a href=( to instances_url "html" ) Instances
+
+- @storage.instances.each do |id, instance|
+  p: a href=( to instance_url instance.id, "html" ) = instance.id
+
+h2 Component
+
+pre: code = @storage.get.to_yaml

@@ -1,4 +1,14 @@
 h1 Revisions
 
-- @storage.revisions.each do |id, revision|
-    p: a href=( to revision_url revision.id, "html" ) = revision.id
+- revisions_by_states_actions do |state, tags, &block|
+  - item_tags = tags && tags.size > 0 ? { state.id => tags } : {}
+  p
+    a href=( to revision_url state.id, "html" ) = state.id
+    - block.call do |action, tags|
+      - item_tags[ action.id ] = tags if tags && tags.size > 0
+      a< href=( to revision_url action.id, "html" ) = action.id
+  - item_tags.each do |id, tags|
+    p
+      | #{id}:
+      - tags.each do |_, tag|
+        a< href=( to( revision_url( id ) + tag_url( tag.id, "html" ) ) ) = tag.id

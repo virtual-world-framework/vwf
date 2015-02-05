@@ -1,18 +1,28 @@
-h1 Instance
+h1 Instance #{ @storage.id }
 
-pre: code == @storage.state.to_yaml
+p: a href=( to "../#{@storage.id}" ) Launch
 
-h2 Revisions
+h2: a href=( to tags_url "html" ) Tags
 
-- @storage.revisions.each do |id, revision|
-    p: a href=( to revision_url revision.id, "html" ) = revision.id
+p
+  - @storage.tags.each do |id, tag|
+    a< href=( to tag_url tag.id, "html" ) = tag.id
 
-h2 States
+h2: a href=( to revisions_url "html" ) Revisions
 
-- @storage.states.each do |id, state|
-    p: a href=( to revision_url state.id, "html" ) = state.id
+- revisions_by_states_actions do |state, tags, &block|
+  - item_tags = tags && tags.size > 0 ? { state.id => tags } : {}
+  p
+    a href=( to revision_url state.id, "html" ) = state.id
+    - block.call do |action, tags|
+      - item_tags[ action.id ] = tags if tags && tags.size > 0
+      a< href=( to revision_url action.id, "html" ) = action.id
+  - item_tags.each do |id, tags|
+    p
+      | #{id}:
+      - tags.each do |_, tag|
+        a< href=( to( revision_url( id ) + tag_url( tag.id, "html" ) ) ) = tag.id
 
-h2 Actions
+h2 State
 
-- @storage.actions.each do |id, action|
-    p: a href=( to revision_url action.id, "html" ) = action.id
+pre: code = @storage.state.to_yaml

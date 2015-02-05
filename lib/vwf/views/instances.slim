@@ -1,4 +1,7 @@
 h1 Instances
 
 - @storage.instances.each do |id, instance|
-    p: a href=( to instance_url instance.id, "html" ) = instance.id
+  p
+    a href=( to instance_url instance.id, "html" ) = instance.id
+    - instance.tags.each do |id, tag|
+      a< href=( to( instance_url( instance.id ) + tag_url( tag.id, "html" ) ) ) = tag.id
