@@ -795,8 +795,6 @@ define( [ "module",
                                     node.sceneNode.scene.primitives.add( node.primitive );    
                                 }                    
                             }
-
-
                             break;
 
 
@@ -2330,7 +2328,7 @@ define( [ "module",
         var geo = undefined;
         var geometryType = options.type ? options.type : options;
  
-        console.log( "createGeometry", JSON.stringify( options ) );
+        //console.log( "createGeometry", JSON.stringify( options ) );
 
         cesiumifyOptions( options );
 
@@ -2478,7 +2476,7 @@ define( [ "module",
         var geometry = undefined;
         var geometryInstance = undefined;
 
-        console.log( "createGeometryPrimitive", id, JSON.stringify( options ) );
+        //console.log( "createGeometryPrimitive", id, JSON.stringify( options ) );
 
         geometry = createGeometry( options.geometry );
 
@@ -2516,7 +2514,7 @@ define( [ "module",
     function createAppearance( options ) {
         var appearance = undefined;
 
-        console.log( "createAppearance", JSON.stringify( options ) );
+        //console.log( "createAppearance", JSON.stringify( options ) );
 
         if ( options ) {
             var appearanceType = options.type ? options.type : "material";
@@ -2759,7 +2757,7 @@ define( [ "module",
     function createMaterial( options ) {
         var material = undefined;
 
-        console.log( "createMaterial", JSON.stringify( options ) );
+        //console.log( "createMaterial", JSON.stringify( options ) );
 
         if ( options !== undefined ) {
             
