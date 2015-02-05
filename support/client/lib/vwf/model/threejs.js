@@ -1923,7 +1923,7 @@ define( [ "module",
             if ( node.isUniformObject ) {
                 value = {};
                 for ( var prop in threeObject ) {
-                    if ( ! threeObject[ prop ] instanceof Function ) {
+                    if ( ! utility.isFunction( threeObject[ prop ] ) ) {
                         if ( threeObject[ prop ].type !== 't' ) {
                             value[ prop ] = {
                                 "type": threeObject[ prop ].type,
