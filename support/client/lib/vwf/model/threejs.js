@@ -4609,7 +4609,6 @@ define( [ "module",
         var childNode;
         findVwfChildren( threeObject, vwfChildren );
         for ( var i = 0; i < vwfChildren.length; i++ ) {
-            console.info( "updating transform dirty on: " + vwfChildren[ i ] );
             childNode = self.state.nodes[ vwfChildren[ i ] ];
             if ( childNode && childNode.transform !== undefined ) {
                 childNode.storedTransformDirty = true;    
