@@ -11,4 +11,4 @@ h1 Revisions
     p
       | #{id}:
       - tags.each do |_, tag|
-        a< href=( to( revision_url( id ) + tag_url( tag.id, "html" ) ) ) = tag.id
+        a< href=( to "#{tag.id}.html" ) = tag.id

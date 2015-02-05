@@ -1,12 +1,12 @@
 h1 Instance #{ @storage.id }
 
-p: a href=( to "../#{ ( @storage.tags[ @tag ] || @storage ).id }" ) Launch
+p: a href=( to "../#{ ( @storage.tags[@tag] || @storage ).id }" ) Launch
 
 h2: a href=( to tags_url "html" ) Tags
 
 p
   - @storage.tags.each do |id, tag|
-    a< href=( to tag_url tag.id, "html" ) = tag.id
+    a< href=( to @tag ? "../#{tag.id}.html" : "../../#{tag.id}.html" ) = tag.id
 
 h2: a href=( to revisions_url "html" ) Revisions
 
@@ -21,7 +21,7 @@ h2: a href=( to revisions_url "html" ) Revisions
     p
       | #{id}:
       - tags.each do |_, tag|
-        a< href=( to( revision_url( id ) + tag_url( tag.id, "html" ) ) ) = tag.id
+        a< href=( to "#{tag.id}.html" ) = tag.id
 
 h2 State
 

@@ -4,4 +4,4 @@ h1 Instances
   p
     a href=( to instance_url instance.id, "html" ) = instance.id
     - instance.tags.each do |id, tag|
-      a< href=( to( instance_url( instance.id ) + tag_url( tag.id, "html" ) ) ) = tag.id
+      a< href=( to "#{tag.id}.html" ) = tag.id

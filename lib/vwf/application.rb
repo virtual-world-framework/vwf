@@ -89,6 +89,7 @@ class VWF::Application < Sinatra::Base
 
   before "/instance/:id/?*" do |id, _|
     if @storage = storage_instance( @storage, id, browser? && SPAWN_ADHOC_INSTANCES )
+      @tag = nil
       route_as "/instance/#{id}"
     else
       halt 404
@@ -113,6 +114,7 @@ class VWF::Application < Sinatra::Base
 
   before "/revision/:id/?*" do |id, _|
     if @storage = storage_revision( @storage, id, browser? && SPAWN_ADHOC_REVISIONS )
+      @tag = nil
       route_as "/revision/#{id}"
     else
       halt 404
