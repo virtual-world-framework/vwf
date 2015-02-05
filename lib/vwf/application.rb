@@ -33,7 +33,7 @@ class VWF::Application < Sinatra::Base
 
   ## Types supported by the API resources, in order of preference.
 
-  @@api_types = [
+  API_TYPES = [
     "application/json",
     "text/yaml",
     "text/html"
@@ -69,93 +69,22 @@ class VWF::Application < Sinatra::Base
 
   end
 
-  ### Detect and remove `.:format`. ################################################################
-
-  before ".:format" do |format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
-  before "/instances.:format" do |format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
-  before "/instance/:instance_id.:format" do |_, format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
-  before "/instance/:instance_id/revisions.:format" do |_, format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
-  before "/instance/:instance_id/revision/:revision_id.:format" do |_, _, format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
-  before "/tags.:format" do |format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
-  before "/tag/:tag_id.:format" do |_, format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
-  before "/instance/:instance_id/tags.:format" do |_, format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
-  before "/instance/:instance_id/tag/:tag_id.:format" do |_, _, format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
-  before "/instance/:instance_id/revision/:revision_id/tags.:format" do |_, _, format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
-  before "/instance/:instance_id/revision/:revision_id/tag/:tag_id.:format" do |_, _, _, format|
-    if type = Rack::Mime.mime_type( ".#{format}" ) and @@api_types.include?( type )
-      @type = type
-      request.path_info = request.path_info.sub( /#{ Regexp.escape ".#{format}" }$/, "" )
-    end
-  end
-
   ### Validate the application, instance, and revision. ############################################
 
-  before "/?*" do
+  before ".:format" do |format|
+    @type = deformat format
+  end
+
+  before "/?*" do |_|
     if @storage = VWF.storage[ request.script_name ]
       @script_name = request.script_name
     else
       halt 404
     end
+  end
+
+  before "/instance/:id.:format" do |_, format|
+    @type = deformat format
   end
 
   before "/instance/:id/?*" do |id, _|
@@ -166,11 +95,19 @@ class VWF::Application < Sinatra::Base
     end
   end
 
+  before "/:tag.:format" do |_, format|
+    @type = deformat format
+  end
+
   before "/:tag/?*" do |tag, _|
     if storage = storage_tagged( @storage, tag )
       @storage = storage
       route_as "/#{tag}"
     end
+  end
+
+  before "/revision/:id.:format" do |_, format|
+    @type = deformat format
   end
 
   before "/revision/:id/?*" do |id, _|
@@ -181,11 +118,33 @@ class VWF::Application < Sinatra::Base
     end
   end
 
+  before "/:tag.:format" do |_, format|
+    @type = deformat format
+  end
+
   before "/:tag/?*" do |tag, _|
     if storage = storage_tagged( @storage, tag )
       @storage = storage
       route_as "/#{tag}"
     end
+  end
+
+  ### Detect and remove `.:format`. ################################################################
+
+  before "/instances.:format" do |format|
+    @type = deformat format
+  end
+
+  before "/revisions.:format" do |format|
+    @type = deformat format
+  end
+
+  before "/tags.:format" do |format|
+    @type = deformat format
+  end
+
+  before "/tag/:tag_id.:format" do |_, format|
+    @type = deformat format
   end
 
   ### Redirect singular resources to directory resources. ##########################################
@@ -270,7 +229,7 @@ class VWF::Application < Sinatra::Base
 
   get "/tag/:id" do |id|
     if tag = @storage.tags[ id ]
-      generate :tag, "", :tag => tag
+      generate :tag, tag.get, :tag => tag
     elsif browser?
       @storage.set( {} ) unless @storage.get  # reify ad hoc revisions
       @storage.tags.create( id, {} )
@@ -331,10 +290,17 @@ class VWF::Application < Sinatra::Base
       end
     end
 
+    def deformat format
+      if type = Rack::Mime.mime_type( ".#{format}" ) and API_TYPES.include?( type )
+        request.path_info = request.path_info[ 0, request.path_info.length - ".#{format}".length ]
+        type
+      end
+    end
+
     def route_as migrating_segments
       if request.path_info.start_with? migrating_segments
         request.script_name += migrating_segments
-        request.path_info = request.path_info[ migrating_segments.length .. -1 ]
+        request.path_info = request.path_info[ migrating_segments.length, request.path_info.length - migrating_segments.length ]
       end
     end
 
@@ -345,7 +311,7 @@ class VWF::Application < Sinatra::Base
     # Generate a JSON or YAML result, or render a template to HTML.
 
     def generate template, value = nil, locals = nil
-      case @type || request.preferred_type( @@api_types )
+      case @type || request.preferred_type( API_TYPES )
         when "application/json"
           content_type :json
           ( value || yield ).to_json
