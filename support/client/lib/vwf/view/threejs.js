@@ -1951,77 +1951,77 @@ define( [ "module",
         
         window.onkeydown = function (event) {
                     
-                    var key = undefined;
-                    var validKey = false;
-                    var keyAlreadyDown = false;
-                    switch ( event.keyCode ) {
-                        case 17:
-                        case 16:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( sceneView, event.keyCode);
-                            keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
-                            sceneView.keyStates.keysDown[key.key] = key;
-                            validKey = true;
+            var key = undefined;
+            var validKey = false;
+            var keyAlreadyDown = false;
+            switch ( event.keyCode ) {
+                case 17:
+                case 16:
+                case 18:
+                case 19:
+                case 20:
+                    break;
+                default:
+                    key = getKeyValue.call( sceneView, event.keyCode);
+                    keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
+                    sceneView.keyStates.keysDown[key.key] = key;
+                    validKey = true;
 
-                            // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                            handleKeyNavigation( event.keyCode, true );
-                            // END TODO
+                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                    handleKeyNavigation( event.keyCode, true );
+                    // END TODO
 
-                            break;
-                    }
-                    
-                    if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
-                    sceneView.keyStates.mods.alt = event.altKey;
-                    sceneView.keyStates.mods.shift = event.shiftKey;
-                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
-                    sceneView.keyStates.mods.meta = event.metaKey;
+                    break;
+            }
+            
+            if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
+            sceneView.keyStates.mods.alt = event.altKey;
+            sceneView.keyStates.mods.shift = event.shiftKey;
+            sceneView.keyStates.mods.ctrl = event.ctrlKey;
+            sceneView.keyStates.mods.meta = event.metaKey;
 
-                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
-                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
-                        //var params = JSON.stringify( sceneView.keyStates );
-                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
-                    }
-                };
+            var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+            if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
+                //var params = JSON.stringify( sceneView.keyStates );
+                sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
+            }
+        };
 
          window.onkeyup = function (event) {
-                    var key = undefined;
-                    var validKey = false;
-                    switch (event.keyCode) {
-                        case 16:
-                        case 17:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( sceneView, event.keyCode);
-                            delete sceneView.keyStates.keysDown[key.key];
-                            sceneView.keyStates.keysUp[key.key] = key;
-                            validKey = true;
+            var key = undefined;
+            var validKey = false;
+            switch (event.keyCode) {
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                    break;
+                default:
+                    key = getKeyValue.call( sceneView, event.keyCode);
+                    delete sceneView.keyStates.keysDown[key.key];
+                    sceneView.keyStates.keysUp[key.key] = key;
+                    validKey = true;
 
-                            // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                            handleKeyNavigation( event.keyCode, false );
-                            // END TODO
+                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                    handleKeyNavigation( event.keyCode, false );
+                    // END TODO
 
-                            break;
-                    }
-                    
-                    sceneView.keyStates.mods.alt = event.altKey;
-                    sceneView.keyStates.mods.shift = event.shiftKey;
-                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
-                    sceneView.keyStates.mods.meta = event.metaKey;
+                    break;
+            }
+            
+            sceneView.keyStates.mods.alt = event.altKey;
+            sceneView.keyStates.mods.shift = event.shiftKey;
+            sceneView.keyStates.mods.ctrl = event.ctrlKey;
+            sceneView.keyStates.mods.meta = event.metaKey;
 
-                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
-                    if (validKey && sceneNode) {
-                        //var params = JSON.stringify( sceneView.keyStates );
-                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
-                        delete sceneView.keyStates.keysUp[key.key];
-                    }
-                };
+            var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+            if (validKey && sceneNode) {
+                //var params = JSON.stringify( sceneView.keyStates );
+                sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
+                delete sceneView.keyStates.keysUp[key.key];
+            }
+        };
 
         window.oncontextmenu = function() {
             if ( navmode == "none" )
