@@ -1154,51 +1154,55 @@ define( [ "module",
 
             }
             
-            // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
-            // Note: this is a costly operation and should be optimized if possible
-            if ( ( now - lastPickTime ) > self.pickInterval && !self.disableInputs )
-            {
-                sceneNode.frameCount = 0;
-            
-                var newPick, newPickId;
+            if ( self.mouseOverCanvas ) {
 
-                if ( self.applicationWantsPointerEvents ) {
-                    newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
-                    newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
-                } else {
-                    newPick = undefined;
-                    newPickId = undefined;
-                }
-
-                if ( self.lastPickId != newPickId && self.lastEventData )
+                // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
+                // Note: this is a costly operation and should be optimized if possible
+                if ( ( self.mouseJustEnteredCanvas || ( ( now - lastPickTime ) > self.pickInterval ) ) && self.enableInputs )
                 {
-                    if ( self.lastPickId ) {
-                        view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
-                                                   self.lastEventData.eventData, 
-                                                   self.lastEventData.eventNodeData );
-                    }
-                    if ( newPickId ) {
-                        view.kernel.dispatchEvent( newPickId, "pointerOver",
-                                                   self.lastEventData.eventData, 
-                                                   self.lastEventData.eventNodeData );
-                    }
-                }
-
-                if ( view.lastEventData && 
-                     ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
-                       view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
-                    oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
-                    oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
-                    hovering = false;
-                }
-                else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
-                    view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-                    hovering = true;
-                }
+                    sceneNode.frameCount = 0;
                 
-                self.lastPickId = newPickId;
-                self.lastPick = newPick;
-                lastPickTime = now;
+                    var newPick, newPickId;
+
+                    if ( self.applicationWantsPointerEvents ) {
+                        newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
+                        newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+                    } else {
+                        newPick = undefined;
+                        newPickId = undefined;
+                    }
+
+                    if ( self.lastPickId != newPickId && self.lastEventData )
+                    {
+                        if ( self.lastPickId ) {
+                            view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
+                                                       self.lastEventData.eventData, 
+                                                       self.lastEventData.eventNodeData );
+                        }
+                        if ( newPickId ) {
+                            view.kernel.dispatchEvent( newPickId, "pointerOver",
+                                                       self.lastEventData.eventData, 
+                                                       self.lastEventData.eventNodeData );
+                        }
+                    }
+
+                    if ( view.lastEventData && 
+                         ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
+                           view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
+                        oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
+                        oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
+                        hovering = false;
+                    }
+                    else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
+                        view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+                        hovering = true;
+                    }
+                    
+                    self.lastPickId = newPickId;
+                    self.lastPick = newPick;
+                    lastPickTime = now;
+                }
+                self.mouseJustEnteredCanvas = false;                
             }
 
             if ( enableStereo && sceneNode && sceneNode.stereo ) {
@@ -1874,7 +1878,11 @@ define( [ "module",
         }
 
         canvas.onmouseover = function( e ) {
-            self.mouseOverCanvas = true;
+            if ( !self.mouseOverCanvas ) {
+                self.mouseJustEnteredCanvas = true;
+                self.mouseOverCanvas = true;
+            }
+
             var eData = getEventData( e, false );
             if ( eData ) {
                 pointerOverID = pointerPickID ? pointerPickID : sceneID;
