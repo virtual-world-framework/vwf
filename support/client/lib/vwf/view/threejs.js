@@ -97,7 +97,7 @@ define( [ "module",
             this.state.appInitialized = false;
 
             this.pickInterval = 10;
-            this.disableInputs = false;
+            this.enableInputs = true;
             this.applicationWantsPointerEvents = false;
 
             // Store parameter options for persistence functionality
@@ -110,8 +110,8 @@ define( [ "module",
                 if ( "pick-interval" in options ) {
                     this.pickInterval = options[ "pick-interval" ];
                 }
-                if ( "disable-inputs" in options ) {
-                    this.disableInputs = options[ "disable-inputs" ];
+                if ( "enable-inputs" in options ) {
+                    this.enableInputs = options[ "enable-inputs" ];
                 }
                 enableStereo = ( options.stereo !== undefined ) ? options.stereo : false;
 
@@ -1139,7 +1139,7 @@ define( [ "module",
                     }
                 }
 
-                if ( navmode != "none" && !self.disableInputs ) {
+                if ( navmode != "none" && self.enableInputs ) {
 
                     // Move the user's camera according to their input
                     inputMoveNavObject( timepassed );
@@ -1344,7 +1344,7 @@ define( [ "module",
             window._dRenderer = renderer;
             window._dSceneNode = sceneNode;
             
-            if(!this.disableInputs) {
+            if ( this.enableInputs ) {
                 initInputEvents.call(this,mycanvas);
             }
             renderScene( ( +new Date ) );
