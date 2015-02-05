@@ -35,7 +35,7 @@ class VWF::Application < Sinatra::Base
 
     set :browser do |wants_browser|
       condition do
-        is_browser = !! request.accept.include?( "text/html" )  # `accept.include?`, not `accept?`; want explict `text/html`
+        is_browser = !! browser?
         wants_browser == is_browser
       end
     end
@@ -105,7 +105,7 @@ class VWF::Application < Sinatra::Base
   end
 
   before "/instance/:id/?*" do |id, _|
-    if @storage = storage_instance( @storage, id, SPAWN_ADHOC_INSTANCES )
+    if @storage = storage_instance( @storage, id, browser? && SPAWN_ADHOC_INSTANCES )
       route_as "/instance/#{id}"
     else
       halt 404
@@ -113,7 +113,7 @@ class VWF::Application < Sinatra::Base
   end
 
   before "/revision/:id/?*" do |id, _|
-    if @storage = storage_revision( @storage, id, SPAWN_ADHOC_REVISIONS )
+    if @storage = storage_revision( @storage, id, browser? && SPAWN_ADHOC_REVISIONS )
       route_as "/revision/#{id}"
     else
       halt 404
@@ -193,6 +193,12 @@ class VWF::Application < Sinatra::Base
   end
 
   helpers do
+
+    # Is this request from a browser--an interactive sesssion, not an API request?
+
+    def browser?
+      request.accept.include?( "text/html" )  # `accept.include?`, not `accept?`; want explict `text/html`
+    end
 
     # Get an instance from a `VWF::Storage` item. With `spawn`, create a new instance if the
     # identified instance doesn't exist. New instances are initialized with the current `item` state.
