@@ -6,7 +6,6 @@ define([
         './defineProperties',
         './Ellipsoid',
         './Rectangle',
-        './TilingScheme',
         './WebMercatorProjection'
     ], function(
         Cartesian2,
@@ -15,7 +14,6 @@ define([
         defineProperties,
         Ellipsoid,
         Rectangle,
-        TilingScheme,
         WebMercatorProjection) {
     "use strict";
 
@@ -134,8 +132,8 @@ define([
      */
     WebMercatorTilingScheme.prototype.rectangleToNativeRectangle = function(rectangle, result) {
         var projection = this._projection;
-        var southwest = projection.project(Rectangle.getSouthwest(rectangle));
-        var northeast = projection.project(Rectangle.getNortheast(rectangle));
+        var southwest = projection.project(Rectangle.southwest(rectangle));
+        var northeast = projection.project(Rectangle.northeast(rectangle));
 
         if (!defined(result)) {
             return new Rectangle(southwest.x, southwest.y, northeast.x, northeast.y);
@@ -221,10 +219,7 @@ define([
      */
     WebMercatorTilingScheme.prototype.positionToTileXY = function(position, level, result) {
         var rectangle = this._rectangle;
-        if (position.latitude > rectangle.north ||
-            position.latitude < rectangle.south ||
-            position.longitude < rectangle.west ||
-            position.longitude > rectangle.east) {
+        if (!Rectangle.contains(rectangle, position)) {
             // outside the bounds of the tiling scheme
             return undefined;
         }

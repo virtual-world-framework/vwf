@@ -408,8 +408,9 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
                 }
             }  
 
-            $('#'+divId).draggable();
-            
+            var divEle = $('#'+divId);
+            divEle && divEle.draggable && divEle.draggable();
+           
         } 
 
         var clr = new utility.color( color );

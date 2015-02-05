@@ -7,6 +7,7 @@ define([
         './defined',
         './defineProperties',
         './DeveloperError',
+        './IndexDatatype',
         './Intersections2D',
         './Math',
         './TaskProcessor',
@@ -19,6 +20,7 @@ define([
         defined,
         defineProperties,
         DeveloperError,
+        IndexDatatype,
         Intersections2D,
         CesiumMath,
         TaskProcessor,
@@ -37,8 +39,9 @@ define([
      *
      * @param {Object} options Object with the following properties:
      * @param {Uint16Array} options.quantizedVertices The buffer containing the quantized mesh.
-     * @param {Uint16Array} options.indices The indices specifying how the quantized vertices are linked
+     * @param {Uint16Array|Uint32Array} options.indices The indices specifying how the quantized vertices are linked
      *                      together into triangles.  Each three indices specifies one triangle.
+     * @param {Uint8Array} options.encodedNormals The buffer containing per vertex normals, encoded using 'oct' encoding
      * @param {Number} options.minimumHeight The minimum terrain height within the tile, in meters above the ellipsoid.
      * @param {Number} options.maximumHeight The maximum terrain height within the tile, in meters above the ellipsoid.
      * @param {BoundingSphere} options.boundingSphere A sphere bounding all of the vertices in the mesh.
@@ -145,6 +148,7 @@ define([
         //>>includeEnd('debug');
 
         this._quantizedVertices = options.quantizedVertices;
+        this._encodedNormals = options.encodedNormals;
         this._indices = options.indices;
         this._minimumHeight = options.minimumHeight;
         this._maximumHeight = options.maximumHeight;
@@ -165,10 +169,11 @@ define([
             return uValues[a] - uValues[b];
         }
 
-        this._westIndices = sortIndicesIfNecessary(options.westIndices, sortByV);
-        this._southIndices = sortIndicesIfNecessary(options.southIndices, sortByU);
-        this._eastIndices = sortIndicesIfNecessary(options.eastIndices, sortByV);
-        this._northIndices = sortIndicesIfNecessary(options.northIndices, sortByU);
+        var requires32BitIndices = vertexCount > 64 * 1024;
+        this._westIndices = sortIndicesIfNecessary(options.westIndices, sortByV, vertexCount);
+        this._southIndices = sortIndicesIfNecessary(options.southIndices, sortByU, vertexCount);
+        this._eastIndices = sortIndicesIfNecessary(options.eastIndices, sortByV, vertexCount);
+        this._northIndices = sortIndicesIfNecessary(options.northIndices, sortByU, vertexCount);
 
         this._westSkirtHeight = options.westSkirtHeight;
         this._southSkirtHeight = options.southSkirtHeight;
@@ -198,7 +203,7 @@ define([
 
     var arrayScratch = [];
 
-    function sortIndicesIfNecessary(indices, sortFunction) {
+    function sortIndicesIfNecessary(indices, sortFunction, vertexCount) {
         arrayScratch.length = indices.length;
 
         var needsSort = false;
@@ -209,7 +214,7 @@ define([
 
         if (needsSort) {
             arrayScratch.sort(sortFunction);
-            return new Uint16Array(arrayScratch);
+            return IndexDatatype.createTypedArray(vertexCount, arrayScratch);
         } else {
             return indices;
         }
@@ -251,6 +256,7 @@ define([
             minimumHeight : this._minimumHeight,
             maximumHeight : this._maximumHeight,
             quantizedVertices : this._quantizedVertices,
+            octEncodedNormals : this._encodedNormals,
             indices : this._indices,
             westIndices : this._westIndices,
             southIndices : this._southIndices,
@@ -272,14 +278,19 @@ define([
 
         var that = this;
         return when(verticesPromise, function(result) {
+            var vertexCount = that._quantizedVertices.length / 3;
+            vertexCount += that._westIndices.length + that._southIndices.length + that._eastIndices.length + that._northIndices.length;
+            var indicesTypedArray = IndexDatatype.createTypedArray(vertexCount, result.indices);
+
             return new TerrainMesh(
                     that._boundingSphere.center,
                     new Float32Array(result.vertices),
-                    new Uint16Array(result.indices),
+                    indicesTypedArray,
                     that._minimumHeight,
                     that._maximumHeight,
                     that._boundingSphere,
-                    that._horizonOcclusionPoint);
+                    that._horizonOcclusionPoint,
+                    defined(that._encodedNormals) ? 7 : 6);
         });
     };
 
@@ -338,6 +349,7 @@ define([
         var upsamplePromise = upsampleTaskProcessor.scheduleTask({
             vertices : this._quantizedVertices,
             indices : this._indices,
+            encodedNormals : this._encodedNormals,
             minimumHeight : this._minimumHeight,
             maximumHeight : this._maximumHeight,
             isEastChild : isEastChild,
@@ -361,9 +373,17 @@ define([
         var northSkirtHeight = isNorthChild ? this._northSkirtHeight : (shortestSkirt * 0.5);
 
         return when(upsamplePromise, function(result) {
+            var quantizedVertices = new Uint16Array(result.vertices);
+            var indicesTypedArray = IndexDatatype.createTypedArray(quantizedVertices.length / 3, result.indices);
+            var encodedNormals;
+            if (defined(result.encodedNormals)) {
+                encodedNormals = new Uint8Array(result.encodedNormals);
+            }
+
             return new QuantizedMeshTerrainData({
-                quantizedVertices : new Uint16Array(result.vertices),
-                indices : new Uint16Array(result.indices),
+                quantizedVertices : quantizedVertices,
+                indices : indicesTypedArray,
+                encodedNormals : encodedNormals,
                 minimumHeight : result.minimumHeight,
                 maximumHeight : result.maximumHeight,
                 boundingSphere : BoundingSphere.clone(result.boundingSphere),
@@ -391,14 +411,13 @@ define([
      * @param {Rectangle} rectangle The rectangle covered by this terrain data.
      * @param {Number} longitude The longitude in radians.
      * @param {Number} latitude The latitude in radians.
-     * @returns {Number} The terrain height at the specified position.  If the position
-     *          is outside the rectangle, this method will extrapolate the height, which is likely to be wildly
-     *          incorrect for positions far outside the rectangle.
+     * @returns {Number} The terrain height at the specified position.  The position is clamped to
+     *          the rectangle, so expect incorrect results for positions far outside the rectangle.
      */
     QuantizedMeshTerrainData.prototype.interpolateHeight = function(rectangle, longitude, latitude) {
-        var u = (longitude - rectangle.west) / (rectangle.east - rectangle.west);
+        var u = CesiumMath.clamp((longitude - rectangle.west) / rectangle.width, 0.0, 1.0);
         u *= maxShort;
-        var v = (latitude - rectangle.south) / (rectangle.north - rectangle.south);
+        var v = CesiumMath.clamp((latitude - rectangle.south) / rectangle.height, 0.0, 1.0);
         v *= maxShort;
 
         var uBuffer = this._uValues;

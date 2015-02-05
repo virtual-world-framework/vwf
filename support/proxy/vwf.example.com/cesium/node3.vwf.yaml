@@ -22,15 +22,16 @@ implements:
 - http://vwf.example.com/animation.vwf
 properties:
   visible: true
+  position: [ 0, 0, 0 ]
+  color: [ 255, 255, 255, 1 ]
+  modelMatrix:
 methods:
   translateBy:
   translateTo:
 scripts:
   - |
     this.translationFromValue = function( value ) {
-      return value && value.length >= 3 ?
-        value :
-        goog.vec.Vec3.create();
+      return value && value.length >= 3 ? value : goog.vec.Vec3.create();
     }  
     this.translateBy = function( translation, duration ) {
       var pos = this.position; 

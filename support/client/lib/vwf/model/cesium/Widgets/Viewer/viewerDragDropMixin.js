@@ -6,8 +6,8 @@ define([
         '../../Core/DeveloperError',
         '../../Core/Event',
         '../../Core/wrapFunction',
-        '../../DynamicScene/CzmlDataSource',
-        '../../DynamicScene/GeoJsonDataSource',
+        '../../DataSources/CzmlDataSource',
+        '../../DataSources/GeoJsonDataSource',
         '../getElement'
     ], function(
         defaultValue,
@@ -210,7 +210,9 @@ define([
                     dataSource.load(JSON.parse(evt.target.result), fileName);
                 } else if (/\.geojson$/i.test(fileName) || /\.json$/i.test(fileName) || /\.topojson$/i.test(fileName)) {
                     dataSource = new GeoJsonDataSource(fileName);
-                    loadPromise = dataSource.load(JSON.parse(evt.target.result), fileName);
+                    loadPromise = dataSource.load(JSON.parse(evt.target.result), {
+                        sourceUri : fileName
+                    });
                 } else {
                     viewer.dropError.raiseEvent(viewer, fileName, 'Unrecognized file: ' + fileName);
                     return;

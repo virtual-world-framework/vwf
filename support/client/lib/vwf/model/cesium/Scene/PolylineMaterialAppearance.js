@@ -4,7 +4,6 @@ define([
         '../Core/defined',
         '../Core/defineProperties',
         '../Core/VertexFormat',
-        '../Renderer/createShaderSource',
         '../Shaders/Appearances/PolylineMaterialAppearanceVS',
         '../Shaders/PolylineCommon',
         '../Shaders/PolylineFS',
@@ -15,13 +14,15 @@ define([
         defined,
         defineProperties,
         VertexFormat,
-        createShaderSource,
         PolylineMaterialAppearanceVS,
         PolylineCommon,
         PolylineFS,
         Appearance,
         Material) {
     "use strict";
+
+    var defaultVertexShaderSource = PolylineCommon + '\n' + PolylineMaterialAppearanceVS;
+    var defaultFragmentShaderSource = PolylineFS;
 
     /**
      * An appearance for {@link PolylineGeometry} that supports shading with materials.
@@ -37,6 +38,7 @@ define([
      * @param {RenderState} [options.renderState] Optional render state to override the default render state.
      *
      * @see {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric|Fabric}
+     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Polyline%20Material.html|Cesium Sandcastle Polyline Material Appearance Demo}
      *
      * @example
      * var primitive = new Cesium.Primitive({
@@ -53,15 +55,13 @@ define([
      *   appearance : new Cesium.PolylineMaterialAppearance({
      *     material : Cesium.Material.fromType('Color')
      *   })
-     * }));
+     * });
      */
     var PolylineMaterialAppearance = function(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
 
         var translucent = defaultValue(options.translucent, true);
         var closed = false;
-        var vs = createShaderSource({ sources : [PolylineCommon, PolylineMaterialAppearanceVS] });
-        var fs = PolylineFS;
         var vertexFormat = PolylineMaterialAppearance.VERTEX_FORMAT;
 
         /**
@@ -86,9 +86,9 @@ define([
          */
         this.translucent = translucent;
 
-        this._vertexShaderSource = defaultValue(options.vertexShaderSource, vs);
-        this._fragmentShaderSource = defaultValue(options.fragmentShaderSource, fs);
-        this._renderState = defaultValue(options.renderState, Appearance.getDefaultRenderState(translucent, closed));
+        this._vertexShaderSource = defaultValue(options.vertexShaderSource, defaultVertexShaderSource);
+        this._fragmentShaderSource = defaultValue(options.fragmentShaderSource, defaultFragmentShaderSource);
+        this._renderState = Appearance.getDefaultRenderState(translucent, closed, options.renderState);
         this._closed = closed;
 
         // Non-derived members
@@ -211,9 +211,9 @@ define([
     PolylineMaterialAppearance.prototype.isTranslucent = Appearance.prototype.isTranslucent;
 
     /**
-     * Creates a render state.  This is not the final {@link RenderState} instance; instead,
-     * it can contain a subset of render state properties identical to <code>renderState</code>
-     * passed to {@link Context#createRenderState}.
+     * Creates a render state.  This is not the final render state instance; instead,
+     * it can contain a subset of render state properties identical to the render state
+     * created in the context.
      *
      * @function
      *

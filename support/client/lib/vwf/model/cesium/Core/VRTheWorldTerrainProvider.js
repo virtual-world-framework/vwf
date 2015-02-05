@@ -64,7 +64,7 @@ define([
      * var terrainProvider = new Cesium.VRTheWorldTerrainProvider({
      *   url : '//www.vr-theworld.com/vr-theworld/tiles1.0.0/73/'
      * });
-     * scene.terrainProvider = terrainProvider;
+     * viewer.terrainProvider = terrainProvider;
      */
     var VRTheWorldTerrainProvider = function VRTheWorldTerrainProvider(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
@@ -198,12 +198,38 @@ define([
             get : function() {
                 return this._ready;
             }
+        },
+
+        /**
+         * Gets a value indicating whether or not the provider includes a water mask.  The water mask
+         * indicates which areas of the globe are water rather than land, so they can be rendered
+         * as a reflective surface with animated waves.  This function should not be
+         * called before {@link VRTheWorldTerrainProvider#ready} returns true.
+         * @memberof VRTheWorldTerrainProvider.prototype
+         * @type {Boolean}
+         */
+        hasWaterMask : {
+            get : function() {
+                return false;
+            }
+        },
+
+        /**
+         * Gets a value indicating whether or not the requested tiles include vertex normals.
+         * This function should not be called before {@link VRTheWorldTerrainProvider#ready} returns true.
+         * @memberof VRTheWorldTerrainProvider.prototype
+         * @type {Boolean}
+         */
+        hasVertexNormals : {
+            get : function() {
+                return false;
+            }
         }
     });
 
     /**
      * Requests the geometry for a given tile.  This function should not be called before
-     * {@link ArcGisImageServerTerrainProvider#ready} returns true.  The result includes terrain
+     * {@link VRTheWorldTerrainProvider#ready} returns true.  The result includes terrain
      * data and indicates that all child tiles are available.
      *
      * @param {Number} x The X coordinate of the tile for which to request geometry.
@@ -266,17 +292,6 @@ define([
         return this._levelZeroMaximumGeometricError / (1 << level);
     };
 
-    /**
-     * Gets a value indicating whether or not the provider includes a water mask.  The water mask
-     * indicates which areas of the globe are water rather than land, so they can be rendered
-     * as a reflective surface with animated waves.
-     *
-     * @returns {Boolean} True if the provider has a water mask; otherwise, false.
-     */
-    VRTheWorldTerrainProvider.prototype.hasWaterMask = function() {
-        return false;
-    };
-
     var rectangleScratch = new Rectangle();
 
     function getChildMask(provider, x, y, level) {
@@ -294,8 +309,8 @@ define([
 
             var testRectangle = rectangle.rectangle;
 
-            var intersection = Rectangle.intersectWith(testRectangle, parentRectangle, rectangleScratch);
-            if (!Rectangle.isEmpty(intersection)) {
+            var intersection = Rectangle.intersection(testRectangle, parentRectangle, rectangleScratch);
+            if (defined(intersection)) {
                 // Parent tile is inside this rectangle, so at least one child is, too.
                 if (isTileInRectangle(tilingScheme, testRectangle, x * 2, y * 2, level + 1)) {
                     childMask |= 4; // northwest
@@ -317,8 +332,20 @@ define([
 
     function isTileInRectangle(tilingScheme, rectangle, x, y, level) {
         var tileRectangle = tilingScheme.tileXYToRectangle(x, y, level);
-        return !Rectangle.isEmpty(Rectangle.intersectWith(tileRectangle, rectangle, rectangleScratch));
+        return defined(Rectangle.intersection(tileRectangle, rectangle, rectangleScratch));
     }
+
+    /**
+     * Determines whether data for a tile is available to be loaded.
+     *
+     * @param {Number} x The X coordinate of the tile for which to request geometry.
+     * @param {Number} y The Y coordinate of the tile for which to request geometry.
+     * @param {Number} level The level of the tile for which to request geometry.
+     * @returns {Boolean} Undefined if not supported, otherwise true or false.
+     */
+    VRTheWorldTerrainProvider.prototype.getTileDataAvailable = function(x, y, level) {
+        return undefined;
+    };
 
     return VRTheWorldTerrainProvider;
 });

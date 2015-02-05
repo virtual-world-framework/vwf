@@ -51,12 +51,35 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
 
             if ( options === undefined ) { options = {}; }
 
-            this.cesiumType = options.cesium !== undefined ? options.cesium : 'widget'; // 'widget', 'viewer', manual - anything else 
-            this.canvasOptions = options.canvasOptions;
-            this.parentDiv = options.parentDiv !== undefined ? options.parentDiv : 'body';
-            this.parentClass = options.parentClass !== undefined ? options.parentClass : 'cesium-main-div';
-            this.container = options.container !== undefined ? options.container : { "create": true, "divName": "cesiumContainer" } ;
-            this.invertMouse = options.invertMouse !== undefined ? options.invertMouse : {};
+            // html creation options
+            this.parentDiv = options.parentDiv || 'body';
+            this.parentClass = options.parentClass || 'cesium-main-div';
+            this.containerClass = options.containerClass || 'fullSize';
+            this.container = options.container || { "create": true, "divName": "cesiumContainer" } ;
+
+            // Context and WebGL creation properties corresponding to options passed to Scene.
+            this.canvasOptions = options.canvasOptions;  
+            
+            this.invertMouse =  options.invertMouse || {};
+            
+            this.cesiumType = options.cesium || 'widget'; // 'widget', 'viewer', manual - anything else 
+
+            // CesiumWidget options, will accept all defaults
+            this.cesiumTypeOptions = options.widget || {
+                //"clock": false,
+                //"imageryProvider": 'OpenStreetMapImageryProvider',
+                //"terrainProvider": 'CesiumTerrainProvider',
+                //"skyBox": {},
+                "sceneMode": Cesium.SceneMode.SCENE3D,
+                "scene3DOnly": false,
+                "orderIndependentTranslucency": true,
+                //"mapProjection": GeographicProjection || WebMercatorProjection
+                "useDefaultRenderLoop": true,
+                //"targetFrameRate": '?',
+                "showRenderLoopErrors": true,
+                //"contextOptions": {}, // Canvas options
+                //"creditContainer": undefined, // DOM element or ID of where the credits go
+            };
 
 
             this.height = 600;
@@ -104,7 +127,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
             if ( isCesiumDefinition.call( this, protos ) ) {
 
                 if ( this.container.create ) {                
-                    var cesiumCont = "<div class='cesuim-container' id='" + this.container.divName + "'></div>";
+                    //var cesiumCont = "<div class='cesuim-container' id='" + this.container.divName + "'></div>";
+                    var cesiumCont = "<div class='"+ this.containerClass +"' id='" + this.container.divName + "'></div>";
 
                     if ( this.parentDiv == 'body' ) {
                         jQuery( this.parentDiv ).append( cesiumCont );
@@ -131,20 +155,30 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
                 
                 // options for oneToOne below
                 //var cesiumOptions = { "contextOptions": { "alpha": true }, }; 
+                var options = this.cesiumTypeOptions;
+
 
                 switch ( this.cesiumType ) {
 
                     case 'widget':
-                        node.cesiumWidget = new Cesium.CesiumWidget( this.container.divName, this.canvasOptions );
-                        node.globe = node.cesiumWidget._globe;
+                        options.clock && this.state.createClock( options );
+                        options.imageryProvider && this.state.createImageryProvider( options );
+                        options.terrainProvider && this.state.createTerrainProvider( options );
+                        options.skyBox && this.state.createSkyBox( options );
+                        options.sceneMode && this.state.setSceneMode( options );
+                        options.mapProjection && this.state.createMapProjection( options );
+
+                        node.cesiumWidget = new Cesium.CesiumWidget( this.container.divName, options );
                         node.scene = scene = node.cesiumWidget.scene;
+                        node.globe = scene.globe;
                         break;
 
                     case 'viewer':
-                        node.cesiumViewer = new Cesium.Viewer( this.container.divName, this.canvasOptions );
+                        node.cesiumViewer = new Cesium.Viewer( this.container.divName, this.cesiumTypeOptions );
                         node.cesiumWidget = node.cesiumViewer.cesiumWidget;
-                        node.globe = node.cesiumViewer._globe;
                         node.scene = scene = node.cesiumViewer.scene;
+                        node.globe = scene.globe;
+
                         break;
                     
                     default:

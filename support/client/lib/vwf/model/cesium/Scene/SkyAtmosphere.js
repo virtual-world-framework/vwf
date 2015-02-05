@@ -10,8 +10,8 @@ define([
         '../Core/GeometryPipeline',
         '../Core/VertexFormat',
         '../Renderer/BufferUsage',
-        '../Renderer/createShaderSource',
         '../Renderer/DrawCommand',
+        '../Renderer/ShaderSource',
         '../Shaders/SkyAtmosphereFS',
         '../Shaders/SkyAtmosphereVS',
         './BlendingState',
@@ -28,8 +28,8 @@ define([
         GeometryPipeline,
         VertexFormat,
         BufferUsage,
-        createShaderSource,
         DrawCommand,
+        ShaderSource,
         SkyAtmosphereFS,
         SkyAtmosphereVS,
         BlendingState,
@@ -75,7 +75,7 @@ define([
 
         this._fCameraHeight = undefined;
         this._fCameraHeight2 = undefined;
-        this._outerRadius = Cartesian3.getMaximumComponent(Cartesian3.multiplyByScalar(ellipsoid.radii, 1.025, new Cartesian3()));
+        this._outerRadius = Cartesian3.maximumComponent(Cartesian3.multiplyByScalar(ellipsoid.radii, 1.025, new Cartesian3()));
         var innerRadius = ellipsoid.maximumRadius;
         var rayleighScaleDepth = 0.25;
 
@@ -113,7 +113,9 @@ define([
         /**
          * Gets the ellipsoid the atmosphere is drawn around.
          * @memberof SkyAtmosphere.prototype
+         *
          * @type {Ellipsoid}
+         * @readonly
          */
         ellipsoid : {
             get : function() {
@@ -162,13 +164,13 @@ define([
                 blending : BlendingState.ALPHA_BLEND
             });
 
-            var vs = createShaderSource({
+            var vs = new ShaderSource({
                 defines : ['SKY_FROM_SPACE'],
                 sources : [SkyAtmosphereVS]
             });
             this._spSkyFromSpace = context.createShaderProgram(vs, SkyAtmosphereFS);
 
-            vs = createShaderSource({
+            vs = new ShaderSource({
                 defines : ['SKY_FROM_ATMOSPHERE'],
                 sources : [SkyAtmosphereVS]
             });

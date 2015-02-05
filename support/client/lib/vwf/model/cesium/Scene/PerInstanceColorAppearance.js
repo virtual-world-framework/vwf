@@ -36,6 +36,8 @@ define([
      * @param {String} [options.fragmentShaderSource] Optional GLSL fragment shader source to override the default fragment shader.
      * @param {RenderState} [options.renderState] Optional render state to override the default render state.
      *
+     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Per%20Instance%20Color.html|Cesium Sandcastle Per Instance Color Appearance Demo}
+     *
      * @example
      * // A solid white line segment
      * var primitive = new Cesium.Primitive({
@@ -54,7 +56,7 @@ define([
      *     flat : true,
      *     translucent : false
      *   })
-     * }));
+     * });
      *
      * // Two rectangles in a primitive, each with a different color
      * var instance = new Cesium.GeometryInstance({
@@ -108,7 +110,7 @@ define([
 
         this._vertexShaderSource = defaultValue(options.vertexShaderSource, vs);
         this._fragmentShaderSource = defaultValue(options.fragmentShaderSource, fs);
-        this._renderState = defaultValue(options.renderState, Appearance.getDefaultRenderState(translucent, closed));
+        this._renderState = Appearance.getDefaultRenderState(translucent, closed, options.renderState);
         this._closed = closed;
 
         // Non-derived members
@@ -280,9 +282,9 @@ define([
     PerInstanceColorAppearance.prototype.isTranslucent = Appearance.prototype.isTranslucent;
 
     /**
-     * Creates a render state.  This is not the final {@link RenderState} instance; instead,
-     * it can contain a subset of render state properties identical to <code>renderState</code>
-     * passed to {@link Context#createRenderState}.
+     * Creates a render state.  This is not the final render state instance; instead,
+     * it can contain a subset of render state properties identical to the render state
+     * created in the context.
      *
      * @function
      *

@@ -56,9 +56,6 @@ define([
 
     var bc = new Color(0.15, 0.15, 0.15, 0.75);
 
-    var performanceContainer = document.createElement('div');
-    performanceContainer.className = 'cesium-cesiumInspector-performanceDisplay';
-
     /**
      * The view model for {@link CesiumInspector}.
      * @alias CesiumInspectorViewModel
@@ -68,20 +65,26 @@ define([
      *
      * @exception {DeveloperError} scene is required.
      */
-    var CesiumInspectorViewModel = function(scene) {
+    var CesiumInspectorViewModel = function(scene, performanceContainer) {
+        //>>includeStart('debug', pragmas.debug);
         if (!defined(scene)) {
             throw new DeveloperError('scene is required');
         }
 
+        if (!defined(performanceContainer)) {
+            throw new DeveloperError('performanceContainer is required');
+        }
+        //>>includeEnd('debug');
+
         var that = this;
         var canvas = scene.canvas;
-        canvas.parentNode.appendChild(performanceContainer);
         this._scene = scene;
         this._canvas = canvas;
         this._primitive = undefined;
         this._tile = undefined;
         this._modelMatrixPrimitive = undefined;
         this._performanceDisplay = undefined;
+        this._performanceContainer = performanceContainer;
 
         var globe = this._scene.globe;
         globe.depthTestAgainstTerrain = true;
@@ -283,12 +286,12 @@ define([
         this._showPerformance = createCommand(function() {
             if (that.performance) {
                 that._performanceDisplay = new PerformanceDisplay({
-                    container : performanceContainer,
+                    container : that._performanceContainer,
                     backgroundColor : bc,
                     font : '12px arial,sans-serif'
                 });
             } else {
-                performanceContainer.innerHTML = '';
+                that._performanceContainer.innerHTML = '';
             }
             return true;
         });
@@ -318,7 +321,7 @@ define([
                     if (defined(that._modelMatrixPrimitive) && command.owner === that._modelMatrixPrimitive._primitive) {
                         return true;
                     } else if (defined(that._primitive)) {
-                        return command.owner === that._primitive || command.owner === that._primitive._billboardCollection;
+                        return command.owner === that._primitive || command.owner === that._primitive._billboardCollection || command.owner.primitive === that._primitive;
                     }
                     return false;
                 };
@@ -329,7 +332,7 @@ define([
         });
 
         this._showWireframe = createCommand(function() {
-            globe._surface._debug.wireframe = that.wireframe;
+            globe._surface.tileProvider._debug.wireframe = that.wireframe;
             return true;
         });
 
@@ -356,9 +359,9 @@ define([
 
         this._showTileBoundingSphere = createCommand(function() {
             if (that.tileBoundingSphere) {
-                globe._surface._debug.boundingSphereTile = that._tile;
+                globe._surface.tileProvider._debug.boundingSphereTile = that._tile;
             } else {
-                globe._surface._debug.boundingSphereTile = undefined;
+                globe._surface.tileProvider._debug.boundingSphereTile = undefined;
             }
             return true;
         });
@@ -371,21 +374,10 @@ define([
                 that.suspendUpdates = true;
                 that.doSuspendUpdates();
 
-                globe._surface._tilesToRenderByTextureCount = [];
+                globe._surface._tilesToRender = [];
 
                 if (defined(that._tile)) {
-                    var readyTextureCount = 0;
-                    var tileImageryCollection = that._tile.imagery;
-                    for (var i = 0, len = tileImageryCollection.length; i < len; ++i) {
-                        var tileImagery = tileImageryCollection[i];
-                        if (defined(tileImagery.readyImagery) && tileImagery.readyImagery.imageryLayer.alpha !== 0.0) {
-                            ++readyTextureCount;
-                        }
-                    }
-
-                    globe._surface._tilesToRenderByTextureCount[readyTextureCount] = [that._tile];
-                    globe._surface._tileLoadQueue.push(that._tile);
-
+                    globe._surface._tilesToRender.push(that._tile);
                 }
             }
             return true;
@@ -422,7 +414,7 @@ define([
 
             if (defined(cartesian)) {
                 var cartographic = ellipsoid.cartesianToCartographic(cartesian);
-                var tilesRendered = globe._surface._tilesToRenderByTextureCount;
+                var tilesRendered = globe._surface.tileProvider._tilesToRenderByTextureCount;
                 for (var textureCount = 0; !selectedTile && textureCount < tilesRendered.length; ++textureCount) {
                     var tilesRenderedByTextureCount = tilesRendered[textureCount];
                     if (!defined(tilesRenderedByTextureCount)) {
@@ -469,6 +461,18 @@ define([
         },
 
         /**
+         * Gets the container of the PerformanceDisplay
+         * @memberof CesiumInspectorViewModel.prototype
+         *
+         * @type {Element}
+         */
+        performanceContainer : {
+            get : function() {
+                return this._performanceContainer;
+            }
+        },
+
+        /**
          * Gets the command to toggle the visibility of the drop down.
          * @memberof CesiumInspectorViewModel.prototype
          *
@@ -493,7 +497,7 @@ define([
         },
 
         /**
-         * Gets the command to toggle the visibility of a {@link PerformanceDisplay}
+         * Gets the command to toggle the visibility of the performance display.
          * @memberof CesiumInspectorViewModel.prototype
          *
          * @type {Command}
@@ -785,7 +789,7 @@ define([
                         this.tileText = 'L: ' + newTile.level + ' X: ' + newTile.x + ' Y: ' + newTile.y;
                         this.tileText += '<br>SW corner: ' + newTile.rectangle.west + ', ' + newTile.rectangle.south;
                         this.tileText += '<br>NE corner: ' + newTile.rectangle.east + ', ' + newTile.rectangle.north;
-                        this.tileText += '<br>Min: ' + newTile.minimumHeight + ' Max: ' + newTile.maximumHeight;
+                        this.tileText += '<br>Min: ' + newTile.data.minimumHeight + ' Max: ' + newTile.data.maximumHeight;
                     }
                     this._tile = newTile;
                     this.showTileBoundingSphere();
