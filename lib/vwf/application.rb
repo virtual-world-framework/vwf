@@ -207,7 +207,7 @@ class VWF::Application < Sinatra::Base
     def storage_instance item, id, spawn = false
       if item.respond_to? :instances
         result = item.instances[ id ]
-        result = item.instances.create( id, item.state ) unless result || ! spawn
+        result = item.instances.create( id, item.state ) if ! result && spawn
         result
       end
     end
@@ -220,7 +220,7 @@ class VWF::Application < Sinatra::Base
     def storage_revision item, id, spawn = false
       if item.respond_to? :revisions
         result = item.revisions[ id ]
-        result = item.revisions.create( id ) unless result || ! spawn
+        result = item.revisions.create( id, nil ) if ! result && spawn && ( item.states[ id ] || item.actions[ id ] )
         result
       end
     end
