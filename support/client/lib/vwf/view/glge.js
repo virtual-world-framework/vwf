@@ -34,11 +34,11 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
 
             if(typeof options == "object") {
                 this.rootSelector = options["application-root"];
-                if("experimental-pick-interval" in options) {
-                    this.pickInterval = options["experimental-pick-interval"];
+                if("pick-interval" in options) {
+                    this.pickInterval = options["pick-interval"];
                 }
-                if("experimental-disable-inputs" in options) {
-                    this.disableInputs = options["experimental-disable-inputs"];
+                if("disable-inputs" in options) {
+                    this.disableInputs = options["disable-inputs"];
                 }
             }
             else {
