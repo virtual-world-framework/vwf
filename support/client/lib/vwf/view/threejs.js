@@ -2438,7 +2438,7 @@ define( [ "module",
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
-        pickDirection.set( x, y, threeCam.near );
+        pickDirection.set( x, y, 0.5 );
 
         var camPos = new THREE.Vector3(
             threeCam.matrixWorld.elements[ 12 ],  
@@ -2481,7 +2481,7 @@ define( [ "module",
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
-        pickDirection.set( x, y, threeCam.near );
+        pickDirection.set( x, y, 0.5 );
 
         var camPos = new THREE.Vector3(
             threeCam.matrixWorld.elements[ 12 ],  
