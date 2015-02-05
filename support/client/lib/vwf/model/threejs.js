@@ -818,7 +818,7 @@ define( [ "module",
 
                         //Threejs does not currently support auto tracking the lookat,
                         //instead, we'll take the position of the node and look at that.
-                        if ( typeof lookAtValue == 'string' ) {
+                        if ( utility.isString( lookAtValue ) ) {
                             
                             // We use '' to denote that there is no object to look at.
                             // Therefore, we only care if it is something other than that.
@@ -2309,7 +2309,7 @@ define( [ "module",
 
                         objectIDs = parameters[5];
 
-                    } else if ( typeof parameters[5] === "string" ) {
+                    } else if ( utility.isString( parameters[5] ) ) {
 
                         objectIDs = new Array();
                         objectIDs.push( parameters[5] );
@@ -5248,7 +5248,7 @@ define( [ "module",
 
         //console.log( [ "loadTexture: ", JSON.stringify( def ) ] );
 
-        if ( typeof def == 'string' ) {
+        if ( utility.isString( def ) ) {
             url = def;    
         } else {
             url = def.url;
