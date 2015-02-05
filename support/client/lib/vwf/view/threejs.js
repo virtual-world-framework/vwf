@@ -97,7 +97,7 @@ define( [ "module",
             this.state.appInitialized = false;
 
             this.pickInterval = 10;
-            this.disableInputs = false;
+            this.enableInputs = true;
             this.applicationWantsPointerEvents = false;
 
             // Store parameter options for persistence functionality
@@ -107,11 +107,11 @@ define( [ "module",
  
                 this.rootSelector = options[ "application-root" ];
 
-                if ( "experimental-pick-interval" in options ) {
-                    this.pickInterval = options[ "experimental-pick-interval" ];
+                if ( "pick-interval" in options ) {
+                    this.pickInterval = options[ "pick-interval" ];
                 }
-                if ( "experimental-disable-inputs" in options ) {
-                    this.disableInputs = options[ "experimental-disable-inputs" ];
+                if ( "enable-inputs" in options ) {
+                    this.enableInputs = options[ "enable-inputs" ];
                 }
                 enableStereo = ( options.stereo !== undefined ) ? options.stereo : false;
 
@@ -1139,7 +1139,7 @@ define( [ "module",
                     }
                 }
 
-                if ( navmode != "none" && !self.disableInputs ) {
+                if ( navmode != "none" && self.enableInputs ) {
 
                     // Move the user's camera according to their input
                     inputMoveNavObject( timepassed );
@@ -1154,51 +1154,55 @@ define( [ "module",
 
             }
             
-            // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
-            // Note: this is a costly operation and should be optimized if possible
-            if ( ( now - lastPickTime ) > self.pickInterval && !self.disableInputs )
-            {
-                sceneNode.frameCount = 0;
-            
-                var newPick, newPickId;
+            if ( self.mouseOverCanvas ) {
 
-                if ( self.applicationWantsPointerEvents ) {
-                    newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
-                    newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
-                } else {
-                    newPick = undefined;
-                    newPickId = undefined;
-                }
-
-                if ( self.lastPickId != newPickId && self.lastEventData )
+                // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
+                // Note: this is a costly operation and should be optimized if possible
+                if ( ( self.mouseJustEnteredCanvas || ( ( now - lastPickTime ) > self.pickInterval ) ) && self.enableInputs )
                 {
-                    if ( self.lastPickId ) {
-                        view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
-                                                   self.lastEventData.eventData, 
-                                                   self.lastEventData.eventNodeData );
-                    }
-                    if ( newPickId ) {
-                        view.kernel.dispatchEvent( newPickId, "pointerOver",
-                                                   self.lastEventData.eventData, 
-                                                   self.lastEventData.eventNodeData );
-                    }
-                }
-
-                if ( view.lastEventData && 
-                     ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
-                       view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
-                    oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
-                    oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
-                    hovering = false;
-                }
-                else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
-                    view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-                    hovering = true;
-                }
+                    sceneNode.frameCount = 0;
                 
-                self.lastPickId = newPickId;
-                self.lastPick = newPick;
-                lastPickTime = now;
+                    var newPick, newPickId;
+
+                    if ( self.applicationWantsPointerEvents ) {
+                        newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
+                        newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+                    } else {
+                        newPick = undefined;
+                        newPickId = undefined;
+                    }
+
+                    if ( self.lastPickId != newPickId && self.lastEventData )
+                    {
+                        if ( self.lastPickId ) {
+                            view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
+                                                       self.lastEventData.eventData, 
+                                                       self.lastEventData.eventNodeData );
+                        }
+                        if ( newPickId ) {
+                            view.kernel.dispatchEvent( newPickId, "pointerOver",
+                                                       self.lastEventData.eventData, 
+                                                       self.lastEventData.eventNodeData );
+                        }
+                    }
+
+                    if ( view.lastEventData && 
+                         ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
+                           view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
+                        oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
+                        oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
+                        hovering = false;
+                    }
+                    else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
+                        view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+                        hovering = true;
+                    }
+                    
+                    self.lastPickId = newPickId;
+                    self.lastPick = newPick;
+                    lastPickTime = now;
+                }
+                self.mouseJustEnteredCanvas = false;                
             }
 
             if ( enableStereo && sceneNode && sceneNode.stereo ) {
@@ -1340,7 +1344,7 @@ define( [ "module",
             window._dRenderer = renderer;
             window._dSceneNode = sceneNode;
             
-            if(!this.disableInputs) {
+            if ( this.enableInputs ) {
                 initInputEvents.call(this,mycanvas);
             }
             renderScene( ( +new Date ) );
@@ -1874,7 +1878,11 @@ define( [ "module",
         }
 
         canvas.onmouseover = function( e ) {
-            self.mouseOverCanvas = true;
+            if ( !self.mouseOverCanvas ) {
+                self.mouseJustEnteredCanvas = true;
+                self.mouseOverCanvas = true;
+            }
+
             var eData = getEventData( e, false );
             if ( eData ) {
                 pointerOverID = pointerPickID ? pointerPickID : sceneID;
@@ -1951,77 +1959,77 @@ define( [ "module",
         
         window.onkeydown = function (event) {
                     
-                    var key = undefined;
-                    var validKey = false;
-                    var keyAlreadyDown = false;
-                    switch ( event.keyCode ) {
-                        case 17:
-                        case 16:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( sceneView, event.keyCode);
-                            keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
-                            sceneView.keyStates.keysDown[key.key] = key;
-                            validKey = true;
+            var key = undefined;
+            var validKey = false;
+            var keyAlreadyDown = false;
+            switch ( event.keyCode ) {
+                case 17:
+                case 16:
+                case 18:
+                case 19:
+                case 20:
+                    break;
+                default:
+                    key = getKeyValue.call( sceneView, event.keyCode);
+                    keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
+                    sceneView.keyStates.keysDown[key.key] = key;
+                    validKey = true;
 
-                            // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                            handleKeyNavigation( event.keyCode, true );
-                            // END TODO
+                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                    handleKeyNavigation( event.keyCode, true );
+                    // END TODO
 
-                            break;
-                    }
-                    
-                    if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
-                    sceneView.keyStates.mods.alt = event.altKey;
-                    sceneView.keyStates.mods.shift = event.shiftKey;
-                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
-                    sceneView.keyStates.mods.meta = event.metaKey;
+                    break;
+            }
+            
+            if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
+            sceneView.keyStates.mods.alt = event.altKey;
+            sceneView.keyStates.mods.shift = event.shiftKey;
+            sceneView.keyStates.mods.ctrl = event.ctrlKey;
+            sceneView.keyStates.mods.meta = event.metaKey;
 
-                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
-                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
-                        //var params = JSON.stringify( sceneView.keyStates );
-                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
-                    }
-                };
+            var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+            if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
+                //var params = JSON.stringify( sceneView.keyStates );
+                sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
+            }
+        };
 
          window.onkeyup = function (event) {
-                    var key = undefined;
-                    var validKey = false;
-                    switch (event.keyCode) {
-                        case 16:
-                        case 17:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( sceneView, event.keyCode);
-                            delete sceneView.keyStates.keysDown[key.key];
-                            sceneView.keyStates.keysUp[key.key] = key;
-                            validKey = true;
+            var key = undefined;
+            var validKey = false;
+            switch (event.keyCode) {
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                    break;
+                default:
+                    key = getKeyValue.call( sceneView, event.keyCode);
+                    delete sceneView.keyStates.keysDown[key.key];
+                    sceneView.keyStates.keysUp[key.key] = key;
+                    validKey = true;
 
-                            // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                            handleKeyNavigation( event.keyCode, false );
-                            // END TODO
+                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                    handleKeyNavigation( event.keyCode, false );
+                    // END TODO
 
-                            break;
-                    }
-                    
-                    sceneView.keyStates.mods.alt = event.altKey;
-                    sceneView.keyStates.mods.shift = event.shiftKey;
-                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
-                    sceneView.keyStates.mods.meta = event.metaKey;
+                    break;
+            }
+            
+            sceneView.keyStates.mods.alt = event.altKey;
+            sceneView.keyStates.mods.shift = event.shiftKey;
+            sceneView.keyStates.mods.ctrl = event.ctrlKey;
+            sceneView.keyStates.mods.meta = event.metaKey;
 
-                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
-                    if (validKey && sceneNode) {
-                        //var params = JSON.stringify( sceneView.keyStates );
-                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
-                        delete sceneView.keyStates.keysUp[key.key];
-                    }
-                };
+            var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+            if (validKey && sceneNode) {
+                //var params = JSON.stringify( sceneView.keyStates );
+                sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
+                delete sceneView.keyStates.keysUp[key.key];
+            }
+        };
 
         window.oncontextmenu = function() {
             if ( navmode == "none" )
@@ -2489,7 +2497,7 @@ define( [ "module",
         for ( var i = 0; i < intersects.length && target === undefined; i++ ) {
             if ( debug ) {
                 for ( var j = 0; j < intersects.length; j++ ) { 
-                    console.info( j + ". " + intersects[ j ].object.name ) 
+                    console.info( j + ". " + getPickObjectID( intersects[ j ].object ) ); 
                 }
             }   
             if ( intersects[ i ].object.visible ) {
