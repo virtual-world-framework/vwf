@@ -2489,7 +2489,7 @@ define( [ "module",
         for ( var i = 0; i < intersects.length && target === undefined; i++ ) {
             if ( debug ) {
                 for ( var j = 0; j < intersects.length; j++ ) { 
-                    console.info( j + ". " + intersects[ j ].object.name ) 
+                    console.info( j + ". " + getPickObjectID( intersects[ j ].object ) ); 
                 }
             }   
             if ( intersects[ i ].object.visible ) {
