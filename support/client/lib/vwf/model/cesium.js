@@ -185,19 +185,15 @@ define( [ "module",
 
             };
             
-            this.state.creataTerrainProvider = function( options ) {
+            this.state.createTerrainProvider = function( options ) {
                 var terrainProvider = undefined;
-                if ( options && options.terrainProvider ) {
-                    var url, ext, type, credit;
+                if ( options ) {
+                    var type, url, credit, ext;
 
-                    if ( !utility.isString( options ) ) {
-                        url = options.terrainProvider.url;
-                        ext = options.terrainProvider.fileExtension;
-                        credit = options.terrainProvider.credit;
-                        type = options.terrainProvider.type;
-                    } else {
-                        type = options.terrainProvider;     
-                    }
+                    type = utility.isString( options ) ? options : options.type;
+                    url = options.url || undefined;
+                    credit = options.credit || undefined;
+                    ext = options.ext || undefined; 
 
                     switch ( type ) {
                         
@@ -238,7 +234,6 @@ define( [ "module",
                             break;
 
                     }
-                    options.terrainProvider = terrainProvider;
                 }
                 return terrainProvider;
             };
@@ -1302,14 +1297,12 @@ define( [ "module",
                         case "terrainProvider":
                             if ( node.cesiumObj instanceof Cesium.Globe ) {
                                 
-                                var requestedType = propertyValue.type || propertyValue.terrainProvider;
+                                var requestedType = propertyValue.type || propertyValue.terrainProvider || propertyValue;
                                 if ( requestedType === node.terrainProviderValue ) {
                                     break;
                                 }
 
-                                node.terrainProvider = this.state.creataTerrainProvider ( { 
-                                    "terrainProvider": propertyValue
-                                } );
+                                node.terrainProvider = this.state.createTerrainProvider( propertyValue );
                                
                                 node.cesiumObj.depthTestAgainstTerrain = ( node.terrainProvider !== undefined );
 
