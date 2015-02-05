@@ -20,6 +20,17 @@ class VWF::Application < Sinatra::Base
   SPAWN_ADHOC_REVISIONS = true          # create temporary revisions when referenced
   SPAWN_ADHOC_TAGS = true               # create unknown tags when referenced
 
+  KEYWORDS = [
+    "instances",
+    "instance",
+    "revisions",
+    "revision",
+    "tags",
+    "tag",
+    "reflector",
+    "client"
+  ]
+
   ## Types supported by the API resources, in order of preference.
 
   @@api_types = [
@@ -303,16 +314,18 @@ class VWF::Application < Sinatra::Base
     end
 
     def storage_tagged item, tag
-      if item.respond_to? :instances
-        item.instances.each.find do |id, instance|
-          if instance.tags[ tag ]
-            break instance
+      unless KEYWORDS.include? tag
+        if item.respond_to? :instances
+          item.instances.each.find do |id, instance|
+            if instance.tags[ tag ]
+              break instance
+            end
           end
-        end
-      elsif item.respond_to? :revisions
-        item.revisions.each.find do |id, revision|
-          if revision.tags[ tag ]
-            break revision
+        elsif item.respond_to? :revisions
+          item.revisions.each.find do |id, revision|
+            if revision.tags[ tag ]
+              break revision
+            end
           end
         end
       end
