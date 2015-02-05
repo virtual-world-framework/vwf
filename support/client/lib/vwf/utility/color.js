@@ -123,6 +123,7 @@ define(function(){
 						}
 						return this;
 					case 'string' :
+						value = value.replace( /\s/g, '' );
 						switch(true){
 							case (namedColors.hasOwnProperty(value)) :
 								value = namedColors[value];

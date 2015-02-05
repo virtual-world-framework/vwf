@@ -145,3 +145,15 @@ properties:
   alphaTest:
     set: |
       this.alphaTest = value;
+
+  ## side
+  ## 
+  ## @name material.vwf#side
+  ## @property
+
+  side:
+    set: |
+      if ( value === "front" || value === "back" || value === "double" ) {
+        this.side = value;  
+      }
+    value: front

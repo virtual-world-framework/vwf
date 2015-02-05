@@ -718,10 +718,6 @@ define( [ "module",
                             break;
 
                         case "color": 
-                            if ( propertyValue instanceof String ) {
-                                propertyValue = propertyValue.replace( /\s/g, '' );
-                            }
-
                             var vwfColor = new utility.color( propertyValue );
                             if ( vwfColor ) {
                                 if ( node.cesiumObj !== undefined ) {                            
@@ -756,9 +752,6 @@ define( [ "module",
 
                         case "fillColor":
                             if ( node.cesiumObj instanceof Cesium.Label ) {
-                                if ( propertyValue instanceof String ) {
-                                    propertyValue = propertyValue.replace( /\s/g, '' );
-                                }
                                 var vwfColor = new utility.color( propertyValue );
                                 if ( vwfColor ) {                            
                                     node.cesiumObj.fillColor.red = vwfColor.red() / 255;
@@ -787,9 +780,6 @@ define( [ "module",
 
                         case "outlineColor":
                             if ( node.cesiumObj instanceof Cesium.Label ) {
-                                if ( propertyValue instanceof String ) {
-                                    propertyValue = propertyValue.replace( /\s/g, '' );
-                                }
                                 var vwfColor = new utility.color( propertyValue );
                                 if ( vwfColor ) {  
                                     node.cesiumObj.outlineColor.red = vwfColor.red() / 255;
@@ -1071,9 +1061,6 @@ define( [ "module",
 
                         case "northPoleColor":
                             if ( node.cesiumObj instanceof Cesium.Globe ) {
-                                if ( propertyValue instanceof String ) {
-                                    propertyValue = propertyValue.replace( /\s/g, '' );
-                                }
                                 var vwfColor = new utility.color( propertyValue );
                                 if ( vwfColor ) {                            
                                     node.cesiumObj.northPoleColor = new Cesium.Cartesian3( 
@@ -1087,10 +1074,7 @@ define( [ "module",
 
                         case "southPoleColor":
                             if ( node.cesiumObj instanceof Cesium.Globe ) {
-                                if ( propertyValue instanceof String ) {
-                                    propertyValue = propertyValue.replace( /\s/g, '' );
-                                }
-                                var vwfColor = new utility.color( propertyValue );
+                                 var vwfColor = new utility.color( propertyValue );
                                 if ( vwfColor ) {                            
                                     node.cesiumObj.southPoleColor = new Cesium.Cartesian3( 
                                         vwfColor.red() / 255, 
@@ -1403,9 +1387,6 @@ define( [ "module",
                         case "backgroundColor":
 
                             if( node.scene ) {
-                                if ( propertyValue instanceof String ) {
-                                    propertyValue = propertyValue.replace( /\s/g, '' );
-                                }
                                 var vwfColor = new utility.color( propertyValue );
                                 if ( vwfColor ) {                            
                                     node.scene.backgroundColor = new Cesium.Color( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255, vwfColor.alpha() );
@@ -2241,9 +2222,6 @@ define( [ "module",
 
 
     function cesuimColor( color ) {
-        if ( color instanceof String ) {
-            color = color.replace( /\s/g, '' );
-        }
         var vwfColor = new utility.color( color );
         if ( vwfColor ) { 
             return new Cesium.Color( vwfColor.red()/255, vwfColor.green()/255, vwfColor.blue()/255, vwfColor.alpha() );

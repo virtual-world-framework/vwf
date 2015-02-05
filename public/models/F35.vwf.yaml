@@ -1,4 +1,0 @@
----
-extends: http://vwf.example.com/node3.vwf
-source: F35.DAE
-type: model/vnd.collada+xml

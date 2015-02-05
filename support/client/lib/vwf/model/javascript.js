@@ -50,8 +50,9 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility", "vwf/confi
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
-            this.nodes = {}; // maps id => new type()
-            this.creatingNode( undefined, 0 ); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
+            this.nodes = {};                    // maps id => new type()
+            this.protoNode = undefined;         // this.nodes[kutility.protoNodeURI] once it exists
+            this.creatingNode( undefined, 0 );  // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
 
         // == Model API ============================================================================
@@ -84,6 +85,10 @@ define( [ "module", "vwf/model", "vwf/kernel/utility", "vwf/utility", "vwf/confi
             // specific prototype if no behaviors are attached.
 
             var node = this.nodes[childID] = Object.create( prototype );
+
+            if ( childID === kutility.protoNodeURI ) {
+                this.protoNode = node;
+            }
 
             Object.defineProperty( node, "private", {
                 value: {} // for bookkeeping, not visible to scripts on the node  // TODO: well, ideally not visible; hide this better ("_private", "vwf_private", ?)
@@ -1606,14 +1611,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     ///   `component` with node references replaced with kernel-style node references.
 
     function componentKernelFromJS( component ) {
-
-        var self = this;
-
-        return utility.transform( component, function( object, names ) {
-            return names[1] === "properties" ?
-                valueKernelFromJS.call( self, object ) : object;
-        } );
-
+        return valueKernelFromJS.call( this, component );
     }
 
     /// Convert a parameter array of values using `valueKernelFromJS`.
@@ -1626,15 +1624,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     /// @returns {Object}
 
     function parametersKernelFromJS( parameters ) {
-
-        if ( parameters && parameters.length ) {
-            return Array.prototype.slice.call( parameters ).map( function( value ) {
-                return valueKernelFromJS.call( this, value );
-            }, this );
-        } else {
-            return parameters;
-        }
-
+        return valueKernelFromJS.call( this, parameters );
     }
 
     /// Convert a parameter array of values using `valueJSFromKernel`.
@@ -1647,15 +1637,7 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
     /// @returns {Object}
 
     function parametersJSFromKernel( parameters ) {
-
-        if ( parameters && parameters.length ) {
-            return Array.prototype.slice.call( parameters ).map( function( value ) {
-                return valueJSFromKernel.call( this, value );
-            }, this );
-        } else {
-            return parameters;
-        }
-
+        return valueJSFromKernel.call( this, parameters );
     }
 
     /// Convert node references into special values that can pass through the kernel. These values
@@ -1673,17 +1655,25 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     function valueKernelFromJS( value ) {
 
-        if ( typeof value === "object" && value !== null ) {
+        var self = this;
 
-            if ( valueIsNode.call( this, value ) ) {
-                return kutility.nodeReference( value.id );
+        return utility.transform( value, function( object, names, depth, finished ) {
+
+            if ( valueIsNode.call( self, object ) ) {
+                finished();
+                return kutility.nodeReference( object.id );
+            } else if ( object && object.buffer && object.buffer.toString() === "[object ArrayBuffer]" ) {
+                finished();
+                return object;
+            } else if ( kutility.valueIsNodeReference( object ) ) {
+                finished();
+                self.logger.warnx( "valueKernelFromJS", "javascript-format value contains a kernel-format node reference" );
+                return object;
             } else {
-                return value;
+                return object;
             }
 
-        } else {
-            return value;
-        }
+        } );
 
     }
 
@@ -1699,17 +1689,25 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     function valueJSFromKernel( value ) {
 
-        if ( typeof value === "object" && value !== null ) {
+        var self = this;
 
-            if ( kutility.valueIsNodeReference( value ) ) {
-                return this.nodes[ value.id ];
+        return utility.transform( value, function( object, names, depth, finished ) {
+
+            if ( kutility.valueIsNodeReference( object ) ) {
+                finished();
+                return self.nodes[ object.id ];
+            } else if ( object && object.buffer && object.buffer.toString() === "[object ArrayBuffer]" ) {
+                finished();
+                return object;
+            } else if ( valueIsNode.call( self, object ) ) {
+                finished();
+                self.logger.warnx( "valueJSFromKernel", "kernel-format value contains a javascript-format node reference" );
+                return object;
             } else {
-                return value;
+                return object;
             }
 
-        } else {
-            return value;
-        }
+        } );
 
     }
 
@@ -1724,10 +1722,8 @@ future.hasOwnProperty( eventName ) ||  // TODO: calculate so that properties tak
 
     function valueIsNode( value ) {
 
-        var protoNodeNode = this.nodes[ kutility.protoNodeURI ];  // our proxy for the node.vwf prototype
-
-        return protoNodeNode &&
-            ( protoNodeNode.isPrototypeOf( value ) || value === protoNodeNode );
+        return this.protoNode &&  // our proxy for the node.vwf prototype
+            ( this.protoNode.isPrototypeOf( value ) || value === this.protoNode );
     }
 
     return exports;

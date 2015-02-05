@@ -27,7 +27,7 @@ properties:
 
   castShadows: false
   
-  ## The type of light (point, directional, spot)
+  ## The type of light (point, directional, spot, hemisphere)
   ## 
   ## @name light.vwf#lightType
   ## @property
@@ -50,6 +50,13 @@ properties:
   ## @property
 
   enable: true
+
+  ## Sets the position of the light
+  ## 
+  ## @name light.vwf#color
+  ## @property
+
+  position: [ 0, 1, 0 ]
 
   ## Sets the color of the light
   ## 
