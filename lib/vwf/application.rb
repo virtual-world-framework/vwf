@@ -102,6 +102,7 @@ class VWF::Application < Sinatra::Base
   before "/:tag/?*" do |tag, _|
     if storage = storage_tagged( @storage, tag )
       @storage = storage
+      @tag = tag
       route_as "/#{tag}"
     end
   end
@@ -125,6 +126,7 @@ class VWF::Application < Sinatra::Base
   before "/:tag/?*" do |tag, _|
     if storage = storage_tagged( @storage, tag )
       @storage = storage
+      @tag = tag
       route_as "/#{tag}"
     end
   end

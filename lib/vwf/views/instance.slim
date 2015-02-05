@@ -1,6 +1,6 @@
 h1 Instance #{ @storage.id }
 
-p: a href=( to "../#{@storage.id}" ) Launch
+p: a href=( to "../#{ ( @storage.tags[ @tag ] || @storage ).id }" ) Launch
 
 h2: a href=( to tags_url "html" ) Tags
 
