@@ -478,7 +478,7 @@ define( [ "module",
 
                         case "dragBoundFunc":
                             var functionString = propertyValue;
-                            if ( typeof functionString !== "string" ) {
+                            if ( !utility.isString( functionString ) ) {
                                 this.logger.errorx( "settingProperty", 
                                     "The value of dragBoundFunc should be a string of the " +
                                     "function to be used." );

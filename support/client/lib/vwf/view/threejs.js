@@ -3406,7 +3406,7 @@ define( [ "module",
 
         //Threejs does not currently support auto tracking the lookat,
         //instead, we'll take the position of the node and look at that.
-        if ( typeof node.lookatval == 'string' ) {
+        if ( utility.isString( node.lookatval ) ) {
             
             var lookatNode = self.state.nodes[ node.lookatval ];
             
