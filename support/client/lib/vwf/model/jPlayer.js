@@ -233,7 +233,8 @@ define( [
                                     setControlDivId( node, node.containerDivId );
                                 }
                             },
-                            supplied: fileTypes
+                            supplied: fileTypes,
+                            size: { width: "1024", height: "768" }
                         } );
                         value = node.playerDivId;
                         break;
