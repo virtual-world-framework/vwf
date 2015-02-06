@@ -239,7 +239,7 @@ module Rack
       end
   
       def on_error env, err
-        # logger.debug "Rack::SocketIO::Application#on_error #{err}"
+        logger.error "Rack::SocketIO::Application#on_error #{err}"
       end
 
       # The session data for the given resource, or nil if no session for that resource exists.
