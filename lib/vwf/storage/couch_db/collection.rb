@@ -9,7 +9,7 @@ module VWF::Storage::CouchDB
     end
 
     def delete id
-      self[ id ].delete
+      self[ id ].send( :delete )
     end
 
     def to_a
