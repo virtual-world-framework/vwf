@@ -600,7 +600,7 @@ define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui",
         
         
         var clients$ = $(this.clientList);
-        var node = this.nodes[ "http-vwf-example-com-clients-vwf" ];
+        var node = this.nodes[ "http://vwf.example.com/clients.vwf" ];
 
         clients$.html("<div class='header'>Connected Clients</div>");
 

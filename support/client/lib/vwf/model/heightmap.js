@@ -102,7 +102,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[ i ] === "http-vwf-example-com-heightmap-vwf" );    
+                found = ( prototypes[ i ] === "http://vwf.example.com/heightmap.vwf" );
             }
         }
         return found;

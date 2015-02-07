@@ -330,12 +330,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             } else {
 
                 switch ( childExtendsID ) {
-                    case "appscene-vwf":
-                    case "index-vwf":
+                    case "appscene.vwf":
+                    case "index.vwf":
                     case "http://vwf.example.com/node.vwf":
-                    case "http-vwf-example-com-node2-vwf":
-                    case "http-vwf-example-com-scene-vwf":
-                    case "http-vwf-example-com-navscene-vwf":
+                    case "http://vwf.example.com/node2.vwf":
+                    case "http://vwf.example.com/scene.vwf":
+                    case "http://vwf.example.com/navscene.vwf":
                     case undefined:
                         break;
 
@@ -1878,27 +1878,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 glgeObjName = name( assetObj );
                 if ( glgeObjName == objName ) {
                     switch ( type ) {
-                        case "http-vwf-example-com-mesh-vwf":
+                        case "http://vwf.example.com/mesh.vwf":
                             if ( assetObj.constructor == GLGE.Object )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-node3-vwf":
+                        case "http://vwf.example.com/node3.vwf":
                             if ( ( assetObj.constructor == GLGE.Group ) || ( assetObj.constructor == GLGE.Object ) )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-light-vwf":
+                        case "http://vwf.example.com/light.vwf":
                             if ( assetObj.constructor == GLGE.Light )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-camera-vwf":
+                        case "http://vwf.example.com/camera.vwf":
                             if ( assetObj.constructor == GLGE.Camera )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-scene-vwf":
+                        case "http://vwf.example.com/scene.vwf":
                             if ( assetObj.constructor == GLGE.Scene )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-particleSystem-vwf":
+                        case "http://vwf.example.com/particleSystem.vwf":
                             if ( assetObj.constructor == GLGE.ParticleSystem )
                                 obj = assetObj;
                             break;
@@ -2307,7 +2307,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-navscene-vwf" || prototypes[i] == "http-vwf-example-com-scene-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/navscene.vwf" || prototypes[i] == "http://vwf.example.com/scene.vwf" );
             }
         }
 
@@ -2318,7 +2318,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-node3-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/node3.vwf" );
             }
         }
 
@@ -2329,7 +2329,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-camera-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/camera.vwf" );
             }
         }
 
@@ -2340,7 +2340,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-light-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/light.vwf" );
             }
         }
 
@@ -2351,7 +2351,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-particlesystem-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/particlesystem.vwf" );
             }
         }
 
@@ -2362,7 +2362,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-material-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/material.vwf" );
             }
         }
 

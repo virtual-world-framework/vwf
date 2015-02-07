@@ -2054,7 +2054,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium.vwf" );
             }
         }
 
@@ -2066,7 +2066,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-globe-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/globe.vwf" );
             }
         }
 
@@ -2078,7 +2078,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-sun-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/sun.vwf" );
             }
         }
 
@@ -2090,7 +2090,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-atmosphere-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/atmosphere.vwf" );
             }
         }
 
@@ -2102,7 +2102,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-skybox-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/skybox.vwf" );
             }
         }
 
@@ -2114,7 +2114,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-billboard-vwf" );   
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/billboard.vwf" );
             }
         }
 
@@ -2126,7 +2126,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-dynamicObject-vwf" );   
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/dynamicObject.vwf" );
             }
         }
 
@@ -2138,7 +2138,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-label-vwf" );   
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/label.vwf" );
             }
         }
 
@@ -2150,7 +2150,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-polylineCollection-vwf" );   
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/polylineCollection.vwf" );
             }
         }
 
@@ -2162,7 +2162,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-polyline-vwf" );   
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/polyline.vwf" );
             }
         }
 
@@ -2174,7 +2174,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-model-vwf" );   
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/model.vwf" );
             }
         }
 
@@ -2186,7 +2186,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-geometry-vwf" );   
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/geometry.vwf" );
             }
         }
 
@@ -2198,7 +2198,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-material-vwf" );   
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/material.vwf" );
             }
         }
 
@@ -2210,7 +2210,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-camera-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/camera.vwf" );
             }
         }
 
@@ -2222,7 +2222,7 @@ define( [ "module",
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-node3-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/node3.vwf" );
             }
         }
 

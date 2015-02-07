@@ -191,11 +191,11 @@ define( [ "module",
                 if ( childImplementsIDs && childImplementsIDs.length > 0 ) {
                     for ( var i = 0; i < childImplementsIDs.length; i++ ) {
                         switch ( childImplementsIDs[ i ] ) {
-                            case "http-vwf-example-com-threejs-fogExp2-vwf":
+                            case "http://vwf.example.com/threejs/fogExp2.vwf":
                                 sceneNode.threeScene.fog = new THREE.FogExp2( 0x000000 );
                                 break;
 
-                            case "http-vwf-example-com-threejs-fog-vwf":
+                            case "http://vwf.example.com/threejs/fog.vwf":
                                 sceneNode.threeScene.fog = new THREE.Fog( 0x000000 );
                                 break;
 
@@ -268,25 +268,25 @@ define( [ "module",
                                 child = node.threeObject.children[ j ];
                                 switch ( childExtendsID ) {
                     
-                                    case "http-vwf-example-com-directionallight-vwf":
+                                    case "http://vwf.example.com/directionallight.vwf":
                                         if ( child instanceof THREE.DirectionalLight ) {
                                             light = child;    
                                         }
                                         break;
 
-                                    case "http-vwf-example-com-spotlight-vwf":
+                                    case "http://vwf.example.com/spotlight.vwf":
                                         if ( child instanceof THREE.SpotLight ) {
                                             light = child;    
                                         }
                                         break;
 
-                                    case "http-vwf-example-com-hemispherelight-vwf":
+                                    case "http://vwf.example.com/hemispherelight.vwf":
                                         if ( child instanceof THREE.HemisphereLight ) {
                                             light = child;    
                                         }
                                         break;
 
-                                    case "http-vwf-example-com-pointlight-vwf":
+                                    case "http://vwf.example.com/pointlight.vwf":
                                     default:
                                         if ( child instanceof THREE.PointLight ) {
                                             light = child;    
@@ -2441,7 +2441,7 @@ define( [ "module",
         var foundScene = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundScene; i++ ) {
-                foundScene = ( prototypes[i] == "http-vwf-example-com-navscene-vwf" || prototypes[i] == "http-vwf-example-com-scene-vwf" );    
+                foundScene = ( prototypes[i] == "http://vwf.example.com/navscene.vwf" || prototypes[i] == "http://vwf.example.com/scene.vwf" );
             }
         }
 
@@ -2451,7 +2451,7 @@ define( [ "module",
         var foundMaterial = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundMaterial; i++ ) {
-                foundMaterial = ( prototypes[i] == "http-vwf-example-com-material-vwf" );    
+                foundMaterial = ( prototypes[i] == "http://vwf.example.com/material.vwf" );
             }
         }
 
@@ -2461,7 +2461,7 @@ define( [ "module",
         var foundMaterial = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundMaterial; i++ ) {
-                foundMaterial = ( prototypes[i] == "http-vwf-example-com-shaderMaterial-vwf" );    
+                foundMaterial = ( prototypes[i] == "http://vwf.example.com/shaderMaterial.vwf" );
             }
         }
 
@@ -2471,7 +2471,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-threejs-uniforms-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/threejs/uniforms.vwf" );
             }
         }
 
@@ -2481,7 +2481,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-texture-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/texture.vwf" );
             }
         }
 
@@ -2491,7 +2491,7 @@ define( [ "module",
         var foundCamera = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundCamera; i++ ) {
-                foundCamera = ( prototypes[i] == "http-vwf-example-com-camera-vwf" );    
+                foundCamera = ( prototypes[i] == "http://vwf.example.com/camera.vwf" );
             }
         }
 
@@ -2501,7 +2501,7 @@ define( [ "module",
         var foundSystem = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundSystem; i++ ) {
-                foundSystem = ( prototypes[i] == "http-vwf-example-com-particlesystem-vwf" );    
+                foundSystem = ( prototypes[i] == "http://vwf.example.com/particlesystem.vwf" );
             }
         }
 
@@ -2513,7 +2513,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-node3-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/node3.vwf" );
             }
         }
 
@@ -2524,7 +2524,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-starfield-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/starfield.vwf" );
             }
         }
         return foundNode;
@@ -2533,7 +2533,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-cube-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/cube.vwf" );
             }
         }
         return foundNode;
@@ -2542,7 +2542,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-circle-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/circle.vwf" );
             }
         }
         return foundNode;
@@ -2551,7 +2551,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-plane-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/plane.vwf" );
             }
         }
         return foundNode;
@@ -2560,7 +2560,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-sphere-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/sphere.vwf" );
             }
         }
         return foundNode;
@@ -2569,7 +2569,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-cylinder-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/cylinder.vwf" );
             }
         }
         return foundNode;
@@ -2578,7 +2578,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-text-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/text.vwf" );
             }
         }
         return foundNode;
@@ -3652,7 +3652,7 @@ define( [ "module",
         var foundLight = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundLight; i++ ) {
-                foundLight = ( prototypes[i] == "http-vwf-example-com-light-vwf" );    
+                foundLight = ( prototypes[i] == "http://vwf.example.com/light.vwf" );
             }
         }
 
@@ -3665,19 +3665,19 @@ define( [ "module",
 
             switch( type ) {
                 
-                case "http-vwf-example-com-directionallight-vwf":
+                case "http://vwf.example.com/directionallight.vwf":
                     child.threeObject = new THREE.DirectionalLight( 'FFFFFF' );
                     break;
 
-                case "http-vwf-example-com-spotlight-vwf":
+                case "http://vwf.example.com/spotlight.vwf":
                     child.threeObject = new THREE.SpotLight( 'FFFFFF' );
                     break;
 
-                case "http-vwf-example-com-hemispherelight-vwf":
+                case "http://vwf.example.com/hemispherelight.vwf":
                     child.threeObject = new THREE.HemisphereLight('FFFFFF','FFFFFF',1);
                     break;
 
-                case "http-vwf-example-com-pointlight-vwf":
+                case "http://vwf.example.com/pointlight.vwf":
                 default:
                     child.threeObject = new THREE.PointLight( 'FFFFFF', 1, 1000 );
                     break;    

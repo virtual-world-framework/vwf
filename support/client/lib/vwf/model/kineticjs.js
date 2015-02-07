@@ -2223,7 +2223,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-stage-vwf"  );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/stage.vwf"  );
             }
         }
         return found;
@@ -2232,7 +2232,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-layer-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/layer.vwf" );
             }
         }
         return found;
@@ -2241,7 +2241,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-canvas-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/canvas.vwf" );
             }
         }
         return found;
@@ -2250,7 +2250,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-shape-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/shape.vwf" );
             }
         }
         return found;
@@ -2259,7 +2259,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-container-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/container.vwf" );
             }
         }
         return found;
@@ -2268,7 +2268,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-node-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/node.vwf" );
             }
         }
         return found;

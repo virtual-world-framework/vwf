@@ -418,7 +418,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             clr = clr.toArray(); 
         }
 
-        this.kernel.callMethod( "index-vwf", "createVideo", [ { 
+        this.kernel.callMethod( "index.vwf", "createVideo", [ {
             "ID": id,
             "url": url, 
             "name": name, 
@@ -439,7 +439,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             client.videoDivID = undefined;
         }
 
-        this.kernel.callMethod( "index-vwf", "removeVideo", [ client.moniker ] ); 
+        this.kernel.callMethod( "index.vwf", "removeVideo", [ client.moniker ] );
 
     }
 
@@ -608,7 +608,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundClient; i++ ) {
-                foundClient = ( prototypes[i] == "http-vwf-example-com-client-vwf" );    
+                foundClient = ( prototypes[i] == "http://vwf.example.com/client.vwf" );
             }
         }
 
@@ -616,7 +616,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
     }
 
     function isClientInstanceDef( nodeID ) {
-        return ( nodeID == "http-vwf-example-com-clients-vwf" );
+        return ( nodeID == "http://vwf.example.com/clients.vwf" );
     }
 
     function mediaConnection( view, peerNode ) {
