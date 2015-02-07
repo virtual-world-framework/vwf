@@ -149,7 +149,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
            
             } else if ( prototypes && isGlgeCameraDefinition.call( this, prototypes ) ) {
                 if ( childName !== undefined ) {
-                    var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
+                    var camName = this.kernel.name( childID );
                     var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                     node = this.state.nodes[childID] = {
                         name: childName,

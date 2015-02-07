@@ -191,8 +191,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             }
             // debugger;
 
-            if ( nodeID.indexOf( "-clients-vwf" ) != -1 ) {
-                var moniker = nodeID.substr( nodeID.lastIndexOf('-')+1, 16 );
+            if ( this.kernel.find( nodeID, "parent::element(*,'http://vwf.example.com/clients.vwf')" ).length > 0 ) {
+                var moniker = this.kernel.name( nodeID );
                 var client = undefined;
 
                 if ( moniker == this.kernel.moniker() ) {

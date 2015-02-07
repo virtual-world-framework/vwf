@@ -206,7 +206,7 @@ define( [ "module",
             
             if ( protos && isCameraDefinition.call( this, protos ) ) {
 
-                var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
+                var camName = this.kernel.name( childID );
                 var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                 node = this.state.nodes[childID] = {
                     name: childName,
