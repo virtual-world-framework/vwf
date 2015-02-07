@@ -2245,33 +2245,21 @@
             // of the descriptor. An existing ID is used when synchronizing to state drawn from
             // another client or to a previously-saved state.
 
-var useLegacyID = nodeID === 0 && childURI &&
-    ( childURI == "index.vwf" || childURI == "appscene.vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
-    childURI != "http://vwf.example.com/node.vwf";
-    
-useLegacyID = useLegacyID ||
-    childName === "camera" && nodeID === this.application(); // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
-
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 childID = childComponent.id;
                 childIndex = this.children( nodeID ).length;
             } else if ( nodeID === 0 ) {  // global: component's URI or hash of its descriptor
                 childID = childURI ||
                     Crypto.MD5( JSON.stringify( childComponent ) ).toString();  // TODO: MD5 may be too slow here
-if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
-}
                 childIndex = childURI;
             } else {  // descendant: parent id + next from parent's sequence
-if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    childID = ( childComponent.extends || this.kutility.protoNodeURI ) + "." + childName;  // TODO: fix static ID references and remove
-    childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
-    childIndex = this.children( nodeID ).length;
-} else {    
                 childID = nodeID + ":" + this.sequence( nodeID ) +
                     ( this.configuration["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
                 childIndex = this.children( nodeID ).length;
+if ( childName === "camera" && nodeID === this.application() ) {  // TODO: fix static ID references and remove
+    childID = ( childComponent.extends || this.kutility.protoNodeURI ) + "." + childName;
+    childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );
 }
             }
 
