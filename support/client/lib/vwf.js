@@ -1416,7 +1416,7 @@
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    this.getNode( "http-vwf-example-com-clients-vwf", full ),
+                    this.getNode( "http://vwf.example.com/clients.vwf", full ),
                     this.getNode( this.application(), full ),
                 ],
 
