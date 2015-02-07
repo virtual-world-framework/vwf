@@ -418,7 +418,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             clr = clr.toArray(); 
         }
 
-        this.kernel.callMethod( "index.vwf", "createVideo", [ {
+        this.kernel.callMethod( this.kernel.application(), "createVideo", [ {
             "ID": id,
             "url": url, 
             "name": name, 
@@ -439,7 +439,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             client.videoDivID = undefined;
         }
 
-        this.kernel.callMethod( "index.vwf", "removeVideo", [ client.moniker ] );
+        this.kernel.callMethod( this.kernel.application(), "removeVideo", [ client.moniker ] );
 
     }
 
