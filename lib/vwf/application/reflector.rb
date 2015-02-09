@@ -25,46 +25,40 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     super
 
-    state = thing.storage.state
-    time = state[ "kernel" ][ "time" ] || 0
+    self.pending = true
 
     if clients.length == 1 || thing.uncapped_actions < 10  # TODO: storage.state has recent enough state, or starting new so take what's there
 
-      send "time" => time, "action" => "setState", "parameters" => [ state ]  # TODO: ... actions too ...
+
+      state = thing.storage.state
+
+      send "time" => 0, "action" => "setState", "parameters" => [ state ]
+      self.pending = false
 
       if clients.length == 1
-        thing.transport.play state[ "queue" ][ "time" ] || time
+        thing.transport.play state[ "queue" ][ "time" ] || 0
       end
 
-    else
+    elsif pending_clients.length == 1
 
-      self.pending = true
+      really_request "action" => "getState" do |sequence, state|
 
-      if pending_clients.length == 1
-
-        really_request "action" => "getState" do |sequence, state|
-
-          if sequence && state
-$stderr.puts "onconnect #{id} ##{clients.length} received state #{ state }"
-            thing.storage.states.create sequence.to_s, state  # ... assumes storage.respond_to? :states, which must if sequence > state.id
-          else
-$stderr.puts "onconnect #{id} ##{clients.length} no state"
-            active_clients.each do |client|
-              client.close_websocket
-              client.closing = true
-            end
+        if sequence && state
+          if thing.storage.respond_to? :states
+            thing.storage.states.create sequence.to_s, state
           end
-
-$stderr.puts "onconnect #{id} ##{clients.length} launch state #{ thing.storage.state }"
-
-          state = thing.storage.state
-          time = state[ "kernel" ][ "time" ] || 0
-
-          pending_clients.each do |client|
-            client.send "time" => time, "action" => "setState", "parameters" => [ state ]  # TODO: ... actions too ... start new ... but waive recent state test
-            client.pending = false
+        else
+          active_clients.each do |client|
+            client.close_websocket
+            client.closing = true
           end
+        end
 
+        state = thing.storage.state
+
+        pending_clients.each do |client|
+          client.send "time" => 0, "action" => "setState", "parameters" => [ state ]
+          client.pending = false
         end
 
       end
@@ -99,17 +93,17 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ thing.storage.s
 
   def ondisconnect
 
-    # Stop the timer after the last disconnection from this instance.
-
-    if clients.length == 1  # going to 0
-      thing.transport.stop
-    end
-
     # Delete the child representing this client in the application's `clients.vwf` global.
 
     broadcast "action" => "deleteChild", "parameters" => [ "http-vwf-example-com-clients-vwf", id ]
 
     logger.debug "VWF::Application::Reflector#disconnect #{resource} #{id} disconnecting"
+
+    # Stop the timer after the last disconnection from this instance.
+
+    if clients.length == 1  # going to 0
+      thing.transport.stop
+    end
 
     super
 
