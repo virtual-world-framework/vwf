@@ -14,6 +14,18 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
+function matset(newv, old) {
+    if (!old) {
+        newv = old;
+        return;
+    }
+    if (!newv)
+        newv = [];
+    for (var i = 0; i < old.length; i++)
+        newv[i] = old[i];
+    return newv;
+}
+
 define( [ "module", 
           "vwf/view", 
           "vwf/utility", 
@@ -1026,84 +1038,84 @@ define( [ "module",
         self.state.nodes[id].threeObject.updateMatrixWorld(true);
     }
     function setInterpolatedTransforms(deltaTime) {
-        this.tickTime += deltaTime || 0;
+        self.tickTime += deltaTime || 0;
         var hit = 0;
-        while (this.tickTime > 50) {
+        while (self.tickTime > 50) {
             hit++;
-            this.tickTime -= 50;
+            self.tickTime -= 50;
         }
-        var step = (this.tickTime) / (50);
+        var step = (self.tickTime) / (50);
         if (hit === 1) {
            
-            var keys = Object.keys(this.nodes);
+            var keys = Object.keys(self.nodes);
 
             for (var j = 0; j < keys.length; j++) {
                 var i = keys[j];
-                if (this.nodes[i].lastTransformStep + 1 < vwf.time()) {
-                    this.nodes[i].lastTickTransform = null;
-                    this.nodes[i].lastFrameInterp = null;
-                    this.nodes[i].thisTickTransform = null;
-                } else if (this.state.nodes[i]) {
-                    this.nodes[i].lastTickTransform = matset(this.nodes[i].lastTickTransform, this.nodes[i].thisTickTransform);
-                    this.nodes[i].thisTickTransform = matset(this.nodes[i].thisTickTransform, getTransform(i));
+                if (self.nodes[i].lastTransformStep + 1 < vwf.time()) {
+                    self.nodes[i].lastTickTransform = null;
+                    self.nodes[i].lastFrameInterp = null;
+                    self.nodes[i].thisTickTransform = null;
+                } else if (self.state.nodes[i]) {
+                    self.nodes[i].lastTickTransform = matset(self.nodes[i].lastTickTransform, self.nodes[i].thisTickTransform);
+                    self.nodes[i].thisTickTransform = matset(self.nodes[i].thisTickTransform, getTransform(i));
                 }
-                if (this.state.nodes[i]) {
-                    this.nodes[i].lastAnimationFrame = this.nodes[i].thisAnimationFrame;
-                    this.nodes[i].thisAnimationFrame = getAnimationFrame(i);
+                if (self.state.nodes[i]) {
+                    self.nodes[i].lastAnimationFrame = self.nodes[i].thisAnimationFrame;
+                    self.nodes[i].thisAnimationFrame = getAnimationFrame(i);
                 }
             }
         }
 
         var lerpStep = Math.min(1, .2 * (deltaTime / 16.6)); //the slower the frames ,the more we have to move per frame. Should feel the same at 60 0r 20
-        var keys = Object.keys(this.nodes);
+        var keys = Object.keys(self.nodes);
         var interp = null;
         for (var j = 0; j < keys.length; j++) {
             var i = keys[j];
 
-            var last = this.nodes[i].lastTickTransform;
-            var now = this.nodes[i].thisTickTransform;
+            var last = self.nodes[i].lastTickTransform;
+            var now = self.nodes[i].thisTickTransform;
             if (last && now) {
 
                 interp = matset(interp, last);
-                interp = this.matrixLerp(last, now, step, interp);
+                interp = self.matrixLerp(last, now, step, interp);
 
-                this.nodes[i].currentTickTransform = matset(this.nodes[i].currentTickTransform, getTransform(i));
+                self.nodes[i].currentTickTransform = matset(self.nodes[i].currentTickTransform, getTransform(i));
                 
-                    if (this.nodes[i].lastFrameInterp)
-                        interp = this.matrixLerp(this.nodes[i].lastFrameInterp, now, lerpStep, interp);
+                    if (self.nodes[i].lastFrameInterp)
+                        interp = self.matrixLerp(self.nodes[i].lastFrameInterp, now, lerpStep, interp);
                     setTransform(i,interp);
-                    this.nodes[i].lastFrameInterp = matset(this.nodes[i].lastFrameInterp || [], interp);
+                    self.nodes[i].lastFrameInterp = matset(self.nodes[i].lastFrameInterp || [], interp);
                 
             }
-            last = this.nodes[i].lastAnimationFrame;
-            now = this.nodes[i].thisAnimationFrame;
+            last = self.nodes[i].lastAnimationFrame;
+            now = self.nodes[i].thisAnimationFrame;
             if (last && now && Math.abs(now - last) < 3) {
                 var interpA = 0;
-                interpA = this.lerp(last, now, step);
-                this.nodes[i].currentAnimationFrame = getAnimationFrame(i);
+                interpA = self.lerp(last, now, step);
+                self.nodes[i].currentAnimationFrame = getAnimationFrame(i);
                 
-                if (this.state.nodes[i].lastAnimationInterp)
-                    interpA = this.lerp(this.state.nodes[i].lastAnimationInterp, now, lerpStep);
+                if (self.state.nodes[i].lastAnimationInterp)
+                    interpA = self.lerp(self.state.nodes[i].lastAnimationInterp, now, lerpStep);
                 setAnimationFrame(i,interpA);
-                this.state.nodes[i].lastAnimationInterp = interpA || 0;
+                self.state.nodes[i].lastAnimationInterp = interpA || 0;
                 
-            } else if (this.state.nodes[i]) {
-                this.state.nodes[i].lastAnimationInterp = null;
+            } else if (self.state.nodes[i]) {
+                self.state.nodes[i].lastAnimationInterp = null;
             }
         }
     }
     function restoreTransforms() {
-        var keys = Object.keys(this.nodes);
+        var keys = Object.keys(self.nodes);
         for (var j = 0; j < keys.length; j++) {
             var i = keys[j];
             
-            var now = this.nodes[i].currentTickTransform;
-            this.nodes[i].currentTickTransform = null;
+            var now = self.nodes[i].currentTickTransform;
+            self.nodes[i].currentTickTransform = null;
             if (now) {
                 setTransform(i,now);
             }
-            now = this.nodes[i].currentAnimationFrame;
-            this.nodes[i].currentAnimationFrame = null;
+            now = self.nodes[i].currentAnimationFrame;
+            self.nodes[i].currentAnimationFrame = null;
             if (now != null) {
                setAnimationFrame(i,now);
             }
