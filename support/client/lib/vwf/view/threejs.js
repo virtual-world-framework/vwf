@@ -1016,41 +1016,96 @@ define( [ "module",
         var interp = goog.vec.Mat4.clone(self.state.nodes[id].threeObject.matrix.elements);
         return interp;
     }
+    function getAnimationFrame(id) {
+        var interp = vwf.getProperty(id,'animationFrame');
+        return interp;
+    }
     function setTransform(id,interp) {
         interp = goog.vec.Mat4.clone(interp)
         self.state.nodes[id].threeObject.matrix.elements = interp;
         self.state.nodes[id].threeObject.updateMatrixWorld(true);
     }
     function setInterpolatedTransforms(deltaTime) {
-        var step = (self.tickTime) / (self.realTickDif);
-        step = Math.min(step,1);
-        deltaTime = Math.min(deltaTime, self.realTickDif)
-        self.tickTime += deltaTime || 0;
-        
-        for(var nodeID in self.nodes) {
-            var last = self.nodes[nodeID].lastTickTransform;
-            var now = self.nodes[nodeID].selfTickTransform;
-            if(last && now && !matCmp(last,now,.0001) ) {             
-                var interp = matrixLerp(last, now, step || 0);
-                
-                var objectIsControlledByUser = ( ( navmode !== "none" ) &&
-                                                 ( ( navObject && ( nodeID === navObject.ID ) ) || 
-                                                   ( cameraNode && ( nodeID === cameraNode.ID ) ) ) );
-                if ( !objectIsControlledByUser ) {             
-                    setTransform(nodeID, interp);    
-                    self.nodes[nodeID].needTransformRestore = true;
+        this.tickTime += deltaTime || 0;
+        var hit = 0;
+        while (this.tickTime > 50) {
+            hit++;
+            this.tickTime -= 50;
+        }
+        var step = (this.tickTime) / (50);
+        if (hit === 1) {
+           
+            var keys = Object.keys(this.nodes);
+
+            for (var j = 0; j < keys.length; j++) {
+                var i = keys[j];
+                if (this.nodes[i].lastTransformStep + 1 < vwf.time()) {
+                    this.nodes[i].lastTickTransform = null;
+                    this.nodes[i].lastFrameInterp = null;
+                    this.nodes[i].thisTickTransform = null;
+                } else if (this.state.nodes[i]) {
+                    this.nodes[i].lastTickTransform = matset(this.nodes[i].lastTickTransform, this.nodes[i].thisTickTransform);
+                    this.nodes[i].thisTickTransform = matset(this.nodes[i].thisTickTransform, getTransform(i));
                 }
+                if (this.state.nodes[i]) {
+                    this.nodes[i].lastAnimationFrame = this.nodes[i].thisAnimationFrame;
+                    this.nodes[i].thisAnimationFrame = getAnimationFrame(i);
+                }
+            }
+        }
+
+        var lerpStep = Math.min(1, .2 * (deltaTime / 16.6)); //the slower the frames ,the more we have to move per frame. Should feel the same at 60 0r 20
+        var keys = Object.keys(this.nodes);
+        var interp = null;
+        for (var j = 0; j < keys.length; j++) {
+            var i = keys[j];
+
+            var last = this.nodes[i].lastTickTransform;
+            var now = this.nodes[i].thisTickTransform;
+            if (last && now) {
+
+                interp = matset(interp, last);
+                interp = this.matrixLerp(last, now, step, interp);
+
+                this.nodes[i].currentTickTransform = matset(this.nodes[i].currentTickTransform, getTransform(i));
+                
+                    if (this.nodes[i].lastFrameInterp)
+                        interp = this.matrixLerp(this.nodes[i].lastFrameInterp, now, lerpStep, interp);
+                    setTransform(i,interp);
+                    this.nodes[i].lastFrameInterp = matset(this.nodes[i].lastFrameInterp || [], interp);
+                
+            }
+            last = this.nodes[i].lastAnimationFrame;
+            now = this.nodes[i].thisAnimationFrame;
+            if (last && now && Math.abs(now - last) < 3) {
+                var interpA = 0;
+                interpA = this.lerp(last, now, step);
+                this.nodes[i].currentAnimationFrame = getAnimationFrame(i);
+                
+                if (this.state.nodes[i].lastAnimationInterp)
+                    interpA = this.lerp(this.state.nodes[i].lastAnimationInterp, now, lerpStep);
+                setAnimationFrame(i,interpA);
+                this.state.nodes[i].lastAnimationInterp = interpA || 0;
+                
+            } else if (this.state.nodes[i]) {
+                this.state.nodes[i].lastAnimationInterp = null;
             }
         }
     }
     function restoreTransforms() {
-        for(var nodeID in self.nodes) {
-            var now = self.nodes[nodeID].selfTickTransform;
+        var keys = Object.keys(this.nodes);
+        for (var j = 0; j < keys.length; j++) {
+            var i = keys[j];
             
-            if(self.node != navObject &&  now && self.nodes[nodeID].needTransformRestore) {
-                self.state.nodes[nodeID].threeObject.matrix.elements = goog.vec.Mat4.clone(now);
-                self.state.nodes[nodeID].threeObject.updateMatrixWorld(true);
-                self.nodes[nodeID].needTransformRestore = false;
+            var now = this.nodes[i].currentTickTransform;
+            this.nodes[i].currentTickTransform = null;
+            if (now) {
+                setTransform(i,now);
+            }
+            now = this.nodes[i].currentAnimationFrame;
+            this.nodes[i].currentAnimationFrame = null;
+            if (now != null) {
+               setAnimationFrame(i,now);
             }
         }
     }
