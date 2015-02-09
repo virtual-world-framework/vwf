@@ -530,7 +530,7 @@ define( [ "module",
                 findNavObject();
             }
             
-            lerpTick();      
+                 
         },
 
         // -- render -----------------------------------------------------------------------------------
@@ -897,22 +897,7 @@ define( [ "module",
 
     var navObject = undefined;
     var cameraNode = undefined;
-    function lerpTick () {
-        var now = performance.now();
-        self.realTickDif = now - self.lastRealTick;
-
-        self.lastRealTick = now;
- 
-        //reset - loading can cause us to get behind and always but up against the max prediction value
-        self.tickTime = 0;
-
-        for ( var nodeID in self.nodes ) {
-            if ( self.state.nodes[nodeID] ) {       
-                self.nodes[nodeID].lastTickTransform = self.nodes[nodeID].selfTickTransform;
-                self.nodes[nodeID].selfTickTransform = getTransform(nodeID);
-            }
-        }
-    }
+   
     function lerp(a,b,l,c) {
         if(c) l = Math.min(1,Math.max(l,0));
         return (b*l) + a*(1.0-l);
@@ -956,7 +941,19 @@ define( [ "module",
         }
     }
 
-    function matrixLerp( a, b, l ) {
+    function matset(newv, old) {
+        if (!old) {
+            newv = old;
+            return;
+        }
+        if (!newv)
+            newv = [];
+        for (var i = 0; i < old.length; i++)
+            newv[i] = old[i];
+        return newv;
+    }
+
+    function matrixLerp( a, b, l,n ) {
         
         // If either of the matrices is not left-handed or not orthogonal, interpolation won't work
         // Just return the second matrix
@@ -964,7 +961,7 @@ define( [ "module",
             return b;
         }
     
-        var n = goog.vec.Mat4.clone(a);
+        if (!n) n = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         n[12] = lerp(a[12],b[12],l);
         n[13] = lerp(a[13],b[13],l);
         n[14] = lerp(a[14],b[14],l);
@@ -1032,23 +1029,33 @@ define( [ "module",
         var interp = vwf.getProperty(id,'animationFrame');
         return interp;
     }
+    function setAnimationFrame(id,val) {
+        //NOTE: this can cause state errors. Need a layer in VWF to abstract the set of this
+        //property from the VWF model state.
+        vwf.setProperty(id,'animationFrame',val);
+    }
     function setTransform(id,interp) {
         interp = goog.vec.Mat4.clone(interp)
         self.state.nodes[id].threeObject.matrix.elements = interp;
         self.state.nodes[id].threeObject.updateMatrixWorld(true);
     }
     function setInterpolatedTransforms(deltaTime) {
+        
+        //smooth over local time
         self.tickTime += deltaTime || 0;
         var hit = 0;
+
+        //how many ticks has it been? 
         while (self.tickTime > 50) {
             hit++;
             self.tickTime -= 50;
         }
         var step = (self.tickTime) / (50);
+        //if the tick is exactly one, we reset
         if (hit === 1) {
            
+            //NOTE: we use this construct because V8 will not optimize a function with a for in loop
             var keys = Object.keys(self.nodes);
-
             for (var j = 0; j < keys.length; j++) {
                 var i = keys[j];
                 if (self.nodes[i].lastTransformStep + 1 < vwf.time()) {
@@ -1066,8 +1073,13 @@ define( [ "module",
             }
         }
 
-        var lerpStep = Math.min(1, .2 * (deltaTime / 16.6)); //the slower the frames ,the more we have to move per frame. Should feel the same at 60 0r 20
+        //this is where we trade off between responsive and smooth. This is sort of a magic number picked 
+        //empirically.
+        //try the duck example with this set to 1, and then again set to .01
+        var LERPFACTOR = .15;
+        var lerpStep = Math.min(1, LERPFACTOR * (deltaTime / 16.6)); //the slower the frames ,the more we have to move per frame. Should feel the same at 60 0r 20
         var keys = Object.keys(self.nodes);
+        //reuse local variables where possible, especially if they are arrays 
         var interp = null;
         for (var j = 0; j < keys.length; j++) {
             var i = keys[j];
@@ -1075,27 +1087,28 @@ define( [ "module",
             var last = self.nodes[i].lastTickTransform;
             var now = self.nodes[i].thisTickTransform;
             if (last && now) {
-
+                //use matset to keep data in temp variables
                 interp = matset(interp, last);
-                interp = self.matrixLerp(last, now, step, interp);
+                interp = matrixLerp(last, now, step, interp);
 
                 self.nodes[i].currentTickTransform = matset(self.nodes[i].currentTickTransform, getTransform(i));
                 
-                    if (self.nodes[i].lastFrameInterp)
-                        interp = self.matrixLerp(self.nodes[i].lastFrameInterp, now, lerpStep, interp);
-                    setTransform(i,interp);
-                    self.nodes[i].lastFrameInterp = matset(self.nodes[i].lastFrameInterp || [], interp);
+                if (self.nodes[i].lastFrameInterp)
+                    interp = matrixLerp(self.nodes[i].lastFrameInterp, now, lerpStep, interp);
+                setTransform(i,interp);
+                self.nodes[i].lastFrameInterp = matset(self.nodes[i].lastFrameInterp || [], interp);
                 
             }
             last = self.nodes[i].lastAnimationFrame;
             now = self.nodes[i].thisAnimationFrame;
+            //If the delta in animation frames is greater than 3, treat is as discontinuous
             if (last && now && Math.abs(now - last) < 3) {
                 var interpA = 0;
-                interpA = self.lerp(last, now, step);
+                interpA = lerp(last, now, step);
                 self.nodes[i].currentAnimationFrame = getAnimationFrame(i);
                 
                 if (self.state.nodes[i].lastAnimationInterp)
-                    interpA = self.lerp(self.state.nodes[i].lastAnimationInterp, now, lerpStep);
+                    interpA = lerp(self.state.nodes[i].lastAnimationInterp, now, lerpStep);
                 setAnimationFrame(i,interpA);
                 self.state.nodes[i].lastAnimationInterp = interpA || 0;
                 
