@@ -19,7 +19,6 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
   def initialize storage, randomize_resource = false
     super randomize_resource
     @storage = storage
-    @requests = []
   end
 
   def onconnect
@@ -248,7 +247,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
   def request action, &block
 
     send action.merge "respond" => true
-    @requests << { :sequence => session[ :thing ].sequence, :callback => block }
+    session[ :thing ].requests << { :sequence => session[ :thing ].sequence, :callback => block }
 
   end
 
@@ -256,7 +255,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
   def response result
 
-    if request = @requests.shift
+    if request = session[ :thing ].requests.shift
       request[ :callback ].call request[ :sequence ], result
     end
 
@@ -402,7 +401,7 @@ public
 
   class Thing
 
-    attr_reader :storage, :sequence, :transport
+    attr_reader :storage, :sequence, :requests, :transport
 
     def initialize storage
 
@@ -424,6 +423,8 @@ public
         state_sequence || 0,
         action_sequence || 0
       ].max
+
+      @requests = []
 
       @transport = Transport.new  # TODO: start_time? ... note: stopped at construction
 
