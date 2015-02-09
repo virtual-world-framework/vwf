@@ -463,9 +463,9 @@ public
       @rate = 1
     end
 
-    def play
+    def play time = nil
       if stopped
-        @start_time = Time.now
+        @start_time = Time.now - ( time || 0 )
       end
     end
 
