@@ -25,10 +25,13 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     super
 
+    logger.debug "VWF::Application::Reflector#connect #{resource} #{id} connecting"
+
     self.pending = true
 
     if clients.length == 1 || thing.uncapped_actions < 10  # TODO: storage.state has recent enough state, or starting new so take what's there
 
+      logger.debug "VWF::Application::Reflector#connect #{resource} #{id} sending state from storage"
 
       state = thing.storage.state
 
@@ -36,10 +39,13 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       self.pending = false
 
       if clients.length == 1
+        logger.debug "VWF::Application::Reflector#connect #{resource} #{id} starting time at #{ state[ "queue" ][ "time" ] || 0 }"
         thing.transport.play state[ "queue" ][ "time" ] || 0
       end
 
     elsif pending_clients.length == 1
+
+      logger.debug "VWF::Application::Reflector#connect #{resource} #{id} requesting state"
 
       really_request "action" => "getState" do |sequence, state|
 
@@ -49,9 +55,11 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
           end
         else
           active_clients.each do |client|
+            logger.debug "VWF::Application::Reflector#connect #{resource} #{client.id} unresponsive, closing"
             client.close_websocket
             client.closing = true
           end
+          logger.debug "VWF::Application::Reflector#connect #{resource} #{id} stopping time"
           thing.transport.stop
         end
 
@@ -60,6 +68,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         state = thing.storage.state
 
         pending_clients.each do |client|
+          logger.debug "VWF::Application::Reflector#connect #{resource} #{client.id} sending #{ restarting ? "state from storage" : "received state" }"
           client.send "time" => 0, "action" => "setState", "parameters" => [ state ]
           client.pending = false
         end
@@ -67,6 +76,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         # Restart time using the state's time if we stopped it earlier.
 
         if restarting
+          logger.debug "VWF::Application::Reflector#connect #{resource} #{id} starting time at #{ state[ "queue" ][ "time" ] || 0 }"
           thing.transport.play state[ "queue" ][ "time" ] || 0
         end
 
@@ -106,13 +116,14 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     broadcast "action" => "deleteChild", "parameters" => [ "http-vwf-example-com-clients-vwf", id ]
 
-    logger.debug "VWF::Application::Reflector#disconnect #{resource} #{id} disconnecting"
-
     # Stop the timer after the last disconnection from this instance.
 
     if clients.length == 1  # going to 0
+      logger.debug "VWF::Application::Reflector#disconnect #{resource} #{id} stopping time"
       thing.transport.stop
     end
+
+    logger.debug "VWF::Application::Reflector#disconnect #{resource} #{id} disconnecting"
 
     super
 
