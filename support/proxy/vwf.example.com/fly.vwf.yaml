@@ -129,7 +129,7 @@ methods:
   ##
   ## @returns undefined
 
-  initialize:
+  initializePoints:
 
   ## Calculates new interpolated positions
   ## 
@@ -172,7 +172,7 @@ scripts:
       this["fly-speed"] = this["fly-speedInAir"];
     }
   }
-  this.initialize = function(){
+  this.initializePoints = function(){
     var trans = this.transform;
     if ( trans ) { 
       var initPt = this.translation;
@@ -270,8 +270,8 @@ scripts:
   this.fly = function() {
     if ( this["fly-flying"] ) {  // if enabled
       if ( this["fly-speed"] < 63 ) {
-        if (!this.points) {  
-          this.initialize();
+        if ( !this.points ) {
+          this.initializePoints();
         }
         this.updateSpeed();
         this.timeToNext = this.points[ this["fly-pointIndex"]+1 ].distance / this["fly-speed"];
