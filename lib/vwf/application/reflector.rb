@@ -36,8 +36,10 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
       send "time" => time, "action" => "setState", "parameters" => [ state ]  # TODO: ... actions too ...
 
-      session[ :thing ].transport.stop
-      session[ :thing ].transport.time = state[ "queue" ][ "time" ] || time
+      if clients.length == 1
+        session[ :thing ].transport.stop
+        session[ :thing ].transport.time = state[ "queue" ][ "time" ] || time
+      end
 
     else
 
