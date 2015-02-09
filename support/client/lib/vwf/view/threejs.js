@@ -14,18 +14,6 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-function matset(newv, old) {
-    if (!old) {
-        newv = old;
-        return;
-    }
-    if (!newv)
-        newv = [];
-    for (var i = 0; i < old.length; i++)
-        newv[i] = old[i];
-    return newv;
-}
-
 define( [ "module", 
           "vwf/view", 
           "vwf/utility", 
