@@ -33,8 +33,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       send "time" => time, "action" => "setState", "parameters" => [ state ]  # TODO: ... actions too ...
 
       if clients.length == 1
-        thing.transport.stop
-        thing.transport.time = state[ "queue" ][ "time" ] || time
+        thing.transport.play state[ "queue" ][ "time" ] || time
       end
 
     else
@@ -76,14 +75,6 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ thing.storage.s
 
     broadcast "action" => "createChild", "parameters" => [ "http-vwf-example-com-clients-vwf", id, {} ]
 
-    # The first client to join the instance.
-
-    if clients.length == 1  # from 0 to 1
-      schedule_tick do  # start the timer on the first connection to this instance.
-        thing.transport.playing && broadcast( {}, false )
-      end
-    end
-
   end
 
   def onmessage message
@@ -111,7 +102,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ thing.storage.s
     # Stop the timer after the last disconnection from this instance.
 
     if clients.length == 1  # going to 0
-      cancel_tick
+      thing.transport.stop
     end
 
     # Delete the child representing this client in the application's `clients.vwf` global.
@@ -351,26 +342,9 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ thing.storage.s
 private
 
   def thing
-    session[ :thing ] ||= Thing.new @storage
-  end
-
-  def schedule_tick
-
-    logger.debug "VWF::Application::Reflector#schedule_tick #{resource} #{id}"
-
-    session[ :timer ] = EventMachine::PeriodicTimer.new( 0.05 ) do  # TODO: configuration parameter for update rate
-      yield
+    session[ :thing ] ||= Thing.new @storage do
+      broadcast( {}, false )
     end
- 
-  end
-  
-  def cancel_tick
-
-    logger.debug "VWF::Application::Reflector#cancel_tick #{resource} #{id}"
-
-    session[ :timer ].cancel
-    session.delete :timer
-    
   end
 
   # def self.clients env
@@ -427,7 +401,9 @@ public
 
       @requests = []
 
-      @transport = Transport.new  # TODO: start_time? ... note: stopped at construction
+      @transport = Transport.new do
+        yield if block_given?
+      end
 
     end
 
@@ -457,15 +433,17 @@ public
 
   class Transport
 
-    def initialize
+    def initialize &tick
       @start_time = nil
       @pause_time = nil
       @rate = 1
+      @tick = tick
     end
 
     def play time = nil
       if stopped
         @start_time = Time.now - ( time || 0 )
+        @timer = EventMachine::PeriodicTimer.new( 0.05 ) { @tick.call unless @pause_time } if @tick  # TODO: configuration parameter for update rate
       end
     end
 
@@ -486,6 +464,8 @@ public
       if playing || paused
         @start_time = nil
         @pause_time = nil
+        @timer.cancel
+        @timer = nil
       end
     end
 
