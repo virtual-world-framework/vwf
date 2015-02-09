@@ -335,6 +335,10 @@ define( [
                         node.jPlayerElement.jPlayer( "stop" );
                         break;
 
+                    case "clearMedia":
+                        node.jPlayerElement.jPlayer( "clearMedia" );
+                        break;
+
                 }  
 
             }
