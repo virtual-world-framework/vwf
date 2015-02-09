@@ -25,19 +25,16 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     super
 
-    session[ :thing ] ||= Thing.new @storage
-    @storage = nil
-
-    state = session[ :thing ].storage.state
+    state = thing.storage.state
     time = state[ "kernel" ][ "time" ] || 0
 
-    if clients.length == 1 || session[ :thing ].uncapped_actions < 10  # TODO: storage.state has recent enough state, or starting new so take what's there
+    if clients.length == 1 || thing.uncapped_actions < 10  # TODO: storage.state has recent enough state, or starting new so take what's there
 
       send "time" => time, "action" => "setState", "parameters" => [ state ]  # TODO: ... actions too ...
 
       if clients.length == 1
-        session[ :thing ].transport.stop
-        session[ :thing ].transport.time = state[ "queue" ][ "time" ] || time
+        thing.transport.stop
+        thing.transport.time = state[ "queue" ][ "time" ] || time
       end
 
     else
@@ -50,7 +47,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
           if sequence && state
 $stderr.puts "onconnect #{id} ##{clients.length} received state #{ state }"
-            session[ :thing ].storage.states.create sequence.to_s, state  # ... assumes storage.respond_to? :states, which must if sequence > state.id
+            thing.storage.states.create sequence.to_s, state  # ... assumes storage.respond_to? :states, which must if sequence > state.id
           else
 $stderr.puts "onconnect #{id} ##{clients.length} no state"
             active_clients.each do |client|
@@ -59,9 +56,9 @@ $stderr.puts "onconnect #{id} ##{clients.length} no state"
             end
           end
 
-$stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing ].storage.state }"
+$stderr.puts "onconnect #{id} ##{clients.length} launch state #{ thing.storage.state }"
 
-          state = session[ :thing ].storage.state
+          state = thing.storage.state
           time = state[ "kernel" ][ "time" ] || 0
 
           pending_clients.each do |client|
@@ -83,7 +80,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
     if clients.length == 1  # from 0 to 1
       schedule_tick do  # start the timer on the first connection to this instance.
-        session[ :thing ].transport.playing && broadcast( {}, false )
+        thing.transport.playing && broadcast( {}, false )
       end
     end
 
@@ -135,7 +132,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
     if Hash === message # magic when passed a fields Hash
 
       fields = Hash[
-        "time" => session[ :thing ].transport.time
+        "time" => thing.transport.time
       ] .merge message
 
       message = JSON.generate fields, :max_nesting => 100
@@ -161,12 +158,12 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
   def broadcast action, log = true
 
     fields = Hash[
-      "time" => session[ :thing ].transport.time
+      "time" => thing.transport.time
     ] .merge action
 
     if fields[ "action" ]
-      if session[ :thing ].storage.respond_to? :actions
-        session[ :thing ].storage.actions.create session[ :thing ].sequencenext.to_s, fields
+      if thing.storage.respond_to? :actions
+        thing.storage.actions.create thing.sequencenext.to_s, fields
       end
     end
 
@@ -247,7 +244,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
   def request action, &block
 
     send action.merge "respond" => true
-    session[ :thing ].requests << { :sequence => session[ :thing ].sequence, :callback => block }
+    thing.requests << { :sequence => thing.sequence, :callback => block }
 
   end
 
@@ -255,7 +252,7 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
 
   def response result
 
-    if request = session[ :thing ].requests.shift
+    if request = thing.requests.shift
       request[ :callback ].call request[ :sequence ], result
     end
 
@@ -352,6 +349,10 @@ $stderr.puts "onconnect #{id} ##{clients.length} launch state #{ session[ :thing
   attr_accessor :pending, :closing
 
 private
+
+  def thing
+    session[ :thing ] ||= Thing.new @storage
+  end
 
   def schedule_tick
 
