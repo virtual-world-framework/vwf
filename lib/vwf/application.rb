@@ -101,7 +101,7 @@ class VWF::Application < Sinatra::Base
   end
 
   before "/:tag/?*" do |tag, _|
-    if storage = storage_tagged( @storage, tag )
+    if storage = storage_instance_tagged( @storage, tag )
       @storage = storage
       @tag = tag
       route_as "/#{tag}"
@@ -126,7 +126,7 @@ class VWF::Application < Sinatra::Base
   end
 
   before "/:tag/?*" do |tag, _|
-    if storage = storage_tagged( @storage, tag )
+    if storage = storage_revision_tagged( @storage, tag )
       @storage = storage
       @tag = tag
       route_as "/#{tag}"
@@ -276,20 +276,24 @@ class VWF::Application < Sinatra::Base
       end
     end
 
-    def storage_tagged item, tag
-      unless KEYWORDS.include? tag
-        if item.respond_to? :instances
-          item.instances.each.find do |id, instance|
-            if instance.tags[ tag ]
-              break instance
-            end
-          end
-        elsif item.respond_to? :revisions
-          item.revisions.each.find do |id, revision|
-            if revision.tags[ tag ]
-              break revision
-            end
-          end
+    # Get an instance identified by a tag from a `VWF::Storage` item. Return `nil` if `item` doesn't
+    # contain instances or if none of the instances have the tag `tag`.
+
+    def storage_instance_tagged item, tag
+      if item.respond_to?( :instances ) && ! KEYWORDS.include?( tag )
+        item.instances.each.find do |id, instance|
+          break instance if instance.tags[ tag ]
+        end
+      end
+    end
+
+    # Get a revision identified by a tag from a `VWF::Storage` item. Return `nil` if `item` doesn't
+    # contain revisions or if none of the revisions have the tag `tag`.
+
+    def storage_revision_tagged item, tag
+      if item.respond_to?( :revisions ) && ! KEYWORDS.include?( tag )
+        item.revisions.each.find do |id, revision|
+          break revision if revision.tags[ tag ]
         end
       end
     end
