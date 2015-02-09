@@ -463,34 +463,22 @@ public
       @rate = 1
     end
 
-    def time= time
-      @start_time = Time.now - time
-      @pause_time = nil
-      @rate = 1
-    end
-
-    def rate= rate
-      if playing
-        @start_time = Time.now - ( Time.now - @start_time ) * @rate / rate
-      elsif paused
-        @start_time = @pause_time - ( @pause_time - @start_time ) * @rate / rate
-      end
-      @rate = rate
-    end
-
     def play
       if stopped
         @start_time = Time.now
-        @pause_time = nil
-      elsif paused
-        @start_time += Time.now - @pause_time
-        @pause_time = nil
       end
     end
 
     def pause
       if playing
         @pause_time = Time.now
+      end
+    end
+
+    def resume
+      if paused
+        @start_time += Time.now - @pause_time
+        @pause_time = nil
       end
     end
 
@@ -511,8 +499,24 @@ public
       end
     end
 
+    def time= time
+      if playing
+        @start_time = Time.now - time / rate
+      elsif paused
+        @start_time = @pause_time - time / rate
+      end
+    end
+
     def rate
       @rate
+    end
+
+    def rate= rate
+      if playing || paused
+        time = self.time
+        @rate = rate
+        self.time = time
+      end
     end
 
     def playing
