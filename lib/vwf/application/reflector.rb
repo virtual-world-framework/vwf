@@ -52,13 +52,22 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
             client.close_websocket
             client.closing = true
           end
+          thing.transport.stop
         end
+
+        restarting = thing.transport.stopped
 
         state = thing.storage.state
 
         pending_clients.each do |client|
           client.send "time" => 0, "action" => "setState", "parameters" => [ state ]
           client.pending = false
+        end
+
+        # Restart time using the state's time if we stopped it earlier.
+
+        if restarting
+          thing.transport.play state[ "queue" ][ "time" ] || 0
         end
 
       end
