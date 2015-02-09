@@ -846,6 +846,11 @@
 
                     secure: window.location.protocol === "https:",
 
+                    // Don't attempt to reestablish lost connections. The client reloads after a
+                    // disconnection to recreate the application from scratch.
+
+                    reconnect: false,
+
                 };
 
                 if ( isSocketIO07() ) {
@@ -968,6 +973,10 @@
                 socket.on( "disconnect", function() {
 
                     vwf.logger.infox( "-socket", "disconnected" );
+
+                    // Reload to rejoin the application.
+
+                    window.location = window.location.href;
 
                 } );
 
