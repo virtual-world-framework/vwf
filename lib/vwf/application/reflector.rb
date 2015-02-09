@@ -27,27 +27,45 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     logger.debug "VWF::Application::Reflector#connect #{resource} #{id} connecting"
 
+    # Mark the new client as pending until we send its state. Pending clients appear in `clients`
+    # and `pending_clients`, but not in `active_clients`.
+
     self.pending = true
 
-    if clients.length == 1 || thing.uncapped_actions < 10  # TODO: storage.state has recent enough state, or starting new so take what's there
+    # For the first client, get the state from storage and send it immediately. Also send the state
+    # immediately to successive clients when the state doesn't contain a significant number of
+    # outstanding actions.
+
+    if clients.length == 1 || thing.uncapped_actions < 10
 
       logger.debug "VWF::Application::Reflector#connect #{resource} #{id} sending state from storage"
+
+      # Get and send the latest state.
 
       state = thing.storage.state
 
       send "time" => 0, "action" => "setState", "parameters" => [ state ]
       self.pending = false
 
+      # Start time when the first client connects to this instance.
+
       if clients.length == 1
         logger.debug "VWF::Application::Reflector#connect #{resource} #{id} starting time at #{ state[ "queue" ][ "time" ] || 0 }"
         thing.transport.play state[ "queue" ][ "time" ] || 0
       end
+
+    # Get the state from one of the active clients when storage doesn't contain a recent state.
+    # Clients that arrive while a request is outstanding wait for the result of that request.
 
     elsif pending_clients.length == 1
 
       logger.debug "VWF::Application::Reflector#connect #{resource} #{id} requesting state"
 
       really_request "action" => "getState" do |sequence, state|
+
+        # Add the reported state to storage if we got a result. Otherwise, the active clients are
+        # all non-responsive, so boot them from the instance and stop time so that we can restart
+        # the instance from storage.
 
         if sequence && state
           if thing.storage.respond_to? :states
@@ -63,7 +81,12 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
           thing.transport.stop
         end
 
+        # Are we restarting from storage, without previously-active clients?
+
         restarting = thing.transport.stopped
+
+        # Get and send the latest state. The state is the one we just received, or if none was
+        # received, the roll-up of the most recent state and the outstanding actions.
 
         state = thing.storage.state
 
@@ -116,9 +139,9 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     broadcast "action" => "deleteChild", "parameters" => [ "http-vwf-example-com-clients-vwf", id ]
 
-    # Stop the timer after the last disconnection from this instance.
+    # Stop the timer after the last client disconnects from this instance.
 
-    if clients.length == 1  # going to 0
+    if clients.length == 1
       logger.debug "VWF::Application::Reflector#disconnect #{resource} #{id} stopping time"
       thing.transport.stop
     end
