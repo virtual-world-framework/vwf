@@ -530,10 +530,10 @@ define( [ "module",
             } else if ( isCamera.call( this, protos ) ) {
                 this.state.nodes[ childID ] = node = createSceneNode( childID );
 
-                if ( childID === "http-vwf-example-com-cesium-camera-vwf-camera" ) {
+                if ( nodeID === this.kernel.application() && childName === 'camera' ) {
                     node.cesiumObj = node.sceneNode.scene.camera;
                 } else {
-                    var camera = new Cesium.Camera(canvas);
+                    var camera = new Cesium.Camera( canvas );
                     camera.position = toCartesian3();
                     camera.direction = Cartesian3.UNIT_Z.negate();
                     camera.up = Cartesian3.UNIT_Y;
