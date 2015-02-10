@@ -4,8 +4,8 @@ properties:
   url:
   posterImageUrl:
   loop: false
-  containerDivId: "jp_container_1"
-  playerDivId: "jquery_jplayer_1"
+  containerDivId: "videoContainer"
+  playerDivId: "videoScreen"
 methods:
   play:
   pause:
