@@ -155,7 +155,7 @@ class VWF::Application < Sinatra::Base
 
   get "", :browser => true do
     pass if @type
-    redirect to "#{request.path_info}/"
+    redirect to "/"
   end
 
   # Redirect the application to a new instance. ####################################################
