@@ -52,7 +52,7 @@ properties:
           }
         }
       } //@ sourceURL=scene.set.activeCamera.vwf
-    value: "http-vwf-example-com-camera-vwf-camera"
+    value: ""
 
   ## Ambient color
   ## 
