@@ -41,14 +41,12 @@ class VWF::Application < Sinatra::Base
 
   configure do
 
-    # Condition to detect browser requests, as opposed to XHR requests. Browser requests for
-    # application resources should bootstrap the client, and singular application resources should
-    # redirect to directory resources.
+    # Condition to detect interactive requests from a user at a browser, as opposed to API requests.
 
-    set :browser do |wants_browser|
+    set :interactive do |wants_interactive|
       condition do
-        is_browser = !! browser?
-        wants_browser == is_browser
+        is_interactive = !! interactive?
+        wants_interactive == is_interactive
       end
     end
 
@@ -88,7 +86,7 @@ class VWF::Application < Sinatra::Base
   end
 
   before "/instance/:id/?*" do |id, _|
-    if @storage = storage_instance( @storage, id, browser? && SPAWN_ADHOC_INSTANCES )
+    if @storage = storage_instance( @storage, id, interactive? && SPAWN_ADHOC_INSTANCES )
       @tag = nil
       route_as "/instance/#{id}"
     else
@@ -113,7 +111,7 @@ class VWF::Application < Sinatra::Base
   end
 
   before "/revision/:id/?*" do |id, _|
-    if @storage = storage_revision( @storage, id, browser? && SPAWN_ADHOC_REVISIONS )
+    if @storage = storage_revision( @storage, id, ( interactive? || @type == "text/html" ) && SPAWN_ADHOC_REVISIONS )
       @tag = nil
       route_as "/revision/#{id}"
     else
@@ -153,14 +151,13 @@ class VWF::Application < Sinatra::Base
 
   ### Redirect singular resources to directory resources. ##########################################
 
-  get "", :browser => true do
-    pass if @type
+  get "", :interactive => true do
     redirect to "/"
   end
 
   # Redirect the application to a new instance. ####################################################
 
-  get "/", :browser => true do
+  get "/", :interactive => true do
 
     unless @storage.respond_to?( :revisions ) || ! SPAWN_INSTANCES
       spawner = @storage
@@ -234,7 +231,7 @@ class VWF::Application < Sinatra::Base
   get "/tag/:id" do |id|
     if tag = @storage.tags[ id ]
       generate :tag, tag.get, :tag => tag
-    elsif browser?
+    elsif interactive?
       @storage.set( {} ) unless @storage.get  # reify ad hoc revisions
       @storage.tags.create( id, {} )
       redirect to "../../#{id}"
@@ -245,10 +242,14 @@ class VWF::Application < Sinatra::Base
 
   helpers do
 
-    # Is this request from a browser--an interactive sesssion, not an API request?
+    # Is this an interactive request from a user at a browser, not an API request?
 
-    def browser?
-      request.accept.include?( "text/html" )  # `accept.include?`, not `accept?`; want explict `text/html`
+    # Interactive requests for applications, instances, or revisions should bootstrap the client,
+    # and singular resources should redirect to directory resources. An explicit type suppresses the
+    # interactive magic.
+
+    def interactive?
+      request.accept.include?( "text/html" ) && ! @type  # `accept.include?`, not `accept?`; want explict `text/html`
     end
 
     # Get an instance from a `VWF::Storage` item. With `spawn`, create a new instance if the
