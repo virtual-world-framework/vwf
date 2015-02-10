@@ -363,6 +363,7 @@
                 { library: "vwf/view/cesium", active: false },
                 { library: "vwf/view/kineticjs", active: false },
                 { library: "vwf/view/mil-sym", active: false },
+                { library: "vwf/view/jPlayer", active: false },
                 { library: "vwf/view/audio", active: false },
                 { library: "vwf/kernel/utility", active: true },
                 { library: "vwf/utility", active: true },
@@ -417,6 +418,7 @@
                     { library: "vwf/view/touch", active: false },
                     { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/mil-sym", active: false },
+                    { library: "vwf/view/jPlayer", active: false },
                     { library: "vwf/view/audio", active: false },
                     { library: "vwf/view/webrtc", active: false}
                 ]

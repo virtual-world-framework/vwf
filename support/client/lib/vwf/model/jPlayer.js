@@ -1,4 +1,4 @@
-/// vwf/model/jPlayer.js is a sound driver
+/// vwf/model/jPlayer.js is a sound/video driver
 /// 
 /// @module vwf/model/jPlayer
 /// @requires vwf/model
@@ -203,10 +203,11 @@ define( [
                         setLoop( node, propertyValue );
                         value = node.loop;
                         break;
+
                     case "z_index":
-                        setZIndex( node, propertyValue );
-                        value = node.z_index;
+                        console.log("Z-index: " + propertyValue);
                         break;
+
                     case "playerDivId":
                         if ( propertyValue === node.playerDivId ) {
                             break;
@@ -437,14 +438,6 @@ define( [
             }
         } else {
             node.jPlayerElement.jPlayer( "clearMedia" );
-        }
-    }
-
-    function setZIndex( node, z_index ) {
-        node.z_index = z_index;
-        if ( node.containerDivId && node.jPlayerElement ) {
-            var containerSelector = "#" + node.containerDivId;
-            $(containerSelector).css('z-index', z_index);
         }
     }
 
