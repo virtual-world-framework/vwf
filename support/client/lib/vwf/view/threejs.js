@@ -28,6 +28,7 @@ define( [ "module",
     // Navigation: Private global variables for navigation
     var navObjectRequested;
     var navObjectName;
+    var localNavObjectID;
     var navmode;
     var touchmode;
     var ownerlessNavObjects = [];
@@ -146,7 +147,7 @@ define( [ "module",
             raycaster = new THREE.Raycaster();
         
             window._dView = this;
-            this.nodes = {};
+
             this.interpolateTransforms = true;
             this.tickTime = 0;
             this.realTickDif = 50;
@@ -163,8 +164,8 @@ define( [ "module",
             //how/when does the model set the state object? 
             if ( this.state.scenes[ childID ] )
             {                
-                this.canvasQuery = $(this.rootSelector).append("<canvas id='" + this.kernel.application() + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
-                ).children(":last");
+                var canvasDef = "<canvas id='" + this.state.sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
+                this.canvasQuery = $(this.rootSelector).append( canvasDef ).children(":last");
                 
                 initScene.call(this,this.state.scenes[childID]);
             }
@@ -175,9 +176,9 @@ define( [ "module",
                 }
             }
         
-            if(this.state.nodes[childID] && this.state.nodes[childID].threeObject instanceof THREE.Object3D) {
-                this.nodes[childID] = {id:childID,extends:childExtendsID};
-            }
+            // if ( this.state.nodes[childID] && this.state.nodes[childID].threeObject instanceof THREE.Object3D ) {
+            //     this.nodes[childID] = {id:childID,extends:childExtendsID};
+            // }
         },
 
         initializedNode: function( nodeID, childID ) {
@@ -216,6 +217,7 @@ define( [ "module",
                 //      Can be removed once kernel.createChild callback works properly
                 var initNode = this.state.nodes[ childID ];
                 if ( initNode && ( initNode.name == navObjectName ) ) {
+                    localNavObjectID = childID;
                     initNode.owner = this.kernel.moniker();
                     controlNavObject( initNode );
                 }
@@ -240,7 +242,12 @@ define( [ "module",
 
         deletedNode: function(childID)
         {
-            delete this.nodes[childID];
+            if ( this.state.animatedNodes[ childID ] !== undefined ) {
+                delete this.state.animatedNodes[ childID ];    
+            }
+            //if ( this.animatedNodes[ childID ] !== undefined ) {
+            //    delete this.animatedNodes[ childID ];    
+            //}            
         },
 
         // -- addedChild -------------------------------------------------------------------------------
@@ -251,13 +258,15 @@ define( [ "module",
 
         //removedChild: function( nodeID, childID ) { },
 
-        // -- createdProperty --------------------------------------------------------------------------
-
-        //createdProperty: function (nodeID, propertyName, propertyValue) { },
-
         // -- initializedProperty ----------------------------------------------------------------------
 
         initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
+            this.satProperty(nodeID, propertyName, propertyValue);
+        },
+
+        // -- createdProperty --------------------------------------------------------------------------
+
+        createdProperty: function (nodeID, propertyName, propertyValue) { 
             this.satProperty(nodeID, propertyName, propertyValue);
         },
 
@@ -307,7 +316,8 @@ define( [ "module",
                 if ( node ) {
                     nodeLookAt( node );
                 }
-            }
+
+            } 
         },
 
         // -- gotProperty ------------------------------------------------------------------------------
@@ -422,7 +432,21 @@ define( [ "module",
         // -- calledMethod -----------------------------------------------------------------------------
 
         calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
-            switch(methodName) {
+            
+            switch( methodName ) {
+
+                case "animationPlay":
+                    if ( navObject === undefined || navObject.ID !== nodeID ) {
+                        if ( this.state.animatedNodes[ nodeID ] === undefined ) {
+                            this.state.animatedNodes[ nodeID ] = { 
+                                "id": nodeID,
+                                "lastAnimationFrame": getAnimationFrame( nodeID ),
+                                "thisAnimationFrame": getAnimationFrame( nodeID ) 
+                            }
+                        }
+                    } 
+                    break;
+
                 case "translateBy":
                 case "translateTo":
                 // No need for rotateBy or rotateTo because they call the quaternion methods
@@ -434,9 +458,14 @@ define( [ "module",
                 case "transformTo":
                 case "worldTransformTo":
                     // If the duration of the transform is 0, set the transforms to their final value so it doesn't interpolate
-                    if(methodParameters.length < 2 || methodParameters[1] == 0) {
-                        this.nodes[nodeID].lastTickTransform = getTransform(nodeID);
-                        this.nodes[nodeID].selfTickTransform = goog.vec.Mat4.clone(this.nodes[nodeID].lastTickTransform);
+                    if ( ( methodParameters.length >= 2 ) && ( methodParameters[ 1 ] !== 0 && methodParameters[ 1 ] !== undefined ) ) {
+                        if ( navObject === undefined || navObject.ID !== nodeID ) {
+                            this.state.animatedNodes[ nodeID ] = { 
+                                "id": nodeID,
+                                "thisTickTransform": getTransform( nodeID ), 
+                                "lastTickTransform": getTransform( nodeID )    
+                            }
+                        } 
                     }
                     break;
             }
@@ -489,7 +518,7 @@ define( [ "module",
 
         // -- firedEvent -----------------------------------------------------------------------------
 
-        firedEvent: function( nodeID, eventName ) {
+        firedEvent: function( nodeID, eventName, eventParameters ) {
             if ( eventName == "changingTransformFromView" ) {
                 var clientThatSatProperty = self.kernel.client();
                 var me = self.kernel.moniker();
@@ -504,7 +533,11 @@ define( [ "module",
                 if(this.state.scenes[nodeID]) {
                     this.state.scenes[nodeID].renderer.setViewport(0,0,window.innerWidth,window.innerHeight);
                 }
-            }
+            } else if ( eventName === "animationStopped" ) {
+                if ( this.state.animatedNodes[ nodeID ] !== undefined  ) {
+                    delete this.state.animatedNodes[ nodeID ];    
+                }
+            } 
         },
 
         // -- ticked -----------------------------------------------------------------------------------
@@ -1013,23 +1046,23 @@ define( [ "module",
         
         return nqm;
     }
-    function getTransform(id) {
-        var interp = goog.vec.Mat4.clone(self.state.nodes[id].threeObject.matrix.elements);
+    function getAnimationFrame( id ) {
+        var interp = vwf.getProperty( id, 'animationFrame' );
         return interp;
     }
-    function getAnimationFrame(id) {
-        var interp = vwf.getProperty(id,'animationFrame');
-        return interp;
-    }
-    function setAnimationFrame(id,val) {
+    function setAnimationFrame( id, val ) {
         //NOTE: this can cause state errors. Need a layer in VWF to abstract the set of this
         //property from the VWF model state.
-        vwf.setProperty(id,'animationFrame',val);
+        vwf.setProperty( id, 'animationFrame', val );
     }
-    function setTransform(id,interp) {
-        interp = goog.vec.Mat4.clone(interp)
-        self.state.nodes[id].threeObject.matrix.elements = interp;
-        self.state.nodes[id].threeObject.updateMatrixWorld(true);
+    function getTransform( id ) {
+        var interp = goog.vec.Mat4.clone( self.state.nodes[ id ].threeObject.matrix.elements );
+        return interp;
+    }
+    function setTransform( id, interp ) {
+        interp = goog.vec.Mat4.clone( interp )
+        self.state.nodes[ id ].threeObject.matrix.elements = interp;
+        self.state.nodes[ id ].threeObject.updateMatrixWorld( true );
     }
     function setInterpolatedTransforms(deltaTime) {
         
@@ -1043,26 +1076,29 @@ define( [ "module",
             self.tickTime -= 50;
         }
         var step = (self.tickTime) / (50);
+        var keys, id, j, nd;
         //if the tick is exactly one, we reset
         if (hit === 1) {
            
             //NOTE: we use this construct because V8 will not optimize a function with a for in loop
-            var keys = Object.keys(self.nodes);
-            for (var j = 0; j < keys.length; j++) {
-                var i = keys[j];
-                if (self.nodes[i].lastTransformStep + 1 < vwf.time()) {
-                    self.nodes[i].lastTickTransform = null;
-                    self.nodes[i].lastFrameInterp = null;
-                    self.nodes[i].thisTickTransform = null;
-                } else if (self.state.nodes[i]) {
-                    self.nodes[i].lastTickTransform = matset(self.nodes[i].lastTickTransform, self.nodes[i].thisTickTransform);
-                    self.nodes[i].thisTickTransform = matset(self.nodes[i].thisTickTransform, getTransform(i));
-                }
-                if (self.state.nodes[i]) {
-                    self.nodes[i].lastAnimationFrame = self.nodes[i].thisAnimationFrame;
-                    self.nodes[i].thisAnimationFrame = getAnimationFrame(i);
+            keys = Object.keys( self.state.animatedNodes );
+            for ( j = 0; j < keys.length; j++) {
+                id = keys[ j ];
+                nd = self.state.animatedNodes[ id ];
+                
+                if ( self.state.nodes[ id ] ) {
+                    if ( nd.lastTickTransform !== undefined && nd.thisTickTransform !== undefined ) {
+                        nd.lastTickTransform = matset( nd.lastTickTransform, nd.thisTickTransform );
+                        nd.thisTickTransform = matset( nd.thisTickTransform, getTransform( id ) );                        
+                    }
+
+                    if ( nd.lastAnimationFrame !== undefined && nd.thisAnimationFrame !== undefined ) {
+                        nd.lastAnimationFrame = nd.thisAnimationFrame;
+                        nd.thisAnimationFrame = getAnimationFrame( id );
+                    }
                 }
             }
+         
         }
 
         //this is where we trade off between responsive and smooth. This is sort of a magic number picked 
@@ -1070,61 +1106,98 @@ define( [ "module",
         //try the duck example with this set to 1, and then again set to .01
         var LERPFACTOR = .15;
         var lerpStep = Math.min(1, LERPFACTOR * (deltaTime / 16.6)); //the slower the frames ,the more we have to move per frame. Should feel the same at 60 0r 20
-        var keys = Object.keys(self.nodes);
+        keys = Object.keys( self.state.animatedNodes );
         //reuse local variables where possible, especially if they are arrays 
         var interp = null;
-        for (var j = 0; j < keys.length; j++) {
-            var i = keys[j];
-
-            var last = self.nodes[i].lastTickTransform;
-            var now = self.nodes[i].thisTickTransform;
+        var last, now;
+        for ( j = 0; j < keys.length; j++) {
+            id = keys[j];
+            nd = self.state.animatedNodes[ id ];
+            last = nd.lastTickTransform;
+            now = nd.thisTickTransform;
             if (last && now) {
                 //use matset to keep data in temp variables
                 interp = matset(interp, last);
                 interp = matrixLerp(last, now, step, interp);
 
-                self.nodes[i].currentTickTransform = matset(self.nodes[i].currentTickTransform, getTransform(i));
+                nd.currentTickTransform = matset( nd.currentTickTransform, getTransform( id ) );
                 
-                if (self.nodes[i].lastFrameInterp)
-                    interp = matrixLerp(self.nodes[i].lastFrameInterp, now, lerpStep, interp);
-                setTransform(i,interp);
-                self.nodes[i].lastFrameInterp = matset(self.nodes[i].lastFrameInterp || [], interp);
-                
+                if ( nd.lastFrameInterp )
+                    interp = matrixLerp( nd.lastFrameInterp, now, lerpStep, interp );
+                setTransform( id, interp );
+                nd.lastFrameInterp = matset( nd.lastFrameInterp || [], interp );
             }
-            last = self.nodes[i].lastAnimationFrame;
-            now = self.nodes[i].thisAnimationFrame;
+
+            last = nd.lastAnimationFrame;
+            now = nd.thisAnimationFrame;
             //If the delta in animation frames is greater than 3, treat is as discontinuous
-            if (last && now && Math.abs(now - last) < 3) {
+            if ( last && now && Math.abs(now - last) < 3) {
                 var interpA = 0;
                 interpA = lerp(last, now, step);
-                self.nodes[i].currentAnimationFrame = getAnimationFrame(i);
+                nd.currentAnimationFrame = getAnimationFrame(id);
                 
-                if (self.state.nodes[i].lastAnimationInterp)
-                    interpA = lerp(self.state.nodes[i].lastAnimationInterp, now, lerpStep);
-                setAnimationFrame(i,interpA);
-                self.state.nodes[i].lastAnimationInterp = interpA || 0;
+                if (self.state.nodes[id].lastAnimationInterp)
+                    interpA = lerp(self.state.nodes[id].lastAnimationInterp, now, lerpStep);
+                setAnimationFrame(id,interpA);
+                self.state.nodes[id].lastAnimationInterp = interpA || 0;
                 
-            } else if (self.state.nodes[i]) {
-                self.state.nodes[i].lastAnimationInterp = null;
+            } else if (self.state.nodes[id]) {
+                self.state.nodes[id].lastAnimationInterp = null;
             }
+                
         }
+
+        // keys = Object.keys( self.animatedNodes );
+        // //reuse local variables where possible, especially if they are arrays 
+        // interp = null;
+        // for ( j = 0; j < keys.length; j++) {
+        //     id = keys[j];        
+        //     nd = self.animatedNodes[ id ];
+        //     last = nd.lastAnimationFrame;
+        //     now = nd.thisAnimationFrame;
+        //     //If the delta in animation frames is greater than 3, treat is as discontinuous
+        //     if ( last && now && Math.abs(now - last) < 3) {
+        //         var interpA = 0;
+        //         interpA = lerp(last, now, step);
+        //         nd.currentAnimationFrame = getAnimationFrame(id);
+                
+        //         if (self.state.nodes[id].lastAnimationInterp)
+        //             interpA = lerp(self.state.nodes[id].lastAnimationInterp, now, lerpStep);
+        //         setAnimationFrame(id,interpA);
+        //         self.state.nodes[id].lastAnimationInterp = interpA || 0;
+                
+        //     } else if (self.state.nodes[id]) {
+        //         self.state.nodes[id].lastAnimationInterp = null;
+        //     }
+        // }
     }
     function restoreTransforms() {
-        var keys = Object.keys(self.nodes);
-        for (var j = 0; j < keys.length; j++) {
-            var i = keys[j];
-            
-            var now = self.nodes[i].currentTickTransform;
-            self.nodes[i].currentTickTransform = null;
-            if (now) {
-                setTransform(i,now);
+        var keys, id, j, now, nd;
+        keys = Object.keys( self.state.animatedNodes );
+        for ( j = 0; j < keys.length; j++) {
+            id = keys[j];
+            nd = self.state.animatedNodes[ id ];
+            if ( nd.currentTickTransform != null ) {
+                now = nd.currentTickTransform;
+                nd.currentTickTransform = null;
+                setTransform( id, now );
             }
-            now = self.nodes[i].currentAnimationFrame;
-            self.nodes[i].currentAnimationFrame = null;
-            if (now != null) {
-               setAnimationFrame(i,now);
+            if ( nd.currentAnimationFrame != null ) {
+                now = nd.currentAnimationFrame;
+                nd.currentAnimationFrame = null;
+                setAnimationFrame( id, now );
             }
         }
+        // keys = Object.keys( self.animatedNodes );
+        // for ( j = 0; j < keys.length; j++) {
+        //     id = keys[j];
+        //     nd = self.animatedNodes[id];
+        //     now = nd.currentAnimationFrame;
+        //     nd.currentAnimationFrame = null;
+        //     if (now != null) {
+        //        setAnimationFrame(id,now);
+        //     }
+        // }
     }
 
     function checkCompatibility() {
