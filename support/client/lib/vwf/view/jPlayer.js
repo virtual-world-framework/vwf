@@ -13,20 +13,55 @@ define( [
                 this.satProperty(nodeID, propertyName, propertyValue);
              },
 
-        // -- initializedProperty ----------------------------------------------------------------------
+            initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
+                this.satProperty(nodeID, propertyName, propertyValue);
+            },
 
-            // initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
-            //     this.satProperty(nodeID, propertyName, propertyValue);
-            // },
+            calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+                var node = this.state.nodes[nodeID]; 
+
+                if( node ){
+                    var containerSelector = "#" + node.containerDivId;
+                    var playerSelector = "#" + node.playerDivId;
+
+                    switch ( methodName ){
+                        //We cannot safely call .show() or .hide() on the jPlayer div
+                        //See http://jplayer.org/latest/developer-guide/#jPlayer-disable-by-css
+                        case "show":
+                            var contX = node.containerDivSize[0];
+                            var contY = node.containerDivSize[1];
+                            var playerX = node.playerDivSize[0];
+                            var playerY = node.playerDivSize[1];
+                            
+                            $( containerSelector ).css('width', contX);
+                            $( containerSelector ).css('height', contY);
+                            $( playerSelector ).css('width', playerX);
+                            $( playerSelector ).css('height', playerY);
+                            break;
+                            
+                        case "hide":
+                            $( containerSelector ).css('width', 0);
+                            $( containerSelector ).css('height', 0);
+                            $( playerSelector ).css('width', 0);
+                            $( playerSelector ).css('height', 0);
+                            break;
+                    }
+                }
+            },
 
     		satProperty: function ( nodeID, propertyName, propertyValue ) {
                 var node = this.state.nodes[nodeID];
                 if( node && propertyValue ){
-                    switch(propertyName){
+                    switch( propertyName ){
                         case "z_index":
                             var containerSelector = "#" + node.containerDivId;
                             $(containerSelector).css('z-index', propertyValue);
-                            // $("#jp_container_1").css('z-index', 103); 
+                            break;
+                        case "containerDivSize":
+                            node.containerDivSize = propertyValue;
+                            break;
+                        case "playerDivSize":
+                            node.playerDivSize = propertyValue;
                             break;
                     }
                 }

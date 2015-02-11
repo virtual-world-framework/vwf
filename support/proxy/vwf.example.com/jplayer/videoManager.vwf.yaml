@@ -6,8 +6,12 @@ properties:
   loop: false
   containerDivId: "videoContainer"
   playerDivId: "videoScreen"
-  # z_index: 103
+  containerDivSize: 
+  playerDivSize:
+  foo: 
 methods:
   play:
   pause:
   stop: 
+  show:
+  hide: 
