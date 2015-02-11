@@ -28,7 +28,6 @@ define( [ "module",
     // Navigation: Private global variables for navigation
     var navObjectRequested;
     var navObjectName;
-    var localNavObjectID;
     var navmode;
     var touchmode;
     var ownerlessNavObjects = [];
@@ -242,9 +241,6 @@ define( [ "module",
             if ( this.state.animatedNodes[ childID ] !== undefined ) {
                 delete this.state.animatedNodes[ childID ];    
             }
-            //if ( this.animatedNodes[ childID ] !== undefined ) {
-            //    delete this.animatedNodes[ childID ];    
-            //}            
         },
 
         // -- addedChild -------------------------------------------------------------------------------
@@ -1142,30 +1138,6 @@ define( [ "module",
             }
                 
         }
-
-        // keys = Object.keys( self.animatedNodes );
-        // //reuse local variables where possible, especially if they are arrays 
-        // interp = null;
-        // for ( j = 0; j < keys.length; j++) {
-        //     id = keys[j];        
-        //     nd = self.animatedNodes[ id ];
-        //     last = nd.lastAnimationFrame;
-        //     now = nd.thisAnimationFrame;
-        //     //If the delta in animation frames is greater than 3, treat is as discontinuous
-        //     if ( last && now && Math.abs(now - last) < 3) {
-        //         var interpA = 0;
-        //         interpA = lerp(last, now, step);
-        //         nd.currentAnimationFrame = getAnimationFrame(id);
-                
-        //         if (self.state.nodes[id].lastAnimationInterp)
-        //             interpA = lerp(self.state.nodes[id].lastAnimationInterp, now, lerpStep);
-        //         setAnimationFrame(id,interpA);
-        //         self.state.nodes[id].lastAnimationInterp = interpA || 0;
-                
-        //     } else if (self.state.nodes[id]) {
-        //         self.state.nodes[id].lastAnimationInterp = null;
-        //     }
-        // }
     }
     function restoreTransforms() {
         var keys, id, j, now, nd;
@@ -1184,16 +1156,6 @@ define( [ "module",
                 setAnimationFrame( id, now );
             }
         }
-        // keys = Object.keys( self.animatedNodes );
-        // for ( j = 0; j < keys.length; j++) {
-        //     id = keys[j];
-        //     nd = self.animatedNodes[id];
-        //     now = nd.currentAnimationFrame;
-        //     nd.currentAnimationFrame = null;
-        //     if (now != null) {
-        //        setAnimationFrame(id,now);
-        //     }
-        // }
     }
 
     function checkCompatibility() {
