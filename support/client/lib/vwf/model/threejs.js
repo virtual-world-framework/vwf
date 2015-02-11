@@ -112,7 +112,7 @@ define( [ "module",
                 "setting": false,
                 "getting": false,
                 "prototypes": false,
-                "loading": true
+                "loading": false
             };
         },
 
