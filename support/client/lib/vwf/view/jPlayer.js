@@ -9,13 +9,26 @@ define( [
         "jquery"
     ], function( module, view, $ ) {
     	return view.load( module, {
+            createdProperty: function (nodeID, propertyName, propertyValue) {
+                this.satProperty(nodeID, propertyName, propertyValue);
+             },
+
+        // -- initializedProperty ----------------------------------------------------------------------
+
+            // initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
+            //     this.satProperty(nodeID, propertyName, propertyValue);
+            // },
+
     		satProperty: function ( nodeID, propertyName, propertyValue ) {
-                switch(propertyName){
-                    case "z_index":
-                        var node = this.state.nodes[nodeID];
-                        var containerSelector = "#" + node.containerDivId;
-                        $(containerSelector).css('z-index', z_index);
-                        break;
+                var node = this.state.nodes[nodeID];
+                if( node && propertyValue ){
+                    switch(propertyName){
+                        case "z_index":
+                            var containerSelector = "#" + node.containerDivId;
+                            $(containerSelector).css('z-index', propertyValue);
+                            // $("#jp_container_1").css('z-index', 103); 
+                            break;
+                    }
                 }
     		}
     	});

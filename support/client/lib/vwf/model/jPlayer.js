@@ -204,9 +204,10 @@ define( [
                         value = node.loop;
                         break;
 
-                    case "z_index":
-                        console.log("Z-index: " + propertyValue);
-                        break;
+                    // case "z_index":
+                    //     console.log("Z-index: " + propertyValue);
+                    //     node.z_index = propertyValue;
+                    //     break;
 
                     case "playerDivId":
                         if ( propertyValue === node.playerDivId ) {
