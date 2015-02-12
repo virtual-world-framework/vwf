@@ -212,7 +212,7 @@ define( [ "module", "vwf/view", "jquery", "jquery-ui" ], function( module, view,
                                 break;
                         }
                     } else {
-                        var stepDivId = nodeId.replace( /\:/g, "_" ).replace( /\./g, "-" );
+                        var stepDivId = nodeId.replace( /\:/g, "_" ).replace( /\./g, "-" ).replace(/\//g, "_");
                         switch ( status ) {
                             case "entered":
                                 this.currentTaskName = vwf_view.kernel.name( nodeId );
@@ -268,7 +268,7 @@ define( [ "module", "vwf/view", "jquery", "jquery-ui" ], function( module, view,
         for ( var i = 0; i < stepIds.length; i++ ) {
             var step = stepIds[ i ];
             var stepText = lessonSteps[ step ];
-            var stepSafeId = step.replace(/\:/g, "_").replace(/\./g, "-");
+            var stepSafeId = step.replace(/\:/g, "_").replace(/\./g, "-").replace(/\//g, "_");
             var $subAccordionDiv = [];
             if ( stepText ) {
                 $subAccordionDiv = $( "<div/>", {
@@ -284,7 +284,7 @@ define( [ "module", "vwf/view", "jquery", "jquery-ui" ], function( module, view,
                 var substep = substepIds[ j ];
                 var substepText = lessonSteps[ substep ];
                 if ( substepText ) {
-                    var substepSafeId = substep.replace(/\:/g, "_").replace(/\./g, "-");
+                    var substepSafeId = substep.replace(/\:/g, "_").replace(/\./g, "-").replace(/\//g, "_");
                     $subAccordionDiv.append( [
                         "<h2>",
                         "  <a id='" + substepSafeId + "' data-index='" + j + "' href='#'>" + substepText + "</a>",
@@ -303,7 +303,7 @@ define( [ "module", "vwf/view", "jquery", "jquery-ui" ], function( module, view,
         function processSubSubSteps( parentStepID, childStepID ) {
             var text = lessonSteps[childStepID];
             if ( text ) {
-                var htmlParent = parentStepID.replace(/\:/g, "_").replace(/\./g, "-");
+                var htmlParent = parentStepID.replace(/\:/g, "_").replace(/\./g, "-").replace(/\//g, "_");
                 while(! $('#div--' + htmlParent).length) 
                 {
                     htmlParent = htmlParent.substring(0, htmlParent.lastIndexOf('_'));
