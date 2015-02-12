@@ -345,6 +345,12 @@ define( [
                         node.jPlayerElement.jPlayer( "clearMedia" );
                         break;
 
+                    case "setEndedCallback":
+                        // console.log("Input: " + methodParameters[0]);
+                        // node.jPlayerElement.bind($.jPlayer.event.ended, methodParameters[0] );
+                        $("#jquery_jplayer_1").bind($.jPlayer.event.ended, methodParameters[0] );
+                        break;
+
                 }  
 
             }
