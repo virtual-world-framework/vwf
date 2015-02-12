@@ -341,6 +341,7 @@
                 { library: "vwf/model/blockly", linkedLibraries: [ "vwf/model/blockly/JS-Interpreter/interpreter.js" ],  active: false },
                 { library: "vwf/model/graphtool", active: false },
                 { library: "vwf/model/eventManager", active: false },
+                { library: "vwf/model/test", active: false },
                 { library: "vwf/model/sound", active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
@@ -362,6 +363,7 @@
                 { library: "vwf/view/cesium", active: false },
                 { library: "vwf/view/kineticjs", active: false },
                 { library: "vwf/view/mil-sym", active: false },
+                { library: "vwf/view/jPlayer", linkedLibraries: ["vwf/model/jPlayer.2.7.0/jquery.jplayer.min"], active: false },
                 { library: "vwf/view/audio", active: false },
                 { library: "vwf/kernel/utility", active: true },
                 { library: "vwf/utility", active: true },
@@ -400,6 +402,7 @@
                     { library: "vwf/model/heightmap", active: false },
                     { library: "vwf/model/buzz", active: false },
                     { library: "vwf/model/jPlayer", active: false },
+                    { library: "vwf/model/test", active: false },
                     { library: "vwf/model/object", active: true }
                 ],
                 view: [
@@ -415,6 +418,7 @@
                     { library: "vwf/view/touch", active: false },
                     { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/mil-sym", active: false },
+                    { library: "vwf/view/jPlayer", active: false },
                     { library: "vwf/view/audio", active: false },
                     { library: "vwf/view/webrtc", active: false}
                 ]

@@ -51,7 +51,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             this.options.toolbox = options.toolbox ? options.toolbox : 'toolbox'; 
             this.options.createButton = options.createButton !== undefined ? options.createButton : true;
 
-
         },
 
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
