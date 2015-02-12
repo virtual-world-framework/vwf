@@ -342,18 +342,6 @@ define( [
                     case "clearMedia":
                         node.jPlayerElement.jPlayer( "clearMedia" );
                         break;
-
-                    // case "testFireEvent":
-                    //     vwf.fireEvent(nodeID, "videoEnded");
-                    //     // this.videoEnded();
-                    //     break;
-
-                    // case "setEndedCallback":
-                    //     // console.log("Input: " + methodParameters[0]);
-                    //     // node.jPlayerElement.bind($.jPlayer.event.ended, methodParameters[0] );
-                    //     $("#jquery_jplayer_1").bind($.jPlayer.event.ended, methodParameters[0] );
-                    //     break;
-
                 }  
 
             }
@@ -430,15 +418,15 @@ define( [
                     }
                     break;
                 case "video":
-                    // if ( url.search( "data:video/mp4" ) === 0 ) {
+                    if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
                         mediaObject = {
                             m4v: url,
                             poster: node.posterImageUrl
                         };
-                    // } else {
-                    //     modelDriver.logger.errorx( "setUrl", 
-                    //         "Unsupported video type for '", url, "'" );
-                    // }
+                    } else {
+                        modelDriver.logger.errorx( "setUrl", 
+                            "Unsupported video type for '", url, "'" );
+                    }
                     break;
                 default:
                     modelDriver.logger.errorx( "setUrl",
