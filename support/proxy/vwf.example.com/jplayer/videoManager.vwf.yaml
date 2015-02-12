@@ -8,11 +8,11 @@ properties:
   playerDivId: "videoScreen"
   containerDivSize: 
   playerDivSize: 
-  foo: 
 methods:
-  play:
+  play: 
   pause:
   stop: 
   show:
   hide: 
-  setEndedCallback: 
+events:
+  videoEnded: 
