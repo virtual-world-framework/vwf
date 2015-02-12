@@ -235,11 +235,13 @@ define( [
                                 }
                             },
                             supplied: fileTypes,
-                            size: { width: "1024", height: "768" }
+                            // size: { width: node.playmoderDivSize[0], height: node.playerDivSize[1] }
                         } );
 
-                        $("#jquery_jplayer_1").bind($.jPlayer.event.ended, videoEndedCallback );
-
+                        if ( node.playerDivId ) {
+                            $( "#" + node.playerDivId ).bind($.jPlayer.event.ended, videoEndedCallback );
+                        }
+                        
                         value = node.playerDivId;
                         break;
                     case "containerDivId":
@@ -249,6 +251,14 @@ define( [
                     case "posterImageUrl":
                         setPosterImageUrl( node, propertyValue );
                         value = node.posterImageUrl;
+                        break;
+                    case "playerSize":
+                        setPlayerSize( node, propertyValue );
+                        value = node.playerSize;
+                        break;
+                    case "containerSize":
+                        setContainerSize( node, propertyValue );
+                        value = node.containerSize;
                         break;
                     default:
                         break;
@@ -469,4 +479,14 @@ define( [
             } );
         }
     }
+
+    function setPlayerSize( node, playerSize ){
+        node.playerSize = playerSize;
+        node.jPlayerElement.jPlayer( "option", "size", {width: playerSize[0], height: playerSize[1]});
+    }
+
+    function setContainerSize( node, containerSize ){
+        node.containerSize = containerSize;
+    }
+
 } );

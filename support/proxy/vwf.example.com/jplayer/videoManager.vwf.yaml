@@ -6,13 +6,14 @@ properties:
   loop: false
   containerDivId: "videoContainer"
   playerDivId: "videoScreen"
-  containerDivSize: 
-  playerDivSize: 
+  containerSize: [ 1024, 768 ]
+  playerSize: [1024, 768]
 methods:
   play: 
   pause:
   stop: 
   show:
   hide: 
+  clearMedia: 
 events:
   videoEnded: 

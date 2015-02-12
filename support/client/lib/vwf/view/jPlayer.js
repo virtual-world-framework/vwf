@@ -28,10 +28,10 @@ define( [
                         //We cannot safely call .show() or .hide() on the jPlayer div
                         //See http://jplayer.org/latest/developer-guide/#jPlayer-disable-by-css
                         case "show":
-                            var contX = node.containerDivSize[0];
-                            var contY = node.containerDivSize[1];
-                            var playerX = node.playerDivSize[0];
-                            var playerY = node.playerDivSize[1];
+                            var contX = node.containerSize[0];
+                            var contY = node.containerSize[1];
+                            var playerX = node.playerSize[0];
+                            var playerY = node.playerSize[1];
                             
                             $( containerSelector ).css('width', contX);
                             $( containerSelector ).css('height', contY);
