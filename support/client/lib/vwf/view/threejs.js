@@ -172,9 +172,6 @@ define( [ "module",
                 setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
             }
         
-            // if ( this.state.nodes[childID] && this.state.nodes[childID].threeObject instanceof THREE.Object3D ) {
-            //     this.nodes[childID] = {id:childID,extends:childExtendsID};
-            // }
         },
 
         initializedNode: function( nodeID, childID ) {
