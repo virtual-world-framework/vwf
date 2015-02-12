@@ -303,15 +303,19 @@ define( [ "module",
             
             } else if ( protos && isMaterialDefinition.call( this, protos ) ) {
 
+                var mat;
                 var matDef = undefined;
 
+                if ( parentNode && parentNode.threeObject ) {
+                    mat = GetMaterial( parentNode.threeObject, childName );    
+                }
                 node = this.state.nodes[childID] = {
                     name: childName,
-                    threeObject: GetMaterial(parentNode.threeObject, childName),
+                    threeObject: mat,
                     ID: childID,
                     parentID: nodeID,
                     type: childExtendsID,
-                    sourceType: childType,
+                    sourceType: childType
                 };
 
                 if ( childType !== undefined ) {
@@ -330,7 +334,11 @@ define( [ "module",
                 if ( matDef !== undefined ) {
                     node.threeObject = createMaterial( matDef );
                     if ( node.threeObject ) {
-                        SetMaterial( parentNode.threeObject, node.threeObject, childName );                        
+                        if ( parentNode && parentNode.threeObject ) {
+                            SetMaterial( parentNode.threeObject, node.threeObject, childName );    
+                        } else {
+                            console.info( "unable to find: " + nodeID );
+                        }
                     }
                 }
 
@@ -343,8 +351,7 @@ define( [ "module",
                     ID: childID,
                     parentID: nodeID,
                     type: childExtendsID,
-                    sourceType: childType,
-                    threejsClass: typeof( THREE.ShaderMaterial )
+                    sourceType: childType
                 };
 
                 if ( childType !== undefined ) {
@@ -363,7 +370,9 @@ define( [ "module",
                 }
 
                 if ( node.threeObject ) {
-                    SetMaterial( parentNode.threeObject, node.threeObject, childName );
+                    if ( parentNode && parentNode.threeObject ) {
+                        SetMaterial( parentNode.threeObject, node.threeObject, childName );    
+                    }
                 }
 
             } else if ( protos && isShaderUniformsDefinition.call( this, protos ) ) {
@@ -686,7 +695,7 @@ define( [ "module",
                             value = propertyValue; 
                             if ( node.threeObject ) {
                                 var parentNode = this.state.nodes[ node.parentID ];
-                                if ( parentNode.threeObject ) {
+                                if ( parentNode && parentNode.threeObject ) {
                                     SetMaterial( parentNode.threeObject, node.threeObject, node.name );
                                 }    
                             }
@@ -698,9 +707,335 @@ define( [ "module",
                             if ( propertyValue instanceof Object ) {
                                 for ( var prop in propertyValue ) {
                                     switch ( prop ) {
+                                        
                                         case "type":
                                             break;
 
+                                        case "color":
+                                        case "specular":
+                                        case "emissive":
+                                            objectDef[ prop ] = new THREE.Color( propertyValue[ prop ] );
+                                            break;
+
+                                        case "shininess":
+                                        case "bumpScale":
+                                        case "reflectivity":                                        
+                                        case "wireframeLinewidth":
+                                        case "refractionRatio":
+                                        case "opacity":
+                                        case "linewidth":
+                                        case "scale":
+                                        case "dashSize":
+                                        case "gapSize":
+                                        case "overdraw":
+                                        case "alphaTest":
+                                        case "polygonOffsetFactor":
+                                        case "polygonOffsetUnits":
+                                        case "size":
+                                            objectDef[ prop ] = parseFloat( propertyValue[ prop ] );
+                                            break;
+
+                                        case "map":
+                                        case "specularMap":
+                                        case "normalMap":
+                                        case "alphaMap":
+                                        case "bumpMap":
+                                        case "lightMap":
+                                            objectDef[ prop ] = loadTexture( undefined, propertyValue[ prop ] );
+                                            break;
+
+                                        case "envMap":
+                                            objectDef[ prop ] = THREE.ImageUtils.loadTextureCube( propertyValue[ prop ] );
+                                            break;
+
+                                        case "normalScale":
+                                        case "uvOffset":
+                                        case "uvScale":
+                                            objectDef[ prop ] = new THREE.Vector2( propertyValue[ prop ][ 0 ], propertyValue[ prop ][ 1 ] );
+                                            break;
+
+                                        case "wrapRGB":
+                                            objectDef[ prop ] = new THREE.Vector3( propertyValue[ prop ][ 0 ], propertyValue[ prop ][ 1 ], propertyValue[ prop ][ 2 ] );
+                                            break;
+
+                                        case "wrapAround":
+                                        case "metal":
+                                        case "fog":
+                                        case "skinning":
+                                        case "morphTargets":
+                                        case "morphNormals":
+                                        case "wireframe":
+                                        case "depthTest":
+                                        case "depthWrite":
+                                        case "transparent":
+                                        case "polygonOffset":
+                                        case "visible":
+                                        case "lights":
+                                            objectDef[ prop ] = Boolean( propertyValue[ prop ] );
+                                            break;
+
+                                        case "vertexColors":
+                                            switch ( propertyValue[ prop ] ) {
+
+                                                case "true":
+                                                    objectDef[ prop ] = true;
+                                                    break;    
+
+                                                case "false":
+                                                    objectDef[ prop ] = false;
+                                                    break; 
+
+                                                case 1:
+                                                case "1":
+                                                case "face":
+                                                    objectDef[ prop ] = THREE.FaceColors;
+                                                    break;
+
+                                                case 2:
+                                                case "2":
+                                                case "vertex":
+                                                    objectDef[ prop ] = THREE.VertexColors;
+                                                    break;
+
+                                                case 0:
+                                                case "0":
+                                                case "no":
+                                                default:
+                                                    objectDef[ prop ] = THREE.NoColors;
+                                                    break;
+                                            }                                            
+                                            break;
+
+                                        case "blendSrc":
+                                        case "blendDst":
+                                            switch ( propertyValue[ prop ] ) {
+
+                                                case 200:
+                                                case "200":
+                                                case "zero":
+                                                    objectDef[ prop ] = THREE.ZeroFactor;
+                                                    break;
+
+                                                case 201:
+                                                case "201":
+                                                case "one":
+                                                    objectDef[ prop ] = THREE.OneFactor;
+                                                    break;
+
+                                                case 202:
+                                                case "202":
+                                                case "srcColor":
+                                                    objectDef[ prop ] = THREE.SrcColorFactor;
+                                                    break;
+
+                                                case 203:
+                                                case "203":
+                                                case "oneMinusSrcColor":
+                                                    objectDef[ prop ] = THREE.OneMinusSrcColorFactor;
+                                                    break;
+
+                                                case 204:
+                                                case "204":
+                                                case "srcAlpha":
+                                                    objectDef[ prop ] = THREE.SrcAlphaFactor;
+                                                    break;
+
+                                                case 205:
+                                                case "205":
+                                                case "oneMinusSrcAlpha":
+                                                    objectDef[ prop ] = THREE.OneMinusSrcAlphaFactor;
+                                                    break;
+
+                                                case 206:
+                                                case "206":
+                                                case "dstAlpha":
+                                                    objectDef[ prop ] = THREE.DstAlphaFactor;
+                                                    break;
+
+                                                case 207:
+                                                case "207":
+                                                case "oneMinusDstAlpha":
+                                                    objectDef[ prop ] = THREE.OneMinusDstAlphaFactor;
+                                                    break;
+
+                                                case 208:
+                                                case "208":
+                                                case "dstColor":
+                                                    objectDef[ prop ] = THREE.DstColorFactor;
+                                                    break;
+
+                                                case 209:
+                                                case "209":
+                                                case "oneMinusDstColor":
+                                                    objectDef[ prop ] = THREE.OneMinusDstColorFactor;
+                                                    break;
+
+                                                case 210:
+                                                case "210":
+                                                case "srcAlphaSaturate":
+                                                    objectDef[ prop ] = THREE.SrcAlphaSaturateFactor;
+                                                    break;
+
+                                            }
+                                            break;
+
+                                        case "blendEquation":
+                                            switch ( propertyValue[ prop ] ) {
+
+                                                case 100:
+                                                case "100":
+                                                case "add":
+                                                    objectDef[ prop ] = THREE.AddEquation;
+                                                    break;
+
+                                                case 101:
+                                                case "101":
+                                                case "sub":
+                                                case "subtract":
+                                                    objectDef[ prop ] = THREE.SubtractEquation;
+                                                    break;
+
+                                                case 102:
+                                                case "102":
+                                                case "revSub":
+                                                case "revSubtract":
+                                                    objectDef[ prop ] = THREE.ReverseSubtractEquation;
+                                                    break;
+
+                                                case 103:
+                                                case "103":
+                                                case "min":
+                                                    objectDef[ prop ] = THREE.MinEquation;
+                                                    break;
+
+                                                case 104:
+                                                case "104":
+                                                case "max":
+                                                    objectDef[ prop ] = THREE.MaxEquation;
+                                                    break;
+                                            }
+                                            break;
+
+                                        case "combine":
+                                            switch ( propertyValue[ prop ] ) {
+
+                                                case 1:
+                                                case "1":
+                                                case "mix":
+                                                    objectDef[ prop ] = THREE.MixOperation;
+                                                    break;
+
+                                                case 2:
+                                                case "2":
+                                                case "add":
+                                                    objectDef[ prop ] = THREE.AddOperation;
+                                                    break;
+
+                                                case 0:
+                                                case "0":
+                                                case "mult":
+                                                case "multiply":
+                                                default:
+                                                    objectDef[ prop ] = THREE.MultiplyOperation;
+                                                    break;
+                                            }
+                                            break;
+
+                                        case "shading":
+                                            switch ( propertyValue[ prop ] ) {
+
+                                                case 1:
+                                                case "1":
+                                                case "flat":
+                                                    objectDef[ prop ] = THREE.FlatShading;
+                                                    break;
+
+                                                case 2:
+                                                case "2":
+                                                case "smooth":
+                                                    objectDef[ prop ] = THREE.SmoothShading;
+                                                    break;
+
+                                                case 0:
+                                                case "0":
+                                                case "no":
+                                                default:
+                                                    objectDef[ prop ] = THREE.NoShading;
+                                                    break;
+                                            }
+                                            break;
+
+                                        case "blending":
+                                            switch ( propertyValue[ prop ] ) {
+
+                                                case 1:
+                                                case "1":
+                                                case "normal":
+                                                    objectDef[ prop ] = THREE.NormalBlending;
+                                                    break;
+
+                                                case 2:
+                                                case "2":
+                                                case "add":
+                                                case "additive":
+                                                    objectDef[ prop ] = THREE.AdditiveBlending;
+                                                    break;
+
+                                                case 3:
+                                                case "3":
+                                                case "sub":
+                                                case "subtractive":
+                                                    objectDef[ prop ] = THREE.SubtractiveBlending;
+                                                    break;
+
+                                                case 4:
+                                                case "4":
+                                                case "mult":
+                                                case "multiply":
+                                                    objectDef[ prop ] = THREE.MultiplyBlending;
+                                                    break;
+
+                                                case 5:
+                                                case "5":
+                                                case "custom":
+                                                    objectDef[ prop ] = THREE.CustomBlending;
+                                                    break;
+
+                                                case 0:
+                                                case "0":
+                                                case "no":
+                                                default:
+                                                    objectDef[ prop ] = THREE.NoBlending;
+                                                    break;
+                                            }
+                                            break;
+
+                                        case "side":
+                                            switch ( propertyValue[ prop ] ) {
+
+                                                case 2:
+                                                case "2":
+                                                case "double":
+                                                    objectDef[ prop ] = THREE.DoubleSide;
+                                                    break;
+
+                                                case 1:
+                                                case "1":                        
+                                                case "back":
+                                                    objectDef[ prop ] = THREE.BackSide;
+                                                    break;
+
+                                                case 0:
+                                                case "0":                        
+                                                case "front":
+                                                default:
+                                                    objectDef[ prop ] = THREE.FrontSide;
+                                                    break;
+                                            }
+                                            break;
+
+                                        case "linecap":
+                                        case "linejoin": 
                                         default:
                                             objectDef[ prop ] = propertyValue[ prop ];
                                             break;    
@@ -712,7 +1047,7 @@ define( [ "module",
                             value = propertyValue; 
                             if ( node.threeObject ) {
                                 var parentNode = this.state.nodes[ node.parentID ];
-                                if ( parentNode.threeObject ) {
+                                if ( parentNode && parentNode.threeObject ) {
                                     SetMaterial( parentNode.threeObject, node.threeObject, node.name );
                                 }    
                             }
@@ -1904,7 +2239,18 @@ define( [ "module",
             }
             if ( threeObject instanceof THREE.ShaderMaterial ) {
                 if ( propertyName === "uniforms" ) {
-                    value = threeObject.uniforms;
+                    value = {};
+                    for ( var uni in threeObject.uniforms ) {
+                        if ( threeObject.uniforms[ uni ].type === 't' ) {
+                            if ( threeObject.uniforms[ uni ].value ) {
+                                value[ uni ] = { "type": 't', "value": threeObject.uniforms[ uni ].value.sourceFile };
+                            } else {
+                                value[ uni ] = threeObject.uniforms[ uni ];    
+                            }
+                        } else {
+                            value[ uni ] = threeObject.uniforms[ uni ];     
+                        }
+                    }
                     return value;
                 }
                 if ( propertyName === "vertexShader" ) {
@@ -2998,7 +3344,7 @@ define( [ "module",
         if ( shaderDef && shaderDef.shaderType ) {
 
             if ( THREE.ShaderLib[ shaderDef.shaderType ] !== undefined ) {
- 
+
                 var shader = THREE.ShaderLib[ shaderDef.shaderType ];
                 var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
                 var mergedShader = { 
@@ -3026,6 +3372,8 @@ define( [ "module",
                             break;                           
                     }
                 }
+
+
 
                 shaderMaterial = new THREE.ShaderMaterial( mergedShader );
 
@@ -5194,6 +5542,8 @@ define( [ "module",
     }
     function setUniformProperty( obj, prop, type, value ) {
         
+        //console.info( "setUniformProperty( obj, "+prop+", "+type+", "+value+" )" );
+
         switch ( type ) {
             case 'i':
                 obj[ prop ].value = Number( value );
@@ -5233,6 +5583,7 @@ define( [ "module",
     }
 
     function loadTexture( mat, def ) {
+        var txt = undefined;
         var url = undefined;
         var mapping = undefined;
         var onLoad = function( texture ) {
@@ -5255,7 +5606,17 @@ define( [ "module",
             mapping = def.mapping;
         }
 
-        return THREE.ImageUtils.loadTexture( url, mapping, onLoad, onError );
+        if ( mat === undefined ) {
+            if ( mapping === undefined ) {
+                txt = THREE.ImageUtils.loadTexture( url );    
+            } else {
+                txt = THREE.ImageUtils.loadTexture( url, mapping );
+            }
+        } else {
+            txt = THREE.ImageUtils.loadTexture( url, mapping, onLoad, onError );            
+        }
+
+        return txt;
     }
 
     function createMaterial( matDef ) {
@@ -5307,7 +5668,7 @@ define( [ "module",
                     break;
 
                 case "MeshPhongMaterial":
-                    mat = new THREE.MeshLambertMaterial( matParameters );
+                    mat = new THREE.MeshPhongMaterial( matParameters );
                     break;
 
                 case "MeshNormalMaterial":
