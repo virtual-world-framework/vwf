@@ -42,13 +42,10 @@ define( [ "module",
                         "uniqueInView": false
                     };
                 },
-                isKineticClass: function( prototypes, classIDArray ) {
+                isKineticClass: function( prototypes, classID ) {
                     if ( prototypes ) {
-                        var id1 = classIDArray.join( '.' ).toLowerCase();
-                        var id2 = classIDArray.join( '-' ).toLowerCase();
                         for ( var i = 0; i < prototypes.length; i++ ) {
-                            if ( prototypes[ i ].toLowerCase().indexOf( id1 ) !== -1 || 
-                                 prototypes[ i ].toLowerCase().indexOf( id2 ) !== -1 ) {
+                            if ( prototypes[ i ] === classID ) {
                                 //console.info( "prototypes[ i ]: " + prototypes[ i ] );
                                 return true;
                             }
@@ -60,7 +57,7 @@ define( [ "module",
                     var found = false;
                     if ( prototypes ) {
                         for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                            found = ( prototypes[ i ].indexOf( "http-vwf-example-com-kinetic-" ) != -1 );    
+                            found = ( prototypes[ i ] === "http://vwf.example.com/kinetic/node.vwf" );
                         }
                     }
                     return found;
@@ -2106,21 +2103,21 @@ define( [ "module",
         var protos = node.prototypes;
         var kineticObj = undefined;
 
-        if ( self.state.isKineticClass( protos, [ "kinetic", "arc", "vwf" ] ) ) {
+        if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/arc.vwf" ) ) {
             kineticObj = new Kinetic.Arc( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "baselayer", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/baseLayer.vwf" ) ) {
             kineticObj = new Kinetic.BaseLayer( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "canvas", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/canvas.vwf" ) ) {
             kineticObj = new Kinetic.Canvas( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "circle", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/circle.vwf" ) ) {
             kineticObj = new Kinetic.Circle( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "ellipse", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/ellipse.vwf" ) ) {
             kineticObj = new Kinetic.Ellipse( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "fastlayer", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/fastLayer.vwf" ) ) {
             kineticObj = new Kinetic.FastLayer( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "group", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/group.vwf" ) ) {
             kineticObj = new Kinetic.Group( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "image", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/image.vwf" ) ) {
             var imageObj = new Image();
             node.scaleOnLoad = false;
             kineticObj = new Kinetic.Image( {
@@ -2129,19 +2126,19 @@ define( [ "module",
             if ( node.source !== undefined ) {
                 imageObj.src = node.source;    
             }
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "layer", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/layer.vwf" ) ) {
             kineticObj = new Kinetic.Layer( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "line", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/line.vwf" ) ) {
             kineticObj = new Kinetic.Line( config || { "points": [] } );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "path", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/path.vwf" ) ) {
             kineticObj = new Kinetic.Path( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "rect", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/rect.vwf" ) ) {
             kineticObj = new Kinetic.Rect( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "regularpolygon", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/regularPolygon.vwf" ) ) {
             kineticObj = new Kinetic.RegularPolygon( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "ring", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/ring.vwf" ) ) {
             kineticObj = new Kinetic.Ring( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "sprite", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/sprite.vwf" ) ) {
             var imageObj = new Image();
             node.scaleOnLoad = false;
             kineticObj = new Kinetic.Sprite( {
@@ -2150,7 +2147,7 @@ define( [ "module",
             if ( node.source !== undefined ) {
                 imageObj.src = node.source;    
             }
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/stage.vwf" ) ) {
             var stageWidth = ( window && window.innerWidth ) ? window.innerWidth : 800;
             var stageHeight = ( window && window.innerHeight ) ? window.innerHeight : 600;
             var stageContainer = ( config && config.container ) || 'vwf-root';
@@ -2163,19 +2160,19 @@ define( [ "module",
             };
             kineticObj = new Kinetic.Stage( stageDef );
             self.state.stages[ node.ID ] = kineticObj;
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "star", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/star.vwf" ) ) {
             kineticObj = new Kinetic.Star( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "text", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/text.vwf" ) ) {
             kineticObj = new Kinetic.Text( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "textpath", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/textPath.vwf" ) ) {
             kineticObj = new Kinetic.TextPath( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "wedge", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/wedge.vwf" ) ) {
             kineticObj = new Kinetic.Wedge( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "shape", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/shape.vwf" ) ) {
             kineticObj = new Kinetic.Shape( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "container", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/container.vwf" ) ) {
             kineticObj = new Kinetic.Container( config || {} );
-        } else if ( self.state.isKineticClass( protos, [ "kinetic", "node", "vwf" ] ) ) {
+        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/node.vwf" ) ) {
             kineticObj = new Kinetic.Node( config || {} );
         }
 
@@ -2223,7 +2220,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-stage-vwf"  );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/stage.vwf"  );
             }
         }
         return found;
@@ -2232,7 +2229,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-layer-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/layer.vwf" );
             }
         }
         return found;
@@ -2241,7 +2238,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-canvas-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/canvas.vwf" );
             }
         }
         return found;
@@ -2250,7 +2247,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-shape-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/shape.vwf" );
             }
         }
         return found;
@@ -2259,7 +2256,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-container-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/container.vwf" );
             }
         }
         return found;
@@ -2268,7 +2265,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-kinetic-node-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/node.vwf" );
             }
         }
         return found;

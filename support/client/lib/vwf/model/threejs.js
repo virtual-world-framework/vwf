@@ -182,20 +182,20 @@ define( [ "module",
             var protos = getPrototypes.call( this, kernel, childExtendsID );
             if ( isSceneDefinition.call(this, protos) && childID == this.kernel.application() )
             {
-                this.state.sceneRootID = childID;
+                var sceneNode = CreateThreeJSSceneNode( nodeID, childID, childExtendsID );
+                this.state.scenes[ childID ] = sceneNode;
+                this.state.cameraInUse = sceneNode.camera.defaultCamera;
 
-                var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
-                this.state.scenes[childID] = sceneNode;
                 sceneCreated = true;
 
                 if ( childImplementsIDs && childImplementsIDs.length > 0 ) {
                     for ( var i = 0; i < childImplementsIDs.length; i++ ) {
                         switch ( childImplementsIDs[ i ] ) {
-                            case "http-vwf-example-com-threejs-fogExp2-vwf":
+                            case "http://vwf.example.com/threejs/fogExp2.vwf":
                                 sceneNode.threeScene.fog = new THREE.FogExp2( 0x000000 );
                                 break;
 
-                            case "http-vwf-example-com-threejs-fog-vwf":
+                            case "http://vwf.example.com/threejs/fog.vwf":
                                 sceneNode.threeScene.fog = new THREE.Fog( 0x000000 );
                                 break;
 
@@ -206,43 +206,32 @@ define( [ "module",
             
             if ( protos && isCameraDefinition.call( this, protos ) ) {
 
-                var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
-                var sceneNode = this.state.scenes[ this.state.sceneRootID ];
-                node = this.state.nodes[childID] = {
+                var sceneID = this.kernel.application();
+                var camName = this.kernel.name( childID );
+                var sceneNode = this.state.scenes[ sceneID ];
+                node = this.state.nodes[ childID ] = {
                     name: childName,
                     threeObject: threeChild,
                     ID: childID,
                     parentID: nodeID,
-                    sceneID: this.state.sceneRootID,
+                    sceneID: this.kernel.application(),
                     threeScene: sceneNode ? sceneNode.threeScene : undefined,
                     type: childExtendsID,
                     sourceType: childType,
-                    prototypes: protos,
+                    prototypes: protos
                 };
                 // if there was not a preexisting object, then you have to make a new camera
-                if ( !node.threeObject ) {
-                    createCamera.call( this, nodeID, childID, childName );
-                }
-                //if the scene node is using this as the default camera, but it does not exist, you must create it
-                if ( sceneNode && sceneNode.camera ) {
-                    if ( childID == sceneNode.camera.defaultCamID ) {
-                        if ( !sceneNode.camera.threeJScameras[ childID ] ) {
-                            var cam = CreateThreeCamera();
-                            sceneNode.camera.threeJScameras[ childID ] = cam;                      
+                if ( node.threeObject === undefined ) {
+                    if ( nodeID === sceneID && childName === "camera" ) {
+                        node.threeObject = sceneNode.camera.defaultCamera;
+                        if ( sceneNode.camera.ID !== undefined ) {
+                            sceneNode.camera.ID = childID;    
                         }
-                        sceneNode.camera.ID = childID;
-                        node.name = camName;
-                        node.threeObject = sceneNode.camera.threeJScameras[ childID ];
-                  
-                    } else if ( node.threeObject ) {
-                        sceneNode.camera.threeJScameras[ childID ] = node.threeObject;
-                        if ( !node.threeObject.parent ) {
-                            this.logger.warnx( "creatingNode", "adding camera to the scene: parent(id:"+nodeID+") not found", childID );
-                            sceneNode.threeScene.add( node.threeObject );                             
-                        }
-
+                    } else {
+                        createCamera.call( this, nodeID, childID, childName );    
                     }
-                }               
+                }
+             
             } else if(protos && isLightDefinition.call( this, protos )) {
                 
                 node = this.state.nodes[ childID ] = this.state.lights[ childID ] = {
@@ -268,25 +257,25 @@ define( [ "module",
                                 child = node.threeObject.children[ j ];
                                 switch ( childExtendsID ) {
                     
-                                    case "http-vwf-example-com-directionallight-vwf":
+                                    case "http://vwf.example.com/directionallight.vwf":
                                         if ( child instanceof THREE.DirectionalLight ) {
                                             light = child;    
                                         }
                                         break;
 
-                                    case "http-vwf-example-com-spotlight-vwf":
+                                    case "http://vwf.example.com/spotlight.vwf":
                                         if ( child instanceof THREE.SpotLight ) {
                                             light = child;    
                                         }
                                         break;
 
-                                    case "http-vwf-example-com-hemispherelight-vwf":
+                                    case "http://vwf.example.com/hemispherelight.vwf":
                                         if ( child instanceof THREE.HemisphereLight ) {
                                             light = child;    
                                         }
                                         break;
 
-                                    case "http-vwf-example-com-pointlight-vwf":
+                                    case "http://vwf.example.com/pointlight.vwf":
                                     default:
                                         if ( child instanceof THREE.PointLight ) {
                                             light = child;    
@@ -419,7 +408,7 @@ define( [ "module",
                 }
             } else if ( protos && isNodeDefinition.call( this, protos ) && childName !== undefined ) {
                 
-                var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+                var sceneNode = this.state.scenes[ this.kernel.application() ];
                 
                 if ( supportedFileType( childType ) ) {
                     
@@ -429,14 +418,14 @@ define( [ "module",
                     node = this.state.nodes[ childID ] = {
                         name: childName,  
                         threeObject: threeChild,
-                        source: utility.resolveURI( childSource, childURI ),
+                        source: utility.resolveURI( childSource, this.kernel.uri( childID, true ) ),
                         ID: childID,
                         parentID: nodeID,
                         sourceType: childType,
                         type: childExtendsID,
                         // Hang on to the callback and call it again in assetLoaded with ready=true
                         loadingCallback: callback,
-                        sceneID: this.state.sceneRootID
+                        sceneID: this.kernel.application()
                     };
                     loadAsset.call( this, parentNode, node, childType, notifyDriverOfPrototypeAndBehaviorProps );     
                 }
@@ -445,12 +434,12 @@ define( [ "module",
                     //callback( false );
                     node = this.state.nodes[ childID ] = {
                         name: childName,  
-                        source: utility.resolveURI( childSource, childURI ),
+                        source: utility.resolveURI( childSource, this.kernel.uri( childID, true ) ),
                         ID: childID,
                         parentID: nodeID,
                         sourceType: childType,
                         type: childExtendsID,
-                        sceneID: this.state.sceneRootID,
+                        sceneID: this.kernel.application(),
                         prototypes: protos,
                     };
                     node.threeObject = new THREE.Object3D(); 
@@ -463,14 +452,14 @@ define( [ "module",
                     node = this.state.nodes[childID] = {
                         name: childName,  
                         threeObject: threeChild,
-                        source: utility.resolveURI( childSource, childURI ),
+                        source: utility.resolveURI( childSource, this.kernel.uri( childID, true ) ),
                         ID: childID,
                         parentID: nodeID,
                         sourceType: childType,
                         type: childExtendsID,
                         //no load callback, maybe don't need this?
                         //loadingCallback: callback,
-                        sceneID: this.state.sceneRootID,
+                        sceneID: this.kernel.application(),
                         prototypes: protos,
                     };
                     if( !node.threeObject )
@@ -1229,7 +1218,7 @@ define( [ "module",
                             var parent = threeObject.parent;
                             if(parent && threeObject && !(threeObject instanceof THREE.PerspectiveCamera))
                             {
-                                var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+                                var sceneNode = this.state.scenes[ this.kernel.application() ];
                                 parent.remove(threeObject);
                                 var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
                                 cam.far = threeObject.far;
@@ -1248,7 +1237,6 @@ define( [ "module",
 
                                 threeObject.updateProjectionMatrix();   
                                 node.threeObject = cam;
-                                sceneNode.camera.threeJScameras[ nodeID ] = cam;
                                 parent.add(node.threeObject);
                             }
                         }
@@ -1259,7 +1247,7 @@ define( [ "module",
                             if(parent && threeObject && !(threeObject instanceof THREE.OrthographicCamera))
                             {
                                 
-                                var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+                                var sceneNode = this.state.scenes[ this.kernel.application() ];
                                 parent.remove(threeObject);
                                 var offset  = threeObject.far * Math.cos(threeObject.fov/2 * 0.0174532925);
                                 offset = offset/2;
@@ -1280,7 +1268,6 @@ define( [ "module",
                                     this.state.cameraInUse = cam;
 
                                 node.threeObject = cam;
-                                sceneNode.camera.threeJScameras[ nodeID ] = cam;
                                 parent.add(node.threeObject);
                             }
                         }
@@ -1342,9 +1329,11 @@ define( [ "module",
                 {
                     if(propertyName == 'activeCamera')
                     {
-                        // Update the model's activeCamera
-                        this.state.scenes[ this.state.sceneRootID ].camera.ID = propertyValue;
-                        value = propertyValue;
+                        if ( this.state.nodes[ propertyValue ] !== undefined ) {
+                            // Update the model's activeCamera
+                            this.state.scenes[ this.kernel.application() ].camera.ID = propertyValue;
+                            value = propertyValue;                            
+                        }
                     }
                     if( propertyName == 'ambientColor' )
                     {
@@ -2441,7 +2430,7 @@ define( [ "module",
         var foundScene = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundScene; i++ ) {
-                foundScene = ( prototypes[i] == "http-vwf-example-com-navscene-vwf" || prototypes[i] == "http-vwf-example-com-scene-vwf" );    
+                foundScene = ( prototypes[i] == "http://vwf.example.com/navscene.vwf" || prototypes[i] == "http://vwf.example.com/scene.vwf" );
             }
         }
 
@@ -2451,7 +2440,7 @@ define( [ "module",
         var foundMaterial = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundMaterial; i++ ) {
-                foundMaterial = ( prototypes[i] == "http-vwf-example-com-material-vwf" );    
+                foundMaterial = ( prototypes[i] == "http://vwf.example.com/material.vwf" );
             }
         }
 
@@ -2461,7 +2450,7 @@ define( [ "module",
         var foundMaterial = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundMaterial; i++ ) {
-                foundMaterial = ( prototypes[i] == "http-vwf-example-com-shaderMaterial-vwf" );    
+                foundMaterial = ( prototypes[i] == "http://vwf.example.com/shaderMaterial.vwf" );
             }
         }
 
@@ -2471,7 +2460,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-threejs-uniforms-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/threejs/uniforms.vwf" );
             }
         }
 
@@ -2481,7 +2470,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "http-vwf-example-com-texture-vwf" );    
+                found = ( prototypes[i] == "http://vwf.example.com/texture.vwf" );
             }
         }
 
@@ -2491,7 +2480,7 @@ define( [ "module",
         var foundCamera = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundCamera; i++ ) {
-                foundCamera = ( prototypes[i] == "http-vwf-example-com-camera-vwf" );    
+                foundCamera = ( prototypes[i] == "http://vwf.example.com/camera.vwf" );
             }
         }
 
@@ -2501,7 +2490,7 @@ define( [ "module",
         var foundSystem = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundSystem; i++ ) {
-                foundSystem = ( prototypes[i] == "http-vwf-example-com-particlesystem-vwf" );    
+                foundSystem = ( prototypes[i] == "http://vwf.example.com/particlesystem.vwf" );
             }
         }
 
@@ -2513,7 +2502,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-node3-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/node3.vwf" );
             }
         }
 
@@ -2524,7 +2513,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-starfield-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/starfield.vwf" );
             }
         }
         return foundNode;
@@ -2533,7 +2522,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-cube-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/cube.vwf" );
             }
         }
         return foundNode;
@@ -2542,7 +2531,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-circle-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/circle.vwf" );
             }
         }
         return foundNode;
@@ -2551,7 +2540,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-plane-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/plane.vwf" );
             }
         }
         return foundNode;
@@ -2560,7 +2549,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-sphere-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/sphere.vwf" );
             }
         }
         return foundNode;
@@ -2569,7 +2558,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-cylinder-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/cylinder.vwf" );
             }
         }
         return foundNode;
@@ -2578,7 +2567,7 @@ define( [ "module",
         var foundNode = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundNode; i++ ) {
-                foundNode = ( prototypes[i] == "http-vwf-example-com-threejs-text-vwf" );    
+                foundNode = ( prototypes[i] == "http://vwf.example.com/threejs/text.vwf" );
             }
         }
         return foundNode;
@@ -2590,14 +2579,14 @@ define( [ "module",
                  type == "model/vnd.gltf+json" ||
                  type == "model/x-threejs-skinned+json" );
     }
-    function CreateThreeJSSceneNode(parentID,thisID,extendsID)
+    function CreateThreeJSSceneNode( parentID, thisID, extendsID )
     {
         var node = {};
         node.name = "scene";
-        node.camera = {};
-        node.camera.ID = undefined;
-        node.camera.defaultCamID = "http-vwf-example-com-camera-vwf-camera";
-        node.camera.threeJScameras = {};
+        node.camera = { 
+            "ID": undefined, 
+            "defaultCamera": CreateThreeCamera() 
+        };
         node.ID = thisID;
         node.parentID = parentID;
         node.type = extendsID;
@@ -2659,11 +2648,11 @@ define( [ "module",
     }   
     function CreateThreeCamera()
     {
-        var cam = new THREE.PerspectiveCamera(35,$(document).width()/$(document).height() ,.01,10000);
+        var cam = new THREE.PerspectiveCamera( 35, $(document).width()/$(document).height() , 0.01, 10000 );
         cam.matrixAutoUpdate = false;
-        cam.up = new THREE.Vector3(0,0,1);
-        cam.matrix.elements = [1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1];
-        cam.updateMatrixWorld(true);    
+        cam.up = new THREE.Vector3( 0, 0, 1 );
+        cam.matrix.elements = [ 1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1 ];
+        cam.updateMatrixWorld( true );    
         return cam;
     }
     function createAmbientLight( threeScene, clr ){
@@ -2682,32 +2671,23 @@ define( [ "module",
 
     function createCamera( nodeID, childID, childName ) {
 
-        var sceneNode = this.state.scenes[nodeID];
-        var parent = sceneNode ? sceneNode : this.state.nodes[nodeID];
-        if ( !sceneNode ) sceneNode = this.state.scenes[parent.sceneID];
+        var sceneNode = this.state.scenes[ nodeID ];
+        var parent = sceneNode ? sceneNode : this.state.nodes[ nodeID ];
+        if ( !sceneNode ) sceneNode = this.state.scenes[ parent.sceneID ];
         if ( sceneNode && parent ) {
-            var child = this.state.nodes[childID];
+            var child = this.state.nodes[ childID ];
             if ( child ) {
-                var cam;
-                if ( sceneNode.camera && sceneNode.camera.threeJScameras ) {
-                    if ( !sceneNode.camera.threeJScameras[childID] ) {
-                        cam = CreateThreeCamera.call(this);
-                        sceneNode.camera.threeJScameras[childID] = cam;
-                    } else {
-                        cam = sceneNode.camera.threeJScameras[childID];
-                    }
-
-                    var threeParent = parent.threeObject;
-                    if(!threeParent) threeParent = parent.threeScene;
-                    if ( threeParent && ( threeParent instanceof THREE.Scene || threeParent instanceof THREE.Object3D )) {
-                        threeParent.add( cam );
-                    }
-
-                    child.name = childName;
-                    child.threeObject = cam;
-                    child.uid = child.threeObject.uid;
-                    cam.name = childName;
+                var cam = CreateThreeCamera.call( this );;
+                var threeParent = parent.threeObject;
+                if( !threeParent ) threeParent = parent.threeScene;
+                if ( threeParent && threeParent.add ) {
+                    threeParent.add( cam );
                 }
+
+                child.name = childName;
+                child.threeObject = cam;
+                child.uid = child.threeObject.uid;
+                cam.name = childName;
             }
         }
 
@@ -3217,7 +3197,7 @@ define( [ "module",
         var nodeID = node.ID;
         var childName = node.name;
         var threeModel = this;
-        var sceneNode = this.state.scenes[ this.state.sceneRootID ];
+        var sceneNode = this.state.scenes[ this.kernel.application() ];
         var parentObject3 = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
         //console.info( "---- loadAsset( "+parentNode.name+", "+node.name+", "+childType+" )" );
 
@@ -3652,7 +3632,7 @@ define( [ "module",
         var foundLight = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundLight; i++ ) {
-                foundLight = ( prototypes[i] == "http-vwf-example-com-light-vwf" );    
+                foundLight = ( prototypes[i] == "http://vwf.example.com/light.vwf" );
             }
         }
 
@@ -3665,19 +3645,19 @@ define( [ "module",
 
             switch( type ) {
                 
-                case "http-vwf-example-com-directionallight-vwf":
+                case "http://vwf.example.com/directionallight.vwf":
                     child.threeObject = new THREE.DirectionalLight( 'FFFFFF' );
                     break;
 
-                case "http-vwf-example-com-spotlight-vwf":
+                case "http://vwf.example.com/spotlight.vwf":
                     child.threeObject = new THREE.SpotLight( 'FFFFFF' );
                     break;
 
-                case "http-vwf-example-com-hemispherelight-vwf":
+                case "http://vwf.example.com/hemispherelight.vwf":
                     child.threeObject = new THREE.HemisphereLight('FFFFFF','FFFFFF',1);
                     break;
 
-                case "http-vwf-example-com-pointlight-vwf":
+                case "http://vwf.example.com/pointlight.vwf":
                 default:
                     child.threeObject = new THREE.PointLight( 'FFFFFF', 1, 1000 );
                     break;    
