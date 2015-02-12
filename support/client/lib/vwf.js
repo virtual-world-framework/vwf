@@ -2257,10 +2257,6 @@
                     ( this.configuration["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
                 childIndex = this.children( nodeID ).length;
-if ( childName === "camera" && nodeID === this.application() ) {  // TODO: fix static ID references and remove
-    childID = ( childComponent.extends || this.kutility.protoNodeURI ) + "." + childName;
-    childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );
-}
             }
 
             // Register the node.
