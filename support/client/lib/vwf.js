@@ -5369,6 +5369,12 @@ if ( ! childComponent.source ) {
             return uri;
         };
 
+        // -- resolvedDescriptor -------------------------------------------------------------------
+
+        /// Resolve relative URIs in a component descriptor.
+        /// 
+        /// @name module:vwf~resolvedDescriptor
+
         var resolvedDescriptor = function( component, baseURI ) {
 
             return require( "vwf/utility" ).transform( component, resolvedDescriptorTransformationWithBaseURI );
@@ -5432,95 +5438,19 @@ if ( ! childComponent.source ) {
 
         var loggableComponentTransformation = function( object, names, depth ) {
 
-            // Find the index of the lowest nested component in the names list.
+            // Get our bearings at the current recusion level.
 
-            var componentIndex = names.length;
+            var markers = descriptorMarkers( object, names, depth );
 
-            while ( componentIndex > 2 && names[componentIndex-1] == "children" ) {
-                componentIndex -= 2;
-            }
+            // Transform the object here.
 
-            // depth                                                  names  notes
-            // -----                                                  -----  -----
-            // 0:                                                        []  the component
-            // 1:                                          [ "properties" ]  its properties object
-            // 2:                          [ "propertyName", "properties" ]  one property
-            // 1:                                            [ "children" ]  the children object
-            // 2:                               [ "childName", "children" ]  one child
-            // 3:                 [ "properties", "childName", "children" ]  the child's properties
-            // 4: [ "propertyName", "properties", "childName", "children" ]  one child property
-
-            if ( componentIndex > 0 ) {
-
-                // Locate the container ("properties", "methods", "events", etc.) below the
-                // component in the names list.
-
-                var containerIndex = componentIndex - 1;
-                var containerName = names[containerIndex];
-
-                // Locate the member as appropriate for the container.
-
-                if ( containerName == "extends" ) {
-
-                    var memberIndex = containerIndex;
-                    var memberName = names[memberIndex];
-
-                } else if ( containerName == "implements" ) {
-
-                    if ( containerIndex > 0 ) {
-                        if ( typeof names[containerIndex-1] == "number" ) {
-                            var memberIndex = containerIndex - 1;
-                            var memberName = names[memberIndex];
-                        } else {
-                            var memberIndex = containerIndex;
-                            var memberName = undefined;
-                        }
-                    } else if ( typeof object != "object" || ! ( object instanceof Array ) ) {
-                        var memberIndex = containerIndex;
-                        var memberName = undefined;
-                    }
-
-                } else if ( containerName == "properties" || containerName == "methods" || containerName == "events" ||
-                        containerName == "children" ) {
-
-                    if ( containerIndex > 0 ) {
-                        var memberIndex = containerIndex - 1;
-                        var memberName = names[memberIndex];
-                    }
-    
-                } else if ( containerName == "scripts" ) {
-
-                    if ( containerIndex > 0 ) {
-                        if ( typeof names[containerIndex-1] == "number" ) {
-                            var memberIndex = containerIndex - 1;
-                            var memberName = names[memberIndex];
-                        } else {
-                            var memberIndex = containerIndex;
-                            var memberName = undefined;
-                        }
-                    } else if ( typeof object != "object" || ! ( object instanceof Array ) ) {
-                        var memberIndex = containerIndex;
-                        var memberName = undefined;
-                    }
-
-                } else {
-
-                    containerIndex = undefined;
-                    containerName = undefined;
-
-                }
-
-            }
-
-            // Transform the object at the current recusion level.
-
-            switch ( containerName ) {
+            switch ( markers.containerName ) {
 
                 case "extends":
 
                     // Omit a component descriptor for the prototype.
 
-                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                    if ( markers.memberIndex == 0 && componentIsDescriptor( object ) ) {
                         return {};
                     }
 
@@ -5530,7 +5460,7 @@ if ( ! childComponent.source ) {
 
                     // Omit component descriptors for the behaviors.
 
-                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                    if ( markers.memberIndex == 0 && componentIsDescriptor( object ) ) {
                         return {};
                     }
 
@@ -5541,10 +5471,10 @@ if ( ! childComponent.source ) {
                     // Convert property values to a loggable version, and omit getter and setter
                     // text.
 
-                    if ( memberIndex == 0 && ! valueHasAccessors( object ) ||
-                            memberIndex == 1 && names[0] == "value" ) {
+                    if ( markers.memberIndex == 0 && ! valueHasAccessors( object ) ||
+                            markers.memberIndex == 1 && names[0] == "value" ) {
                         return loggableValue( object );
-                    } else if ( memberIndex == 1 && ( names[0] == "get" || names[0] == "set" ) ) {
+                    } else if ( markers.memberIndex == 1 && ( names[0] == "get" || names[0] == "set" ) ) {
                         return "...";
                     }
 
@@ -5554,8 +5484,8 @@ if ( ! childComponent.source ) {
 
                     // Omit method body text.
 
-                    if ( memberIndex == 0 && ! valueHasBody( object ) || 
-                            memberIndex == 1 && names[0] == "body" ) {
+                    if ( markers.memberIndex == 0 && ! valueHasBody( object ) ||
+                            markers.memberIndex == 1 && names[0] == "body" ) {
                         return "...";
                     }
 
@@ -5571,7 +5501,7 @@ if ( ! childComponent.source ) {
 
                     // Omit child component descriptors.
 
-                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
+                    if ( markers.memberIndex == 0 && componentIsDescriptor( object ) ) {
                         return {};
                     }
 
@@ -5581,8 +5511,8 @@ if ( ! childComponent.source ) {
 
                     // Shorten script text.
 
-                    if ( memberIndex == 0 && ! valueHasType( object ) || 
-                            memberIndex == 1 && names[0] == "text" ) {
+                    if ( markers.memberIndex == 0 && ! valueHasType( object ) ||
+                            markers.memberIndex == 1 && names[0] == "text" ) {
                         return "...";
                     }
 
@@ -5595,11 +5525,53 @@ if ( ! childComponent.source ) {
 
         // -- resolvedDescriptorTransformation -----------------------------------------------------
 
-        /// vwf/utility/transform() transformation function to ...
+        /// vwf/utility/transform() transformation function to resolve relative URIs in a component
+        /// descriptor.
         /// 
         /// @name module:vwf~resolvedDescriptorTransformation
 
         var resolvedDescriptorTransformation = function( object, names, depth, baseURI ) {
+
+            // Get our bearings at the current recusion level.
+
+            var markers = descriptorMarkers( object, names, depth );
+
+            // Resolve all the URIs.
+
+            switch ( markers.containerName ) {
+
+                case "extends":
+                case "implements":
+                case "source":
+                case "children":
+
+                    if ( markers.memberIndex == 0 && componentIsURI( object ) ) {
+                        return require( "vwf/utility" ).resolveURI( object, baseURI );
+                    }
+
+                    break;
+
+                case "scripts":
+
+                    if ( markers.memberIndex == 1 && names[0] == "source" ) {
+                        return require( "vwf/utility" ).resolveURI( object, baseURI );
+                    }
+
+                    break;
+
+            }
+
+            return object;
+        };
+
+        // -- descriptorMarkers --------------------------------------------------------------------
+
+        /// Locate the closest container (`properties`, `methods`, `events`, `children`) and
+        /// contained member in a `vwf/utility/transform` iterator call on a component descriptor.
+        /// 
+        /// @name module:vwf~descriptorMarkers
+
+        var descriptorMarkers = function( object, names, depth ) {
 
             // Find the index of the lowest nested component in the names list.
 
@@ -5686,32 +5658,13 @@ if ( ! childComponent.source ) {
 
             }
 
-            // Transform the object at the current recusion level.
+            return {
+                containerIndex: containerIndex,
+                containerName: containerName,
+                memberIndex: memberIndex,
+                memberName: memberName,
+            };
 
-            switch ( containerName ) {
-
-                case "extends":
-                case "implements":
-                case "source":
-                case "children":
-
-                    if ( memberIndex == 0 && componentIsURI( object ) ) {
-                        return require( "vwf/utility" ).resolveURI( object, baseURI );
-                    }
-
-                    break;
-
-                case "scripts":
-
-                    if ( memberIndex == 1 && names[0] == "source" ) {
-                        return require( "vwf/utility" ).resolveURI( object, baseURI );
-                    }
-
-                    break;
-
-            }
-
-            return object;
         };
 
         /// Locate nodes matching a search pattern. {@link module:vwf/api/kernel.find} describes the
