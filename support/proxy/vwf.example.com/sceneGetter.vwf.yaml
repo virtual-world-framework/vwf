@@ -25,11 +25,10 @@ properties:
         //  we want to make sure that we don't incorrectly set this.scene, so 
         //  just short-circuit and return undefined.
         if ( this.scene === this ) {
-          return undefined;
-        }
-        if ( !this.scene ) {
-          this.logger.errorx( "scene.get", "Could not find scene node: '" + sp +
-                                           "'" );
+          this.scene  = undefined;
+        } else if ( !this.scene ) {
+          this.logger.errorx( "scene.get", 
+                              "Could not find scene node: '" + sp + "'" );
         }
       }
       return this.scene;
