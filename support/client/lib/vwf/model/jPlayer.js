@@ -204,11 +204,6 @@ define( [
                         value = node.loop;
                         break;
 
-                    // case "z_index":
-                    //     console.log("Z-index: " + propertyValue);
-                    //     node.z_index = propertyValue;
-                    //     break;
-
                     case "playerDivId":
                         if ( propertyValue === node.playerDivId ) {
                             break;
@@ -242,6 +237,9 @@ define( [
                             supplied: fileTypes,
                             size: { width: "1024", height: "768" }
                         } );
+
+                        $("#jquery_jplayer_1").bind($.jPlayer.event.ended, videoEndedCallback );
+
                         value = node.playerDivId;
                         break;
                     case "containerDivId":
@@ -345,11 +343,16 @@ define( [
                         node.jPlayerElement.jPlayer( "clearMedia" );
                         break;
 
-                    case "setEndedCallback":
-                        // console.log("Input: " + methodParameters[0]);
-                        // node.jPlayerElement.bind($.jPlayer.event.ended, methodParameters[0] );
-                        $("#jquery_jplayer_1").bind($.jPlayer.event.ended, methodParameters[0] );
-                        break;
+                    // case "testFireEvent":
+                    //     vwf.fireEvent(nodeID, "videoEnded");
+                    //     // this.videoEnded();
+                    //     break;
+
+                    // case "setEndedCallback":
+                    //     // console.log("Input: " + methodParameters[0]);
+                    //     // node.jPlayerElement.bind($.jPlayer.event.ended, methodParameters[0] );
+                    //     $("#jquery_jplayer_1").bind($.jPlayer.event.ended, methodParameters[0] );
+                    //     break;
 
                 }  
 
@@ -358,6 +361,13 @@ define( [
         },
 
     } );
+
+    function videoEndedCallback(){
+        var mediaManagerID = vwf.find( undefined, "/mediaManager" )[ 0 ];
+        var videoManagerID = vwf.find( mediaManagerID, "videoManager" ) [ 0 ];
+        console.log("Video ended callback in driver fired!");
+        vwf.fireEvent(videoManagerID, "videoEnded");
+    }
 
     function getPrototypes( kernel, extendsID ) {
         var prototypes = [];
