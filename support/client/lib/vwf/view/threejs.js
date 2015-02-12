@@ -293,7 +293,10 @@ define( [ "module",
 
             // Pay attention to these properties for all nodes
             if ( propertyName == "transform" ) {
+            {
                 receiveModelTransformChanges( nodeID, propertyValue );
+                this.nodes[nodeID].lastTransformStep = vwf.time(); //keep track of the last time a set transform occured
+            }
             } else if ( propertyName == "lookAt") {
 
                 var node = this.state.nodes[ nodeID ];
