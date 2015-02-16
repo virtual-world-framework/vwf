@@ -1,4 +1,4 @@
-/// vwf/model/jPlayer.js is a sound driver
+/// vwf/model/jPlayer.js is a sound/video driver
 /// 
 /// @module vwf/model/jPlayer
 /// @requires vwf/model
@@ -203,6 +203,7 @@ define( [
                         setLoop( node, propertyValue );
                         value = node.loop;
                         break;
+
                     case "playerDivId":
                         if ( propertyValue === node.playerDivId ) {
                             break;
@@ -233,8 +234,14 @@ define( [
                                     setControlDivId( node, node.containerDivId );
                                 }
                             },
-                            supplied: fileTypes
+                            supplied: fileTypes,
+                            // size: { width: node.playmoderDivSize[0], height: node.playerDivSize[1] }
                         } );
+
+                        if ( node.playerDivId ) {
+                            $( "#" + node.playerDivId ).bind($.jPlayer.event.ended, videoEndedCallback );
+                        }
+                        
                         value = node.playerDivId;
                         break;
                     case "containerDivId":
@@ -244,6 +251,14 @@ define( [
                     case "posterImageUrl":
                         setPosterImageUrl( node, propertyValue );
                         value = node.posterImageUrl;
+                        break;
+                    case "playerSize":
+                        setPlayerSize( node, propertyValue );
+                        value = node.playerSize;
+                        break;
+                    case "containerSize":
+                        setContainerSize( node, propertyValue );
+                        value = node.containerSize;
                         break;
                     default:
                         break;
@@ -334,6 +349,9 @@ define( [
                         node.jPlayerElement.jPlayer( "stop" );
                         break;
 
+                    case "clearMedia":
+                        node.jPlayerElement.jPlayer( "clearMedia" );
+                        break;
                 }  
 
             }
@@ -341,6 +359,13 @@ define( [
         },
 
     } );
+
+    function videoEndedCallback(){
+        var mediaManagerID = vwf.find( undefined, "/mediaManager" )[ 0 ];
+        var videoManagerID = vwf.find( mediaManagerID, "videoManager" ) [ 0 ];
+        console.log("Video ended callback in driver fired!");
+        vwf.fireEvent(videoManagerID, "videoEnded");
+    }
 
     function getPrototypes( kernel, extendsID ) {
         var prototypes = [];
@@ -403,7 +428,7 @@ define( [
                     }
                     break;
                 case "video":
-                    if ( url.search( "data:video/mp4" ) === 0 ) {
+                    if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
                         mediaObject = {
                             m4v: url,
                             poster: node.posterImageUrl
@@ -454,4 +479,14 @@ define( [
             } );
         }
     }
+
+    function setPlayerSize( node, playerSize ){
+        node.playerSize = playerSize;
+        node.jPlayerElement.jPlayer( "option", "size", {width: playerSize[0], height: playerSize[1]});
+    }
+
+    function setContainerSize( node, containerSize ){
+        node.containerSize = containerSize;
+    }
+
 } );
