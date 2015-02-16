@@ -1647,13 +1647,13 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         // Do not emulate mouse events on touch
         Hammer.NO_MOUSEEVENTS = true;
 
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("touch release", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("hold tap doubletap", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("drag dragstart dragend dragup dragdown dragleft dragright", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("swipe swipeup swipedown swipeleft,swiperight", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("transform transformstart transformend", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("rotate", self.handleHammer);
-        $(canvas).hammer({ drag_lock_to_axis: false }).on("pinch pinchin pinchout", self.handleHammer);
+        // $(canvas).hammer({ drag_lock_to_axis: false }).on("touch release", self.handleHammer);
+        // $(canvas).hammer({ drag_lock_to_axis: false }).on("hold tap doubletap", self.handleHammer);
+        // $(canvas).hammer({ drag_lock_to_axis: false }).on("drag dragstart dragend dragup dragdown dragleft dragright", self.handleHammer);
+        // $(canvas).hammer({ drag_lock_to_axis: false }).on("swipe swipeup swipedown swipeleft,swiperight", self.handleHammer);
+        // $(canvas).hammer({ drag_lock_to_axis: false }).on("transform transformstart transformend", self.handleHammer);
+        // $(canvas).hammer({ drag_lock_to_axis: false }).on("rotate", self.handleHammer);
+        // $(canvas).hammer({ drag_lock_to_axis: false }).on("pinch pinchin pinchout", self.handleHammer);
 
         canvas.onmousedown = function( e ) {
 
