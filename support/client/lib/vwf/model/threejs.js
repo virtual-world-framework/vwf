@@ -73,8 +73,9 @@ define( [ "module",
 
             checkCompatibility.call(this);
 
-            this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
-            this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
+            this.state.scenes = {}; 
+            this.state.nodes = {}; 
+            this.state.animatedNodes = {};
             this.state.prototypes = {}; 
             this.state.kernel = this.kernel.kernel.kernel; 
             this.state.lights = {};           
@@ -110,7 +111,8 @@ define( [ "module",
                 "properties": false,
                 "setting": false,
                 "getting": false,
-                "prototypes": false
+                "prototypes": false,
+                "loading": false
             };
         },
 
@@ -3547,7 +3549,10 @@ define( [ "module",
         var threeModel = this;
         var sceneNode = this.state.scenes[ this.kernel.application() ];
         var parentObject3 = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
-        //console.info( "---- loadAsset( "+parentNode.name+", "+node.name+", "+childType+" )" );
+        
+        if ( this.debug.loading  ) {
+            this.logger.infox( "loadAsset", parentNode.ID, node.ID, childType );
+        }  
 
         node.assetLoaded = function( geometry , materials) { 
             //console.info( "++++ assetLoaded( "+parentNode.name+", "+node.name+", "+childType+" )" );
