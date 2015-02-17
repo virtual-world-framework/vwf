@@ -338,6 +338,10 @@ define( [
                 switch( methodName ) {
                     
                     case "play":
+
+                        if( methodParameters ){
+                            vwf.setProperty( node.ID, "url", methodParameters );
+                        }
                         node.jPlayerElement.jPlayer( "play" ); 
                         break;
 
