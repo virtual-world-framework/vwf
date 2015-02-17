@@ -162,7 +162,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     broadcast "time" => session[:transport].time,
       "action" => "createChild",
-      "parameters" => [ "http-vwf-example-com-clients-vwf", id, {} ]
+      "parameters" => [ "http://vwf.example.com/clients.vwf", id, {} ]
 
   end
 
@@ -268,7 +268,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     broadcast "time" => session[:transport].time,
       "action" => "deleteChild",
-      "parameters" => [ "http-vwf-example-com-clients-vwf", id ]
+      "parameters" => [ "http://vwf.example.com/clients.vwf", id ]
 
     # Just log the disconnection if no clients are waiting for replication.
 

@@ -112,9 +112,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     glgeKeys: new GLGE.KeyInput(),
                     type: childExtendsID,
                     camera: {
-                        ID: undefined,
-                        defaultCamID: "http-vwf-example-com-camera-vwf-camera",
-                        glgeCameras: {},
+                        ID: undefined
                     },
                     xmlColladaObjects: [],
                     srcColladaObjects: [],
@@ -124,7 +122,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 };
 				
                 if ( sceneNode.glgeScene.camera ) {
-                    sceneNode.camera.glgeCameras[ sceneNode.camera.defaultCamID ] = sceneNode.glgeScene.camera;
                     sceneNode.glgeScene.camera.name = "camera";
                     this.state.cameraInUse = sceneNode.glgeScene.camera;
                     initCamera.call( this, sceneNode.glgeScene.camera );
@@ -149,7 +146,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
            
             } else if ( prototypes && isGlgeCameraDefinition.call( this, prototypes ) ) {
                 if ( childName !== undefined ) {
-                    var camName = childID.substring( childID.lastIndexOf( '-' ) + 1 );
+                    var camName = this.kernel.name( childID );
                     var sceneNode = this.state.scenes[ this.state.sceneRootID ];
                     node = this.state.nodes[childID] = {
                         name: childName,
@@ -162,24 +159,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         sourceType: childType,
                     };
 
-                    if ( nodeID != 0 && !node.glgeObject ) {
+                    if ( nodeID === this.kernel.application() && childName === "camera" ) {
+
+                    } else if ( node.glgeObject === undefined ){
                         createCamera.call( this, nodeID, childID, childName );
                     }
-
-                    if ( sceneNode && sceneNode.camera ) {
-                        if ( childID == sceneNode.camera.defaultCamID ) {
-                            if ( !sceneNode.camera.glgeCameras[ childID ] ) {
-                                var cam = new GLGE.Camera();
-                                sceneNode.camera.glgeCameras[ childID ] = cam;
-                                initCamera.call( this, cam );
-                            }
-                            node.name = camName;
-                            node.glgeObject = sceneNode.camera.glgeCameras[ childID ];
-                      
-                        } else if ( node.glgeObject ) {
-                            sceneNode.camera.glgeCameras[ childID ] = node.glgeObject;
-                        }
-                    } 
                 }              
             } else if ( prototypes && isGlgeLightDefinition.call( this, prototypes ) ) {
                 if ( childName !== undefined ) {
@@ -327,29 +311,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     };
                     findMaterial.call( this, nodeID, childName, node );
                 }
-            } else {
-
-                switch ( childExtendsID ) {
-                    case "appscene-vwf":
-                    case "index-vwf":
-                    case "http://vwf.example.com/node.vwf":
-                    case "http-vwf-example-com-node2-vwf":
-                    case "http-vwf-example-com-scene-vwf":
-                    case "http-vwf-example-com-navscene-vwf":
-                    case undefined:
-                        break;
-
-                    default:
-                        node = this.state.nodes[ childID ] = {
-                            name: childName,
-                            glgeObject: glgeChild,
-                            ID: childID,
-                            parentID: nodeID,
-                            type: childExtendsID,
-                            sourceType: childType,
-                        };
-                        break;
-                 }  // end of switch
             } // end of else
 
             // If we do not have a load a model for this node, then we are almost done, so we can update all
@@ -1878,27 +1839,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 glgeObjName = name( assetObj );
                 if ( glgeObjName == objName ) {
                     switch ( type ) {
-                        case "http-vwf-example-com-mesh-vwf":
+                        case "http://vwf.example.com/mesh.vwf":
                             if ( assetObj.constructor == GLGE.Object )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-node3-vwf":
+                        case "http://vwf.example.com/node3.vwf":
                             if ( ( assetObj.constructor == GLGE.Group ) || ( assetObj.constructor == GLGE.Object ) )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-light-vwf":
+                        case "http://vwf.example.com/light.vwf":
                             if ( assetObj.constructor == GLGE.Light )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-camera-vwf":
+                        case "http://vwf.example.com/camera.vwf":
                             if ( assetObj.constructor == GLGE.Camera )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-scene-vwf":
+                        case "http://vwf.example.com/scene.vwf":
                             if ( assetObj.constructor == GLGE.Scene )
                                 obj = assetObj;
                             break;
-                        case "http-vwf-example-com-particleSystem-vwf":
+                        case "http://vwf.example.com/particleSystem.vwf":
                             if ( assetObj.constructor == GLGE.ParticleSystem )
                                 obj = assetObj;
                             break;
@@ -1966,30 +1927,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         if ( sceneNode && parent ) {
             var child = this.state.nodes[childID];
             if ( child ) {
-                var cam;
-                if ( sceneNode.camera && sceneNode.camera.glgeCameras ) {
-                    if ( !sceneNode.camera.glgeCameras[childID] ) {
-                        cam = new GLGE.Camera();
-                        initCamera.call( this, cam );
-                        sceneNode.camera.glgeCameras[childID] = cam;
-                    } else {
-                        cam = sceneNode.camera.glgeCameras[childID];
-                    }
-                    var glgeParent = parent.glgeObject;
-                    if ( glgeParent && ( glgeParent instanceof GLGE.Scene || glgeParent instanceof GLGE.Group )) {
-                        glgeParent.addObject( cam );
-                    }
-
-                    var glgeParent = parent.glgeObject;
-                    if ( glgeParent && ( glgeParent instanceof GLGE.Scene || glgeParent instanceof GLGE.Group )) {
-                        glgeParent.addObject( cam );
-                    }
-
-                    child.name = childName;
-                    child.glgeObject = cam;
-                    child.uid = child.glgeObject.uid;
-                    cam.name = childName;
+                var cam = new GLGE.Camera();;
+                initCamera.call( this, cam );
+                var glgeParent = parent.glgeObject;
+                if ( glgeParent && ( glgeParent instanceof GLGE.Scene || glgeParent instanceof GLGE.Group )) {
+                    glgeParent.addObject( cam );
                 }
+
+                child.name = childName;
+                child.glgeObject = cam;
+                child.uid = child.glgeObject.uid;
+                cam.name = childName;
             }
         }  
 
@@ -2307,7 +2255,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-navscene-vwf" || prototypes[i] == "http-vwf-example-com-scene-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/navscene.vwf" || prototypes[i] == "http://vwf.example.com/scene.vwf" );
             }
         }
 
@@ -2318,7 +2266,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-node3-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/node3.vwf" );
             }
         }
 
@@ -2329,7 +2277,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-camera-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/camera.vwf" );
             }
         }
 
@@ -2340,7 +2288,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-light-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/light.vwf" );
             }
         }
 
@@ -2351,7 +2299,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-particlesystem-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/particlesystem.vwf" );
             }
         }
 
@@ -2362,7 +2310,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundGlge = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGlge; i++ ) {
-                foundGlge = ( prototypes[i] == "http-vwf-example-com-material-vwf" );    
+                foundGlge = ( prototypes[i] == "http://vwf.example.com/material.vwf" );
             }
         }
 

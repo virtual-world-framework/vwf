@@ -163,13 +163,16 @@ define( [ "module",
             //how/when does the model set the state object? 
             if ( this.state.scenes[ childID ] )
             {                
-                this.canvasQuery = $(this.rootSelector).append("<canvas id='" + this.state.sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
+                this.canvasQuery = $(this.rootSelector).append("<canvas id='" + this.kernel.application() + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
                 ).children(":last");
                 
                 initScene.call(this,this.state.scenes[childID]);
             }
-            else if (this.state.scenes[ this.kernel.application() ] && this.state.scenes[ this.kernel.application() ].camera.ID == childID) {
-                setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
+            else if ( this.state.scenes[ this.kernel.application() ] ) {
+                var sceneNode = this.state.scenes[ this.kernel.application() ];
+                if ( sceneNode.camera.ID == childID ) {
+                    setActiveCamera.call( this, sceneNode.camera.ID );    
+                }
             }
         
             if(this.state.nodes[childID] && this.state.nodes[childID].threeObject instanceof THREE.Object3D) {
@@ -265,6 +268,7 @@ define( [ "module",
         satProperty: function ( nodeID, propertyName, propertyValue ) {         
             // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
             // rotationSpeed
+
             if ( navObject && ( nodeID == navObject.ID ) ) {
                 if ( propertyName == "navmode" ) {
                     navmode = propertyValue;
@@ -285,7 +289,7 @@ define( [ "module",
                 } else if ( propertyName == "boundingBox" ) {
                     boundingBox = propertyValue;
                 } else if ( propertyName == "activeCamera" ) {
-                    setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
+                    setActiveCamera.call( this, this.state.scenes[ this.kernel.application() ].camera.ID );
                 } else if ( propertyName == "usersShareView" ) {
                     usersShareView = propertyValue;
                 }
@@ -311,7 +315,7 @@ define( [ "module",
         gotProperty: function ( nodeID, propertyName, propertyValue ) { 
             var clientThatGotProperty = this.kernel.client();
             var me = this.kernel.moniker();
-            var sceneRootID = this.state.sceneRootID;
+            var sceneRootID = this.kernel.application();
             if ( clientThatGotProperty == me ) {
                 if ( propertyName == "owner") {
 
@@ -354,7 +358,7 @@ define( [ "module",
                                     // Retrieve the userObject property so we may create a navigation object from 
                                     // it for this user (the rest of the logic is in the gotProperty call for 
                                     // userObject)
-                                    this.kernel.getProperty( sceneRootID, "userObject" );
+                                    this.kernel.getProperty( this.kernel.application(), "userObject" );
                                     userObjectRequested = true;
                                 }
                             }
@@ -384,7 +388,7 @@ define( [ "module",
     
                         // TODO: The callback function is commented out because callbacks have not yet been 
                         //       implemented for createChild - see workaround in initializedNode
-                        this.kernel.createChild( sceneRootID, navObjectName, userObject, undefined, undefined /*,
+                        this.kernel.createChild( this.kernel.application(), navObjectName, userObject, undefined, undefined /*,
                                                  function( nodeID ) {
                             controlNavObject( this.state.nodes[ nodeID ] );
                         } */ );
@@ -1166,7 +1170,7 @@ define( [ "module",
 
                     if ( self.applicationWantsPointerEvents ) {
                         newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
-                        newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
+                        newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.kernel.application();
                     } else {
                         newPick = undefined;
                         newPickId = undefined;
@@ -1384,8 +1388,8 @@ define( [ "module",
     // -- initInputEvents ------------------------------------------------------------------------
 
     function initInputEvents( canvas ) {
-        var sceneNode = this.state.scenes[this.state.sceneRootID], child;
-        var sceneID = this.state.sceneRootID;
+        var sceneID = this.kernel.application();
+        var sceneNode = this.state.scenes[ sceneID ], child;
         var sceneView = this;
 
         var touchID = undefined;
@@ -1988,7 +1992,7 @@ define( [ "module",
             sceneView.keyStates.mods.ctrl = event.ctrlKey;
             sceneView.keyStates.mods.meta = event.metaKey;
 
-            var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+            var sceneNode = sceneView.state.scenes[ sceneView.kernel.application() ];
             if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
                 //var params = JSON.stringify( sceneView.keyStates );
                 sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
@@ -2023,7 +2027,7 @@ define( [ "module",
             sceneView.keyStates.mods.ctrl = event.ctrlKey;
             sceneView.keyStates.mods.meta = event.metaKey;
 
-            var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
+            var sceneNode = sceneView.state.scenes[ sceneView.kernel.application() ];
             if (validKey && sceneNode) {
                 //var params = JSON.stringify( sceneView.keyStates );
                 sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
@@ -3115,7 +3119,7 @@ define( [ "module",
 
     function findNavObject() {
         // Find the navigable objects in the scene
-        var sceneRootID = self.state.sceneRootID;
+        var sceneRootID = self.kernel.application();
         var navObjectIds = self.kernel.find( sceneRootID,
                                              ".//element(*,'http://vwf.example.com/navigable.vwf')" );
         numNavCandidates = navObjectIds.length;
@@ -3132,7 +3136,6 @@ define( [ "module",
             vwf_view.kernel.getProperty( sceneRootID, "boundingBox" );
             vwf_view.kernel.getProperty( sceneRootID, "userObject" );
             userObjectRequested = true;
-
         }
     }
 
@@ -3168,11 +3171,13 @@ define( [ "module",
     }
 
     function inputHandleScroll( wheelDelta, distanceToTarget ) {
-        var navThreeObject = navObject.threeObject;
-        var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
-        self.handleScroll( wheelDelta, navObject, navmode, rotationSpeed, translationSpeed, distanceToTarget );
-        setTransformFromWorldTransform( navThreeObject );
-        callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+        if ( navObject && navObject.threeObject ) {
+            var navThreeObject = navObject.threeObject;
+            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+            self.handleScroll( wheelDelta, navObject, navmode, rotationSpeed, translationSpeed, distanceToTarget );
+            setTransformFromWorldTransform( navThreeObject );
+            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+        }
     }
 
     function inputMoveNavObject( msSinceLastFrame ) {
@@ -3662,16 +3667,14 @@ define( [ "module",
     }
 
     function setActiveCamera( cameraID ) {
-        var sceneRootID = this.state.sceneRootID;
-        var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
-        if( modelCameraInfo.threeJScameras[ cameraID ] ) {
-            // If the view is currently using the model's activeCamera, update it to the new activeCamera
-            if ( usersShareView ) {
-                cameraNode = this.state.nodes[cameraID];
-                this.state.cameraInUse = cameraNode.threeObject;
-                var canvas = this.canvasQuery[ 0 ];
-                this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
-            }
+        if ( usersShareView && this.state.nodes[ cameraID ] !== undefined ) {
+            var sceneID = this.kernel.application();
+            var sceneNode = this.state.scenes[ sceneID ];
+            //var cameras = this.kernel.find( sceneID, "./element(*,'http://vwf.example.com/camera.vwf')" );            
+            cameraNode = this.state.nodes[ cameraID ];
+            this.state.cameraInUse = cameraNode.threeObject;
+            var canvas = this.canvasQuery[ 0 ];
+            this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
         }
     }
 
