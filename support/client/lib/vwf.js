@@ -324,7 +324,7 @@
                         deps: [ "vwf/model/blockly/blockly_compressed" ]
                     },
                     "vwf/model/hud/hud": {
-                        exports: "HUD2"
+                        exports: "HUD"
                     }
                 }
             };
