@@ -73,8 +73,9 @@ define( [ "module",
 
             checkCompatibility.call(this);
 
-            this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
-            this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
+            this.state.scenes = {}; 
+            this.state.nodes = {}; 
+            this.state.animatedNodes = {};
             this.state.prototypes = {}; 
             this.state.kernel = this.kernel.kernel.kernel; 
             this.state.lights = {};           
@@ -110,7 +111,8 @@ define( [ "module",
                 "properties": false,
                 "setting": false,
                 "getting": false,
-                "prototypes": false
+                "prototypes": false,
+                "loading": false
             };
         },
 
@@ -807,7 +809,7 @@ define( [ "module",
 
                         //Threejs does not currently support auto tracking the lookat,
                         //instead, we'll take the position of the node and look at that.
-                        if ( typeof lookAtValue == 'string' ) {
+                        if ( utility.isString( lookAtValue ) ) {
                             
                             // We use '' to denote that there is no object to look at.
                             // Therefore, we only care if it is something other than that.
@@ -1912,7 +1914,7 @@ define( [ "module",
             if ( node.isUniformObject ) {
                 value = {};
                 for ( var prop in threeObject ) {
-                    if ( ! threeObject[ prop ] instanceof Function ) {
+                    if ( ! utility.isFunction( threeObject[ prop ] ) ) {
                         if ( threeObject[ prop ].type !== 't' ) {
                             value[ prop ] = {
                                 "type": threeObject[ prop ].type,
@@ -2298,7 +2300,7 @@ define( [ "module",
 
                         objectIDs = parameters[5];
 
-                    } else if ( typeof parameters[5] === "string" ) {
+                    } else if ( utility.isString( parameters[5] ) ) {
 
                         objectIDs = new Array();
                         objectIDs.push( parameters[5] );
@@ -3199,7 +3201,10 @@ define( [ "module",
         var threeModel = this;
         var sceneNode = this.state.scenes[ this.kernel.application() ];
         var parentObject3 = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
-        //console.info( "---- loadAsset( "+parentNode.name+", "+node.name+", "+childType+" )" );
+        
+        if ( this.debug.loading  ) {
+            this.logger.infox( "loadAsset", parentNode.ID, node.ID, childType );
+        }  
 
         node.assetLoaded = function( geometry , materials) { 
             //console.info( "++++ assetLoaded( "+parentNode.name+", "+node.name+", "+childType+" )" );
@@ -5228,7 +5233,7 @@ define( [ "module",
 
         //console.log( [ "loadTexture: ", JSON.stringify( def ) ] );
 
-        if ( typeof def == 'string' ) {
+        if ( utility.isString( def ) ) {
             url = def;    
         } else {
             url = def.url;

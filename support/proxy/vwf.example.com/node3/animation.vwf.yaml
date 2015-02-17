@@ -416,5 +416,5 @@ methods:
       }
       this.transformTo( stopTransform, duration ); //@ sourceURL=node3.animation.worldTransformTo.vwf
 
-event: 
+events: 
   changingTransformFromView:
