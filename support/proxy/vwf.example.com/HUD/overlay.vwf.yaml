@@ -1,6 +1,5 @@
 extends: http://vwf.example.com/node.vwf
 properties:
-  drawRate: 30
   visible: true
 methods:
 events:
