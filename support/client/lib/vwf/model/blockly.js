@@ -420,7 +420,7 @@ define( [ "module", "vwf/model", "vwf/utility",
         var found = false;
         if ( implementsIDs ) {
             for ( var i = 0; i < implementsIDs.length && !found; i++ ) {
-                found = ( implementsIDs[i] == "http-vwf-example-com-blockly-controller-vwf" ); 
+                found = ( implementsIDs[i] == "http://vwf.example.com/blockly/controller.vwf" );
             }
         }
        return found;

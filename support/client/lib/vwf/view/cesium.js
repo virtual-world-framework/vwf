@@ -379,7 +379,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium.vwf" );
             }
         }
 
@@ -391,7 +391,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-sun-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/sun.vwf" );
             }
         }
 
@@ -403,7 +403,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-atmosphere-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/atmosphere.vwf" );
             }
         }
 
@@ -415,7 +415,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundCesium; i++ ) {
-                foundCesium = ( prototypes[i] == "http-vwf-example-com-cesium-skybox-vwf" );    
+                foundCesium = ( prototypes[i] == "http://vwf.example.com/cesium/skybox.vwf" );
             }
         }
 
