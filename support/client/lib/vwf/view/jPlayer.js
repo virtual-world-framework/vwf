@@ -53,10 +53,6 @@ define( [
                 var node = this.state.nodes[nodeID];
                 if( node && propertyValue ){
                     switch( propertyName ){
-                        case "z_index":
-                            var containerSelector = "#" + node.containerDivId;
-                            $(containerSelector).css('z-index', propertyValue);
-                            break;
                         case "containerDivSize":
                             node.containerDivSize = propertyValue;
                             break;
