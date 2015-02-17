@@ -68,7 +68,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
                 node = this.state.elements[ nodeID ];
                 if ( propertyName === "images" ) {
                     node.properties.images = loadImages( node, propertyValue );
-                } else if ( node.drawProperties.hasOwnProperty( propertyName ) ) {
+                } else if ( node.initialized && node.drawProperties.hasOwnProperty( propertyName ) ) {
                     node.viewObject[ propertyName ] = propertyValue;
                 }
             }
@@ -148,8 +148,14 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
             // If the image property doesn't exist or the image hasn't been loaded or the image src
             // has changed, then we need to load the image. Otherwise, just copy the old image data
             if ( !oldImage || !( oldImage.value instanceof Image ) || oldImage.src !== newImage.src ) {
-                newImage.value = new Image();
-                newImage.value.src = newImage.src;
+                if ( oldImage.value instanceof Image ) {
+                    newImage.value = oldImage.value;
+                } else {
+                    newImage.value = new Image();
+                }
+                if ( newImage.src ) {
+                    newImage.value.src = newImage.src;
+                }
             } else {
                 newImage = oldImage;
             }
