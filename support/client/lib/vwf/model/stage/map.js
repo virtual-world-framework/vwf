@@ -49,8 +49,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- createNode ---------------------------------------------------------------------------
 
-        createNode: function( nodeComponent, nodeAnnotation, callback /* ( nodeID ) */ ) {
-            return this.kernel.createNode( nodeComponent, nodeAnnotation, callback );   // TODO remap callback parameter (nodeAnnotation is optional and callback may be second argument)
+        createNode: function( nodeComponent, nodeAnnotation, baseURI, callback /* ( nodeID ) */ ) {
+            return this.kernel.createNode( nodeComponent, nodeAnnotation, baseURI, callback );   // TODO remap callback parameter (nodeAnnotation and baseURI are optional and callback may be second or third argument)
         },
 
         // -- deleteNode ---------------------------------------------------------------------------
@@ -201,8 +201,8 @@ define( [ "module", "vwf/model/stage" ], function( module, stage ) {
 
         // -- uri ----------------------------------------------------------------------------------
 
-        uri: function( node ) {
-            return this.kernel.uri( this.model_to_kernel[this.object_id(node)] || node );
+        uri: function( node, searchAncestors, initializedOnly ) {
+            return this.kernel.uri( this.model_to_kernel[this.object_id(node)] || node, searchAncestors, initializedOnly );
         },
 
         // -- name ---------------------------------------------------------------------------------
