@@ -15,4 +15,10 @@ properties:
 methods:
   draw:
 events:
+  onClick:
+  onMouseDown:
+  onMouseUp:
+  onMouseMove:
+  onMouseOver:
+  onMouseOut:
 scripts:

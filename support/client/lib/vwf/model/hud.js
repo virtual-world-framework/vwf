@@ -126,7 +126,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     return undefined;
                 }
             }
-        },
+        }
 
     } );
 
