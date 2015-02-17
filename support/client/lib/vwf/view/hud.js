@@ -99,14 +99,35 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
         var drawFunction = function( context, position ) { eval( node.draw ) };
         var element = new HUD.Element( node.name, drawFunction, props.width, props.height, props.visible );
         var i, keys;
+        // Add custom properties to the element
         keys = Object.keys( drawProps );
         for ( i = 0; i < keys.length; i++ ) {
             element[ keys[ i ] ] = drawProps[ keys[ i ] ];
         }
+        // Add images to the element as properties
         keys = Object.keys( props.images );
         for ( i = 0; i < keys.length; i++ ) {
             element[ keys[ i ] ] = props.images[ keys[ i ] ].value;
         }
+        // Add event listeners to the element
+        element.onClick = function( event ) {
+            vwf_view.kernel.fireEvent( node.id, "onClick" );
+        };
+        element.onMouseDown = function( event ) {
+            vwf_view.kernel.fireEvent( node.id, "onMouseDown" );
+        };
+        element.onMouseUp = function( event ) {
+            vwf_view.kernel.fireEvent( node.id, "onMouseUp" );
+        };
+        element.onMouseMove = function( event ) {
+            vwf_view.kernel.fireEvent( node.id, "onMouseMove" );
+        };
+        element.onMouseOver = function( event ) {
+            vwf_view.kernel.fireEvent( node.id, "onMouseOver" );
+        };
+        element.onMouseOut = function( event ) {
+            vwf_view.kernel.fireEvent( node.id, "onMouseOut" );
+        };
         return element;
     }
 
