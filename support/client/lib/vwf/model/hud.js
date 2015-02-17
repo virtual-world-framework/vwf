@@ -6,10 +6,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     return model.load( module, {
 
-        // == Module Definition ====================================================================
-
-        // -- initialize ---------------------------------------------------------------------------
-
         initialize: function() {
             var lastKernel;
             this.state.overlays = {};
@@ -22,29 +18,40 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             logger = this.logger;
         },
 
-        // == Model API ============================================================================
-
-        // -- creatingNode -------------------------------------------------------------------------
-
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             var node = undefined;
-            var protos = getPrototypes.call( this, kernel, childExtendsID );
+            var protos = getPrototypes.call( this, this.state.kernel, childExtendsID );
 
             if ( protos && isOverlay( protos ) ) {
 
                 node = this.state.overlays[ childID ] = {
+                    "id": childID,
+                    "name": childName,
                     "elements": {},
-                    "properties": {},
+                    "properties": {
+                        "visible": undefined
+                    },
                     "initialized": false
                 };
 
             } else if ( protos && isElement( protos ) ) {
-
                 node = this.state.elements[ childID ] = {
-                    "overlay": this.state.overlays[ node.parentID ],
-                    "properties": {},
+                    "id": childID,
+                    "name": childName,
+                    "overlay": this.state.overlays[ nodeID ],
+                    "properties": {
+                        "images": undefined,
+                        "width": undefined,
+                        "height": undefined,
+                        "visible": undefined,
+                        "enabled": undefined,
+                        "alignH": undefined,
+                        "alignV": undefined,
+                        "offsetH": undefined,
+                        "offsetV": undefined
+                    },
                     "drawProperties": {},
                     "initialized": false
                 };
@@ -54,48 +61,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }
         },
 
-        // -- initializingNode ---------------------------------------------------------------------
-
-        initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-            childSource, childType, childIndex, childName ) {
-
-            var node;
-
-            if ( this.state.overlays[ childID ] ) {
-
-                node = this.state.overlays[ childID ];
-                node.properties = {
-                    "drawRate": undefined,
-                    "visible": undefined
-                };
-
-            } else if ( this.state.elements[ childID ] ) {
-
-                node = this.state.elements[ childID ];
-                node.properties = {
-                      "images": undefined,
-                      "width": undefined,
-                      "height": undefined,
-                      "visible": undefined,
-                      "enabled": undefined,
-                      "alignH": undefined,
-                      "alignV": undefined,
-                      "offsetH": undefined,
-                      "offsetV": undefined
-                };
-                node.drawProperties = {};
-
-            }
-
-        },
-
-        // -- creatingProperty ---------------------------------------------------------------------
-
         creatingProperty: function( nodeID, propertyName, propertyValue ) {
             return this.initializingProperty( nodeID, propertyName, propertyValue );
         },
-
-        // -- initializingProperty -----------------------------------------------------------------
 
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
             var value = undefined;
@@ -114,34 +82,22 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             return value;
         },
 
-        // TODO: deletingProperty
-
-        // -- settingProperty ----------------------------------------------------------------------
-
         settingProperty: function( nodeID, propertyName, propertyValue ) {
             var node, value;
 
-            if ( this.state.overlays[ childID ] ) {
+            if ( this.state.overlays[ nodeID ] ) {
 
-                node = this.state.overlays[ childID ];
+                node = this.state.overlays[ nodeID ];
                 if ( node.properties.hasOwnProperty( propertyName ) ) {
                     node.properties[ propertyName ] = propertyValue;
                     value = propertyValue;
                 }
 
-            } else if ( this.state.elements[ childID ] ) {
+            } else if ( this.state.elements[ nodeID ] ) {
 
-                node = this.state.elements[ childID ];
+                node = this.state.elements[ nodeID ];
                 if ( node.properties.hasOwnProperty( propertyName ) ) {
-                    if ( node.initialized ) {
-                        switch ( propertyName ) {
-                            case "images":
-                                node.properties.images = loadImages( node, propertyValue );
-                                break;
-                        }
-                    } else {
-                        node.properties[ propertyName ] = propertyValue;
-                    }
+                    node.properties[ propertyName ] = propertyValue;
                 } else {
                     node.drawProperties[ propertyName ] = propertyValue;
                 }
@@ -152,13 +108,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             return value;
         },
 
-        // -- gettingProperty ----------------------------------------------------------------------
-
-        gettingProperty: function( nodeID, propertyName, propertyValue ) {
-        },
-
-        // -- creatingMethod ------------------------------------------------------------------------
-
         creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
             if ( this.state.elements[ nodeID ] ) {
                 var node = this.state.elements[ nodeID ];
@@ -166,9 +115,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     node.draw = methodBody;
                 }
             }
-        }
-
-        // -- callingMethod ------------------------------------------------------------------------
+        },
 
         callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
             if ( this.state.elements[ nodeID ] ) {
@@ -181,37 +128,38 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }
         },
 
-        // -- firingEvent --------------------------------------------------------------------------
-
-        firingEvent: function( nodeID, eventName, eventParameters ) {
-        },
-
     } );
 
-    function loadImages( node, images ) {
-        var keys = Object.keys( images );
-        var newImage, oldImage;
-        for ( var i = 0; i < keys.length; i++ ) {
-            newImage = images[ keys[ i ] ];
-            if ( !newImage.hasOwnProperty( "src" ) ) {
-                logger.errorx( "loadImages", "Image \"" + keys[ i ] + "\" is malformed! It " +
-                    "does not contain a \"src\" property! Skipping image load!" );
-                continue;
-            } else if ( !newImage.hasOwnProperty( "value" ) ) {
-                logger.warnx( "loadImages", "Image \"" + keys[ i ] + "\" does not contain a " +
-                    "\"value\" property! One will be generated automatically." );
-            }
-            oldImage = node.properties.images[ keys[ i ] ];
-            // If the image property doesn't exist or the image hasn't been loaded or the image src
-            // has changed, then we need to load the image. Otherwise, just copy the old image data
-            if ( !oldImage || !( oldImage.value instanceof Image ) || oldImage.src !== newImage.src ) {
-                newImage.value = new Image();
-                newImage.value.src = newImage.src;
-            } else {
-                newImage = oldImage;
+    function getPrototypes( kernel, extendsID ) {
+        var prototypes = [];
+        var id = extendsID;
+        while ( id !== undefined ) {
+            prototypes.push( id );
+            id = kernel.prototype( id );
+        }
+        return prototypes;
+    }
+
+    function isOverlay( prototypes ) {
+        var foundOverlay = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundOverlay; i++ ) {
+                foundOverlay = ( prototypes[i] == "http-vwf-example-com-hud-overlay-vwf" );    
             }
         }
-        return images;
+
+        return foundOverlay;
+    }
+
+    function isElement( prototypes ) {
+        var foundElement = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundElement; i++ ) {
+                foundElement = ( prototypes[i] == "http-vwf-example-com-hud-element-vwf" );    
+            }
+        }
+
+        return foundElement;
     }
 
 } );
