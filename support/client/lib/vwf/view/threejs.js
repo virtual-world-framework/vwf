@@ -213,7 +213,6 @@ define( [ "module",
                 //      Can be removed once kernel.createChild callback works properly
                 var initNode = this.state.nodes[ childID ];
                 if ( initNode && ( initNode.name == navObjectName ) ) {
-                    localNavObjectID = childID;
                     initNode.owner = this.kernel.moniker();
                     controlNavObject( initNode );
                 }
