@@ -297,7 +297,10 @@ define( [ "module",
 
             // Pay attention to these properties for all nodes
             if ( propertyName == "transform" ) {
+            {
                 receiveModelTransformChanges( nodeID, propertyValue );
+                this.nodes[nodeID].lastTransformStep = vwf.time(); //keep track of the last time a set transform occured
+            }
             } else if ( propertyName == "lookAt") {
 
                 var node = this.state.nodes[ nodeID ];
@@ -522,7 +525,7 @@ define( [ "module",
                 findNavObject();
             }
             
-            lerpTick();      
+                 
         },
 
         // -- render -----------------------------------------------------------------------------------
@@ -889,22 +892,7 @@ define( [ "module",
 
     var navObject = undefined;
     var cameraNode = undefined;
-    function lerpTick () {
-        var now = performance.now();
-        self.realTickDif = now - self.lastRealTick;
-
-        self.lastRealTick = now;
- 
-        //reset - loading can cause us to get behind and always but up against the max prediction value
-        self.tickTime = 0;
-
-        for ( var nodeID in self.nodes ) {
-            if ( self.state.nodes[nodeID] ) {       
-                self.nodes[nodeID].lastTickTransform = self.nodes[nodeID].selfTickTransform;
-                self.nodes[nodeID].selfTickTransform = getTransform(nodeID);
-            }
-        }
-    }
+   
     function lerp(a,b,l,c) {
         if(c) l = Math.min(1,Math.max(l,0));
         return (b*l) + a*(1.0-l);
@@ -948,7 +936,19 @@ define( [ "module",
         }
     }
 
-    function matrixLerp( a, b, l ) {
+    function matset(newv, old) {
+        if (!old) {
+            newv = old;
+            return;
+        }
+        if (!newv)
+            newv = [];
+        for (var i = 0; i < old.length; i++)
+            newv[i] = old[i];
+        return newv;
+    }
+
+    function matrixLerp( a, b, l,n ) {
         
         // If either of the matrices is not left-handed or not orthogonal, interpolation won't work
         // Just return the second matrix
@@ -956,7 +956,7 @@ define( [ "module",
             return b;
         }
     
-        var n = goog.vec.Mat4.clone(a);
+        if (!n) n = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         n[12] = lerp(a[12],b[12],l);
         n[13] = lerp(a[13],b[13],l);
         n[14] = lerp(a[14],b[14],l);
@@ -1020,41 +1020,112 @@ define( [ "module",
         var interp = goog.vec.Mat4.clone(self.state.nodes[id].threeObject.matrix.elements);
         return interp;
     }
+    function getAnimationFrame(id) {
+        var interp = vwf.getProperty(id,'animationFrame');
+        return interp;
+    }
+    function setAnimationFrame(id,val) {
+        //NOTE: this can cause state errors. Need a layer in VWF to abstract the set of this
+        //property from the VWF model state.
+        vwf.setProperty(id,'animationFrame',val);
+    }
     function setTransform(id,interp) {
         interp = goog.vec.Mat4.clone(interp)
         self.state.nodes[id].threeObject.matrix.elements = interp;
         self.state.nodes[id].threeObject.updateMatrixWorld(true);
     }
     function setInterpolatedTransforms(deltaTime) {
-        var step = (self.tickTime) / (self.realTickDif);
-        step = Math.min(step,1);
-        deltaTime = Math.min(deltaTime, self.realTickDif)
-        self.tickTime += deltaTime || 0;
         
-        for(var nodeID in self.nodes) {
-            var last = self.nodes[nodeID].lastTickTransform;
-            var now = self.nodes[nodeID].selfTickTransform;
-            if(last && now && !matCmp(last,now,.0001) ) {             
-                var interp = matrixLerp(last, now, step || 0);
-                
-                var objectIsControlledByUser = ( ( navmode !== "none" ) &&
-                                                 ( ( navObject && ( nodeID === navObject.ID ) ) || 
-                                                   ( cameraNode && ( nodeID === cameraNode.ID ) ) ) );
-                if ( !objectIsControlledByUser ) {             
-                    setTransform(nodeID, interp);    
-                    self.nodes[nodeID].needTransformRestore = true;
+        //smooth over local time
+        self.tickTime += deltaTime || 0;
+        var hit = 0;
+
+        //how many ticks has it been? 
+        while (self.tickTime > 50) {
+            hit++;
+            self.tickTime -= 50;
+        }
+        var step = (self.tickTime) / (50);
+        //if the tick is exactly one, we reset
+        if (hit === 1) {
+           
+            //NOTE: we use this construct because V8 will not optimize a function with a for in loop
+            var keys = Object.keys(self.nodes);
+            for (var j = 0; j < keys.length; j++) {
+                var i = keys[j];
+                if (self.nodes[i].lastTransformStep + 1 < vwf.time()) {
+                    self.nodes[i].lastTickTransform = null;
+                    self.nodes[i].lastFrameInterp = null;
+                    self.nodes[i].thisTickTransform = null;
+                } else if (self.state.nodes[i]) {
+                    self.nodes[i].lastTickTransform = matset(self.nodes[i].lastTickTransform, self.nodes[i].thisTickTransform);
+                    self.nodes[i].thisTickTransform = matset(self.nodes[i].thisTickTransform, getTransform(i));
                 }
+                if (self.state.nodes[i]) {
+                    self.nodes[i].lastAnimationFrame = self.nodes[i].thisAnimationFrame;
+                    self.nodes[i].thisAnimationFrame = getAnimationFrame(i);
+                }
+            }
+        }
+
+        //this is where we trade off between responsive and smooth. This is sort of a magic number picked 
+        //empirically.
+        //try the duck example with this set to 1, and then again set to .01
+        var LERPFACTOR = .15;
+        var lerpStep = Math.min(1, LERPFACTOR * (deltaTime / 16.6)); //the slower the frames ,the more we have to move per frame. Should feel the same at 60 0r 20
+        var keys = Object.keys(self.nodes);
+        //reuse local variables where possible, especially if they are arrays 
+        var interp = null;
+        for (var j = 0; j < keys.length; j++) {
+            var i = keys[j];
+
+            var last = self.nodes[i].lastTickTransform;
+            var now = self.nodes[i].thisTickTransform;
+            if (last && now) {
+                //use matset to keep data in temp variables
+                interp = matset(interp, last);
+                interp = matrixLerp(last, now, step, interp);
+
+                self.nodes[i].currentTickTransform = matset(self.nodes[i].currentTickTransform, getTransform(i));
+                
+                if (self.nodes[i].lastFrameInterp)
+                    interp = matrixLerp(self.nodes[i].lastFrameInterp, now, lerpStep, interp);
+                setTransform(i,interp);
+                self.nodes[i].lastFrameInterp = matset(self.nodes[i].lastFrameInterp || [], interp);
+                
+            }
+            last = self.nodes[i].lastAnimationFrame;
+            now = self.nodes[i].thisAnimationFrame;
+            //If the delta in animation frames is greater than 3, treat is as discontinuous
+            if (last && now && Math.abs(now - last) < 3) {
+                var interpA = 0;
+                interpA = lerp(last, now, step);
+                self.nodes[i].currentAnimationFrame = getAnimationFrame(i);
+                
+                if (self.state.nodes[i].lastAnimationInterp)
+                    interpA = lerp(self.state.nodes[i].lastAnimationInterp, now, lerpStep);
+                setAnimationFrame(i,interpA);
+                self.state.nodes[i].lastAnimationInterp = interpA || 0;
+                
+            } else if (self.state.nodes[i]) {
+                self.state.nodes[i].lastAnimationInterp = null;
             }
         }
     }
     function restoreTransforms() {
-        for(var nodeID in self.nodes) {
-            var now = self.nodes[nodeID].selfTickTransform;
+        var keys = Object.keys(self.nodes);
+        for (var j = 0; j < keys.length; j++) {
+            var i = keys[j];
             
-            if(self.node != navObject &&  now && self.nodes[nodeID].needTransformRestore) {
-                self.state.nodes[nodeID].threeObject.matrix.elements = goog.vec.Mat4.clone(now);
-                self.state.nodes[nodeID].threeObject.updateMatrixWorld(true);
-                self.nodes[nodeID].needTransformRestore = false;
+            var now = self.nodes[i].currentTickTransform;
+            self.nodes[i].currentTickTransform = null;
+            if (now) {
+                setTransform(i,now);
+            }
+            now = self.nodes[i].currentAnimationFrame;
+            self.nodes[i].currentAnimationFrame = null;
+            if (now != null) {
+               setAnimationFrame(i,now);
             }
         }
     }
