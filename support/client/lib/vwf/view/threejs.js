@@ -430,7 +430,9 @@ define( [ "module",
                             this.state.animatedNodes[ nodeID ] = { 
                                 "id": nodeID,
                                 "lastAnimationFrame": getAnimationFrame( nodeID ),
-                                "thisAnimationFrame": getAnimationFrame( nodeID ) 
+                                "thisAnimationFrame": getAnimationFrame( nodeID ), 
+                                "thisTickTransform": getTransform( nodeID ), 
+                                "lastTickTransform": getTransform( nodeID )
                             }
                         }
                     } 
@@ -455,6 +457,8 @@ define( [ "module",
                                 "lastTickTransform": getTransform( nodeID )    
                             }
                         } 
+                    } else if ( this.state.animatedNodes[ nodeID ] !== undefined ) {
+                        delete this.state.animatedNodes[ nodeID ];    
                     }
                     break;
             }
