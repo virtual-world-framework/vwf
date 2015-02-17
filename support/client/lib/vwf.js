@@ -834,6 +834,11 @@
 
                     secure: window.location.protocol === "https:",
 
+                    // Don't attempt to reestablish lost connections. The client reloads after a
+                    // disconnection to recreate the application from scratch.
+
+                    reconnect: false,
+
                 };
 
                 if ( isSocketIO07() ) {
@@ -957,6 +962,10 @@
                 socket.on( "disconnect", function() {
 
                     vwf.logger.infox( "-socket", "disconnected" );
+
+                    // Reload to rejoin the application.
+
+                    window.location = window.location.href;
 
                 } );
 
@@ -1379,7 +1388,7 @@
                 // Global node and descendant deltas.
 
                 nodes: [  // TODO: all global objects
-                    this.getNode( "http-vwf-example-com-clients-vwf", full ),
+                    this.getNode( "http://vwf.example.com/clients.vwf", full ),
                     this.getNode( this.application(), full ),
                 ],
 
@@ -1476,15 +1485,21 @@
         /// 
         /// @see {@link module:vwf/api/kernel.createNode}
 
-        this.createNode = function( nodeComponent, nodeAnnotation, callback_async /* ( nodeID ) */ ) {
+        this.createNode = function( nodeComponent, nodeAnnotation, baseURI, callback_async /* ( nodeID ) */ ) {
 
             // Interpret `createNode( nodeComponent, callback )` as
-            // `createNode( nodeComponent, undefined, callback )`. (`nodeAnnotation` was added in
-            // 0.6.12.)
+            // `createNode( nodeComponent, undefined, undefined, callback )` and
+            // `createNode( nodeComponent, nodeAnnotation, callback )` as
+            // `createNode( nodeComponent, nodeAnnotation, undefined, callback )`. `nodeAnnotation`
+            // was added in 0.6.12, and `baseURI` was added in 0.6.25.
 
             if ( typeof nodeAnnotation == "function" || nodeAnnotation instanceof Function ) {
                 callback_async = nodeAnnotation;
+                baseURI = undefined;
                 nodeAnnotation = undefined;
+            } else if ( typeof baseURI == "function" || baseURI instanceof Function ) {
+                callback_async = baseURI;
+                baseURI = undefined;
             }
 
             this.logger.debuggx( "createNode", function() {
@@ -1513,7 +1528,11 @@
 
                     if ( componentIsURI( nodeComponent ) ) { // URI  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
-                        nodeURI = nodeComponent;  // TODO: canonicalize uri
+                        // Resolve relative URIs, but leave host-relative, locally-absolute
+                        // references intact.
+
+                        nodeURI = nodeComponent[0] == "/" ?
+                            nodeComponent : require( "vwf/utility" ).resolveURI( nodeComponent, baseURI );
 
                         // Load the document if we haven't seen this URI yet. Mark the components
                         // list to indicate that this component is loading.
@@ -1522,7 +1541,7 @@
 
                             components[nodeURI] = []; // [] => array of callbacks while loading => true
 
-                            loadComponent( nodeURI, function( nodeDescriptor ) /* async */ {
+                            loadComponent( nodeURI, undefined, function( nodeDescriptor ) /* async */ {
                                 nodeComponent = nodeDescriptor;
                                 series_callback_async( undefined, undefined );
                             }, function( errorMessage ) {
@@ -1576,9 +1595,10 @@
 
                     if ( componentIsDescriptor( nodeComponent ) && nodeComponent.includes && componentIsURI( nodeComponent.includes ) ) {  // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
 
-                        var prototypeURI = nodeComponent.includes;
+                        var prototypeURI = require( "vwf/utility" ).resolveURI( nodeComponent.includes, nodeURI || baseURI );
 
-                        loadComponent( prototypeURI, function( prototypeDescriptor ) /* async */ {
+                        loadComponent( prototypeURI, undefined, function( prototypeDescriptor ) /* async */ {
+                            prototypeDescriptor = resolvedDescriptor( prototypeDescriptor, prototypeURI );
                             nodeComponent = mergeDescriptors( nodeComponent, prototypeDescriptor ); // modifies prototypeDescriptor
                             series_callback_async( undefined, undefined );
                         }, function( errorMessage ) {
@@ -1866,11 +1886,13 @@
                     var scripts = nodeComponent.scripts ?
                         [].concat( nodeComponent.scripts ) : []; // accept either an array or a single item
 
+                    var baseURI = vwf.uri( nodeID, true );
+
                     async.map( scripts, function( script, map_callback_async /* ( err, result ) */ ) {
 
                         if ( valueHasType( script ) ) {
                             if ( script.source ) {
-                                loadScript( script.source, function( scriptText ) /* async */ {  // TODO: this load would be better left to the driver, which may want to ignore it in certain cases, but that would require a completion callback from kernel.execute()
+                                loadScript( script.source, baseURI, function( scriptText ) /* async */ {  // TODO: this load would be better left to the driver, which may want to ignore it in certain cases, but that would require a completion callback from kernel.execute()
                                     map_callback_async( undefined, { text: scriptText, type: script.type } );
                                 }, function( errorMessage ) {
                                     map_callback_async( errorMessage, undefined );
@@ -2197,6 +2219,8 @@
 
             var child, childID, childIndex, childPrototypeID, childBehaviorIDs = [], deferredInitializations = {};
 
+            var resolvedSource;  // resolved `childComponent.source` for the drivers.
+
             // Determine if we're replicating previously-saved state, or creating a fresh object.
 
             var replicating = !! childComponent.id;
@@ -2208,34 +2232,18 @@
             // of the descriptor. An existing ID is used when synchronizing to state drawn from
             // another client or to a previously-saved state.
 
-var useLegacyID = nodeID === 0 && childURI &&
-    ( childURI == "index.vwf" || childURI == "appscene.vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
-    childURI != "http://vwf.example.com/node.vwf";
-    
-useLegacyID = useLegacyID ||
-    childName === "camera" && nodeID === this.application(); // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
-
             if ( childComponent.id ) {  // incoming replication: pre-calculated id
                 childID = childComponent.id;
                 childIndex = this.children( nodeID ).length;
             } else if ( nodeID === 0 ) {  // global: component's URI or hash of its descriptor
                 childID = childURI ||
                     Crypto.MD5( JSON.stringify( childComponent ) ).toString();  // TODO: MD5 may be too slow here
-if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
-}
                 childIndex = childURI;
             } else {  // descendant: parent id + next from parent's sequence
-if ( useLegacyID ) {  // TODO: fix static ID references and remove
-    childID = ( childComponent.extends || this.kutility.protoNodeURI ) + "." + childName;  // TODO: fix static ID references and remove
-    childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
-    childIndex = this.children( nodeID ).length;
-} else {    
                 childID = nodeID + ":" + this.sequence( nodeID ) +
                     ( this.configuration["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
                     ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
                 childIndex = this.children( nodeID ).length;
-}
             }
 
             // Register the node.
@@ -2250,6 +2258,10 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
 
             vwf.models.object.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
                 childComponent.source, childComponent.type, childIndex, childName );  // TODO: move node metadata back to the kernel and only use vwf/model/object just as a property store?
+
+            // The base URI for relative references is the URI of this node or the closest ancestor.
+
+            var baseURI = vwf.uri( childID, true );
 
             // Construct the node.
 
@@ -2268,11 +2280,17 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
 
                     if ( componentIsDescriptor( childComponent ) && childComponent.includes && componentIsURI( childComponent.includes ) ) {  // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
 
-                        var prototypeURI = childComponent.includes;
+                        var prototypeURI = require( "vwf/utility" ).resolveURI( childComponent.includes, baseURI );
 
                         var sync = true; // will loadComponent() complete synchronously?
 
-                        loadComponent( prototypeURI, function( prototypeDescriptor ) /* async */ {
+                        loadComponent( prototypeURI, undefined, function( prototypeDescriptor ) /* async */ {
+
+                            // Resolve relative references with respect to the included component.
+
+                            prototypeDescriptor = resolvedDescriptor( prototypeDescriptor, prototypeURI );
+
+                            // Merge the child descriptor onto the `includes` descriptor.
 
                             childComponent = mergeDescriptors( childComponent, prototypeDescriptor ); // modifies prototypeDescriptor
 
@@ -2321,7 +2339,10 @@ if ( useLegacyID ) {  // TODO: fix static ID references and remove
                             // Create or find the prototype and save the ID in childPrototypeID.
 
                             if ( childComponent.extends !== null ) {  // TODO: any way to prevent node loading node as a prototype without having an explicit null prototype attribute in node?
-                                vwf.createNode( childComponent.extends || vwf.kutility.protoNodeURI, function( prototypeID ) /* async */ {
+
+                                var prototypeComponent = childComponent.extends || vwf.kutility.protoNodeURI;
+
+                                vwf.createNode( prototypeComponent, undefined, baseURI, function( prototypeID ) /* async */ {
                                     childPrototypeID = prototypeID;
 
 // TODO: the GLGE driver doesn't handle source/type or properties in prototypes properly; as a work-around pull those up into the component when not already defined
@@ -2357,7 +2378,7 @@ if ( ! childComponent.source ) {
                                 [].concat( childComponent.implements ) : []; // accept either an array or a single item
 
                             async.map( behaviorComponents, function( behaviorComponent, map_callback_async /* ( err, result ) */ ) {
-                                vwf.createNode( behaviorComponent, function( behaviorID ) /* async */ {
+                                vwf.createNode( behaviorComponent, undefined, baseURI, function( behaviorID ) /* async */ {
                                     map_callback_async( undefined, behaviorID );
                                 } );
                             }, function( err, behaviorIDs ) /* async */ {
@@ -2400,6 +2421,11 @@ if ( ! childComponent.source ) {
                     vwf.models.object.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
                         childComponent.source, childComponent.type, childIndex, childName );  // TODO: move node metadata back to the kernel and only use vwf/model/object just as a property store?
 
+                    // Resolve the asset source URL for the drivers.
+
+                    resolvedSource = childComponent.source &&
+                        require( "vwf/utility" ).resolveURI( childComponent.source, baseURI );
+
                     // Call creatingNode() on each model. The node is considered to be constructed
                     // after all models have run.
 
@@ -2411,7 +2437,7 @@ if ( ! childComponent.source ) {
                         // TODO: suppress kernel reentry here (just for childID?) with kernel/model showing a warning when breached; no actions are allowed until all drivers have seen creatingNode()
 
                         model.creatingNode && model.creatingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childIndex, childName, function( ready ) /* async */ {
+                                resolvedSource, childComponent.type, childIndex, childName, function( ready ) /* async */ {
 
                             if ( driver_ready && ! ready ) {
                                 suspend();
@@ -2456,7 +2482,7 @@ if ( ! childComponent.source ) {
                         var timeoutID;
 
                         view.createdNode && view.createdNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                childComponent.source, childComponent.type, childIndex, childName, function( ready ) /* async */ {
+                                resolvedSource, childComponent.type, childIndex, childName, function( ready ) /* async */ {
 
                             if ( driver_ready && ! ready ) {
                                 suspend();
@@ -2608,7 +2634,7 @@ if ( ! childComponent.source ) {
 
                         if ( valueHasType( script ) ) {
                             if ( script.source ) {
-                                loadScript( script.source, function( scriptText ) /* async */ {  // TODO: this load would be better left to the driver, which may want to ignore it in certain cases, but that would require a completion callback from kernel.execute()
+                                loadScript( script.source, baseURI, function( scriptText ) /* async */ {  // TODO: this load would be better left to the driver, which may want to ignore it in certain cases, but that would require a completion callback from kernel.execute()
                                     map_callback_async( undefined, { text: scriptText, type: script.type } );
                                 }, function( errorMessage ) {
                                     map_callback_async( errorMessage, undefined );
@@ -2692,7 +2718,7 @@ if ( ! childComponent.source ) {
                                         } else {
                                             model.initializingNode &&
                                                 model.initializingNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                                    childComponent.source, childComponent.type, childIndex, childName );
+                                                    resolvedSource, childComponent.type, childIndex, childName );
                                         }
 
                                         // Restore kernel reentry.
@@ -2710,7 +2736,7 @@ if ( ! childComponent.source ) {
 
                                 vwf.views.forEach( function( view ) {
                                     view.initializedNode && view.initializedNode( nodeID, childID, childPrototypeID, childBehaviorIDs,
-                                        childComponent.source, childComponent.type, childIndex, childName );
+                                        resolvedSource, childComponent.type, childIndex, childName );
                                 } );
 
                                 // Mark the node as initialized.
@@ -4281,8 +4307,17 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.uri}
 
-        this.uri = function( nodeID ) {
-            return this.models.object.uri( nodeID );
+        this.uri = function( nodeID, searchAncestors, initializedOnly ) {
+
+            var uri = this.models.object.uri( nodeID );
+
+            if ( searchAncestors ) {
+                while ( ! uri && ( nodeID = this.parent( nodeID, initializedOnly ) ) ) {
+                    uri = this.models.object.uri( nodeID );
+                }
+            }
+
+            return uri;
         };
 
         // -- name ---------------------------------------------------------------------------------
@@ -4656,7 +4691,7 @@ if ( ! childComponent.source ) {
 
         /// @name module:vwf~loadComponent
 
-        var loadComponent = function( nodeURI, callback_async /* nodeDescriptor */, errback_async /* errorMessage */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
+        var loadComponent = function( nodeURI, baseURI, callback_async /* nodeDescriptor */, errback_async /* errorMessage */ ) {  // TODO: turn this into a generic xhr loader exposed as a kernel function?
 
             if ( nodeURI == vwf.kutility.protoNodeURI ) {
 
@@ -4676,7 +4711,7 @@ if ( ! childComponent.source ) {
 
                 jQuery.ajax( {
 
-                    url: remappedURI( nodeURI ),
+                    url: remappedURI( require( "vwf/utility" ).resolveURI( nodeURI, baseURI ) ),
                     dataType: "jsonp",
                     timeout: vwf.configuration["load-timeout"] * 1000,
 
@@ -4701,7 +4736,7 @@ if ( ! childComponent.source ) {
 
         /// @name module:vwf~loadScript
 
-        var loadScript = function( scriptURI, callback_async /* scriptText */, errback_async /* errorMessage */ ) {
+        var loadScript = function( scriptURI, baseURI, callback_async /* scriptText */, errback_async /* errorMessage */ ) {
 
             if ( scriptURI.match( RegExp( "^data:application/javascript;base64," ) ) ) {
 
@@ -4717,7 +4752,7 @@ if ( ! childComponent.source ) {
 
                 jQuery.ajax( {
 
-                    url: remappedURI( scriptURI ),
+                    url: remappedURI( require( "vwf/utility" ).resolveURI( scriptURI, baseURI ) ),
                     dataType: "text",
                     timeout: vwf.configuration["load-timeout"] * 1000,
 
@@ -5289,6 +5324,22 @@ if ( ! childComponent.source ) {
             return uri;
         };
 
+        // -- resolvedDescriptor -------------------------------------------------------------------
+
+        /// Resolve relative URIs in a component descriptor.
+        /// 
+        /// @name module:vwf~resolvedDescriptor
+
+        var resolvedDescriptor = function( component, baseURI ) {
+
+            return require( "vwf/utility" ).transform( component, resolvedDescriptorTransformationWithBaseURI );
+
+            function resolvedDescriptorTransformationWithBaseURI( object, names, depth ) {
+                return resolvedDescriptorTransformation.call( this, object, names, depth, baseURI );
+            }
+
+        };
+
         // -- queueTransitTransformation -----------------------------------------------------------
 
         /// vwf/utility/transform() transformation function to convert the message queue for proper
@@ -5342,6 +5393,141 @@ if ( ! childComponent.source ) {
 
         var loggableComponentTransformation = function( object, names, depth ) {
 
+            // Get our bearings at the current recusion level.
+
+            var markers = descriptorMarkers( object, names, depth );
+
+            // Transform the object here.
+
+            switch ( markers.containerName ) {
+
+                case "extends":
+
+                    // Omit a component descriptor for the prototype.
+
+                    if ( markers.memberIndex == 0 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "implements":
+
+                    // Omit component descriptors for the behaviors.
+
+                    if ( markers.memberIndex == 0 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "properties":
+
+                    // Convert property values to a loggable version, and omit getter and setter
+                    // text.
+
+                    if ( markers.memberIndex == 0 && ! valueHasAccessors( object ) ||
+                            markers.memberIndex == 1 && names[0] == "value" ) {
+                        return loggableValue( object );
+                    } else if ( markers.memberIndex == 1 && ( names[0] == "get" || names[0] == "set" ) ) {
+                        return "...";
+                    }
+
+                    break;
+
+                case "methods":
+
+                    // Omit method body text.
+
+                    if ( markers.memberIndex == 0 && ! valueHasBody( object ) ||
+                            markers.memberIndex == 1 && names[0] == "body" ) {
+                        return "...";
+                    }
+
+                    break;
+
+                case "events":
+
+                    // Nothing for events.
+
+                    break;
+
+                case "children":
+
+                    // Omit child component descriptors.
+
+                    if ( markers.memberIndex == 0 && componentIsDescriptor( object ) ) {
+                        return {};
+                    }
+
+                    break;
+
+                case "scripts":
+
+                    // Shorten script text.
+
+                    if ( markers.memberIndex == 0 && ! valueHasType( object ) ||
+                            markers.memberIndex == 1 && names[0] == "text" ) {
+                        return "...";
+                    }
+
+                    break;
+
+            }
+
+            return object;
+        };
+
+        // -- resolvedDescriptorTransformation -----------------------------------------------------
+
+        /// vwf/utility/transform() transformation function to resolve relative URIs in a component
+        /// descriptor.
+        /// 
+        /// @name module:vwf~resolvedDescriptorTransformation
+
+        var resolvedDescriptorTransformation = function( object, names, depth, baseURI ) {
+
+            // Get our bearings at the current recusion level.
+
+            var markers = descriptorMarkers( object, names, depth );
+
+            // Resolve all the URIs.
+
+            switch ( markers.containerName ) {
+
+                case "extends":
+                case "implements":
+                case "source":
+                case "children":
+
+                    if ( markers.memberIndex == 0 && componentIsURI( object ) ) {
+                        return require( "vwf/utility" ).resolveURI( object, baseURI );
+                    }
+
+                    break;
+
+                case "scripts":
+
+                    if ( markers.memberIndex == 1 && names[0] == "source" ) {
+                        return require( "vwf/utility" ).resolveURI( object, baseURI );
+                    }
+
+                    break;
+
+            }
+
+            return object;
+        };
+
+        // -- descriptorMarkers --------------------------------------------------------------------
+
+        /// Locate the closest container (`properties`, `methods`, `events`, `children`) and
+        /// contained member in a `vwf/utility/transform` iterator call on a component descriptor.
+        /// 
+        /// @name module:vwf~descriptorMarkers
+
+        var descriptorMarkers = function( object, names, depth ) {
+
             // Find the index of the lowest nested component in the names list.
 
             var componentIndex = names.length;
@@ -5390,6 +5576,11 @@ if ( ! childComponent.source ) {
                         var memberName = undefined;
                     }
 
+                } else if ( containerName == "source" || containerName == "type" ) {
+
+                    var memberIndex = containerIndex;
+                    var memberName = names[memberIndex];
+
                 } else if ( containerName == "properties" || containerName == "methods" || containerName == "events" ||
                         containerName == "children" ) {
 
@@ -5422,85 +5613,13 @@ if ( ! childComponent.source ) {
 
             }
 
-            // Transform the object at the current recusion level.
+            return {
+                containerIndex: containerIndex,
+                containerName: containerName,
+                memberIndex: memberIndex,
+                memberName: memberName,
+            };
 
-            switch ( containerName ) {
-
-                case "extends":
-
-                    // Omit a component descriptor for the prototype.
-
-                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
-                        return {};
-                    }
-
-                    break;
-
-                case "implements":
-
-                    // Omit component descriptors for the behaviors.
-
-                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
-                        return {};
-                    }
-
-                    break;
-
-                case "properties":
-
-                    // Convert property values to a loggable version, and omit getter and setter
-                    // text.
-
-                    if ( memberIndex == 0 && ! valueHasAccessors( object ) ||
-                            memberIndex == 1 && names[0] == "value" ) {
-                        return loggableValue( object );
-                    } else if ( memberIndex == 1 && ( names[0] == "get" || names[0] == "set" ) ) {
-                        return "...";
-                    }
-
-                    break;
-
-                case "methods":
-
-                    // Omit method body text.
-
-                    if ( memberIndex == 0 && ! valueHasBody( object ) || 
-                            memberIndex == 1 && names[0] == "body" ) {
-                        return "...";
-                    }
-
-                    break;
-
-                case "events":
-
-                    // Nothing for events.
-
-                    break;
-
-                case "children":
-
-                    // Omit child component descriptors.
-
-                    if ( memberIndex == 0 && componentIsDescriptor( object ) ) {
-                        return {};
-                    }
-
-                    break;
-
-                case "scripts":
-
-                    // Shorten script text.
-
-                    if ( memberIndex == 0 && ! valueHasType( object ) || 
-                            memberIndex == 1 && names[0] == "text" ) {
-                        return "...";
-                    }
-
-                    break;
-
-            }
-
-            return object;
         };
 
         /// Locate nodes matching a search pattern. {@link module:vwf/api/kernel.find} describes the

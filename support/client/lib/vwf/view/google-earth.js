@@ -66,7 +66,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, jQuery ) {
             var win;
     
             switch ( childExtendsID.toLowerCase() ) {
-                case "http-vwf-example-com-googleearth-vwf":
+                case "http://vwf.example.com/googleearth.vwf":
                     this.state.scenes[ childID ] = node;
                     var outerDiv = jQuery('body').append(
                         "<div id='map3d' style='border: 1px solid silver; width: " + this.width + "px; height: " + this.height + "px;'></div>"
@@ -75,7 +75,7 @@ define( [ "module", "vwf/view", "jquery" ], function( module, view, jQuery ) {
                    window.onresize = function( event ) { console.info( "WINDOW: onresize" ); }
                    break;
 
-                case "http-vwf-example-com-node3-vwf":
+                case "http://vwf.example.com/node3.vwf":
                     
                     this.state.nodes[ childID ] = node;
                     var view = this;
