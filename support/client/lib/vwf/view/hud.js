@@ -127,7 +127,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
         var keys = Object.keys( images );
         var newImage, oldImage;
         for ( var i = 0; i < keys.length; i++ ) {
-            newImage = images[ keys[ i ] ];
+            newImage = images[ keys[ i ] ] || {};
             oldImage = node.properties.images[ keys[ i ] ];
             // If the image property doesn't exist or the image hasn't been loaded or the image src
             // has changed, then we need to load the image. Otherwise, just copy the old image data
