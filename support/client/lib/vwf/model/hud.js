@@ -31,6 +31,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     "properties": {
                         "visible": undefined
                     },
+                    "elementPreDraw": undefined,
+                    "elementPostDraw": undefined,
+                    "globalPreDraw": undefined,
+                    "globalPostDraw": undefined,
                     "initialized": false
                 };
             } else if ( protos && isElement( protos ) ) {
@@ -76,7 +80,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         },
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
-            var node, value;
+            var node, value, images, keys, i, image;
             if ( this.state.overlays[ nodeID ] ) {
                 node = this.state.overlays[ nodeID ];
                 if ( node.properties.hasOwnProperty( propertyName ) ) {
@@ -86,7 +90,26 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             } else if ( this.state.elements[ nodeID ] ) {
                 node = this.state.elements[ nodeID ];
                 if ( node.properties.hasOwnProperty( propertyName ) ) {
-                    node.properties[ propertyName ] = propertyValue;
+                    if ( propertyName === "images" ) {
+                        images = propertyValue;
+                        keys = Object.keys( images );
+                        for ( i = 0; i < keys.length; i++ ) {
+                            image = images[ keys[ i ] ];
+                            if ( !image ) {
+                                image = {};
+                            }
+                            if ( !image.hasOwnProperty( "src" ) ) {
+                                image.src = undefined;
+                            }
+                            if ( !image.hasOwnProperty( "value" ) ) {
+                                image.value = undefined;
+                            }
+                            images[ keys[ i ] ] = image;
+                        }
+                        node.properties.images = images;
+                    } else {
+                        node.properties[ propertyName ] = propertyValue;
+                    }
                 } else {
                     node.drawProperties[ propertyName ] = propertyValue;
                 }
@@ -97,8 +120,19 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         },
 
         creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
-            if ( this.state.elements[ nodeID ] ) {
-                var node = this.state.elements[ nodeID ];
+            var node;
+            if ( this.state.overlays[ nodeID ] ) {
+                node = this.state.overlays[ nodeID ];
+                switch ( methodName ) {
+                    case "elementPreDraw":
+                    case "elementPostDraw":
+                    case "globalPreDraw":
+                    case "globalPostDraw":
+                        node[ methodName ] = methodBody;
+                        break;
+                }
+            } else if ( this.state.elements[ nodeID ] ) {
+                node = this.state.elements[ nodeID ];
                 if ( methodName === "draw" ) {
                     node.draw = methodBody;
                 }

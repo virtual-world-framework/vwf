@@ -2,5 +2,9 @@ extends: http://vwf.example.com/node.vwf
 properties:
   visible: true
 methods:
+  elementPreDraw:
+  elementPostDraw:
+  globalPreDraw:
+  globalPostDraw:
 events:
 scripts:
