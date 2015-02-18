@@ -85,9 +85,7 @@ HUD.prototype = {
         this.sortedElements.sort( this.sortFunction );
         for ( var i = 0; i < this.sortedElements.length; i++ ) {
             this.elementPreDraw( context, this.sortedElements[ i ] );
-            this.sortedElements[ i ].preDraw( context, this.sortedElements[ i ].position );
             this.sortedElements[ i ].draw( context, this.sortedElements[ i ].position );
-            this.sortedElements[ i ].postDraw( context, this.sortedElements[ i ].position );
             this.elementPostDraw( context, this.sortedElements[ i ] );
         }
         this.globalPostDraw( context );
@@ -249,20 +247,12 @@ HUD.prototype = {
         this.elements[ id ].drawOrder = this.elementCount;
     },
 
-    // Draw instructions that occur prior to the element's preDraw
-    //  and draw functions. Executes on each element in the HUD.
     elementPreDraw: function( context, element ) { },
 
-    // Draw instructions that occur after the element's draw and
-    //  postDraw functions. Executes on each element in the HUD.
     elementPostDraw: function( context, element ) { },
 
-    // Draw instructions that occur before anything is drawn to
-    //  the HUD.
     globalPreDraw: function( context ) { },
 
-    // Draw instructions that occur after everything is drawn to
-    //  the HUD.
     globalPostDraw: function( context ) { }
 
 }
@@ -300,17 +290,7 @@ HUD.Element.prototype = {
         this.enabled = true;
     },
 
-    // Draw instructions for the element. Executes after the HUD's
-    //  elementPreDraw funtion and the element's preDraw function.
     draw: function( context, position ) { },
-
-    // Draw instructions that execute just befor the element's
-    //  draw function.
-    preDraw: function( context, position ) { },
-
-    // Draw instructions that execute immediately after the element's
-    //  draw function.
-    postDraw: function( context, position ) { },
 
     onClick: function( event ) { },
 

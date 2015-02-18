@@ -82,6 +82,26 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
             props = element.properties;
             overlay.add( element.viewObject, props.alignH, props.alignV, props.offsetH, props.offsetV );
         }
+        if ( node.elementPreDraw ) {
+            overlay.elementPreDraw = function( context, element ) {
+                eval( node.elementPreDraw )
+            }
+        }
+        if ( node.elementPostDraw ) {
+            overlay.elementPostDraw = function( context, element ) {
+                eval( node.elementPostDraw )
+            }
+        }
+        if ( node.globalPreDraw ) {
+            overlay.globalPreDraw = function( context ) {
+                eval( node.globalPreDraw )
+            }
+        }
+        if ( node.globalPostDraw ) {
+            overlay.globalPostDraw = function( context ) {
+                eval( node.globalPostDraw )
+            }
+        }
         return overlay;
     }
 
