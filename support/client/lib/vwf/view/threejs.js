@@ -185,7 +185,6 @@ define( [ "module",
             // If the node that was initialized is the application node, find the user's navigation object
             var appID = this.kernel.application();
             if ( childID == appID ) {
-                this.state.appInitialized = true;
 
                 if ( enableStereo ) {
                     var viewCam = this.state.cameraInUse;
@@ -206,6 +205,7 @@ define( [ "module",
                         effect.setSize( this.width, this.height ); 
                     }
                 }
+                this.state.appInitialized = true;
 
             } else {
 
@@ -1112,6 +1112,10 @@ define( [ "module",
 
             // Schedule the next render
             window.requestAnimationFrame( renderScene ); 
+
+            if ( !self.state.appInitialized ) {
+                return;
+            }
 
             // Verify that there is a camera to render from before going any farther
             var camera = self.state.cameraInUse;
