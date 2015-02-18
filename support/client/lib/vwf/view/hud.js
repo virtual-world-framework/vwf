@@ -1,14 +1,10 @@
 "use strict";
 
-var debugHUD;
-
 define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function( module, model, utility, HUD ) {
 
     return model.load( module, {
 
-        initialize: function() {
-            this.runningOverlays = {};
-        },
+        initialize: function() {},
 
         initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName ) {
@@ -27,7 +23,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
         },
 
         deletedNode: function( nodeID ) {
-
             if ( this.state.overlays[ nodeID ] ) {
                 var node, keys, i;
                 node = this.state.overlays[ nodeID ];
@@ -38,7 +33,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
                 node = this.state.elements[ nodeID ];
                 delete this.state.elements[ nodeID ];
             }
-
         },
 
         createdProperty: function( nodeID, propertyName, propertyValue ) {
@@ -46,8 +40,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
         },
 
         initializedProperty: function( nodeID, propertyName, propertyValue ) {
-            var value = undefined;
-
+            var value;
             if ( propertyValue !== undefined ) {
                 var node = this.state.overlays[ nodeID ] || this.state.elements[ nodeID ] ;
                 if ( node !== undefined ) {
@@ -58,7 +51,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
                     }
                 }
             }
-
             return value;
         },
 
@@ -136,14 +128,6 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
         var newImage, oldImage;
         for ( var i = 0; i < keys.length; i++ ) {
             newImage = images[ keys[ i ] ];
-            if ( !newImage.hasOwnProperty( "src" ) ) {
-                logger.errorx( "loadImages", "Image \"" + keys[ i ] + "\" is malformed! It " +
-                    "does not contain a \"src\" property! Skipping image load!" );
-                continue;
-            } else if ( !newImage.hasOwnProperty( "value" ) ) {
-                logger.warnx( "loadImages", "Image \"" + keys[ i ] + "\" does not contain a " +
-                    "\"value\" property! One will be generated automatically." );
-            }
             oldImage = node.properties.images[ keys[ i ] ];
             // If the image property doesn't exist or the image hasn't been loaded or the image src
             // has changed, then we need to load the image. Otherwise, just copy the old image data
@@ -155,6 +139,8 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
                 }
                 if ( newImage.src ) {
                     newImage.value.src = newImage.src;
+                } else {
+                    newImage.src = "";
                 }
             } else {
                 newImage = oldImage;
