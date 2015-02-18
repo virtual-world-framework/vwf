@@ -21,11 +21,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
-            var node = undefined;
+            var node;
             var protos = getPrototypes.call( this, this.state.kernel, childExtendsID );
-
             if ( protos && isOverlay( protos ) ) {
-
                 node = this.state.overlays[ childID ] = {
                     "id": childID,
                     "name": childName,
@@ -35,7 +33,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     },
                     "initialized": false
                 };
-
             } else if ( protos && isElement( protos ) ) {
                 node = this.state.elements[ childID ] = {
                     "id": childID,
@@ -56,8 +53,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     "initialized": false
                 };
                 node.overlay.elements[ childID ] = node;
-                node.initialized = false;
-
             }
         },
 
@@ -66,8 +61,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         },
 
         initializingProperty: function( nodeID, propertyName, propertyValue ) {
-            var value = undefined;
-
+            var value;
             if ( propertyValue !== undefined ) {
                 var node = this.state.overlays[ nodeID ] || this.state.elements[ nodeID ] ;
                 if ( node !== undefined ) {
@@ -78,23 +72,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     }
                 }
             }
-
             return value;
         },
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
             var node, value;
-
             if ( this.state.overlays[ nodeID ] ) {
-
                 node = this.state.overlays[ nodeID ];
                 if ( node.properties.hasOwnProperty( propertyName ) ) {
                     node.properties[ propertyName ] = propertyValue;
                     value = propertyValue;
                 }
-
             } else if ( this.state.elements[ nodeID ] ) {
-
                 node = this.state.elements[ nodeID ];
                 if ( node.properties.hasOwnProperty( propertyName ) ) {
                     node.properties[ propertyName ] = propertyValue;
@@ -102,7 +91,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     node.drawProperties[ propertyName ] = propertyValue;
                 }
                 value = propertyValue;
-
             }
 
             return value;
@@ -123,7 +111,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 if ( methodName === "draw" ) {
                     this.logger.errorx( "callingMethod", "The draw method should not be called " +
                         "from outside the HUD driver!" );
-                    return undefined;
+                    return;
                 }
             }
         }
@@ -147,7 +135,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 foundOverlay = ( prototypes[i] == "http-vwf-example-com-hud-overlay-vwf" );    
             }
         }
-
         return foundOverlay;
     }
 
@@ -158,7 +145,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 foundElement = ( prototypes[i] == "http-vwf-example-com-hud-element-vwf" );    
             }
         }
-
         return foundElement;
     }
 
