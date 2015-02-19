@@ -1965,7 +1965,7 @@ define( [ "module",
             }
 
             return value;
-        },
+        }
 
 
         // TODO: deletingMethod
@@ -1984,8 +1984,6 @@ define( [ "module",
         //executing: function( nodeID, scriptText, scriptType ) {
         //    return undefined;
         //},
-
-        // == ticking =============================================================================
 
 
     } );

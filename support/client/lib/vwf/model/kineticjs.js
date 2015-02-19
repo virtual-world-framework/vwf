@@ -2062,27 +2062,24 @@ define( [ "module",
             }
 
             return value;
-        },
+        }
 
 
         // TODO: deletingMethod
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName, methodParameters, methodValue ) { 
-            if ( this.debug.methods ) {
-                this.logger.infox( "   M === callingMethod ", nodeID, methodName );
-            }
-        },
+        // callingMethod: function( nodeID, methodName, methodParameters, methodValue ) { 
+        //     if ( this.debug.methods ) {
+        //         this.logger.infox( "   M === callingMethod ", nodeID, methodName );
+        //     }
+        // },
 
         // -- executing ------------------------------------------------------------------------------
 
         // executing: function( nodeID, scriptText, scriptType ) {
         //     return undefined;
         // },
-
-        // ticking: function( vwfTime ) {
-        // }
 
     } );
     // == PRIVATE  ========================================================================================
