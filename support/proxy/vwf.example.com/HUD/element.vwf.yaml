@@ -1,9 +1,6 @@
 extends: http://vwf.example.com/node.vwf
 properties:
   images:
-    # image:
-    #   src:
-    #   value:
   width:
   height:
   visible:
@@ -21,4 +18,3 @@ events:
   onMouseMove:
   onMouseOver:
   onMouseOut:
-scripts:

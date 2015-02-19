@@ -91,22 +91,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 node = this.state.elements[ nodeID ];
                 if ( node.properties.hasOwnProperty( propertyName ) ) {
                     if ( propertyName === "images" ) {
-                        images = propertyValue;
-                        keys = Object.keys( images );
-                        for ( i = 0; i < keys.length; i++ ) {
-                            image = images[ keys[ i ] ];
-                            if ( !image ) {
-                                image = {};
-                            }
-                            if ( !image.hasOwnProperty( "src" ) ) {
-                                image.src = undefined;
-                            }
-                            if ( !image.hasOwnProperty( "value" ) ) {
-                                image.value = undefined;
-                            }
-                            images[ keys[ i ] ] = image;
-                        }
-                        node.properties.images = images;
+                        node.properties.images = propertyValue;
                     } else {
                         node.properties[ propertyName ] = propertyValue;
                     }
@@ -116,6 +101,24 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 value = propertyValue;
             }
 
+            return value;
+        },
+
+        gettingProperty: function( nodeID, propertyName ) {
+            var node, value;
+            if ( this.state.overlays[ nodeID ] ) {
+                node = this.state.overlays[ nodeID ];
+                if ( node.properties.hasOwnProperty( propertyName ) ) {
+                    value = node.properties[ propertyName ];
+                }
+            } else if ( this.state.elements[ nodeID ] ) {
+                node = this.state.elements[ nodeID ];
+                if ( node.properties.hasOwnProperty( propertyName ) ) {
+                    value = node.properties[ propertyName ];
+                } else if ( node.drawProperties.hasOwnProperty( propertyName ) ) {
+                    value = node.drawProperties[ propertyName ];
+                }
+            }
             return value;
         },
 
@@ -140,8 +143,21 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         },
 
         callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
-            if ( this.state.elements[ nodeID ] ) {
-                var node = this.state.elements[ nodeID ];
+            var node;
+            if ( this.state.overlays[ nodeID ] ) {
+                node = this.state.overlays[ nodeID ];
+                switch ( methodName ) {
+                    case "elementPreDraw":
+                    case "elementPostDraw":
+                    case "globalPreDraw":
+                    case "globalPostDraw":
+                        this.logger.errorx( "callingMethod", "The " + methodName + " method should not " +
+                            "be called from outside the HUD driver!" );
+                        return;
+                        break;
+                }
+            } else if ( this.state.elements[ nodeID ] ) {
+                node = this.state.elements[ nodeID ];
                 if ( methodName === "draw" ) {
                     this.logger.errorx( "callingMethod", "The draw method should not be called " +
                         "from outside the HUD driver!" );
