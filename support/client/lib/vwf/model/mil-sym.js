@@ -403,7 +403,7 @@ define( [ "module",
             }
 
             return value;
-        },
+        }
 
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
@@ -413,14 +413,6 @@ define( [ "module",
         // executing: function( nodeID, scriptText, scriptType ) {
         //     return undefined;
         // },
-
-        // == ticking =============================================================================
-
-        // ticking: function( vwfTime ) {
-            
-        // }
-
-
 
     } );
 
