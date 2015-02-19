@@ -2344,6 +2344,7 @@ define( [ "module",
         canvas.ondragover = function( e ) {
             sceneCanvas.mouseX=e.clientX;
             sceneCanvas.mouseY=e.clientY;
+            self.mouseOverCanvas = true;
             var eData = getEventData( e, false );
             if ( eData ) {
                 e.dataTransfer.dropEffect = "copy";
