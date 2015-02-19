@@ -784,7 +784,8 @@ define( [ "module",
                     switch ( propertyName ) {
                         
                         case "geometryDefinition":
-                            var geoObjects = createGeometryPrimitive( nodeID, propertyValue );
+                            var geoDef = JSON.parse( JSON.stringify( propertyValue ) );
+                            var geoObjects = createGeometryPrimitive( nodeID, geoDef );
 
                             if ( geoObjects !== undefined ) {
                                 node.geometry = geoObjects.geometry;
@@ -2593,17 +2594,6 @@ define( [ "module",
         }        
     }
     
-    function cesiumify( obj, type ) {
-        var value = obj;
-        switch ( type ) {
-            
-            case "cart3":
-                break 
-
-        }
-        return value;
-    }
-
     function cesiumifyOptions( options, geometry ) {
 
         if ( options !== undefined ) {
