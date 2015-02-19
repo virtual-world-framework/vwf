@@ -35,12 +35,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 "scenes": {},
                 "active": {},
                 "enabled": false,
-                "lastTime": 0,
                 "delayedProperties": {},
-                "updating": false,
-                "setProperty": function( id, propertyName, propertyValue ) {
-                    modelDriver.kernel.setProperty( id, propertyName, propertyValue );    
-                } 
+                "updating": false
             }
 
             // turns on logger debugger console messages 
@@ -505,8 +501,20 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         // -- callingMethod ------------------------------------------------------------------------
 
-        //callingMethod: function( nodeID, methodName, methodParameters ) {
-        //},
+        callingMethod: function( nodeID, methodName, methodParameters ) {
+
+            var sceneID = this.kernel.application();
+            if ( nodeID === sceneID ) {
+                switch ( methodName ) {
+                    
+                    case "update":
+                        updateScene( 0.05 );
+                        this.kernel.callMethod( sceneID, "update", [], -0.05 );
+                        break;
+
+                }
+            }
+        }
 
         // -- creatingEvent ------------------------------------------------------------------------
 
@@ -524,35 +532,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // executing: function (nodeID, scriptText, scriptType) {
         //    return undefined;
         //},
-
-        // == ticking =============================================================================
-
-        // ticking: function( vwfTime ) {
-
-        //     var elaspedTime = vwfTime - this.state.lastTime;
-        //     this.state.lastTime = vwfTime;
-            
-        //     if ( this.state.enabled ) {
-        //         if ( elaspedTime > 0 ) {
-        //             if (elaspedTime > 0.05) elaspedTime = 0.05;
-        //             var activeObj, posRotProp, pos, rot, posRot;
-        //             var sceneNode = this.state.scenes[ this.kernel.application() ];
-
-        //             if ( sceneNode && sceneNode.system ) {
-        //                 sceneNode.system.integrate( elaspedTime );
-        //                 this.state.updating = true;
-        //                 for ( var nodeID in this.state.active ) {
-        //                     activeObj = this.state.active[nodeID];
-        //                     if ( activeObj && activeObj.jlObj ) {
-        //                         var trans = activeObj.jlObj.get_Transform();
-        //                         this.kernel.setProperty( nodeID, "transform", trans );
-        //                     }
-        //                 }
-        //                 this.state.updating = false;
-        //             }
-        //         }
-        //     }
-        // }
 
     } );
 
@@ -790,6 +769,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
         scene.propertyMap = {};
         scene.initialized = true;
+        this.kernel.callMethod( this.kernel.application(), "update", [], -0.05 )
     }
 
     // == initializeObject ===================================================================
@@ -854,5 +834,36 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }                      
         }
     }
+
+    // == updateScene ===================================================================
+
+    function updateScene( elaspedTime ) {
+
+        if ( modelDriver.state.enabled ) {
+
+            var activeObj, trans;
+            var sceneNode = modelDriver.state.scenes[ modelDriver.kernel.application() ];
+
+            if ( sceneNode && sceneNode.system ) {
+                sceneNode.system.integrate( elaspedTime );
+
+                var activeKeys = Object.keys( modelDriver.state.active );
+                if ( activeKeys !== undefined ) {
+                    modelDriver.state.updating = true;
+                    for ( var i = 0; i < activeKeys.length; i++ ) {
+                        activeObj = modelDriver.state.active[ activeKeys[ i ] ];
+                        if ( activeObj && activeObj.jlObj ) {
+                            trans = activeObj.jlObj.get_Transform();
+                            modelDriver.kernel.setProperty( activeKeys[ i ], "transform", trans );
+                        }                            
+                    }
+                    modelDriver.state.updating = false;
+                }
+
+            }
+
+        }
+    }
+
 
 } );
