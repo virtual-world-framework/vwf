@@ -67,7 +67,13 @@ define( [
                         }
                     }
                     return found;
-                }
+                },
+                "videoEndedCallback" : function() {
+                    var mediaManagerID = modelDriver.kernel.find( undefined, "/mediaManager" )[ 0 ];
+                    var videoManagerID = modelDriver.kernel.find( mediaManagerID, "videoManager" ) [ 0 ];
+                    console.log("Video ended callback in driver fired!");
+                    modelDriver.kernel.fireEvent(videoManagerID, "videoEnded");
+                },
             };
 
             // turns on logger debugger console messages 
@@ -239,7 +245,7 @@ define( [
                         } );
 
                         if ( node.playerDivId ) {
-                            $( "#" + node.playerDivId ).bind($.jPlayer.event.ended, videoEndedCallback );
+                            $( "#" + node.playerDivId ).bind($.jPlayer.event.ended, this.state.videoEndedCallback );
                         }
                         
                         value = node.playerDivId;
@@ -316,7 +322,6 @@ define( [
             return node && node[ propertyName ];
         },
 
-
         // TODO: deletingMethod
 
         // -- callingMethod --------------------------------------------------------------------------
@@ -340,7 +345,7 @@ define( [
                     case "play":
 
                         if( methodParameters ){
-                            vwf.setProperty( node.ID, "url", methodParameters );
+                            this.kernel.setProperty( node.ID, "url", methodParameters );
                         }
                         node.jPlayerElement.jPlayer( "play" ); 
                         break;
@@ -364,12 +369,12 @@ define( [
 
     } );
 
-    function videoEndedCallback(){
-        var mediaManagerID = vwf.find( undefined, "/mediaManager" )[ 0 ];
-        var videoManagerID = vwf.find( mediaManagerID, "videoManager" ) [ 0 ];
-        console.log("Video ended callback in driver fired!");
-        vwf.fireEvent(videoManagerID, "videoEnded");
-    }
+    // function videoEndedCallback(){
+    //     var mediaManagerID = this.kernel.kernel.find( undefined, "/mediaManager" )[ 0 ];
+    //     var videoManagerID = this.kernel.kernel.find( mediaManagerID, "videoManager" ) [ 0 ];
+    //     console.log("Video ended callback in driver fired!");
+    //     this.kernel.fireEvent(videoManagerID, "videoEnded");
+    // }
 
     function getPrototypes( kernel, extendsID ) {
         var prototypes = [];
