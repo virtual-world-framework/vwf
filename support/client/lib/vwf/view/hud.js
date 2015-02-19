@@ -56,14 +56,25 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
 
         satProperty: function( nodeID, propertyName, propertyValue ) {
             var value, node;
-            if ( this.state.elements[ nodeID ] ) {
-                node = this.state.elements[ nodeID ];
-                if ( propertyName === "images" ) {
-                    node.properties.images = loadImages( node, propertyValue );
-                } else if ( node.initialized && node.drawProperties.hasOwnProperty( propertyName ) ) {
+            if ( this.state.overlays[ nodeID ] ) {
+                node = this.state.overlays[ nodeID ];
+                if ( node.initialized && node.properties.hasOwnProperty( propertyName ) ) {
                     node.viewObject[ propertyName ] = propertyValue;
                 }
+                value = propertyValue;
+            } else if ( this.state.elements[ nodeID ] ) {
+                node = this.state.elements[ nodeID ];
+                if ( propertyName === "images" ) {
+                    value = propertyValue;
+                    if ( node.initialized ) {
+                        updateImages( node, propertyValue );
+                    }
+                } else if ( node.initialized && node.drawProperties.hasOwnProperty( propertyName ) ) {
+                    node.viewObject[ propertyName ] = propertyValue;
+                    value = propertyValue;
+                }
             }
+            return value;
         }
 
     } );
@@ -110,16 +121,17 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
         var drawProps = node.drawProperties;
         var drawFunction = function( context, position ) { eval( node.draw ) };
         var element = new HUD.Element( node.name, drawFunction, props.width, props.height, props.visible );
-        var i, keys;
+        var i, keys, images;
         // Add custom properties to the element
         keys = Object.keys( drawProps );
         for ( i = 0; i < keys.length; i++ ) {
             element[ keys[ i ] ] = drawProps[ keys[ i ] ];
         }
         // Add images to the element as properties
-        keys = Object.keys( props.images );
+        images = loadImages( node );
+        keys = Object.keys( images );
         for ( i = 0; i < keys.length; i++ ) {
-            element[ keys[ i ] ] = props.images[ keys[ i ] ].value;
+            element[ keys[ i ] ] = images[ keys[ i ] ];
         }
         // Add event listeners to the element
         element.onClick = function( event ) {
@@ -143,30 +155,32 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function(
         return element;
     }
 
-    function loadImages( node, images ) {
+    function loadImages( node ) {
+        var images = node.properties.images;
         var keys = Object.keys( images );
-        var newImage, oldImage;
+        var image, src;
+        var results = {};
         for ( var i = 0; i < keys.length; i++ ) {
-            newImage = images[ keys[ i ] ] || {};
-            oldImage = node.properties.images[ keys[ i ] ];
-            // If the image property doesn't exist or the image hasn't been loaded or the image src
-            // has changed, then we need to load the image. Otherwise, just copy the old image data
-            if ( !oldImage || !( oldImage.value instanceof Image ) || oldImage.src !== newImage.src ) {
-                if ( oldImage.value instanceof Image ) {
-                    newImage.value = oldImage.value;
-                } else {
-                    newImage.value = new Image();
-                }
-                if ( newImage.src ) {
-                    newImage.value.src = newImage.src;
-                } else {
-                    newImage.src = "";
-                }
-            } else {
-                newImage = oldImage;
+            image = new Image();
+            src = images[ keys[ i ] ];
+            if ( src ) {
+                image.src = src;
+            }
+            results[ keys[ i ] ] = image;
+        }
+        return results;
+    }
+
+    function updateImages( node, images ) {
+        var keys = Object.keys( images );
+        var newImageSrc, oldImage;
+        for ( var i = 0; i < keys.length; i++ ) {
+            newImageSrc = images[ keys[ i ] ];
+            oldImage = node.viewObject[ keys[ i ] ];
+            if ( newImageSrc && oldImage instanceof Image && newImageSrc !== oldImage.src ) {
+                oldImage.src = newImageSrc;
             }
         }
-        return images;
     }
 
 } );

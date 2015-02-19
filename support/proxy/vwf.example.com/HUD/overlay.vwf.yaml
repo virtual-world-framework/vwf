@@ -6,5 +6,3 @@ methods:
   elementPostDraw:
   globalPreDraw:
   globalPostDraw:
-events:
-scripts:
