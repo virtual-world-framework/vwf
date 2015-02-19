@@ -50,7 +50,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 "parenting": false,
                 "deleting": false,
                 "properties": false,
-                "setting": true,
+                "setting": false,
                 "getting": false,
                 "prototypes": false,
                 "loading": false
