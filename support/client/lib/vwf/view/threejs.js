@@ -2342,6 +2342,7 @@ define( [ "module",
         // -- dragOver ---------------------------------------------------------------------------------
 
         canvas.ondragover = function( e ) {
+            self.mouseOverCanvas = true;
             sceneCanvas.mouseX=e.clientX;
             sceneCanvas.mouseY=e.clientY;
             var eData = getEventData( e, false );

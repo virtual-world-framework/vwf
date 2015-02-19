@@ -607,15 +607,16 @@ define( [
                 instIndex = pathSplit.length - 4;
             }
         }
-        var root = pathSplit[ 0 ];
-        for ( var createRootIndex = 1; createRootIndex < instIndex - 1; createRootIndex++ ) {
-          root = root + "/" + pathSplit[ createRootIndex ];
+
+        var root = "";
+        for ( var i=0; i < instIndex; i++ ) {
+            if ( root != "" ) {
+                root = root + "/";
+            } 
+            root = root + pathSplit[i];
         }
 
         if(root.indexOf('.vwf') != -1) root = root.substring(0, root.lastIndexOf('/'));
-
-        
-        
         
         var clients$ = $(this.clientList);
         var node = this.nodes[ "http://vwf.example.com/clients.vwf" ];
@@ -1826,9 +1827,13 @@ define( [
                 }
             }
             inst = pathSplit[ instIndex ];
-            var root = pathSplit[ 0 ];
-            for ( var createRootIndex = 1; createRootIndex < instIndex - 1; createRootIndex++ ) {
-              root = root + "/" + pathSplit[ createRootIndex ];
+
+            var root = "";
+            for ( var i=0; i < instIndex; i++ ) {
+                if ( root != "" ) {
+                    root = root + "/";
+                } 
+                root = root + pathSplit[i];
             }
 
             if(filename == '') filename = inst;
