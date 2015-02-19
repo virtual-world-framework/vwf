@@ -22,6 +22,15 @@ define( [
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function( options ) {
+
+            var containerDiv = document.createElement( 'div' );
+            containerDiv.id = "jp_container_1";
+            containerDiv.className = "jp-video jp-video-360p";
+            var playerDiv = document.createElement( 'div' );
+            playerDiv.id = "jquery_jplayer_1";
+            playerDiv.className = "jp-jplayer";
+            containerDiv.appendChild( playerDiv );
+            $( "body" ).append(containerDiv);
             
         	modelDriver = this;
 
