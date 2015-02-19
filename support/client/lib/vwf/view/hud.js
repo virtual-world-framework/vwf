@@ -1,6 +1,6 @@
 "use strict";
 
-define( [ "module", "vwf/model", "vwf/utility", "vwf/model/hud/hud" ], function( module, model, utility, HUD ) {
+define( [ "module", "vwf/model", "vwf/utility", "vwf/view/hud/hud" ], function( module, model, utility, HUD ) {
 
     return model.load( module, {
 
