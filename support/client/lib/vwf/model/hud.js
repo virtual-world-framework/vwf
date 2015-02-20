@@ -122,26 +122,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             return value;
         },
 
-        creatingMethod: function( nodeID, methodName, methodParameters, methodBody ) {
-            var node;
-            if ( this.state.overlays[ nodeID ] ) {
-                node = this.state.overlays[ nodeID ];
-                switch ( methodName ) {
-                    case "elementPreDraw":
-                    case "elementPostDraw":
-                    case "globalPreDraw":
-                    case "globalPostDraw":
-                        node[ methodName ] = methodBody;
-                        break;
-                }
-            } else if ( this.state.elements[ nodeID ] ) {
-                node = this.state.elements[ nodeID ];
-                if ( methodName === "draw" ) {
-                    node.draw = methodBody;
-                }
-            }
-        },
-
         callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
             var node;
             if ( this.state.overlays[ nodeID ] ) {
