@@ -128,10 +128,12 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/view/hud/hud" ], function( 
             element[ keys[ i ] ] = drawProps[ keys[ i ] ];
         }
         // Add images to the element as properties
-        images = loadImages( node );
-        keys = Object.keys( images );
-        for ( i = 0; i < keys.length; i++ ) {
-            element[ keys[ i ] ] = images[ keys[ i ] ];
+        if ( props.images ) {
+            images = loadImages( node );
+            keys = Object.keys( images );
+            for ( i = 0; i < keys.length; i++ ) {
+                element[ keys[ i ] ] = images[ keys[ i ] ];
+            }
         }
         // Add event listeners to the element
         element.onClick = function( event ) {
