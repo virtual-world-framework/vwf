@@ -106,7 +106,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         send "time" => session[:transport].time,
           "action" => "createNode",
           "parameters" => [
-            env["vwf.root"] + "/" + env["vwf.application"],
+            ( env["vwf.root"] == "/" ? "" : env["vwf.root"] ) + "/" + env["vwf.application"],
             "application"
           ]
 
