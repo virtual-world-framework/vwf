@@ -64,15 +64,15 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/view/hud/hud" ], function( 
                 value = propertyValue;
             } else if ( this.state.elements[ nodeID ] ) {
                 node = this.state.elements[ nodeID ];
-                if ( propertyName === "images" ) {
-                    value = propertyValue;
-                    if ( node.initialized ) {
+                if ( node.initialized ) {
+                    if ( propertyName === "images" ) {
                         updateImages( node, propertyValue );
+                    } else if ( node.properties.hasOwnProperty( propertyName ) ||
+                        node.drawProperties.hasOwnProperty( propertyName ) ) {
+                        node.viewObject[ propertyName ] = propertyValue;
                     }
-                } else if ( node.initialized && node.drawProperties.hasOwnProperty( propertyName ) ) {
-                    node.viewObject[ propertyName ] = propertyValue;
-                    value = propertyValue;
                 }
+                value = propertyValue;
             }
             return value;
         }
