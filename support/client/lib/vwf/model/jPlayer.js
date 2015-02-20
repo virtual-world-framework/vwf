@@ -14,6 +14,7 @@ define( [
     var jPlayerInstanceCreated = false;
     var audioManagerProtoId = "http-vwf-example-com-jplayer-audioManager-vwf";
     var videoManagerProtoId = "http-vwf-example-com-jplayer-videoManager-vwf";
+    var jplayerContainerId = "jp_container_1";
 
     return model.load( module, {
 
@@ -24,7 +25,7 @@ define( [
         initialize: function( options ) {
 
             var containerDiv = document.createElement( 'div' );
-            containerDiv.id = "jp_container_1";
+            containerDiv.id = jplayerContainerId;
             containerDiv.className = "jp-video jp-video-360p";
             var playerDiv = document.createElement( 'div' );
             playerDiv.id = "jquery_jplayer_1";
@@ -231,10 +232,26 @@ define( [
                         if ( $existingElement.length ) {
                             node.jPlayerElement = $existingElement;
                         } else {
-                            node.jPlayerElement = $( "<div/>", {
-                                id: node.playerDivId
-                            } );
-                            $( "body" ).append( node.jPlayerElement );
+                            //Change the existing element to match the new name
+                            var playerDiv = document.createElement( 'div' );
+                            playerDiv.id = node.playerDivId;
+                            if( node.containerDivId ){
+                                // playerDiv.className = "jp-jplayer";
+                                $( "#" + node.containerDivId ).append( playerDiv );
+                            } else {
+                                $("#jp_container_1").append( playerDiv );
+                            }
+                            node.jPlayerElement = $( "#" + node.playerDivId );
+
+                            // $( "#" + jplayerContainerId ).jPlayer("option", "cssSelectorAncestor", "#" + node.playerDivId);
+                            // $( "#" + jplayerContainerId ).attr( "id", node.playerDivId );
+                            // jplayerContainerId = node.playerDivId;
+
+                            // node.jPlayerElement = $( "#" + node.playerDivId );
+                            // node.jPlayerElement = $( "<div/>", {
+                            //     id: node.playerDivId
+                            // } );
+                            // $( "body" ).append( node.jPlayerElement );
                         }
                         var fileTypes = ( node.managerType === "audio" ) ? "mp3,wav" : "m4v";
                         node.jPlayerElement.jPlayer( {
@@ -483,9 +500,9 @@ define( [
 
     function setControlDivId( node, containerDivId ) {
         node.containerDivId = containerDivId;
-        if ( node.jPlayerElement ) {
-            node.jPlayerElement.jPlayer( "option", { cssSelectorAncestor: "#" + containerDivId } );
-        }
+        // if ( node.jPlayerElement ) {
+        //     node.jPlayerElement.jPlayer( "option", { cssSelectorAncestor: "#" + containerDivId } );
+        // }
     }
 
     function setPosterImageUrl( node, posterImageUrl ) {
