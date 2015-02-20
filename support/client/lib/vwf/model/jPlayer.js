@@ -12,8 +12,8 @@ define( [
 
     var modelDriver;
     var jPlayerInstanceCreated = false;
-    var audioManagerProtoId = "http://vwf.example.com/jplayer/audioManager.vwf";
-    var videoManagerProtoId = "http://vwf.example.com/jplayer/videoManager.vwf";
+    var audioManagerProtoId = "http-vwf-example-com-jplayer-audioManager-vwf";
+    var videoManagerProtoId = "http-vwf-example-com-jplayer-videoManager-vwf";
     var jplayerContainerId = "jp_container_1";
 
     return model.load( module, {
