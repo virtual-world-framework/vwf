@@ -48,6 +48,7 @@ define([
      * @param {RenderState} [options.renderState] Optional render state to override the default render state.
      *
      * @see {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric|Fabric}
+     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Material.html|Cesium Sandcastle Material Appearance Demo}
      *
      * @example
      * var primitive = new Cesium.Primitive({
@@ -94,7 +95,7 @@ define([
 
         this._vertexShaderSource = defaultValue(options.vertexShaderSource, materialSupport.vertexShaderSource);
         this._fragmentShaderSource = defaultValue(options.fragmentShaderSource, materialSupport.fragmentShaderSource);
-        this._renderState = defaultValue(options.renderState, Appearance.getDefaultRenderState(translucent, closed));
+        this._renderState = Appearance.getDefaultRenderState(translucent, closed, options.renderState);
         this._closed = closed;
 
         // Non-derived members
@@ -201,7 +202,7 @@ define([
          * @type VertexFormat
          * @readonly
          *
-         * @default {@link MaterialAppearance.VERTEX_FORMAT}
+         * @default {@link MaterialAppearance.MaterialSupport.TEXTURED.vertexFormat}
          */
         vertexFormat : {
             get : function() {
@@ -267,9 +268,9 @@ define([
     MaterialAppearance.prototype.isTranslucent = Appearance.prototype.isTranslucent;
 
     /**
-     * Creates a render state.  This is not the final {@link RenderState} instance; instead,
-     * it can contain a subset of render state properties identical to <code>renderState</code>
-     * passed to {@link Context#createRenderState}.
+     * Creates a render state.  This is not the final render state instance; instead,
+     * it can contain a subset of render state properties identical to the render state
+     * created in the context.
      *
      * @function
      *

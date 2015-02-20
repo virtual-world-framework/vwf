@@ -358,6 +358,14 @@ define( [ "module",
             return undefined;
         },
 
+        isString: function( s ) {
+            return ( typeof( s ) === 'string' || s instanceof String );
+        },
+
+        isFunction: function( obj ) {
+            return ( typeof obj === 'function' || obj instanceof Function );
+        },
+
 
         // -- xpath --------------------------------------------------------------------------------
 

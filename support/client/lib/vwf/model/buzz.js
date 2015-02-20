@@ -52,7 +52,7 @@ define( [
                     var found = false;
                     if ( prototypes ) {
                         for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                            found = ( prototypes[ i ].indexOf( "http-vwf-example-com-sound3-vwf" ) != -1 );    
+                            found = ( prototypes[ i ] === "http://vwf.example.com/sound3.vwf" );
                         }
                     }
                     return found;
@@ -61,7 +61,7 @@ define( [
                     var found = false;
                     if ( prototypes ) {
                         for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                            found = ( prototypes[ i ].indexOf( "http-vwf-example-com-sound-vwf" ) != -1 );    
+                            found = ( prototypes[ i ] === "http://vwf.example.com/sound.vwf" );
                         }
                     }
                     return found;

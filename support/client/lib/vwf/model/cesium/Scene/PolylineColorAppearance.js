@@ -3,7 +3,6 @@ define([
         '../Core/defaultValue',
         '../Core/defineProperties',
         '../Core/VertexFormat',
-        '../Renderer/createShaderSource',
         '../Shaders/Appearances/PerInstanceFlatColorAppearanceFS',
         '../Shaders/Appearances/PolylineColorAppearanceVS',
         '../Shaders/PolylineCommon',
@@ -12,12 +11,14 @@ define([
         defaultValue,
         defineProperties,
         VertexFormat,
-        createShaderSource,
         PerInstanceFlatColorAppearanceFS,
         PolylineColorAppearanceVS,
         PolylineCommon,
         Appearance) {
     "use strict";
+
+    var defaultVertexShaderSource = PolylineCommon + '\n' + PolylineColorAppearanceVS;
+    var defaultFragmentShaderSource = PerInstanceFlatColorAppearanceFS;
 
     /**
      * An appearance for {@link GeometryInstance} instances with color attributes and {@link PolylineGeometry}.
@@ -33,6 +34,8 @@ define([
      * @param {String} [options.fragmentShaderSource] Optional GLSL fragment shader source to override the default fragment shader.
      * @param {RenderState} [options.renderState] Optional render state to override the default render state.
      *
+     *@demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Polyline%20Color.html|Cesium Sandcastle Polyline Color Appearance Demo}
+     *
      * @example
      * // A solid white line segment
      * var primitive = new Cesium.Primitive({
@@ -43,7 +46,7 @@ define([
      *         5.0, 0.0
      *       ]),
      *       width : 10.0,
-     *       vertexFormat : Cesium.PolylineColorApperance.VERTEX_FORMAT
+     *       vertexFormat : Cesium.PolylineColorAppearance.VERTEX_FORMAT
      *     }),
      *     attributes : {
      *       color : Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(1.0, 1.0, 1.0, 1.0))
@@ -52,15 +55,13 @@ define([
      *   appearance : new Cesium.PolylineColorAppearance({
      *     translucent : false
      *   })
-     * }));
+     * });
      */
     var PolylineColorAppearance = function(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
 
         var translucent = defaultValue(options.translucent, true);
         var closed = false;
-        var vs = createShaderSource({ sources : [PolylineCommon, PolylineColorAppearanceVS] });
-        var fs = PerInstanceFlatColorAppearanceFS;
         var vertexFormat = PolylineColorAppearance.VERTEX_FORMAT;
 
         /**
@@ -83,9 +84,9 @@ define([
          */
         this.translucent = translucent;
 
-        this._vertexShaderSource = defaultValue(options.vertexShaderSource, vs);
-        this._fragmentShaderSource = defaultValue(options.fragmentShaderSource, fs);
-        this._renderState = defaultValue(options.renderState, Appearance.getDefaultRenderState(translucent, closed));
+        this._vertexShaderSource = defaultValue(options.vertexShaderSource, defaultVertexShaderSource);
+        this._fragmentShaderSource = defaultValue(options.fragmentShaderSource, defaultFragmentShaderSource);
+        this._renderState = Appearance.getDefaultRenderState(translucent, closed, options.renderState);
         this._closed = closed;
 
         // Non-derived members
@@ -206,9 +207,9 @@ define([
     PolylineColorAppearance.prototype.isTranslucent = Appearance.prototype.isTranslucent;
 
     /**
-     * Creates a render state.  This is not the final {@link RenderState} instance; instead,
-     * it can contain a subset of render state properties identical to <code>renderState</code>
-     * passed to {@link Context#createRenderState}.
+     * Creates a render state.  This is not the final render state instance; instead,
+     * it can contain a subset of render state properties identical to the render state
+     * created in the context.
      *
      * @function
      *

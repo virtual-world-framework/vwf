@@ -7,10 +7,13 @@ define([
         './defaultValue',
         './defined',
         './DeveloperError',
+        './Ellipsoid',
         './Geometry',
         './GeometryAttribute',
         './GeometryAttributes',
+        './GeometryType',
         './IndexDatatype',
+        './Math',
         './PolylinePipeline',
         './PrimitiveType',
         './VertexFormat'
@@ -22,14 +25,53 @@ define([
         defaultValue,
         defined,
         DeveloperError,
+        Ellipsoid,
         Geometry,
         GeometryAttribute,
         GeometryAttributes,
+        GeometryType,
         IndexDatatype,
+        CesiumMath,
         PolylinePipeline,
         PrimitiveType,
         VertexFormat) {
     "use strict";
+
+    var scratchInterpolateColorsArray = [];
+
+    function interpolateColors(p0, p1, color0, color1, numPoints) {
+        var colors = scratchInterpolateColorsArray;
+        colors.length = numPoints;
+        var i;
+
+        var r0 = color0.red;
+        var g0 = color0.green;
+        var b0 = color0.blue;
+        var a0 = color0.alpha;
+
+        var r1 = color1.red;
+        var g1 = color1.green;
+        var b1 = color1.blue;
+        var a1 = color1.alpha;
+
+        if (Color.equals(color0, color1)) {
+            for (i = 0; i < numPoints; i++) {
+                colors[i] = Color.clone(color0);
+            }
+            return colors;
+        }
+
+        var redPerVertex = (r1 - r0) / numPoints;
+        var greenPerVertex = (g1 - g0) / numPoints;
+        var bluePerVertex = (b1 - b0) / numPoints;
+        var alphaPerVertex = (a1 - a0) / numPoints;
+
+        for (i = 0; i < numPoints; i++) {
+            colors[i] = new Color(r0 + i * redPerVertex, g0 + i * greenPerVertex, b0 + i * bluePerVertex, a0 + i * alphaPerVertex);
+        }
+
+        return colors;
+    }
 
     /**
      * A description of a polyline modeled as a line strip; the first two positions define a line segment,
@@ -44,12 +86,17 @@ define([
      * @param {Number} [options.width=1.0] The width in pixels.
      * @param {Color[]} [options.colors] An Array of {@link Color} defining the per vertex or per segment colors.
      * @param {Boolean} [options.colorsPerVertex=false] A boolean that determines whether the colors will be flat across each segment of the line or interpolated across the vertices.
+     * @param {Boolean} [options.followSurface=true] A boolean that determines whether positions will be adjusted to the surface of the ellipsoid via a great arc.
+     * @param {Number} [options.granularity=CesiumMath.RADIANS_PER_DEGREE] The distance, in radians, between each latitude and longitude if options.followSurface=true. Determines the number of positions in the buffer.
+     * @param {Ellipsoid} [options.ellipsoid=Ellipsoid.WGS84] The ellipsoid to be used as a reference.
      *
      * @exception {DeveloperError} At least two positions are required.
      * @exception {DeveloperError} width must be greater than or equal to one.
      * @exception {DeveloperError} colors has an invalid length.
      *
      * @see PolylineGeometry#createGeometry
+     *
+     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Polyline.html|Cesium Sandcastle Polyline Demo}
      *
      * @example
      * // A polyline with two connected line segments
@@ -87,6 +134,9 @@ define([
         this._width = width;
         this._perVertex = perVertex;
         this._vertexFormat = defaultValue(options.vertexFormat, VertexFormat.DEFAULT);
+        this._followSurface = defaultValue(options.followSurface, true);
+        this._granularity = defaultValue(options.granularity, CesiumMath.RADIANS_PER_DEGREE);
+        this._ellipsoid = defaultValue(options.ellipsoid, Ellipsoid.WGS84);
         this._workerName = 'createPolylineGeometry';
     };
 
@@ -94,31 +144,91 @@ define([
     var scratchPosition = new Cartesian3();
     var scratchPrevPosition = new Cartesian3();
     var scratchNextPosition = new Cartesian3();
+
     /**
      * Computes the geometric representation of a polyline, including its vertices, indices, and a bounding sphere.
      *
      * @param {PolylineGeometry} polylineGeometry A description of the polyline.
      * @returns {Geometry} The computed vertices and indices.
+     *
+     * @exception {DeveloperError} At least two unique positions are required.
+     *
      */
     PolylineGeometry.createGeometry = function(polylineGeometry) {
         var width = polylineGeometry._width;
         var vertexFormat = polylineGeometry._vertexFormat;
         var colors = polylineGeometry._colors;
         var perVertex = polylineGeometry._perVertex;
+        var followSurface = polylineGeometry._followSurface;
+        var granularity = polylineGeometry._granularity;
+        var ellipsoid = polylineGeometry._ellipsoid;
 
-        var segments = PolylinePipeline.wrapLongitude(polylineGeometry._positions);
-        var positions = segments.positions;
-        var lengths = segments.lengths;
+        var minDistance = CesiumMath.chordLength(granularity, ellipsoid.maximumRadius);
 
         var i;
         var j;
         var k;
 
-        var size = 0;
-        var length = lengths.length;
-        for (i = 0; i < length; ++i) {
-            size += lengths[i] * 4.0 - 4.0;
+        var positions = PolylinePipeline.removeDuplicates(polylineGeometry._positions);
+        if (!defined(positions)) {
+            positions = polylineGeometry._positions;
         }
+        var positionsLength = positions.length;
+
+        //>>includeStart('debug', pragmas.debug);
+        if (positionsLength < 2) {
+            throw new DeveloperError('At least two unique positions are required.');
+        }
+        //>>includeEnd('debug');
+
+        if (followSurface) {
+            var heights = PolylinePipeline.extractHeights(positions, ellipsoid);
+
+            if (defined(colors)) {
+                var colorLength = 1;
+                for (i = 0; i < positionsLength - 1; ++i) {
+                    colorLength += PolylinePipeline.numberOfPoints(positions[i], positions[i+1], minDistance);
+                }
+
+                var newColors = new Array(colorLength);
+                var newColorIndex = 0;
+
+                for (i = 0; i < positionsLength - 1; ++i) {
+                    var p0 = positions[i];
+                    var p1 = positions[i+1];
+                    var c0 = colors[i];
+
+                    var numColors = PolylinePipeline.numberOfPoints(p0, p1, minDistance);
+                    if (perVertex && i < colorLength) {
+                        var c1 = colors[i+1];
+                        var interpolatedColors = interpolateColors(p0, p1, c0, c1, numColors);
+                        var interpolatedColorsLength = interpolatedColors.length;
+                        for (j = 0; j < interpolatedColorsLength; ++j) {
+                            newColors[newColorIndex++] = interpolatedColors[j];
+                        }
+                    } else {
+                        for (j = 0; j < numColors; ++j) {
+                            newColors[newColorIndex++] = Color.clone(c0);
+                        }
+                    }
+                }
+
+                newColors[newColorIndex] = Color.clone(colors[colors.length-1]);
+                colors = newColors;
+
+                scratchInterpolateColorsArray.length = 0;
+            }
+
+            positions = PolylinePipeline.generateCartesianArc({
+                positions: positions,
+                minDistance: minDistance,
+                ellipsoid: ellipsoid,
+                height: heights
+            });
+        }
+
+        positionsLength = positions.length;
+        var size = positionsLength * 4.0 - 4.0;
 
         var finalPositions = new Float64Array(size * 3);
         var prevPositions = new Float64Array(size * 3);
@@ -137,7 +247,6 @@ define([
         var count = 0;
         var position;
 
-        var positionsLength = positions.length;
         for (j = 0; j < positionsLength; ++j) {
             if (j === 0) {
                 position = scratchCartesian3;
@@ -160,31 +269,21 @@ define([
 
             Cartesian3.clone(position, scratchNextPosition);
 
-            segmentLength = lengths[segmentIndex];
-            if (j === count + segmentLength) {
-                count += segmentLength;
-                ++segmentIndex;
-            }
-
-            var segmentStart = j - count === 0;
-            var segmentEnd = j === count + lengths[segmentIndex] - 1;
-
-            var startK = segmentStart ? 2 : 0;
-            var endK = segmentEnd ? 2 : 4;
-
             var color0, color1;
             if (defined(finalColors)) {
-                var colorSegmentIndex = j - segmentIndex;
-                if (!segmentStart && !perVertex) {
-                    color0 = colors[colorSegmentIndex - 1];
+                if (j !== 0 && !perVertex) {
+                    color0 = colors[j - 1];
                 } else {
-                    color0 = colors[colorSegmentIndex];
+                    color0 = colors[j];
                 }
 
-                if (!segmentEnd) {
-                    color1 = colors[colorSegmentIndex];
+                if (j !== positionsLength - 1) {
+                    color1 = colors[j];
                 }
             }
+
+            var startK = j === 0 ? 2 : 0;
+            var endK = j === positionsLength - 1 ? 2 : 4;
 
             for (k = startK; k < endK; ++k) {
                 Cartesian3.pack(scratchPosition, finalPositions, positionIndex);
@@ -255,30 +354,28 @@ define([
             });
         }
 
-        length = lengths.length;
-        var indices = IndexDatatype.createTypedArray(size, positions.length * 6 - length * 6);
+        var indices = IndexDatatype.createTypedArray(size, positionsLength * 6 - 6);
         var index = 0;
         var indicesIndex = 0;
-        for (i = 0; i < length; ++i) {
-            segmentLength = lengths[i] - 1.0;
-            for (j = 0; j < segmentLength; ++j) {
-                indices[indicesIndex++] = index;
-                indices[indicesIndex++] = index + 2;
-                indices[indicesIndex++] = index + 1;
+        var length = positionsLength - 1.0;
+        for (j = 0; j < length; ++j) {
+            indices[indicesIndex++] = index;
+            indices[indicesIndex++] = index + 2;
+            indices[indicesIndex++] = index + 1;
 
-                indices[indicesIndex++] = index + 1;
-                indices[indicesIndex++] = index + 2;
-                indices[indicesIndex++] = index + 3;
+            indices[indicesIndex++] = index + 1;
+            indices[indicesIndex++] = index + 2;
+            indices[indicesIndex++] = index + 3;
 
-                index += 4;
-            }
+            index += 4;
         }
 
         return new Geometry({
             attributes : attributes,
             indices : indices,
             primitiveType : PrimitiveType.TRIANGLES,
-            boundingSphere : BoundingSphere.fromPoints(positions)
+            boundingSphere : BoundingSphere.fromPoints(positions),
+            geometryType : GeometryType.POLYLINES
         });
     };
 

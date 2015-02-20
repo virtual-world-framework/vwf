@@ -44,16 +44,23 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             case "createNode":
 
-                return function( nodeComponent, nodeAnnotation, when, callback /* nodeID */ ) {
+                return function( nodeComponent, nodeAnnotation, baseURI, when, callback /* nodeID */ ) {
 
                     // Interpret `createNode( nodeComponent, when, callback )` as
-                    // `createNode( nodeComponent, undefined, when, callback )`. (`nodeAnnotation`
-                    // was added in 0.6.12.)
+                    // `createNode( nodeComponent, undefined, undefined, when, callback )` and
+                    // `createNode( nodeComponent, nodeAnnotation, when, callback )` as
+                    // `createNode( nodeComponent, nodeAnnotation, undefined, when, callback )`.
+                    // `nodeAnnotation` was added in 0.6.12, and `baseURI` was added in 0.6.25.
 
-                    if ( typeof when == "function" || when instanceof Function ) {
-                        callback = when;
+                    if ( typeof baseURI == "function" || baseURI instanceof Function ) {
+                        callback = baseURI;
                         when = nodeAnnotation;
+                        baseURI = undefined;
                         nodeAnnotation = undefined;
+                    } else if ( typeof when == "function" || when instanceof Function ) {
+                        callback = when;
+                        when = baseURI;
+                        baseURI = undefined;
                     }
 
                     // Make the call.

@@ -2,11 +2,31 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
-0.6.24
+0.7.0
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change. 
 
-- CHG: Fixes getWorldTransform and recursively sets transform dirty
+- CHG: Calculate the correct application component URL for components in "/".
+- CHG: Fix editor paths for existing save/load capability.
+- CHG: Set mouseOverCanvas property on drag and drop to appropriately get the correct pickInfo.
+- CHG: Update models directory paths in admin files for both ruby and node.js server.
+- CHG: Delay rendering the scene until initialize complete.
+- CHG: Load the application component using an absolute URL (node server).
+- CHG: Replace '/' in lesson IDs with underscores to correct jQuery issues.
+- CHG: Leave host-relative application IDs intact.
+- CHG: Resolve relative references with repect to the component when loading: prototypes, behaviors, 'include' components, 'source' assets, scripts. 
+- CHG: Load component resources wrt the component (application only, actually), not the application instance in the reflector.
+- CHG: Load the application component using an absolute (host-relative) URL.
+- CHG*: Remove legacy ID format support. 
+- CHG: Reload when the connection drops instead of reconnection + `setState`.
+- NEW: Add more functionality for material creation. 
+- CHG: Move proxy path code before the application patterns. This change corrects the issue with the ruby server and a default application in public.
+- CHG: Fix fly behavior implementation. 
+- CHG: Update utilities to use isString and isFunction functions. 
+- CHG: Update cesium to version 1.5. Correct all cesium related applications. 
+- CHG: Remove warning that fires unnecessarily during getState when kernel re-entry is blocked.
+- CHG: Update threejs drivers for correct picking functionality. 
+- CHG: Fixes getWorldTransform and recursively sets transform dirty.
 - CHG: Don't create new watchers at every reload of a file
 - CHG: Move required test files back to public for build purposes.
 - CHG: Remove index.html as it is now replaced by the default duck app.

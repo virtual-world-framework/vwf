@@ -42,7 +42,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
       # Initialize the client configuration from the runtime environment.
 
       logger.debug "VWF::Application::Reflector#connect #{id} " +
-          "launching from #{ env["vwf.application"] }"
+          "launching from #{ env["vwf.root"] + "/" + env["vwf.application"] }"
       
       if env["vwf.load"]
         filename = VWF.settings.public_folder+"/../documents#{ env['vwf.root'] }/#{ env['vwf.load'] }/saveState.vwf.json"
@@ -106,7 +106,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
         send "time" => session[:transport].time,
           "action" => "createNode",
           "parameters" => [
-            env["vwf.application"],
+            ( env["vwf.root"] == "/" ? "" : env["vwf.root"] ) + "/" + env["vwf.application"],
             "application"
           ]
 
@@ -162,7 +162,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     broadcast "time" => session[:transport].time,
       "action" => "createChild",
-      "parameters" => [ "http-vwf-example-com-clients-vwf", id, {} ]
+      "parameters" => [ "http://vwf.example.com/clients.vwf", id, {} ]
 
   end
 
@@ -268,7 +268,7 @@ class VWF::Application::Reflector < Rack::SocketIO::Application
 
     broadcast "time" => session[:transport].time,
       "action" => "deleteChild",
-      "parameters" => [ "http-vwf-example-com-clients-vwf", id ]
+      "parameters" => [ "http://vwf.example.com/clients.vwf", id ]
 
     # Just log the disconnection if no clients are waiting for replication.
 

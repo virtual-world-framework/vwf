@@ -440,7 +440,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "unit-vwf" || prototypes[i] == "unit.vwf" ); 
+                found = ( prototypes[i] == "unit.vwf" );
             }
         }
        return found;
@@ -450,7 +450,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "modifier-vwf" || prototypes[i] == "modifier.vwf" ); 
+                found = ( prototypes[i] == "modifier.vwf" );
             }
         }
        return found;

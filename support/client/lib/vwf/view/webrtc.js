@@ -191,8 +191,8 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             }
             // debugger;
 
-            if ( nodeID.indexOf( "-clients-vwf" ) != -1 ) {
-                var moniker = nodeID.substr( nodeID.lastIndexOf('-')+1, 16 );
+            if ( this.kernel.find( nodeID, "parent::element(*,'http://vwf.example.com/clients.vwf')" ).length > 0 ) {
+                var moniker = this.kernel.name( nodeID );
                 var client = undefined;
 
                 if ( moniker == this.kernel.moniker() ) {
@@ -408,8 +408,9 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
                 }
             }  
 
-            $('#'+divId).draggable();
-            
+            var divEle = $('#'+divId);
+            divEle && divEle.draggable && divEle.draggable();
+           
         } 
 
         var clr = new utility.color( color );
@@ -417,7 +418,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             clr = clr.toArray(); 
         }
 
-        this.kernel.callMethod( "index-vwf", "createVideo", [ { 
+        this.kernel.callMethod( this.kernel.application(), "createVideo", [ {
             "ID": id,
             "url": url, 
             "name": name, 
@@ -438,7 +439,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
             client.videoDivID = undefined;
         }
 
-        this.kernel.callMethod( "index-vwf", "removeVideo", [ client.moniker ] ); 
+        this.kernel.callMethod( this.kernel.application(), "removeVideo", [ client.moniker ] );
 
     }
 
@@ -607,7 +608,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
         if ( prototypes ) {
             var len = prototypes.length;
             for ( var i = 0; i < len && !foundClient; i++ ) {
-                foundClient = ( prototypes[i] == "http-vwf-example-com-client-vwf" );    
+                foundClient = ( prototypes[i] == "http://vwf.example.com/client.vwf" );
             }
         }
 
@@ -615,7 +616,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
     }
 
     function isClientInstanceDef( nodeID ) {
-        return ( nodeID == "http-vwf-example-com-clients-vwf" );
+        return ( nodeID == "http://vwf.example.com/clients.vwf" );
     }
 
     function mediaConnection( view, peerNode ) {

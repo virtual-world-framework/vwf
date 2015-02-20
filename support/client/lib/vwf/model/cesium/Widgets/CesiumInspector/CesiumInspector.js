@@ -28,6 +28,8 @@ define([
      *
      * @exception {DeveloperError} container is required.
      * @exception {DeveloperError} scene is required.
+     *
+     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Cesium%20Inspector.html|Cesium Sandcastle Cesium Inspector Demo}
      */
     var CesiumInspector = function(container, scene) {
         if (!defined(container)) {
@@ -40,7 +42,9 @@ define([
 
         container = getElement(container);
 
-        var viewModel = new CesiumInspectorViewModel(scene);
+        var performanceContainer = document.createElement('div');
+
+        var viewModel = new CesiumInspectorViewModel(scene, performanceContainer);
         this._viewModel = viewModel;
         this._container = container;
 
@@ -93,6 +97,9 @@ define([
         pdCheckbox.setAttribute('data-bind', 'checked: performance, click: showPerformance');
         performanceDisplay.appendChild(pdCheckbox);
         performanceDisplay.appendChild(document.createTextNode('Performance Display'));
+
+        performanceContainer.className = 'cesium-cesiumInspector-performanceDisplay';
+        generalSection.appendChild(performanceContainer);
 
         // Primitives
         var prim = document.createElement('div');

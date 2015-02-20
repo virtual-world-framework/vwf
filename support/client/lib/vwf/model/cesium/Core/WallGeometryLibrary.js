@@ -1,6 +1,5 @@
 /*global define*/
 define([
-        './Cartesian3',
         './Cartographic',
         './defined',
         './DeveloperError',
@@ -10,7 +9,6 @@ define([
         './PolylinePipeline',
         './WindingOrder'
     ], function(
-        Cartesian3,
         Cartographic,
         defined,
         DeveloperError,
@@ -26,30 +24,6 @@ define([
      */
     var WallGeometryLibrary = {};
 
-    function subdivideHeights(p0, p1, h0, h1, granularity) {
-        var angleBetween = Cartesian3.angleBetween(p0, p1);
-        var numPoints = Math.ceil(angleBetween/granularity);
-        var heights = new Array(numPoints);
-        var i;
-        if (h0 === h1) {
-            for (i = 0; i < numPoints; i++) {
-                heights[i] = h0;
-            }
-            return heights;
-        }
-
-        var dHeight = h1 - h0;
-        var heightPerVertex = dHeight / (numPoints);
-
-        for (i = 1; i < numPoints; i++) {
-            var h = h0 + i*heightPerVertex;
-            heights[i] = h;
-        }
-
-        heights[0] = h0;
-        return heights;
-    }
-
     function latLonEquals(c0, c1) {
         return ((CesiumMath.equalsEpsilon(c0.latitude, c1.latitude, CesiumMath.EPSILON14)) && (CesiumMath.equalsEpsilon(c0.longitude, c1.longitude, CesiumMath.EPSILON14)));
     }
@@ -57,46 +31,62 @@ define([
     var scratchCartographic1 = new Cartographic();
     var scratchCartographic2 = new Cartographic();
     function removeDuplicates(ellipsoid, positions, topHeights, bottomHeights) {
-        var hasBottomHeights = (defined(bottomHeights));
-        var hasTopHeights = (defined(topHeights));
-        var cleanedPositions = [];
-        var cleanedTopHeights = [];
-        var cleanedBottomHeights = hasBottomHeights ? [] : undefined;
-
         var length = positions.length;
         if (length < 2) {
             return { positions: positions };
         }
 
+        var hasBottomHeights = (defined(bottomHeights));
+        var hasTopHeights = (defined(topHeights));
+
+        var cleanedPositions = new Array(length);
+        var cleanedTopHeights = new Array(length);
+        var cleanedBottomHeights = new Array(length);
+
         var v0 = positions[0];
-        cleanedPositions.push(v0);
+        cleanedPositions[0] = v0;
+
         var c0 = ellipsoid.cartesianToCartographic(v0, scratchCartographic1);
         if (hasTopHeights) {
             c0.height = topHeights[0];
         }
-        cleanedTopHeights.push(c0.height);
+        cleanedTopHeights[0] = c0.height;
+
         if (hasBottomHeights) {
-            cleanedBottomHeights.push(bottomHeights[0]);
+            cleanedBottomHeights[0] = bottomHeights[0];
+        } else {
+            cleanedBottomHeights[0] = 0.0;
         }
 
+        var index = 1;
         for (var i = 1; i < length; ++i) {
             var v1 = positions[i];
             var c1 = ellipsoid.cartesianToCartographic(v1, scratchCartographic2);
             if (hasTopHeights) {
                 c1.height = topHeights[i];
             }
+
             if (!latLonEquals(c0, c1)) {
-                cleanedPositions.push(v1); // Shallow copy!
-                cleanedTopHeights.push(c1.height);
+                cleanedPositions[index] = v1; // Shallow copy!
+                cleanedTopHeights[index] = c1.height;
+
                 if (hasBottomHeights) {
-                    cleanedBottomHeights.push(bottomHeights[i]);
+                    cleanedBottomHeights[index] = bottomHeights[i];
+                } else {
+                    cleanedBottomHeights[index] = 0.0;
                 }
+
+                ++index;
             } else if (c0.height < c1.height) {
-                cleanedTopHeights[cleanedTopHeights.length-1] = c1.height;
+                cleanedTopHeights[index - 1] = c1.height;
             }
 
             Cartographic.clone(c1, c0);
         }
+
+        cleanedPositions.length = index;
+        cleanedTopHeights.length = index;
+        cleanedBottomHeights.length = index;
 
         return {
             positions: cleanedPositions,
@@ -104,6 +94,15 @@ define([
             bottomHeights: cleanedBottomHeights
         };
     }
+
+    var positionsArrayScratch = new Array(2);
+    var heightsArrayScratch = new Array(2);
+    var generateArcOptionsScratch = {
+        positions : undefined,
+        height : undefined,
+        granularity : undefined,
+        ellipsoid : undefined
+    };
 
     /**
      * @private
@@ -121,8 +120,6 @@ define([
         }
         //>>includeEnd('debug');
 
-        var hasMinHeights = (defined(minimumHeights));
-
         if (wallPositions.length >= 3) {
             // Order positions counter-clockwise
             var tangentPlane = EllipsoidTangentPlane.fromPoints(wallPositions, ellipsoid);
@@ -131,56 +128,64 @@ define([
             if (PolygonPipeline.computeWindingOrder2D(positions2D) === WindingOrder.CLOCKWISE) {
                 wallPositions.reverse();
                 maximumHeights.reverse();
-
-                if (hasMinHeights) {
-                    minimumHeights.reverse();
-                }
+                minimumHeights.reverse();
             }
         }
 
-        var i;
         var length = wallPositions.length;
-        var newMaxHeights = [];
-        var newMinHeights = (hasMinHeights) ? [] : undefined;
-        var newWallPositions = [];
-        for (i = 0; i < length-1; i++) {
-            var p1 = wallPositions[i];
-            var p2 = wallPositions[i + 1];
-            var h1 = maximumHeights[i];
-            var h2 = maximumHeights[i + 1];
-            newMaxHeights = newMaxHeights.concat(subdivideHeights(p1, p2, h1, h2, granularity));
-            if (duplicateCorners) {
-                newMaxHeights.push(h2);
+        var topPositions;
+        var bottomPositions;
+
+        var minDistance = CesiumMath.chordLength(granularity, ellipsoid.maximumRadius);
+
+        var generateArcOptions = generateArcOptionsScratch;
+        generateArcOptions.minDistance = minDistance;
+        generateArcOptions.ellipsoid = ellipsoid;
+
+        if (duplicateCorners) {
+            var count = 0;
+            var i;
+
+            for (i = 0; i < length - 1; i++) {
+                count += PolylinePipeline.numberOfPoints(wallPositions[i], wallPositions[i+1], minDistance) + 1;
             }
 
-            if (hasMinHeights) {
-                p1 = wallPositions[i];
-                p2 = wallPositions[i + 1];
-                h1 = minimumHeights[i];
-                h2 = minimumHeights[i + 1];
-                newMinHeights = newMinHeights.concat(subdivideHeights(p1, p2, h1, h2, granularity));
-                if (duplicateCorners) {
-                    newMinHeights.push(h2);
-                }
-            }
+            topPositions = new Float64Array(count * 3);
+            bottomPositions = new Float64Array(count * 3);
 
-            if (duplicateCorners) {
-                newWallPositions = newWallPositions.concat(PolylinePipeline.scaleToSurface([p1, p2], granularity, ellipsoid));
+            var generateArcPositions = positionsArrayScratch;
+            var generateArcHeights = heightsArrayScratch;
+            generateArcOptions.positions = generateArcPositions;
+            generateArcOptions.height = generateArcHeights;
+
+            var offset = 0;
+            for (i = 0; i < length - 1; i++) {
+                generateArcPositions[0] = wallPositions[i];
+                generateArcPositions[1] = wallPositions[i + 1];
+
+                generateArcHeights[0] = maximumHeights[i];
+                generateArcHeights[1] = maximumHeights[i + 1];
+
+                var pos = PolylinePipeline.generateArc(generateArcOptions);
+                topPositions.set(pos, offset);
+
+                generateArcHeights[0] = minimumHeights[i];
+                generateArcHeights[1] = minimumHeights[i + 1];
+
+                bottomPositions.set(PolylinePipeline.generateArc(generateArcOptions), offset);
+
+                offset += pos.length;
             }
+        } else {
+            generateArcOptions.positions = wallPositions;
+            generateArcOptions.height = maximumHeights;
+            topPositions = new Float64Array(PolylinePipeline.generateArc(generateArcOptions));
+
+            generateArcOptions.height = minimumHeights;
+            bottomPositions = new Float64Array(PolylinePipeline.generateArc(generateArcOptions));
         }
-
-        if (!duplicateCorners) {
-            newWallPositions = PolylinePipeline.scaleToSurface(wallPositions, granularity, ellipsoid);
-            newMaxHeights.push(maximumHeights[length-1]);
-            if (hasMinHeights) {
-                newMinHeights.push(minimumHeights[length-1]);
-            }
-        }
-        var bottomPositions = (hasMinHeights) ? PolylinePipeline.scaleToGeodeticHeight(newWallPositions, newMinHeights, ellipsoid) : newWallPositions.slice(0);
-        var topPositions = PolylinePipeline.scaleToGeodeticHeight(newWallPositions, newMaxHeights, ellipsoid);
 
         return {
-            newWallPositions: newWallPositions,
             bottomPositions: bottomPositions,
             topPositions: topPositions
         };

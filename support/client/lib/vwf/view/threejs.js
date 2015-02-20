@@ -97,7 +97,7 @@ define( [ "module",
             this.state.appInitialized = false;
 
             this.pickInterval = 10;
-            this.disableInputs = false;
+            this.enableInputs = true;
             this.applicationWantsPointerEvents = false;
 
             // Store parameter options for persistence functionality
@@ -107,11 +107,11 @@ define( [ "module",
  
                 this.rootSelector = options[ "application-root" ];
 
-                if ( "experimental-pick-interval" in options ) {
-                    this.pickInterval = options[ "experimental-pick-interval" ];
+                if ( "pick-interval" in options ) {
+                    this.pickInterval = options[ "pick-interval" ];
                 }
-                if ( "experimental-disable-inputs" in options ) {
-                    this.disableInputs = options[ "experimental-disable-inputs" ];
+                if ( "enable-inputs" in options ) {
+                    this.enableInputs = options[ "enable-inputs" ];
                 }
                 enableStereo = ( options.stereo !== undefined ) ? options.stereo : false;
 
@@ -163,13 +163,16 @@ define( [ "module",
             //how/when does the model set the state object? 
             if ( this.state.scenes[ childID ] )
             {                
-                this.canvasQuery = $(this.rootSelector).append("<canvas id='" + this.state.sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
+                this.canvasQuery = $(this.rootSelector).append("<canvas id='" + this.kernel.application() + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
                 ).children(":last");
                 
                 initScene.call(this,this.state.scenes[childID]);
             }
-            else if (this.state.scenes[ this.kernel.application() ] && this.state.scenes[ this.kernel.application() ].camera.ID == childID) {
-                setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
+            else if ( this.state.scenes[ this.kernel.application() ] ) {
+                var sceneNode = this.state.scenes[ this.kernel.application() ];
+                if ( sceneNode.camera.ID == childID ) {
+                    setActiveCamera.call( this, sceneNode.camera.ID );    
+                }
             }
         
             if(this.state.nodes[childID] && this.state.nodes[childID].threeObject instanceof THREE.Object3D) {
@@ -182,7 +185,6 @@ define( [ "module",
             // If the node that was initialized is the application node, find the user's navigation object
             var appID = this.kernel.application();
             if ( childID == appID ) {
-                this.state.appInitialized = true;
 
                 if ( enableStereo ) {
                     var viewCam = this.state.cameraInUse;
@@ -203,6 +205,7 @@ define( [ "module",
                         effect.setSize( this.width, this.height ); 
                     }
                 }
+                this.state.appInitialized = true;
 
             } else {
 
@@ -265,6 +268,7 @@ define( [ "module",
         satProperty: function ( nodeID, propertyName, propertyValue ) {         
             // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
             // rotationSpeed
+
             if ( navObject && ( nodeID == navObject.ID ) ) {
                 if ( propertyName == "navmode" ) {
                     navmode = propertyValue;
@@ -285,7 +289,7 @@ define( [ "module",
                 } else if ( propertyName == "boundingBox" ) {
                     boundingBox = propertyValue;
                 } else if ( propertyName == "activeCamera" ) {
-                    setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
+                    setActiveCamera.call( this, this.state.scenes[ this.kernel.application() ].camera.ID );
                 } else if ( propertyName == "usersShareView" ) {
                     usersShareView = propertyValue;
                 }
@@ -311,7 +315,7 @@ define( [ "module",
         gotProperty: function ( nodeID, propertyName, propertyValue ) { 
             var clientThatGotProperty = this.kernel.client();
             var me = this.kernel.moniker();
-            var sceneRootID = this.state.sceneRootID;
+            var sceneRootID = this.kernel.application();
             if ( clientThatGotProperty == me ) {
                 if ( propertyName == "owner") {
 
@@ -354,7 +358,7 @@ define( [ "module",
                                     // Retrieve the userObject property so we may create a navigation object from 
                                     // it for this user (the rest of the logic is in the gotProperty call for 
                                     // userObject)
-                                    this.kernel.getProperty( sceneRootID, "userObject" );
+                                    this.kernel.getProperty( this.kernel.application(), "userObject" );
                                     userObjectRequested = true;
                                 }
                             }
@@ -384,7 +388,7 @@ define( [ "module",
     
                         // TODO: The callback function is commented out because callbacks have not yet been 
                         //       implemented for createChild - see workaround in initializedNode
-                        this.kernel.createChild( sceneRootID, navObjectName, userObject, undefined, undefined /*,
+                        this.kernel.createChild( this.kernel.application(), navObjectName, userObject, undefined, undefined /*,
                                                  function( nodeID ) {
                             controlNavObject( this.state.nodes[ nodeID ] );
                         } */ );
@@ -1109,6 +1113,10 @@ define( [ "module",
             // Schedule the next render
             window.requestAnimationFrame( renderScene ); 
 
+            if ( !self.state.appInitialized ) {
+                return;
+            }
+
             // Verify that there is a camera to render from before going any farther
             var camera = self.state.cameraInUse;
             if ( !camera ) {
@@ -1139,7 +1147,7 @@ define( [ "module",
                     }
                 }
 
-                if ( navmode != "none" && !self.disableInputs ) {
+                if ( navmode != "none" && self.enableInputs ) {
 
                     // Move the user's camera according to their input
                     inputMoveNavObject( timepassed );
@@ -1154,51 +1162,55 @@ define( [ "module",
 
             }
             
-            // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
-            // Note: this is a costly operation and should be optimized if possible
-            if ( ( now - lastPickTime ) > self.pickInterval && !self.disableInputs )
-            {
-                sceneNode.frameCount = 0;
-            
-                var newPick, newPickId;
+            if ( self.mouseOverCanvas ) {
 
-                if ( self.applicationWantsPointerEvents ) {
-                    newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
-                    newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
-                } else {
-                    newPick = undefined;
-                    newPickId = undefined;
-                }
-
-                if ( self.lastPickId != newPickId && self.lastEventData )
+                // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
+                // Note: this is a costly operation and should be optimized if possible
+                if ( ( self.mouseJustEnteredCanvas || ( ( now - lastPickTime ) > self.pickInterval ) ) && self.enableInputs )
                 {
-                    if ( self.lastPickId ) {
-                        view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
-                                                   self.lastEventData.eventData, 
-                                                   self.lastEventData.eventNodeData );
-                    }
-                    if ( newPickId ) {
-                        view.kernel.dispatchEvent( newPickId, "pointerOver",
-                                                   self.lastEventData.eventData, 
-                                                   self.lastEventData.eventNodeData );
-                    }
-                }
-
-                if ( view.lastEventData && 
-                     ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
-                       view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
-                    oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
-                    oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
-                    hovering = false;
-                }
-                else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
-                    view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-                    hovering = true;
-                }
+                    sceneNode.frameCount = 0;
                 
-                self.lastPickId = newPickId;
-                self.lastPick = newPick;
-                lastPickTime = now;
+                    var newPick, newPickId;
+
+                    if ( self.applicationWantsPointerEvents ) {
+                        newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
+                        newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.kernel.application();
+                    } else {
+                        newPick = undefined;
+                        newPickId = undefined;
+                    }
+
+                    if ( self.lastPickId != newPickId && self.lastEventData )
+                    {
+                        if ( self.lastPickId ) {
+                            view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
+                                                       self.lastEventData.eventData, 
+                                                       self.lastEventData.eventNodeData );
+                        }
+                        if ( newPickId ) {
+                            view.kernel.dispatchEvent( newPickId, "pointerOver",
+                                                       self.lastEventData.eventData, 
+                                                       self.lastEventData.eventNodeData );
+                        }
+                    }
+
+                    if ( view.lastEventData && 
+                         ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
+                           view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
+                        oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
+                        oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
+                        hovering = false;
+                    }
+                    else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
+                        view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+                        hovering = true;
+                    }
+                    
+                    self.lastPickId = newPickId;
+                    self.lastPick = newPick;
+                    lastPickTime = now;
+                }
+                self.mouseJustEnteredCanvas = false;                
             }
 
             if ( enableStereo && sceneNode && sceneNode.stereo ) {
@@ -1340,7 +1352,7 @@ define( [ "module",
             window._dRenderer = renderer;
             window._dSceneNode = sceneNode;
             
-            if(!this.disableInputs) {
+            if ( this.enableInputs ) {
                 initInputEvents.call(this,mycanvas);
             }
             renderScene( ( +new Date ) );
@@ -1380,8 +1392,8 @@ define( [ "module",
     // -- initInputEvents ------------------------------------------------------------------------
 
     function initInputEvents( canvas ) {
-        var sceneNode = this.state.scenes[this.state.sceneRootID], child;
-        var sceneID = this.state.sceneRootID;
+        var sceneID = this.kernel.application();
+        var sceneNode = this.state.scenes[ sceneID ], child;
         var sceneView = this;
 
         var touchID = undefined;
@@ -1874,7 +1886,11 @@ define( [ "module",
         }
 
         canvas.onmouseover = function( e ) {
-            self.mouseOverCanvas = true;
+            if ( !self.mouseOverCanvas ) {
+                self.mouseJustEnteredCanvas = true;
+                self.mouseOverCanvas = true;
+            }
+
             var eData = getEventData( e, false );
             if ( eData ) {
                 pointerOverID = pointerPickID ? pointerPickID : sceneID;
@@ -1951,77 +1967,77 @@ define( [ "module",
         
         window.onkeydown = function (event) {
                     
-                    var key = undefined;
-                    var validKey = false;
-                    var keyAlreadyDown = false;
-                    switch ( event.keyCode ) {
-                        case 17:
-                        case 16:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( sceneView, event.keyCode);
-                            keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
-                            sceneView.keyStates.keysDown[key.key] = key;
-                            validKey = true;
+            var key = undefined;
+            var validKey = false;
+            var keyAlreadyDown = false;
+            switch ( event.keyCode ) {
+                case 17:
+                case 16:
+                case 18:
+                case 19:
+                case 20:
+                    break;
+                default:
+                    key = getKeyValue.call( sceneView, event.keyCode);
+                    keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
+                    sceneView.keyStates.keysDown[key.key] = key;
+                    validKey = true;
 
-                            // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                            handleKeyNavigation( event.keyCode, true );
-                            // END TODO
+                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                    handleKeyNavigation( event.keyCode, true );
+                    // END TODO
 
-                            break;
-                    }
-                    
-                    if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
-                    sceneView.keyStates.mods.alt = event.altKey;
-                    sceneView.keyStates.mods.shift = event.shiftKey;
-                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
-                    sceneView.keyStates.mods.meta = event.metaKey;
+                    break;
+            }
+            
+            if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
+            sceneView.keyStates.mods.alt = event.altKey;
+            sceneView.keyStates.mods.shift = event.shiftKey;
+            sceneView.keyStates.mods.ctrl = event.ctrlKey;
+            sceneView.keyStates.mods.meta = event.metaKey;
 
-                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
-                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
-                        //var params = JSON.stringify( sceneView.keyStates );
-                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
-                    }
-                };
+            var sceneNode = sceneView.state.scenes[ sceneView.kernel.application() ];
+            if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
+                //var params = JSON.stringify( sceneView.keyStates );
+                sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
+            }
+        };
 
          window.onkeyup = function (event) {
-                    var key = undefined;
-                    var validKey = false;
-                    switch (event.keyCode) {
-                        case 16:
-                        case 17:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( sceneView, event.keyCode);
-                            delete sceneView.keyStates.keysDown[key.key];
-                            sceneView.keyStates.keysUp[key.key] = key;
-                            validKey = true;
+            var key = undefined;
+            var validKey = false;
+            switch (event.keyCode) {
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                    break;
+                default:
+                    key = getKeyValue.call( sceneView, event.keyCode);
+                    delete sceneView.keyStates.keysDown[key.key];
+                    sceneView.keyStates.keysUp[key.key] = key;
+                    validKey = true;
 
-                            // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                            handleKeyNavigation( event.keyCode, false );
-                            // END TODO
+                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                    handleKeyNavigation( event.keyCode, false );
+                    // END TODO
 
-                            break;
-                    }
-                    
-                    sceneView.keyStates.mods.alt = event.altKey;
-                    sceneView.keyStates.mods.shift = event.shiftKey;
-                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
-                    sceneView.keyStates.mods.meta = event.metaKey;
+                    break;
+            }
+            
+            sceneView.keyStates.mods.alt = event.altKey;
+            sceneView.keyStates.mods.shift = event.shiftKey;
+            sceneView.keyStates.mods.ctrl = event.ctrlKey;
+            sceneView.keyStates.mods.meta = event.metaKey;
 
-                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
-                    if (validKey && sceneNode) {
-                        //var params = JSON.stringify( sceneView.keyStates );
-                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
-                        delete sceneView.keyStates.keysUp[key.key];
-                    }
-                };
+            var sceneNode = sceneView.state.scenes[ sceneView.kernel.application() ];
+            if (validKey && sceneNode) {
+                //var params = JSON.stringify( sceneView.keyStates );
+                sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
+                delete sceneView.keyStates.keysUp[key.key];
+            }
+        };
 
         window.oncontextmenu = function() {
             if ( navmode == "none" )
@@ -2326,6 +2342,7 @@ define( [ "module",
         // -- dragOver ---------------------------------------------------------------------------------
 
         canvas.ondragover = function( e ) {
+            self.mouseOverCanvas = true;
             sceneCanvas.mouseX=e.clientX;
             sceneCanvas.mouseY=e.clientY;
             var eData = getEventData( e, false );
@@ -2430,7 +2447,7 @@ define( [ "module",
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
-        pickDirection.set( x, y, threeCam.near );
+        pickDirection.set( x, y, 0.5 );
 
         var camPos = new THREE.Vector3(
             threeCam.matrixWorld.elements[ 12 ],  
@@ -2473,7 +2490,7 @@ define( [ "module",
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
-        pickDirection.set( x, y, threeCam.near );
+        pickDirection.set( x, y, 0.5 );
 
         var camPos = new THREE.Vector3(
             threeCam.matrixWorld.elements[ 12 ],  
@@ -2489,7 +2506,7 @@ define( [ "module",
         for ( var i = 0; i < intersects.length && target === undefined; i++ ) {
             if ( debug ) {
                 for ( var j = 0; j < intersects.length; j++ ) { 
-                    console.info( j + ". " + intersects[ j ].object.name ) 
+                    console.info( j + ". " + getPickObjectID( intersects[ j ].object ) ); 
                 }
             }   
             if ( intersects[ i ].object.visible ) {
@@ -3107,7 +3124,7 @@ define( [ "module",
 
     function findNavObject() {
         // Find the navigable objects in the scene
-        var sceneRootID = self.state.sceneRootID;
+        var sceneRootID = self.kernel.application();
         var navObjectIds = self.kernel.find( sceneRootID,
                                              ".//element(*,'http://vwf.example.com/navigable.vwf')" );
         numNavCandidates = navObjectIds.length;
@@ -3124,7 +3141,6 @@ define( [ "module",
             vwf_view.kernel.getProperty( sceneRootID, "boundingBox" );
             vwf_view.kernel.getProperty( sceneRootID, "userObject" );
             userObjectRequested = true;
-
         }
     }
 
@@ -3160,11 +3176,13 @@ define( [ "module",
     }
 
     function inputHandleScroll( wheelDelta, distanceToTarget ) {
-        var navThreeObject = navObject.threeObject;
-        var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
-        self.handleScroll( wheelDelta, navObject, navmode, rotationSpeed, translationSpeed, distanceToTarget );
-        setTransformFromWorldTransform( navThreeObject );
-        callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+        if ( navObject && navObject.threeObject ) {
+            var navThreeObject = navObject.threeObject;
+            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+            self.handleScroll( wheelDelta, navObject, navmode, rotationSpeed, translationSpeed, distanceToTarget );
+            setTransformFromWorldTransform( navThreeObject );
+            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+        }
     }
 
     function inputMoveNavObject( msSinceLastFrame ) {
@@ -3398,7 +3416,7 @@ define( [ "module",
 
         //Threejs does not currently support auto tracking the lookat,
         //instead, we'll take the position of the node and look at that.
-        if ( typeof node.lookatval == 'string' ) {
+        if ( utility.isString( node.lookatval ) ) {
             
             var lookatNode = self.state.nodes[ node.lookatval ];
             
@@ -3654,16 +3672,14 @@ define( [ "module",
     }
 
     function setActiveCamera( cameraID ) {
-        var sceneRootID = this.state.sceneRootID;
-        var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
-        if( modelCameraInfo.threeJScameras[ cameraID ] ) {
-            // If the view is currently using the model's activeCamera, update it to the new activeCamera
-            if ( usersShareView ) {
-                cameraNode = this.state.nodes[cameraID];
-                this.state.cameraInUse = cameraNode.threeObject;
-                var canvas = this.canvasQuery[ 0 ];
-                this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
-            }
+        if ( usersShareView && this.state.nodes[ cameraID ] !== undefined ) {
+            var sceneID = this.kernel.application();
+            var sceneNode = this.state.scenes[ sceneID ];
+            //var cameras = this.kernel.find( sceneID, "./element(*,'http://vwf.example.com/camera.vwf')" );            
+            cameraNode = this.state.nodes[ cameraID ];
+            this.state.cameraInUse = cameraNode.threeObject;
+            var canvas = this.canvasQuery[ 0 ];
+            this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
         }
     }
 
