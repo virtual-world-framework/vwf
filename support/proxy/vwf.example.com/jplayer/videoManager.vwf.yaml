@@ -7,7 +7,7 @@ properties:
   containerDivId: "videoContainer"
   playerDivId: "videoScreen"
   containerSize: [ 1024, 768 ]
-  playerSize: [1024, 768]
+  playerSize: [ 1024, 768 ]
 methods:
   play: 
   pause:

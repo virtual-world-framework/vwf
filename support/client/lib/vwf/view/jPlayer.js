@@ -8,7 +8,7 @@ define( [
         "vwf/view", 
         "jquery"
     ], function( module, view, $ ) {
-    	return view.load( module, {
+        return view.load( module, {
             createdProperty: function (nodeID, propertyName, propertyValue) {
                 this.satProperty(nodeID, propertyName, propertyValue);
              },
@@ -49,7 +49,7 @@ define( [
                 }
             },
 
-    		satProperty: function ( nodeID, propertyName, propertyValue ) {
+        satProperty: function ( nodeID, propertyName, propertyValue ) {
                 var node = this.state.nodes[nodeID];
                 if( node && propertyValue ){
                     switch( propertyName ){
@@ -61,7 +61,7 @@ define( [
                             break;
                     }
                 }
-    		}
-    	});
+            }
+        });
     }
 );
