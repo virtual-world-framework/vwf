@@ -75,6 +75,54 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/view/hud/hud" ], function( 
                 value = propertyValue;
             }
             return value;
+        },
+
+        createdMethod: function( nodeID, methodName, methodParameters, methodBody ) {
+            var node;
+            if ( this.state.overlays[ nodeID ] ) {
+                node = this.state.overlays[ nodeID ];
+                switch ( methodName ) {
+                    case "elementPreDraw":
+                    case "elementPostDraw":
+                    case "globalPreDraw":
+                    case "globalPostDraw":
+                        this.kernel.getMethod( nodeID, methodName );
+                        break;
+                }
+            } else if ( this.state.elements[ nodeID ] ) {
+                node = this.state.elements[ nodeID ];
+                if ( methodName === "draw" ) {
+                    this.kernel.getMethod( nodeID, "draw" );
+                }
+            }
+        },
+
+        gotMethod: function( nodeID, methodName, methodHandler ) {
+            var node;
+            if ( this.state.overlays[ nodeID ] ) {
+                node = this.state.overlays[ nodeID ];
+                switch ( methodName ) {
+                    case "elementPreDraw":
+                    case "elementPostDraw":
+                        node.viewObject[ methodName ] = function( context, element ) {
+                            eval( methodHandler.body );
+                        };
+                        break;
+                    case "globalPreDraw":
+                    case "globalPostDraw":
+                        node.viewObject[ methodName ] = function( context ) {
+                            eval( methodHandler.body );
+                        };
+                        break;
+                }
+            } else if ( this.state.elements[ nodeID ] ) {
+                node = this.state.elements[ nodeID ];
+                if ( methodName === "draw" ) {
+                    node.viewObject[ methodName ] = function( context, position ) {
+                        eval( methodHandler.body );
+                    };
+                }
+            }
         }
 
     } );
@@ -93,34 +141,13 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/view/hud/hud" ], function( 
             props = element.properties;
             overlay.add( element.viewObject, props.alignH, props.alignV, props.offsetH, props.offsetV );
         }
-        if ( node.elementPreDraw ) {
-            overlay.elementPreDraw = function( context, element ) {
-                eval( node.elementPreDraw )
-            }
-        }
-        if ( node.elementPostDraw ) {
-            overlay.elementPostDraw = function( context, element ) {
-                eval( node.elementPostDraw )
-            }
-        }
-        if ( node.globalPreDraw ) {
-            overlay.globalPreDraw = function( context ) {
-                eval( node.globalPreDraw )
-            }
-        }
-        if ( node.globalPostDraw ) {
-            overlay.globalPostDraw = function( context ) {
-                eval( node.globalPostDraw )
-            }
-        }
         return overlay;
     }
 
     function createElement( node ) {
         var props = node.properties;
         var drawProps = node.drawProperties;
-        var drawFunction = function( context, position ) { eval( node.draw ) };
-        var element = new HUD.Element( node.name, drawFunction, props.width, props.height, props.visible );
+        var element = new HUD.Element( node.name, undefined, props.width, props.height, props.visible );
         var i, keys, images;
         // Add custom properties to the element
         keys = Object.keys( drawProps );
