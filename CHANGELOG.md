@@ -200,31 +200,31 @@ Note: (*) indicates an API change.
 - NEW: Interpolate between transforms on frames between ticks.
 - NEW: Move per-prototype `initialize` from `model/javascript` to the kernel.
 
-  In order for the javascript driver to create an async break between
-  calls to a node's prototype `initialize` functions, it needs to call
-  back into `kernel.execute` and iterate using the `execute` callback. But
-  kernel reentry is during replication. The driver can't make the extra
-  hop through the kernel to execute its script. It needs to execute it
-  directly.
+	In order for the javascript driver to create an async break between
+	calls to a node's prototype `initialize` functions, it needs to call
+	back into `kernel.execute` and iterate using the `execute` callback. But
+	kernel reentry is during replication. The driver can't make the extra
+	hop through the kernel to execute its script. It needs to execute it
+	directly.
 
-  This commit makes the kernel responsible for applying the prototypes'
-  initializers to the node. Using the new `initializingNodeFromPrototype`
-  handler, the kernel directs drivers to run the relevant prototype
-  initializers on the node. The kernel provides an async break between
-  initializations when needed.
+	This commit makes the kernel responsible for applying the prototypes'
+	initializers to the node. Using the new `initializingNodeFromPrototype`
+	handler, the kernel directs drivers to run the relevant prototype
+	initializers on the node. The kernel provides an async break between
+	initializations when needed.
 
-  Drivers only need to apply one initializer at a time. They no longer
-  need to search through the prototype chain and don't need to be
-  concerned about waiting for async operations from a prototype's
-  initializer to complete before calling a derived node's initializer.
+	Drivers only need to apply one initializer at a time. They no longer
+	need to search through the prototype chain and don't need to be
+	concerned about waiting for async operations from a prototype's
+	initializer to complete before calling a derived node's initializer.
 
-  An added benefit is that multiple drivers can perform partial
-  initialization correctly (such as if two scripting systems are active).
-  Previously, one driver would execute initialization for the entire
-  prototype chain without allowing the next driver to interleave its
-  initialization for the same nodes.
+	An added benefit is that multiple drivers can perform partial
+	initialization correctly (such as if two scripting systems are active).
+	Previously, one driver would execute initialization for the entire
+	prototype chain without allowing the next driver to interleave its
+	initialization for the same nodes.
 
-  References #2417.
+	References #2417.
 
 - NEW: Make jQuery and bootstrap load as RequireJS modules to remove them from the global namespace. Refs #3108, #3109
 - CHG: New loader screen!
@@ -270,6 +270,7 @@ Note: (*) indicates an API change.
 - CHG: No longer create default lights in every app - only if app doesn't create any itself (the create two directional lights and one ambient)
 - CHG: Remove/encapsulate external dependencies so they don't conflict with app dependencies
 
+
 ----------------------------------
 0.6.21
 ----------------------------------------------------------------------------------------------------
@@ -283,6 +284,7 @@ Note: (*) indicates an API change.
 - NEW: Three.js JSON Model loader and animations, Refs #2891
 - NEW: Clean up the Three.js JSON model testcase.  Refs #2981
 - NEW: Update to three.js r64
+- CHG: Reorder client disconnect code in Node server.  Refs #2978
 - CHG: Update shrinkwrap with the new modules.
 - CHG: Update node server docs with application path info. Closes #3011
 - CHG: Update readme.md to include new instructions for VWF 1.0 installation steps. Closes #2959
