@@ -57,6 +57,9 @@ define(function(){
 	var isHSL = /^hsla?\((\d{1,3}?),\s*(\d{1,3}%),\s*(\d{1,3}%)(,\s*[01]?\.?\d*)?\)$/;
 	var isRGB = /^rgba?\((\d{1,3}%?),\s*(\d{1,3}%?),\s*(\d{1,3}%?)(,\s*[01]?\.?\d*)?\)$/;
 	var isPercent = /^\d+(\.\d+)*%$/;
+	var isString = function( s ) {
+        return ( typeof( s ) === 'string' || s instanceof String );
+    }
 
 	var hexBit = /([0-9a-f])/gi;
 	var leadHex = /^#/;
@@ -101,6 +104,43 @@ define(function(){
 			case (value instanceof Color) :
 				this.copy(value);
 				return this;
+			case ( isString( value ) ):
+				value = value.replace( /\s/g, '' );
+				switch(true){
+					case (namedColors.hasOwnProperty(value)) :
+						value = namedColors[value];
+						var stripped = value.replace(leadHex, '');
+						this.decimal(parseInt(stripped, 16));
+						return this;
+					case isHex.test(value) :
+						var stripped = value.replace(leadHex, '');
+						if(stripped.length == 3) {
+							stripped = stripped.replace(hexBit, '$1$1');
+						};
+						this.decimal(parseInt(stripped, 16));
+						return this;
+					case isRGB.test(value) :
+						var parts = value.match(matchRGB);
+						var alphaIsValid = !( isNaN( parseFloat( parts[5] ) ) );
+						this.red(p2v(parts[1]));
+						this.green(p2v(parts[2]));
+						this.blue(p2v(parts[3]));
+						this.alpha( alphaIsValid ? parseFloat( parts[5] ) : 1 );
+						this.output = alphaIsValid ? Color.RGBA : ( isPercent.test( parts[1] ) ? Color.PRGB : Color.RGB );
+						return this;
+					case isHSL.test(value) :  
+						var parts = value.match(matchHSL);
+						this.hue(parseInt(parts[1]));
+						this.saturation(parseInt(parts[2]));
+						this.lightness(parseInt(parts[3]));
+						this.alpha( isNaN( parseFloat( parts[5] ) ) ? 1 : parseFloat( parts[5] ) );
+						this.output = parts[5] ? 6: 5; 
+						return this;
+					default:
+						console.info( "WARNING: color not parsed" );
+						break;
+				};				
+				break;
 			default : 
 				switch(typeof value) {
 					case 'object' :
@@ -123,6 +163,7 @@ define(function(){
 						}
 						return this;
 					case 'string' :
+						value = value.replace( /\s/g, '' );
 						switch(true){
 							case (namedColors.hasOwnProperty(value)) :
 								value = namedColors[value];
@@ -163,7 +204,7 @@ define(function(){
 		return this;
 	};
 
-	
+
 	Color.prototype.clone = function(){
 		return new Color(this.decimal());
 	};

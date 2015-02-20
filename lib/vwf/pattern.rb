@@ -122,10 +122,10 @@ private
           break template_extension
         end
       end
-    elsif path =~ /\.(dae|unity3d)$/  # TODO: test  # TODO: or any other data type with automatic mapping from data type to component type  # TODO: sync with server mime types and mappings in vwf.js normalizedComponent()
-      if file? path
-        ""
-      end
+    # elsif path =~ /\.(dae|unity3d)$/  # TODO: test  # TODO: or any other data type with automatic mapping from data type to component type  # TODO: sync with server mime types and mappings in vwf.js normalizedComponent()
+    #   if file? path
+    #     ""
+    #   end
     end
   end
 

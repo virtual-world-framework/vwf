@@ -1,18 +1,18 @@
 /*global define*/
 define([
         '../Core/clone',
+        '../Core/combine',
         '../Core/defaultValue',
         '../Core/defined',
         '../Core/defineProperties',
-        '../Renderer/createShaderSource',
         './BlendingState',
         './CullFace'
     ], function(
         clone,
+        combine,
         defaultValue,
         defined,
         defineProperties,
-        createShaderSource,
         BlendingState,
         CullFace) {
     "use strict";
@@ -27,7 +27,7 @@ define([
      *
      * @param {Object} [options] Object with the following properties:
      * @param {Boolean} [options.translucent=true] When <code>true</code>, the geometry is expected to appear translucent so {@link Appearance#renderState} has alpha blending enabled.
-     * @param {Boolean} [options.closed=false] When <code>true</code>, the geometry is expected to be closed so {@link lAppearance#renderState} has backface culling enabled.
+     * @param {Boolean} [options.closed=false] When <code>true</code>, the geometry is expected to be closed so {@link Appearance#renderState} has backface culling enabled.
      * @param {Material} [options.material=Material.ColorType] The material used to determine the fragment color.
      * @param {String} [options.vertexShaderSource] Optional GLSL vertex shader source to override the default vertex shader.
      * @param {String} [options.fragmentShaderSource] Optional GLSL fragment shader source to override the default fragment shader.
@@ -39,6 +39,8 @@ define([
      * @see DebugAppearance
      * @see PolylineColorAppearance
      * @see PolylineMaterialAppearance
+     *
+     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Geometry%20and%20Appearances.html|Geometry and Appearances Demo}
      */
     var Appearance = function(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
@@ -137,10 +139,19 @@ define([
      * @returns {String} The full GLSL fragment shader source.
      */
     Appearance.prototype.getFragmentShaderSource = function() {
-        return createShaderSource({
-            defines : [this.flat ? 'FLAT' : '', this.faceForward ? 'FACE_FORWARD' : ''],
-            sources : [defined(this.material) ? this.material.shaderSource : '', this.fragmentShaderSource]
-        });
+        var parts = [];
+        if (this.flat) {
+            parts.push('#define FLAT');
+        }
+        if (this.faceForward) {
+            parts.push('#define FACE_FORWARD');
+        }
+        if (defined(this.material)) {
+            parts.push(this.material.shaderSource);
+        }
+        parts.push(this.fragmentShaderSource);
+
+        return parts.join('\n');
     };
 
     /**
@@ -153,9 +164,9 @@ define([
     };
 
     /**
-     * Creates a render state.  This is not the final {@link RenderState} instance; instead,
-     * it can contain a subset of render state properties identical to <code>renderState</code>
-     * passed to {@link Context#createRenderState}.
+     * Creates a render state.  This is not the final render state instance; instead,
+     * it can contain a subset of render state properties identical to the render state
+     * created in the context.
      *
      * @returns {Object} The render state.
      */
@@ -174,7 +185,7 @@ define([
     /**
      * @private
      */
-    Appearance.getDefaultRenderState = function(translucent, closed) {
+    Appearance.getDefaultRenderState = function(translucent, closed, existing) {
         var rs = {
             depthTest : {
                 enabled : true
@@ -191,6 +202,10 @@ define([
                 enabled : true,
                 face : CullFace.BACK
             };
+        }
+
+        if (defined(existing)) {
+            rs = combine(existing, rs, true);
         }
 
         return rs;

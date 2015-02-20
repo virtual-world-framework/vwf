@@ -14,7 +14,14 @@
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 
-define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( module, view, utility, Hammer, $ ) {
+define( [ "module", 
+          "vwf/view", 
+          "vwf/utility", 
+          "hammer", 
+          "jquery" 
+        ], 
+
+    function( module, view, utility, Hammer, $ ) {
 
     var self;
 
@@ -32,7 +39,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                                  "mozPointerLockElement" in document ||
                                  "webkitPointerLockElement" in document;
     var pointerLocked = false;
-    var pickDirectionVector;
+    var pickDirection = undefined;
+    var raycaster = undefined;
     var pitchMatrix;
     var rollMatrix;
     var yawMatrix;
@@ -75,6 +83,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
     var Vec3 = goog.vec.Vec3;
     var Quaternion = goog.vec.Quaternion;
+
+    var enableStereo = false;
+
     return view.load( module, {
 
         initialize: function( options ) {
@@ -86,19 +97,32 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             this.state.appInitialized = false;
 
             this.pickInterval = 10;
-            this.disableInputs = false;
+            this.enableInputs = true;
             this.applicationWantsPointerEvents = false;
 
             // Store parameter options for persistence functionality
             this.parameters = options;
 
-            if(typeof options == "object") {
-                this.rootSelector = options["application-root"];
-                if("experimental-pick-interval" in options) {
-                    this.pickInterval = options["experimental-pick-interval"];
+            if ( typeof options == "object" ) {
+ 
+                this.rootSelector = options[ "application-root" ];
+
+                if ( "pick-interval" in options ) {
+                    this.pickInterval = options[ "pick-interval" ];
                 }
-                if("experimental-disable-inputs" in options) {
-                    this.disableInputs = options["experimental-disable-inputs"];
+                if ( "enable-inputs" in options ) {
+                    this.enableInputs = options[ "enable-inputs" ];
+                }
+                enableStereo = ( options.stereo !== undefined ) ? options.stereo : false;
+
+                if ( options.shaders ) {
+                    var scriptEle = undefined;
+                    // jQuery.getScript()
+                    for ( var i = 0; i < options.shaders.length; i++ ) {
+                        var scriptEle = document.createElement( 'script' );
+                        scriptEle.setAttribute( "type", "text/javascript" );
+                        scriptEle.setAttribute( "src", options.shaders[ i ] );
+                    }
                 }
             }
             else {
@@ -108,14 +132,18 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             this.height = 600;
             this.width = 800;
             this.canvasQuery = null;
+
             if ( window && window.innerHeight ) this.height = window.innerHeight;
             if ( window && window.innerWidth ) this.width = window.innerWidth;
+
             this.keyStates = { keysDown: {}, mods: {}, keysUp: {} };
 
             pitchMatrix = new THREE.Matrix4();
             rollMatrix = new THREE.Matrix4();
             yawMatrix = new THREE.Matrix4();
             translationMatrix = new THREE.Matrix4();
+            pickDirection = new THREE.Vector3();
+            raycaster = new THREE.Raycaster();
         
             window._dView = this;
             this.nodes = {};
@@ -135,13 +163,16 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             //how/when does the model set the state object? 
             if ( this.state.scenes[ childID ] )
             {                
-                this.canvasQuery = $(this.rootSelector).append("<canvas id='" + this.state.sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
+                this.canvasQuery = $(this.rootSelector).append("<canvas id='" + this.kernel.application() + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
                 ).children(":last");
                 
                 initScene.call(this,this.state.scenes[childID]);
             }
-            else if (this.state.scenes[ this.kernel.application() ] && this.state.scenes[ this.kernel.application() ].camera.ID == childID) {
-                setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
+            else if ( this.state.scenes[ this.kernel.application() ] ) {
+                var sceneNode = this.state.scenes[ this.kernel.application() ];
+                if ( sceneNode.camera.ID == childID ) {
+                    setActiveCamera.call( this, sceneNode.camera.ID );    
+                }
             }
         
             if(this.state.nodes[childID] && this.state.nodes[childID].threeObject instanceof THREE.Object3D) {
@@ -154,7 +185,28 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             // If the node that was initialized is the application node, find the user's navigation object
             var appID = this.kernel.application();
             if ( childID == appID ) {
+
+                if ( enableStereo ) {
+                    var viewCam = this.state.cameraInUse;
+                    var sceneNode = this.state.scenes[ childID ];
+                    
+                    if ( sceneNode ) {
+                        sceneNode.stereo = {
+                            "effect": new THREE.StereoEffect( sceneNode.renderer ),
+                            "element": sceneNode.renderer.domElement,
+                            "controls": viewCam ? createControls( viewCam, sceneNode.renderer.domElement ) : undefined
+                        } 
+                        var effect = sceneNode.stereo.effect;
+
+                        effect.separation = this.parameters.IPD ? this.parameters.IPD : 0.2;
+                        effect.offset = this.parameters.offset ? this.parameters.offset : -0.2;
+                        effect.delta = this.parameters.delta ? this.parameters.delta : 0.01;
+
+                        effect.setSize( this.width, this.height ); 
+                    }
+                }
                 this.state.appInitialized = true;
+
             } else {
 
                 //TODO: This is a temporary workaround until the callback functionality is implemented for 
@@ -166,6 +218,18 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 if ( initNode && ( initNode.name == navObjectName ) ) {
                     initNode.owner = this.kernel.moniker();
                     controlNavObject( initNode );
+                }
+
+                // in the case that camera was not defined when the scene was created
+                // we need to see if that camera is now defined, and set up the camera controls
+                if ( enableStereo ) {
+                    var sceneNode = this.state.scenes[ appID ];
+                    if ( sceneNode && sceneNode.stereo && sceneNode.stereo.controls === undefined ) {
+                        if ( this.state.cameraInUse !== undefined ) {
+                            sceneNode.stereo.controls = createControls( this.state.cameraInUse, sceneNode.renderer.domElement );    
+                        }
+                    }
+
                 }
             }
             //End TODO
@@ -204,6 +268,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         satProperty: function ( nodeID, propertyName, propertyValue ) {         
             // If this is this user's navObject, pay attention to changes in navmode, translationSpeed, and 
             // rotationSpeed
+
             if ( navObject && ( nodeID == navObject.ID ) ) {
                 if ( propertyName == "navmode" ) {
                     navmode = propertyValue;
@@ -224,7 +289,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 } else if ( propertyName == "boundingBox" ) {
                     boundingBox = propertyValue;
                 } else if ( propertyName == "activeCamera" ) {
-                    setActiveCamera.call(this, this.state.scenes[ this.kernel.application() ].camera.ID);
+                    setActiveCamera.call( this, this.state.scenes[ this.kernel.application() ].camera.ID );
                 } else if ( propertyName == "usersShareView" ) {
                     usersShareView = propertyValue;
                 }
@@ -250,7 +315,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         gotProperty: function ( nodeID, propertyName, propertyValue ) { 
             var clientThatGotProperty = this.kernel.client();
             var me = this.kernel.moniker();
-            var sceneRootID = this.state.sceneRootID;
+            var sceneRootID = this.kernel.application();
             if ( clientThatGotProperty == me ) {
                 if ( propertyName == "owner") {
 
@@ -293,7 +358,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                                     // Retrieve the userObject property so we may create a navigation object from 
                                     // it for this user (the rest of the logic is in the gotProperty call for 
                                     // userObject)
-                                    this.kernel.getProperty( sceneRootID, "userObject" );
+                                    this.kernel.getProperty( this.kernel.application(), "userObject" );
                                     userObjectRequested = true;
                                 }
                             }
@@ -323,7 +388,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     
                         // TODO: The callback function is commented out because callbacks have not yet been 
                         //       implemented for createChild - see workaround in initializedNode
-                        this.kernel.createChild( sceneRootID, navObjectName, userObject, undefined, undefined /*,
+                        this.kernel.createChild( this.kernel.application(), navObjectName, userObject, undefined, undefined /*,
                                                  function( nodeID ) {
                             controlNavObject( this.state.nodes[ nodeID ] );
                         } */ );
@@ -637,7 +702,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             var orbiting = ( navMode == "fly" ) && ( mouseDown.middle )
 
-            if ( orbiting || !pickDirectionVector ) {
+            if ( orbiting || !pickDirection ) {
                 return;
             }
 
@@ -665,9 +730,9 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             extractRotationAndTranslation( navObject.threeObject );
 
             var translationArray = translationMatrix.elements;
-            translationArray[ 12 ] += amountToMove * pickDirectionVector.x;
-            translationArray[ 13 ] += amountToMove * pickDirectionVector.y;
-            translationArray[ 14 ] += amountToMove * pickDirectionVector.z;
+            translationArray[ 12 ] += amountToMove * pickDirection.x;
+            translationArray[ 13 ] += amountToMove * pickDirection.y;
+            translationArray[ 14 ] += amountToMove * pickDirection.z;
             if ( boundingBox != undefined ) {
                 if ( translationArray[ 12 ] < boundingBox[ 0 ][ 0 ] ) {
                     translationArray[ 12 ] = boundingBox[ 0 ][ 0 ];
@@ -1015,6 +1080,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     function initScene( sceneNode ) {
     
         var lastPickTime = 0;
+        var mobileDevice = isMobile();
         
         function GetParticleSystems(node,list)
         {
@@ -1022,7 +1088,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                 list = [];
             for(var i =0; i<node.children.length; i++)
             {
-                if(node.children[i] instanceof THREE.ParticleSystem)
+                if(node.children[i] instanceof THREE.PointCloud)
                     list.push(node.children[i]);
                 list =  GetParticleSystems(node.children[i],list);
             }           
@@ -1046,6 +1112,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             // Schedule the next render
             window.requestAnimationFrame( renderScene ); 
+
+            if ( !self.state.appInitialized ) {
+                return;
+            }
 
             // Verify that there is a camera to render from before going any farther
             var camera = self.state.cameraInUse;
@@ -1077,7 +1147,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     }
                 }
 
-                if ( navmode != "none" && !self.disableInputs ) {
+                if ( navmode != "none" && self.enableInputs ) {
 
                     // Move the user's camera according to their input
                     inputMoveNavObject( timepassed );
@@ -1089,59 +1159,72 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                         nodeLookAt( cameraNode );
                     }
                 }
+
             }
             
-            // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
-            // Note: this is a costly operation and should be optimized if possible
-            if ( ( now - lastPickTime ) > self.pickInterval && !self.disableInputs )
-            {
-                sceneNode.frameCount = 0;
-            
-                var newPick, newPickId;
+            if ( self.mouseOverCanvas ) {
 
-                if ( self.applicationWantsPointerEvents ) {
-                    newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
-                    newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.state.sceneRootID;
-                } else {
-                    newPick = undefined;
-                    newPickId = undefined;
-                }
-
-                if ( self.lastPickId != newPickId && self.lastEventData )
+                // Only do a pick every "pickInterval" ms. Defaults to 10 ms.
+                // Note: this is a costly operation and should be optimized if possible
+                if ( ( self.mouseJustEnteredCanvas || ( ( now - lastPickTime ) > self.pickInterval ) ) && self.enableInputs )
                 {
-                    if ( self.lastPickId ) {
-                        view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
-                                                   self.lastEventData.eventData, 
-                                                   self.lastEventData.eventNodeData );
-                    }
-                    if ( newPickId ) {
-                        view.kernel.dispatchEvent( newPickId, "pointerOver",
-                                                   self.lastEventData.eventData, 
-                                                   self.lastEventData.eventNodeData );
-                    }
-                }
-
-                if ( view.lastEventData && 
-                     ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
-                       view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
-                    oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
-                    oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
-                    hovering = false;
-                }
-                else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
-                    view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
-                    hovering = true;
-                }
+                    sceneNode.frameCount = 0;
                 
-                self.lastPickId = newPickId;
-                self.lastPick = newPick;
-                lastPickTime = now;
+                    var newPick, newPickId;
+
+                    if ( self.applicationWantsPointerEvents ) {
+                        newPick = ThreeJSPick.call( self, mycanvas, sceneNode, false );
+                        newPickId = newPick ? getPickObjectID.call( view, newPick.object ) : view.kernel.application();
+                    } else {
+                        newPick = undefined;
+                        newPickId = undefined;
+                    }
+
+                    if ( self.lastPickId != newPickId && self.lastEventData )
+                    {
+                        if ( self.lastPickId ) {
+                            view.kernel.dispatchEvent( self.lastPickId, "pointerOut", 
+                                                       self.lastEventData.eventData, 
+                                                       self.lastEventData.eventNodeData );
+                        }
+                        if ( newPickId ) {
+                            view.kernel.dispatchEvent( newPickId, "pointerOver",
+                                                       self.lastEventData.eventData, 
+                                                       self.lastEventData.eventNodeData );
+                        }
+                    }
+
+                    if ( view.lastEventData && 
+                         ( view.lastEventData.eventData[0].screenPosition[0] != oldMouseX || 
+                           view.lastEventData.eventData[0].screenPosition[1] != oldMouseY ) ) {
+                        oldMouseX = view.lastEventData.eventData[0].screenPosition[0];
+                        oldMouseY = view.lastEventData.eventData[0].screenPosition[1];
+                        hovering = false;
+                    }
+                    else if(self.lastEventData && self.mouseOverCanvas && !hovering && newPick) {
+                        view.kernel.dispatchEvent( newPickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData );
+                        hovering = true;
+                    }
+                    
+                    self.lastPickId = newPickId;
+                    self.lastPick = newPick;
+                    lastPickTime = now;
+                }
+                self.mouseJustEnteredCanvas = false;                
             }
 
-            self.render(renderer, scene, camera);
+            if ( enableStereo && sceneNode && sceneNode.stereo ) {
+                if ( mobileDevice && sceneNode.stereo.controls ) {
+                    sceneNode.stereo.controls.update( timepassed );
+                }
+
+                sceneNode.stereo.effect.render( scene, camera );
+            } else {
+                self.render( renderer, scene, camera );    
+            }
             sceneNode.lastTime = now;
             
-            if(self.interpolateTransforms) {
+            if ( self.interpolateTransforms ) {
                 restoreTransforms();        
             }
         };
@@ -1198,6 +1281,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             var oldMouseY = 0;
             var hovering = false;
             var view = this;
+            var viewCam;
             window.onresize = function () {
                 var origWidth = self.width;
                 var origHeight = self.height;
@@ -1215,23 +1299,25 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                     }
 
                     sceneNode.renderer.setSize( self.width, self.height, true );
+                    if ( enableStereo && sceneNode.stereo && sceneNode.stereo.effect ) {
+                        sceneNode.stereo.effect.setSize( self.width, self.height );
+                    }
                 }
 
-                var viewCam = view.state.cameraInUse;
+                viewCam = view.state.cameraInUse;
                 if ( viewCam ) {
                     viewCam.aspect = mycanvas.clientWidth / mycanvas.clientHeight;
                     viewCam.updateProjectionMatrix();
                 }
             }
 
-            if(detectWebGL() && getURLParameter('disableWebGL') == 'null')
-            {
-                sceneNode.renderer = new THREE.WebGLRenderer({canvas:mycanvas,antialias:true});
-            }else
-            {
-                sceneNode.renderer = new THREE.CanvasRenderer({canvas:mycanvas,antialias:true});
+            if ( detectWebGL() && getURLParameter('disableWebGL') == 'null' ){
+                sceneNode.renderer = new THREE.WebGLRenderer( { canvas: mycanvas, antialias: true } );
+            } else {
+                sceneNode.renderer = new THREE.CanvasRenderer( { canvas: mycanvas, antialias: true } );
+                sceneNode.renderer.setSize( window.innerWidth,window.innerHeight );
             }
-            sceneNode.renderer.setSize(self.width,self.height,true);
+            sceneNode.renderer.setSize( self.width, self.height, true );
 
             // backgroundColor, enableShadows, shadowMapCullFace and shadowMapType are dependent on the renderer object, but if they are set in a prototype,
             // the renderer is not available yet, so set them now.
@@ -1255,7 +1341,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             }
             
             rebuildAllMaterials.call(this);
-            if(sceneNode.renderer.setFaceCulling)
+            if ( sceneNode.renderer.setFaceCulling )
                 sceneNode.renderer.setFaceCulling( THREE.CullFaceBack );
 
             // Schedule the renderer.
@@ -1266,10 +1352,10 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             window._dRenderer = renderer;
             window._dSceneNode = sceneNode;
             
-            if(!this.disableInputs) {
+            if ( this.enableInputs ) {
                 initInputEvents.call(this,mycanvas);
             }
-            renderScene((+new Date));
+            renderScene( ( +new Date ) );
         }
 
         // If scene is already loaded, find the user's navigation object
@@ -1306,8 +1392,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     // -- initInputEvents ------------------------------------------------------------------------
 
     function initInputEvents( canvas ) {
-        var sceneNode = this.state.scenes[this.state.sceneRootID], child;
-        var sceneID = this.state.sceneRootID;
+        var sceneID = this.kernel.application();
+        var sceneNode = this.state.scenes[ sceneID ], child;
         var sceneView = this;
 
         var touchID = undefined;
@@ -1320,7 +1406,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         var win = window;
 
-        var container = document.getElementById("container");
+        var container = document.getElementById( "container" );
         var sceneCanvas = canvas;
         //var mouse = new GLGE.MouseInput( sceneCanvas );
 
@@ -1422,7 +1508,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
             returnData.eventNodeData = { "": [ {
                 pickID: pointerPickID,
-                pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
+                pointerVector: pickDirection ? vec3ToArray( pickDirection ) : undefined,
                 distance: pickInfo ? pickInfo.distance : undefined,
                 origin: pickInfo ? pickInfo.worldCamPos : undefined,
                 globalPosition: pickInfo ? [pickInfo.point.x,pickInfo.point.y,pickInfo.point.z] : undefined,
@@ -1477,7 +1563,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
                                         
                     returnData.eventNodeData[ childID ] = [ {
                         pickID: pointerPickID,
-                        pointerVector: pickDirectionVector ? vec3ToArray( pickDirectionVector ) : undefined,
+                        pointerVector: pickDirection ? vec3ToArray( pickDirection ) : undefined,
                         position: localTrans,
                         normal: localNormal,
                         source: relativeCamPos,
@@ -1800,7 +1886,11 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         }
 
         canvas.onmouseover = function( e ) {
-            self.mouseOverCanvas = true;
+            if ( !self.mouseOverCanvas ) {
+                self.mouseJustEnteredCanvas = true;
+                self.mouseOverCanvas = true;
+            }
+
             var eData = getEventData( e, false );
             if ( eData ) {
                 pointerOverID = pointerPickID ? pointerPickID : sceneID;
@@ -1877,77 +1967,77 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         
         window.onkeydown = function (event) {
                     
-                    var key = undefined;
-                    var validKey = false;
-                    var keyAlreadyDown = false;
-                    switch ( event.keyCode ) {
-                        case 17:
-                        case 16:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( sceneView, event.keyCode);
-                            keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
-                            sceneView.keyStates.keysDown[key.key] = key;
-                            validKey = true;
+            var key = undefined;
+            var validKey = false;
+            var keyAlreadyDown = false;
+            switch ( event.keyCode ) {
+                case 17:
+                case 16:
+                case 18:
+                case 19:
+                case 20:
+                    break;
+                default:
+                    key = getKeyValue.call( sceneView, event.keyCode);
+                    keyAlreadyDown = !!sceneView.keyStates.keysDown[key.key];
+                    sceneView.keyStates.keysDown[key.key] = key;
+                    validKey = true;
 
-                            // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                            handleKeyNavigation( event.keyCode, true );
-                            // END TODO
+                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                    handleKeyNavigation( event.keyCode, true );
+                    // END TODO
 
-                            break;
-                    }
-                    
-                    if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
-                    sceneView.keyStates.mods.alt = event.altKey;
-                    sceneView.keyStates.mods.shift = event.shiftKey;
-                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
-                    sceneView.keyStates.mods.meta = event.metaKey;
+                    break;
+            }
+            
+            if (!sceneView.keyStates.mods) sceneView.keyStates.mods = {};
+            sceneView.keyStates.mods.alt = event.altKey;
+            sceneView.keyStates.mods.shift = event.shiftKey;
+            sceneView.keyStates.mods.ctrl = event.ctrlKey;
+            sceneView.keyStates.mods.meta = event.metaKey;
 
-                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
-                    if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
-                        //var params = JSON.stringify( sceneView.keyStates );
-                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
-                    }
-                };
+            var sceneNode = sceneView.state.scenes[ sceneView.kernel.application() ];
+            if (validKey && sceneNode && !keyAlreadyDown /*&& Object.keys( sceneView.keyStates.keysDown ).length > 0*/) {
+                //var params = JSON.stringify( sceneView.keyStates );
+                sceneView.kernel.dispatchEvent(sceneNode.ID, "keyDown", [sceneView.keyStates]);
+            }
+        };
 
          window.onkeyup = function (event) {
-                    var key = undefined;
-                    var validKey = false;
-                    switch (event.keyCode) {
-                        case 16:
-                        case 17:
-                        case 18:
-                        case 19:
-                        case 20:
-                            break;
-                        default:
-                            key = getKeyValue.call( sceneView, event.keyCode);
-                            delete sceneView.keyStates.keysDown[key.key];
-                            sceneView.keyStates.keysUp[key.key] = key;
-                            validKey = true;
+            var key = undefined;
+            var validKey = false;
+            switch (event.keyCode) {
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                    break;
+                default:
+                    key = getKeyValue.call( sceneView, event.keyCode);
+                    delete sceneView.keyStates.keysDown[key.key];
+                    sceneView.keyStates.keysUp[key.key] = key;
+                    validKey = true;
 
-                            // TODO: Navigation - see main "TODO: Navigation" comment for explanation
-                            handleKeyNavigation( event.keyCode, false );
-                            // END TODO
+                    // TODO: Navigation - see main "TODO: Navigation" comment for explanation
+                    handleKeyNavigation( event.keyCode, false );
+                    // END TODO
 
-                            break;
-                    }
-                    
-                    sceneView.keyStates.mods.alt = event.altKey;
-                    sceneView.keyStates.mods.shift = event.shiftKey;
-                    sceneView.keyStates.mods.ctrl = event.ctrlKey;
-                    sceneView.keyStates.mods.meta = event.metaKey;
+                    break;
+            }
+            
+            sceneView.keyStates.mods.alt = event.altKey;
+            sceneView.keyStates.mods.shift = event.shiftKey;
+            sceneView.keyStates.mods.ctrl = event.ctrlKey;
+            sceneView.keyStates.mods.meta = event.metaKey;
 
-                    var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
-                    if (validKey && sceneNode) {
-                        //var params = JSON.stringify( sceneView.keyStates );
-                        sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
-                        delete sceneView.keyStates.keysUp[key.key];
-                    }
-                };
+            var sceneNode = sceneView.state.scenes[ sceneView.kernel.application() ];
+            if (validKey && sceneNode) {
+                //var params = JSON.stringify( sceneView.keyStates );
+                sceneView.kernel.dispatchEvent(sceneNode.ID, "keyUp", [sceneView.keyStates]);
+                delete sceneView.keyStates.keysUp[key.key];
+            }
+        };
 
         window.oncontextmenu = function() {
             if ( navmode == "none" )
@@ -2252,6 +2342,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         // -- dragOver ---------------------------------------------------------------------------------
 
         canvas.ondragover = function( e ) {
+            self.mouseOverCanvas = true;
             sceneCanvas.mouseX=e.clientX;
             sceneCanvas.mouseY=e.clientY;
             var eData = getEventData( e, false );
@@ -2347,41 +2438,26 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             return;
         }
 
-        if(!this.raycaster) this.raycaster = new THREE.Raycaster();
-        if(!this.projector) this.projector = new THREE.Projector();
-        
-        var SCREEN_HEIGHT = window.innerHeight;
-        var SCREEN_WIDTH = window.innerWidth;
-
-        var mousepos = { x: this.lastEventData.eventData[0].position[0], y: this.lastEventData.eventData[0].position[1] }; // window coordinates
+        var intersects = undefined;
+         var mousepos = { 
+            "x": this.lastEventData.eventData[0].position[0], 
+            "y": this.lastEventData.eventData[0].position[1] 
+        }; // window coordinates
 
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
-        pickDirectionVector = new THREE.Vector3();
-        pickDirectionVector.set( x, y, 0.5 );
+        pickDirection.set( x, y, 0.5 );
 
-        var intersects = undefined;
+        var camPos = new THREE.Vector3(
+            threeCam.matrixWorld.elements[ 12 ],  
+            threeCam.matrixWorld.elements[ 13 ], 
+            threeCam.matrixWorld.elements[ 14 ]  
+        );
 
-        if ( threeCam instanceof THREE.OrthographicCamera ) {
-            var ray = this.projector.pickingRay( pickDirectionVector, threeCam );
-            intersects = ray.intersectObjects( sceneNode.threeScene.children, true );
-        } else {
-            this.projector.unprojectVector(pickDirectionVector, threeCam);
-            var pos = new THREE.Vector3();
-            pos.setFromMatrixPosition( threeCam.matrixWorld );
-            pickDirectionVector.sub(pos);
-            pickDirectionVector.normalize();
-                    
-            this.raycaster.set(pos, pickDirectionVector);
-            intersects = this.raycaster.intersectObjects(sceneNode.threeScene.children, true);
-        }
-        
-        // intersections are, by default, ordered by distance,
-        // so we only care for the first (visible) one. The intersection
-        // object holds the intersection point, the face that's
-        // been "hit" by the ray, and the object to which that
-        // face belongs. We only care for the object itself.
+        pickDirection.unproject( threeCam );
+        raycaster.ray.set( camPos, pickDirection.sub( camPos ).normalize() );
+        intersects = raycaster.intersectObjects( sceneNode.threeScene.children, true );
 
         // Cycle through the list of intersected objects and return the first visible one
         for ( var i = 0; i < intersects.length; i++ ) {
@@ -2404,12 +2480,8 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             return;
         }
 
-        if(!this.raycaster) this.raycaster = new THREE.Raycaster();
-        if(!this.projector) this.projector = new THREE.Projector();
-        
-        var SCREEN_HEIGHT = window.innerHeight;
-        var SCREEN_WIDTH = window.innerWidth;
-
+        var intersects = undefined;
+        var target = undefined;
         var mousepos = { 
             "x": this.lastEventData.eventData[0].position[0], 
             "y": this.lastEventData.eventData[0].position[1] 
@@ -2418,45 +2490,25 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
         var x = ( mousepos.x ) * 2 - 1;
         var y = -( mousepos.y ) * 2 + 1;
 
-        pickDirectionVector = new THREE.Vector3();
-        
-        pickDirectionVector.set( x, y, 0.5 );
+        pickDirection.set( x, y, 0.5 );
 
-        var intersects = undefined;
-        var target = undefined;
+        var camPos = new THREE.Vector3(
+            threeCam.matrixWorld.elements[ 12 ],  
+            threeCam.matrixWorld.elements[ 13 ], 
+            threeCam.matrixWorld.elements[ 14 ]  
+        );
 
-
-        // TODO: The check for the camera type may not be needed
-        // the first option should work for the perspective camera as well
-        // we just need to make the switch and then test thoroughly 
-        if ( threeCam instanceof THREE.OrthographicCamera ) {
-            var ray = this.projector.pickingRay( pickDirectionVector, threeCam );
-            intersects = ray.intersectObjects( sceneNode.threeScene.children, true );
-        } else {
-            this.projector.unprojectVector( pickDirectionVector, threeCam );
-            var pos = new THREE.Vector3();
-            pos.setFromMatrixPosition( threeCam.matrixWorld );
-            pickDirectionVector.sub(pos);
-            pickDirectionVector.normalize();
-            
-            this.raycaster.set( pos, pickDirectionVector );
-            intersects = this.raycaster.intersectObjects( sceneNode.threeScene.children, true );
-        }
-
-        // intersections are, by default, ordered by distance,
-        // so we only care for the first (visible) one. The intersection
-        // object holds the intersection point, the face that's
-        // been "hit" by the ray, and the object to which that
-        // face belongs. We only care for the object itself.
+        pickDirection.unproject( threeCam );
+        raycaster.ray.set( camPos, pickDirection.sub( camPos ).normalize() );
+        intersects = raycaster.intersectObjects( sceneNode.threeScene.children, true );
 
         // Cycle through the list of intersected objects and return the first visible one
         for ( var i = 0; i < intersects.length && target === undefined; i++ ) {
             if ( debug ) {
-                for ( var i = 0; i < intersects.length; i++ ) { 
-                    console.info( i + ". " + intersects[i].object.name ) 
+                for ( var j = 0; j < intersects.length; j++ ) { 
+                    console.info( j + ". " + getPickObjectID( intersects[ j ].object ) ); 
                 }
             }   
-
             if ( intersects[ i ].object.visible ) {
                 if ( getPickObjectID( intersects[ i ].object ) !== null ) {
                     target = intersects[ i ];
@@ -3072,7 +3124,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
     function findNavObject() {
         // Find the navigable objects in the scene
-        var sceneRootID = self.state.sceneRootID;
+        var sceneRootID = self.kernel.application();
         var navObjectIds = self.kernel.find( sceneRootID,
                                              ".//element(*,'http://vwf.example.com/navigable.vwf')" );
         numNavCandidates = navObjectIds.length;
@@ -3089,7 +3141,6 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
             vwf_view.kernel.getProperty( sceneRootID, "boundingBox" );
             vwf_view.kernel.getProperty( sceneRootID, "userObject" );
             userObjectRequested = true;
-
         }
     }
 
@@ -3125,11 +3176,13 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     }
 
     function inputHandleScroll( wheelDelta, distanceToTarget ) {
-        var navThreeObject = navObject.threeObject;
-        var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
-        self.handleScroll( wheelDelta, navObject, navmode, rotationSpeed, translationSpeed, distanceToTarget );
-        setTransformFromWorldTransform( navThreeObject );
-        callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+        if ( navObject && navObject.threeObject ) {
+            var navThreeObject = navObject.threeObject;
+            var originalTransform = goog.vec.Mat4.clone( navThreeObject.matrix.elements );
+            self.handleScroll( wheelDelta, navObject, navmode, rotationSpeed, translationSpeed, distanceToTarget );
+            setTransformFromWorldTransform( navThreeObject );
+            callModelTransformBy( navObject, originalTransform, navThreeObject.matrix.elements );
+        }
     }
 
     function inputMoveNavObject( msSinceLastFrame ) {
@@ -3231,7 +3284,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         if ( threeObject instanceof THREE.Camera ) {  
             transformMatrix = convertCameraTransformFromVWFtoThreejs( transformMatrix );
-        } else if( threeObject instanceof THREE.ParticleSystem ) {
+        } else if( threeObject instanceof THREE.PointCloud ) {
             // I don't see where this function is defined. Maybe a copy-paste bug from
             // GLGE driver? - Eric (5/13/13)
             threeObject.updateTransform( transformMatrix );
@@ -3363,7 +3416,7 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
 
         //Threejs does not currently support auto tracking the lookat,
         //instead, we'll take the position of the node and look at that.
-        if ( typeof node.lookatval == 'string' ) {
+        if ( utility.isString( node.lookatval ) ) {
             
             var lookatNode = self.state.nodes[ node.lookatval ];
             
@@ -3619,16 +3672,76 @@ define( [ "module", "vwf/view", "vwf/utility", "hammer", "jquery" ], function( m
     }
 
     function setActiveCamera( cameraID ) {
-        var sceneRootID = this.state.sceneRootID;
-        var modelCameraInfo = this.state.scenes[ sceneRootID ].camera;
-        if( modelCameraInfo.threeJScameras[ cameraID ] ) {
-            // If the view is currently using the model's activeCamera, update it to the new activeCamera
-            if ( usersShareView ) {
-                cameraNode = this.state.nodes[cameraID];
-                this.state.cameraInUse = cameraNode.threeObject;
-                var canvas = this.canvasQuery[ 0 ];
-                this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
+        if ( usersShareView && this.state.nodes[ cameraID ] !== undefined ) {
+            var sceneID = this.kernel.application();
+            var sceneNode = this.state.scenes[ sceneID ];
+            //var cameras = this.kernel.find( sceneID, "./element(*,'http://vwf.example.com/camera.vwf')" );            
+            cameraNode = this.state.nodes[ cameraID ];
+            this.state.cameraInUse = cameraNode.threeObject;
+            var canvas = this.canvasQuery[ 0 ];
+            this.state.cameraInUse.aspect = canvas.clientWidth / canvas.clientHeight;
+        }
+    }
+
+    function createControls( camera, element ) {
+
+        var controls;
+        if ( !isMobile() ) {
+            controls = new THREE.OrbitControls( camera, element );
+            //controls.rotateUp(Math.PI / 4);
+            controls.target.set(
+            camera.position.x + 0.1,
+            camera.position.y,
+            camera.position.z
+            );
+            controls.noZoom = true;
+            controls.noPan = true;
+            controls.autoRotate = false;
+        } else {
+            controls = new THREE.DeviceOrientationControls( camera, true );
+
+            controls.connect();
+            controls.update();
+
+            element.addEventListener( 'click', fullscreen, false );
+        }
+
+        return controls;
+    }
+
+    function fullscreen() {
+        var container = document.getElementById( "container" );
+        if ( container ) {
+            if ( container.requestFullscreen ) {
+                container.requestFullscreen();
+            } else if ( container.msRequestFullscreen ) {
+                container.msRequestFullscreen();
+            } else if ( container.mozRequestFullScreen ) {
+                container.mozRequestFullScreen();
+            } else if ( container.webkitRequestFullscreen ) {
+                container.webkitRequestFullscreen();
             }
         }
     }
+
+    function isMobileAndroid() {
+        return navigator.userAgent.match(/Android/i);
+    }
+    function isMobileBlackBerry() {
+        return navigator.userAgent.match(/BlackBerry/i);
+    }
+    function isMobileiOS() {
+        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+    }
+    function isMobileOpera() {
+        return navigator.userAgent.match(/Opera Mini/i);
+    }
+    function isMobileWindows() {
+        return navigator.userAgent.match(/IEMobile/i);
+    }
+    function isMobile(){
+        return (isMobileAndroid() || isMobileBlackBerry() || isMobileiOS() || isMobileOpera() || isMobileWindows());
+    }
+
+
 });

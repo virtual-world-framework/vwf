@@ -39,7 +39,7 @@ define([
      * var instanceBottom = new Cesium.GeometryInstance({
      *   geometry : geometry,
      *   modelMatrix : Cesium.Matrix4.multiplyByTranslation(Cesium.Transforms.eastNorthUpToFixedFrame(
-     *     Cesium.Cartesian3.fromDegrees(-75.59777, 40.03883)), new Cesium.Cartesian3(0.0, 0.0, 1000000.0)),
+     *     Cesium.Cartesian3.fromDegrees(-75.59777, 40.03883)), new Cesium.Cartesian3(0.0, 0.0, 1000000.0), new Cesium.Matrix4()),
      *   attributes : {
      *     color : new Cesium.ColorGeometryInstanceAttribute(Cesium.Color.AQUA)
      *   }
@@ -48,7 +48,7 @@ define([
      * var instanceTop = new Cesium.GeometryInstance({
      *   geometry : geometry,
      *   modelMatrix : Cesium.Matrix4.multiplyByTranslation(Cesium.Transforms.eastNorthUpToFixedFrame(
-     *     Cesium.Cartesian3.fromDegrees(-75.59777, 40.03883)), new Cesium.Cartesian3(0.0, 0.0, 3000000.0)),
+     *     Cesium.Cartesian3.fromDegrees(-75.59777, 40.03883)), new Cesium.Cartesian3(0.0, 0.0, 3000000.0), new Cesium.Matrix4()),
      *   attributes : {
      *     color : new Cesium.ColorGeometryInstanceAttribute(Cesium.Color.AQUA)
      *   }
@@ -113,6 +113,15 @@ define([
          * @default undefined
          */
         this.attributes = defaultValue(options.attributes, {});
+
+        /**
+         * @private
+         */
+        this.westHemisphereGeometry = undefined;
+        /**
+         * @private
+         */
+        this.eastHemisphereGeometry = undefined;
     };
 
     return GeometryInstance;

@@ -20,7 +20,15 @@
 /// @requires vwf/view
 /// @requires vwf/utility
 
-define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui", "jquery-encoder-0.1.0" ], function( module, version, view, utility, $ ) {
+define( [ 
+    "module", 
+    "version", 
+    "vwf/view", 
+    "vwf/utility", 
+    "jquery", 
+    "jquery-ui", 
+    "jquery-encoder-0.1.0" 
+    ], function( module, version, view, utility, $ ) {
 
     return view.load( module, {
 
@@ -57,6 +65,8 @@ define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui",
             this.currentModelURL = '';
             this.highlightedChild = '';
             this.intervalTimer = 0;
+
+            this.activeCameraID = undefined;
             
             $('body').append(
                 "<div id='editor' class='relClass'>\n" +
@@ -190,6 +200,10 @@ define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui",
                 });
                 $('#children > div:last').css('border-bottom-width', '3px');
             }
+
+            if ( nodeID === this.kernel.application() && childName === 'camera' ) {
+                this.activeCameraID = childID;    
+            }
         },
         
         createdProperty: function (nodeID, propertyName, propertyValue) {
@@ -235,6 +249,12 @@ define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui",
                 node.properties.push( property );
             }
             
+            if ( propertyName === "activeCamera" ) {
+                if ( this.nodes[ propertyValue ] !== undefined ) {
+                    this.activeCameraID = propertyValue;
+                }
+            }
+
             try {
                 propertyValue = utility.transform( propertyValue, utility.transforms.transit );
                 node.properties[ propertyName ].value = JSON.stringify( propertyValue );
@@ -316,12 +336,10 @@ define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui",
 
     function updateCameraProperties () {
 
-        var cameraNodeName = "http-vwf-example-com-camera-vwf-camera";
-        
-        if ( this.currentNodeID == cameraNodeName ) {
+        if ( this.currentNodeID == this.activeCameraID ) {
             if ( !this.intervalTimer ) {
                 var self = this;
-                this.intervalTimer = setInterval( function() {updateProperties.call( self, cameraNodeName )}, 200 );
+                this.intervalTimer = setInterval( function() { updateProperties.call( self, self.activeCameraID ) }, 200 );
             }
         }
         else {
@@ -589,18 +607,19 @@ define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui",
                 instIndex = pathSplit.length - 4;
             }
         }
-        var root = pathSplit[ 0 ];
-        for ( var createRootIndex = 1; createRootIndex < instIndex - 1; createRootIndex++ ) {
-          root = root + "/" + pathSplit[ createRootIndex ];
+
+        var root = "";
+        for ( var i=0; i < instIndex; i++ ) {
+            if ( root != "" ) {
+                root = root + "/";
+            } 
+            root = root + pathSplit[i];
         }
 
         if(root.indexOf('.vwf') != -1) root = root.substring(0, root.lastIndexOf('/'));
-
-        
-        
         
         var clients$ = $(this.clientList);
-        var node = this.nodes[ "http-vwf-example-com-clients-vwf" ];
+        var node = this.nodes[ "http://vwf.example.com/clients.vwf" ];
 
         clients$.html("<div class='header'>Connected Clients</div>");
 
@@ -1808,9 +1827,13 @@ define( [ "module", "version", "vwf/view", "vwf/utility", "jquery", "jquery-ui",
                 }
             }
             inst = pathSplit[ instIndex ];
-            var root = pathSplit[ 0 ];
-            for ( var createRootIndex = 1; createRootIndex < instIndex - 1; createRootIndex++ ) {
-              root = root + "/" + pathSplit[ createRootIndex ];
+
+            var root = "";
+            for ( var i=0; i < instIndex; i++ ) {
+                if ( root != "" ) {
+                    root = root + "/";
+                } 
+                root = root + pathSplit[i];
             }
 
             if(filename == '') filename = inst;

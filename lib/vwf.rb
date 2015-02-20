@@ -45,6 +45,24 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
 
   end
 
+  # Serve files at "/proxy/<host>" from ^/support/proxy/<host>. We're pretending these come from
+  # another host.
+
+  get "/proxy/:host/*" do |host, path|
+
+    delegated_env = env.merge(
+      "PATH_INFO" => "/" + path
+    )
+
+    cascade = Rack::Cascade.new [
+      Rack::File.new( File.join VWF.settings.support, "proxy", host ),          # Proxied content from ^/support/proxy  # TODO: will match public_path/index.html which we don't really want
+      Application::Component.new( File.join VWF.settings.support, "proxy", host ) # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
+    ]
+
+    cascade.call delegated_env
+
+  end
+
   get Pattern.new do |public_path, application, instance, private_path|
   
     logger.debug "VWF#get #{public_path} - #{application} - #{instance} - #{private_path}"
@@ -86,24 +104,6 @@ set :component_template_types, [ :json, :yaml ]  # get from Component?
     logger.debug "VWF#post #{public_path} - #{application} - #{instance} - #{private_path}"
 
     delegate_to_application public_path, application, instance, private_path
-
-  end
-
-  # Serve files at "/proxy/<host>" from ^/support/proxy/<host>. We're pretending these come from
-  # another host.
-
-  get "/proxy/:host/*" do |host, path|
-
-    delegated_env = env.merge(
-      "PATH_INFO" => "/" + path
-    )
-
-    cascade = Rack::Cascade.new [
-      Rack::File.new( File.join VWF.settings.support, "proxy", host ),          # Proxied content from ^/support/proxy  # TODO: will match public_path/index.html which we don't really want
-      Application::Component.new( File.join VWF.settings.support, "proxy", host ) # A component, possibly from a template or as JSONP  # TODO: before public for serving plain json as jsonp?
-    ]
-
-    cascade.call delegated_env
 
   end
 

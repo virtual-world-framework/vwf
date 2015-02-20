@@ -2,6 +2,77 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.7.0
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change. 
+
+- CHG: Calculate the correct application component URL for components in "/".
+- CHG: Fix editor paths for existing save/load capability.
+- CHG: Set mouseOverCanvas property on drag and drop to appropriately get the correct pickInfo.
+- CHG: Update models directory paths in admin files for both ruby and node.js server.
+- CHG: Delay rendering the scene until initialize complete.
+- CHG: Load the application component using an absolute URL (node server).
+- CHG: Replace '/' in lesson IDs with underscores to correct jQuery issues.
+- CHG: Leave host-relative application IDs intact.
+- CHG: Resolve relative references with repect to the component when loading: prototypes, behaviors, 'include' components, 'source' assets, scripts. 
+- CHG: Load component resources wrt the component (application only, actually), not the application instance in the reflector.
+- CHG: Load the application component using an absolute (host-relative) URL.
+- CHG*: Remove legacy ID format support. 
+- CHG: Reload when the connection drops instead of reconnection + `setState`.
+- NEW: Add more functionality for material creation. 
+- CHG: Move proxy path code before the application patterns. This change corrects the issue with the ruby server and a default application in public.
+- CHG: Fix fly behavior implementation. 
+- CHG: Update utilities to use isString and isFunction functions. 
+- CHG: Update cesium to version 1.5. Correct all cesium related applications. 
+- CHG: Remove warning that fires unnecessarily during getState when kernel re-entry is blocked.
+- CHG: Update threejs drivers for correct picking functionality. 
+- CHG: Fixes getWorldTransform and recursively sets transform dirty.
+- CHG: Don't create new watchers at every reload of a file
+- CHG: Move required test files back to public for build purposes.
+- CHG: Remove index.html as it is now replaced by the default duck app.
+- CHG: Remove web example apps from main repository.
+- CHG: Update path to duck content.
+- NEW: Remove demo apps from main repository and created a new vwf-apps repo. 
+- CHG: Fix bug is streaming for media files
+- CHG: Fix requirements page link on browser compatibility warning. 
+- CHG: Clean up threejs implementation and vwf drivers. 
+- CHG: Update to version 69 of threejs. 
+- CHG: Remove glgeLight behavior references from test apps. 
+- CHG: Update test models and camera initializations.
+- CHG: Update particle system tests.
+- CHG: Update object transform tests.
+- CHG: Remove GLGE references from tests. Update tests. 
+- CHG: Update transparency of models in tests.
+- CHG: Update camera related tests, including fixing alpha channels on box and duck collada models, and simplifying yaml files where applicable.
+- CHG: Add support for single-point tactical graphics.
+- NEW: Exclude `ArrayBuffer`s from recursion since they never contain nodes.
+- NEW: Warn about foreign-format node references.
+- NEW: Keep a `node.vwf` reference to avoid lookups on each `valueIsNode` call.
+- NEW: Recursively apply the kernel:javascript property, etc. value mapping. This allows properties, method parameters and results, and event parameters to contain objects and arrays of node references rather than just simple node references themselves.
+- CHG: Update pixelSize modifier.
+- CHG: Remove the setting of playerConnected
+- CHG: Update the findClients function to use find
+- CHG: Get the blockly UI state to synchronize
+- CHG: Update gem versions for compatability with demo.virtual.wf.
+- CHG: Use the `/latest/{darwin,linux}` service at `http://download.virtual...`.
+- NEW: Add messages for `loadComponent` and `loadScript` errors.
+- CHG: Remove `Master` from the filename template. The version string now includes "" / "integration" / "development" as appropriate to identify the build type.
+- CHG: Simulate the build context so that the Rakefile will stamp the version.
+- CHG: Update tar build links in install.sh.
+- CHG: Set this.tilePositions property directly at the end of the shuffle call to ensure the property changes are replicated for new joiners. Remove initializeCamera method, and set camera properties in initialize.
+- CHG: Use a `sed` backup extension for compatibility with both Linux and BSD.
+- CHG: Generate a SemVer-style version identifier that includes the `development` / `integration` annotation for those builds.
+- NEW: Create a deployment tool to generate the version string from version.js.
+- CHG: Re-enable auto-shutdown.
+- CHG: Version the Windows installer file and post to `archive` instead of current.
+- CHG: Don't include the node.js executable in the Windows build.
+- NEW: Integration version of the bash build script.
+- NEW: Bash build scripts as currently on the Windows build server.
+- CHG: Move hammer event handler back down to canvas listeners to fix touch implementation.
+- CHG: Add pushpin and line variables to be part of the sandtable app model. Fixes draw capability.
+
+
+----------------------------------
 0.6.23
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change. 

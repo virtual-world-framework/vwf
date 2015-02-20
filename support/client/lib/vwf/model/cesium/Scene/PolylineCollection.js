@@ -3,6 +3,7 @@ define([
         '../Core/BoundingSphere',
         '../Core/Cartesian3',
         '../Core/Cartesian4',
+        '../Core/Cartographic',
         '../Core/Color',
         '../Core/ComponentDatatype',
         '../Core/defaultValue',
@@ -16,8 +17,8 @@ define([
         '../Core/Math',
         '../Core/Matrix4',
         '../Renderer/BufferUsage',
-        '../Renderer/createShaderSource',
         '../Renderer/DrawCommand',
+        '../Renderer/ShaderSource',
         '../Shaders/PolylineCommon',
         '../Shaders/PolylineFS',
         '../Shaders/PolylineVS',
@@ -30,6 +31,7 @@ define([
         BoundingSphere,
         Cartesian3,
         Cartesian4,
+        Cartographic,
         Color,
         ComponentDatatype,
         defaultValue,
@@ -43,8 +45,8 @@ define([
         CesiumMath,
         Matrix4,
         BufferUsage,
-        createShaderSource,
         DrawCommand,
+        ShaderSource,
         PolylineCommon,
         PolylineFS,
         PolylineVS,
@@ -109,12 +111,13 @@ define([
      * @see PolylineCollection#remove
      * @see Polyline
      * @see LabelCollection
+     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Polylines.html|Cesium Sandcastle Polyline Demo}
      *
      * @example
      * // Create a polyline collection with two polylines
      * var polylines = new Cesium.PolylineCollection();
      * polylines.add({
-     *   position : Cartesian3.fromDegreesArray([
+     *   position : Cesium.Cartesian3.fromDegreesArray([
      *     -75.10, 39.57,
      *     -77.02, 38.53,
      *     -80.50, 35.14,
@@ -123,15 +126,13 @@ define([
      * });
      *
      * polylines.add({
-     *   positions : Cartesian3.fromDegreesArray([
+     *   positions : Cesium.Cartesian3.fromDegreesArray([
      *     -73.10, 37.57,
      *     -75.02, 36.53,
      *     -78.50, 33.14,
      *     -78.12, 23.46]),
      *   width : 4
      * });
-     *
-     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Polylines.html|Cesium Sandcastle Polyline Demo}
      */
     var PolylineCollection = function(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
@@ -151,7 +152,7 @@ define([
         /**
          * This property is for debugging only; it is not for production use nor is it optimized.
          * <p>
-         * Draws the bounding sphere for each {@link DrawCommand} in the primitive.
+         * Draws the bounding sphere for each draw command in the primitive.
          * </p>
          *
          * @type {Boolean}
@@ -922,7 +923,7 @@ define([
         var length = polylines.length;
         for ( var i = 0; i < length; ++i) {
             var p = polylines[i];
-            if (p.positions.length > 1) {
+            if (p._actualPositions.length > 1) {
                 p.update();
                 var material = p.material;
                 var value = polylineBuckets[material.type];
@@ -1029,11 +1030,18 @@ define([
             return;
         }
 
-        var vsSource = createShaderSource({ sources : [PolylineCommon, PolylineVS] });
-        var fsSource = createShaderSource({ sources : [this.material.shaderSource, PolylineFS] });
-        var fsPick = createShaderSource({ sources : [fsSource], pickColorQualifier : 'varying' });
-        this.shaderProgram = context.createShaderProgram(vsSource, fsSource, attributeLocations);
-        this.pickShaderProgram = context.createShaderProgram(vsSource, fsPick, attributeLocations);
+        var vs = new ShaderSource({
+            sources : [PolylineCommon, PolylineVS]
+        });
+        var fs = new ShaderSource({
+            sources : [this.material.shaderSource, PolylineFS]
+        });
+        var fsPick = new ShaderSource({
+            sources : fs.sources,
+            pickColorQualifier : 'varying'
+        });
+        this.shaderProgram = context.createShaderProgram(vs, fs, attributeLocations);
+        this.pickShaderProgram = context.createShaderProgram(vs, fsPick, attributeLocations);
     };
 
     function intersectsIDL(polyline) {
@@ -1044,7 +1052,7 @@ define([
     PolylineBucket.prototype.getPolylinePositionsLength = function(polyline) {
         var length;
         if (this.mode === SceneMode.SCENE3D || !intersectsIDL(polyline)) {
-            length = polyline.positions.length;
+            length = polyline._actualPositions.length;
             return length * 4.0 - 4.0;
         }
 
@@ -1252,7 +1260,7 @@ define([
             var segments;
             if (this.mode === SceneMode.SCENE3D) {
                 segments = scratchSegmentLengths;
-                var positionsLength = polyline.positions.length;
+                var positionsLength = polyline._actualPositions.length;
                 if (positionsLength > 0) {
                     segments[0] = positionsLength;
                 } else {
@@ -1337,9 +1345,11 @@ define([
         lengths : undefined
     };
     var scratchLengths = new Array(1);
+    var pscratch = new Cartesian3();
+    var scratchCartographic = new Cartographic();
 
     PolylineBucket.prototype.getSegments = function(polyline, projection) {
-        var positions = polyline.positions;
+        var positions = polyline._actualPositions;
 
         if (this.mode === SceneMode.SCENE3D) {
             scratchLengths[0] = positions.length;
@@ -1357,12 +1367,12 @@ define([
         var modelMatrix = this.modelMatrix;
         var length = positions.length;
         var position;
-        var p;
+        var p = pscratch;
 
         for ( var n = 0; n < length; ++n) {
             position = positions[n];
-            p = Matrix4.multiplyByPoint(modelMatrix, position);
-            newPositions.push(projection.project(ellipsoid.cartesianToCartographic(p)));
+            p = Matrix4.multiplyByPoint(modelMatrix, position, p);
+            newPositions.push(projection.project(ellipsoid.cartesianToCartographic(p, scratchCartographic)));
         }
 
         if (newPositions.length > 0) {

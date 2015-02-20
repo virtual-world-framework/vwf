@@ -20,7 +20,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
     var createBlocklyDivs = true;
     var blocksInWorkspace = {};
-    var handleChangedEvents = true;
+    var handleChangeEvents = true;
     var blockIdIterator;
 
     return view.load( module, {
@@ -50,7 +50,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             this.options.divName = options.divName ? options.divName : 'blocklyDiv'; 
             this.options.toolbox = options.toolbox ? options.toolbox : 'toolbox'; 
             this.options.createButton = options.createButton !== undefined ? options.createButton : true;
-
 
         },
 
@@ -96,7 +95,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             
             self = this;
 
-            if ( childID == this.kernel.application() ) {
+            if ( childID === this.kernel.application() ) {
                 
                 self.kernel.setProperty( childID, "toolbox", self.options.toolbox );
                 Blockly.inject( document.getElementById( self.options.divName ), { 
@@ -112,56 +111,64 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
                 Blockly.addChangeListener( function( event ) {
                     
-                    if ( handleChangedEvents && self.state.blockly.node !== undefined ) {
-                        var i, block;
-                        var previousBlockIds = Object.keys( blocksInWorkspace );
-                        var previousBlockCount = previousBlockIds.length;
-                        var blocks = Blockly.mainWorkspace.getAllBlocks();
-                        var blockCount = blocks.length;
-                        var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
-                        
-                        if ( blockCount > previousBlockCount ) {
+                    if ( handleChangeEvents ) {
+                        if ( self.state.blockly.node !== undefined ) {
+                            var i, block;
+                            var previousBlockIds = Object.keys( blocksInWorkspace );
+                            var previousBlockCount = previousBlockIds.length;
+                            var blocks = Blockly.mainWorkspace.getAllBlocks();
+                            var blockCount = blocks.length;
+                            var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
                             
-                            for ( i = 0; i < blocks.length; i++ ) {
-                                block = blocks[ i ];
-                                if ( blocksInWorkspace[ block.id ] === undefined ) {
-                                    blocksInWorkspace[ block.id ] = { "id": block.id, "type": block.type }; 
-                                    self.kernel.fireEvent( self.state.blockly.node.ID, "blocklyBlockAdded", [ block.id, block.type ] );   
+                            self.kernel.fireEvent( self.kernel.application(), "blocklyContentChanged", [ true ] );
+                            self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
+                            self.kernel.setProperty( self.state.blockly.node.ID, "blockly_topBlockCount", topBlockCount );
+
+                            if ( blockCount > previousBlockCount ) {
+                                
+                                for ( i = 0; i < blocks.length; i++ ) {
+                                    block = blocks[ i ];
+                                    if ( blocksInWorkspace[ block.id ] === undefined ) {
+                                        blocksInWorkspace[ block.id ] = { "id": block.id, "type": block.type }; 
+                                        self.kernel.fireEvent( self.state.blockly.node.ID, "blocklyBlockAdded", [ block.id, block.type ] );   
+                                    }
+                                } 
+
+                            } else if ( blockCount < previousBlockCount ) {
+
+                                var activeBlocks = {};
+                                for ( i = 0; i < blocks.length; i++ ) {
+                                    activeBlocks[ blocks[ i ].id ] = blocks[ i ];    
                                 }
-                            } 
-
-                        } else if ( blockCount < previousBlockCount ) {
-
-                            var activeBlocks = {};
-                            for ( i = 0; i < blocks.length; i++ ) {
-                                activeBlocks[ blocks[ i ].id ] = blocks[ i ];    
-                            }
-                            var blockIDsRemoved = [];
-                            for ( var id in blocksInWorkspace ) {
-                                if ( activeBlocks[ id ] === undefined ) {
-                                    blockIDsRemoved.push( id );    
+                                var blockIDsRemoved = [];
+                                for ( var id in blocksInWorkspace ) {
+                                    if ( activeBlocks[ id ] === undefined ) {
+                                        blockIDsRemoved.push( id );    
+                                    }
                                 }
-                            }
-                            for ( i = 0; i < blockIDsRemoved.length; i++ ) {
-                                block = blocksInWorkspace[ blockIDsRemoved[ i ] ];
-                                self.kernel.fireEvent( self.state.blockly.node.ID, "blocklyBlockRemoved", [ block.id, block.type ] );
-                                delete blocksInWorkspace[ blockIDsRemoved[ i ] ];   
-                            }
+                                for ( i = 0; i < blockIDsRemoved.length; i++ ) {
+                                    block = blocksInWorkspace[ blockIDsRemoved[ i ] ];
+                                    self.kernel.fireEvent( self.state.blockly.node.ID, "blocklyBlockRemoved", [ block.id, block.type ] );
+                                    delete blocksInWorkspace[ blockIDsRemoved[ i ] ];   
+                                }
 
+                            } else {
+
+                                // Set the appropriate model properties based on this change
+                                var xmlDom = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
+                                console.log (xmlDom);
+                                if ( xmlDom ) {
+                                    var newXmlText = Blockly.Xml.domToText( xmlDom );
+                                    self.kernel.setProperty( self.state.blockly.node.ID, "blockly_xml", 
+                                        Blockly.Xml.domToText( xmlDom ) );
+                                }
+                                self.kernel.setProperty( self.state.blockly.node.ID, "blockly_code", 
+                                    Blockly.JavaScript.workspaceToCode() );
+                            }
+                            
                         }
-                        
-                        self.kernel.fireEvent( self.kernel.application(), "blocklyContentChanged", [ true ] );
-                        self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
-                        self.kernel.setProperty( self.state.blockly.node.ID, "blockly_topBlockCount", topBlockCount );
-
-                        // the following code could be used to 
-                        // replicate the blockly blocks in the current UI
-                        //var xml = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
-                        //if ( xml ) { 
-                        //    self.kernel.setProperty( self.state.blockly.node.ID, "blockly_xml", Blockly.Xml.domToText( xml ) );
-                        //}
-                        //self.kernel.setProperty( self.state.blockly.node.ID, "blockly_code", Blockly.JavaScript.workspaceToCode() );
- 
+                    } else {
+                        handleChangeEvents = true;
                     }
 
                 });           
@@ -218,34 +225,51 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 var app = this.state.scenes[ nodeID ];
                 switch ( propertyName ) {
                     case "blockly_activeNodeID":
-                        if ( this.state.nodes[ propertyValue ] !== undefined ) {
+
+                        var newActiveNodeId = propertyValue;
+                        var previousActiveNode = this.state.blockly.node;
+                        var blocklyNode = this.state.nodes[ newActiveNodeId ];
+
+                        // If the new node is the same as the old - exit early to prevent 
+                        // breaking synchronization.
+
+                        if ( previousActiveNode === newActiveNodeId ) {
+                            break;
+                        }
+
+                        if ( blocklyNode !== undefined ) {
                             var show = true;
-                            node = this.state.nodes[ propertyValue ];
-                            if ( this.state.blockly.node !== undefined ) {
-                                getBlockXML( this.state.blockly.node );
-                                setBlocklyUIVisibility( this.state.blockly.node, false ); 
-                                show = ( this.state.blockly.node.ID !== propertyValue );
-                                this.state.blockly.node = undefined;                           
-                            } 
+
+                            //If there was already an active blockly node, deal with it before
+                            //activating the new one
+                            if ( previousActiveNode !== undefined ) {
+                               getBlockXML( previousActiveNode );
+                               setBlocklyUIVisibility( previousActiveNode, false ); 
+                               show = ( previousActiveNode.ID !== newActiveNodeId );
+                               this.state.blockly.node = undefined;                           
+                            }
+
+                            // If the new active node is different than the old,
+                            // then we need to load its program into the toolbox
                             if ( show ) {
-                                if ( node.toolbox !== undefined ) {
-                                    loadToolbox( node.toolbox );    
+                                if ( blocklyNode.toolbox !== undefined ) {
+                                    loadToolbox( blocklyNode.toolbox );    
                                 } else if ( app.toolbox !== undefined ) {
                                     loadToolbox( app.toolbox );
                                 }
-                                if ( node.defaultXml !== undefined ) {
-                                    loadDefaultXml( node.defaultXml );    
+                                if ( blocklyNode.defaultXml !== undefined ) {
+                                    loadDefaultXml( blocklyNode.defaultXml );    
                                 } else if ( app.defaultXml !== undefined ) {
                                     loadDefaultXml( app.defaultXml ); 
                                 }                               
-                                this.state.blockly.node = node;
-                                setBlockXML( node );
-                                setBlocklyUIVisibility( node, true );
+                                this.state.blockly.node = blocklyNode;
+                                setBlockXML( blocklyNode );
+                                setBlocklyUIVisibility( blocklyNode, true );
                             }                        
                         } else {
-                            if ( this.state.blockly.node !== undefined ) {
-                                getBlockXML( this.state.blockly.node );
-                                setBlocklyUIVisibility( this.state.blockly.node, false );
+                            if ( previousActiveNode !== undefined ) {
+                                getBlockXML( previousActiveNode );
+                                setBlocklyUIVisibility( previousActiveNode, false );
                                 this.state.blockly.node = undefined;                            
                             } 
                         }
@@ -268,10 +292,23 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             this.delayedProperties.blockly_autoClose = Boolean( propertyValue );
                         }
                         break;
-
                 }
 
-            }         
+            } else if ( this.state.blockly.node && ( nodeID === this.state.blockly.node.ID ) ) {
+                switch ( propertyName ) {
+                    case "blockly_xml":
+                        var clientThatSetProperty = this.kernel.client();
+                        var me = this.kernel.moniker();
+                        if ( clientThatSetProperty !== me ) {
+                            var xmlText = propertyValue;
+                            handleChangeEvents = false;
+                            setWorkspaceFromXmlText( xmlText, true );
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }   
         },
 
         // -- gotProperty ------------------------------------------------------------------------------
@@ -311,7 +348,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         var found = false;
         if ( implementsIDs ) {
             for ( var i = 0; i < implementsIDs.length && !found; i++ ) {
-                found = ( implementsIDs[i] == "http-vwf-example-com-blockly-controller-vwf" ); 
+                found = ( implementsIDs[i] == "http://vwf.example.com/blockly/controller.vwf" );
             }
         }
        return found;
@@ -319,22 +356,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
     function setBlockXML( node ) {
 
-        handleChangedEvents = false;
+        handleChangeEvents = false;
 
         var xmlText = node.blocks;
-        var xmlDom = null;
-        try {
-            xmlDom = Blockly.Xml.textToDom( xmlText );
-        } catch (e) {
-            var q = window.confirm( "XML is invalid" );
-            if ( !q ) {
-                return;
-            }
-        }
-        if ( xmlDom ) {
-            Blockly.mainWorkspace.clear();
-            domCopyToWorkspace( Blockly.mainWorkspace, xmlDom );
-        } 
+        var clearBeforeSet = true;
+        setWorkspaceFromXmlText( xmlText, clearBeforeSet );
+
         var blocks = Blockly.mainWorkspace.getAllBlocks();
         var blockCount = blocks.length;
         var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
@@ -345,9 +372,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         }
 
         self.kernel.setProperty( node.ID, "blockly_blockCount", blockCount );
-        self.kernel.setProperty( node.ID, "blockly_topBlockCount", topBlockCount );   
-
-        handleChangedEvents = true;   
+        self.kernel.setProperty( node.ID, "blockly_topBlockCount", topBlockCount );     
     }
 
     function getBlockXML( node ) {
@@ -462,6 +487,23 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             childBlock = block.childBlocks_[ i ];
             childXml = xmlDescendants[ blockIdIterator++ ];
             setChildBlockIDs( childBlock, childXml, xmlDescendants );
+        }
+    }
+
+    function setWorkspaceFromXmlText( xmlText, clearBeforeSet ) {
+        var xmlDom = null;
+        try {
+            xmlDom = Blockly.Xml.textToDom( xmlText );
+        } catch ( e ) {
+            var q = window.confirm( "XML is invalid" );
+            if ( !q ) {
+                return;
+            }
+        }
+        if ( xmlDom ) {
+            console.log (xmlDom);
+            clearBeforeSet && Blockly.mainWorkspace.clear();
+            domCopyToWorkspace( Blockly.mainWorkspace, xmlDom );
         }
     }
 

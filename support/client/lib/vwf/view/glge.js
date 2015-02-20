@@ -27,18 +27,18 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             checkCompatibility.call(this);
 
             this.pickInterval = 10;
-            this.disableInputs = false;
+            this.enableInputs = true;
 
             // Store parameter options for persistence functionality
             this.parameters = options;
 
             if(typeof options == "object") {
                 this.rootSelector = options["application-root"];
-                if("experimental-pick-interval" in options) {
-                    this.pickInterval = options["experimental-pick-interval"];
+                if("pick-interval" in options) {
+                    this.pickInterval = options["pick-interval"];
                 }
-                if("experimental-disable-inputs" in options) {
-                    this.disableInputs = options["experimental-disable-inputs"];
+                if("enable-inputs" in options) {
+                    this.enableInputs = options["enable-inputs"];
                 }
             }
             else {
@@ -82,7 +82,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
                 ).children(":last");
 
                 var canvas = this.canvasQuery.get(0);
-                if(!this.disableInputs) {
+                if( this.enableInputs ) {
                     window.onkeydown = function (event) {
                         var key = undefined;
                         var validKey = false;
@@ -243,7 +243,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             time = time || 0;
             window.requestAnimationFrame( renderScene );
             sceneNode.frameCount++;
-            if((time - lastPickTime) > self.pickInterval && !self.disableInputs) {
+            if((time - lastPickTime) > self.pickInterval && self.enableInputs) {
                 var newPick = mousePick.call( this, mouse, sceneNode );
                 self.lastPick = newPick;
                 if((mouse.getMousePosition().x != oldMouseX || mouse.getMousePosition().y != oldMouseY)) {
@@ -278,7 +278,7 @@ define( [ "module", "vwf/view", "vwf/utility" ], function( module, view, utility
             this.state.cameraInUse.setAspect( ( canvas.width / canvas.height)  );
 
             // set up all of the mouse event handlers
-            if(!self.disableInputs) {
+            if( self.enableInputs ) {
                 initMouseEvents.call( this, canvas );
             }
 

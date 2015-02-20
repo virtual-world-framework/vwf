@@ -71,6 +71,8 @@ properties:
         this.transform = transform;
         this.transformChanged( transform );
       }  //@ sourceURL=node3.transform.set.vwf
+    get: |
+      return this.transform || goog.vec.Mat4.createIdentity(); //@ sourceURL=node3.transform.get.vwf
 
   ## Translation of 3D node
   ## node.translation <= [ x, y, z ]
@@ -321,11 +323,9 @@ properties:
   visible: 
     set: |
       this.visible = value;
-      if(this.children) {
-        for(var i in this.children) {
-          this.children[i].visible = value;
-        }
-      }
+      this.children.forEach( function( child ) {
+        child.visible = value;
+      } );
     value: true
 
 events:

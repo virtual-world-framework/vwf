@@ -6,6 +6,7 @@ define([
         '../Core/Cartesian3',
         '../Core/Color',
         '../Core/ColorGeometryInstanceAttribute',
+        '../Core/createGuid',
         '../Core/defaultValue',
         '../Core/defined',
         '../Core/defineProperties',
@@ -55,6 +56,7 @@ define([
         Cartesian3,
         Color,
         ColorGeometryInstanceAttribute,
+        createGuid,
         defaultValue,
         defined,
         defineProperties,
@@ -152,7 +154,8 @@ define([
      * @param {Object} [options.contextOptions] Context and WebGL creation properties.  See details above.
      * @param {Element} [options.creditContainer] The HTML element in which the credits will be displayed.
      * @param {MapProjection} [options.mapProjection=new GeographicProjection()] The map projection to use in 2D and Columbus View modes.
-     *
+     * @param {Boolean} [options.orderIndependentTranslucency=true] If true and the configuration supports it, use order independent translucency.
+     * @param {Boolean} [options.scene3DOnly=false] If true, optimizes memory use and performance for 3D mode but disables the ability to use 2D or Columbus View.     *
      * @see CesiumWidget
      * @see {@link http://www.khronos.org/registry/webgl/specs/latest/#5.2|WebGLContextAttributes}
      *
@@ -190,7 +193,11 @@ define([
             creditContainer.style['padding-right'] = '5px';
             canvas.parentNode.appendChild(creditContainer);
         }
+
+        this._id = createGuid();
         this._frameState = new FrameState(new CreditDisplay(creditContainer));
+        this._frameState.scene3DOnly = defaultValue(options.scene3DOnly, false);
+
         this._passState = new PassState(context);
         this._canvas = canvas;
         this._context = context;
@@ -208,7 +215,7 @@ define([
         this._frustumCommandsList = [];
         this._overlayCommandList = [];
 
-        this._oit = new OIT(context);
+        this._oit = defaultValue(options.orderIndependentTranslucency, true) ? new OIT(context) : undefined;
         this._executeOITFunction = undefined;
 
         this._fxaa = new FXAA();
@@ -315,15 +322,9 @@ define([
          */
         this.backgroundColor = Color.clone(Color.BLACK);
 
-        /**
-         * The current mode of the scene.
-         *
-         * @type {SceneMode}
-         * @default {@link SceneMode.SCENE3D}
-         */
-        this.mode = SceneMode.SCENE3D;
+        this._mode = SceneMode.SCENE3D;
 
-        this._mapProjection = defaultValue(options.mapProjection, new GeographicProjection());
+        this._mapProjection = defined(options.mapProjection) ? options.mapProjection : new GeographicProjection();
 
         /**
          * The current morph transition time between 2D/Columbus View and 3D,
@@ -367,9 +368,6 @@ define([
          * scene.debugCommandFilter = function(command) {
          *     return command.owner === billboards;
          * };
-         *
-         * @see DrawCommand
-         * @see ClearCommand
          */
         this.debugCommandFilter = undefined;
 
@@ -441,7 +439,7 @@ define([
 
         var camera = new Camera(this);
         this._camera = camera;
-        this._screenSpaceCameraController = new ScreenSpaceCameraController(canvas, camera);
+        this._screenSpaceCameraController = new ScreenSpaceCameraController(this);
 
         // initial guess at frustums.
         var near = camera.frustum.near;
@@ -505,7 +503,7 @@ define([
          * @type {Number}
          * @readonly
          *
-         * @see {@link http://www.khronos.org/opengles/sdk/2.0/docs/man/glGet.xml|glGet} with <code>ALIASED_LINE_WIDTH_RANGE</code>.
+         * @see {@link https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGet.xml|glGet} with <code>ALIASED_LINE_WIDTH_RANGE</code>.
          */
         maximumAliasedLineWidth : {
             get : function() {
@@ -592,6 +590,8 @@ define([
          *
          * @type {FrameState}
          * @readonly
+         *
+         * @private
          */
         frameState : {
             get: function() {
@@ -632,7 +632,6 @@ define([
          * @memberof Scene.prototype
          *
          * @type {TerrainProvider}
-         * @readonly
          */
         terrainProvider : {
             get : function() {
@@ -690,6 +689,7 @@ define([
         /**
          * @memberof Scene.prototype
          * @private
+         * @readonly
          */
         context : {
             get : function() {
@@ -719,6 +719,62 @@ define([
             get : function() {
                 return this._debugFrustumStatistics;
             }
+        },
+
+        /**
+         * Gets whether or not the scene is optimized for 3D only viewing.
+         * @memberof Scene.prototype
+         * @type {Boolean}
+         * @readonly
+         */
+        scene3DOnly : {
+            get : function() {
+                return this._frameState.scene3DOnly;
+            }
+        },
+
+        /**
+         * Gets whether or not the scene has order independent translucency enabled.
+         * Note that this only reflects the original construction option, and there are
+         * other factors that could prevent OIT from functioning on a given system configuration.
+         * @memberof Scene.prototype
+         * @type {Boolean}
+         * @readonly
+         */
+        orderIndependentTranslucency : {
+            get : function() {
+                return defined(this._oit);
+            }
+        },
+
+        /**
+         * Gets the unique identifier for this scene.
+         * @memberof Scene.prototype
+         * @type {String}
+         * @readonly
+         */
+        id : {
+            get : function() {
+                return this._id;
+            }
+        },
+
+        /**
+         * Gets or sets the current mode of the scene.
+         * @memberof Scene.prototype
+         * @type {SceneMode}
+         * @default {@link SceneMode.SCENE3D}
+         */
+        mode : {
+            get : function() {
+                return this._mode;
+            },
+            set : function(value) {
+                if (this.scene3DOnly && value !== SceneMode.SCENE3D) {
+                    throw new DeveloperError('Only SceneMode.SCENE3D is valid when scene3DOnly is true.');
+                }
+                this._mode = value;
+            }
         }
     });
 
@@ -729,7 +785,7 @@ define([
         // TODO: The occluder is the top-level globe. When we add
         //       support for multiple central bodies, this should be the closest one.
         var globe = scene.globe;
-        if (scene.mode === SceneMode.SCENE3D && defined(globe)) {
+        if (scene._mode === SceneMode.SCENE3D && defined(globe)) {
             var ellipsoid = globe.ellipsoid;
             scratchOccluderBoundingSphere.radius = ellipsoid.minimumRadius;
             scratchOccluder = Occluder.fromBoundingSphere(scratchOccluderBoundingSphere, scene._camera.positionWC, scratchOccluder);
@@ -748,7 +804,7 @@ define([
         var camera = scene._camera;
 
         var frameState = scene._frameState;
-        frameState.mode = scene.mode;
+        frameState.mode = scene._mode;
         frameState.morphTime = scene.morphTime;
         frameState.mapProjection = scene.mapProjection;
         frameState.frameNumber = frameNumber;
@@ -874,12 +930,12 @@ define([
                 var boundingVolume = command.boundingVolume;
                 if (defined(boundingVolume)) {
                     if (command.cull &&
-                            ((cullingVolume.getVisibility(boundingVolume) === Intersect.OUTSIDE) ||
+                            ((cullingVolume.computeVisibility(boundingVolume) === Intersect.OUTSIDE) ||
                              (defined(occluder) && !occluder.isBoundingSphereVisible(boundingVolume)))) {
                         continue;
                     }
 
-                    distances = BoundingSphere.getPlaneDistances(boundingVolume, position, direction, distances);
+                    distances = BoundingSphere.computePlaneDistances(boundingVolume, position, direction, distances);
                     near = Math.min(near, distances.start);
                     far = Math.max(far, distances.stop);
                 } else {
@@ -932,8 +988,12 @@ define([
     function createDebugFragmentShaderProgram(command, scene, shaderProgram) {
         var context = scene.context;
         var sp = defaultValue(shaderProgram, command.shaderProgram);
-        var fragmentShaderSource = sp.fragmentShaderSource;
-        var renamedFS = fragmentShaderSource.replace(/void\s+main\s*\(\s*(?:void)?\s*\)/g, 'void czm_Debug_main()');
+        var fs = sp.fragmentShaderSource.clone();
+
+        fs.sources = fs.sources.map(function(source) {
+            source = source.replace(/void\s+main\s*\(\s*(?:void)?\s*\)/g, 'void czm_Debug_main()');
+            return source;
+        });
 
         var newMain =
             'void main() \n' +
@@ -959,9 +1019,10 @@ define([
 
         newMain += '}';
 
-        var source = renamedFS + '\n' + newMain;
+        fs.sources.push(newMain);
+
         var attributeLocations = getAttributeLocations(sp);
-        return context.createShaderProgram(sp.vertexShaderSource, source, attributeLocations);
+        return context.createShaderProgram(sp.vertexShaderSource, fs, attributeLocations);
     }
 
     function executeDebugCommand(command, scene, passState, renderState, shaderProgram) {
@@ -973,12 +1034,11 @@ define([
         }
     }
 
-    var transformFrom2D = Matrix4.inverseTransformation(//
-                            new Matrix4(0.0, 0.0, 1.0, 0.0, //
-                                        1.0, 0.0, 0.0, 0.0, //
-                                        0.0, 1.0, 0.0, 0.0, //
-                                        0.0, 0.0, 0.0, 1.0));
-
+    var transformFrom2D = new Matrix4(0.0, 0.0, 1.0, 0.0,
+                                        1.0, 0.0, 0.0, 0.0,
+                                        0.0, 1.0, 0.0, 0.0,
+                                        0.0, 0.0, 0.0, 1.0);
+    transformFrom2D = Matrix4.inverseTransformation(transformFrom2D, transformFrom2D);
     function executeCommand(command, scene, context, passState, renderState, shaderProgram, debugFramebuffer) {
         if ((defined(scene.debugCommandFilter)) && !scene.debugCommandFilter(command)) {
             return;
@@ -1008,7 +1068,7 @@ define([
             })));
 
             if (frameState.mode !== SceneMode.SCENE3D) {
-                center = Matrix4.multiplyByPoint(transformFrom2D, center);
+                center = Matrix4.multiplyByPoint(transformFrom2D, center, center);
                 var projection = frameState.mapProjection;
                 var centerCartographic = projection.unproject(center);
                 center = projection.ellipsoid.cartographicToCartesian(centerCartographic);
@@ -1017,7 +1077,7 @@ define([
             scene._debugSphere = new Primitive({
                 geometryInstances : new GeometryInstance({
                     geometry : geometry,
-                    modelMatrix : Matrix4.multiplyByTranslation(Matrix4.IDENTITY, center),
+                    modelMatrix : Matrix4.multiplyByTranslation(Matrix4.IDENTITY, center, new Matrix4()),
                     attributes : {
                         color : new ColorGeometryInstanceAttribute(1.0, 0.0, 0.0, 1.0)
                     }
@@ -1066,7 +1126,7 @@ define([
         return ((defined(command)) &&
                  ((!defined(command.boundingVolume)) ||
                   !command.cull ||
-                  ((cullingVolume.getVisibility(boundingVolume) !== Intersect.OUTSIDE) &&
+                  ((cullingVolume.computeVisibility(boundingVolume) !== Intersect.OUTSIDE) &&
                    (!defined(occluder) || occluder.isBoundingSphereVisible(boundingVolume)))));
     }
 
@@ -1096,7 +1156,7 @@ define([
         var us = context.uniformState;
 
         var frustum;
-        if (defined(camera.frustum.fovy)) {
+        if (defined(camera.frustum.fov)) {
             frustum = camera.frustum.clone(scratchPerspectiveFrustum);
         } else if (defined(camera.frustum.infiniteProjectionMatrix)){
             frustum = camera.frustum.clone(scratchPerspectiveOffCenterFrustum);
@@ -1137,7 +1197,7 @@ define([
             }
         }
 
-        var useOIT = !picking && renderTranslucentCommands && scene._oit.isSupported();
+        var useOIT = !picking && renderTranslucentCommands && defined(scene._oit) && scene._oit.isSupported();
         if (useOIT) {
             scene._oit.update(context);
             scene._oit.clear(context, passState, clearColor);
@@ -1284,8 +1344,8 @@ define([
         }
 
         this._tweens.update();
-        this._camera.update(this.mode);
-        this._screenSpaceCameraController.update(this.mode);
+        this._camera.update(this._mode);
+        this._screenSpaceCameraController.update();
     };
 
     function render(scene, time) {
@@ -1322,9 +1382,10 @@ define([
         if (scene.debugShowFramesPerSecond) {
             if (!defined(scene._performanceDisplay)) {
                 var performanceContainer = document.createElement('div');
+                performanceContainer.className = 'cesium-performanceDisplay';
                 performanceContainer.style.position = 'absolute';
-                performanceContainer.style.top = '10px';
-                performanceContainer.style.left = '10px';
+                performanceContainer.style.top = '50px';
+                performanceContainer.style.right = '10px';
                 var container = scene._canvas.parentNode;
                 container.appendChild(performanceContainer);
                 var performanceDisplay = new PerformanceDisplay({container: performanceContainer});
@@ -1357,6 +1418,14 @@ define([
                 throw error;
             }
         }
+    };
+
+    /**
+     * @private
+     */
+    Scene.prototype.clampLineWidth = function(width) {
+        var context = this._context;
+        return Math.max(context.minimumAliasedLineWidth, Math.min(width, context.maximumAliasedLineWidth));
     };
 
     var orthoPickingFrustum = new OrthographicFrustum();
@@ -1439,7 +1508,7 @@ define([
     }
 
     function getPickCullingVolume(scene, drawingBufferPosition, width, height) {
-        if (scene.mode === SceneMode.SCENE2D) {
+        if (scene._mode === SceneMode.SCENE2D) {
             return getPickOrthographicCullingVolume(scene, drawingBufferPosition, width, height);
         }
 
@@ -1574,11 +1643,15 @@ define([
      * @param {Number} [duration=2.0] The amount of time, in seconds, for transition animations to complete.
      */
     Scene.prototype.morphTo2D = function(duration) {
+        var ellipsoid;
         var globe = this.globe;
         if (defined(globe)) {
-            duration = defaultValue(duration, 2.0);
-            this._transitioner.morphTo2D(duration, globe.ellipsoid);
+            ellipsoid = globe.ellipsoid;
+        } else {
+            ellipsoid = this.mapProjection.ellipsoid;
         }
+        duration = defaultValue(duration, 2.0);
+        this._transitioner.morphTo2D(duration, ellipsoid);
     };
 
     /**
@@ -1586,11 +1659,15 @@ define([
      * @param {Number} [duration=2.0] The amount of time, in seconds, for transition animations to complete.
      */
     Scene.prototype.morphToColumbusView = function(duration) {
+        var ellipsoid;
         var globe = this.globe;
         if (defined(globe)) {
-            duration = defaultValue(duration, 2.0);
-            this._transitioner.morphToColumbusView(duration, globe.ellipsoid);
+            ellipsoid = globe.ellipsoid;
+        } else {
+            ellipsoid = this.mapProjection.ellipsoid;
         }
+        duration = defaultValue(duration, 2.0);
+        this._transitioner.morphToColumbusView(duration, ellipsoid);
     };
 
     /**
@@ -1598,11 +1675,15 @@ define([
      * @param {Number} [duration=2.0] The amount of time, in seconds, for transition animations to complete.
      */
     Scene.prototype.morphTo3D = function(duration) {
+        var ellipsoid;
         var globe = this.globe;
         if (defined(globe)) {
-            duration = defaultValue(duration, 2.0);
-            this._transitioner.morphTo3D(duration, globe.ellipsoid);
+            ellipsoid = globe.ellipsoid;
+        } else {
+            ellipsoid = this.mapProjection.ellipsoid;
         }
+        duration = defaultValue(duration, 2.0);
+        this._transitioner.morphTo3D(duration, ellipsoid);
     };
 
     /**
@@ -1650,7 +1731,9 @@ define([
 
         this._transitioner.destroy();
 
-        this._oit.destroy();
+        if (defined(this._oit)) {
+            this._oit.destroy();
+        }
         this._fxaa.destroy();
 
         this._context = this._context && this._context.destroy();

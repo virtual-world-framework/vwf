@@ -4253,6 +4253,618 @@ define( function(){
             }
         },
 
+        // Task point Tactical Graphics
+        "task": {
+            "TACGRP.TSK.DSTY": {
+                "symbolID": "GUTPD-----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.TSK.ITDT": {
+                "symbolID": "GUTPI-----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.TSK.NEUT": {
+                "symbolID": "GUTPN-----****X",
+                "tag": "TACGRP"
+            }
+        },
+        
+        // Command Control General Maneuver point Tactical Graphics
+        "c2gm": {
+            "TACGRP.C2GM.GNL.PNT.REFPNT": {
+                "symbolID": "GUGPGPR---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.REFPNT.NAVREF": {
+                "symbolID": "GUGPGPRN--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.REFPNT.SPLPNT": {
+                "symbolID": "GUGPGPRS--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.REFPNT.DLRP": {
+                "symbolID": "GUGPGPRD--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.REFPNT.PIM": {
+                "symbolID": "GUGPGPRP--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.REFPNT.MRSH": {
+                "symbolID": "GUGPGPRM--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.REFPNT.WAP": {
+                "symbolID": "GUGPGPRW--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.REFPNT.CRDRTB": {
+                "symbolID": "GUGPGPRC--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.REFPNT.PNTINR": {
+                "symbolID": "GUGPGPRI--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.WPN.AIMPNT": {
+                "symbolID": "GUGPGPWA--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.WPN.DRPPNT": {
+                "symbolID": "GUGPGPWD--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.WPN.ENTPNT": {
+                "symbolID": "GUGPGPWE--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.WPN.GRDZRO": {
+                "symbolID": "GUGPGPWG--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.WPN.MSLPNT": {
+                "symbolID": "GUGPGPWM--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.WPN.IMTPNT": {
+                "symbolID": "GUGPGPWI--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.WPN.PIPNT": {
+                "symbolID": "GUGPGPWP--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.FRMN": {
+                "symbolID": "GUGPGPF---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.HBR": {
+                "symbolID": "GUGPGPH---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.HBR.PNTQ": {
+                "symbolID": "GUGPGPHQ--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.HBR.PNTA": {
+                "symbolID": "GUGPGPHA--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.HBR.PNTX": {
+                "symbolID": "GUGPGPHX--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.RTE": {
+                "symbolID": "GUGPGPO---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.RTE.RDV": {
+                "symbolID": "GUGPGPOZ--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.RTE.DVSN": {
+                "symbolID": "GUGPGPOD--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.RTE.WAP": {
+                "symbolID": "GUGPGPOW--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.RTE.PIM": {
+                "symbolID": "GUGPGPOP--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.RTE.PNTR": {
+                "symbolID": "GUGPGPOR--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT": {
+                "symbolID": "GUGPGPP---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.CHKPNT": {
+                "symbolID": "GUGPGPPK--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.CONPNT": {
+                "symbolID": "GUGPGPPC--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.CRDPNT": {
+                "symbolID": "GUGPGPPO--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.DCNPNT": {
+                "symbolID": "GUGPGPPD--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.LNKUPT": {
+                "symbolID": "GUGPGPPL--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.PSSPNT": {
+                "symbolID": "GUGPGPPP--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.RAYPNT": {
+                "symbolID": "GUGPGPPR--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.RELPNT": {
+                "symbolID": "GUGPGPPE--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.STRPNT": {
+                "symbolID": "GUGPGPPS--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.AMNPNT": {
+                "symbolID": "GUGPGPPA--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.GNL.PNT.ACTPNT.WAP": {
+                "symbolID": "GUGPGPPW--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.DEF.PNT.TGTREF": {
+                "symbolID": "GUGPDPT---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.DEF.PNT.OBSPST": {
+                "symbolID": "GUGPDPO---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.DEF.PNT.OBSPST.CBTPST": {
+                "symbolID": "GUGPDPOC--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.DEF.PNT.OBSPST.RECON": {
+                "symbolID": "GUGPDPOR--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.DEF.PNT.OBSPST.FWDOP": {
+                "symbolID": "GUGPDPOF--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.DEF.PNT.OBSPST.SOP": {
+                "symbolID": "GUGPDPOS--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.DEF.PNT.OBSPST.CBRN": {
+                "symbolID": "GUGPDPON--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.C2GM.OFF.PNT.PNTD": {
+                "symbolID": "GUGPOPP---****X",
+                "tag": "TACGRP"
+            }
+        },
+        
+        // Mobility/Survivability point Tactical Graphics
+        "mobsu": {
+            "TACGRP.MOBSU.OBST.ATO.TDTSM.FIXPFD": {
+                "symbolID": "GUMPOAOF--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.OBST.ATO.TDTSM.MVB": {
+                "symbolID": "GUMPOAOM--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.OBST.ATO.TDTSM.MVBPFD": {
+                "symbolID": "GUMPOAOP--****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.OBST.BBY": {
+                "symbolID": "GUMPOB----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.OBST.MNE.USPMNE": {
+                "symbolID": "GUMPOMU---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.OBST.MNE.ATMNE": {
+                "symbolID": "GUMPOMT---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.OBST.MNE.ATMAHD": {
+                "symbolID": "GUMPOMD---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.OBST.MNE.ATMDIR": {
+                "symbolID": "GUMPOME---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.OBST.MNE.APMNE": {
+                "symbolID": "GUMPOMP---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.OBST.MNE.WAMNE": {
+                "symbolID": "GUMPOMW---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.OBSTBP.CSGSTE.ERP": {
+                "symbolID": "GUMPBCP---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.SU.ESTOF": {
+                "symbolID": "GUMPSE----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.SU.FRT": {
+                "symbolID": "GUMPSF----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.SU.SUFSHL": {
+                "symbolID": "GUMPSS----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.MOBSU.SU.UGDSHL": {
+                "symbolID": "GUMPSU----****X",
+                "tag": "TACGRP"
+            }
+        },
+
+        // Fire Support point Tactical Graphics        
+        "fsupp": {
+            "TACGRP.FSUPP.PNT.TGT.PTGT": {
+                "symbolID": "GUFPPTS---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.FSUPP.PNT.TGT.NUCTGT": {
+                "symbolID": "GUFPPTN---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.FSUPP.PNT.C2PNT.FSS": {
+                "symbolID": "GUFPPCF---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.FSUPP.PNT.C2PNT.SCP": {
+                "symbolID": "GUFPPCS---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.FSUPP.PNT.C2PNT.FP": {
+                "symbolID": "GUFPPCB---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.FSUPP.PNT.C2PNT.RP": {
+                "symbolID": "GUFPPCR---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.FSUPP.PNT.C2PNT.HP": {
+                "symbolID": "GUFPPCH---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.FSUPP.PNT.C2PNT.LP": {
+                "symbolID": "GUFPPCL---****X",
+                "tag": "TACGRP"
+            }
+        },
+        
+        // Combat Service Support point Tactical Graphics
+        "css": {
+            "TACGRP.CSS.PNT.AEP": {
+                "symbolID": "GUSPPX----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.CBNP": {
+                "symbolID": "GUSPPC----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.CCP": {
+                "symbolID": "GUSPPY----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.CVP": {
+                "symbolID": "GUSPPT----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.DCP": {
+                "symbolID": "GUSPPD----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.EPWCP": {
+                "symbolID": "GUSPPE----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.LRP": {
+                "symbolID": "GUSPPL----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.MCP": {
+                "symbolID": "GUSPPM----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.RRRP": {
+                "symbolID": "GUSPPR----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.ROM": {
+                "symbolID": "GUSPPU----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.TCP": {
+                "symbolID": "GUSPPO----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.TTP": {
+                "symbolID": "GUSPPI----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.UMC": {
+                "symbolID": "GUSPPN----****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.GNL": {
+                "symbolID": "GUSPPSZ---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.CLS1": {
+                "symbolID": "GUSPPSA---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.CLS2": {
+                "symbolID": "GUSPPSB---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.CLS3": {
+                "symbolID": "GUSPPSC---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.CLS4": {
+                "symbolID": "GUSPPSD---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.CLS5": {
+                "symbolID": "GUSPPSE---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.CLS6": {
+                "symbolID": "GUSPPSF---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.CLS7": {
+                "symbolID": "GUSPPSG---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.CLS8": {
+                "symbolID": "GUSPPSH---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.CLS9": {
+                "symbolID": "GUSPPSI---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.SPT.CLS10": {
+                "symbolID": "GUSPPSJ---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.AP.ASP": {
+                "symbolID": "GUSPPAS---****X",
+                "tag": "TACGRP"
+            },
+            "TACGRP.CSS.PNT.AP.ATP": {
+                "symbolID": "GUSPPAT---****X",
+                "tag": "TACGRP"
+            }
+        },
+                
+        // Stabilizing Operations point graphics
+        "stbops": {
+            "STBOPS.VIOATY.ASN": {
+                "symbolID": "OUVPA-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.KILL": {
+                "symbolID": "OUVPM-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.KILL.MDR": {
+                "symbolID": "OUVPMA----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.KILL.EX": {
+                "symbolID": "OUVPMB----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.KILL.ASS": {
+                "symbolID": "OUVPMC----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.BM": {
+                "symbolID": "OUVPB-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.BBY": {
+                "symbolID": "OUVPY-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.DBS": {
+                "symbolID": "OUVPD-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.SPG": {
+                "symbolID": "OUVPS-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.PSNG": {
+                "symbolID": "OUVPP-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.EXPLSN": {
+                "symbolID": "OUVPE-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.VIOATY.EXPLSN.EXPLSN": {
+                "symbolID": "OUVPEI----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.LOCAT.BLST": {
+                "symbolID": "OULPB-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.LOCAT.GLST": {
+                "symbolID": "OULPG-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.LOCAT.WLST": {
+                "symbolID": "OULPW-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.LOCAT.MASS": {
+                "symbolID": "OULPM-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.PATG": {
+                "symbolID": "OUOPP-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.DEMO": {
+                "symbolID": "OUOPD-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.ML": {
+                "symbolID": "OUOPM-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.FRGSRH": {
+                "symbolID": "OUOPF-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.SPY": {
+                "symbolID": "OUOPS-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.FDDIST": {
+                "symbolID": "OUOPO-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.EXTN": {
+                "symbolID": "OUOPE-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.HJKG.VEH": {
+                "symbolID": "OUOPHT----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.HJKG.APL": {
+                "symbolID": "OUOPHA----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.HJKG.BOAT": {
+                "symbolID": "OUOPHV----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.KDNG": {
+                "symbolID": "OUOPK-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.KDNG.ATEMPT": {
+                "symbolID": "OUOPK-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.ARR": {
+                "symbolID": "OUOPA-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.OPN.DGOPN": {
+                "symbolID": "OUOPU-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.ITM.RFG": {
+                "symbolID": "OUIPR-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.ITM.SAFHSE": {
+                "symbolID": "OUIPS-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.ITM.GRF": {
+                "symbolID": "OUIPG-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.ITM.VRLRPS": {
+                "symbolID": "OUIPV-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.ITM.KNIVEH": {
+                "symbolID": "OUIPI-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.ITM.DGVEH": {
+                "symbolID": "OUIPD-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.ITM.ISF": {
+                "symbolID": "OUIPF-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.INDIV": {
+                "symbolID": "OUPP------*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.INDIV.LEADER": {
+                "symbolID": "OUPPA-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.INDIV.TRGTD": {
+                "symbolID": "OUPPB-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.INDIV.TERRST": {
+                "symbolID": "OUPPC-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.GRPORG": {
+                "symbolID": "OUGP------*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.GRPORG.DPRE": {
+                "symbolID": "OUGPA-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.GRPORG.NGO": {
+                "symbolID": "OUGPB-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.GRPORG.TERRST": {
+                "symbolID": "OUGPC-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.GRPORG.RELIGS": {
+                "symbolID": "OUGPD-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.GRPORG.FNFGHT": {
+                "symbolID": "OUGPE-----*****",
+                "tag": "STBOPS"     
+            },
+            "STBOPS.GRPORG.GANG": {
+                "symbolID": "OUGPF-----*****",
+                "tag": "STBOPS"     
+            }
+        },
+        
         "aliasModifiers": { 
             "quantity":            { modifier:  "C_QUANTITY",
                                      type:      "ModifiersUnits",

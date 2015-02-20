@@ -2,23 +2,14 @@
     /*global define*/
     define(function() {
     "use strict";
-    return "attribute vec3 positionHigh;\n\
-attribute vec3 positionLow;\n\
-attribute vec2 direction;                       // in screen space\n\
-attribute vec4 textureCoordinatesAndImageSize;  // size in normalized texture coordinates\n\
-attribute vec3 originAndShow;                   // show is 0.0 (false) or 1.0 (true)\n\
-attribute vec4 pixelOffsetAndTranslate;         // x,y, translateX, translateY\n\
-attribute vec4 eyeOffsetAndScale;               // eye offset in meters\n\
-attribute vec4 rotationAndAlignedAxis;\n\
-attribute vec4 scaleByDistance;                 // near, nearScale, far, farScale\n\
-attribute vec4 translucencyByDistance;          // near, nearTrans, far, farTrans\n\
-attribute vec4 pixelOffsetScaleByDistance;      // near, nearScale, far, farScale\n\
-\n\
-#ifdef RENDER_FOR_PICK\n\
-attribute vec4 pickColor;\n\
-#else\n\
-attribute vec4 color;\n\
-#endif\n\
+    return "attribute vec4 positionHighAndScale;\n\
+attribute vec4 positionLowAndRotation;   \n\
+attribute vec4 compressedAttribute0;        // pixel offset, translate, horizontal origin, vertical origin, show, texture coordinates, direction\n\
+attribute vec4 compressedAttribute1;        // aligned axis, translucency by distance, image width\n\
+attribute vec4 compressedAttribute2;        // image height, color, pick color, 2 bytes free\n\
+attribute vec3 eyeOffset;                   // eye offset in meters\n\
+attribute vec4 scaleByDistance;             // near, nearScale, far, farScale\n\
+attribute vec4 pixelOffsetScaleByDistance;  // near, nearScale, far, farScale\n\
 \n\
 varying vec2 v_textureCoordinates;\n\
 \n\
@@ -35,29 +26,123 @@ float getNearFarScalar(vec4 nearFarScalar, float cameraDistSq)\n\
     float nearDistanceSq = nearFarScalar.x * nearFarScalar.x;\n\
     float farDistanceSq = nearFarScalar.z * nearFarScalar.z;\n\
 \n\
-    // ensure that t will fall within the range of [0.0, 1.0]\n\
-    cameraDistSq = clamp(cameraDistSq, nearDistanceSq, farDistanceSq);\n\
-\n\
     float t = (cameraDistSq - nearDistanceSq) / (farDistanceSq - nearDistanceSq);\n\
 \n\
-    t = pow(t, 0.15);\n\
+    t = pow(clamp(t, 0.0, 1.0), 0.2);\n\
 \n\
     return mix(valueAtMin, valueAtMax, t);\n\
 }\n\
+\n\
+const float UPPER_BOUND = 32768.0;\n\
+\n\
+const float SHIFT_LEFT16 = 65536.0;\n\
+const float SHIFT_LEFT8 = 256.0;\n\
+const float SHIFT_LEFT7 = 128.0;\n\
+const float SHIFT_LEFT5 = 32.0;\n\
+const float SHIFT_LEFT3 = 8.0;\n\
+const float SHIFT_LEFT2 = 4.0;\n\
+const float SHIFT_LEFT1 = 2.0;\n\
+\n\
+const float SHIFT_RIGHT8 = 1.0 / 256.0;\n\
+const float SHIFT_RIGHT7 = 1.0 / 128.0;\n\
+const float SHIFT_RIGHT5 = 1.0 / 32.0;\n\
+const float SHIFT_RIGHT3 = 1.0 / 8.0;\n\
+const float SHIFT_RIGHT2 = 1.0 / 4.0;\n\
+const float SHIFT_RIGHT1 = 1.0 / 2.0;\n\
 \n\
 void main() \n\
 {\n\
     // Modifying this shader may also require modifications to Billboard._computeScreenSpacePosition\n\
     \n\
     // unpack attributes\n\
-    vec3 eyeOffset = eyeOffsetAndScale.xyz;\n\
-    float scale = eyeOffsetAndScale.w;\n\
-    vec2 textureCoordinates = textureCoordinatesAndImageSize.xy;\n\
-    vec2 imageSize = textureCoordinatesAndImageSize.zw;\n\
-    vec2 origin = originAndShow.xy;\n\
-    float show = originAndShow.z;\n\
-    vec2 pixelOffset = pixelOffsetAndTranslate.xy;\n\
-    vec2 translate = pixelOffsetAndTranslate.zw;\n\
+    vec3 positionHigh = positionHighAndScale.xyz;\n\
+    vec3 positionLow = positionLowAndRotation.xyz;\n\
+    float scale = positionHighAndScale.w;\n\
+    \n\
+#if defined(ROTATION) || defined(ALIGNED_AXIS)\n\
+    float rotation = positionLowAndRotation.w;\n\
+#endif\n\
+\n\
+    float compressed = compressedAttribute0.x;\n\
+    \n\
+    vec2 pixelOffset;\n\
+    pixelOffset.x = floor(compressed * SHIFT_RIGHT7);\n\
+    compressed -= pixelOffset.x * SHIFT_LEFT7;\n\
+    pixelOffset.x -= UPPER_BOUND;\n\
+    \n\
+    vec2 origin;\n\
+    origin.x = floor(compressed * SHIFT_RIGHT5);\n\
+    compressed -= origin.x * SHIFT_LEFT5;\n\
+    \n\
+    origin.y = floor(compressed * SHIFT_RIGHT3);\n\
+    compressed -= origin.y * SHIFT_LEFT3;\n\
+    \n\
+    origin -= vec2(1.0);\n\
+    \n\
+    float show = floor(compressed * SHIFT_RIGHT2);\n\
+    compressed -= show * SHIFT_LEFT2;\n\
+    \n\
+    vec2 direction;\n\
+    direction.x = floor(compressed * SHIFT_RIGHT1);\n\
+    direction.y = compressed - direction.x * SHIFT_LEFT1;\n\
+    \n\
+    float temp = compressedAttribute0.y  * SHIFT_RIGHT8;\n\
+    pixelOffset.y = -(floor(temp) - UPPER_BOUND);\n\
+    \n\
+    vec2 translate;\n\
+    translate.y = (temp - floor(temp)) * SHIFT_LEFT16;\n\
+    \n\
+    temp = compressedAttribute0.z * SHIFT_RIGHT8;\n\
+    translate.x = floor(temp) - UPPER_BOUND;\n\
+    \n\
+    translate.y += (temp - floor(temp)) * SHIFT_LEFT8;\n\
+    translate.y -= UPPER_BOUND;\n\
+    \n\
+    vec2 textureCoordinates = czm_decompressTextureCoordinates(compressedAttribute0.w);\n\
+    \n\
+    temp = compressedAttribute1.x * SHIFT_RIGHT8;\n\
+    \n\
+    vec2 imageSize = vec2(floor(temp), compressedAttribute2.w);\n\
+    \n\
+#ifdef EYE_DISTANCE_TRANSLUCENCY\n\
+    vec4 translucencyByDistance;\n\
+    translucencyByDistance.x = compressedAttribute1.z;\n\
+    translucencyByDistance.z = compressedAttribute1.w;\n\
+    \n\
+    translucencyByDistance.y = ((temp - floor(temp)) * SHIFT_LEFT8) / 255.0;\n\
+    \n\
+    temp = compressedAttribute1.y * SHIFT_RIGHT8;\n\
+    translucencyByDistance.w = ((temp - floor(temp)) * SHIFT_LEFT8) / 255.0;\n\
+#endif\n\
+\n\
+#ifdef ALIGNED_AXIS\n\
+    vec3 alignedAxis = czm_octDecode(floor(compressedAttribute1.y * SHIFT_RIGHT8));\n\
+#else\n\
+    vec3 alignedAxis = vec3(0.0);\n\
+#endif\n\
+    \n\
+#ifdef RENDER_FOR_PICK\n\
+    temp = compressedAttribute2.y;\n\
+#else\n\
+    temp = compressedAttribute2.x;\n\
+#endif\n\
+\n\
+    vec4 color;\n\
+    temp = temp * SHIFT_RIGHT8;\n\
+    color.b = (temp - floor(temp)) * SHIFT_LEFT8;\n\
+    temp = floor(temp) * SHIFT_RIGHT8;\n\
+    color.g = (temp - floor(temp)) * SHIFT_LEFT8;\n\
+    color.r = floor(temp);\n\
+    \n\
+    temp = compressedAttribute2.z * SHIFT_RIGHT8;\n\
+    \n\
+#ifdef RENDER_FOR_PICK\n\
+    color.a = (temp - floor(temp)) * SHIFT_LEFT8;\n\
+    vec4 pickColor = color / 255.0;\n\
+#else\n\
+    color.a = floor(temp);\n\
+    color /= 255.0;\n\
+#endif\n\
     \n\
     ///////////////////////////////////////////////////////////////////////////\n\
     \n\
@@ -113,11 +198,8 @@ void main() \n\
     \n\
     positionWC.xy += (origin * abs(halfSize));\n\
     \n\
-#ifdef ROTATION\n\
-    float rotation = rotationAndAlignedAxis.x;\n\
-    vec3 alignedAxis = rotationAndAlignedAxis.yzw;\n\
-    \n\
-    if (!all(equal(rotationAndAlignedAxis, vec4(0.0))))\n\
+#if defined(ROTATION) || defined(ALIGNED_AXIS)\n\
+    if (!all(equal(alignedAxis, vec3(0.0))) || rotation != 0.0)\n\
     {\n\
         float angle = rotation;\n\
         if (!all(equal(alignedAxis, vec3(0.0))))\n\

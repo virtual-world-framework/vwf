@@ -26,7 +26,7 @@ define([
     var ModelMaterial = function(model, material, id) {
         this._name = material.name;
         this._id = id;
-        this._uniformMap = model._rendererResources.uniformMaps[id];
+        this._uniformMap = model._uniformMaps[id];
     };
 
     defineProperties(ModelMaterial.prototype, {
@@ -76,7 +76,7 @@ define([
      * @exception {DeveloperError} name must match a parameter name in the material's technique that is targetable and not optimized out.
      *
      * @example
-     * material.setValue('diffuse', new Cartesian4(1.0, 0.0, 0.0, 1.0));  // vec4
+     * material.setValue('diffuse', new Cesium.Cartesian4(1.0, 0.0, 0.0, 1.0));  // vec4
      * material.setValue('shininess', 256.0);                             // scalar
      */
     ModelMaterial.prototype.setValue = function(name, value) {

@@ -51,14 +51,13 @@ trap "echo Installation failed." EXIT
 
 # Starting a clean install here:
 [ -e "$HOME/.vwf" ] && rm -rf "$HOME/.vwf"
-VERSION=$(cat support/client/lib/version.js | support/deployment/version.sh)
 if [ "$UNAME" = "Darwin" ] ; then
   ### OSX ###
-  TARBALL_URL="http://download.virtualworldframework.com/files/vwf-${VERSION}.tar.gz"
+  TARBALL_URL="http://download.virtualworldframework.com/latest/darwin"
   NODEPACKAGE="node-v0.10.22-darwin-x64"
 elif [ "$UNAME" = "Linux" ] ; then
   ### Linux ###
-  TARBALL_URL="http://download.virtualworldframework.com/files/vwf-${VERSION}.tar.gz"
+  TARBALL_URL="http://download.virtualworldframework.com/latest/linux"
 fi
 
 
@@ -69,7 +68,7 @@ fi
 mkdir "$INSTALL_TMPDIR"
 echo "Downloading latest VWF distribution"
 
-curl --progress-bar --fail "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
+curl --progress-bar --fail -L "$TARBALL_URL" | tar -xzf - -C "$INSTALL_TMPDIR"
 # bomb out if it didn't work, eg no net
 test -x "${INSTALL_TMPDIR}/public"
 mv "${INSTALL_TMPDIR}" "$HOME/.vwf"

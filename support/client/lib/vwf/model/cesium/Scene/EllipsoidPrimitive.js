@@ -11,8 +11,8 @@ define([
         '../Core/Matrix4',
         '../Core/VertexFormat',
         '../Renderer/BufferUsage',
-        '../Renderer/createShaderSource',
         '../Renderer/DrawCommand',
+        '../Renderer/ShaderSource',
         '../Shaders/EllipsoidFS',
         '../Shaders/EllipsoidVS',
         './BlendingState',
@@ -32,8 +32,8 @@ define([
         Matrix4,
         VertexFormat,
         BufferUsage,
-        createShaderSource,
         DrawCommand,
+        ShaderSource,
         EllipsoidFS,
         EllipsoidVS,
         BlendingState,
@@ -65,6 +65,8 @@ define([
      * @param {Object} [options.id] A user-defined object to return when the instance is picked with {@link Scene#pick}
      * @param {Boolean} [options.debugShowBoundingVolume=false] For debugging only. Determines if this primitive's commands' bounding spheres are shown.
      *
+     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Volumes.html|Cesium Sandcastle Volumes Demo}
+     *
      * @example
      * // 1. Create a sphere using the ellipsoid primitive
      * primitives.add(new Cesium.EllipsoidPrimitive({
@@ -79,8 +81,6 @@ define([
      *   Cesium.Cartesian3.fromDegrees(-95.0, 40.0, 200000.0));
      * e.radii = new Cesium.Cartesian3(100000.0, 100000.0, 200000.0);
      * primitives.add(e);
-     *
-     * @demo {@link http://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Volumes.html|Cesium Sandcastle Volumes Demo}
      */
     var EllipsoidPrimitive = function(options) {
         options = defaultValue(options, defaultValue.EMPTY_OBJECT);
@@ -184,7 +184,7 @@ define([
         /**
          * This property is for debugging only; it is not for production use nor is it optimized.
          * <p>
-         * Draws the bounding sphere for each {@link DrawCommand} in the primitive.
+         * Draws the bounding sphere for each draw command in the primitive.
          * </p>
          *
          * @type {Boolean}
@@ -334,7 +334,7 @@ define([
 
         if (boundingSphereDirty) {
             Cartesian3.clone(Cartesian3.ZERO, this._boundingSphere.center);
-            this._boundingSphere.radius = Cartesian3.getMaximumComponent(radii);
+            this._boundingSphere.radius = Cartesian3.maximumComponent(radii);
             BoundingSphere.transform(this._boundingSphere, this._computedModelMatrix, this._boundingSphere);
         }
 
@@ -346,18 +346,22 @@ define([
         this._onlySunLighting = this.onlySunLighting;
 
         var colorCommand = this._colorCommand;
+        var vs;
+        var fs;
 
-        // Recompile shader when material, lighting, or transluceny changes
+        // Recompile shader when material, lighting, or translucency changes
         if (materialChanged || lightingChanged || translucencyChanged) {
-            var colorFS = createShaderSource({
-                defines : [
-                    this.onlySunLighting ? 'ONLY_SUN_LIGHTING' : '',
-                    (!translucent && context.fragmentDepth) ? 'WRITE_DEPTH' : ''
-                ],
-                sources : [this.material.shaderSource, EllipsoidFS] }
-            );
+            fs = new ShaderSource({
+                sources : [this.material.shaderSource, EllipsoidFS]
+            });
+            if (this.onlySunLighting) {
+                fs.defines.push('ONLY_SUN_LIGHTING');
+            }
+            if (!translucent && context.fragmentDepth) {
+                fs.defines.push('WRITE_DEPTH');
+            }
 
-            this._sp = context.replaceShaderProgram(this._sp, EllipsoidVS, colorFS, attributeLocations);
+            this._sp = context.replaceShaderProgram(this._sp, EllipsoidVS, fs, attributeLocations);
 
             colorCommand.vertexArray = this._va;
             colorCommand.renderState = this._rs;
@@ -391,16 +395,18 @@ define([
 
             // Recompile shader when material changes
             if (materialChanged || lightingChanged || !defined(this._pickSP)) {
-                var pickFS = createShaderSource({
-                    defines : [
-                        this.onlySunLighting ? 'ONLY_SUN_LIGHTING' : '',
-                        (!translucent && context.fragmentDepth) ? 'WRITE_DEPTH' : ''
-                    ],
+                fs = new ShaderSource({
                     sources : [this.material.shaderSource, EllipsoidFS],
                     pickColorQualifier : 'uniform'
                 });
+                if (this.onlySunLighting) {
+                    fs.defines.push('ONLY_SUN_LIGHTING');
+                }
+                if (!translucent && context.fragmentDepth) {
+                    fs.defines.push('WRITE_DEPTH');
+                }
 
-                this._pickSP = context.replaceShaderProgram(this._pickSP, EllipsoidVS, pickFS, attributeLocations);
+                this._pickSP = context.replaceShaderProgram(this._pickSP, EllipsoidVS, fs, attributeLocations);
 
                 pickCommand.vertexArray = this._va;
                 pickCommand.renderState = this._rs;

@@ -112,17 +112,17 @@ define([
      *
      * @example
      * // Example 2. Add an animation and provide all properties and events
-     * var startTime = JulianDate.now();
+     * var startTime = Cesium.JulianDate.now();
      *
      * var animation = model.activeAnimations.add({
      *   name : 'another animation name',
      *   startTime : startTime,
      *   delay : 0.0,                          // Play at startTime (default)
-     *   stopTime : JulianDate.addSeconds(startTime, 4.0, new JulianDate()),
+     *   stopTime : Cesium.JulianDate.addSeconds(startTime, 4.0, new Cesium.JulianDate()),
      *   removeOnStop : false,                 // Do not remove when animation stops (default)
      *   speedup : 2.0,                        // Play at double speed
      *   reverse : true,                       // Play in reverse
-     *   loop : ModelAnimationLoop.REPEAT      // Loop the animation
+     *   loop : Cesium.ModelAnimationLoop.REPEAT      // Loop the animation
      * });
      *
      * animation.start.addEventListener(function(model, animation) {
@@ -188,7 +188,7 @@ define([
      * @example
      * model.activeAnimations.addAll({
      *   speedup : 0.5,                        // Play at half-speed
-     *   loop : ModelAnimationLoop.REPEAT      // Loop the animations
+     *   loop : Cesium.ModelAnimationLoop.REPEAT      // Loop the animations
      * });
      */
     ModelAnimationCollection.prototype.addAll = function(options) {
@@ -207,12 +207,11 @@ define([
         options = clone(options);
 
         var scheduledAnimations = [];
-        var animations = this._model.gltf.animations;
-        for (var name in animations) {
-            if (animations.hasOwnProperty(name)) {
-                options.name = name;
-                scheduledAnimations.push(this.add(options));
-            }
+        var animationIds = this._model._animationIds;
+        var length = animationIds.length;
+        for (var i = 0; i < length; ++i) {
+            options.name = animationIds[i];
+            scheduledAnimations.push(this.add(options));
         }
 
         return scheduledAnimations;
@@ -348,20 +347,20 @@ define([
             var scheduledAnimation = scheduledAnimations[i];
             var runtimeAnimation = scheduledAnimation._runtimeAnimation;
 
-            if (!defined(scheduledAnimation._startTime)) {
-                scheduledAnimation._startTime = JulianDate.addSeconds(defaultValue(scheduledAnimation.startTime, sceneTime), scheduledAnimation.delay, new JulianDate());
+            if (!defined(scheduledAnimation._computedStartTime)) {
+                scheduledAnimation._computedStartTime = JulianDate.addSeconds(defaultValue(scheduledAnimation.startTime, sceneTime), scheduledAnimation.delay, new JulianDate());
             }
 
             if (!defined(scheduledAnimation._duration)) {
                 scheduledAnimation._duration = runtimeAnimation.stopTime * (1.0 / scheduledAnimation.speedup);
             }
 
-            var startTime = scheduledAnimation._startTime;
+            var startTime = scheduledAnimation._computedStartTime;
             var duration = scheduledAnimation._duration;
             var stopTime = scheduledAnimation.stopTime;
 
             // [0.0, 1.0] normalized local animation time
-            var delta = (duration !== 0.0) ? (JulianDate.getSecondsDifference(sceneTime, startTime) / duration) : 0.0;
+            var delta = (duration !== 0.0) ? (JulianDate.secondsDifference(sceneTime, startTime) / duration) : 0.0;
             var pastStartTime = (delta >= 0.0);
 
             // Play animation if

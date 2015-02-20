@@ -337,7 +337,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundGraph; i++ ) {
-                foundGraph = ( prototypes[i] == "http-vwf-example-com-graphtool-graph-vwf" );    
+                foundGraph = ( prototypes[i] == "http://vwf.example.com/graphtool/graph.vwf" );
             }
         }
 
@@ -350,10 +350,10 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundObject; i++ ) {
-                foundObject = ( prototypes[i] == "http-vwf-example-com-graphtool-graphline-vwf" ) ||
-                    ( prototypes[i] == "http-vwf-example-com-graphtool-graphlinefunction-vwf" ) ||
-                    ( prototypes[i] == "http-vwf-example-com-graphtool-graphplane-vwf" ) ||
-                    ( prototypes[i] == "http-vwf-example-com-graphtool-graphgroup-vwf" );
+                foundObject = ( prototypes[i] == "http://vwf.example.com/graphtool/graphline.vwf" ) ||
+                    ( prototypes[i] == "http://vwf.example.com/graphtool/graphlinefunction.vwf" ) ||
+                    ( prototypes[i] == "http://vwf.example.com/graphtool/graphplane.vwf" ) ||
+                    ( prototypes[i] == "http://vwf.example.com/graphtool/graphgroup.vwf" );
             }
         }
 
@@ -364,13 +364,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length; i++ ) {
-                if ( prototypes[i] == "http-vwf-example-com-graphtool-graphline-vwf" ) {
+                if ( prototypes[i] == "http://vwf.example.com/graphtool/graphline.vwf" ) {
                     return "line";
-                } else if ( prototypes[i] == "http-vwf-example-com-graphtool-graphlinefunction-vwf" ) {
+                } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphlinefunction.vwf" ) {
                     return "function";
-                } else if ( prototypes[i] == "http-vwf-example-com-graphtool-graphplane-vwf" ) {
+                } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphplane.vwf" ) {
                     return "plane";
-                } else if ( prototypes[i] == "http-vwf-example-com-graphtool-graphgroup-vwf" ) {
+                } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphgroup.vwf" ) {
                     return "group";
                 }
             }
@@ -965,7 +965,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var d = 1 - c;
         var s = Math.sin( angle );
 
-        mat = new THREE.Matrix3(
+        mat = new THREE.Matrix3();
+
+        mat.set(
             axis.x * axis.x * d + c,
             axis.x * axis.y * d + axis.z * s,
             axis.x * axis.z * d - axis.y * s,

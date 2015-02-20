@@ -6,7 +6,8 @@ define([
         './DeveloperError',
         './Ellipsoid',
         './freezeObject',
-        './Math'
+        './Math',
+        './Rectangle'
     ], function(
         Cartesian3,
         defaultValue,
@@ -14,13 +15,15 @@ define([
         DeveloperError,
         Ellipsoid,
         freezeObject,
-        CesiumMath) {
+        CesiumMath,
+        Rectangle) {
     "use strict";
 
     /**
      * Contains functions to create a mesh from a heightmap image.
      *
-     * @exports HeightmapTessellator
+     * @namespace
+     * @alias HeightmapTessellator
      */
     var HeightmapTessellator = {};
 
@@ -30,13 +33,13 @@ define([
      * @constant
      */
     HeightmapTessellator.DEFAULT_STRUCTURE = freezeObject({
-            heightScale : 1.0,
-            heightOffset : 0.0,
-            elementsPerHeight : 1,
-            stride : 1,
-            elementMultiplier : 256.0,
-            isBigEndian : false
-        });
+        heightScale : 1.0,
+        heightOffset : 0.0,
+        elementsPerHeight : 1,
+        stride : 1,
+        elementMultiplier : 256.0,
+        isBigEndian : false
+    });
 
     /**
      * Fills an array of vertices from a heightmap image.  On return, the vertex data is in the order
@@ -91,7 +94,6 @@ define([
      * var width = 5;
      * var height = 5;
      * var vertices = new Float32Array(width * height * 6);
-     * var options = ;
      * Cesium.HeightmapTessellator.computeVertices({
      *     vertices : vertices,
      *     heightmap : [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
@@ -186,8 +188,8 @@ define([
         var elementMultiplier = defaultValue(structure.elementMultiplier, HeightmapTessellator.DEFAULT_STRUCTURE.elementMultiplier);
         var isBigEndian = defaultValue(structure.isBigEndian, HeightmapTessellator.DEFAULT_STRUCTURE.isBigEndian);
 
-        var granularityX = (nativeRectangle.east - nativeRectangle.west) / (width - 1);
-        var granularityY = (nativeRectangle.north - nativeRectangle.south) / (height - 1);
+        var granularityX = Rectangle.computeWidth(nativeRectangle) / (width - 1);
+        var granularityY = Rectangle.computeHeight(nativeRectangle) / (height - 1);
 
         var radiiSquared = ellipsoid.radiiSquared;
         var radiiSquaredX = radiiSquared.x;
@@ -211,7 +213,7 @@ define([
             ++endCol;
         }
 
-        for ( var rowIndex = startRow; rowIndex < endRow; ++rowIndex) {
+        for (var rowIndex = startRow; rowIndex < endRow; ++rowIndex) {
             var row = rowIndex;
             if (row < 0) {
                 row = 0;
@@ -234,7 +236,7 @@ define([
 
             var v = (latitude - geographicSouth) / (geographicNorth - geographicSouth);
 
-            for ( var colIndex = startCol; colIndex < endCol; ++colIndex) {
+            for (var colIndex = startCol; colIndex < endCol; ++colIndex) {
                 var col = colIndex;
                 if (col < 0) {
                     col = 0;

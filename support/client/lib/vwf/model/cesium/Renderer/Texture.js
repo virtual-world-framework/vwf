@@ -6,7 +6,6 @@ define([
         '../Core/defineProperties',
         '../Core/destroyObject',
         '../Core/DeveloperError',
-        '../Core/FeatureDetection',
         '../Core/Math',
         '../Core/PixelFormat',
         './MipmapHint',
@@ -21,7 +20,6 @@ define([
         defineProperties,
         destroyObject,
         DeveloperError,
-        FeatureDetection,
         CesiumMath,
         PixelFormat,
         MipmapHint,
@@ -305,35 +303,13 @@ define([
         if (yOffset < 0) {
             throw new DeveloperError('yOffset must be greater than or equal to zero.');
         }
-        if (xOffset +  source.width > this._width) {
+        if (xOffset + source.width > this._width) {
             throw new DeveloperError('xOffset + source.width must be less than or equal to width.');
         }
         if (yOffset + source.height > this._height) {
             throw new DeveloperError('yOffset + source.height must be less than or equal to height.');
         }
         //>>includeEnd('debug');
-
-        // Internet Explorer 11.0.8 is apparently unable to upload a texture to a non-zero
-        // yOffset when the pipeline is configured to FLIP_Y.  So do the flip manually.
-        if (FeatureDetection.isInternetExplorer() && yOffset !== 0 && this._flipY) {
-            var texture = new Texture(this._context, {
-                source : source,
-                flipY : true,
-                pixelFormat : this._pixelFormat,
-                pixelDatatype : this._pixelDatatype,
-                preMultiplyAlpha : this._preMultiplyAlpha
-            });
-
-            var framebuffer = this._context.createFramebuffer({
-                colorTextures : [texture]
-            });
-            framebuffer._bind();
-            this.copyFromFramebuffer(xOffset, yOffset, 0, 0, texture.width, texture.height);
-            framebuffer._unBind();
-            framebuffer.destroy();
-
-            return;
-        }
 
         var gl = this._context._gl;
         var target = this._textureTarget;
@@ -345,7 +321,7 @@ define([
         gl.bindTexture(target, this._texture);
 
         if (source.arrayBufferView) {
-            gl.texSubImage2D(target, 0, xOffset, yOffset,  source.width, source.height, this._pixelFormat, this._pixelDatatype, source.arrayBufferView);
+            gl.texSubImage2D(target, 0, xOffset, yOffset, source.width, source.height, this._pixelFormat, this._pixelDatatype, source.arrayBufferView);
         } else {
             gl.texSubImage2D(target, 0, xOffset, yOffset, this._pixelFormat, this._pixelDatatype, source);
         }
