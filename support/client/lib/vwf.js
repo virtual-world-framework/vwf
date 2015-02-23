@@ -323,6 +323,9 @@
                     "vwf/model/blockly/msg/js/en": {
                         deps: [ "vwf/model/blockly/blockly_compressed" ]
                     },
+                    "vwf/model/hud/hud": {
+                        exports: "HUD"
+                    }
                 }
             };
 
@@ -363,6 +366,7 @@
                     active: false 
                 },
                 { library: "vwf/model/graphtool", active: false },
+                { library: "vwf/model/hud", active: false },
                 { library: "vwf/model/eventManager", active: false },
                 { library: "vwf/model/sound", active: false },
                 { library: "vwf/model/object", active: true },
@@ -401,6 +405,7 @@
                     active: false 
                 },
                 { library: "vwf/view/blockly", active: false },
+                { library: "vwf/view/hud", active: false },
                 { library: "vwf/view/sound", active: false },
                 { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
@@ -440,6 +445,7 @@
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/blockly", active: false },
                     { library: "vwf/model/graphtool", active: false },
+                    { library: "vwf/model/hud", active: false },
                     { library: "vwf/model/eventManager", active: false },
                     { library: "vwf/model/sound", active: false },
                     { library: "vwf/model/kineticjs", active: false },
@@ -458,6 +464,7 @@
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
                     { library: "vwf/view/blockly", active: false },
+                    { library: "vwf/view/hud", active: false },
                     { library: "vwf/view/sound", active: false },
                     { library: "vwf/view/touch", active: false },
                     { library: "vwf/view/kineticjs", active: false },
