@@ -23,7 +23,9 @@ define( [ "module", "vwf/model", "vwf/utility",
         ], 
         function( module, model, utility, acorn, Blockly ) {
 
-    var self;
+    var modelDriver;
+    var updateTime = -0.05;
+    var startUpdate = false;
 
     return model.load( module, {
 
@@ -33,13 +35,13 @@ define( [ "module", "vwf/model", "vwf/utility",
 
         initialize: function( options ) {
 
-            self = this;
+            modelDriver = this;
 
             this.arguments = Array.prototype.slice.call( arguments );
 
-            if ( options === undefined ) { 
-                options = {}; 
-            }
+            this.options = options || {};
+
+            updateTime = this.options.updateTime || -0.05; 
 
             this.state = {
                 "nodes": {},
@@ -138,6 +140,13 @@ define( [ "module", "vwf/model", "vwf/utility",
                 this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
             } 
 
+            var appID = this.kernel.application();
+            if ( childID === appID ) {
+                if ( !startUpdate ) {
+                    this.kernel.callMethod( appID, "update", [], updateTime ); 
+                    startUpdate = true;   
+                }
+            }
 
         },
 
@@ -308,13 +317,14 @@ define( [ "module", "vwf/model", "vwf/utility",
         // -- callingMethod --------------------------------------------------------------------------
 
         callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+            var appID = this.kernel.application();
             var node = this.state.nodes[ nodeID ];
 
             if ( this.debug.methods ) {
                 this.logger.infox( "   M === callingMethod ", nodeID, methodName );
             }
 
-            if ( nodeID == this.kernel.application() ) {
+            if ( nodeID == appID ) {
                 
                 switch ( methodName ) {
                     
@@ -333,6 +343,11 @@ define( [ "module", "vwf/model", "vwf/utility",
                         }  
                         break;
 
+                    case "update":
+                        executeBlocks();
+                        this.kernel.callMethod( appID, "update", [], updateTime );
+                        break;
+
 
                 }
             } else if ( node !== undefined ) {
@@ -346,7 +361,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         break;
                 }
             }
-        },
+        }
 
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
@@ -357,45 +372,6 @@ define( [ "module", "vwf/model", "vwf/utility",
         //    return undefined;
         //},
 
-        // == ticking =============================================================================
-
-        ticking: function( vwfTime ) {
-            
-            if ( this.state.executingBlocks !== undefined ) {
-                var blocklyNode = undefined;
-
-                for ( var nodeID in this.state.executingBlocks ) {
-
-                    blocklyNode = this.state.executingBlocks[ nodeID ];
-                    var executeNextLine = false;
-
-                    if ( blocklyNode.interpreter === undefined ||
-                         blocklyNode.interpreterStatus === "completed" ) {
-                        blocklyNode.interpreter = createInterpreter( acorn, blocklyNode.code );
-                        blocklyNode.interpreterStatus = "created";
-                        blocklyNode.lastLineExeTime = vwfTime;
-                        executeNextLine = true;
-                    } else {
-                        var elaspedTime = vwfTime - blocklyNode.lastLineExeTime;
-                        if ( elaspedTime >= blocklyNode.timeBetweenLines ) {
-                            executeNextLine = true;
-                            blocklyNode.lastLineExeTime = vwfTime;
-                        } 
-                    }
-
-                    if ( executeNextLine ) {
-
-                        self.state.executionHalted = false;
-                        
-                        nextStep( blocklyNode );
-
-                        this.kernel.fireEvent( nodeID, "blocklyExecuted", [ blocklyNode.interpreter.value ] ); 
-                    }
-                } 
-            }
-
-        }        
-
     } );
 
     function getPrototypes( extendsID ) {
@@ -404,14 +380,14 @@ define( [ "module", "vwf/model", "vwf/utility",
 
         while ( id !== undefined ) {
             prototypes.push( id );
-            id = self.kernel.prototype( id );
+            id = modelDriver.kernel.prototype( id );
         }
                 
         return prototypes;
     }
 
     function isBlockly3Node( nodeID ) {
-        return self.kernel.test( nodeID,
+        return modelDriver.kernel.test( nodeID,
             "self::element(*,'http://vwf.example.com/blockly/controller.vwf')",
             nodeID );
     }
@@ -424,6 +400,43 @@ define( [ "module", "vwf/model", "vwf/utility",
             }
         }
        return found;
+    }
+
+    function executeBlocks() {
+        
+        if ( modelDriver.state.executingBlocks !== undefined ) {
+            var blocklyNode = undefined;
+
+            for ( var nodeID in modelDriver.state.executingBlocks ) {
+
+                blocklyNode = modelDriver.state.executingBlocks[ nodeID ];
+                var executeNextLine = false;
+
+                if ( blocklyNode.interpreter === undefined ||
+                     blocklyNode.interpreterStatus === "completed" ) {
+                    blocklyNode.interpreter = createInterpreter( acorn, blocklyNode.code );
+                    blocklyNode.interpreterStatus = "created";
+                    blocklyNode.lastLineExeTime = vwfTime;
+                    executeNextLine = true;
+                } else {
+                    var elaspedTime = vwfTime - blocklyNode.lastLineExeTime;
+                    if ( elaspedTime >= blocklyNode.timeBetweenLines ) {
+                        executeNextLine = true;
+                        blocklyNode.lastLineExeTime = vwfTime;
+                    } 
+                }
+
+                if ( executeNextLine ) {
+
+                    modelDriver.state.executionHalted = false;
+                    
+                    nextStep( blocklyNode );
+
+                    modelDriver.kernel.fireEvent( nodeID, "blocklyExecuted", [ blocklyNode.interpreter.value ] ); 
+                }
+            } 
+        }
+
     }
 
     function getJavaScript( node ) {
@@ -459,10 +472,10 @@ define( [ "module", "vwf/model", "vwf/utility",
 
         if ( node.interpreter !== undefined ) {
             var stepType = node.interpreter.step();
-            while ( stepType && !self.state.executionHalted ) {
+            while ( stepType && !modelDriver.state.executionHalted ) {
                 if ( stepType === "stepProgram" ) {
                     if ( node.interpreterStatus === "created" ) {
-                        self.kernel.fireEvent( node.ID, "blocklyStarted", [ true ] );
+                        modelDriver.kernel.fireEvent( node.ID, "blocklyStarted", [ true ] );
                         node.interpreterStatus = "started";                        
                     }
                 }
@@ -470,8 +483,8 @@ define( [ "module", "vwf/model", "vwf/utility",
             }
             if ( stepType === false ) {
                 if ( node.interpreterStatus === "started" ) {
-                    self.kernel.setProperty( node.ID, "blockly_executing", false );
-                    self.kernel.fireEvent( node.ID, "blocklyStopped", [ true ] );
+                    modelDriver.kernel.setProperty( node.ID, "blockly_executing", false );
+                    modelDriver.kernel.fireEvent( node.ID, "blocklyStopped", [ true ] );
                     node.interpreterStatus = "completed"; 
                 }
             }
@@ -495,7 +508,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         for ( var j = 0; j < arguments.length; j++) {
                             parms.push( arguments[ j ].toString() );
                         }
-                        self.state.executionHalted = true;
+                        modelDriver.state.executionHalted = true;
                         return interpreter.createPrimitive( nativeFunc.apply( vwf, parms ) );
                     };
                 } )( vwf[ vwfKernelFunctions[ i ] ] );
@@ -516,7 +529,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                                 parms.push( arguments[ j ].toString() );
                             }
                         }
-                        self.state.executionHalted = true;
+                        modelDriver.state.executionHalted = true;
                         return interpreter.createPrimitive( nativeFunc.apply( vwf, parms ) );
                     };
                 } )( vwf[ vwfKernelFunctions[ i ] ] );

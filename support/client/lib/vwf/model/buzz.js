@@ -394,7 +394,7 @@ define( [
             }
 
         
-        },
+        }
 
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
@@ -404,13 +404,6 @@ define( [
         // executing: function( nodeID, scriptText, scriptType ) {
         //     return undefined;
         // },
-
-        // == ticking =============================================================================
-
-        // ticking: function( vwfTime ) {
-            
-        // }
-
 
 
     } );

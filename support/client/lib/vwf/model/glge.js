@@ -802,7 +802,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             return value;
 
-        },
+        }
 
 
         // TODO: deletingMethod
@@ -822,10 +822,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 //            return undefined;
 //        },
 
-        // == ticking =============================================================================
-
-//        ticking: function( vwfTime ) {
-//        },
 
     } );
 

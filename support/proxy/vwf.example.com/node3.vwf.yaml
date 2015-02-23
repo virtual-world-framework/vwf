@@ -274,45 +274,6 @@ properties:
   ## @name node3.vwf#vertices
   ## @property
 
-  vertices: 
-    set: |
-      this.logger.info( "WARNING: node3 vertices cannot be set" )
-
-  ## Vertex indices of 3D node
-  ## 
-  ## @name node3.vwf#vertexIndices
-  ## @property
-
-  vertexIndices: 
-    set: |
-      this.logger.info( "WARNING: node3 vertexIndices cannot be set" )
-
-  ## Speed value
-  ## 
-  ## @name node3.vwf#speed
-  ## @property
-
-  speed: 1
-
-  ## Playing value
-  ## 
-  ## @name node3.vwf#playing
-  ## @property
-
-  playing: false
-
-  ## Looping value
-  ## 
-  ## @name node3.vwf#looping
-  ## @property
-
-  looping: false
-
-  ## Look at value
-  ## 
-  ## @name lookAt
-  ## @property
-
   lookAt: ""
 
   ## Visible value
