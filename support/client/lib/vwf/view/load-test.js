@@ -21,26 +21,36 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     return view.load( module, {
 
         initialize: function() {
+
             this.state.enabled = false;
+            this.state.duration = 10;
+
             this.state.size = 1;
             this.state.interval = 1;
-            this.state.clients = 0;
+            this.state.clients = {};
+
+            this.state.startTime = 0;
+            this.state.lastTime = 0;
             this.state.intervalID = undefined;
+
             this.state.results = [];
+            this.state.others = 0;
+            this.state.pending = 0;
+
         },
 
-        addedChild: function( nodeID, childID, childName ) {
+        createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName, callback /* ready */ ) {
 
-            if ( this.kernel.uri( nodeID ) === "http://vwf.example.com/client.vwf" ) {
-                clients.call( this, clients.call( this ) + 1 );
+            if ( this.kernel.uri( nodeID ) === "http://vwf.example.com/clients.vwf" ) {
+                this.state.clients[ childID ] = true;
             }
 
         },
 
-        removedChild: function( nodeID, childID ) {
+        deletedNode: function( nodeID ) {
 
-            if ( this.kernel.uri( nodeID ) === "http://vwf.example.com/client.vwf" ) {
-                clients.call( this, clients.call( this ) - 1 );
+            if ( this.state.clients[ nodeID ] ) {
+                delete this.state.clients[ nodeID ];
             }
 
         },
@@ -65,6 +75,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
                 switch( propertyName ) {
                     case "enabled":   enabled.call( this,   propertyValue );  break;
+                    case "duration":  duration.call( this,  propertyValue );  break;
                     case "size":      size.call( this,      propertyValue );  break;
                     case "interval":  interval.call( this,  propertyValue );  break;
                     case "ping":      pong.call( this,      propertyValue );  break;
@@ -77,11 +88,33 @@ define( [ "module", "vwf/view" ], function( module, view ) {
     } );
 
     function ping() {
-        this.kernel.setProperty( this.kernel.application(), "ping", +new Date );
+
+        var time = +new Date;
+
+        if ( time - this.state.startTime < this.state.duration * 1000 ) {
+            while( this.state.lastTime < time ) {
+                this.state.lastTime += this.state.interval * 1000;
+                this.kernel.setProperty( this.kernel.application(), "ping", time );
+                this.state.pending++;
+            }
+        } else {
+            enabled.call( this, false );
+            console.log( "Results", this.state );
+        }
+
     }
 
     function pong( pingTime ) {
-        this.state.results.push( { ping: pingTime, pong: +new Date } );
+
+        if ( enabled.call( this ) ) {
+            if ( this.kernel.client() === this.kernel.moniker() ) {
+                this.state.results.push( { ping: pingTime, pong: +new Date } );
+                this.state.pending--;
+            } else {
+                this.state.others++;
+            }
+        }
+
     }
 
     function enabled( value ) {
@@ -95,6 +128,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             if ( value !== this.state.enabled ) {
 
                 if ( value ) {
+                    this.state.startTime = this.state.lastTime = +new Date;
                     this.state.intervalID = setInterval( function() { ping.call( self ) }, interval.call( self ) * 1000 );
                 } else if ( this.state.intervalID ) {
                     clearInterval( this.state.intervalID );
@@ -108,6 +142,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
 
         return this.state.enabled;
+    }
+
+    function duration( value ) {
+
+        if ( value !== undefined ) {
+            value = +value || 10;
+            this.state.duration = value;
+        }
+
+        return this.state.duration;
     }
 
     function size( value ) {
@@ -128,17 +172,6 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         }
 
         return this.state.interval;
-    }
-
-    function clients( value ) {
-
-        if ( value !== undefined ) {
-            value = +value || 1;
-            this.state.clients = value;
-        }
-
-        return this.state.clients;
-
     }
 
 } );
