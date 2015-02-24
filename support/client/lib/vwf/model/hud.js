@@ -162,7 +162,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundOverlay = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundOverlay; i++ ) {
-                foundOverlay = ( prototypes[i] == "http-vwf-example-com-hud-overlay-vwf" );    
+                foundOverlay = ( prototypes[i] == "http://vwf.example.com/hud/overlay.vwf" );    
             }
         }
         return foundOverlay;
@@ -172,7 +172,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var foundElement = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !foundElement; i++ ) {
-                foundElement = ( prototypes[i] == "http-vwf-example-com-hud-element-vwf" );    
+                foundElement = ( prototypes[i] == "http://vwf.example.com/hud/element.vwf" );    
             }
         }
         return foundElement;
