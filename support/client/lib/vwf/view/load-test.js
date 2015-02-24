@@ -32,6 +32,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             this.state.startTime = 0;
             this.state.lastTime = 0;
             this.state.intervalID = undefined;
+            this.state.payload = "*";
 
             this.state.results = [];
             this.state.others = 0;
@@ -78,9 +79,16 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                     case "duration":  duration.call( this,  propertyValue );  break;
                     case "size":      size.call( this,      propertyValue );  break;
                     case "interval":  interval.call( this,  propertyValue );  break;
-                    case "ping":      pong.call( this,      propertyValue );  break;
                 }
 
+            }
+
+        },
+
+        calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+
+            if ( nodeID === this.kernel.application() && methodName == "ping" ) {
+                pong.call( this, methodParameters[ 0 ] );
             }
 
         },
@@ -94,7 +102,7 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         if ( time - this.state.startTime < this.state.duration * 1000 ) {
             while( this.state.lastTime < time ) {
                 this.state.lastTime += this.state.interval * 1000;
-                this.kernel.setProperty( this.kernel.application(), "ping", time );
+                this.kernel.callMethod( this.kernel.application(), "ping", [ time, this.state.payload ] );
                 this.state.pending++;
             }
         } else {
@@ -159,6 +167,8 @@ define( [ "module", "vwf/view" ], function( module, view ) {
         if ( value !== undefined ) {
             value = +value || 1;
             this.state.size = value;
+            this.state.payload = "";
+            for ( var i = 0; i < value; i++ ) { this.state.payload += "*" }
         }
 
         return this.state.size;
