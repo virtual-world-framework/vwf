@@ -391,6 +391,7 @@
                     active: false 
                 },
                 { library: "vwf/view/lesson", active: false},
+                { library: "vwf/view/load-test", active: false},
                 { library: "vwf/view/threejs", 
                     disabledBy: ["vwf/model/glge", "vwf/view/glge"], 
                     active: false 
@@ -453,6 +454,7 @@
                     { library: "vwf/view/document", active: true },
                 	{ library: "vwf/view/editor", active: false },
                     { library: "vwf/view/lesson", active: false},
+                    { library: "vwf/view/load-test", active: false},
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
                     { library: "vwf/view/blockly", active: false },
