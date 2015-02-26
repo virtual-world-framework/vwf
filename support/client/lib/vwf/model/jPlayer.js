@@ -446,17 +446,19 @@ define( [
         if ( url ) {
 
             // Construct the media object based on the type of file being passed in
-            var mediaObject;
+            var mediaObject = {};
             switch ( node.managerType ) {
                 case "audio":
                     if ( url.search( "data:audio/mp3" ) === 0 ) {
-                        mediaObject = {
-                            mp3: url
-                        };
+                        medaObject.mp3 = url;
+                        // mediaObject = {
+                        //     mp3: url
+                        // };
                     } else if ( url.search( "data:audio/wav" ) === 0 ) {
-                        mediaObject = {
-                            wav: url
-                        };
+                        mediaObject.wav = url;
+                        // mediaObject = {
+                        //     wav: url
+                        // };
                     } else {
                         modelDriver.logger.errorx( "setUrl", 
                             "Unsupported sound type for '", url, "'" );
@@ -464,10 +466,12 @@ define( [
                     break;
                 case "video":
                     if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
-                        mediaObject = {
-                            m4v: url,
-                            poster: node.posterImageUrl
-                        };
+                        mediaObject.poster = node.posterImageUrl;
+                        mediaObject.m4v = url;
+                        // mediaObject = {
+                        //     m4v: url,
+                        //     poster: node.posterImageUrl
+                        // };
                     } else {
                         modelDriver.logger.errorx( "setUrl", 
                             "Unsupported video type for '", url, "'" );
