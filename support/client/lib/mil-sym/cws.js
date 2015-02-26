@@ -1194,6 +1194,14 @@ define( function(){
             "ZOR": "ZONE OF RESPONSIBILITY (ZOR)"
         },
 
+        "unk": {
+
+            "WAR.UNK": {
+                "symbolID": "SUZP------*****", 
+                "tag": "UNK"   
+            }
+        },
+
         "space": {
 
             "WAR.SPC": {
@@ -5136,7 +5144,7 @@ define( function(){
         },
         "hostile": function( symbolID ) {
             return symbolID.substr( 0, 1 ) + "H" + symbolID.substr( 2 );
-        },  
+        },
         "modifierByAlias": function( alias ) {
             var modifierObj = undefined;
                                 
