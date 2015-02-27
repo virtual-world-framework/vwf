@@ -257,7 +257,7 @@ define( [
                         node.jPlayerElement.jPlayer( {
                             ready: function() {
                                 if ( node.url !== undefined ) {
-                                    setUrl( node, node.url );
+                                    setUrl( node, [ node.url ] );
                                 }
                                 if ( node.loop !== undefined ) {
                                     setLoop( node, node.loop );
@@ -432,7 +432,8 @@ define( [
         }
     }
 
-    function setUrl( node, url ) {
+    function setUrl( node, urlArray ) {
+        var url = urlArray[ 0 ];
         node.url = url;
 
         // If there is no jPlayerElement, there is nothing to do yet so we return.
@@ -449,16 +450,11 @@ define( [
             var mediaObject = {};
             switch ( node.managerType ) {
                 case "audio":
+                    //TODO: Support multiple URLs for audio.
                     if ( url.search( "data:audio/mp3" ) === 0 ) {
                         medaObject.mp3 = url;
-                        // mediaObject = {
-                        //     mp3: url
-                        // };
                     } else if ( url.search( "data:audio/wav" ) === 0 ) {
                         mediaObject.wav = url;
-                        // mediaObject = {
-                        //     wav: url
-                        // };
                     } else {
                         modelDriver.logger.errorx( "setUrl", 
                             "Unsupported sound type for '", url, "'" );
@@ -468,10 +464,6 @@ define( [
                     if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
                         mediaObject.poster = node.posterImageUrl;
                         mediaObject.m4v = url;
-                        // mediaObject = {
-                        //     m4v: url,
-                        //     poster: node.posterImageUrl
-                        // };
                     } else {
                         modelDriver.logger.errorx( "setUrl", 
                             "Unsupported video type for '", url, "'" );
