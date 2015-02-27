@@ -463,9 +463,9 @@ define( [
                 case "video":
                     mediaObject.poster = node.posterImageUrl;
                     for( var i = 0; i < urlArray.length; i++ ){
-                        if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
+                        if ( urlArray[ i ].search( "data:video/mp4" ) === 0 || urlArray[ i ].search( ".mp4$" ) > -1 ) {
                             mediaObject.m4v = urlArray[ i ];
-                        }else if( url.search( ".webm$" ) > -1 ){
+                        }else if( urlArray[ i ].search( ".webm$" ) > -1 ){
                              mediaObject.webmv = urlArray[ i ]; 
                         } else {
                             modelDriver.logger.errorx( "setUrl", 
@@ -478,6 +478,9 @@ define( [
                             "Unsupported manager type '", node.managerType, "'" );
                     break;
             }
+
+            console.log("Setting media object!");
+            console.log("Media object is: " + mediaObject)
 
             // If we succeeded in creating a media object, set it on the jPlayer object
             // Otherwise, clear the current media
