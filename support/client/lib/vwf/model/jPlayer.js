@@ -253,11 +253,11 @@ define( [
                             // } );
                             // $( "body" ).append( node.jPlayerElement );
                         }
-                        var fileTypes = ( node.managerType === "audio" ) ? "mp3,wav" : "m4v";
+                        var fileTypes = ( node.managerType === "audio" ) ? "mp3,wav" : "m4v,webmv";
                         node.jPlayerElement.jPlayer( {
                             ready: function() {
                                 if ( node.url !== undefined ) {
-                                    setUrl( node, [ node.url ] );
+                                    setUrl( node, node.url );
                                 }
                                 if ( node.loop !== undefined ) {
                                     setLoop( node, node.loop );
@@ -461,12 +461,16 @@ define( [
                     }
                     break;
                 case "video":
-                    if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
-                        mediaObject.poster = node.posterImageUrl;
-                        mediaObject.m4v = url;
-                    } else {
-                        modelDriver.logger.errorx( "setUrl", 
-                            "Unsupported video type for '", url, "'" );
+                    mediaObject.poster = node.posterImageUrl;
+                    for( var i = 0; i < urlArray.length; i++ ){
+                        if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
+                            mediaObject.m4v = urlArray[ i ];
+                        }else if( url.search( ".webm$" ) > -1 ){
+                             mediaObject.webmv = urlArray[ i ]; 
+                        } else {
+                            modelDriver.logger.errorx( "setUrl", 
+                                "Unsupported video type for '", url, "'" );
+                        }
                     }
                     break;
                 default:
