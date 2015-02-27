@@ -164,22 +164,46 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/view/hud/hud" ], function( 
         }
         // Add event listeners to the element
         element.onClick = function( event ) {
-            vwf_view.kernel.fireEvent( node.id, "onClick" );
+            var elementMousePosition = {
+                "x": event.clientX - this.position.x,
+                "y": event.clientY - this.position.y
+            };
+            vwf_view.kernel.fireEvent( node.id, "onClick", [ elementMousePosition ] );
         };
         element.onMouseDown = function( event ) {
-            vwf_view.kernel.fireEvent( node.id, "onMouseDown" );
+            var elementMousePosition = {
+                "x": event.clientX - this.position.x,
+                "y": event.clientY - this.position.y
+            };
+            vwf_view.kernel.fireEvent( node.id, "onMouseDown", [ elementMousePosition ] );
         };
         element.onMouseUp = function( event ) {
-            vwf_view.kernel.fireEvent( node.id, "onMouseUp" );
+            var elementMousePosition = {
+                "x": event.clientX - this.position.x,
+                "y": event.clientY - this.position.y
+            };
+            vwf_view.kernel.fireEvent( node.id, "onMouseUp", [ elementMousePosition ] );
         };
         element.onMouseMove = function( event ) {
-            vwf_view.kernel.fireEvent( node.id, "onMouseMove" );
+            var elementMousePosition = {
+                "x": event.clientX - this.position.x,
+                "y": event.clientY - this.position.y
+            };
+            vwf_view.kernel.fireEvent( node.id, "onMouseMove", [ elementMousePosition ] );
         };
         element.onMouseOver = function( event ) {
-            vwf_view.kernel.fireEvent( node.id, "onMouseOver" );
+            var elementMousePosition = {
+                "x": event.clientX - this.position.x,
+                "y": event.clientY - this.position.y
+            };
+            vwf_view.kernel.fireEvent( node.id, "onMouseOver", [ elementMousePosition ] );
         };
         element.onMouseOut = function( event ) {
-            vwf_view.kernel.fireEvent( node.id, "onMouseOut" );
+            var elementMousePosition = {
+                "x": event.clientX - this.position.x,
+                "y": event.clientY - this.position.y
+            };
+            vwf_view.kernel.fireEvent( node.id, "onMouseOut", [ elementMousePosition ] );
         };
         return element;
     }
