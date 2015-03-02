@@ -490,9 +490,6 @@ define( [
                     break;
             }
 
-            console.log("Setting media object!");
-            console.log("Media object is: " + mediaObject)
-
             // If we succeeded in creating a media object, set it on the jPlayer object
             // Otherwise, clear the current media
             if ( mediaObject ) {
