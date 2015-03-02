@@ -12,8 +12,13 @@ define( [
 
     var modelDriver;
     var jPlayerInstanceCreated = false;
-    var audioManagerProtoId = "http-vwf-example-com-jplayer-audioManager-vwf";
-    var videoManagerProtoId = "http-vwf-example-com-jplayer-videoManager-vwf";
+    // NXM: For some reason, using the format below breaks video!
+    // var audioManagerProtoId = "http-vwf-example-com-jplayer-audioManager-vwf";
+    // var videoManagerProtoId = "http-vwf-example-com-jplayer-videoManager-vwf";
+
+    var audioManagerProtoId = "http://vwf.example.com/jplayer/audioManager.vwf";
+    var videoManagerProtoId = "http://vwf.example.com/jplayer/videoManager.vwf";
+
     var jplayerContainerId = "jp_container_1";
 
     return model.load( module, {
@@ -129,8 +134,10 @@ define( [
 
                 if ( prototypeID.indexOf( audioManagerProtoId ) !== -1 ) {
                     this.state.audioManagerProto = this.state.prototypes[ prototypeID ];
+                    this.logger.infox( "Got audio manager prototype!" );
                 } else if ( prototypeID.indexOf( videoManagerProtoId ) !== -1 ) {
                     this.state.videoManagerProto = this.state.prototypes[ prototypeID ];
+                    this.logger.infox( "Got video manager prototype!" );
                 }
 
                 return;                
@@ -361,6 +368,10 @@ define( [
             var node = this.state.nodes[ nodeID ];   
 
             if ( !node ) {
+                //NATHAN: Remove the below... IF block... it's for debugging only
+                if( methodName === "play" ){
+                    this.logger.infox( "Node is NULL when calling: " + methodName + " on " + nodeID);
+                }
                 return;
             }
             
