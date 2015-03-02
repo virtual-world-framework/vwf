@@ -459,6 +459,18 @@ define( [
 
             // Construct the media object based on the type of file being passed in
             var mediaObject = {};
+
+            function setVideoURL( mediaObj, url ){
+                if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
+                    mediaObj.m4v = url;
+                }else if( url.search( ".webm$" ) > -1 ){
+                    mediaObj.webmv = url; 
+                } else {
+                    modelDriver.logger.errorx( "setUrl", 
+                        "Unsupported video type for '", url, "'" );
+                }
+            }
+
             switch ( node.managerType ) {
                 case "audio":
                     //TODO: Support multiple URLs for audio.
@@ -474,14 +486,7 @@ define( [
                 case "video":
                     mediaObject.poster = node.posterImageUrl;
                     for( var i = 0; i < urlArray.length; i++ ){
-                        if ( urlArray[ i ].search( "data:video/mp4" ) === 0 || urlArray[ i ].search( ".mp4$" ) > -1 ) {
-                            mediaObject.m4v = urlArray[ i ];
-                        }else if( urlArray[ i ].search( ".webm$" ) > -1 ){
-                             mediaObject.webmv = urlArray[ i ]; 
-                        } else {
-                            modelDriver.logger.errorx( "setUrl", 
-                                "Unsupported video type for '", url, "'" );
-                        }
+                        setVideoURL( mediaObject, urlArray[i] );
                     }
                     break;
                 default:
