@@ -134,10 +134,8 @@ define( [
 
                 if ( prototypeID.indexOf( audioManagerProtoId ) !== -1 ) {
                     this.state.audioManagerProto = this.state.prototypes[ prototypeID ];
-                    this.logger.infox( "Got audio manager prototype!" );
                 } else if ( prototypeID.indexOf( videoManagerProtoId ) !== -1 ) {
                     this.state.videoManagerProto = this.state.prototypes[ prototypeID ];
-                    this.logger.infox( "Got video manager prototype!" );
                 }
 
                 return;                
@@ -435,19 +433,17 @@ define( [
         }
     }
 
-    function setUrl( node, url ) {
+    function setUrl( node, inputUrl ) {
 
         var usingMultiUrls;
-        if( url.constructor === Array ){
+        var url;
+        if( inputUrl && ( inputUrl.constructor === Array ) ){
             usingMultiUrls = true; 
-        } else if( typeof url === 'string' ) {
+            url = inputUrl[ 0 ];
+        } else{
             usingMultiUrls = false;
-        } else {
-            modelDriver.logger.errorx( "setUrl", 
-                "URL is not a string or an array" );
-        }
-         
-        var url = urlArray[ 0 ];
+            url = inputUrl;
+        }          
         node.url = url;
 
         // If there is no jPlayerElement, there is nothing to do yet so we return.
@@ -477,9 +473,13 @@ define( [
                     break;
                 case "video":
                     mediaObject.poster = node.posterImageUrl;
-                    // for( var i = 0; i < urlArray.length; i++ ){
-                    setVideoURL( mediaObject, urlArray[i] );
-                    // }
+                    if( usingMultiUrls ) {
+                        for( var i = 0; i < inputUrl.length; i++ ) {
+                            setVideoURL( mediaObject, inputUrl[ i ] );
+                        }
+                    } else {
+                        setVideoURL( mediaObject, url );
+                    }
                     break;
                 default:
                     modelDriver.logger.errorx( "setUrl",
