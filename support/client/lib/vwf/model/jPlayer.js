@@ -243,22 +243,11 @@ define( [
                             var playerDiv = document.createElement( 'div' );
                             playerDiv.id = node.playerDivId;
                             if( node.containerDivId ){
-                                // playerDiv.className = "jp-jplayer";
                                 $( "#" + node.containerDivId ).append( playerDiv );
                             } else {
                                 $("#jp_container_1").append( playerDiv );
                             }
                             node.jPlayerElement = $( "#" + node.playerDivId );
-
-                            // $( "#" + jplayerContainerId ).jPlayer("option", "cssSelectorAncestor", "#" + node.playerDivId);
-                            // $( "#" + jplayerContainerId ).attr( "id", node.playerDivId );
-                            // jplayerContainerId = node.playerDivId;
-
-                            // node.jPlayerElement = $( "#" + node.playerDivId );
-                            // node.jPlayerElement = $( "<div/>", {
-                            //     id: node.playerDivId
-                            // } );
-                            // $( "body" ).append( node.jPlayerElement );
                         }
                         var fileTypes = ( node.managerType === "audio" ) ? "mp3,wav" : "m4v,webmv";
                         node.jPlayerElement.jPlayer( {
@@ -274,11 +263,10 @@ define( [
                                 }
                             },
                             supplied: fileTypes,
-                            // size: { width: node.playmoderDivSize[0], height: node.playerDivSize[1] }
                         } );
 
                         if ( node.playerDivId ) {
-                            $( "#" + node.playerDivId ).bind($.jPlayer.event.ended, this.state.videoEndedCallback );
+                            $( "#" + node.playerDivId ).bind( $.jPlayer.event.ended, this.state.videoEndedCallback );
                         }
                         
                         value = node.playerDivId;
@@ -406,13 +394,6 @@ define( [
 
     } );
 
-    // function videoEndedCallback(){
-    //     var mediaManagerID = this.kernel.kernel.find( undefined, "/mediaManager" )[ 0 ];
-    //     var videoManagerID = this.kernel.kernel.find( mediaManagerID, "videoManager" ) [ 0 ];
-    //     console.log("Video ended callback in driver fired!");
-    //     this.kernel.fireEvent(videoManagerID, "videoEnded");
-    // }
-
     function getPrototypes( kernel, extendsID ) {
         var prototypes = [];
         var id = extendsID;
@@ -443,7 +424,29 @@ define( [
         }
     }
 
-    function setUrl( node, urlArray ) {
+    function setVideoURL( mediaObj, url ) {
+        if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
+            mediaObj.m4v = url;
+        }else if( url.search( ".webm$" ) > -1 ){
+            mediaObj.webmv = url; 
+        } else {
+            modelDriver.logger.errorx( "setUrl", 
+                "Unsupported video type for '", url, "'" );
+        }
+    }
+
+    function setUrl( node, url ) {
+
+        var usingMultiUrls;
+        if( url.constructor === Array ){
+            usingMultiUrls = true; 
+        } else if( typeof url === 'string' ) {
+            usingMultiUrls = false;
+        } else {
+            modelDriver.logger.errorx( "setUrl", 
+                "URL is not a string or an array" );
+        }
+         
         var url = urlArray[ 0 ];
         node.url = url;
 
@@ -460,17 +463,6 @@ define( [
             // Construct the media object based on the type of file being passed in
             var mediaObject = {};
 
-            function setVideoURL( mediaObj, url ){
-                if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
-                    mediaObj.m4v = url;
-                }else if( url.search( ".webm$" ) > -1 ){
-                    mediaObj.webmv = url; 
-                } else {
-                    modelDriver.logger.errorx( "setUrl", 
-                        "Unsupported video type for '", url, "'" );
-                }
-            }
-
             switch ( node.managerType ) {
                 case "audio":
                     //TODO: Support multiple URLs for audio.
@@ -485,9 +477,9 @@ define( [
                     break;
                 case "video":
                     mediaObject.poster = node.posterImageUrl;
-                    for( var i = 0; i < urlArray.length; i++ ){
-                        setVideoURL( mediaObject, urlArray[i] );
-                    }
+                    // for( var i = 0; i < urlArray.length; i++ ){
+                    setVideoURL( mediaObject, urlArray[i] );
+                    // }
                     break;
                 default:
                     modelDriver.logger.errorx( "setUrl",
@@ -516,9 +508,6 @@ define( [
 
     function setControlDivId( node, containerDivId ) {
         node.containerDivId = containerDivId;
-        // if ( node.jPlayerElement ) {
-        //     node.jPlayerElement.jPlayer( "option", { cssSelectorAncestor: "#" + containerDivId } );
-        // }
     }
 
     function setPosterImageUrl( node, posterImageUrl ) {
