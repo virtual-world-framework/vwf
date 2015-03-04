@@ -12,8 +12,13 @@ define( [
 
     var modelDriver;
     var jPlayerInstanceCreated = false;
+    // NXM: For some reason, using the format below breaks video!
+    // var audioManagerProtoId = "http-vwf-example-com-jplayer-audioManager-vwf";
+    // var videoManagerProtoId = "http-vwf-example-com-jplayer-videoManager-vwf";
+
     var audioManagerProtoId = "http://vwf.example.com/jplayer/audioManager.vwf";
     var videoManagerProtoId = "http://vwf.example.com/jplayer/videoManager.vwf";
+
     var jplayerContainerId = "jp_container_1";
 
     return model.load( module, {
@@ -236,24 +241,13 @@ define( [
                             var playerDiv = document.createElement( 'div' );
                             playerDiv.id = node.playerDivId;
                             if( node.containerDivId ){
-                                // playerDiv.className = "jp-jplayer";
                                 $( "#" + node.containerDivId ).append( playerDiv );
                             } else {
                                 $("#jp_container_1").append( playerDiv );
                             }
                             node.jPlayerElement = $( "#" + node.playerDivId );
-
-                            // $( "#" + jplayerContainerId ).jPlayer("option", "cssSelectorAncestor", "#" + node.playerDivId);
-                            // $( "#" + jplayerContainerId ).attr( "id", node.playerDivId );
-                            // jplayerContainerId = node.playerDivId;
-
-                            // node.jPlayerElement = $( "#" + node.playerDivId );
-                            // node.jPlayerElement = $( "<div/>", {
-                            //     id: node.playerDivId
-                            // } );
-                            // $( "body" ).append( node.jPlayerElement );
                         }
-                        var fileTypes = ( node.managerType === "audio" ) ? "mp3,wav" : "m4v";
+                        var fileTypes = ( node.managerType === "audio" ) ? "mp3,wav" : "m4v,webmv";
                         node.jPlayerElement.jPlayer( {
                             ready: function() {
                                 if ( node.url !== undefined ) {
@@ -267,11 +261,10 @@ define( [
                                 }
                             },
                             supplied: fileTypes,
-                            // size: { width: node.playmoderDivSize[0], height: node.playerDivSize[1] }
                         } );
 
                         if ( node.playerDivId ) {
-                            $( "#" + node.playerDivId ).bind($.jPlayer.event.ended, this.state.videoEndedCallback );
+                            $( "#" + node.playerDivId ).bind( $.jPlayer.event.ended, this.state.videoEndedCallback );
                         }
                         
                         value = node.playerDivId;
@@ -395,13 +388,6 @@ define( [
 
     } );
 
-    // function videoEndedCallback(){
-    //     var mediaManagerID = this.kernel.kernel.find( undefined, "/mediaManager" )[ 0 ];
-    //     var videoManagerID = this.kernel.kernel.find( mediaManagerID, "videoManager" ) [ 0 ];
-    //     console.log("Video ended callback in driver fired!");
-    //     this.kernel.fireEvent(videoManagerID, "videoEnded");
-    // }
-
     function getPrototypes( kernel, extendsID ) {
         var prototypes = [];
         var id = extendsID;
@@ -432,7 +418,28 @@ define( [
         }
     }
 
-    function setUrl( node, url ) {
+    function setVideoURL( mediaObj, url ) {
+        if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
+            mediaObj.m4v = url;
+        } else if( url.search( ".webm$" ) > -1 ){
+            mediaObj.webmv = url; 
+        } else {
+            modelDriver.logger.errorx( "setUrl", 
+                "Unsupported video type for '", url, "'" );
+        }
+    }
+
+    function setUrl( node, inputUrl ) {
+
+        var usingMultiUrls;
+        var url;
+        if( inputUrl && ( inputUrl.constructor === Array ) ){
+            usingMultiUrls = true; 
+            url = inputUrl[ 0 ];
+        } else {
+            usingMultiUrls = false;
+            url = inputUrl;
+        }          
         node.url = url;
 
         // If there is no jPlayerElement, there is nothing to do yet so we return.
@@ -446,31 +453,28 @@ define( [
         if ( url ) {
 
             // Construct the media object based on the type of file being passed in
-            var mediaObject;
+            var mediaObject = {};
+
             switch ( node.managerType ) {
                 case "audio":
+                    //TODO: Support multiple URLs for audio.
                     if ( url.search( "data:audio/mp3" ) === 0 ) {
-                        mediaObject = {
-                            mp3: url
-                        };
+                        medaObject.mp3 = url;
                     } else if ( url.search( "data:audio/wav" ) === 0 ) {
-                        mediaObject = {
-                            wav: url
-                        };
+                        mediaObject.wav = url;
                     } else {
                         modelDriver.logger.errorx( "setUrl", 
                             "Unsupported sound type for '", url, "'" );
                     }
                     break;
                 case "video":
-                    if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
-                        mediaObject = {
-                            m4v: url,
-                            poster: node.posterImageUrl
-                        };
+                    mediaObject.poster = node.posterImageUrl;
+                    if( usingMultiUrls ) {
+                        for( var i = 0; i < inputUrl.length; i++ ) {
+                            setVideoURL( mediaObject, inputUrl[ i ] );
+                        }
                     } else {
-                        modelDriver.logger.errorx( "setUrl", 
-                            "Unsupported video type for '", url, "'" );
+                        setVideoURL( mediaObject, url );
                     }
                     break;
                 default:
@@ -500,9 +504,6 @@ define( [
 
     function setControlDivId( node, containerDivId ) {
         node.containerDivId = containerDivId;
-        // if ( node.jPlayerElement ) {
-        //     node.jPlayerElement.jPlayer( "option", { cssSelectorAncestor: "#" + containerDivId } );
-        // }
     }
 
     function setPosterImageUrl( node, posterImageUrl ) {
