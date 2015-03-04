@@ -354,10 +354,6 @@ define( [
             var node = this.state.nodes[ nodeID ];   
 
             if ( !node ) {
-                //NATHAN: Remove the below... IF block... it's for debugging only
-                if( methodName === "play" ){
-                    this.logger.infox( "Node is NULL when calling: " + methodName + " on " + nodeID);
-                }
                 return;
             }
             
@@ -425,7 +421,7 @@ define( [
     function setVideoURL( mediaObj, url ) {
         if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
             mediaObj.m4v = url;
-        }else if( url.search( ".webm$" ) > -1 ){
+        } else if( url.search( ".webm$" ) > -1 ){
             mediaObj.webmv = url; 
         } else {
             modelDriver.logger.errorx( "setUrl", 
@@ -440,7 +436,7 @@ define( [
         if( inputUrl && ( inputUrl.constructor === Array ) ){
             usingMultiUrls = true; 
             url = inputUrl[ 0 ];
-        } else{
+        } else {
             usingMultiUrls = false;
             url = inputUrl;
         }          
