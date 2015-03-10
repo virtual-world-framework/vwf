@@ -389,7 +389,9 @@ define( [ "module", "vwf/model", "vwf/utility",
                         
                         nextStep( blocklyNode );
 
-                        this.kernel.fireEvent( nodeID, "blocklyExecuted", [ blocklyNode.interpreter.value ] ); 
+                        // Does this serve any real purpose? It's not handled in any application.
+                        // Certain blocks, such as repeat blocks, break with the recursive node reference changes.
+                        // this.kernel.fireEvent( nodeID, "blocklyExecuted", [ blocklyNode.interpreter.value ] ); 
                     }
                 } 
             }
