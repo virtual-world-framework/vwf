@@ -251,6 +251,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             // If the new active node is different than the old,
                             // then we need to load its program into the toolbox
                             if ( show ) {
+                                if ( Blockly.mainWorkspace ) {
+                                    Blockly.mainWorkspace.maxBlocks = blocklyNode.ramMax;
+                                } else {
+                                    console.log("Blockly.mainWorkspace not found!");
+                                }
+
                                 if ( blocklyNode.toolbox !== undefined ) {
                                     loadToolbox( blocklyNode.toolbox );    
                                 } else if ( app.toolbox !== undefined ) {
@@ -261,6 +267,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                                 } else if ( app.defaultXml !== undefined ) {
                                     loadDefaultXml( app.defaultXml ); 
                                 }                               
+                                
                                 this.state.blockly.node = blocklyNode;
                                 setBlockXML( blocklyNode );
                                 setBlocklyUIVisibility( blocklyNode, true );
