@@ -307,7 +307,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName, methodParameters ) { 
             var node = this.state.nodes[ nodeID ];
 
             if ( this.debug.methods ) {
@@ -318,6 +318,23 @@ define( [ "module", "vwf/model", "vwf/utility",
                 
                 switch ( methodName ) {
                     
+                    case "stopExecutionForNode":
+                        if ( methodParameters ) {
+                            var id = methodParameters; 
+                            var currBlockly3Node= this.state.executingBlocks[ id ];
+                            if ( currBlockly3Node ) {
+                                currBlockly3Node.interpreterStatus = "completed";
+                                this.kernel.setProperty( id, 'blockly_executing', false );
+                                this.kernel.fireEvent( id, "blocklyStopped", [ true ] );
+                            } else {
+                                this.logger.errorx("stopExecutionForNode", "Node with", id, 
+                                    "is not currently executing Blockly!");
+                            } 
+                        } else {
+                            this.logger.errorx("stopExecutionForNode", "No node specified!");
+                        }
+                        break;
+                        
                     case "stopAllExecution":
                         for ( var id in this.state.executingBlocks ) {
                             this.state.executingBlocks[ id ].interpreterStatus = "completed";
