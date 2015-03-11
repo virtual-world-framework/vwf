@@ -31,7 +31,6 @@ properties:
   absoluteTransform:
   absoluteOpacity:
   absoluteZIndex:
-  uniqueInView:
   supportMouseEvents:
   supportTouchEvents:
   hasMouseEvents: false

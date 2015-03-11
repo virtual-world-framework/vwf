@@ -6,7 +6,7 @@ define( [ "module",
           "vwf/utility/color" 
         ], function( module, model, utility, color ) {
 
-    var self;
+    var modelDriver;
 
     return model.load( module, {
 
@@ -16,17 +16,18 @@ define( [ "module",
 
         initialize: function( options ) {
             
-            self = this;
+            modelDriver = this;
 
             this.arguments = Array.prototype.slice.call( arguments );
 
             this.options = ( options !== undefined ) ? options : {}; 
 
             this.state = {
-                nodes: {},
-                stages: {},
-                prototypes: {},
-                createLocalNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+                "nodes": {},
+                "draggingNodes": {},
+                "stages": {},
+                "prototypes": {},
+                "createLocalNode": function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
                     return {
                         "parentID": nodeID,
@@ -39,12 +40,12 @@ define( [ "module",
                         "prototypes": undefined,
                         "kineticObj": undefined,
                         "stage": undefined,
-                        "uniqueInView": false,
+                        "uniqueInView": false
                         "hasMouseEvents": false,
                         "hasTouchEvents": false
-                    };
+                        "model": {}                    };
                 },
-                isKineticClass: function( prototypes, classID ) {
+                "isKineticClass": function( prototypes, classID ) {
                     if ( prototypes ) {
                         for ( var i = 0; i < prototypes.length; i++ ) {
                             if ( prototypes[ i ] === classID ) {
@@ -55,7 +56,7 @@ define( [ "module",
                     }
                     return false;        
                 },
-                isKineticComponent: function( prototypes ) {
+                "isKineticComponent": function( prototypes ) {
                     var found = false;
                     if ( prototypes ) {
                         for ( var i = 0; i < prototypes.length && !found; i++ ) {
@@ -63,253 +64,101 @@ define( [ "module",
                         }
                     }
                     return found;
-                }
-            };
-
-            // turns on logger debugger console messages 
-            this.debug = {
-                "creation": false,
-                "native": false,
-                "initializing": false,
-                "parenting": false,
-                "deleting": false,
-                "properties": false,
-                "setting": false,
-                "getting": false,
-                "methods": false,
-                "events": false,
-                "prototypes": false
-            };
-           
         },
+                "setProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = undefined;
 
+                    value = this.setNodeProperty( kineticObj, propertyName, propertyValue );
 
-        // == Model API ============================================================================
-
-        // -- creatingNode ------------------------------------------------------------------------
-        
-        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childIndex, childName, callback ) {
-
-            var appID = this.kernel.application();
-
-            if ( this.debug.creation ) {
-                this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName );
-            }
-
-            // If the node being created is a prototype, construct it and add it to the array of prototypes,
-            // and then return
-            var prototypeID = utility.ifPrototypeGetId( appID, this.state.prototypes, nodeID, childID );
-            if ( prototypeID !== undefined ) {
-                
-                if ( this.debug.prototypes ) {
-                    this.logger.infox( "prototype: ", prototypeID );
-                }
-
-                this.state.prototypes[ prototypeID ] = {
-                    parentID: nodeID,
-                    ID: childID,
-                    extendsID: childExtendsID,
-                    implementsID: childImplementsIDs,
-                    source: childSource, 
-                    type: childType,
-                    name: childName
-                };
-                return;                
-            }
-
-            var protos = getPrototypes( this.kernel, childExtendsID );
-
-            var node;
-
-            if ( this.state.isKineticComponent( protos ) ) {
-
-                if ( this.debug.native ) {
-                    this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName );
-                }
-                
-                // Create the local copy of the node properties
-                if ( this.state.nodes[ childID ] === undefined ){
-                    this.state.nodes[ childID ] = this.state.createLocalNode( nodeID, childID, childExtendsID, childImplementsIDs,
-                                childSource, childType, childIndex, childName, callback );
-                }
-
-                node = this.state.nodes[ childID ];
-                
-                node.prototypes = protos;
-               
-                node.kineticObj = createKineticObject( node );
-
-                // If the kineticObj was created, attach it to the parent kineticObj, if it is a 
-                // kinetic container
-                // (if a kinteticObj is created asynchronously ... like an Image, it will be
-                // undefined here, but will be added to its parent in the appropriate callback)
-                addNodeToHierarchy( node );
-
-            }
-           
-        },
-
-        // initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-        //     childSource, childType, childIndex, childName ) {
-
-        //     if ( this.debug.initializing ) {
-        //         this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
-        //     } 
-
-
-        // },
-         
-        // -- deletingNode -------------------------------------------------------------------------
-
-        deletingNode: function( nodeID ) {
-
-            if ( this.debug.deleting ) {
-                this.logger.infox( "deletingNode", nodeID );
-            }
-
-            if ( this.state.nodes[ nodeID ] !== undefined ) {
-                
-                var node = this.state.nodes[ nodeID ];
-                if ( node.kineticObj !== undefined ) {
-                    // removes and destroys object
-                    node.kineticObj.destroy();
-                    node.kineticObj = undefined;    
-                }                
-
-                delete this.state.nodes[ nodeID ];
-            }
-            
-        },
-
-        // -- addingChild ------------------------------------------------------------------------
-        
-        // addingChild: function( nodeID, childID, childName ) {
-        //     if ( this.debug.parenting ) {
-        //         this.logger.infox( "addingChild", nodeID, childID, childName );
-        //     }
-        // },
-
-
-        // -- movingChild ------------------------------------------------------------------------
-        
-        movingChild: function( nodeID, childID, childName ) {
-            
-            if ( this.debug.parenting ) {
-                this.logger.infox( "movingChild", nodeID, childID, childName );
-            }
-
-            if ( this.state.nodes[ childID ] !== undefined ) {
-                
-                if ( this.state.nodes[ nodeID ] !== undefined ) {
-                    var parentNode = this.state.nodes[ nodeID ];
-                    
-                    if ( isContainerDefinition( parentNode.prototypes ) && parentNode.kineticObj ) {
-                        
-                        var node = this.state.nodes[ childID ];
-                        if ( node.kineticObj !== undefined ) {
-                            // removes object only
-                            node.kineticObj.remove();
-                            parentNode.kineticObj.add( node.kineticObj );
-                        } 
+                    if ( value === undefined ) {
+                        value = this.setShapeProperty( kineticObj, propertyName, propertyValue );
                     }
-                }               
+
+                    if ( value === undefined ) {
+                        value = this.setContainerProperty( kineticObj, propertyName, propertyValue );
             }
 
-        },
+                    if ( value === undefined && kineticObj instanceof Kinetic.Arc ) {
+                        value = this.setArcProperty( kineticObj, propertyName, propertyValue );
+                }
 
-
-        // -- removingChild ------------------------------------------------------------------------
-        
-        // removingChild: function( nodeID, childID, childName ) {
-        //     if ( this.debug.parenting ) {
-        //         this.logger.infox( "removingChild", nodeID, childID, childName );
-        //     }
-        // },
-
-        // -- creatingProperty ---------------------------------------------------------------------
-
-        creatingProperty: function( nodeID, propertyName, propertyValue ) {
-
-            var value = undefined;
-
-            if ( this.debug.properties ) {
-                this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
+                    if ( value === undefined && 
+                        ( kineticObj instanceof Kinetic.BaseLayer || 
+                          kineticObj instanceof Kinetic.FastLayer ||
+                          kineticObj instanceof Kinetic.Layer
+                        ) ) {
+                        value = this.setLayerProperty( kineticObj, propertyName, propertyValue );                  
             }
 
-            var node = this.state.nodes[ nodeID ];
-            if ( node !== undefined ) {
-                value = this.settingProperty( nodeID, propertyName, propertyValue );                  
+                    if ( value === undefined && kineticObj instanceof Kinetic.Canvas ) {
+                        value = this.setCanvasProperty( kineticObj, propertyName, propertyValue );  
+                    }                
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Circle ) {
+                        value = this.setCircleProperty( kineticObj, propertyName, propertyValue );                   
+                    }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Ellipse ) {
+                        value = this.setEllipseProperty( kineticObj, propertyName, propertyValue )                   
+                    }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Image ) {
+                        value = this.setImageProperty( kineticObj, propertyName, propertyValue );
+                }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Line ) {
+                        value = this.setLineProperty( kineticObj, propertyName, propertyValue );
+                }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Path ) {
+                        value = this.setPathProperty( kineticObj, propertyName, propertyValue );
             }
 
-            return value;
-        },
-
-        // -- initializingProperty -----------------------------------------------------------------
-
-        initializingProperty: function( nodeID, propertyName, propertyValue ) {
-
-            var value = undefined;
-
-            if ( this.debug.properties ) {
-                this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
+                    if ( value === undefined && kineticObj instanceof Kinetic.Rect ) {
+                        value = this.setRectProperty( kineticObj, propertyName, propertyValue );
             }
 
-            var node = this.state.nodes[ nodeID ];
-            if ( node !== undefined ) {
-                value = this.settingProperty( nodeID, propertyName, propertyValue );                  
+                    if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon ) {
+                        value = this.setRegularPolygonProperty( kineticObj, propertyName, propertyValue );
             }
-
-            return value;
             
+                    if ( value === undefined && kineticObj instanceof Kinetic.Ring ) {
+                        value = this.setRingProperty( kineticObj, propertyName, propertyValue );
+            }
+                
+                    if ( value === undefined && kineticObj instanceof Kinetic.Sprite ) {
+                        value = this.setSpriteProperty( kineticObj, propertyName, propertyValue );
+                    }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Star ) {
+                        value = this.setStarProperty( kineticObj, propertyName, propertyValue );
+            }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Text ) {
+                        value = this.setTextProperty( kineticObj, propertyName, propertyValue );
+            }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.TextPath ) {
+                        value = this.setTextPathProperty( kineticObj, propertyName, propertyValue );
+            }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Wedge ) {
+                        value = this.setWedgeProperty( kineticObj, propertyName, propertyValue );
+            }
+                    return value;                    
         },
-        // -- settingProperty ----------------------------------------------------------------------
+                "setNodeProperty": function( kineticObj, propertyName, propertyValue ) {
 
-        settingProperty: function( nodeID, propertyName, propertyValue ) {
+                    var value = propertyValue;
           
-            if ( this.debug.properties || this.debug.setting ) {
-                this.logger.infox( "    S === settingProperty ", nodeID, propertyName, propertyValue );
-            }          
-            var node = this.state.nodes[ nodeID ];
-            var imageObj;
-            var value = undefined;
-            if ( node && node.kineticObj && utility.validObject( propertyValue ) ) {
-                
-                var kineticObj = node.kineticObj;
-                
-                if ( isNodeDefinition( node.prototypes ) ) {
-
-                    // 'id' will be set to the nodeID
-                    value = propertyValue;
-                    
                     switch ( propertyName ) {
 
                         case "x":
-                            kineticObj.modelX = Number( propertyValue );
-
-                            // Update the view - though this would be more appropriate to do in the
-                            // view driver's satProperty, it is important that it be updated 
-                            // atomically with the model so there is no risk that "ticked" will 
-                            // discover the descrepancy between model and view values and assume 
-                            // that the user has dragged the node via kinetic (thus triggering it to
-                            // set the model value from the old view value)
-                            if ( !node.uniqueInView ) {
-                                kineticObj.x( kineticObj.modelX );                                
-                            }
+                            kineticObj.x( Number( propertyValue ) );                                
                             break;
 
                         case "y":
-                            kineticObj.modelY = Number( propertyValue );
-
-                            // Update the view - though this would be more appropriate to do in the
-                            // view driver's satProperty, it is important that it be updated 
-                            // atomically with the model so there is no risk that "ticked" will 
-                            // discover the descrepancy between model and view values and assume 
-                            // that the user has dragged the node via kinetic (thus triggering it to
-                            // set the model value from the old view value)
-                            if ( !node.uniqueInView ) {
-                                kineticObj.y( Number( kineticObj.modelY ) );
-                            }                            
+                            kineticObj.y( Number( propertyValue ) );
                             break;
 
                         case "width":
@@ -400,40 +249,25 @@ define( [ "module",
 
                         case "position":
                             if ( propertyValue instanceof Array ) {
-                                kineticObj.modelX = Number( propertyValue[ 0 ] );
-                                kineticObj.modelY = Number( propertyValue[ 1 ] ); 
-                            } else {
-                                kineticObj.modelX = Number( propertyValue.x );
-                                kineticObj.modelY = Number( propertyValue.y );
-                            }
-
-                            // Update the view - though this would be more appropriate to do in the
-                            // view driver's satProperty, it is important that it be updated 
-                            // atomically with the model so there is no risk that "ticked" will 
-                            // discover the descrepancy between model and view values and assume 
-                            // that the user has dragged the node via kinetic (thus triggering it to
-                            // set the model value from the old view value)
-
-                            // If the node is being dragged by this client, then its view has 
-                            // already updated, and we risk updating it with a stale value.  
-                            // Therefore, if the view has told us to ignore the next update, we will
-                            // do that.  Otherwise, update the view value.
-                            if ( node.viewIgnoreNextPositionUpdate ) {
-                                node.viewIgnoreNextPositionUpdate = false;
-                            } else if ( !node.uniqueInView ) {
                                 kineticObj.setPosition( { 
-                                    x: kineticObj.modelX, 
-                                    y: kineticObj.modelY
+                                    x: Number( propertyValue[ 0 ] ), 
+                                    y: Number( propertyValue[ 1 ] )
+                                } );
+                            } else {
+                                kineticObj.setPosition( { 
+                                    x: propertyValue.x, 
+                                    y: propertyValue.y
                                 } );
                             }
                             break;
+                            
                         case "absolutePosition":
 
-                            // Store the current absolute position because we are about to tamper 
-                            // with the view value to get kinetic to compute the new model values 
-                            // for us.  If uniqueInView is true, we should not change the view 
-                            // value, so we will need to put this one back.
-                            var oldAbsolutePosition = kineticObj.getAbsolutePosition();
+                            // // Store the current absolute position because we are about to tamper 
+                            // // with the view value to get kinetic to compute the new model values 
+                            // // for us.  If uniqueInView is true, we should not change the view 
+                            // // value, so we will need to put this one back.
+                            // var oldAbsolutePosition = kineticObj.getAbsolutePosition();
 
                             // Compute new modelX and modelY values
                             if ( propertyValue instanceof Array ) { 
@@ -447,61 +281,60 @@ define( [ "module",
                                     "y":  Number( propertyValue.y ) 
                                 });
                             }
-                            kineticObj.modelX = kineticObj.x();
-                            kineticObj.modelY = kineticObj.y();
+                            // kineticObj.modelX = kineticObj.x();
+                            // kineticObj.modelY = kineticObj.y();
 
-                            // If each user has a unique view value, setting the model value should
-                            // not change the view value, so we set the original view value back now
-                            // that we are done using it to calculate the new model value.
-                            if ( node.uniqueInView ) {
-                                kineticObj.setAbsolutePosition( oldAbsolutePosition );
-                            }
+                            // // If each user has a unique view value, setting the model value should
+                            // // not change the view value, so we set the original view value back now
+                            // // that we are done using it to calculate the new model value.
+                            // if ( node.uniqueInView ) {
+                            //     kineticObj.setAbsolutePosition( oldAbsolutePosition );
+                            // }
                             break;
 
-                        case "uniqueInView":
-                            node.uniqueInView = Boolean( propertyValue );
+                        // case "uniqueInView":
+                        //     node.uniqueInView = Boolean( propertyValue );
 
-                            // If we no longer have unique views, all view positions should be set
-                            // to the model value
-                            // Note: though this would be more appropriate to do in the view 
-                            // driver's satProperty, it is important that it be updated atomically 
-                            // with the model so there is no risk that "ticked" will discover the 
-                            // descrepancy between model and view values and assume that the user 
-                            // has dragged the node via kinetic (thus triggering it to set the model
-                            // value from the old view value)
-                            if ( !node.uniqueInView ) {
-                                kineticObj.x( kineticObj.modelX );
-                                kineticObj.y( kineticObj.modelY );
-                            }
-                            break;
+                        //     // If we no longer have unique views, all view positions should be set
+                        //     // to the model value
+                        //     // Note: though this would be more appropriate to do in the view 
+                        //     // driver's satProperty, it is important that it be updated atomically 
+                        //     // with the model so there is no risk that "ticked" will discover the 
+                        //     // descrepancy between model and view values and assume that the user 
+                        //     // has dragged the node via kinetic (thus triggering it to set the model
+                        //     // value from the old view value)
+                        //     if ( !node.uniqueInView ) {
+                        //         kineticObj.x( kineticObj.modelX );
+                        //         kineticObj.y( kineticObj.modelY );
+                        //     }
+                        //     break;
 
                         case "dragBoundFunc":
                             var functionString = propertyValue;
                             if ( !utility.isString( functionString ) ) {
-                                this.logger.errorx( "settingProperty", 
+                                modelDriver.logger.errorx( "settingProperty", 
                                     "The value of dragBoundFunc should be a string of the " +
                                     "function to be used." );
                                 break;
                             }
-                            node.kineticObj.dragBoundFunc( eval( "(" + functionString + ")" ) );
+                            kineticObj.dragBoundFunc( eval( "(" + functionString + ")" ) );
                             break;
 
                         case "transform":
                         case "absoluteTransform":
                         case "absoluteOpacity":
                         case "absoluteZIndex":
-                            this.logger.errorx( "settingProperty", "Cannot set property ", 
-                                propertyName );
+                            modelDriver.logger.errorx( "settingProperty", "Cannot set property ", propertyName );
                             value = undefined;
+
                         default:
                             value = undefined;
                             break;
                     }
-                }
-
-                if ( value === undefined && isShapeDefinition( node.prototypes ) ) {
-
-                    value = propertyValue;
+                    return value;
+                },
+                "setShapeProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
                     
                     switch ( propertyName ) {
 
@@ -519,11 +352,11 @@ define( [ "module",
                         case "fillGreen":
                             kineticObj.fillGreen( Number( propertyValue ) );
                             break;
- 
+
                         case "fillBlue":
                             kineticObj.fillGreen( Number( propertyValue ) );
                             break;
- 
+
                         case "fillAlpha":
                             kineticObj.fillAlpha( parseFloat( propertyValue ) );
                             break;
@@ -550,7 +383,7 @@ define( [ "module",
                         case "fillPatternY":
                             kineticObj.fillPatternY( Number( propertyValue ) );
                             break;
-  
+
                         case "fillPatternOffset":
                             if ( propertyValue instanceof Array ) { 
                                 kineticObj.fillPatternOffset( { "x": Number( propertyValue[ 0 ] ), "y": Number( propertyValue[ 1 ] ) });
@@ -598,7 +431,7 @@ define( [ "module",
                                     break; 
 
                                 default:
-                                    this.logger.warnx( "incorrect value for fillPatternRepeat: " + propertyValue );
+                                    modelDriver.logger.warnx( "incorrect value for fillPatternRepeat: " + propertyValue );
                                     break;
                             }   
                             break;
@@ -699,7 +532,7 @@ define( [ "module",
                                     break; 
 
                                 default:
-                                    this.logger.warnx( "incorrect value for fillPriority: " + propertyValue );
+                                    modelDriver.logger.warnx( "incorrect value for fillPriority: " + propertyValue );
                                     break;
                             }   
                             break;
@@ -749,7 +582,7 @@ define( [ "module",
                                     break; 
 
                                 default:
-                                    this.logger.warnx( "incorrect value for lineJoin: " + propertyValue );
+                                    modelDriver.logger.warnx( "incorrect value for lineJoin: " + propertyValue );
                                     break;
                             }   
                             break;
@@ -764,7 +597,7 @@ define( [ "module",
                                     break; 
 
                                 default:
-                                    this.logger.warnx( "incorrect value for lineCap: " + propertyValue );
+                                    modelDriver.logger.warnx( "incorrect value for lineCap: " + propertyValue );
                                     break;
                             }   
                             break;
@@ -830,23 +663,11 @@ define( [ "module",
                         default:
                             value = undefined;
                             break;
-                    }
-                }
-
-                if ( value === undefined && isContainerDefinition( node.prototypes ) ) {
-                    value = propertyValue;
-                    
-                    switch ( propertyName ) {
-                        
-                        case "clipFunc":
-                        default:
-                            value = undefined;
-                            break;
-                    }
-                }
-
-                if ( value === undefined && kineticObj instanceof Kinetic.Arc ) {
-                    value = propertyValue;
+                    } 
+                    return value;  
+                },
+                "setArcProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
                     
                     switch ( propertyName ) {
                         
@@ -870,14 +691,11 @@ define( [ "module",
                             value = undefined;
                             break;
                     }
-                }
 
-                if ( value === undefined && 
-                    ( kineticObj instanceof Kinetic.BaseLayer || 
-                      kineticObj instanceof Kinetic.FastLayer ||
-                      kineticObj instanceof Kinetic.Layer
-                    ) ) {
-                    value = propertyValue;
+                    return value;
+                },
+                "setCanvasProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
                     
                     switch ( propertyName ) {
 
@@ -888,17 +706,6 @@ define( [ "module",
                         case "hitGraphEnabled":
                             kineticObj.hitGraphEnabled( Boolean(propertyValue) );
                             break;
-
-                        default:
-                            value = undefined;
-                            break;
-                    }                    
-                }
-
-                if ( value === undefined && kineticObj instanceof Kinetic.Canvas ) {
-                    value = propertyValue;
-                    
-                    switch ( propertyName ) {
 
                         case "width":
                             kineticObj.setWidth( Number( propertyValue ) );
@@ -916,11 +723,40 @@ define( [ "module",
                             value = undefined;
                             break;
                     }  
-                }                
+                    return value;     
+                },
+                "setContainerProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Circle ) {
-                    value = propertyValue;
+                    switch ( propertyName ) {
                     
+                        case "clipFunc":
+                        default:
+                            value = undefined;
+                            break;
+                    }
+
+                    return value; 
+                },
+                "setLayerProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
+                    switch ( propertyName ) {
+
+                        case "clearBeforeDraw":
+                            kineticObj.clearBeforeDraw( Boolean( propertyValue ) );
+                            break;
+                        
+                        default:
+                            value = undefined;
+                            break;
+                    } 
+
+                    return value;
+                },
+                "setCircleProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
 
                         case "radius":
@@ -931,12 +767,11 @@ define( [ "module",
                             value = undefined;
                             break;
                     }                    
-                }
+                    return value; 
+                },
+                "setEllipseProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
 
-
-                if ( value === undefined && kineticObj instanceof Kinetic.Ellipse ) {
-                    value = propertyValue;
-                    
                     switch ( propertyName ) {
 
                         case "radius":
@@ -951,16 +786,17 @@ define( [ "module",
                             value = undefined;
                             break;
                     }                    
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Image ) {
-                    value = propertyValue;
-                    
+                    return value; 
+                },
+                "setImageProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
 
                         case "image":
                             if ( utility.validObject( propertyValue ) ) {
-                                loadImage( node, propertyValue );
+                                loadImage( kineticObj, propertyValue );
                             }
                             break;
 
@@ -982,18 +818,19 @@ define( [ "module",
                             break;
 
                         case "scaleOnLoad":
-                            node.scaleOnLoad = Boolean( propertyValue );
+                            //node.scaleOnLoad = Boolean( propertyValue );
                             break;
                         
                         default:
                             value = undefined;
                             break;
                     }                    
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Line ) {
-                    value = propertyValue;
-                    
+                    return value; 
+                },
+                "setLineProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
                         
                         case "points":
@@ -1012,11 +849,12 @@ define( [ "module",
                             value = undefined;
                             break;
                     }
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Path ) {
-                    value = propertyValue;
-                    
+                    return value;
+                },
+                "setPathProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
                         
                         case "data":
@@ -1027,11 +865,12 @@ define( [ "module",
                             value = undefined;
                             break;
                     }
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Rect ) {
-                    value = propertyValue;
-                    
+                    return value; 
+                },
+                "setRectProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
                         
                         case "cornerRadius":
@@ -1042,11 +881,12 @@ define( [ "module",
                             value = undefined;
                             break;
                     }
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon ) {
-                    value = propertyValue;
-                    
+                    return value;         
+                },
+                "setRegularPolygonProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
                         
                         case "sides":
@@ -1061,11 +901,12 @@ define( [ "module",
                             value = undefined;
                             break;
                     }
-                }
-            
-                if ( value === undefined && kineticObj instanceof Kinetic.Ring ) {
-                    value = propertyValue;
-                    
+
+                    return value;
+                },
+                "setRingProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
                         
                         case "innerRadius":
@@ -1080,11 +921,12 @@ define( [ "module",
                             value = undefined;
                             break;
                     }
-                }
-                
-                if ( value === undefined && kineticObj instanceof Kinetic.Sprite ) {
-                    value = propertyValue;
-                    
+
+                    return value; 
+                },
+                "setSpriteProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
                         
                         case "animation":
@@ -1101,23 +943,24 @@ define( [ "module",
 
                         case "image":
                             if ( utility.validObject( propertyValue ) ) {
-                                loadImage( node, propertyValue );
+                                loadImage( kineticObj, propertyValue );
                             }
                             break;
 
                         case "scaleOnLoad":
-                            node.scaleOnLoad = Boolean( propertyValue );
+                            //node.scaleOnLoad = Boolean( propertyValue );
                             break;
 
                         default:
                             value = undefined;
                             break;
                     }
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Star ) {
-                    value = propertyValue;
-                    
+                    return value;         
+                },
+                "setStarProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
                         
                         case "numPoints":
@@ -1135,13 +978,12 @@ define( [ "module",
                         default:
                             value = undefined;
                             break;
-                    }
-                }
+                    }        
+                    return value;
+                },
+                "setTextProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
 
-
-                if ( value === undefined && kineticObj instanceof Kinetic.Text ) {
-                    value = propertyValue;
-                    
                     switch ( propertyName ) {
                         
                         case "fontFamily":
@@ -1162,7 +1004,7 @@ define( [ "module",
                                     break; 
 
                                 default:
-                                    this.logger.warnx( "incorrect value for fontStyle: " + propertyValue );
+                                    modelDriver.logger.warnx( "incorrect value for fontStyle: " + propertyValue );
                                     break;
                             }   
                             break;
@@ -1176,7 +1018,7 @@ define( [ "module",
                                     break; 
 
                                 default:
-                                    this.logger.warnx( "incorrect value for fontVariant: " + propertyValue );
+                                    modelDriver.logger.warnx( "incorrect value for fontVariant: " + propertyValue );
                                     break;
                             }   
                             break;
@@ -1195,7 +1037,7 @@ define( [ "module",
                                     break; 
 
                                 default:
-                                    this.logger.warnx( "incorrect value for align: " + propertyValue );
+                                    modelDriver.logger.warnx( "incorrect value for align: " + propertyValue );
                                     break;
                             }   
                             break;
@@ -1226,7 +1068,7 @@ define( [ "module",
                                     break; 
 
                                 default:
-                                    this.logger.warnx( "incorrect value for wrap: " + propertyValue );
+                                    modelDriver.logger.warnx( "incorrect value for wrap: " + propertyValue );
                                     break;
                             }   
                             break;
@@ -1235,11 +1077,12 @@ define( [ "module",
                             value = undefined;
                             break;
                     }
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.TextPath ) {
-                    value = propertyValue;
-                    
+                    return value; 
+                },
+                "setTextPathProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
                         
                         case "fontFamily":
@@ -1260,7 +1103,7 @@ define( [ "module",
                                     break; 
 
                                 default:
-                                    this.logger.warnx( "incorrect value for fontStyle: " + propertyValue );
+                                    modelDriver.logger.warnx( "incorrect value for fontStyle: " + propertyValue );
                                     break;
                             }   
                             break;
@@ -1274,7 +1117,7 @@ define( [ "module",
                                     break; 
 
                                 default:
-                                    this.logger.warnx( "incorrect value for fontVariant: " + propertyValue );
+                                    modelDriver.logger.warnx( "incorrect value for fontVariant: " + propertyValue );
                                     break;
                             }   
                             break;
@@ -1291,11 +1134,12 @@ define( [ "module",
                             value = undefined;
                             break;
                     }
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Wedge ) {
-                    value = propertyValue;
-                    
+                    return value;         
+                }, 
+                "setWedgeProperty": function( kineticObj, propertyName, propertyValue ) {
+                    var value = propertyValue;
+
                     switch ( propertyName ) {
                         
                         case "angle":
@@ -1313,28 +1157,11 @@ define( [ "module",
                         default:
                             value = undefined;
                             break;
-                    }
-                }
-
-            }
+                    }        
             return value;
         },
-
-        // -- gettingProperty ----------------------------------------------------------------------
-
-        gettingProperty: function( nodeID, propertyName, propertyValue ) {
-
-            if ( this.debug.properties || this.debug.getting ) {
-                this.logger.infox( "   G === gettingProperty ", nodeID, propertyName );
-            }
-
-            var node = this.state.nodes[nodeID];
+                "getProperty": function( kineticObj, propertyName ) {
             var value = undefined;
-            if ( node && node.kineticObj ) {
-                var kineticObj = node.kineticObj;
-
-
-                if ( isNodeDefinition( node.prototypes ) ) {
 
                     switch ( propertyName ) {
 
@@ -1422,7 +1249,7 @@ define( [ "module",
                             break;
 
                         case "dragBoundFunc":
-                            var dragBoundFunc = node.kineticObj.dragBoundFunc();
+                            var dragBoundFunc = kineticObj.dragBoundFunc();
                             value = dragBoundFunc ? dragBoundFunc.toString() : undefined;
                             break;
 
@@ -1443,34 +1270,16 @@ define( [ "module",
 
                         case "transform":
                             value = kineticObj.getTransform().m;
-                            value[ 4 ] = kineticObj.modelX || 0;
-                            value[ 5 ] = kineticObj.modelY || 0;
+                            //value[ 4 ] = kineticObj.modelX || 0;
+                            //value[ 5 ] = kineticObj.modelY || 0;
                             break;
 
                         case "absolutePosition":
-                            if ( !node.uniqueInView ) {
                                 value = kineticObj.getAbsolutePosition();
-                            } else {
-                                // TODO: Since we are allowing the view to drag objects independent
-                                //       of the model, we can't be sure that kinetic has the proper 
-                                //       model value.  Therefore, we need to compute the math 
-                                //       ourselves.
-                                this.logger.errorx( "gettingProperty", "getter for ",
-                                    "absolutePosition when uniqueInView is not implemented" );
-                            }
                             break;
 
                         case "absoluteTransform":
-                            if ( !node.uniqueInView ) {
                                 value = kineticObj.getAbsoluteTransform();
-                            } else {
-                                // TODO: Since we are allowing the view to drag objects independent 
-                                //       of the model, we can't be sure that kinetic has the proper 
-                                //       model value.  Therefore, we need to compute the math 
-                                //       ourselves.
-                                this.logger.errorx( "gettingProperty", "getter for ",
-                                    "absoluteTransform when uniqueInView is not implemented" );
-                            }
                             break;
 
                         case "absoluteOpacity":
@@ -1481,265 +1290,8 @@ define( [ "module",
                             value = kineticObj.getAbsoluteZIndex();
                             break;
 
-                        case "uniqueInView":
-                            value = node.uniqueInView;
-                            break;
-
                     }
-                }
 
-                if ( value === undefined && isShapeDefinition( node.prototypes ) ) {
-
-                    var img = undefined;
-
-                    switch ( propertyName ) {
-
-                        case "fill":
-                            value = kineticObj.fill();
-                            break;
-
-                        case "fillRed":
-                            value = kineticObj.fillRed();
-                            break;
-
-                        case "fillGreen":
-                            value = kineticObj.fillGreen();
-                            break;
- 
-                        case "fillBlue":
-                            value = kineticObj.fillGreen();
-                            break;
- 
-                        case "fillAlpha":
-                            value = kineticObj.fillAlpha();
-                            break;
-
-                        case "fillPatternImage":
-                            img = kineticObj.fillPatternImage();
-                            if ( img ){
-                                value = img.src;
-                            }
-                            break;
-
-                        case "fillPatternX":
-                            value = kineticObj.fillPatternX();
-                            break;
-
-                        case "fillPatternY":
-                            value = kineticObj.fillPatternY();
-                            break;
-  
-                        case "fillPatternOffset":
-                            value = kineticObj.fillPatternOffset();
-                            break;
-
-                        case "fillPatternOffsetX":
-                            value = kineticObj.fillPatternOffsetX();
-                            break;
-
-                        case "fillPatternOffsetY":
-                            value = kineticObj.fillPatternOffsetY();
-                            break;
-
-                        case "fillPatternScale":
-                            value = kineticObj.fillPatternScale();
-                            break;
-
-                        case "fillPatternScaleX":
-                            value = kineticObj.fillPatternScaleX();
-                            break;
-
-                        case "fillPatternScaleY":
-                            value = kineticObj.fillPatternScaleY();
-                            break;
-
-                        case "fillPatternRotation":
-                            value = kineticObj.fillPatternRotation();
-                            break;
-
-                        case "fillPatternRepeat":
-                            value = kineticObj.fillPatternRepeat();
-                            break;
-
-                        case "fillLinearGradientStartPoint":
-                            value = kineticObj.fillLinearGradientStartPoint();
-                            break;
-
-                        case "fillLinearGradientStartPointX":
-                            value = kineticObj.fillLinearGradientStartPointX();
-                            break;
-
-                        case "fillLinearGradientStartPointY":
-                            value = kineticObj.fillLinearGradientStartPointY();
-                            break;
-
-                        case "fillLinearGradientEndPoint":
-                            value = kineticObj.fillLinearGradientEndPoint();
-                            break;
-
-                        case "fillLinearGradientEndPointX":
-                            value = kineticObj.fillLinearGradientEndPointX();
-                            break;
-
-                        case "fillLinearGradientEndPointY":
-                            value = kineticObj.fillLinearGradientEndPointY();
-                            break;
-
-                        case "fillLinearGradientColorStops":
-                            value = kineticObj.fillLinearGradientColorStops();
-                            break;
-
-                        case "fillRadialGradientStartPoint":
-                            value = kineticObj.fillRadialGradientStartPoint();
-                            break;
-
-                        case "fillRadialGradientStartPointX":
-                            value = kineticObj.fillRadialGradientStartPointX();
-                            break;
-
-                        case "fillRadialGradientStartPointY":
-                            value = kineticObj.fillRadialGradientStartPointX();
-                            break;
-
-                        case "fillRadialGradientEndPoint":
-                            value = kineticObj.fillRadialGradientEndPoint();
-                            break;
-
-                        case "fillRadialGradientEndPointX":
-                            value = kineticObj.fillRadialGradientEndPointX();
-                            break;
-
-                        case "fillRadialGradientEndPointY":
-                            value = kineticObj.fillRadialGradientEndPointY();
-                            break;
-
-                        case "fillRadialGradientStartRadius":
-                            value = kineticObj.fillRadialGradientStartRadius();
-                            break;
-
-                        case "fillRadialGradientEndRadius":
-                            value = kineticObj.fillRadialGradientEndRadius();
-                            break;
-
-                        case "fillRadialGradientColorStops":
-                            value = kineticObj.fillRadialGradientColorStops();
-                            break;
-
-                        case "fillEnabled":
-                            value = kineticObj.fillEnabled();
-                            break;
-
-                        case "fillPriority":
-                            value = kineticObj.fillPriority();
-                            break;
-
-                        case "stroke":
-                            value = kineticObj.stroke();
-                            break;
-
-                        case "strokeRed":
-                            value = kineticObj.strokeRed();
-                            break;
-
-                        case "strokeGreen":
-                            value = kineticObj.strokeGreen();
-                            break;
-
-                        case "strokeBlue":
-                            value = kineticObj.strokeBlue();
-                            break;
-
-                        case "strokeAlpha":
-                            value = kineticObj.strokeAlpha();
-                            break; 
-
-                        case "strokeWidth":
-                            value = kineticObj.strokeWidth();
-                            break;
-
-                        case "strokeScaleEnabled":
-                            value = kineticObj.strokeScaleEnabled();
-                            break;
-
-                        case "strokeEnabled":
-                            value = kineticObj.strokeEnabled();
-                            break;
-
-                        case "lineJoin":
-                            value = kineticObj.lineJoin();
-                            break;
-
-                        case "lineCap":
-                            value = kineticObj.lineCap();
-                            break;
-
-                        case "shadowColor":
-                            value = kineticObj.shadowColor();
-
-                            break;
-
-                        case "shadowRed":
-                            value = kineticObj.shadowRed();
-                            break;
-
-                        case "shadowGreen":
-                            value = kineticObj.shadowGreen();
-                            break;
-
-                        case "shadowBlue":
-                            value = kineticObj.shadowBlue();
-                            break;
-
-                        case "shadowBlue":
-                            value = kineticObj.shadowBlue();
-                            break;
-
-                        case "shadowBlur":
-                            value = kineticObj.shadowBlur();
-                            break;
-
-                        case "shadowOffset":
-                            value = kineticObj.shadowOffset();
-                            break;                        
-                        
-                        case "shadowOffsetX":
-                            value = kineticObj.shadowOffsetX();
-                            break;  
-
-                        case "shadowOffsetY":
-                            value = kineticObj.shadowOffsetY();
-                            break;
-                        
-                        case "shadowOpacity":
-                            value = kineticObj.shadowOpacity();
-                            break;
-
-                        case "shadowEnabled":
-                            value = kineticObj.shadowEnabled();
-                            break;                        
-                        
-                        case "dash":
-                            value = kineticObj.dash();
-                            break;  
-
-                        case "dashEnabled": 
-                            value = kineticObj.dashEnabled();
-                            break; 
-
-                        default:
-                            value = undefined;
-                            break;
-                    }
-                }
-
-                if ( value === undefined && isContainerDefinition( node.prototypes ) ) {
-                    
-                    switch ( propertyName ) {
-                        
-                        case "clipFunc":
-                            break;
-                    }
-                }
 
 
                 // this is causing the editor to cause a infinite loop
@@ -1847,7 +1399,7 @@ define( [ "module",
                             break;
 
                         case "scaleOnLoad":
-                            value = node.scaleOnLoad;
+                                //value = node.scaleOnLoad;
                             break;
                         
                     }                    
@@ -1944,7 +1496,7 @@ define( [ "module",
                             break;
 
                         case "scaleOnLoad":
-                            value = node.scaleOnLoad;
+                                //value = node.scaleOnLoad;
                             break;
                     }
                 }
@@ -2066,6 +1618,245 @@ define( [ "module",
                     }
                 }
 
+                    return value;
+            }
+            };
+
+            // turns on logger debugger console messages 
+            this.debug = {
+                "creation": false,
+                "native": false,
+                "initializing": false,
+                "parenting": false,
+                "deleting": false,
+                "properties": false,
+                "setting": false,
+                "getting": false,
+                "methods": false,
+                "events": false,
+                "prototypes": false
+            };
+           
+        },
+
+
+        // == Model API ============================================================================
+
+        // -- creatingNode ------------------------------------------------------------------------
+        
+        creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+                                childSource, childType, childIndex, childName, callback ) {
+
+            var appID = this.kernel.application();
+
+            if ( this.debug.creation ) {
+                this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName );
+            }
+
+            // If the node being created is a prototype, construct it and add it to the array of prototypes,
+            // and then return
+            var prototypeID = utility.ifPrototypeGetId( appID, this.state.prototypes, nodeID, childID );
+            if ( prototypeID !== undefined ) {
+                
+                if ( this.debug.prototypes ) {
+                    this.logger.infox( "prototype: ", prototypeID );
+                }
+
+                this.state.prototypes[ prototypeID ] = {
+                    parentID: nodeID,
+                    ID: childID,
+                    extendsID: childExtendsID,
+                    implementsID: childImplementsIDs,
+                    source: childSource, 
+                    type: childType,
+                    name: childName
+                };
+                return;                
+            }
+
+            var protos = getPrototypes( this.kernel, childExtendsID );
+
+            var node;
+
+            if ( this.state.isKineticComponent( protos ) ) {
+
+                if ( this.debug.native ) {
+                    this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName );
+                }
+                
+                // Create the local copy of the node properties
+                if ( this.state.nodes[ childID ] === undefined ){
+                    this.state.nodes[ childID ] = this.state.createLocalNode( nodeID, childID, childExtendsID, childImplementsIDs,
+                                childSource, childType, childIndex, childName, callback );
+                }
+
+                node = this.state.nodes[ childID ];
+                
+                node.prototypes = protos;
+               
+                node.kineticObj = createKineticObject( node );
+
+                // if ( node.kineticObj instanceof Kinetic.Stage ) {
+                //     node.model.scale = { "value": 1, "type": "static" };
+                //     node.model.scaleX = { "value": 1, "type": "static" };
+                //     node.model.scaleY = { "value": 1, "type": "static" };
+                //     node.model.x = { "value": 0, "type": "static" };
+                //     node.model.y = { "value": 0, "type": "static" };
+                //     node.model.position = { "value": [ 0, 0 ], "type": "static" };
+                //     node.model.absolutePosition = { "value": [ 0, 0 ], "type": "static" };
+                //     node.model.absoluteTransform = { "value": [ 1, 0, 0, 1 ], "type": "static" };
+                // }
+
+                // If the kineticObj was created, attach it to the parent kineticObj, if it is a 
+                // kinetic container
+                // (if a kineticObj is created asynchronously ... like an Image, it will be
+                // undefined here, but will be added to its parent in the appropriate callback)
+                addNodeToHierarchy( node );
+
+            }
+           
+        },
+
+        // initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+        //     childSource, childType, childIndex, childName ) {
+
+        //     if ( this.debug.initializing ) {
+        //         this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+        //     } 
+
+
+        // },
+         
+        // -- deletingNode -------------------------------------------------------------------------
+
+        deletingNode: function( nodeID ) {
+
+            if ( this.debug.deleting ) {
+                this.logger.infox( "deletingNode", nodeID );
+            }
+
+            if ( this.state.nodes[ nodeID ] !== undefined ) {
+                
+                var node = this.state.nodes[ nodeID ];
+                if ( node.kineticObj !== undefined ) {
+                    // removes and destroys object
+                    node.kineticObj.destroy();
+                    node.kineticObj = undefined;    
+                }                
+
+                delete this.state.nodes[ nodeID ];
+            }
+            
+        },
+
+        // -- addingChild ------------------------------------------------------------------------
+        
+        // addingChild: function( nodeID, childID, childName ) {
+        //     if ( this.debug.parenting ) {
+        //         this.logger.infox( "addingChild", nodeID, childID, childName );
+        //     }
+        // },
+
+
+        // -- movingChild ------------------------------------------------------------------------
+        
+        movingChild: function( nodeID, childID, childName ) {
+            
+            if ( this.debug.parenting ) {
+                this.logger.infox( "movingChild", nodeID, childID, childName );
+            }
+
+            if ( this.state.nodes[ childID ] !== undefined ) {
+                
+                if ( this.state.nodes[ nodeID ] !== undefined ) {
+                    var parentNode = this.state.nodes[ nodeID ];
+                    
+                    if ( isContainerDefinition( parentNode.prototypes ) && parentNode.kineticObj ) {
+                        
+                        var node = this.state.nodes[ childID ];
+                        if ( node.kineticObj !== undefined ) {
+                            // removes object only
+                            node.kineticObj.remove();
+                            parentNode.kineticObj.add( node.kineticObj );
+                        } 
+                    }
+                }               
+            }
+
+        },
+
+
+        // -- removingChild ------------------------------------------------------------------------
+        
+        // removingChild: function( nodeID, childID, childName ) {
+        //     if ( this.debug.parenting ) {
+        //         this.logger.infox( "removingChild", nodeID, childID, childName );
+        //     }
+        // },
+
+        // -- creatingProperty ---------------------------------------------------------------------
+
+        creatingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            if ( this.debug.properties ) {
+                this.logger.infox( "C === creatingProperty ", nodeID, propertyName, propertyValue );
+            }
+            return this.settingProperty( nodeID, propertyName, propertyValue );;
+        },
+
+        // -- initializingProperty -----------------------------------------------------------------
+
+        initializingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            if ( this.debug.properties ) {
+                this.logger.infox( "  I === initializingProperty ", nodeID, propertyName, propertyValue );
+            }
+            return this.settingProperty( nodeID, propertyName, propertyValue );;
+            
+        },
+        // -- settingProperty ----------------------------------------------------------------------
+
+        settingProperty: function( nodeID, propertyName, propertyValue ) {
+          
+            if ( this.debug.properties || this.debug.setting ) {
+                this.logger.infox( "    S === settingProperty ", nodeID, propertyName, propertyValue );
+            }          
+            var node = this.state.nodes[ nodeID ];
+            var imageObj;
+            var value = undefined;
+            if ( node && node.kineticObj && utility.validObject( propertyValue ) ) {
+
+                if ( node.model[ propertyName ] !== undefined ) {
+                    if ( this.kernel.client() === this.kernel.moniker() ) {
+                        //node.model[ propertyName ] = propertyValue;
+                        value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
+                    }                    
+                } else {
+                    value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );     
+                }
+                   
+            }
+            return value;
+        },
+
+        // -- gettingProperty ----------------------------------------------------------------------
+
+        gettingProperty: function( nodeID, propertyName, propertyValue ) {
+
+            if ( this.debug.properties || this.debug.getting ) {
+                this.logger.infox( "   G === gettingProperty ", nodeID, propertyName );
+            }
+
+            var node = this.state.nodes[nodeID];
+            var value = undefined;
+            if ( node && node.kineticObj ) {
+                var kineticObj = node.kineticObj;
+
+                if ( node.model[ propertyName ] ) {
+                    value = node.model[ propertyName ].value;
+                } else {
+                    value = this.state.getProperty( kineticObj, propertyName );    
+                }
             }
             if ( value !== undefined ) {
                 propertyValue = value;
@@ -2113,21 +1904,21 @@ define( [ "module",
         var protos = node.prototypes;
         var kineticObj = undefined;
 
-        if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/arc.vwf" ) ) {
+        if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/arc.vwf" ) ) {
             kineticObj = new Kinetic.Arc( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/baseLayer.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/baseLayer.vwf" ) ) {
             kineticObj = new Kinetic.BaseLayer( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/canvas.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/canvas.vwf" ) ) {
             kineticObj = new Kinetic.Canvas( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/circle.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/circle.vwf" ) ) {
             kineticObj = new Kinetic.Circle( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/ellipse.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/ellipse.vwf" ) ) {
             kineticObj = new Kinetic.Ellipse( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/fastLayer.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/fastLayer.vwf" ) ) {
             kineticObj = new Kinetic.FastLayer( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/group.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/group.vwf" ) ) {
             kineticObj = new Kinetic.Group( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/image.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/image.vwf" ) ) {
             var imageObj = new Image();
             node.scaleOnLoad = false;
             kineticObj = new Kinetic.Image( {
@@ -2136,19 +1927,19 @@ define( [ "module",
             if ( node.source !== undefined ) {
                 imageObj.src = node.source;    
             }
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/layer.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/layer.vwf" ) ) {
             kineticObj = new Kinetic.Layer( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/line.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/line.vwf" ) ) {
             kineticObj = new Kinetic.Line( config || { "points": [] } );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/path.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/path.vwf" ) ) {
             kineticObj = new Kinetic.Path( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/rect.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/rect.vwf" ) ) {
             kineticObj = new Kinetic.Rect( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/regularPolygon.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/regularPolygon.vwf" ) ) {
             kineticObj = new Kinetic.RegularPolygon( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/ring.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/ring.vwf" ) ) {
             kineticObj = new Kinetic.Ring( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/sprite.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/sprite.vwf" ) ) {
             var imageObj = new Image();
             node.scaleOnLoad = false;
             kineticObj = new Kinetic.Sprite( {
@@ -2157,7 +1948,7 @@ define( [ "module",
             if ( node.source !== undefined ) {
                 imageObj.src = node.source;    
             }
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/stage.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/stage.vwf" ) ) {
             var stageWidth = ( window && window.innerWidth ) ? window.innerWidth : 800;
             var stageHeight = ( window && window.innerHeight ) ? window.innerHeight : 600;
             var stageContainer = ( config && config.container ) || 'vwf-root';
@@ -2169,20 +1960,20 @@ define( [ "module",
                 "height": stageHeight 
             };
             kineticObj = new Kinetic.Stage( stageDef );
-            self.state.stages[ node.ID ] = kineticObj;
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/star.vwf" ) ) {
+            modelDriver.state.stages[ node.ID ] = kineticObj;
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/star.vwf" ) ) {
             kineticObj = new Kinetic.Star( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/text.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/text.vwf" ) ) {
             kineticObj = new Kinetic.Text( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/textPath.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/textPath.vwf" ) ) {
             kineticObj = new Kinetic.TextPath( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/wedge.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/wedge.vwf" ) ) {
             kineticObj = new Kinetic.Wedge( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/shape.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/shape.vwf" ) ) {
             kineticObj = new Kinetic.Shape( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/container.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/container.vwf" ) ) {
             kineticObj = new Kinetic.Container( config || {} );
-        } else if ( self.state.isKineticClass( protos, "http://vwf.example.com/kinetic/node.vwf" ) ) {
+        } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/node.vwf" ) ) {
             kineticObj = new Kinetic.Node( config || {} );
         }
 
@@ -2206,8 +1997,8 @@ define( [ "module",
     function addNodeToHierarchy( node ) {
         
         if ( node.kineticObj ) {
-            if ( self.state.nodes[ node.parentID ] !== undefined ) {
-                var parent = self.state.nodes[ node.parentID ];
+            if ( modelDriver.state.nodes[ node.parentID ] !== undefined ) {
+                var parent = modelDriver.state.nodes[ node.parentID ];
                 if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
                     
                     if ( parent.children === undefined ) {
@@ -2281,9 +2072,8 @@ define( [ "module",
         return found;
     }
 
-    function loadImage( node, url ) {
-        if ( node && node.kineticObj ) {
-            var kineticObj = node.kineticObj;
+    function loadImage( kineticObj, url ) {
+        
             var imageObj = kineticObj.image();
             var validImage = ( imageObj !== undefined ); 
             var width = kineticObj.width();
@@ -2305,16 +2095,17 @@ define( [ "module",
                         kineticObj.scale( { "x": height / imageObj.height ,"y": height / imageObj.height } );
                     }
                 }
-                self.kernel.fireEvent( node.ID, "imageLoaded", [ url ] );
+            modelDriver.kernel.fireEvent( node.ID, "imageLoaded", [ url ] );
             }
             imageObj.onerror = function() {
-                self.logger.errorx( "loadImage", "Invalid image url:", url );
+            modelDriver.logger.errorx( "loadImage", "Invalid image url:", url );
                 imageObj.src = oldSrc;
-                self.kernel.fireEvent( node.ID, "imageLoadError", [ url ] );
+            modelDriver.kernel.fireEvent( node.ID, "imageLoadError", [ url ] );
             }
             var oldSrc = imageObj.src;
             imageObj.src = url;
     
-        }   
+ 
     }
+
 });
