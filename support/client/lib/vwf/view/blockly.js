@@ -245,7 +245,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                                getBlockXML( previousActiveNode );
                                setBlocklyUIVisibility( previousActiveNode, false ); 
                                show = ( previousActiveNode.ID !== newActiveNodeId );
-                               this.state.blockly.node = undefined;                           
+                               this.state.blockly.node = undefined;
                             }
 
                             // If the new active node is different than the old,
@@ -269,7 +269,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             if ( previousActiveNode !== undefined ) {
                                 getBlockXML( previousActiveNode );
                                 setBlocklyUIVisibility( previousActiveNode, false );
-                                this.state.blockly.node = undefined;                            
+                                this.state.blockly.node = undefined;
                             } 
                         }
                         break;
