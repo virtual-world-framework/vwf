@@ -30,7 +30,6 @@ properties:
   absoluteTransform:
   absoluteOpacity:
   absoluteZIndex:
-  uniqueInView:
   dragProperty: "position"
 methods:
   toggleVisibility:
@@ -51,7 +50,6 @@ events:
   dragStart:
   dragMove:
   dragEnd:
-  draggingFromView:
 scripts:
 - source: "http://vwf.example.com/kinetic/node.js"
 

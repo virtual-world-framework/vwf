@@ -3,108 +3,16 @@
 define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ], 
     function( module, view, $, utility, color ) {
 
-    var self;
+    var viewDriver;
     var stageContainer;
     var stageWidth = 800;
     var stageHeight = 600;
-
-    function processEvent( e, node, propagate ) {
-        var returnData = { eventData: undefined, eventNodeData: undefined };
-
-        if ( !propagate ) {
-            // For the "dragend" event, kinetic sometimes sends us an event object that doesn't
-            // have all the expected functions and properties attached
-            e.evt.stopPropagation && e.evt.stopPropagation();
-        }
-
-        var eventPosition;
-        var isTouchEvent = ( e.evt instanceof TouchEvent );
-        if ( isTouchEvent ) {
-            eventPosition = e.evt.changedTouches[ 0 ];
-        } else {
-            eventPosition = e.evt;
-        }
-
-        var stage = node && node.stage;
-        returnData.eventData = [ convertBrowserEventDataToVwf( eventPosition, stage ) ];
-
-        var eventDataElement = returnData.eventData[ 0 ];
-        eventDataElement.button = e.evt.button;
-        eventDataElement.timeStamp = e.evt.timeStamp;
-        eventDataElement.shiftKey = e.evt.shiftKey;
-        eventDataElement.ctrlKey = e.evt.ctrlKey;
-        eventDataElement.altKey = e.evt.altKey;
-        eventDataElement.metaKey = e.evt.metaKey;
-
-        if ( isTouchEvent ) {
-            returnData.eventData[ 0 ].touches = [];
-            for ( var i = 0; i < e.evt.touches.length; i++ ) {
-                returnData.eventData[ 0 ].touches[ i ] = convertBrowserEventDataToVwf( 
-                    e.evt.touches[ i ], 
-                    stage 
-                );
-            }    
-        }
-
-        if ( propagate ) {
-
-            var stageId = stage && stage.getId();
-            var pointerPickID = e.targetNode ? e.targetNode.getId() : stageId;
-
-            returnData.eventNodeData = { "": [ {
-                pickID: pointerPickID,
-            } ] };
-
-            if ( self && self.state.nodes[ pointerPickID ] ) {
-                var childID = pointerPickID;
-                var child = self.state.nodes[ childID ];
-                var parentID = child.parentID;
-                var parent = self.state.nodes[ child.parentID ];
-                while ( child ) {
-
-                    returnData.eventNodeData[ childID ] = [ {
-                        pickID: pointerPickID,
-                    } ];
-
-                    childID = parentID;
-                    child = self.state.nodes[ childID ];
-                    parentID = child ? child.parentID : undefined;
-                    parent = parentID ? self.state.nodes[ child.parentID ] : undefined;
-
-                }
-            }
-        }
-
-        return returnData;
-    }
-
-    function convertBrowserEventDataToVwf( browserEventData, stage ) {
-        var vwfEventData = { 
-            "location": [ browserEventData.x, browserEventData.y ],
-            "stageRelative": [ browserEventData.pageX, browserEventData.pageY ],
-            "client": [ browserEventData.clientX, browserEventData.clientY ],
-            "screen": [ browserEventData.screenX, browserEventData.screenY ],
-            "layer": [ browserEventData.layerX, browserEventData.layerY ],
-            "page": [ browserEventData.pageX, browserEventData.pageY ],
-            "offset": [ browserEventData.offsetX, browserEventData.offsetY ],
-            "movement": [ browserEventData.webkitMovementX, browserEventData.webkitMovementY ]
-        };
-
-        if ( stage ) {
-            vwfEventData.stage = [ stage.x(), stage.y() ];
-            vwfEventData.stageRelative = [ 
-                ( browserEventData.pageX - stage.x() ) / stage.scaleX(),
-                ( browserEventData.pageY - stage.y() ) / stage.scaleY()
-            ];    
-        }
-        return vwfEventData;
-    }
 
     return view.load( module, {
 
         initialize: function( options ) {
            
-            self = this;
+            viewDriver = this;
 
             this.arguments = Array.prototype.slice.call( arguments );
 
@@ -134,10 +42,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             }
 
             var protos = node.prototypes;
-            if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
-                
+            if ( viewDriver.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
                 var stage = this.state.stage = node.kineticObj;
- 
             }
                
         },
@@ -164,106 +70,119 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 node.kineticObj.on( "mousemove", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, 'pointerMove', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerMove', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, 'pointerMove', eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'pointerMove', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseout", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    self.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
+                    viewDriver.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseenter", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, 'pointerEnter', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerEnter', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, 'pointerEnter', eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'pointerEnter', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseleave", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    // self.kernel.dispatchEvent( node.ID, 'pointerLeave', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
+                    // viewDriver.kernel.dispatchEvent( node.ID, 'pointerLeave', eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mousedown", function( evt ) { 
                     var eData = processEvent( evt, node, false );
                     mouseDown = true;
-                    //self.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
                 } );
 
                 node.kineticObj.on( "mouseup", function( evt ) {
                     var eData = processEvent( evt, node, false );
                     mouseDown = false;
-                    //self.kernel.dispatchEvent( node.ID, 'pointerUp', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
-                    if ( node.kineticObj.mouseDragging ) {
-                        self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
-                        node.kineticObj.mouseDragging = false;
+                    //viewDriver.kernel.dispatchEvent( node.ID, 'pointerUp', eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
+
+                    viewDriver.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
+                    setViewProperty( node.ID, "x" );
+                    setViewProperty( node.ID, "y" );
+
+                    if ( viewDriver.state.draggingNodes[ node.ID ] !== undefined ) {
+                        //var x = viewDriver.state.getModelProperty( node.ID, "x" );
+                        //var y = viewDriver.state.getModelProperty( node.ID, "y" );
+                        delete viewDriver.state.draggingNodes[ node.ID ]; 
+                        //viewDriver.state.setModelProperty( node.ID, "x", x );
+                        //viewDriver.state.setModelProperty( node.ID, "y", y );   
                     }
+                     
                 } );
 
                 node.kineticObj.on( "click", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, 'pointerClick', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerClick', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, 'pointerClick', eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'pointerClick', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dblclick", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, 'pointerDoubleClick', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerDoubleClick', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, 'pointerDoubleClick', eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'pointerDoubleClick', eData.eventData );
                 } );
 
                 node.kineticObj.on( "touchstart", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "touchStart", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'touchStart', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, "touchStart", eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'touchStart', eData.eventData );
                 } );
 
                 node.kineticObj.on( "touchmove", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "touchMove", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'touchMove', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, "touchMove", eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'touchMove', eData.eventData );
                 } );
 
                 node.kineticObj.on( "touchend", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "touchEnd", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'touchEnd', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, "touchEnd", eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'touchEnd', eData.eventData );
                 } );
 
                 node.kineticObj.on( "tap", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "tap", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'tap', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, "tap", eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'tap', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dbltap", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'doubleTap', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'doubleTap', eData.eventData );
                 } );
 
                 node.kineticObj.on( "dragstart", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
-                    node.kineticObj.mouseDragging = true;
+                    //viewDriver.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
+                    
+                    viewDriver.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
+                    setViewProperty( node.ID, "x", viewDriver.state.getProperty( node.ID, "x" ) );
+                    setViewProperty( node.ID, "y", viewDriver.state.getProperty( node.ID, "y" ) );
+
+                    viewDriver.state.draggingNodes[ node.ID ] = true;
                 } );
 
                 node.kineticObj.on( "dragmove", function( evt ) {
                     var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "dragMove", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
+                    //viewDriver.kernel.dispatchEvent( node.ID, "dragMove", eData.eventData, eData.eventNodeData );
+                    viewDriver.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
                 } );
 
                 // I couldn't get this to work, so instead I keep track of mouseDragging separately
                 // in dragstart and mouseup (Eric - 11/18/14)
                 // node.kineticObj.on( "dragend", function( evt ) {
                 //     var eData = processEvent( evt, node, false );
-                //     //self.kernel.dispatchEvent( node.ID, "dragEnd", eData.eventData, eData.eventNodeData );
-                //     self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
+                //     //viewDriver.kernel.dispatchEvent( node.ID, "dragEnd", eData.eventData, eData.eventNodeData );
+                //     viewDriver.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
                 // } );
 
             }
@@ -314,7 +233,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     var timer = new Date();
 
                     var protos = node.prototypes;
-                    if ( self.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
+                    if ( viewDriver.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
 
                         var stage = kineticObj;
                         var TOUCH_EVENT = true;
@@ -335,28 +254,28 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                                 mouseDownId = ( node !== undefined ) ? node.getId() : stage.getId();
                                 mouseDown = true;
                                 mouseDownTime = timer.getTime();
-                                var eData = processEvent( evt, self.state.nodes[ mouseDownId ], true );  // false might be more corret here
+                                var eData = processEvent( evt, viewDriver.state.nodes[ mouseDownId ], true );  // false might be more corret here
 
-                                self.kernel.dispatchEvent( mouseDownId, 'pointerDown', eData.eventData, eData.eventNodeData );
+                                viewDriver.kernel.dispatchEvent( mouseDownId, 'pointerDown', eData.eventData, eData.eventNodeData );
                             });
 
                             stage.on( 'contentMousemove', function( evt ) {
                                 var node = evt.targetNode;
                                 
-                                var eData = processEvent( evt, self.state.nodes[ mouseDownId ], true );  // false might be more corret here
+                                var eData = processEvent( evt, viewDriver.state.nodes[ mouseDownId ], true );  // false might be more corret here
 
-                                self.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerMove', eData.eventData, eData.eventNodeData ); 
+                                viewDriver.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerMove', eData.eventData, eData.eventNodeData ); 
                             });
 
                             stage.on( 'contentMouseup', function( evt ) {
                                 var node = evt.targetNode;
                                 mouseDown = false;
 
-                                var eData = processEvent( evt, self.state.nodes[ mouseDownId ], true );  // false might be more corret here
+                                var eData = processEvent( evt, viewDriver.state.nodes[ mouseDownId ], true );  // false might be more corret here
                                 if ( timer.getTime() - mouseDownTime < 700.0 ) {
-                                    self.kernel.dispatchEvent( mouseDownId, 'pointerClick', eData.eventData, eData.eventNodeData );
+                                    viewDriver.kernel.dispatchEvent( mouseDownId, 'pointerClick', eData.eventData, eData.eventNodeData );
                                 }
-                                self.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerUp', eData.eventData, eData.eventNodeData );
+                                viewDriver.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerUp', eData.eventData, eData.eventNodeData );
 
                                 mouseDownTime = null;
                                 mouseDownId = null;
@@ -376,79 +295,90 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     }
                     break;
                 case "scale":
-                    if ( !node.uniqueInView ) {
+                    if ( node.model.scale !== undefined ) {
                         kineticObj.scale( { 
-                            "x": kineticObj.modelScaleX, 
-                            "y": kineticObj.modelScaleY 
+                            "x": node.model.scale.x, 
+                            "y": node.model.scale.y 
                         } );
                     }
                     break;
                 case "scaleX":
-                    if ( !node.uniqueInView ) {
-                        kineticObj.scaleX( kineticObj.modelScaleX );
+                    if ( node.model.scaleX !== undefined ) {
+                        kineticObj.scaleX( node.model.scaleX );
                     }
                     break;
                 case "scaleY":
-                    if ( !node.uniqueInView ) {
-                        kineticObj.scaleY( kineticObj.modelScaleY );
+                    if ( node.model.scaleX !== undefined ) {
+                        kineticObj.scaleY( node.model.scaleX );
                     }
                     break;
             }            
 
         },
 
-        firedEvent: function( nodeID, eventName ) {
-            if ( eventName == "draggingFromView" ) {
-                var clientThatSatProperty = self.kernel.client();
-                var me = self.kernel.moniker();
-
-                // If the transform property was initially updated by this view....
-                if ( clientThatSatProperty == me ) {
-
-                    // Tell the model not to update the view on the next position update because 
-                    // kinetic has already done so
-                    // (this event is fired right before this driver sets the model property, so we 
-                    // can be sure that the very next set of the position property is from us)
-                    var node = this.state.nodes[ nodeID ];
-                    node.viewIgnoreNextPositionUpdate = true;
+        calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+            
+            if ( this.kernel.client() === this.kernel.moniker() ) {
+                var prop, value, t;
+                switch ( methodName ) {
+                    
+                    case "setViewProperty":
+                        prop = methodParameters[ 0 ];
+                        value = methodParameters[ 1 ];
+                        t = methodParameters.length > 1 ? methodParameters[ 2 ] : "dynamic";
+                        
+                        setViewProperty( nodeID, prop, value, t );
+                        break;
                 }
             }
+
         },
 
+        // firedEvent: function( nodeID, eventName ) {
+        // },
+
         ticked: function( vwfTime ) {
-            var nodeIDs = Object.keys( this.state.nodes );
-            for ( var i = 0; i < nodeIDs.length; i++ ) {
-                var nodeID = nodeIDs[ i ];
-                var node = this.state.nodes[ nodeID ];
-
-                // If users can drag this node and all clients should stay synchronized, we must 
-                // pull the new node position out of kinetic and update the model with it
-                if ( node.kineticObj.draggable() && !node.uniqueInView ) {
-                    var kineticX = node.kineticObj.x();
-                    var kineticY = node.kineticObj.y();
-
-                    // If the position of this node has changes since it's last model value, set the
-                    // model property with the new value
-                    if ( ( node.kineticObj.modelX !== kineticX ) || 
-                        ( node.kineticObj.modelY !== kineticY ) ) {
-
-                        // Fire this event to notify the model that kinetic has already updated the
-                        // view and it doesn't need to (if the model set the value, it would risk 
-                        // having the model set the view back to an old value, which results in 
-                        // jitter while the user is dragging the node)
-                        vwf_view.kernel.fireEvent( nodeID, "draggingFromView" );
-                        vwf_view.kernel.setProperty( nodeID, "position", [ kineticX, kineticY ] );
-                    }
-                }
-            }
-            for ( var id in self.state.stages ){
-                renderScene( self.state.stages[ id ] );                
-            } 
-            
+            update( vwfTime );
         }
     
     
     } );
+
+    function update( vwfTime ) {
+        
+        // switch to update, when the tickless branch is merged to development
+        var nodeIDs = Object.keys( viewDriver.state.draggingNodes );
+        
+        for ( var i = 0; i < nodeIDs.length; i++ ) {
+            
+            var nodeID = nodeIDs[ i ];
+            var node = viewDriver.state.draggingNodes[ nodeID ];
+
+            // If users can drag this node and all clients should stay synchronized, we must 
+            // pull the new node position out of kinetic and update the model with it
+            if ( node.kineticObj.draggable() && node.model.x !== undefined && node.model.y !== undefined ) {
+                var kineticX = node.kineticObj.x();
+                var kineticY = node.kineticObj.y();
+
+                // If the position of this node has changes since it's last model value, set the
+                // model property with the new value
+                if ( ( node.model.x !== kineticX ) || 
+                    ( node.model.y !== kineticY ) ) {
+
+                    // Fire this event to notify the model that kinetic has already updated the
+                    // view and it doesn't need to (if the model set the value, it would risk 
+                    // having the model set the view back to an old value, which results in 
+                    // jitter while the user is dragging the node)
+                    viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
+                    viewDriver.kernel.setProperty( nodeID, "position", [ kineticX, kineticY ] );
+                }
+            }
+        }
+
+        for ( var id in viewDriver.state.stages ){
+            renderScene( viewDriver.state.stages[ id ] );                
+        }         
+    }
 
     function renderScene( stage ) {
         //window.requestAnimationFrame( renderScene( stage ) );
@@ -457,5 +387,119 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
     }
 
+    function processEvent( e, node, propagate ) {
+        var returnData = { eventData: undefined, eventNodeData: undefined };
+
+        if ( !propagate ) {
+            // For the "dragend" event, kinetic sometimes sends us an event object that doesn't
+            // have all the expected functions and properties attached
+            e.evt.stopPropagation && e.evt.stopPropagation();
+        }
+
+        var eventPosition;
+        var isTouchEvent = ( e.evt instanceof TouchEvent );
+        if ( isTouchEvent ) {
+            eventPosition = e.evt.changedTouches[ 0 ];
+        } else {
+            eventPosition = e.evt;
+        }
+
+        var stage = node && node.stage;
+        returnData.eventData = [ convertBrowserEventDataToVwf( eventPosition, stage ) ];
+
+        var eventDataElement = returnData.eventData[ 0 ];
+        eventDataElement.button = e.evt.button;
+        eventDataElement.timeStamp = e.evt.timeStamp;
+        eventDataElement.shiftKey = e.evt.shiftKey;
+        eventDataElement.ctrlKey = e.evt.ctrlKey;
+        eventDataElement.altKey = e.evt.altKey;
+        eventDataElement.metaKey = e.evt.metaKey;
+
+        if ( isTouchEvent ) {
+            returnData.eventData[ 0 ].touches = [];
+            for ( var i = 0; i < e.evt.touches.length; i++ ) {
+                returnData.eventData[ 0 ].touches[ i ] = convertBrowserEventDataToVwf( 
+                    e.evt.touches[ i ], 
+                    stage 
+                );
+            }    
+        }
+
+        if ( propagate ) {
+
+            var stageId = stage && stage.getId();
+            var pointerPickID = e.targetNode ? e.targetNode.getId() : stageId;
+
+            returnData.eventNodeData = { "": [ {
+                pickID: pointerPickID,
+            } ] };
+
+            if ( viewDriver && viewDriver.state.nodes[ pointerPickID ] ) {
+                var childID = pointerPickID;
+                var child = viewDriver.state.nodes[ childID ];
+                var parentID = child.parentID;
+                var parent = viewDriver.state.nodes[ child.parentID ];
+                while ( child ) {
+
+                    returnData.eventNodeData[ childID ] = [ {
+                        pickID: pointerPickID,
+                    } ];
+
+                    childID = parentID;
+                    child = viewDriver.state.nodes[ childID ];
+                    parentID = child ? child.parentID : undefined;
+                    parent = parentID ? viewDriver.state.nodes[ child.parentID ] : undefined;
+
+                }
+            }
+        }
+
+        return returnData;
+    }
+
+    function convertBrowserEventDataToVwf( browserEventData, stage ) {
+        var vwfEventData = { 
+            "location": [ browserEventData.x, browserEventData.y ],
+            "stageRelative": [ browserEventData.pageX, browserEventData.pageY ],
+            "client": [ browserEventData.clientX, browserEventData.clientY ],
+            "screen": [ browserEventData.screenX, browserEventData.screenY ],
+            "layer": [ browserEventData.layerX, browserEventData.layerY ],
+            "page": [ browserEventData.pageX, browserEventData.pageY ],
+            "offset": [ browserEventData.offsetX, browserEventData.offsetY ],
+            "movement": [ browserEventData.webkitMovementX, browserEventData.webkitMovementY ]
+        };
+
+        if ( stage ) {
+            vwfEventData.stage = [ stage.x(), stage.y() ];
+            vwfEventData.stageRelative = [ 
+                ( browserEventData.pageX - stage.x() ) / stage.scaleX(),
+                ( browserEventData.pageY - stage.y() ) / stage.scaleY()
+            ];    
+        }
+        return vwfEventData;
+    }
+
+    function setViewProperty( id, propertyName, propertyValue, type ) {
+        
+        //console.info( "setViewProperty( "+id+", "+propertyName+", "+propertyValue+", "+type+" )" );
+        node = viewDriver.state.nodes[ id ];
+        if ( node && node.kineticObj ) {
+            if ( utility.validObject( propertyValue ) ) {
+                if ( node.model[ propertyName ] === undefined ) {
+                    node.model[ propertyName ] = {
+                        "value": viewDriver.state.getProperty( node.kineticObj, propertyName ),
+                        "type": type
+                    };
+                }
+                viewDriver.state.setProperty( node.kineticObj, propertyName, propertyValue ); 
+            } else {
+                var modelValue = node.model[ propertyName ].value;
+                if ( modelValue !== undefined ) {
+                    delete node.model[ propertyName ]; 
+                    viewDriver.state.setProperty( node.kineticObj, propertyName, modelValue );   
+                }
+            }
+        }        
+    }
 
 });

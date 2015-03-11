@@ -28,6 +28,10 @@ this.isValid = function( obj ) {
 
 this.clientJoin = function( moniker ) {
 
+    if ( this.id === "http://vwf.example.com/kinetic/drawing.vwf" ){
+        return;
+    }
+
     // mirrors the initial state of the toolbar
     if ( !this.isValid( this.drawing_clients ) ) {
         this.drawing_clients = {};
@@ -45,7 +49,7 @@ this.clientJoin = function( moniker ) {
             "angle": 30
         };
     }
-    this.drawing_clients = this.drawing_clients;
+    //this.drawing_clients = this.drawing_clients;
 
 };
 
