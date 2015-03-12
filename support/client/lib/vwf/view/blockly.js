@@ -388,7 +388,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             self.delayedProperties = undefined;
         }
 
-        self.kernel.fireEvent( node.ID, "blocklyVisibleChanged", [ show ] );
+        if ( node && node.ID ) {
+            self.kernel.fireEvent( node.ID, "blocklyVisibleChanged", [ show ] );
+        }
     }
 
     function loadToolbox( toolboxDef ) {
