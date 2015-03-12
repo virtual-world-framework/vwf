@@ -256,6 +256,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             }
                             this.state.blockly.node = blocklyNode;
                             setBlockXML( blocklyNode );
+                            this.kernel.fireEvent( blocklyNode.ID, "blocklyVisibleChanged", [ getBlocklyUIVisibility() ] );
                         }
                         break;
 
@@ -391,6 +392,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         if ( node && node.ID ) {
             self.kernel.fireEvent( node.ID, "blocklyVisibleChanged", [ show ] );
         }
+    }
+
+    function getBlocklyUIVisibility() {
+        var div = document.getElementById( self.options.divParent );
+        var result = div.style.visibility === "visible" ? true : false;
+        return result;
     }
 
     function loadToolbox( toolboxDef ) {
