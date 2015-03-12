@@ -232,45 +232,30 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         // If the new node is the same as the old - exit early to prevent 
                         // breaking synchronization.
 
-                        if ( previousActiveNode === newActiveNodeId ) {
+                        if ( previousActiveNode === blocklyNode ) {
                             break;
                         }
 
+                        if ( previousActiveNode !== undefined ) {
+                            getBlockXML( previousActiveNode );
+                            this.state.blockly.node = undefined;
+                        }
+
                         if ( blocklyNode !== undefined ) {
-                            var show = true;
-
-                            //If there was already an active blockly node, deal with it before
-                            //activating the new one
-                            if ( previousActiveNode !== undefined ) {
-                               getBlockXML( previousActiveNode );
-                               setBlocklyUIVisibility( previousActiveNode, false ); 
-                               show = ( previousActiveNode.ID !== newActiveNodeId );
-                               this.state.blockly.node = undefined;                           
-                            }
-
                             // If the new active node is different than the old,
                             // then we need to load its program into the toolbox
-                            if ( show ) {
-                                if ( blocklyNode.toolbox !== undefined ) {
-                                    loadToolbox( blocklyNode.toolbox );    
-                                } else if ( app.toolbox !== undefined ) {
-                                    loadToolbox( app.toolbox );
-                                }
-                                if ( blocklyNode.defaultXml !== undefined ) {
-                                    loadDefaultXml( blocklyNode.defaultXml );    
-                                } else if ( app.defaultXml !== undefined ) {
-                                    loadDefaultXml( app.defaultXml ); 
-                                }                               
-                                this.state.blockly.node = blocklyNode;
-                                setBlockXML( blocklyNode );
-                                setBlocklyUIVisibility( blocklyNode, true );
-                            }                        
-                        } else {
-                            if ( previousActiveNode !== undefined ) {
-                                getBlockXML( previousActiveNode );
-                                setBlocklyUIVisibility( previousActiveNode, false );
-                                this.state.blockly.node = undefined;                            
-                            } 
+                            if ( blocklyNode.toolbox !== undefined ) {
+                                loadToolbox( blocklyNode.toolbox );
+                            } else if ( app.toolbox !== undefined ) {
+                                loadToolbox( app.toolbox );
+                            }
+                            if ( blocklyNode.defaultXml !== undefined ) {
+                                loadDefaultXml( blocklyNode.defaultXml );
+                            } else if ( app.defaultXml !== undefined ) {
+                                loadDefaultXml( app.defaultXml );
+                            }
+                            this.state.blockly.node = blocklyNode;
+                            setBlockXML( blocklyNode );
                         }
                         break;
 
