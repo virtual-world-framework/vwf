@@ -276,6 +276,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             this.delayedProperties.blockly_autoClose = Boolean( propertyValue );
                         }
                         break;
+
+                    case "blockly_interfaceVisible":
+                        setBlocklyUIVisibility( this.state.blockly.node, propertyValue );
+                        break;
                 }
 
             } else if ( this.state.blockly.node && ( nodeID === this.state.blockly.node.ID ) ) {
