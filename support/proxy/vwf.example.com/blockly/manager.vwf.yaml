@@ -27,6 +27,5 @@ properties:
 methods:
   startAllExecution:
   stopAllExecution:
-  stopExecutionForNode:
 events:
   blocklyContentChanged:
