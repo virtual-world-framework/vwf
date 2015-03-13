@@ -232,6 +232,9 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/view/hud/hud" ], function( 
             oldImage = node.viewObject[ keys[ i ] ];
             if ( newImageSrc && oldImage instanceof Image && newImageSrc !== oldImage.src ) {
                 oldImage.src = newImageSrc;
+            } else if ( !oldImage ) {
+                var newImage = node.viewObject[ keys[ i ] ] = new Image();
+                newImage.src = newImageSrc;
             }
         }
     }
