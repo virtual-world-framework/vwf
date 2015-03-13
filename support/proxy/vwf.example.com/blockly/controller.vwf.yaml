@@ -55,6 +55,7 @@ properties:
 methods:
   getWorldXYVector:
   blocklyClear:
+  stopExecution:
 events:
   blocklyStarted:
   blocklyExecuted:

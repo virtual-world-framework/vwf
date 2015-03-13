@@ -307,7 +307,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName, methodParameters ) { 
             var node = this.state.nodes[ nodeID ];
 
             if ( this.debug.methods ) {
@@ -317,7 +317,7 @@ define( [ "module", "vwf/model", "vwf/utility",
             if ( nodeID == this.kernel.application() ) {
                 
                 switch ( methodName ) {
-                    
+                        
                     case "stopAllExecution":
                         for ( var id in this.state.executingBlocks ) {
                             this.state.executingBlocks[ id ].interpreterStatus = "completed";
@@ -332,8 +332,6 @@ define( [ "module", "vwf/model", "vwf/utility",
                             this.kernel.fireEvent( id, "blocklyStarted", [ true ] );
                         }  
                         break;
-
-
                 }
             } else if ( node !== undefined ) {
                 switch ( methodName ) {
@@ -343,6 +341,17 @@ define( [ "module", "vwf/model", "vwf/utility",
                             Blockly.mainWorkspace.clear();
                             this.kernel.setProperty( nodeID, "blockly_xml", '<xml></xml>' );
                         }
+                        break;
+                    case "stopExecution":
+                        var currBlockly3Node = this.state.executingBlocks[ nodeID ];
+                        if ( currBlockly3Node ) {
+                            currBlockly3Node.interpreterStatus = "completed";
+                            this.kernel.setProperty( nodeID, 'blockly_executing', false );
+                            this.kernel.fireEvent( nodeID, "blocklyStopped", [ true ] );
+                        } else {
+                            this.logger.errorx("stopExecutionForNode", "Node with", nodeID, 
+                                "is not currently executing Blockly!");
+                        } 
                         break;
                 }
             }

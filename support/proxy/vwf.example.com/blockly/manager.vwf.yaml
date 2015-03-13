@@ -29,4 +29,3 @@ methods:
   stopAllExecution:
 events:
   blocklyContentChanged:
-  
