@@ -86,6 +86,8 @@ define( [ "module",
 
     var enableStereo = false;
 
+    var sceneRootID = undefined;
+
     return view.load( module, {
 
         initialize: function( options ) {
@@ -95,7 +97,7 @@ define( [ "module",
             checkCompatibility.call(this);
 
             this.state.appInitialized = false;
-
+            sceneRootID = this.kernel.application();
             this.pickInterval = 10;
             this.enableInputs = true;
             this.applicationWantsPointerEvents = false;
@@ -159,17 +161,18 @@ define( [ "module",
         createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName, callback /* ( ready ) */) {
             
+            sceneRootID = this.kernel.application();
             //the created node is a scene, and has already been added to the state by the model.
             //how/when does the model set the state object? 
             if ( this.state.scenes[ childID ] )
             {                
-                this.canvasQuery = $(this.rootSelector).append("<canvas id='" + this.kernel.application() + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
+                this.canvasQuery = $(this.rootSelector).append("<canvas id='" + sceneRootID + "' width='"+this.width+"' height='"+this.height+"' class='vwf-scene'/>"
                 ).children(":last");
                 
                 initScene.call(this,this.state.scenes[childID]);
             }
-            else if ( this.state.scenes[ this.kernel.application() ] ) {
-                var sceneNode = this.state.scenes[ this.kernel.application() ];
+            else if ( this.state.scenes[ sceneRootID ] ) {
+                var sceneNode = this.state.scenes[ sceneRootID ];
                 if ( sceneNode.camera.ID == childID ) {
                     setActiveCamera.call( this, sceneNode.camera.ID );    
                 }
@@ -183,7 +186,8 @@ define( [ "module",
         initializedNode: function( nodeID, childID ) {
 
             // If the node that was initialized is the application node, find the user's navigation object
-            var appID = this.kernel.application();
+            var appID = sceneRootID;
+
             if ( childID == appID ) {
 
                 if ( enableStereo ) {
@@ -206,6 +210,7 @@ define( [ "module",
                     }
                 }
                 this.state.appInitialized = true;
+
 
             } else {
 
@@ -289,7 +294,7 @@ define( [ "module",
                 } else if ( propertyName == "boundingBox" ) {
                     boundingBox = propertyValue;
                 } else if ( propertyName == "activeCamera" ) {
-                    setActiveCamera.call( this, this.state.scenes[ this.kernel.application() ].camera.ID );
+                    setActiveCamera.call( this, this.state.scenes[ sceneRootID ].camera.ID );
                 } else if ( propertyName == "usersShareView" ) {
                     usersShareView = propertyValue;
                 }
@@ -315,7 +320,7 @@ define( [ "module",
         gotProperty: function ( nodeID, propertyName, propertyValue ) { 
             var clientThatGotProperty = this.kernel.client();
             var me = this.kernel.moniker();
-            var sceneRootID = this.kernel.application();
+
             if ( clientThatGotProperty == me ) {
                 if ( propertyName == "owner") {
 
@@ -358,7 +363,7 @@ define( [ "module",
                                     // Retrieve the userObject property so we may create a navigation object from 
                                     // it for this user (the rest of the logic is in the gotProperty call for 
                                     // userObject)
-                                    this.kernel.getProperty( this.kernel.application(), "userObject" );
+                                    this.kernel.getProperty( sceneRootID, "userObject" );
                                     userObjectRequested = true;
                                 }
                             }
@@ -388,7 +393,7 @@ define( [ "module",
     
                         // TODO: The callback function is commented out because callbacks have not yet been 
                         //       implemented for createChild - see workaround in initializedNode
-                        this.kernel.createChild( this.kernel.application(), navObjectName, userObject, undefined, undefined /*,
+                        this.kernel.createChild( sceneRootID, navObjectName, userObject, undefined, undefined /*,
                                                  function( nodeID ) {
                             controlNavObject( this.state.nodes[ nodeID ] );
                         } */ );
