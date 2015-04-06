@@ -1,0 +1,51 @@
+--- 
+extends: http://vwf.example.com/node2.vwf
+properties:
+
+  echelon:
+    set: |
+      if ( this.echelon !== value ) {
+        this.echelon = value;
+        this.echelonChanged( value ); 
+      }  
+
+  affiliation:
+    set: |
+      if ( this.affiliation !== value ) {
+        this.affiliation = value;
+        this.affiliationChanged( value ); 
+      } 
+
+  fullName: 
+
+  tagName:
+
+  description:
+
+  symbolID:
+    set: |
+      if ( this.symbolID !== value ) {
+        this.symbolID = value;
+        this.symbolIDChanged( value ); 
+      }  
+
+  image:
+
+methods:
+
+  render:
+
+  handleRender:
+
+events:
+
+  imageRendered:
+
+  echelonChanged:
+
+  affiliationChanged:
+  
+  symbolIDChanged:
+
+scripts:
+- source: "unit.js"

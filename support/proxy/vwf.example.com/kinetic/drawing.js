@@ -21,15 +21,20 @@ this.clientWatch = function() {
 
 };
 
-this.isValid = function( obj ) {
-    var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
-    return ( objType != 'null' && objType != 'undefined' );
-}; 
+// this.isValid = function( obj ) {
+//     var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
+//     return ( objType != 'null' && objType != 'undefined' );
+// }; 
 
 this.clientJoin = function( moniker ) {
 
+    function isValid( obj ) {
+        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
+        return ( objType != 'null' && objType != 'undefined' );
+    };
+
     // mirrors the initial state of the toolbar
-    if ( !this.isValid( this.drawing_clients ) ) {
+    if ( !isValid( this.drawing_clients ) ) {
         this.drawing_clients = {};
     }
     if ( this.drawing_clients[ moniker ] === undefined ) {
@@ -77,10 +82,15 @@ this.setUpPrivate = function( moniker ) {
 
 this.setClientUIState = function( stateObj ) {
 
+    function isValid( obj ) {
+        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
+        return ( objType != 'null' && objType != 'undefined' );
+    };
+
     //console.info( "setClientUIState " + JSON.stringify( stateObj ) );
     if ( stateObj !== undefined ) {
-        if ( !this.isValid( this.drawing_clients ) || 
-             !this.isValid( this.drawing_clients[ this.client ] ) ) {
+        if ( !isValid( this.drawing_clients ) || 
+             !isValid( this.drawing_clients[ this.client ] ) ) {
             this.clientJoin( this.client );
         } 
         var clients = this.drawing_clients;
@@ -94,12 +104,16 @@ this.setClientUIState = function( stateObj ) {
 
 this.down = function( eventData, nodeData, touch ) {
 
-    if ( !this.isValid( this.drawing_clients ) || 
-         !this.isValid( this.drawing_clients[ this.client ] ) ) {
+    function isValid( obj ) {
+        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
+        return ( objType != 'null' && objType != 'undefined' );
+    };
+    if ( !isValid( this.drawing_clients ) || 
+         !isValid( this.drawing_clients[ this.client ] ) ) {
         this.clientJoin( this.client );
     } 
-    if ( !this.isValid( this.drawing_private ) || 
-         !this.isValid( this.drawing_private[ this.client ] ) ) {
+    if ( !isValid( this.drawing_private ) || 
+         !isValid( this.drawing_private[ this.client ] ) ) {
         this.setUpPrivate( this.client );
     }
 
@@ -107,7 +121,7 @@ this.down = function( eventData, nodeData, touch ) {
     var privateState = this.drawing_private[ this.client ];
     var drawingMode = userState.drawing_mode;
 
-    if ( privateState.drawingObject !== null ) {
+    if ( privateState.drawingObject !== null || drawingMode === 'none' ) {
         return;
     }
 
@@ -274,13 +288,23 @@ this.down = function( eventData, nodeData, touch ) {
 
 this.move = function( eventData, nodeData, touch ) {
 
-    if ( !this.isValid( this.drawing_clients ) || 
-         !this.isValid( this.drawing_clients[ this.client ] ) ) {
+    function isValid( obj ) {
+        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
+        return ( objType != 'null' && objType != 'undefined' );
+    };
+
+    if ( !isValid( this.drawing_clients ) || 
+         !isValid( this.drawing_clients[ this.client ] ) ) {
         this.clientJoin( this.client );
     } 
     if ( this.drawing_private === undefined || 
          this.drawing_private[ this.client ] === undefined ) {
         this.setUpPrivate( this.client );
+    }
+
+    var userState = this.drawing_clients[ this.client ];
+    if ( userState.drawing_mode === 'none' ) {
+        return;
     }
 
     this.update( eventData, nodeData, false );
@@ -327,10 +351,15 @@ this.up = function( eventData, nodeData, touch ) {
 };
 
 this.update = function( eventData, nodeData, upEvent ) {
+
+    function isValid( obj ) {
+        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
+        return ( objType != 'null' && objType != 'undefined' );
+    };
     
     if ( this.drawing_private === undefined || 
          this.drawing_private[ this.client ] === undefined || 
-         !this.isValid( this.drawing_clients ) ) {
+         !isValid( this.drawing_clients ) ) {
         return;
     }
 

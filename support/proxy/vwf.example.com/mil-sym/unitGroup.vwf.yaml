@@ -1,0 +1,61 @@
+--- 
+extends: http://vwf.example.com/kinetic/group.vwf
+properties: 
+  
+  mapPosition:
+    set: |
+      if ( value !== undefined ) {
+        this.mapPosition = value;
+        if ( this.icon && this.icon.symbolCenter ) {
+          this.position = {
+            "x": this.mapPosition.x - this.icon.symbolCenter.x,
+            "y": this.mapPosition.y - this.icon.symbolCenter.y
+          };
+        } else {
+          this.position = value;
+        } 
+      }
+    value: { "x": 0, "y": 0 }
+
+  threatShape: 
+    set: |
+      if ( this.threatShape !== value ) {
+        this.threatShape = value;
+        this.updateThreatShape();  
+      }
+    value: "circle"
+
+  showThreat:
+    set: |
+      if ( this.threatArea !== undefined ) {
+        this.threatArea.visible = value;
+      }
+    get: |
+      if ( this.threatArea !== undefined ) {
+        return this.threatArea.visible;
+      }
+      return false;      
+    value: false 
+
+  showBorder:
+    set: |
+      if ( this.border !== undefined ) {
+        this.border.visible = value;
+      }
+    get: |
+      if ( this.border !== undefined ) {
+        return this.border.visible;
+      }
+      return false;      
+    value: false
+
+methods:
+  updateThreatShape:
+
+  handleRender:
+
+events:
+  threatShapeChanged:
+
+scripts:
+- source: "unitGroup.js"
