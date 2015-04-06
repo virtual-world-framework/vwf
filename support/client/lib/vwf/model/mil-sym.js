@@ -24,7 +24,7 @@ define( [ "module",
           "jquery" ], 
     function( module, model, utility, Color, cws, $ ) {
 
-    var self;
+    var modelDriver;
 
     return model.load( module, {
 
@@ -34,7 +34,7 @@ define( [ "module",
 
         initialize: function( options ) {
             
-            self = this;
+            modelDriver = this;
 
             this.arguments = Array.prototype.slice.call( arguments );
 
@@ -57,7 +57,6 @@ define( [ "module",
                     };
                 }
             };
-
 
             // turns on logger debugger console messages 
             this.debug = {
@@ -109,6 +108,7 @@ define( [ "module",
 
             var protos = getPrototypes( childExtendsID );
             var node = this.state.nodes[ childID ];
+
             if ( node === undefined ) {
 
                 if ( isUnitNode( protos ) ) {
@@ -430,7 +430,7 @@ define( [ "module",
 
         while ( id !== undefined ) {
             prototypes.push( id );
-            id = self.kernel.prototype( id );
+            id = modelDriver.kernel.prototype( id );
         }
                 
         return prototypes;
@@ -440,7 +440,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "unit.vwf" );
+                found = ( prototypes[i] == "http://vwf.example.com/mil-sym/unit.vwf" );
             }
         }
        return found;
@@ -450,7 +450,7 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "modifier.vwf" );
+                found = ( prototypes[i] == "http://vwf.example.com/mil-sym/modifier.vwf" );
             }
         }
        return found;
@@ -459,6 +459,11 @@ define( [ "module",
 
 
     function render( node ) {
+
+        if ( node === undefined ) {
+            return;
+        }
+
         var value = undefined;
         
         if ( node !== undefined && node.nodeType === "unit" && node.symbolID !== undefined ) {
@@ -475,9 +480,9 @@ define( [ "module",
             // getting the events to replicate, this should be switched
             // back to the event when the replication is fixed.  handleRender
             // can then be completely removed
-            //self.kernel.fireEvent( node.ID, "imageRendered", [ node.image, imgSize, centerPt, symbolBounds ] );
+            //modelDriver.kernel.fireEvent( node.ID, "imageRendered", [ node.image, imgSize, centerPt, symbolBounds ] );
             
-            self.kernel.callMethod( node.ID, "handleRender", [ node.image, imgSize, centerPt, symbolBounds ] );
+            modelDriver.kernel.callMethod( node.ID, "handleRender", [ node.image, imgSize, centerPt, symbolBounds ] );
 
         } 
 
@@ -505,7 +510,7 @@ define( [ "module",
                     break;
                     
                 default:
-                    self.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified." );
+                    modelDriver.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified." );
                     return modifierSet;
             }
             
@@ -558,7 +563,7 @@ define( [ "module",
                     break;
                     
                 default:
-                    self.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
+                    modelDriver.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
                     return value;
             }
 
@@ -567,5 +572,6 @@ define( [ "module",
          
         return value;
     }
+
     
 } );

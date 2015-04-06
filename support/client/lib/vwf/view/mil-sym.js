@@ -96,15 +96,19 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         // -- calledMethod -----------------------------------------------------------------------------
 
         calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+
+            //console.info( nodeID + " " + methodName );
             if ( nodeID === this.kernel.application() ) {
                 var clientThatCalledMethod = this.kernel.client();
                 var me = this.kernel.moniker();
                 switch ( methodName ) {
+
                     case "insertUnits":
                         if ( clientThatCalledMethod === me ) {
                             addInsertableUnits( methodParameters[ 0 ] );
                         }
                         break;
+
                     case "getUnitSymbol":
                         if ( clientThatCalledMethod === me ) {
                             getUnitSymbol( methodParameters[ 0 ], methodParameters[ 1 ], methodParameters[ 2 ], methodParameters[ 3 ], methodParameters[ 4 ], methodParameters[ 5 ] );
