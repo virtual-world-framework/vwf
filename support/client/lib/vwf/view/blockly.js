@@ -100,7 +100,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 self.kernel.setProperty( childID, "toolbox", self.options.toolbox );
                 Blockly.inject( document.getElementById( self.options.divName ), { 
                     path: this.options.blocklyPath,
-                    toolbox: document.getElementById( self.options.toolbox ),
+                    toolbox: document.getElementById( self.options.toolbox )
                 } ); 
 
                 // HACK: Fix Blockly's hijacking of the backspace and delete keys in password fields
@@ -452,11 +452,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         // in Blockly.createDom_ when deleting blocks over the flyout
         // SJF: Overlap not present in Blockly with categories enabled
 
-        //var negateOverlap = 35;
+        // var negateOverlap = 35;
         Blockly.updateToolbox( xml );
-        //Blockly.mainWorkspace.scrollX = Blockly.mainWorkspace.flyout_.width_ + negateOverlap;
-        var translation = 'translate( 0, 0)';
-        Blockly.mainWorkspace.getCanvas().setAttribute('transform', translation);
+        // Blockly.mainWorkspace.scrollX = Blockly.mainWorkspace.flyout_.width_ + negateOverlap;
+        // var translation = 'translate( ' + Blockly.mainWorkspace.scrollX + ', 0 )';
+        // Blockly.mainWorkspace.getCanvas().setAttribute('transform', translation);
     }
 
     // domCopyToWorkspace copies the saved blocks to the workspace exactly
