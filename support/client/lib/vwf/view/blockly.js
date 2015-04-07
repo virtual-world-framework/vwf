@@ -101,7 +101,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 Blockly.inject( document.getElementById( self.options.divName ), { 
                     path: this.options.blocklyPath,
                     toolbox: document.getElementById( self.options.toolbox ),
-                    trashcan: false,
                 } ); 
 
                 // HACK: Fix Blockly's hijacking of the backspace and delete keys in password fields
@@ -451,10 +450,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     function cleanUpdateToolbox( xml ) {
         // negateOverlap is being use to negate some of the effect of the MARGIN variable
         // in Blockly.createDom_ when deleting blocks over the flyout
-        var negateOverlap = 35;
+        // SJF: Overlap not present in Blockly with categories enabled
+
+        //var negateOverlap = 35;
         Blockly.updateToolbox( xml );
-        Blockly.mainWorkspace.scrollX = Blockly.mainWorkspace.flyout_.width_ + negateOverlap;
-        var translation = 'translate(' + Blockly.mainWorkspace.scrollX + ', 0)';
+        //Blockly.mainWorkspace.scrollX = Blockly.mainWorkspace.flyout_.width_ + negateOverlap;
+        var translation = 'translate( 0, 0)';
         Blockly.mainWorkspace.getCanvas().setAttribute('transform', translation);
     }
 
