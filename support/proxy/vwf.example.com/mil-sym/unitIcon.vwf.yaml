@@ -1,0 +1,41 @@
+--- 
+extends: http://vwf.example.com/kinetic/image.vwf
+properties:
+
+  image:
+    set: |
+      if ( value !== undefined ) {
+        this.image = value;
+        this.imageChanged( value );
+      }
+
+  iconSize:
+    set: |
+      if ( value !== undefined ) {
+        this.iconSize = value;
+        this.iconSizeChanged( value );
+      }
+    value: { "width": 32, "height": 32 }
+
+  symbolCenter:
+    set: |
+      if ( value !== undefined ) {
+        this.symbolCenter = value;
+        this.symbolCenterChanged( value );
+      }
+    value: { "x": 16, "y": 16 }
+
+events:
+
+  imageChanged:
+
+  iconSizeChanged:
+
+  symbolCenterChanged:
+
+methods:
+
+  handleRender:
+
+scripts:
+- source: "unitIcon.js"
