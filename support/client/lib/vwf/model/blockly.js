@@ -231,6 +231,10 @@ define( [ "module", "vwf/model", "vwf/utility",
                         value = node.blocks = propertyValue;
                         break;
 
+                     case "blockly_timeBetweenLines":
+                        this.state.blockly.node.timeBetweenLines = propertyValue;
+                        break;
+
                     case "blockly_executing":
                         var exe = Boolean( propertyValue );
                         if ( exe ) {
@@ -376,6 +380,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                 for ( var nodeID in this.state.executingBlocks ) {
 
                     blocklyNode = this.state.executingBlocks[ nodeID ];
+
                     var executeNextLine = false;
 
                     if ( blocklyNode.interpreter === undefined ||
@@ -387,6 +392,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                     } else {
                         var elaspedTime = vwfTime - blocklyNode.lastLineExeTime;
                         if ( elaspedTime >= blocklyNode.timeBetweenLines ) {
+                            console.log( 'm'+ blocklyNode.timeBetweenLines );
                             executeNextLine = true;
                             blocklyNode.lastLineExeTime = vwfTime;
                         } 
