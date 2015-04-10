@@ -392,7 +392,6 @@ define( [ "module", "vwf/model", "vwf/utility",
                     } else {
                         var elaspedTime = vwfTime - blocklyNode.lastLineExeTime;
                         if ( elaspedTime >= blocklyNode.timeBetweenLines ) {
-                            console.log( 'm'+ blocklyNode.timeBetweenLines );
                             executeNextLine = true;
                             blocklyNode.lastLineExeTime = vwfTime;
                         } 
