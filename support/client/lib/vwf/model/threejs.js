@@ -1655,6 +1655,10 @@ define( [ "module",
                                 eval( this.updateFunction );
                             }
                         }
+                        if ( propertyName === "lights" ) {
+                            value = propertyValue;
+                            threeObject.lights = value;
+                        }
                     }
                 }
                 if ( node.isUniformObject ) {
