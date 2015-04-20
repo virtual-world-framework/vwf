@@ -220,6 +220,7 @@ define( [
                         setUrl( node, propertyValue );
                         value = node.url;
                         break;
+
                     case "loop":
                         setLoop( node, propertyValue );
                         value = node.loop;
@@ -362,11 +363,17 @@ define( [
                 switch( methodName ) {
                     
                     case "play":
-
-                        if( methodParameters ){
-                            this.kernel.setProperty( node.ID, "url", methodParameters );
+                        //TODO: Check if URL exists. If it doesn't, print out an error.
+                        //ALSO, node.url should be instantiated to null. Or something.
+                        //Basically, if the URL is never set, we have to catch that.
+                        //if( methodParameters ){
+                            //this.kernel.setProperty( node.ID, "url", methodParameters );
+                        //}
+                        if( node.url ) {
+                            node.jPlayerElement.jPlayer( "play" ); 
+                        } else {
+                                
                         }
-                        node.jPlayerElement.jPlayer( "play" ); 
                         break;
 
                     case "pause":
