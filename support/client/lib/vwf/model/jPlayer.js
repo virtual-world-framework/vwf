@@ -363,16 +363,10 @@ define( [
                 switch( methodName ) {
                     
                     case "play":
-                        //TODO: Check if URL exists. If it doesn't, print out an error.
-                        //ALSO, node.url should be instantiated to null. Or something.
-                        //Basically, if the URL is never set, we have to catch that.
-                        //if( methodParameters ){
-                            //this.kernel.setProperty( node.ID, "url", methodParameters );
-                        //}
                         if( node.url ) {
                             node.jPlayerElement.jPlayer( "play" ); 
                         } else {
-                                
+                            this.logger.errorx( "No URL given!" ); 
                         }
                         break;
 
