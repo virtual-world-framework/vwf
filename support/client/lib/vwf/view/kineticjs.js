@@ -258,14 +258,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 vwf_view.kernel.getProperty( childID, "supportMouseEvents" );
                 vwf_view.kernel.getProperty( childID, "supportTouchEvents" );
 
-                // I couldn't get this to work, so instead I keep track of mouseDragging separately
-                // in dragstart and mouseup (Eric - 11/18/14)
-                // node.kineticObj.on( "dragend", function( evt ) {
-                //     var eData = processEvent( evt, node, false );
-                //     //self.kernel.dispatchEvent( node.ID, "dragEnd", eData.eventData, eData.eventNodeData );
-                //     self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
-                // } );
-
             }
 
          },
@@ -412,28 +404,35 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         gotProperty: function( nodeID, propertyName, propertyValue ) {
  
             var node = this.state.nodes[ nodeID ];
+            var returnVal = false;
 
             // If we don't have a record of this node, it is not a kinetic node, and we ignore it
             if ( !( node && node.kineticObj ) ) {
-                return;
+                return returnVal;
             }
 
             switch ( propertyName ) {
                 case "supportMouseEvents":
-                    if ( propertyValue === true ) {
+                    if ( ( propertyValue === true ) && ( node.mouseEventsAdded === undefined ) ) {
                         attachMouseEvents( node );
+                        node.mouseEventsAdded = true;
+                        returnVal = node.mouseEventsAdded;
                     }
                     break;
                     
                 case "supportTouchEvents":
-                    if ( propertyValue === true ) {
+                    if ( ( propertyValue === true ) && ( node.touchEventsAdded === undefined ) ) {
                         attachTouchEvents( node );
+                        node.touchEventsAdded = true;
+                        returnVal = node.touchEventsAdded;
                     }
                     break;
 
                 default:
                     break;
-            }            
+            }
+
+            return returnVal;
         },
 
         firedEvent: function( nodeID, eventName ) {
