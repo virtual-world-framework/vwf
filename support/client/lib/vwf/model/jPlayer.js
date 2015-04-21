@@ -220,6 +220,7 @@ define( [
                         setUrl( node, propertyValue );
                         value = node.url;
                         break;
+
                     case "loop":
                         setLoop( node, propertyValue );
                         value = node.loop;
@@ -361,12 +362,21 @@ define( [
 
                 switch( methodName ) {
                     
-                    case "play":
-
-                        if( methodParameters ){
-                            this.kernel.setProperty( node.ID, "url", methodParameters );
+                    case "load":
+                        if( node.url ) {
+                            node.jPlayerElement.jPlayer( "load" ); 
+                            this.logger.infox( "Loading!" ); 
+                        } else {
+                            this.logger.errorx( "No URL given!" ); 
                         }
-                        node.jPlayerElement.jPlayer( "play" ); 
+                        break;
+
+                    case "play":
+                        if( node.url ) {
+                            node.jPlayerElement.jPlayer( "play" ); 
+                        } else {
+                            this.logger.errorx( "No URL given!" ); 
+                        }
                         break;
 
                     case "pause":
