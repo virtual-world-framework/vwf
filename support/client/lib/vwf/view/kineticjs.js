@@ -404,11 +404,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         gotProperty: function( nodeID, propertyName, propertyValue ) {
  
             var node = this.state.nodes[ nodeID ];
-            var returnVal = false;
+            var eventsAdded = false;
 
             // If we don't have a record of this node, it is not a kinetic node, and we ignore it
             if ( !( node && node.kineticObj ) ) {
-                return returnVal;
+                return eventsAdded;
             }
 
             switch ( propertyName ) {
@@ -416,7 +416,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     if ( ( propertyValue === true ) && ( node.mouseEventsAdded === undefined ) ) {
                         attachMouseEvents( node );
                         node.mouseEventsAdded = true;
-                        returnVal = node.mouseEventsAdded;
+                        eventsAdded = node.mouseEventsAdded;
                     }
                     break;
                     
@@ -424,7 +424,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     if ( ( propertyValue === true ) && ( node.touchEventsAdded === undefined ) ) {
                         attachTouchEvents( node );
                         node.touchEventsAdded = true;
-                        returnVal = node.touchEventsAdded;
+                        eventsAdded = node.touchEventsAdded;
                     }
                     break;
 
@@ -432,7 +432,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
             }
 
-            return returnVal;
+            return eventsAdded;
         },
 
         firedEvent: function( nodeID, eventName ) {
