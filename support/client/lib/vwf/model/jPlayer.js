@@ -363,7 +363,12 @@ define( [
                 switch( methodName ) {
                     
                     case "load":
-                        node.jPlayerElement.jPlayer( "load" ); 
+                        if( node.url ) {
+                            node.jPlayerElement.jPlayer( "load" ); 
+                            this.logger.infox( "Loading!" ); 
+                        } else {
+                            this.logger.errorx( "No URL given!" ); 
+                        }
                         break;
 
                     case "play":
