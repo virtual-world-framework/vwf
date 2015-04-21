@@ -31,6 +31,8 @@ properties:
   absoluteOpacity:
   absoluteZIndex:
   uniqueInView:
+  supportMouseEvents:
+  supportTouchEvents:
   dragProperty: "position"
 methods:
   toggleVisibility:

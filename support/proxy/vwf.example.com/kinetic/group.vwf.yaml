@@ -2,3 +2,6 @@
 
 --- 
 extends: http://vwf.example.com/kinetic/container.vwf
+properties:
+  supportMouseEvents: false
+  supportTouchEvents: false
