@@ -362,6 +362,10 @@ define( [
 
                 switch( methodName ) {
                     
+                    case "load":
+                        node.jPlayerElement.jPlayer( "load" ); 
+                        break;
+
                     case "play":
                         if( node.url ) {
                             node.jPlayerElement.jPlayer( "play" ); 
