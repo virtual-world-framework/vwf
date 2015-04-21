@@ -1608,7 +1608,7 @@ define( [ "module",
                         }
                     }
                 }
-                if ( threeObject instanceof THREE.Material ) {
+                if ( threeObject instanceof THREE.Material && !( threeObject instanceof THREE.ShaderMaterial ) ) {
 
                     value = setMaterialProperty( threeObject, propertyName, propertyValue );
 
@@ -1639,25 +1639,23 @@ define( [ "module",
                         if ( propertyName === "uniforms" ) {
                             value = propertyValue;
                             threeObject.uniforms = value;
-                        }
-                        if ( propertyName === "vertexShader" ) {
+                        } else if ( propertyName === "vertexShader" ) {
                             value = propertyValue;
                             threeObject.vertexShader = value;
-                        }
-                        if ( propertyName === "fragmentShader" ) {
+                        } else if ( propertyName === "fragmentShader" ) {
                             value = propertyValue;
                             threeObject.fragmentShader = value;
-                        }
-                        if ( propertyName === "updateFunction" ) {
+                        } else if ( propertyName === "updateFunction" ) {
                             value = propertyValue;
                             threeObject.updateFunction = value;
                             threeObject.update = function() {
                                 eval( this.updateFunction );
                             }
-                        }
-                        if ( propertyName === "lights" ) {
+                        } else if ( propertyName === "lights" ) {
                             value = propertyValue;
                             threeObject.lights = value;
+                        } else if ( !threeObject.hasOwnProperty( propertyName ) ) {
+                            threeObject[ propertyName ] = propertyValue;
                         }
                     }
                 }
