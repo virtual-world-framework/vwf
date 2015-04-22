@@ -33,6 +33,8 @@ properties:
   uniqueInView:
   supportMouseEvents:
   supportTouchEvents:
+  hasMouseEvents: false
+  hasTouchEvents: false
   dragProperty: "position"
 methods:
   toggleVisibility:

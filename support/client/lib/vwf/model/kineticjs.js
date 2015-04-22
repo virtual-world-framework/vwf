@@ -39,7 +39,9 @@ define( [ "module",
                         "prototypes": undefined,
                         "kineticObj": undefined,
                         "stage": undefined,
-                        "uniqueInView": false
+                        "uniqueInView": false,
+                        "hasMouseEvents": false,
+                        "hasTouchEvents": false
                     };
                 },
                 isKineticClass: function( prototypes, classID ) {

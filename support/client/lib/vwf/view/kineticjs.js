@@ -413,18 +413,18 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             switch ( propertyName ) {
                 case "supportMouseEvents":
-                    if ( ( propertyValue === true ) && ( node.mouseEventsAdded === undefined ) ) {
+                    if ( ( propertyValue === true ) && ( !node.hasMouseEvents ) ) {
                         attachMouseEvents( node );
-                        node.mouseEventsAdded = true;
-                        eventsAdded = node.mouseEventsAdded;
+                        node.hasMouseEvents = true;
+                        eventsAdded = node.hasMouseEvents;
                     }
                     break;
                     
                 case "supportTouchEvents":
-                    if ( ( propertyValue === true ) && ( node.touchEventsAdded === undefined ) ) {
+                    if ( ( propertyValue === true ) && ( !node.hasTouchEvents ) ) {
                         attachTouchEvents( node );
-                        node.touchEventsAdded = true;
-                        eventsAdded = node.touchEventsAdded;
+                        node.hasMouseEvents = true;
+                        eventsAdded = node.hasMouseEvents;
                     }
                     break;
 
