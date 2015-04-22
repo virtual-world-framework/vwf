@@ -221,6 +221,11 @@ define( [
                         value = node.url;
                         break;
 
+                    case "preload":
+                        setPreload( node, propertyValue );
+                        value = node.preload;
+                        break;
+
                     case "loop":
                         setLoop( node, propertyValue );
                         value = node.loop;
@@ -256,6 +261,9 @@ define( [
                                 }
                                 if ( node.loop !== undefined ) {
                                     setLoop( node, node.loop );
+                                }
+                                if ( node.preload !== undefined ) {
+                                    setPreload( node, node.preload );
                                 }
                                 if ( node.containerDivId !== undefined ) {
                                     setControlDivId( node, node.containerDivId );
@@ -362,14 +370,19 @@ define( [
 
                 switch( methodName ) {
                     
-                    case "load":
-                        if( node.url ) {
-                            node.jPlayerElement.jPlayer( "load" ); 
-                            this.logger.infox( "Loading!" ); 
-                        } else {
-                            this.logger.errorx( "No URL given!" ); 
-                        }
-                        break;
+                    //case "load":
+                        //if( node.url ) {
+                            //if( !node.loadedUrl || node.url !== node.loadedUrl ){
+                                //node.jPlayerElement.jPlayer( "load" ); 
+                                //node.loadedUrl = node.url;  
+                                //console.log("Loading!");
+                            //} else {
+                            //console.log("Not loading, becuase node.url matches node.loadedURL");
+                            //}
+                        //} else {
+                            //this.logger.errorx( "No URL given!" ); 
+                        //}
+                        //break;
 
                     case "play":
                         if( node.url ) {
@@ -439,6 +452,30 @@ define( [
         }
     }
 
+    Array.prototype.equals = function (array) {
+        // if the other array is a falsy value, return
+        if (!array)
+            return false;
+
+        // compare lengths - can save a lot of time 
+        if (this.length != array.length)
+            return false;
+
+        for (var i = 0, l=this.length; i < l; i++) {
+            // Check if we have nested arrays
+            if (this[i] instanceof Array && array[i] instanceof Array) {
+                // recurse into the nested arrays
+                if (!this[i].equals(array[i]))
+                    return false;       
+            }           
+            else if (this[i] != array[i]) { 
+                // Warning - two different object instances will never be equal: {x:20} != {x:20}
+                return false;   
+            }           
+        }       
+        return true;
+    }   
+
     function setUrl( node, inputUrl ) {
 
         var usingMultiUrls;
@@ -450,6 +487,10 @@ define( [
             usingMultiUrls = false;
             url = inputUrl;
         }          
+        if( node.url && url && (node.url).equals( url ) ){
+            console.log("Setting redudant URL! Quitting!");
+            return;
+        }
         node.url = url;
 
         // If there is no jPlayerElement, there is nothing to do yet so we return.
@@ -497,11 +538,20 @@ define( [
             // Otherwise, clear the current media
             if ( mediaObject ) {
                 node.jPlayerElement.jPlayer( "setMedia", mediaObject );
+                node.jPlayerElement.jPlayer( "load" ); 
             }  else {
                 node.jPlayerElement.jPlayer( "clearMedia" );
             }
         } else {
             node.jPlayerElement.jPlayer( "clearMedia" );
+        }
+    }
+
+    function setPreload( node, preload ) {
+        node.preload = preload;
+        if ( node.jPlayerElement ) {
+            node.jPlayerElement.jPlayer( "option", { preload: preload } );
+            console.log("Setting preload to: " + preload);
         }
     }
 
