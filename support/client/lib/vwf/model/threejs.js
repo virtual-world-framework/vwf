@@ -1654,7 +1654,7 @@ define( [ "module",
                         } else if ( propertyName === "lights" ) {
                             value = propertyValue;
                             threeObject.lights = value;
-                        } else if ( !threeObject.hasOwnProperty( propertyName ) ) {
+                        } else {
                             threeObject[ propertyName ] = propertyValue;
                         }
                     }
