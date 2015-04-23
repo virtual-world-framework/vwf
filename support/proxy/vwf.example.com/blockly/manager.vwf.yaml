@@ -24,9 +24,9 @@ properties:
   blockly_toolbox:
   blockly_defaultXml:
   blockly_autoClose:
+  blockly_interfaceVisible:
 methods:
   startAllExecution:
   stopAllExecution:
 events:
   blocklyContentChanged:
-  

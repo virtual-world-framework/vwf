@@ -2,12 +2,20 @@
 extends: http://vwf.example.com/node.vwf
 properties:
   url:
+  altUrls:
   posterImageUrl:
   loop: false
-  containerDivId: "videoContainer"
+  containerDivId: "jp_container_1"
   playerDivId: "videoScreen"
+  containerSize: [ 1024, 768 ]
+  playerSize: [ 1024, 768 ]
+  preload: "auto"
 methods:
-  play:
+  play: 
   pause:
-  stop:
-  
+  stop: 
+  show:
+  hide: 
+  clearMedia: 
+events:
+  videoEnded: 

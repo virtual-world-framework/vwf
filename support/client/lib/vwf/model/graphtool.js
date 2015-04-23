@@ -47,6 +47,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     "yAxisVisible": undefined,
                     "zAxisVisible": undefined,
                     "gridVisible": undefined,
+                    "graphVisible": undefined,
                     "axisOpacity": undefined,
                     "gridOpacity": undefined,
                     "renderTop": undefined
@@ -209,7 +210,12 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             case "yAxisVisible":
                             case "zAxisVisible":
                             case "gridVisible":
-                                setGraphVisibility( node, true );
+                                if ( propertyValue ) {
+                                    this.kernel.setProperty( nodeID, "graphVisible", true );
+                                }
+                                break;
+                            case "graphVisible":
+                                setGraphVisibility( node, propertyValue );
                                 break;
                             case "graphScale":
                                 redrawGraph( node );
@@ -264,15 +270,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         callingMethod: function( nodeID, methodName, methodParameters, methodValue ) {
             var node;
 
-            if ( this.state.graphs[ nodeID ] ) {
-                node = this.state.graphs[ nodeID ];
-                
-                if ( methodName === "setGraphVisibility" ) {
-                    var visible = methodParameters[0];
-                    setGraphVisibility( node, visible );
-                }
-
-            } else if ( this.state.objects[ nodeID ] ) {
+            if ( this.state.objects[ nodeID ] ) {
                 node = this.state.objects[ nodeID ];
 
                 if ( methodName === "setGroupItemProperty" ) {
@@ -391,6 +389,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 props.yAxisVisible,
                 props.zAxisVisible,
                 props.gridVisible,
+                props.graphVisible,
                 props.axisOpacity,
                 props.gridOpacity,
                 props.renderTop
@@ -541,7 +540,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     }
 
     function generateGraph( graphScale, gridInterval, gridLineInterval, gridLength, xAxisVisible, 
-                        yAxisVisible, zAxisVisible, gridVisible, axisOpacity, gridOpacity, renderTop ) {
+                        yAxisVisible, zAxisVisible, gridVisible, graphVisible, axisOpacity, gridOpacity, renderTop ) {
 
         var xAxis, yAxis, zAxis, gridX, gridY, axisLine;
         var thickness = 0.1;
@@ -552,15 +551,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         xAxis = generateLine( graphScale, [ 1, 0, 0 ], -gridLength, gridLength, [ 255, 0, 0 ], axisOpacity, thickness, renderTop );
         xAxis.name = "xAxis";
-        xAxis.visible = xAxisVisible;
+        xAxis.visible = xAxisVisible && graphVisible;
 
         yAxis = generateLine( graphScale, [ 0, 1, 0 ], -gridLength, gridLength, [ 0, 0, 255 ], axisOpacity, thickness, renderTop );
         yAxis.name = "yAxis";
-        yAxis.visible = yAxisVisible;
+        yAxis.visible = yAxisVisible && graphVisible;
 
         zAxis = generateLine( graphScale, [ 0, 0, 1 ], -gridLength, gridLength, [ 0, 255, 0 ], axisOpacity, thickness, renderTop );
         zAxis.name = "zAxis";
-        zAxis.visible = zAxisVisible;
+        zAxis.visible = zAxisVisible && graphVisible;
 
         if ( renderTop ) {
             xAxis.renderDepth = yAxis.renderDepth = zAxis.renderDepth = DEPTH_AXES;
@@ -583,11 +582,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             gridX = generateLine( graphScale, [ 1, 0, 0 ], -gridLength, gridLength, [ 255, 255, 255 ], gridOpacity, thickness, renderTop );
             gridX.position.set( 0, i, 0 );
-            gridX.visible = gridVisible;
+            gridX.visible = gridVisible && graphVisible;
 
             gridY = generateLine( graphScale, [ 0, 1, 0 ], -gridLength, gridLength, [ 255, 255, 255 ], gridOpacity, thickness, renderTop );
             gridY.position.set( i, 0, 0 );
-            gridY.visible = gridVisible;
+            gridY.visible = gridVisible && graphVisible;
 
             if ( renderTop ) {
                 gridX.renderDepth = gridY.renderDepth = DEPTH_GRID;

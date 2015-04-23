@@ -323,6 +323,9 @@
                     "vwf/model/blockly/msg/js/en": {
                         deps: [ "vwf/model/blockly/blockly_compressed" ]
                     },
+                    "vwf/model/hud/hud": {
+                        exports: "HUD"
+                    }
                 }
             };
 
@@ -363,6 +366,8 @@
                     active: false 
                 },
                 { library: "vwf/model/graphtool", active: false },
+                { library: "vwf/model/hud", active: false },
+                { library: "vwf/model/eventManager", active: false },
                 { library: "vwf/model/sound", active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
@@ -400,11 +405,13 @@
                     active: false 
                 },
                 { library: "vwf/view/blockly", active: false },
+                { library: "vwf/view/hud", active: false },
                 { library: "vwf/view/sound", active: false },
                 { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
                 { library: "vwf/view/kineticjs", active: false },
                 { library: "vwf/view/mil-sym", active: false },
+                { library: "vwf/view/jPlayer", linkedLibraries: ["vwf/model/jPlayer.2.7.1/jquery.jplayer.min"], active: false },
                 { library: "vwf/view/audio", active: false },
                 { library: "vwf/kernel/utility", active: true },
                 { library: "vwf/utility", active: true },
@@ -439,6 +446,8 @@
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/blockly", active: false },
                     { library: "vwf/model/graphtool", active: false },
+                    { library: "vwf/model/hud", active: false },
+                    { library: "vwf/model/eventManager", active: false },
                     { library: "vwf/model/sound", active: false },
                     { library: "vwf/model/kineticjs", active: false },
                     { library: "vwf/model/mil-sym", active: false },
@@ -456,10 +465,12 @@
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
                     { library: "vwf/view/blockly", active: false },
+                    { library: "vwf/view/hud", active: false },
                     { library: "vwf/view/sound", active: false },
                     { library: "vwf/view/touch", active: false },
                     { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/mil-sym", active: false },
+                    { library: "vwf/view/jPlayer", active: false },
                     { library: "vwf/view/audio", active: false },
                     { library: "vwf/view/webrtc", active: false}
                 ]
@@ -3177,73 +3188,87 @@ if ( ! childComponent.source ) {
 
             var delegated = false, assigned = false;
 
-            // Call settingProperty() on each model. The first model to return a non-undefined value
-            // has performed the set and dictates the return value. The property is considered set
-            // after all models have run.
+            if ( propertyName[ propertyName.length - 1 ] !== "$" ) {
 
-            this.models.some( function( model, index ) {
+                // Call settingProperty() on each model. The first model to return a non-undefined value
+                // has performed the set and dictates the return value. The property is considered set
+                // after all models have run.
 
-                // Skip initial models that an outer call has already invoked for this node and
-                // property (if any). If an inner call completed for this node and property, skip
-                // the remaining models.
+                this.models.some( function( model, index ) {
 
-                if ( ( ! reentered || index > entry.index ) && ! reentry.completed ) {
+                    // Skip initial models that an outer call has already invoked for this node and
+                    // property (if any). If an inner call completed for this node and property, skip
+                    // the remaining models.
 
-                    // Record the active model number.
- 
-                    reentry.index = index;
+                    if ( ( ! reentered || index > entry.index ) && ! reentry.completed ) {
 
-                    // Record the number of assignments made since the outermost call. When
-                    // `entrants.assignments` increases, a driver has called `setProperty` to make
-                    // an assignment elsewhere.
+                        // Record the active model number.
 
-                    var assignments = entrants.assignments;
+                        reentry.index = index;
 
-                    // Make the call.
+                        // Record the number of assignments made since the outermost call. When
+                        // `entrants.assignments` increases, a driver has called `setProperty` to make
+                        // an assignment elsewhere.
 
-                    if ( ! delegated && ! assigned ) {
-                        var value = model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, propertyValue );
-                    } else {
-                        model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, undefined );
+                        var assignments = entrants.assignments;
+
+                        // Make the call.
+
+                        if ( ! delegated && ! assigned ) {
+                            var value = model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, propertyValue );
+                        } else {
+                            model[settingPropertyEtc] && model[settingPropertyEtc]( nodeID, propertyName, undefined );
+                        }
+
+                        // Ignore the result if reentry is disabled and the driver attempted to call
+                        // back into the kernel. Kernel reentry is disabled during replication to
+                        // prevent coloring from accessor scripts.
+
+                        if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
+                            value = undefined;
+                        }
+
+                        // The property was delegated if the call made any assignments.
+
+                        if ( entrants.assignments !== assignments ) {
+                            delegated = true;
+                        }
+
+                        // Otherwise if the call returned a value, the property was assigned here.
+
+                        else if ( value !== undefined ) {
+                            entrants.assignments++;
+                            assigned = true;
+                        }
+
+                        // Record the value actually assigned. This may differ from the incoming value
+                        // if it was range limited, quantized, etc. by the model. This is the value
+                        // passed to the views.
+
+                        if ( value !== undefined ) {
+                            propertyValue = value;
+                        }
+
+                        // If we are setting, exit from the this.models.some() iterator once the value
+                        // has been set. Don't exit early if we are creating or initializing since every
+                        // model needs the opportunity to register the property.
+
+                        return settingPropertyEtc == "settingProperty" && ( delegated || assigned );
                     }
 
-                    // Ignore the result if reentry is disabled and the driver attempted to call
-                    // back into the kernel. Kernel reentry is disabled during replication to 
-                    // prevent coloring from accessor scripts.
+                }, this );
 
-                    if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
-                        value = undefined;
-                    }
+            } else {
 
-                    // The property was delegated if the call made any assignments.
+                var value = this.models.object[settingPropertyEtc]( nodeID, propertyName, propertyValue );
 
-                    if ( entrants.assignments !== assignments ) {
-                        delegated = true;
-                    }
-
-                    // Otherwise if the call returned a value, the property was assigned here.
-
-                    else if ( value !== undefined ) {
-                        entrants.assignments++;
-                        assigned = true;
-                    }
-
-                    // Record the value actually assigned. This may differ from the incoming value
-                    // if it was range limited, quantized, etc. by the model. This is the value
-                    // passed to the views.
-
-                    if ( value !== undefined ) {
-                        propertyValue = value;
-                    }
-
-                    // If we are setting, exit from the this.models.some() iterator once the value
-                    // has been set. Don't exit early if we are creating or initializing since every
-                    // model needs the opportunity to register the property.
-
-                    return settingPropertyEtc == "settingProperty" && ( delegated || assigned );
+                if ( value !== undefined ) {
+                    entrants.assignments++;
+                    assigned = true;
+                    propertyValue = value;
                 }
 
-            }, this );
+            }
 
             // Record the change if the property was assigned here.
 
@@ -3258,7 +3283,7 @@ if ( ! childComponent.source ) {
             // ephemeral, and views on late-joining clients would never see it, it's best to never
             // send those notifications.
 
-            if ( assigned ) {
+            if ( assigned && propertyName[ propertyName.length - 1 ] !== "$" ) {
                 this.views.forEach( function( view ) {
                     view[satPropertyEtc] && view[satPropertyEtc]( nodeID, propertyName, propertyValue );
                 } );
@@ -3350,65 +3375,78 @@ if ( ! childComponent.source ) {
 
             var delegated = false, retrieved = false;
 
-            // Call gettingProperty() on each model. The first model to return a non-undefined value
-            // dictates the return value.
+            if ( propertyName[ propertyName.length - 1 ] !== "$" ) {
 
-            this.models.some( function( model, index ) {
+                // Call gettingProperty() on each model. The first model to return a non-undefined value
+                // dictates the return value.
 
-                // Skip initial models that an outer call has already invoked for this node and
-                // property (if any). If an inner call completed for this node and property, skip
-                // the remaining models.
+                this.models.some( function( model, index ) {
 
-                if ( ( ! reentered || index > entry.index ) && ! reentry.completed ) {
+                    // Skip initial models that an outer call has already invoked for this node and
+                    // property (if any). If an inner call completed for this node and property, skip
+                    // the remaining models.
 
-                    // Record the active model number.
- 
-                    reentry.index = index;
+                    if ( ( ! reentered || index > entry.index ) && ! reentry.completed ) {
 
-                    // Record the number of retrievals made since the outermost call. When
-                    // `entrants.retrievals` increases, a driver has called `getProperty` to make
-                    // a retrieval elsewhere.
+                        // Record the active model number.
 
-                    var retrievals = entrants.retrievals;
+                        reentry.index = index;
 
-                    // Make the call.
+                        // Record the number of retrievals made since the outermost call. When
+                        // `entrants.retrievals` increases, a driver has called `getProperty` to make
+                        // a retrieval elsewhere.
 
-                    var value = model.gettingProperty &&
-                        model.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
+                        var retrievals = entrants.retrievals;
 
-                    // Ignore the result if reentry is disabled and the driver attempted to call
-                    // back into the kernel. Kernel reentry is disabled during replication to 
-                    // prevent coloring from accessor scripts.
+                        // Make the call.
 
-                    if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
-                        value = undefined;
+                        var value = model.gettingProperty &&
+                            model.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
+
+                        // Ignore the result if reentry is disabled and the driver attempted to call
+                        // back into the kernel. Kernel reentry is disabled during replication to
+                        // prevent coloring from accessor scripts.
+
+                        if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
+                            value = undefined;
+                        }
+
+                        // The property was delegated if the call made any retrievals.
+
+                        if ( entrants.retrievals !== retrievals ) {
+                            delegated = true;
+                        }
+
+                        // Otherwise if the call returned a value, the property was retrieved here.
+
+                        else if ( value !== undefined ) {
+                            entrants.retrievals++;
+                            retrieved = true;
+                        }
+
+                        // Record the value retrieved.
+
+                        if ( value !== undefined ) {
+                            propertyValue = value;
+                        }
+
+                        // Exit from the this.models.some() iterator once we have a return value.
+
+                        return delegated || retrieved;
                     }
 
-                    // The property was delegated if the call made any retrievals.
+                }, this );
 
-                    if ( entrants.retrievals !== retrievals ) {
-                        delegated = true;
-                    }
+            } else {
 
-                    // Otherwise if the call returned a value, the property was retrieved here.
+                var value = this.models.object.gettingProperty( nodeID, propertyName, propertyValue );  // TODO: probably don't need propertyValue here
 
-                    else if ( value !== undefined ) {
-                        entrants.retrievals++;
-                        retrieved = true;
-                    }
-
-                    // Record the value retrieved.
-
-                    if ( value !== undefined ) {
-                        propertyValue = value;
-                    }
-
-                    // Exit from the this.models.some() iterator once we have a return value.
-
-                    return delegated || retrieved;
+                if ( value !== undefined ) {
+                    entrants.retrievals++;
+                    propertyValue = value;
                 }
 
-            }, this );
+            }
 
             if ( reentered ) {
 
@@ -3447,9 +3485,11 @@ if ( ! childComponent.source ) {
 
                 // Call gotProperty() on each view.
 
-                this.views.forEach( function( view ) {
-                    view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
-                } );
+                if ( propertyName[ propertyName.length - 1 ] !== "$" ) {
+                    this.views.forEach( function( view ) {
+                        view.gotProperty && view.gotProperty( nodeID, propertyName, propertyValue );  // TODO: be sure this is the value actually gotten and not an intermediate value from above
+                    } );
+                }
 
             }
 

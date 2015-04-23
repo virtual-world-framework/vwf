@@ -1,4 +1,4 @@
-/// vwf/model/jPlayer.js is a sound driver
+/// vwf/model/jPlayer.js is a sound/video driver
 /// 
 /// @module vwf/model/jPlayer
 /// @requires vwf/model
@@ -12,8 +12,14 @@ define( [
 
     var modelDriver;
     var jPlayerInstanceCreated = false;
+    // NXM: For some reason, using the format below breaks video!
+    // var audioManagerProtoId = "http-vwf-example-com-jplayer-audioManager-vwf";
+    // var videoManagerProtoId = "http-vwf-example-com-jplayer-videoManager-vwf";
+
     var audioManagerProtoId = "http://vwf.example.com/jplayer/audioManager.vwf";
     var videoManagerProtoId = "http://vwf.example.com/jplayer/videoManager.vwf";
+
+    var jplayerContainerId = "jp_container_1";
 
     return model.load( module, {
 
@@ -22,6 +28,15 @@ define( [
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function( options ) {
+
+            var containerDiv = document.createElement( 'div' );
+            containerDiv.id = jplayerContainerId;
+            containerDiv.className = "jp-video jp-video-360p";
+            var playerDiv = document.createElement( 'div' );
+            playerDiv.id = "jquery_jplayer_1";
+            playerDiv.className = "jp-jplayer";
+            containerDiv.appendChild( playerDiv );
+            $( "body" ).append(containerDiv);
             
         	modelDriver = this;
 
@@ -67,7 +82,13 @@ define( [
                         }
                     }
                     return found;
-                }
+                },
+                "videoEndedCallback" : function() {
+                    var mediaManagerID = modelDriver.kernel.find( undefined, "/mediaManager" )[ 0 ];
+                    var videoManagerID = modelDriver.kernel.find( mediaManagerID, "videoManager" ) [ 0 ];
+                    console.log("Video ended callback in driver fired!");
+                    modelDriver.kernel.fireEvent(videoManagerID, "videoEnded");
+                },
             };
 
             // turns on logger debugger console messages 
@@ -199,10 +220,17 @@ define( [
                         setUrl( node, propertyValue );
                         value = node.url;
                         break;
+
+                    case "preload":
+                        setPreload( node, propertyValue );
+                        value = node.preload;
+                        break;
+
                     case "loop":
                         setLoop( node, propertyValue );
                         value = node.loop;
                         break;
+
                     case "playerDivId":
                         if ( propertyValue === node.playerDivId ) {
                             break;
@@ -215,12 +243,17 @@ define( [
                         if ( $existingElement.length ) {
                             node.jPlayerElement = $existingElement;
                         } else {
-                            node.jPlayerElement = $( "<div/>", {
-                                id: node.playerDivId
-                            } );
-                            $( "body" ).append( node.jPlayerElement );
+                            //Change the existing element to match the new name
+                            var playerDiv = document.createElement( 'div' );
+                            playerDiv.id = node.playerDivId;
+                            if( node.containerDivId ){
+                                $( "#" + node.containerDivId ).append( playerDiv );
+                            } else {
+                                $("#jp_container_1").append( playerDiv );
+                            }
+                            node.jPlayerElement = $( "#" + node.playerDivId );
                         }
-                        var fileTypes = ( node.managerType === "audio" ) ? "mp3,wav" : "m4v";
+                        var fileTypes = ( node.managerType === "audio" ) ? "mp3,wav" : "m4v,webmv";
                         node.jPlayerElement.jPlayer( {
                             ready: function() {
                                 if ( node.url !== undefined ) {
@@ -229,12 +262,20 @@ define( [
                                 if ( node.loop !== undefined ) {
                                     setLoop( node, node.loop );
                                 }
+                                if ( node.preload !== undefined ) {
+                                    setPreload( node, node.preload );
+                                }
                                 if ( node.containerDivId !== undefined ) {
                                     setControlDivId( node, node.containerDivId );
                                 }
                             },
-                            supplied: fileTypes
+                            supplied: fileTypes,
                         } );
+
+                        if ( node.playerDivId ) {
+                            $( "#" + node.playerDivId ).bind( $.jPlayer.event.ended, this.state.videoEndedCallback );
+                        }
+                        
                         value = node.playerDivId;
                         break;
                     case "containerDivId":
@@ -244,6 +285,14 @@ define( [
                     case "posterImageUrl":
                         setPosterImageUrl( node, propertyValue );
                         value = node.posterImageUrl;
+                        break;
+                    case "playerSize":
+                        setPlayerSize( node, propertyValue );
+                        value = node.playerSize;
+                        break;
+                    case "containerSize":
+                        setContainerSize( node, propertyValue );
+                        value = node.containerSize;
                         break;
                     default:
                         break;
@@ -301,7 +350,6 @@ define( [
             return node && node[ propertyName ];
         },
 
-
         // TODO: deletingMethod
 
         // -- callingMethod --------------------------------------------------------------------------
@@ -322,8 +370,26 @@ define( [
 
                 switch( methodName ) {
                     
+                    //case "load":
+                        //if( node.url ) {
+                            //if( !node.loadedUrl || node.url !== node.loadedUrl ){
+                                //node.jPlayerElement.jPlayer( "load" ); 
+                                //node.loadedUrl = node.url;  
+                                //console.log("Loading!");
+                            //} else {
+                            //console.log("Not loading, becuase node.url matches node.loadedURL");
+                            //}
+                        //} else {
+                            //this.logger.errorx( "No URL given!" ); 
+                        //}
+                        //break;
+
                     case "play":
-                        node.jPlayerElement.jPlayer( "play" ); 
+                        if( node.url ) {
+                            node.jPlayerElement.jPlayer( "play" ); 
+                        } else {
+                            this.logger.errorx( "No URL given!" ); 
+                        }
                         break;
 
                     case "pause":
@@ -334,6 +400,9 @@ define( [
                         node.jPlayerElement.jPlayer( "stop" );
                         break;
 
+                    case "clearMedia":
+                        node.jPlayerElement.jPlayer( "clearMedia" );
+                        break;
                 }  
 
             }
@@ -372,7 +441,60 @@ define( [
         }
     }
 
-    function setUrl( node, url ) {
+    function setVideoURL( mediaObj, url ) {
+        if ( url.search( "data:video/mp4" ) === 0 || url.search( ".mp4$" ) > -1 ) {
+            mediaObj.m4v = url;
+        } else if( url.search( ".webm$" ) > -1 ){
+            mediaObj.webmv = url; 
+        } else {
+            modelDriver.logger.errorx( "setUrl", 
+                "Unsupported video type for '", url, "'" );
+        }
+    }
+
+/*
+ *    Array.prototype.equals = function (array) {
+ *        // if the other array is a falsy value, return
+ *        if (!array)
+ *            return false;
+ *
+ *        // compare lengths - can save a lot of time 
+ *        if (this.length != array.length)
+ *            return false;
+ *
+ *        for (var i = 0, l=this.length; i < l; i++) {
+ *            // Check if we have nested arrays
+ *            if (this[i] instanceof Array && array[i] instanceof Array) {
+ *                // recurse into the nested arrays
+ *                if (!this[i].equals(array[i]))
+ *                    return false;       
+ *            }           
+ *            else if (this[i] != array[i]) { 
+ *                // Warning - two different object instances will never be equal: {x:20} != {x:20}
+ *                return false;   
+ *            }           
+ *        }       
+ *        return true;
+ *    }   
+ */
+
+    function setUrl( node, inputUrl ) {
+
+        var usingMultiUrls;
+        var url;
+        if( inputUrl && ( inputUrl.constructor === Array ) ){
+            usingMultiUrls = true; 
+            url = inputUrl[ 0 ];
+        } else {
+            usingMultiUrls = false;
+            url = inputUrl;
+        }          
+        
+        if( node.url && url && ( node.url === url ) ){
+            console.log("Setting redudant URL! Quitting!");
+            return;
+        }
+
         node.url = url;
 
         // If there is no jPlayerElement, there is nothing to do yet so we return.
@@ -386,31 +508,28 @@ define( [
         if ( url ) {
 
             // Construct the media object based on the type of file being passed in
-            var mediaObject;
+            var mediaObject = {};
+
             switch ( node.managerType ) {
                 case "audio":
+                    //TODO: Support multiple URLs for audio.
                     if ( url.search( "data:audio/mp3" ) === 0 ) {
-                        mediaObject = {
-                            mp3: url
-                        };
+                        medaObject.mp3 = url;
                     } else if ( url.search( "data:audio/wav" ) === 0 ) {
-                        mediaObject = {
-                            wav: url
-                        };
+                        mediaObject.wav = url;
                     } else {
                         modelDriver.logger.errorx( "setUrl", 
                             "Unsupported sound type for '", url, "'" );
                     }
                     break;
                 case "video":
-                    if ( url.search( "data:video/mp4" ) === 0 ) {
-                        mediaObject = {
-                            m4v: url,
-                            poster: node.posterImageUrl
-                        };
+                    mediaObject.poster = node.posterImageUrl;
+                    if( usingMultiUrls ) {
+                        for( var i = 0; i < inputUrl.length; i++ ) {
+                            setVideoURL( mediaObject, inputUrl[ i ] );
+                        }
                     } else {
-                        modelDriver.logger.errorx( "setUrl", 
-                            "Unsupported video type for '", url, "'" );
+                        setVideoURL( mediaObject, url );
                     }
                     break;
                 default:
@@ -423,11 +542,20 @@ define( [
             // Otherwise, clear the current media
             if ( mediaObject ) {
                 node.jPlayerElement.jPlayer( "setMedia", mediaObject );
+                node.jPlayerElement.jPlayer( "load" ); 
             }  else {
                 node.jPlayerElement.jPlayer( "clearMedia" );
             }
         } else {
             node.jPlayerElement.jPlayer( "clearMedia" );
+        }
+    }
+
+    function setPreload( node, preload ) {
+        node.preload = preload;
+        if ( node.jPlayerElement ) {
+            node.jPlayerElement.jPlayer( "option", { preload: preload } );
+            console.log("Setting preload to: " + preload);
         }
     }
 
@@ -440,9 +568,6 @@ define( [
 
     function setControlDivId( node, containerDivId ) {
         node.containerDivId = containerDivId;
-        if ( node.jPlayerElement ) {
-            node.jPlayerElement.jPlayer( "option", { cssSelectorAncestor: "#" + containerDivId } );
-        }
     }
 
     function setPosterImageUrl( node, posterImageUrl ) {
@@ -454,4 +579,14 @@ define( [
             } );
         }
     }
+
+    function setPlayerSize( node, playerSize ){
+        node.playerSize = playerSize;
+        node.jPlayerElement.jPlayer( "option", "size", {width: playerSize[0], height: playerSize[1]});
+    }
+
+    function setContainerSize( node, containerSize ){
+        node.containerSize = containerSize;
+    }
+
 } );
