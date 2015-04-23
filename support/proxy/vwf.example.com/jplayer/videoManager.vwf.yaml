@@ -9,8 +9,8 @@ properties:
   playerDivId: "videoScreen"
   containerSize: [ 1024, 768 ]
   playerSize: [ 1024, 768 ]
+  preload: "auto"
 methods:
-  load:
   play: 
   pause:
   stop: 

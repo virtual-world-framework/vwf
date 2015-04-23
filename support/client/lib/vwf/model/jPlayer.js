@@ -221,6 +221,11 @@ define( [
                         value = node.url;
                         break;
 
+                    case "preload":
+                        setPreload( node, propertyValue );
+                        value = node.preload;
+                        break;
+
                     case "loop":
                         setLoop( node, propertyValue );
                         value = node.loop;
@@ -256,6 +261,9 @@ define( [
                                 }
                                 if ( node.loop !== undefined ) {
                                     setLoop( node, node.loop );
+                                }
+                                if ( node.preload !== undefined ) {
+                                    setPreload( node, node.preload );
                                 }
                                 if ( node.containerDivId !== undefined ) {
                                     setControlDivId( node, node.containerDivId );
@@ -362,15 +370,6 @@ define( [
 
                 switch( methodName ) {
                     
-                    case "load":
-                        if( node.url ) {
-                            node.jPlayerElement.jPlayer( "load" ); 
-                            this.logger.infox( "Loading!" ); 
-                        } else {
-                            this.logger.errorx( "No URL given!" ); 
-                        }
-                        break;
-
                     case "play":
                         if( node.url ) {
                             node.jPlayerElement.jPlayer( "play" ); 
@@ -450,6 +449,12 @@ define( [
             usingMultiUrls = false;
             url = inputUrl;
         }          
+        
+        if( node.url && url && ( node.url === url ) ){
+            console.log("Setting redudant URL! Quitting!");
+            return;
+        }
+
         node.url = url;
 
         // If there is no jPlayerElement, there is nothing to do yet so we return.
@@ -497,11 +502,20 @@ define( [
             // Otherwise, clear the current media
             if ( mediaObject ) {
                 node.jPlayerElement.jPlayer( "setMedia", mediaObject );
+                node.jPlayerElement.jPlayer( "load" ); 
             }  else {
                 node.jPlayerElement.jPlayer( "clearMedia" );
             }
         } else {
             node.jPlayerElement.jPlayer( "clearMedia" );
+        }
+    }
+
+    function setPreload( node, preload ) {
+        node.preload = preload;
+        if ( node.jPlayerElement ) {
+            node.jPlayerElement.jPlayer( "option", { preload: preload } );
+            console.log("Setting preload to: " + preload);
         }
     }
 
