@@ -370,20 +370,6 @@ define( [
 
                 switch( methodName ) {
                     
-                    //case "load":
-                        //if( node.url ) {
-                            //if( !node.loadedUrl || node.url !== node.loadedUrl ){
-                                //node.jPlayerElement.jPlayer( "load" ); 
-                                //node.loadedUrl = node.url;  
-                                //console.log("Loading!");
-                            //} else {
-                            //console.log("Not loading, becuase node.url matches node.loadedURL");
-                            //}
-                        //} else {
-                            //this.logger.errorx( "No URL given!" ); 
-                        //}
-                        //break;
-
                     case "play":
                         if( node.url ) {
                             node.jPlayerElement.jPlayer( "play" ); 
