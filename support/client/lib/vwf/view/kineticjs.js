@@ -423,8 +423,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "supportTouchEvents":
                     if ( ( propertyValue === true ) && ( !node.hasTouchEvents ) ) {
                         attachTouchEvents( node );
-                        node.hasMouseEvents = true;
-                        eventsAdded = node.hasMouseEvents;
+                        node.hasTouchEvents = true;
+                        eventsAdded = node.hasTouchEvents;
                     }
                     break;
 

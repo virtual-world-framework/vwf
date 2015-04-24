@@ -10,6 +10,7 @@ properties:
   visible:
   isVisible:
   listening:
+  isListening:
   id:
   name:
   opacity:
@@ -38,6 +39,7 @@ properties:
   dragProperty: "position"
 methods:
   toggleVisibility:
+  toggleListening:
 events:
   pointerMove:
   pointerOut:

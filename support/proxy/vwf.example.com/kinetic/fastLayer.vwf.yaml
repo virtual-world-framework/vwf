@@ -6,3 +6,5 @@ properties:
   clearBeforeDraw:
   supportMouseEvents: false
   supportTouchEvents: false
+  hitGraphEnabled: false
+  listening: false
