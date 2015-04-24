@@ -1635,9 +1635,20 @@ define( [ "module",
                 if ( threeObject instanceof THREE.ShaderMaterial ) {
                     
                     if ( utility.validObject( propertyValue ) ) {
-                        
                         if ( propertyName === "uniforms" ) {
-                            value = propertyValue;
+                            // Copy uniforms to prevent uniforms being shared across shaders
+                            var names = Object.keys( propertyValue );
+                            var uniforms = {};
+                            for ( var i = 0; i < names.length; i++ ) {
+                                var type, value;
+                                type = propertyValue[ names[ i ] ].type;
+                                value = propertyValue[ names[ i ] ].value;
+                                uniforms[ names[ i ] ] = {
+                                    "type": type,
+                                    "value": getUniformValueByType( type, value )
+                                }
+                            }
+                            value = uniforms;
                             threeObject.uniforms = value;
                         } else if ( propertyName === "vertexShader" ) {
                             value = propertyValue;
@@ -1654,7 +1665,10 @@ define( [ "module",
                         } else if ( propertyName === "lights" ) {
                             value = propertyValue;
                             threeObject.lights = value;
-                        } else {
+                        } else if ( threeObject.uniforms.hasOwnProperty( propertyName ) ) {
+                            var type = threeObject.uniforms[ propertyName ].type;
+                            setUniformProperty( threeObject.uniforms, propertyName, type, propertyValue );
+                        } else if ( propertyName.indexOf("_") === 0 ) {
                             threeObject[ propertyName ] = propertyValue;
                         }
                     }
@@ -5575,6 +5589,35 @@ define( [ "module",
                 break;
         } 
     
+    }
+    function getUniformValueByType( type, value ) {
+        var result = value;
+        switch ( type ) {
+            case 'i':
+                result = Number( value );
+                break
+            case 'f':
+                result = parseFloat( value );
+                break;
+            case 'c':
+                result = new THREE.Color( value );
+                break;
+            case 'v2':
+                result = new THREE.Vector2( value[0], value[1] );
+                break;
+            case 'v3':
+                result = new THREE.Vector3( value[0], value[1], value[2] );
+                break;
+            case 'v4':
+                result = new THREE.Vector4( value[0], value[1], value[2], value[3] );
+                break;
+            case 't':
+                if ( value ) {
+                    result = loadTexture( undefined, value );
+                }
+                break;
+        }
+        return result;
     }
     function decompress(dataencoded)
     {
