@@ -5563,6 +5563,13 @@ define( [ "module",
                 obj[ prop ].src = value;
                 obj[ prop ].value = loadTexture( undefined, value );
                 break;
+            case 'tv':
+                var textureArray = [];
+                for ( var i = 0; i < value.length; i++ ) {
+                    textureArray.push( loadTexture( undefined, value[ i ] ) );
+                }
+                obj[ prop ].value = textureArray;
+                break;
         } 
     
     }
@@ -5592,6 +5599,12 @@ define( [ "module",
                     result = loadTexture( undefined, value );
                 }
                 break;
+            case 'tv':
+                result = [];
+                for ( var i = 0; i < value.length; i++ ) {
+                    result.push( loadTexture( undefined, value[ i ] ) );
+                }
+                break;
         }
         return result;
     }
@@ -5611,6 +5624,7 @@ define( [ "module",
         var txt = undefined;
         var url = undefined;
         var mapping = undefined;
+        var wrapTexture = false;
         var onLoad = function( texture ) {
             if ( mat ) {
                 mat.map = texture;
@@ -5629,6 +5643,7 @@ define( [ "module",
         } else {
             url = def.url;
             mapping = def.mapping;
+            wrapTexture = Boolean( def.wrapTexture );
         }
 
         if ( mat === undefined ) {
@@ -5639,6 +5654,10 @@ define( [ "module",
             }
         } else {
             txt = THREE.ImageUtils.loadTexture( url, mapping, onLoad, onError );            
+        }
+
+        if ( wrapTexture ) {
+            txt.wrapS = txt.wrapT = THREE.RepeatWrapping;
         }
 
         return txt;
