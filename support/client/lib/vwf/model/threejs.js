@@ -1608,7 +1608,7 @@ define( [ "module",
                         }
                     }
                 }
-                if ( threeObject instanceof THREE.Material ) {
+                if ( threeObject instanceof THREE.Material && !( threeObject instanceof THREE.ShaderMaterial ) ) {
 
                     value = setMaterialProperty( threeObject, propertyName, propertyValue );
 
@@ -1635,25 +1635,41 @@ define( [ "module",
                 if ( threeObject instanceof THREE.ShaderMaterial ) {
                     
                     if ( utility.validObject( propertyValue ) ) {
-                        
                         if ( propertyName === "uniforms" ) {
-                            value = propertyValue;
+                            // Copy uniforms to prevent uniforms being shared across shaders
+                            var names = Object.keys( propertyValue );
+                            var uniforms = {};
+                            for ( var i = 0; i < names.length; i++ ) {
+                                var type, value;
+                                type = propertyValue[ names[ i ] ].type;
+                                value = propertyValue[ names[ i ] ].value;
+                                uniforms[ names[ i ] ] = {
+                                    "type": type,
+                                    "value": getUniformValueByType( type, value )
+                                }
+                            }
+                            value = uniforms;
                             threeObject.uniforms = value;
-                        }
-                        if ( propertyName === "vertexShader" ) {
+                        } else if ( propertyName === "vertexShader" ) {
                             value = propertyValue;
                             threeObject.vertexShader = value;
-                        }
-                        if ( propertyName === "fragmentShader" ) {
+                        } else if ( propertyName === "fragmentShader" ) {
                             value = propertyValue;
                             threeObject.fragmentShader = value;
-                        }
-                        if ( propertyName === "updateFunction" ) {
+                        } else if ( propertyName === "updateFunction" ) {
                             value = propertyValue;
                             threeObject.updateFunction = value;
                             threeObject.update = function() {
                                 eval( this.updateFunction );
                             }
+                        } else if ( propertyName === "lights" ) {
+                            value = propertyValue;
+                            threeObject.lights = value;
+                        } else if ( threeObject.uniforms.hasOwnProperty( propertyName ) ) {
+                            var type = threeObject.uniforms[ propertyName ].type;
+                            setUniformProperty( threeObject.uniforms, propertyName, type, propertyValue );
+                        } else if ( propertyName.indexOf("_") === 0 ) {
+                            threeObject[ propertyName ] = propertyValue;
                         }
                     }
                 }
@@ -5571,8 +5587,50 @@ define( [ "module",
                 obj[ prop ].src = value;
                 obj[ prop ].value = loadTexture( undefined, value );
                 break;
+            case 'tv':
+                var textureArray = [];
+                for ( var i = 0; i < value.length; i++ ) {
+                    textureArray.push( loadTexture( undefined, value[ i ] ) );
+                }
+                obj[ prop ].value = textureArray;
+                break;
         } 
     
+    }
+    function getUniformValueByType( type, value ) {
+        var result = value;
+        switch ( type ) {
+            case 'i':
+                result = Number( value );
+                break
+            case 'f':
+                result = parseFloat( value );
+                break;
+            case 'c':
+                result = new THREE.Color( value );
+                break;
+            case 'v2':
+                result = new THREE.Vector2( value[0], value[1] );
+                break;
+            case 'v3':
+                result = new THREE.Vector3( value[0], value[1], value[2] );
+                break;
+            case 'v4':
+                result = new THREE.Vector4( value[0], value[1], value[2], value[3] );
+                break;
+            case 't':
+                if ( value ) {
+                    result = loadTexture( undefined, value );
+                }
+                break;
+            case 'tv':
+                result = [];
+                for ( var i = 0; i < value.length; i++ ) {
+                    result.push( loadTexture( undefined, value[ i ] ) );
+                }
+                break;
+        }
+        return result;
     }
     function decompress(dataencoded)
     {
@@ -5590,6 +5648,7 @@ define( [ "module",
         var txt = undefined;
         var url = undefined;
         var mapping = undefined;
+        var wrapTexture = false;
         var onLoad = function( texture ) {
             if ( mat ) {
                 mat.map = texture;
@@ -5608,6 +5667,7 @@ define( [ "module",
         } else {
             url = def.url;
             mapping = def.mapping;
+            wrapTexture = Boolean( def.wrapTexture );
         }
 
         if ( mat === undefined ) {
@@ -5618,6 +5678,10 @@ define( [ "module",
             }
         } else {
             txt = THREE.ImageUtils.loadTexture( url, mapping, onLoad, onError );            
+        }
+
+        if ( wrapTexture ) {
+            txt.wrapS = txt.wrapT = THREE.RepeatWrapping;
         }
 
         return txt;
