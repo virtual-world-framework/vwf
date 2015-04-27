@@ -1194,6 +1194,14 @@ define( function(){
             "ZOR": "ZONE OF RESPONSIBILITY (ZOR)"
         },
 
+        "unk": {
+
+            "WAR.UNK": {
+                "symbolID": "SUZP------*****", 
+                "tag": "UNK"   
+            }
+        },
+
         "space": {
 
             "WAR.SPC": {
