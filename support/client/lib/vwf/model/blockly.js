@@ -240,6 +240,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                         if ( propertyValue > 0 && propertyValue <= 10 ) {
                             this.state.blockly.node.baseExecutionSpeed = propertyValue;
+                            console.log('speed set');
                         } else {
                             this.logger.errorx("baseExecutionSpeed", "Blockly node with", nodeID, 
                                 "must have base execution greater than 0 and less than 10.");
@@ -369,22 +370,6 @@ define( [ "module", "vwf/model", "vwf/utility",
                                 "is not currently executing Blockly!");
                         } 
                         break;
-                    case "changeBaseExecutionSpeed":
-                        if ( !methodParameters || methodParameters.length !== 1 ) {
-                            this.logger.errorx("changeBaseExecutionSpeed", "Node with", nodeID, 
-                                "takes one argument to change the Blockly base execution speed!");
-                            break;
-                        }
-
-                        var newValue = methodParameters[ 0 ];
-
-                        if ( newValue > 0 && newValue <= 10 ) {
-                            this.kernel.setProperty( nodeID, 'blockly_baseExecutionSpeed',newValue );
-                        } else {
-                            this.logger.errorx("changeBaseExecutionSpeed", "Blockly node with", 
-                                nodeID, "must have base execution greater than 0 and less than 10.");
-                        } 
-                        break;
                 }
             }
         },
@@ -410,7 +395,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                     blocklyNode = this.state.executingBlocks[ nodeID ];
 
                     var executeNextLine = false;
-
+                    
                     if ( blocklyNode.interpreter === undefined ||
                          blocklyNode.interpreterStatus === "completed" ) {
                         blocklyNode.interpreter = createInterpreter( acorn, blocklyNode.code );
@@ -419,7 +404,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         executeNextLine = true;
                     } else {
                         var elaspedTime = vwfTime - blocklyNode.lastLineExeTime;
-                        if ( elaspedTime >= blocklyNode.timeBetweenLines * blocklyNode.baseExecutionSpeed ) {
+                        if ( elaspedTime >= ( blocklyNode.timeBetweenLines * blocklyNode.baseExecutionSpeed ) ) {
                             executeNextLine = true;
                             blocklyNode.lastLineExeTime = vwfTime;
                         } 
