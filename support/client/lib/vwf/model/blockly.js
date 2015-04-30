@@ -240,7 +240,6 @@ define( [ "module", "vwf/model", "vwf/utility",
 
                         if ( propertyValue > 0 && propertyValue <= 10 ) {
                             this.state.blockly.node.baseExecutionSpeed = propertyValue;
-                            console.log('speed set');
                         } else {
                             this.logger.errorx("baseExecutionSpeed", "Blockly node with", nodeID, 
                                 "must have base execution greater than 0 and less than 10.");
