@@ -64,6 +64,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         "code": undefined,
                         "lastLineExeTime": undefined,
                         "timeBetweenLines": 1,
+                        "baseExecutionSpeed": 1,
                         "interpreter": undefined,
                         "interpreterStatus": ""
                     };
@@ -235,6 +236,17 @@ define( [ "module", "vwf/model", "vwf/utility",
                         this.state.blockly.node.timeBetweenLines = propertyValue;
                         break;
 
+                    case "blockly_baseExecutionSpeed":
+
+                        if ( propertyValue > 0 && propertyValue <= 10 ) {
+                            this.state.blockly.node.baseExecutionSpeed = propertyValue;
+                        } else {
+                            this.logger.errorx("baseExecutionSpeed", "Blockly node with", nodeID, 
+                                "must be in the range (0,10).");
+                        }
+                        
+                        break;
+
                     case "blockly_executing":
                         var exe = Boolean( propertyValue );
                         if ( exe ) {
@@ -382,7 +394,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                     blocklyNode = this.state.executingBlocks[ nodeID ];
 
                     var executeNextLine = false;
-
+                    
                     if ( blocklyNode.interpreter === undefined ||
                          blocklyNode.interpreterStatus === "completed" ) {
                         blocklyNode.interpreter = createInterpreter( acorn, blocklyNode.code );
@@ -391,7 +403,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         executeNextLine = true;
                     } else {
                         var elaspedTime = vwfTime - blocklyNode.lastLineExeTime;
-                        if ( elaspedTime >= blocklyNode.timeBetweenLines ) {
+                        if ( elaspedTime >= ( blocklyNode.timeBetweenLines * blocklyNode.baseExecutionSpeed ) ) {
                             executeNextLine = true;
                             blocklyNode.lastLineExeTime = vwfTime;
                         } 
