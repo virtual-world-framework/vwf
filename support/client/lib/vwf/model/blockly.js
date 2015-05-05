@@ -242,7 +242,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                             this.state.blockly.node.baseExecutionSpeed = propertyValue;
                         } else {
                             this.logger.errorx("baseExecutionSpeed", "Blockly node with", nodeID, 
-                                "must have base execution greater than 0 and less than 10.");
+                                "must be in the range (0,10).");
                         }
                         
                         break;
