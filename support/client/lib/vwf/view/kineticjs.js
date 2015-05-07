@@ -100,6 +100,102 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         return vwfEventData;
     }
 
+    function attachMouseEvents( node ) {
+
+        var mouseDown = false;
+
+        node.kineticObj.on( "mousemove", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'pointerMove', eData.eventData );
+        } );
+
+        node.kineticObj.on( "mouseout", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
+        } );
+
+        node.kineticObj.on( "mouseenter", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'pointerEnter', eData.eventData );
+        } );
+
+        node.kineticObj.on( "mouseleave", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
+        } );
+
+        node.kineticObj.on( "mousedown", function( evt ) { 
+            var eData = processEvent( evt, node, false );
+            mouseDown = true;
+            self.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
+        } );
+
+        node.kineticObj.on( "mouseup", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            mouseDown = false;
+            self.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
+            if ( node.kineticObj.mouseDragging ) {
+                self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
+                node.kineticObj.mouseDragging = false;
+            }
+        } );
+
+        node.kineticObj.on( "click", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'pointerClick', eData.eventData );
+        } );
+
+        node.kineticObj.on( "dblclick", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'pointerDoubleClick', eData.eventData );
+        } );
+
+        node.kineticObj.on( "dragstart", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
+            node.kineticObj.mouseDragging = true;
+        } );
+
+        node.kineticObj.on( "dragmove", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
+        } );
+
+    }
+
+    function attachTouchEvents( node ) {
+
+        var TOUCH_EVENT = true;
+
+        node.kineticObj.on( "touchstart", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'touchStart', eData.eventData );
+        } );
+
+        node.kineticObj.on( "touchmove", function( evt ) {
+            var eData = processEvent( evt, node, false );
+             self.kernel.fireEvent( node.ID, 'touchMove', eData.eventData );
+        } );
+
+        node.kineticObj.on( "touchend", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'touchEnd', eData.eventData );
+        } );
+
+        node.kineticObj.on( "tap", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'tap', eData.eventData );
+        } );
+
+        node.kineticObj.on( "dbltap", function( evt ) {
+            var eData = processEvent( evt, node, false );
+            self.kernel.fireEvent( node.ID, 'doubleTap', eData.eventData );
+        } );
+
+    }
+
+
+
     return view.load( module, {
 
         initialize: function( options ) {
@@ -156,115 +252,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 return;
             }
 
-            if ( node.kineticObj ) {
+            if ( node.kineticObj )  { 
 
-                var mouseDown = false;
-
-                var TOUCH_EVENT = true;
-
-                node.kineticObj.on( "mousemove", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, 'pointerMove', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerMove', eData.eventData );
-                } );
-
-                node.kineticObj.on( "mouseout", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    self.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
-                } );
-
-                node.kineticObj.on( "mouseenter", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, 'pointerEnter', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerEnter', eData.eventData );
-                } );
-
-                node.kineticObj.on( "mouseleave", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    // self.kernel.dispatchEvent( node.ID, 'pointerLeave', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
-                } );
-
-                node.kineticObj.on( "mousedown", function( evt ) { 
-                    var eData = processEvent( evt, node, false );
-                    mouseDown = true;
-                    //self.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
-                } );
-
-                node.kineticObj.on( "mouseup", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    mouseDown = false;
-                    //self.kernel.dispatchEvent( node.ID, 'pointerUp', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
-                    if ( node.kineticObj.mouseDragging ) {
-                        self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
-                        node.kineticObj.mouseDragging = false;
-                    }
-                } );
-
-                node.kineticObj.on( "click", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, 'pointerClick', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerClick', eData.eventData );
-                } );
-
-                node.kineticObj.on( "dblclick", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, 'pointerDoubleClick', eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'pointerDoubleClick', eData.eventData );
-                } );
-
-                node.kineticObj.on( "touchstart", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "touchStart", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'touchStart', eData.eventData );
-                } );
-
-                node.kineticObj.on( "touchmove", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "touchMove", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'touchMove', eData.eventData );
-                } );
-
-                node.kineticObj.on( "touchend", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "touchEnd", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'touchEnd', eData.eventData );
-                } );
-
-                node.kineticObj.on( "tap", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "tap", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'tap', eData.eventData );
-                } );
-
-                node.kineticObj.on( "dbltap", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'doubleTap', eData.eventData );
-                } );
-
-                node.kineticObj.on( "dragstart", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
-                    node.kineticObj.mouseDragging = true;
-                } );
-
-                node.kineticObj.on( "dragmove", function( evt ) {
-                    var eData = processEvent( evt, node, false );
-                    //self.kernel.dispatchEvent( node.ID, "dragMove", eData.eventData, eData.eventNodeData );
-                    self.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
-                } );
-
-                // I couldn't get this to work, so instead I keep track of mouseDragging separately
-                // in dragstart and mouseup (Eric - 11/18/14)
-                // node.kineticObj.on( "dragend", function( evt ) {
-                //     var eData = processEvent( evt, node, false );
-                //     //self.kernel.dispatchEvent( node.ID, "dragEnd", eData.eventData, eData.eventNodeData );
-                //     self.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
-                // } );
+                // Attach the mouse and/or touch events based on property settings
+                vwf_view.kernel.getProperty( childID, "supportMouseEvents" );
+                vwf_view.kernel.getProperty( childID, "supportTouchEvents" );
 
             }
 
@@ -305,6 +297,18 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             var kineticObj = node.kineticObj;
             switch ( propertyName ) {
+                case "supportMouseEvents":
+                    if ( propertyValue === true ) {
+                        attachMouseEvents( node );
+                    }
+                    break;
+                    
+                case "supportTouchEvents":
+                    if ( propertyValue === true ) {
+                        attachTouchEvents( node );
+                    }
+                    break;
+                    
                 case "enableEvents":
                     var mouseDown = false;
                     var touch = false;
@@ -395,6 +399,40 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
             }            
 
+        },
+
+        gotProperty: function( nodeID, propertyName, propertyValue ) {
+ 
+            var node = this.state.nodes[ nodeID ];
+            var eventsAdded = false;
+
+            // If we don't have a record of this node, it is not a kinetic node, and we ignore it
+            if ( !( node && node.kineticObj ) ) {
+                return eventsAdded;
+            }
+
+            switch ( propertyName ) {
+                case "supportMouseEvents":
+                    if ( ( propertyValue === true ) && ( !node.hasMouseEvents ) ) {
+                        attachMouseEvents( node );
+                        node.hasMouseEvents = true;
+                        eventsAdded = node.hasMouseEvents;
+                    }
+                    break;
+                    
+                case "supportTouchEvents":
+                    if ( ( propertyValue === true ) && ( !node.hasTouchEvents ) ) {
+                        attachTouchEvents( node );
+                        node.hasTouchEvents = true;
+                        eventsAdded = node.hasTouchEvents;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+            return eventsAdded;
         },
 
         firedEvent: function( nodeID, eventName ) {

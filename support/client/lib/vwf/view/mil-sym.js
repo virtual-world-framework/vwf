@@ -300,7 +300,11 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             switch ( options.request ) {
                 case "addQuickUnit":
                     unitEvent = "quickUnitAdded";
-                    self.kernel.fireEvent( appID, unitEvent, [ options.unitID, updatedUnit ] );
+                    if ( options.role ) {
+                        self.kernel.fireEvent( appID, unitEvent, [ options.role, options.unitID, updatedUnit ] );
+                    } else {
+                        self.kernel.fireEvent( appID, unitEvent, [ '', options.unitID, updatedUnit ] );                        
+                    }
                     break;
                 case "addFavoriteUnit":
                     unitEvent = "favoriteUnitAdded";

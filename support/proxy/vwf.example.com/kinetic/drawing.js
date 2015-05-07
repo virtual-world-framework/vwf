@@ -187,6 +187,7 @@ this.down = function( eventData, nodeData, touch ) {
     var getDefaultProperties = function( drawingMode, groupParent, eventPoint ) {
         var retObj = {
             "visible": 'inherit',
+            "listening": 'inherit',
             "opacity": userState.drawing_opacity,
             "z-index": 4
         };
@@ -236,6 +237,7 @@ this.down = function( eventData, nodeData, touch ) {
             "extends": groupExtends,
             "properties": {
                 "visible": false,
+                "listening": false,
                 "position": eventPointDown                
             },
             "children": {}
@@ -373,6 +375,9 @@ this.update = function( eventData, nodeData, upEvent ) {
 
         if ( drawingObject.visible !== userState.drawing_visible ) {
             drawingObject.visible = userState.drawing_visible;
+        }
+        if ( drawingObject.listening !== userState.drawing_listening ) {
+            drawingObject.listening = userState.drawing_listening;
         }
         var diffX = eventPoint[ 0 ] - privateState.initialDownPoint[ 0 ];
         var diffY = eventPoint[ 1 ] - privateState.initialDownPoint[ 1 ];

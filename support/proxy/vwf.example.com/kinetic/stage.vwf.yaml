@@ -4,6 +4,8 @@
 extends: http://vwf.example.com/kinetic/container.vwf
 properties:
   container:
+  supportMouseEvents: true
+  supportTouchEvents: true
   enableEvents:
 events:
   pointerDown:

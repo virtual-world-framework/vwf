@@ -39,7 +39,9 @@ define( [ "module",
                         "prototypes": undefined,
                         "kineticObj": undefined,
                         "stage": undefined,
-                        "uniqueInView": false
+                        "uniqueInView": false,
+                        "hasMouseEvents": false,
+                        "hasTouchEvents": false
                     };
                 },
                 isKineticClass: function( prototypes, classID ) {
@@ -883,6 +885,10 @@ define( [ "module",
                             kineticObj.clearBeforeDraw( Boolean( propertyValue ) );
                             break;
                         
+                        case "hitGraphEnabled":
+                            kineticObj.hitGraphEnabled( Boolean(propertyValue) );
+                            break;
+
                         default:
                             value = undefined;
                             break;
@@ -1358,6 +1364,10 @@ define( [ "module",
 
                         case "listening":
                             value = kineticObj.listening();
+                            break;
+                        
+                        case "isListening":
+                            value = kineticObj.isListening();
                             break;
                         
                         case "opacity":
