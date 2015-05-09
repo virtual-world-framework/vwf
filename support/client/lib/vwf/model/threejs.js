@@ -179,7 +179,7 @@ define( [ "module",
             }
             var kernel = this.kernel.kernel.kernel;
             
-            var protos = getPrototypes.call( this, kernel, childExtendsID );
+            var protos = this.kernel.prototypes( childID );
             if ( isSceneDefinition.call(this, protos) && childID == this.kernel.application() )
             {
                 var sceneNode = CreateThreeJSSceneNode( nodeID, childID, childExtendsID );
@@ -511,7 +511,7 @@ define( [ "module",
             //       there, too
             function notifyDriverOfPrototypeAndBehaviorProps() {
                 var ptPropValue;
-                var protos = getPrototypes.call( this, kernel, childExtendsID );
+                var protos = self.kernel.prototypes( childID );
                 protos.forEach( function( prototypeID ) {
                     for ( var propertyName in kernel.getProperties( prototypeID ) ) {
                         ptPropValue = kernel.getProperty( childExtendsID, propertyName );
@@ -2788,18 +2788,6 @@ define( [ "module",
         this.compatibilityStatus.compatible = false;
         this.compatibilityStatus.errors["WGL"] = "This browser is not compatible. The vwf/view/threejs driver requires WebGL.";
         return false;
-    }
-
-    function getPrototypes( kernel, extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = kernel.prototype( id );
-        }
-                
-        return prototypes;
     }
 
     function getThreeScene( id ) {

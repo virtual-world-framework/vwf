@@ -116,7 +116,7 @@ define( [ "module",
                 return;                
             }
 
-            var protos = getPrototypes( this.kernel, childExtendsID );
+            var protos = this.kernel.prototypes( childID );
 
             var node;
 
@@ -2086,18 +2086,6 @@ define( [ "module",
 
     } );
     // == PRIVATE  ========================================================================================
-
-    function getPrototypes( kernel, extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
 
     function createKineticObject( node, config ) {
         var protos = node.prototypes;
