@@ -7,14 +7,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     return model.load( module, {
 
         initialize: function() {
-            var lastKernel;
             this.state.overlays = {};
             this.state.elements = {};
-            lastKernel = this.kernel;
-            while ( lastKernel.kernel ) {
-                lastKernel = lastKernel.kernel;
-            }
-            this.state.kernel = lastKernel;
             logger = this.logger;
         },
 
