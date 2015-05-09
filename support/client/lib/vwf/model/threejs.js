@@ -50,11 +50,12 @@
 define( [ "module", 
           "vwf/model", 
           "vwf/utility", 
+          "vwf/kernel/utility",
           "vwf/utility/color", 
           "jquery" 
         ], 
 
-    function( module, model, utility, Color, $ ) {
+    function( module, model, utility, kutility, Color, $ ) {
 
     var self;
 
@@ -76,7 +77,6 @@ define( [ "module",
             this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
             this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
             this.state.prototypes = {}; 
-            this.state.kernel = this.kernel.kernel.kernel; 
             this.state.lights = {};           
  
             this.state.setMeshPropertyRecursively = function( threeObject, propertyName, value ) {
@@ -177,7 +177,6 @@ define( [ "module",
                     }
                 }               
             }
-            var kernel = this.kernel.kernel.kernel;
             
             var protos = this.kernel.prototypes( childID );
             if ( isSceneDefinition.call(this, protos) && childID == this.kernel.application() )
@@ -513,16 +512,16 @@ define( [ "module",
                 var ptPropValue;
                 var protos = self.kernel.prototypes( childID );
                 protos.forEach( function( prototypeID ) {
-                    for ( var propertyName in kernel.getProperties( prototypeID ) ) {
-                        ptPropValue = kernel.getProperty( childExtendsID, propertyName );
+                    for ( var propertyName in self.kernel.getProperties( prototypeID ) ) {
+                        ptPropValue = self.kernel.getProperty( childExtendsID, propertyName );
                         if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
                     }
                 } );
                 childImplementsIDs.forEach( function( behaviorID ) {
-                    for ( var propertyName in kernel.getProperties( behaviorID ) ) {
-                        ptPropValue = kernel.getProperty( behaviorID, propertyName );
+                    for ( var propertyName in self.kernel.getProperties( behaviorID ) ) {
+                        ptPropValue = self.kernel.getProperty( behaviorID, propertyName );
                         if ( ptPropValue !== undefined && ptPropValue !== null && childID !== undefined && childID !== null) {
                             self.settingProperty( childID, propertyName, ptPropValue );
                         }
@@ -1282,12 +1281,12 @@ define( [ "module",
 
                         // Skeletal Animations (takes precedence over Morph Target)
                         if ( node.threeObject.bones && node.threeObject.bones.length > 0 ) {
-                            var animRate = this.state.kernel.getProperty( nodeID, "animationRate" ) || 1;
+                            var animRate = this.kernel.getProperty( nodeID, "animationRate" ) || 1;
                             THREE.AnimationHandler.update(animRate);
                         } 
                         // Morph Target Animations
                         else if ( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length && propertyValue !== undefined ) {
-                            var fps = this.state.kernel.getProperty( nodeID, "animationFPS" ) || 30;
+                            var fps = this.kernel.getProperty( nodeID, "animationFPS" ) || 30;
                             for( var i = 0; i < node.threeObject.animatedMesh.length; i++ ) {
                                 if ( node.threeObject.animatedMesh[i].morphTargetInfluences ) {
                                     for( var j = 0; j < node.threeObject.animatedMesh[i].morphTargetInfluences.length; j++ ) {
@@ -1724,7 +1723,7 @@ define( [ "module",
                         }
 
                         // Need to reset the viewport or you just get a blank screen
-                        this.state.kernel.dispatchEvent( nodeID, "resetViewport" );
+                        this.kernel.dispatchEvent( nodeID, "resetViewport" );
                     }
                     if ( propertyName == 'shadowMapCullFace') {
                         var shadowMapCullFace;
@@ -2102,7 +2101,7 @@ define( [ "module",
                         value = animationDuration;
                     }
                     else if ( node.threeObject.animatedMesh && node.threeObject.animatedMesh.length ) {
-                        var fps = this.state.kernel.getProperty( nodeID, "animationFPS") || 30;
+                        var fps = this.kernel.getProperty( nodeID, "animationFPS") || 30;
                         for(var i=0, il = node.threeObject.animatedMesh.length; i < il; i++) {
                             if (node.threeObject.animatedMesh[i].bones) {
                                 
@@ -2715,7 +2714,7 @@ define( [ "module",
                     while ( !intersectedNode.vwfID ) {
                         intersectedNode = intersectedNode.parent;
                     }
-                    result[ "node" ] = this.state.kernel.kutility.nodeReference( intersectedNode.vwfID );
+                    result[ "node" ] = kutility.nodeReference( intersectedNode.vwfID );
                     result[ "normal" ] = [
                         intersects[ i ].face.normal.x,
                         intersects[ i ].face.normal.y,

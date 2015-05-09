@@ -20,7 +20,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             self = this;
             this.state.graphs = {};
             this.state.objects = {};
-            this.state.kernel = this.kernel.kernel.kernel;
         },
 
         // == Model API ============================================================================
@@ -31,7 +30,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             var node = undefined;
-            var kernel = this.state.kernel;
             var protos = this.kernel.prototypes( childID );
 
             if ( protos && isGraph( protos ) ) {
