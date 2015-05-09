@@ -100,8 +100,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 self.kernel.setProperty( childID, "toolbox", self.options.toolbox );
                 Blockly.inject( document.getElementById( self.options.divName ), { 
                     path: this.options.blocklyPath,
-                    toolbox: document.getElementById( self.options.toolbox ),
-                    trashcan: false,
+                    toolbox: document.getElementById( self.options.toolbox )
                 } ); 
 
                 // HACK: Fix Blockly's hijacking of the backspace and delete keys in password fields
@@ -156,7 +155,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
                                 // Set the appropriate model properties based on this change
                                 var xmlDom = Blockly.Xml.workspaceToDom( Blockly.getMainWorkspace() );
-                                console.log (xmlDom);
                                 if ( xmlDom ) {
                                     var newXmlText = Blockly.Xml.domToText( xmlDom );
                                     self.kernel.setProperty( self.state.blockly.node.ID, "blockly_xml", 
@@ -233,45 +231,31 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         // If the new node is the same as the old - exit early to prevent 
                         // breaking synchronization.
 
-                        if ( previousActiveNode === newActiveNodeId ) {
+                        if ( previousActiveNode === blocklyNode ) {
                             break;
                         }
 
+                        if ( previousActiveNode !== undefined ) {
+                            getBlockXML( previousActiveNode );
+                            this.state.blockly.node = undefined;
+                        }
+
                         if ( blocklyNode !== undefined ) {
-                            var show = true;
-
-                            //If there was already an active blockly node, deal with it before
-                            //activating the new one
-                            if ( previousActiveNode !== undefined ) {
-                               getBlockXML( previousActiveNode );
-                               setBlocklyUIVisibility( previousActiveNode, false ); 
-                               show = ( previousActiveNode.ID !== newActiveNodeId );
-                               this.state.blockly.node = undefined;                           
-                            }
-
                             // If the new active node is different than the old,
                             // then we need to load its program into the toolbox
-                            if ( show ) {
-                                if ( blocklyNode.toolbox !== undefined ) {
-                                    loadToolbox( blocklyNode.toolbox );    
-                                } else if ( app.toolbox !== undefined ) {
-                                    loadToolbox( app.toolbox );
-                                }
-                                if ( blocklyNode.defaultXml !== undefined ) {
-                                    loadDefaultXml( blocklyNode.defaultXml );    
-                                } else if ( app.defaultXml !== undefined ) {
-                                    loadDefaultXml( app.defaultXml ); 
-                                }                               
-                                this.state.blockly.node = blocklyNode;
-                                setBlockXML( blocklyNode );
-                                setBlocklyUIVisibility( blocklyNode, true );
-                            }                        
-                        } else {
-                            if ( previousActiveNode !== undefined ) {
-                                getBlockXML( previousActiveNode );
-                                setBlocklyUIVisibility( previousActiveNode, false );
-                                this.state.blockly.node = undefined;                            
-                            } 
+                            if ( blocklyNode.toolbox !== undefined ) {
+                                loadToolbox( blocklyNode.toolbox );
+                            } else if ( app.toolbox !== undefined ) {
+                                loadToolbox( app.toolbox );
+                            }
+                            if ( blocklyNode.defaultXml !== undefined ) {
+                                loadDefaultXml( blocklyNode.defaultXml );
+                            } else if ( app.defaultXml !== undefined ) {
+                                loadDefaultXml( app.defaultXml );
+                            }
+                            this.state.blockly.node = blocklyNode;
+                            setBlockXML( blocklyNode );
+                            this.kernel.fireEvent( blocklyNode.ID, "blocklyVisibleChanged", [ getBlocklyUIVisibility() ] );
                         }
                         break;
 
@@ -291,6 +275,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         } else {
                             this.delayedProperties.blockly_autoClose = Boolean( propertyValue );
                         }
+                        break;
+
+                    case "blockly_interfaceVisible":
+                        setBlocklyUIVisibility( this.state.blockly.node, propertyValue );
                         break;
                 }
 
@@ -400,7 +388,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             self.delayedProperties = undefined;
         }
 
-        self.kernel.fireEvent( node.ID, "blocklyVisibleChanged", [ show ] );
+        if ( node && node.ID ) {
+            self.kernel.fireEvent( node.ID, "blocklyVisibleChanged", [ show ] );
+        }
+    }
+
+    function getBlocklyUIVisibility() {
+        var div = document.getElementById( self.options.divParent );
+        var result = div.style.visibility === "visible" ? true : false;
+        return result;
     }
 
     function loadToolbox( toolboxDef ) {
@@ -454,11 +450,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     function cleanUpdateToolbox( xml ) {
         // negateOverlap is being use to negate some of the effect of the MARGIN variable
         // in Blockly.createDom_ when deleting blocks over the flyout
-        var negateOverlap = 35;
+        // SJF: Overlap not present in Blockly with categories enabled
+
+        // var negateOverlap = 35;
         Blockly.updateToolbox( xml );
-        Blockly.mainWorkspace.scrollX = Blockly.mainWorkspace.flyout_.width_ + negateOverlap;
-        var translation = 'translate(' + Blockly.mainWorkspace.scrollX + ', 0)';
-        Blockly.mainWorkspace.getCanvas().setAttribute('transform', translation);
+        // Blockly.mainWorkspace.scrollX = Blockly.mainWorkspace.flyout_.width_ + negateOverlap;
+        // var translation = 'translate( ' + Blockly.mainWorkspace.scrollX + ', 0 )';
+        // Blockly.mainWorkspace.getCanvas().setAttribute('transform', translation);
     }
 
     // domCopyToWorkspace copies the saved blocks to the workspace exactly
@@ -501,7 +499,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             }
         }
         if ( xmlDom ) {
-            console.log (xmlDom);
             clearBeforeSet && Blockly.mainWorkspace.clear();
             domCopyToWorkspace( Blockly.mainWorkspace, xmlDom );
         }
