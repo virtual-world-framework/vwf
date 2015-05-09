@@ -75,7 +75,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
 
             var self = this, node;
             
-            var protos = getPrototypes.call( self, childExtendsID )
+            var protos = this.kernel.prototypes( childID );
    
             if ( isClientInstanceDef.call( this, protos ) && childName ) {
                 
@@ -338,18 +338,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/utility/color", "jquery" ], 
 
     } );
  
-    function getPrototypes( extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = this.kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
-
     function getPeer( moniker ) {
         var clientNode;
         for ( var id in this.state.clients ) {

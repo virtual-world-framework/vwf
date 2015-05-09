@@ -32,7 +32,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             var node = undefined;
             var kernel = this.state.kernel;
-            var protos = getPrototypes.call( this, kernel, childExtendsID );
+            var protos = this.kernel.prototypes( childID );
 
             if ( protos && isGraph( protos ) ) {
 
@@ -317,18 +317,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         return threejs;
 
-    }
-    
-    function getPrototypes( kernel, extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = kernel.prototype( id );
-        }
-                
-        return prototypes;
     }
 
     function isGraph( prototypes ) {
