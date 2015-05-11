@@ -4353,7 +4353,11 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.application}
 
+this.applicationID = undefined;
+
         this.application = function( initializedOnly ) {
+
+if ( this.applicationID ) return this.applicationID;
 
             var applicationID;
 
@@ -4363,6 +4367,8 @@ if ( ! childComponent.source ) {
                     applicationID = globalID;
                 }
             }, this );
+
+this.applicationID = applicationID;
 
             return applicationID;
         };
