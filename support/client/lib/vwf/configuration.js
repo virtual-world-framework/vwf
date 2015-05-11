@@ -187,8 +187,8 @@ define( function() {
 
         development: {
             "log-level": "info",
-            "randomize-ids": true,
-            "humanize-ids": true,
+            // "randomize-ids": true,
+            // "humanize-ids": true,
             "load-timeout": 30,
         },
 

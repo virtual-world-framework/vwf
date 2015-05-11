@@ -451,6 +451,23 @@ define( [ "module", "vwf/model", "vwf/utility",
             node.blocks = Blockly.Xml.domToText( xml );
         }
         node.code = Blockly.JavaScript.workspaceToCode();
+
+// vwf.execute( vwf.application(), "this.player.rover.blockly_executing = true" )
+// vwf.execute( vwf.application(), "this.player.rover.blockly_executing = false" )
+
+// vwf.execute( vwf.application(), "this.player.rover2.blockly_executing = true" )
+// vwf.execute( vwf.application(), "this.player.rover2.blockly_executing = false" )
+
+if ( node.name === "rover" ) {
+    node.blocks = '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="controls_whileUntil" id="7" inline="false" x="183" y="161"><field name="MODE">WHILE</field><value name="BOOL"><block type="logic_boolean" id="8" inline="false"><field name="BOOL">true</field></block></value><statement name="DO"><block type="rover_turn" id="16"><field name="DIR">Turn: Left</field></block></statement></block></xml>';
+    node.code = "vwf.fireEvent( '/mars-game/index.vwf', 'blockExecuted',  [ 'repeat while true ? do Turn: Left', 7 ] ); while (true) { vwf.callMethod( '/mars-game/index.vwf', 'executeBlock', [  { 'blockName': 'Turn: Left', 'id': 16, 'exeTime': 1 },{ 'nodeID': '/mars-game/index.vwf:18:1', 'methodName': 'turnLeft', 'args': [] }] ); }";
+} else if ( node.name === "rover2" ) {
+    node.blocks = '<xml xmlns="http://www.w3.org/1999/xhtml"><block type="controls_whileUntil" id="86" inline="false" x="180" y="69"><field name="MODE">WHILE</field><value name="BOOL"><block type="logic_boolean" id="87" inline="false"><field name="BOOL">true</field></block></value><statement name="DO"><block type="rover_moveRadial" id="95" inline="true"><value name="x"><block type="math_number_out" id="103" inline="false"><field name="VALUE">1</field></block></value><value name="y"><block type="math_number_out" id="106" inline="false"><field name="VALUE">0</field></block></value><next><block type="rover_moveRadial" id="94" inline="true"><value name="x"><block type="math_number_out" id="105" inline="false"><field name="VALUE">-1</field></block></value><value name="y"><block type="math_number_out" id="104" inline="false"><field name="VALUE">0</field></block></value></block></next></block></statement></block></xml>';
+    node.code = "vwf.fireEvent( '/mars-game/index.vwf', 'blockExecuted',  [ 'repeat while true ? do Move: Δx 1 ? Δy 0 ?', 86 ] ); while (true) { vwf.callMethod( '/mars-game/index.vwf', 'executeBlock', [  { 'blockName': 'Move: Δx 1 ? Δy 0 ?', 'id': 95, 'exeTime': 1},{ 'nodeID': '/mars-game/index.vwf:18:2', 'methodName': 'moveRadial', 'args': [1,0]}] ); vwf.callMethod( '/mars-game/index.vwf', 'executeBlock', [  { 'blockName': 'Move: Δx -1 ? Δy 0 ?', 'id': 94, 'exeTime': 1},{ 'nodeID': '/mars-game/index.vwf:18:2', 'methodName': 'moveRadial', 'args': [-1,0]}] ); }";
+} else if ( node.name === "rover3" ) {
+
+}
+
     }
 
     function setToolboxBlockEnable( enable ) {
