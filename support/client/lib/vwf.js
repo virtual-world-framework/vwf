@@ -708,7 +708,7 @@
 
                     var model = require( modelName ).create(
                         this.models.kernel,                         // model's kernel access
-                        [ require( "vwf/model/stage/log" ) ],       // stages between the kernel and model
+                        [],       // stages between the kernel and model
                         {},                                         // state shared with a paired view
                         [].concat( modelArguments || [] )           // arguments for initialize()
                     );
@@ -727,10 +727,15 @@
                             while ( this.models.object.model ) this.models.object = this.models.object.model;
                         }
                         
-                        if(model.model.compatibilityStatus) {
+                        if(model.model && model.model.compatibilityStatus) {
                             if(!model.model.compatibilityStatus.compatible) {
                                 compatibilityStatus.compatible = false;
                                 jQuery.extend(compatibilityStatus.errors, model.model.compatibilityStatus.errors);
+                            }
+                        } else if(model.compatibilityStatus) {
+                            if(!model.compatibilityStatus.compatible) {
+                                compatibilityStatus.compatible = false;
+                                jQuery.extend(compatibilityStatus.errors, model.compatibilityStatus.errors);
                             }
                         }
                     }
@@ -4359,7 +4364,11 @@ if ( ! childComponent.source ) {
         /// 
         /// @see {@link module:vwf/api/kernel.application}
 
+this.applicationID = undefined;
+
         this.application = function( initializedOnly ) {
+
+if ( this.applicationID ) return this.applicationID;
 
             var applicationID;
 
@@ -4369,6 +4378,8 @@ if ( ! childComponent.source ) {
                     applicationID = globalID;
                 }
             }, this );
+
+this.applicationID = applicationID;
 
             return applicationID;
         };

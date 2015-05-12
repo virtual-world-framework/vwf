@@ -75,7 +75,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
             var node, parentNode, glgeChild, glgeParent;
             var kernel = this.kernel;
-            var prototypes = getPrototypes.call( this, kernel, childExtendsID );
+            var prototypes = this.kernel.prototypes( childID );
 
 //            this.logger.enabled = true;
 //            this.logger.infox( "creatingNode", nodeID, childID, childExtendsID, childImplementsIDs,
@@ -328,7 +328,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             //       there, too
             function notifyDriverOfPrototypeAndBehaviorProps() {
                 var ptPropValue;
-                var protos = getPrototypes.call( this, kernel, childExtendsID );
+                var protos = self.kernel.prototypes( childID );
                 protos.forEach( function( prototypeID ) {
                     for ( var propertyName in kernel.getProperties( prototypeID ) ) {
                         //console.info( " 1    getting "+propertyName+" of: " + childExtendsID  );
@@ -620,7 +620,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         break;
 
                     default:
-                        prototypes = getPrototypes.call( this, this.kernel.kernel.kernel, node["type"] );
+                        prototypes = this.kernel.prototypes( node.ID );
                         if ( isGlgeMaterialDefinition.call( this, prototypes ) ){
                             value = setMaterialProperty.call( this, nodeID, propertyName, propertyValue );
                         } else if ( isGlgeCameraDefinition.call( this, prototypes ) ) {
@@ -773,7 +773,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                     default:
                         // handle all of the other types
-                        prototypes = getPrototypes.call( this, this.kernel.kernel.kernel, node["type"] );
+                        prototypes = this.kernel.prototypes( node.ID );
                         if ( isGlgeMaterialDefinition.call( this, prototypes ) ){
                             value = getMaterialProperty.call( this, nodeID, propertyName, propertyValue );
                         } else if ( isGlgeCameraDefinition.call( this, prototypes ) ) {
@@ -2220,20 +2220,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 
         return vertexIndices;
-    }
-
-    // get the list of types this ID extends
-
-    function getPrototypes( kernel, extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = kernel.prototype( id );
-        }
-                
-        return prototypes;
     }
 
     function isPrototype( nodeID, childID ) {

@@ -121,7 +121,7 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
             };
 
             var kernel = this.kernel;
-            var protos = getPrototypes.call( this, childExtendsID  )
+            var protos = this.kernel.prototypes( childID );
             var node = undefined;
 
             if ( isCesiumDefinition.call( this, protos ) ) {
@@ -362,18 +362,6 @@ define( [ "module", "vwf/view", "vwf/utility", "vwf/model/cesium/Cesium", "jquer
             
     } );
  
-    function getPrototypes( extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = this.kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
-
     function isCesiumDefinition( prototypes ) {
         var foundCesium = false;
         if ( prototypes ) {

@@ -112,7 +112,7 @@ define( [
                 return;                
             }
 
-            var protos = getPrototypes( this.kernel, childExtendsID );
+            var protos = this.kernel.prototypes( childID );
             var node;
 
             if ( this.state.isSoundComponent( protos ) ) {
@@ -414,18 +414,6 @@ define( [
 
 
     } );
-
-    function getPrototypes( kernel, extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
 
     function createSound( node, url ) {
         
