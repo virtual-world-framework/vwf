@@ -59,7 +59,6 @@ define( [ "module",
     var self;
 
     var checkLights = true;
-    var sceneCreated = false;
 
     return model.load( module, {
 
@@ -73,8 +72,9 @@ define( [ "module",
 
             checkCompatibility.call(this);
 
-            this.state.scenes = {}; // id => { glgeDocument: new GLGE.Document(), glgeRenderer: new GLGE.Renderer(), glgeScene: new GLGE.Scene() }
-            this.state.nodes = {}; // id => { name: string, glgeObject: GLGE.Object, GLGE.Collada, GLGE.Light, or other...? }
+            this.state.scenes = {}; 
+            this.state.nodes = {}; 
+            this.state.animatedNodes = {};
             this.state.prototypes = {}; 
             this.state.kernel = this.kernel.kernel.kernel; 
             this.state.lights = {};           
@@ -110,7 +110,8 @@ define( [ "module",
                 "properties": false,
                 "setting": false,
                 "getting": false,
-                "prototypes": false
+                "prototypes": false,
+                "loading": false
             };
         },
 
@@ -180,13 +181,13 @@ define( [ "module",
             var kernel = this.kernel.kernel.kernel;
             
             var protos = getPrototypes.call( this, kernel, childExtendsID );
-            if ( isSceneDefinition.call(this, protos) && childID == this.kernel.application() )
+            if ( isSceneDefinition.call(this, protos) && childID == appID )
             {
                 var sceneNode = CreateThreeJSSceneNode( nodeID, childID, childExtendsID );
                 this.state.scenes[ childID ] = sceneNode;
                 this.state.cameraInUse = sceneNode.camera.defaultCamera;
 
-                sceneCreated = true;
+                createDefaultLighting.call( this, sceneLights.call( this ) );
 
                 if ( childImplementsIDs && childImplementsIDs.length > 0 ) {
                     for ( var i = 0; i < childImplementsIDs.length; i++ ) {
@@ -2704,29 +2705,16 @@ define( [ "module",
             }
 
             return undefined;
-        },
+        }
 
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
 
         // -- executing ------------------------------------------------------------------------------
 
-        executing: function( nodeID, scriptText, scriptType ) {
-            return undefined;
-        },
-
-        // == ticking =============================================================================
-
-        ticking: function( vwfTime ) {
-            
-            if ( checkLights && this.state.appInitialized && sceneCreated ) {
-                
-                var lightsInScene = sceneLights.call( this );
-
-                createDefaultLighting.call( this, lightsInScene );
-                checkLights = false;    
-            }
-        }
+        // executing: function( nodeID, scriptText, scriptType ) {
+        //     return undefined;
+        // }
 
     } );
 
@@ -2735,7 +2723,7 @@ define( [ "module",
     function checkCompatibility() {
         this.compatibilityStatus = { compatible:true, errors:{} }
         var contextNames = ["webgl","experimental-webgl","moz-webgl","webkit-3d"];
-        for(var i = 0; i < contextNames.length; i++){
+        for( var i = 0; i < contextNames.length; i++){
             try{
                 var canvas = document.createElement('canvas');
                 var gl = canvas.getContext(contextNames[i]);
@@ -3547,7 +3535,10 @@ define( [ "module",
         var threeModel = this;
         var sceneNode = this.state.scenes[ this.kernel.application() ];
         var parentObject3 = parentNode.threeObject ? parentNode.threeObject : parentNode.threeScene;
-        //console.info( "---- loadAsset( "+parentNode.name+", "+node.name+", "+childType+" )" );
+        
+        if ( this.debug.loading  ) {
+            this.logger.infox( "loadAsset", parentNode.ID, node.ID, childType );
+        }  
 
         node.assetLoaded = function( geometry , materials) { 
             //console.info( "++++ assetLoaded( "+parentNode.name+", "+node.name+", "+childType+" )" );
