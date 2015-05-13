@@ -40,9 +40,9 @@ define( [ "module",
                         "prototypes": undefined,
                         "kineticObj": undefined,
                         "stage": undefined,
-                        "uniqueInView": false
+                        //"uniqueInView": false,
                         "hasMouseEvents": false,
-                        "hasTouchEvents": false
+                        "hasTouchEvents": false,
                         "model": {}                    };
                 },
                 "isKineticClass": function( prototypes, classID ) {
@@ -64,9 +64,13 @@ define( [ "module",
                         }
                     }
                     return found;
-        },
+                },
                 "setProperty": function( kineticObj, propertyName, propertyValue ) {
                     var value = undefined;
+
+                    if ( !kineticObj ) {
+                        return value;
+                    }
 
                     value = this.setNodeProperty( kineticObj, propertyName, propertyValue );
 
@@ -76,11 +80,11 @@ define( [ "module",
 
                     if ( value === undefined ) {
                         value = this.setContainerProperty( kineticObj, propertyName, propertyValue );
-            }
+                    }
 
                     if ( value === undefined && kineticObj instanceof Kinetic.Arc ) {
                         value = this.setArcProperty( kineticObj, propertyName, propertyValue );
-                }
+                    }
 
                     if ( value === undefined && 
                         ( kineticObj instanceof Kinetic.BaseLayer || 
@@ -88,7 +92,7 @@ define( [ "module",
                           kineticObj instanceof Kinetic.Layer
                         ) ) {
                         value = this.setLayerProperty( kineticObj, propertyName, propertyValue );                  
-            }
+                    }
 
                     if ( value === undefined && kineticObj instanceof Kinetic.Canvas ) {
                         value = this.setCanvasProperty( kineticObj, propertyName, propertyValue );  
@@ -104,27 +108,27 @@ define( [ "module",
 
                     if ( value === undefined && kineticObj instanceof Kinetic.Image ) {
                         value = this.setImageProperty( kineticObj, propertyName, propertyValue );
-                }
+                    }
 
                     if ( value === undefined && kineticObj instanceof Kinetic.Line ) {
                         value = this.setLineProperty( kineticObj, propertyName, propertyValue );
-                }
+                    }
 
                     if ( value === undefined && kineticObj instanceof Kinetic.Path ) {
                         value = this.setPathProperty( kineticObj, propertyName, propertyValue );
-            }
+                    }
 
                     if ( value === undefined && kineticObj instanceof Kinetic.Rect ) {
                         value = this.setRectProperty( kineticObj, propertyName, propertyValue );
-            }
+                    }
 
                     if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon ) {
                         value = this.setRegularPolygonProperty( kineticObj, propertyName, propertyValue );
-            }
+                    }
             
                     if ( value === undefined && kineticObj instanceof Kinetic.Ring ) {
                         value = this.setRingProperty( kineticObj, propertyName, propertyValue );
-            }
+                    }
                 
                     if ( value === undefined && kineticObj instanceof Kinetic.Sprite ) {
                         value = this.setSpriteProperty( kineticObj, propertyName, propertyValue );
@@ -132,21 +136,21 @@ define( [ "module",
 
                     if ( value === undefined && kineticObj instanceof Kinetic.Star ) {
                         value = this.setStarProperty( kineticObj, propertyName, propertyValue );
-            }
+                    }
 
                     if ( value === undefined && kineticObj instanceof Kinetic.Text ) {
                         value = this.setTextProperty( kineticObj, propertyName, propertyValue );
-            }
+                    }
 
                     if ( value === undefined && kineticObj instanceof Kinetic.TextPath ) {
                         value = this.setTextPathProperty( kineticObj, propertyName, propertyValue );
-            }
+                    }
 
                     if ( value === undefined && kineticObj instanceof Kinetic.Wedge ) {
                         value = this.setWedgeProperty( kineticObj, propertyName, propertyValue );
-            }
+                    }
                     return value;                    
-        },
+                },
                 "setNodeProperty": function( kineticObj, propertyName, propertyValue ) {
 
                     var value = propertyValue;
@@ -1158,468 +1162,470 @@ define( [ "module",
                             value = undefined;
                             break;
                     }        
-            return value;
-        },
+                    return value;
+                },
                 "getProperty": function( kineticObj, propertyName ) {
-            var value = undefined;
+                    var value = undefined;
+                    if ( !kineticObj ) {
+                        return value;
+                    }
 
-                    switch ( propertyName ) {
+                    //if ( value === undefined ) {
 
-                        case "x":
-                            value = kineticObj.modelX || 0;
-                            break;
+                        switch ( propertyName ) {
 
-                        case "y":
-                            value = kineticObj.modelY || 0;
-                            break;
+                            case "x":
+                                value = kineticObj.x() || 0;
+                                break;
 
-                        case "width":
-                            value = kineticObj.width();
-                            break;
+                            case "y":
+                                value = kineticObj.y() || 0;
+                                break;
 
-                        case "height":
-                            value = kineticObj.height();
-                            break;
+                            case "width":
+                                value = kineticObj.width();
+                                break;
 
-                        case "visible":
-                            value = kineticObj.visible();
-                            break;
+                            case "height":
+                                value = kineticObj.height();
+                                break;
 
-                        case "isVisible":
-                            value = kineticObj.isVisible();
-                            break;
+                            case "visible":
+                                value = kineticObj.visible();
+                                break;
 
-                        case "listening":
-                            value = kineticObj.listening();
-                            break;
+                            case "isVisible":
+                                value = kineticObj.isVisible();
+                                break;
+
+                            case "listening":
+                                value = kineticObj.listening();
+                                break;
+                            
+                            case "isListening":
+                                value = kineticObj.isListening();
+                                break;
+                            
+                            case "opacity":
+                                value = kineticObj.opacity();
+                                break;
+
+                            case "scale":
+                                value = kineticObj.scale();
+                                break;
+
+                            case "scaleX":
+                                value = kineticObj.scaleX();
+                                break;
+
+                            case "scaleY":
+                                value = kineticObj.scaleY();
+                                break;
+
+                            case "rotation":
+                                value = kineticObj.rotation();
+                                break;
+
+                            // check code, not in docs
+                            case "offset":
+                                value = kineticObj.offset();
+                                break;
+
+                            // check code, not in docs
+                            case "offsetX":
+                                value = kineticObj.offsetX();
+                                break;
+
+                            case "offsetY":
+                                value = kineticObj.offsetY();
+                                break;
+
+                            case "draggable":
+                                // Return the model value that we have stored separately, 
+                                // not the value that is directly in the kinetic object 
+                                // because a user's view might have changed that for only 
+                                // that user
+                                value = kineticObj.isDraggable;    
+                                break;
+
+                            // check code, not in docs
+                            case "dragDistance":
+                                value = kineticObj.dragDistance();    
+                                break;
+
+                            case "zIndex":
+                                value = kineticObj.getZIndex();
+                                break;
+
+                            case "dragBoundFunc":
+                                var dragBoundFunc = kineticObj.dragBoundFunc();
+                                value = dragBoundFunc ? dragBoundFunc.toString() : undefined;
+                                break;
+
+                            case "id":
+                                value = kineticObj.getId();
+                                break
+
+                            case "name":
+                                value = kineticObj.getName();
+                                break;
+                            
+                            case "position":
+                                value = {
+                                    x: kineticObj.x() || 0,
+                                    y: kineticObj.y() || 0
+                                };
+                                break;
+
+                            case "transform":
+                                value = kineticObj.getTransform().m;
+                                break;
+
+                            case "absolutePosition":
+                                    value = kineticObj.getAbsolutePosition();
+                                break;
+
+                            case "absoluteTransform":
+                                    value = kineticObj.getAbsoluteTransform();
+                                break;
+
+                            case "absoluteOpacity":
+                                value = kineticObj.getAbsoluteOpacity();
+                                break;
+
+                            case "absoluteZIndex":
+                                value = kineticObj.getAbsoluteZIndex();
+                                break;
+
+                        }
+                    //}
+
+                    // this is causing the editor to cause a infinite loop
+                    // need to understand why, but no time now
+
+                    // if ( value === undefined && kineticObj instanceof Kinetic.Stage ) {
                         
-                        case "isListening":
-                            value = kineticObj.isListening();
-                            break;
+                    //     switch ( propertyName ) {
+                            
+                    //         case "container":
+                    //             value = kineticObj.getAttr( 'container' );
+                    //             break;
+                    //     }
+                    // }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Arc ) {
                         
-                        case "opacity":
-                            value = kineticObj.opacity();
-                            break;
+                        switch ( propertyName ) {
+                            
+                            case "angle":
+                                value = kineticObj.angle();
+                                break;
 
-                        case "scale":
-                            value = kineticObj.scale();
-                            break;
+                            case "innerRadius":
+                                value = kineticObj.innerRadius();
+                                break;
 
-                        case "scaleX":
-                            value = kineticObj.scaleX();
-                            break;
+                            case "outerRadius":
+                                value = kineticObj.outerRadius();
+                                break;
 
-                        case "scaleY":
-                            value = kineticObj.scaleY();
-                            break;
+                            case "clockwise":
+                                value = kineticObj.clockwise();
+                                break;
+                        }
+                    }
 
-                        case "rotation":
-                            value = kineticObj.rotation();
-                            break;
+                    if ( value === undefined && 
+                        ( kineticObj instanceof Kinetic.BaseLayer || 
+                          kineticObj instanceof Kinetic.FastLayer ||
+                          kineticObj instanceof Kinetic.Layer
+                        ) ) {
+                       
+                        switch ( propertyName ) {
 
-                        // check code, not in docs
-                        case "offset":
-                            value = kineticObj.offset();
-                            break;
+                            case "clearBeforeDraw":
+                                value = kineticObj.clearBeforeDraw();
+                                break;
+                        }                    
+                    }
 
-                        // check code, not in docs
-                        case "offsetX":
-                            value = kineticObj.offsetX();
-                            break;
-
-                        case "offsetY":
-                            value = kineticObj.offsetY();
-                            break;
-
-                        case "draggable":
-                            // Return the model value that we have stored separately, 
-                            // not the value that is directly in the kinetic object 
-                            // because a user's view might have changed that for only 
-                            // that user
-                            value = kineticObj.isDraggable;    
-                            break;
-
-                        // check code, not in docs
-                        case "dragDistance":
-                            value = kineticObj.dragDistance();    
-                            break;
-
-                        case "zIndex":
-                            value = kineticObj.getZIndex();
-                            break;
-
-                        case "dragBoundFunc":
-                            var dragBoundFunc = kineticObj.dragBoundFunc();
-                            value = dragBoundFunc ? dragBoundFunc.toString() : undefined;
-                            break;
-
-                        case "id":
-                            value = kineticObj.getId();
-                            break
-
-                        case "name":
-                            value = kineticObj.getName();
-                            break;
+                    if ( value === undefined && kineticObj instanceof Kinetic.Canvas ) {
                         
-                        case "position":
-                            value = {
-                                x: kineticObj.modelX || 0,
-                                y: kineticObj.modelY || 0
-                            };
-                            break;
+                        switch ( propertyName ) {
 
-                        case "transform":
-                            value = kineticObj.getTransform().m;
-                            //value[ 4 ] = kineticObj.modelX || 0;
-                            //value[ 5 ] = kineticObj.modelY || 0;
-                            break;
+                            case width:
+                                value = kineticObj.getWidth();
+                                break;
 
-                        case "absolutePosition":
-                                value = kineticObj.getAbsolutePosition();
-                            break;
+                            case height:
+                                value = kineticObj.getHeight();
+                                break;
 
-                        case "absoluteTransform":
-                                value = kineticObj.getAbsoluteTransform();
-                            break;
+                            case pixelRatio:
+                                value = kineticObj.getPixelRatio();
+                                break;
+                        }  
+                    }                
 
-                        case "absoluteOpacity":
-                            value = kineticObj.getAbsoluteOpacity();
-                            break;
+                    if ( value === undefined && kineticObj instanceof Kinetic.Circle ) {
+                        
+                        switch ( propertyName ) {
 
-                        case "absoluteZIndex":
-                            value = kineticObj.getAbsoluteZIndex();
-                            break;
+                            case "radius":
+                                value = kineticObj.radius();
+                                break;
 
+                        }                    
                     }
 
 
-
-                // this is causing the editor to cause a infinite loop
-                // need to understand why, but no time now
-
-                // if ( value === undefined && kineticObj instanceof Kinetic.Stage ) {
-                    
-                //     switch ( propertyName ) {
+                    if ( value === undefined && kineticObj instanceof Kinetic.Ellipse ) {
                         
-                //         case "container":
-                //             value = kineticObj.getAttr( 'container' );
-                //             break;
-                //     }
-                // }
+                        switch ( propertyName ) {
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Arc ) {
-                    
-                    switch ( propertyName ) {
-                        
-                        case "angle":
-                            value = kineticObj.angle();
-                            break;
-
-                        case "innerRadius":
-                            value = kineticObj.innerRadius();
-                            break;
-
-                        case "outerRadius":
-                            value = kineticObj.outerRadius();
-                            break;
-
-                        case "clockwise":
-                            value = kineticObj.clockwise();
-                            break;
+                            case "radius":
+                                value = kineticObj.radius();
+                                break;
+                        }                    
                     }
-                }
 
-                if ( value === undefined && 
-                    ( kineticObj instanceof Kinetic.BaseLayer || 
-                      kineticObj instanceof Kinetic.FastLayer ||
-                      kineticObj instanceof Kinetic.Layer
-                    ) ) {
-                   
-                    switch ( propertyName ) {
-
-                        case "clearBeforeDraw":
-                            value = kineticObj.clearBeforeDraw();
-                            break;
-                    }                    
-                }
-
-                if ( value === undefined && kineticObj instanceof Kinetic.Canvas ) {
-                    
-                    switch ( propertyName ) {
-
-                        case width:
-                            value = kineticObj.getWidth();
-                            break;
-
-                        case height:
-                            value = kineticObj.getHeight();
-                            break;
-
-                        case pixelRatio:
-                            value = kineticObj.getPixelRatio();
-                            break;
-                    }  
-                }                
-
-                if ( value === undefined && kineticObj instanceof Kinetic.Circle ) {
-                    
-                    switch ( propertyName ) {
-
-                        case "radius":
-                            value = kineticObj.radius();
-                            break;
-
-                    }                    
-                }
-
-
-                if ( value === undefined && kineticObj instanceof Kinetic.Ellipse ) {
-                    
-                    switch ( propertyName ) {
-
-                        case "radius":
-                            value = kineticObj.radius();
-                            break;
-                    }                    
-                }
-
-                if ( value === undefined && kineticObj instanceof Kinetic.Image ) {
-                    
-                    switch ( propertyName ) {
-
-                        case "image":
-                            var imageObj = kineticObj.image();
-                            if ( imageObj !== undefined ) {
-                                value = imageObj.src;    
-                            }
-                            break;
-
-                        case "crop":
-                            value = kineticObj.crop();
-                            break;
-
-                        case "scaleOnLoad":
-                                //value = node.scaleOnLoad;
-                            break;
+                    if ( value === undefined && kineticObj instanceof Kinetic.Image ) {
                         
-                    }                    
-                }
+                        switch ( propertyName ) {
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Line ) {
-                    
-                    switch ( propertyName ) {
-                        
-                        case "points":
-                            value = kineticObj.points();
-                            break;
+                            case "image":
+                                var imageObj = kineticObj.image();
+                                if ( imageObj !== undefined ) {
+                                    value = imageObj.src;    
+                                }
+                                break;
 
-                        case "tension":
-                            value = kineticObj.tension();
-                            break;
+                            case "crop":
+                                value = kineticObj.crop();
+                                break;
 
-                        case "closed":
-                            value = kineticObj.closed();
-                            break;
+                            case "scaleOnLoad":
+                                    //value = node.scaleOnLoad;
+                                break;
+                            
+                        }                    
                     }
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Path ) {
-                    
-                    switch ( propertyName ) {
+                    if ( value === undefined && kineticObj instanceof Kinetic.Line ) {
                         
-                        case "data":
-                            value = kineticObj.data();
-                            break;
+                        switch ( propertyName ) {
+                            
+                            case "points":
+                                value = kineticObj.points();
+                                break;
 
+                            case "tension":
+                                value = kineticObj.tension();
+                                break;
+
+                            case "closed":
+                                value = kineticObj.closed();
+                                break;
+                        }
                     }
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Rect ) {
-                    
-                    switch ( propertyName ) {
+                    if ( value === undefined && kineticObj instanceof Kinetic.Path ) {
                         
-                        case "cornerRadius":
-                            value = kineticObj.cornerRadius();
-                            break;
-                    }
-                }
+                        switch ( propertyName ) {
+                            
+                            case "data":
+                                value = kineticObj.data();
+                                break;
 
-                if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon ) {
-                    
-                    switch ( propertyName ) {
+                        }
+                    }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Rect ) {
                         
-                        case "sides":
-                            value = kineticObj.sides();
-                            break;
-
-                        case "radius":
-                            value = kineticObj.radius();
-                            break;
+                        switch ( propertyName ) {
+                            
+                            case "cornerRadius":
+                                value = kineticObj.cornerRadius();
+                                break;
+                        }
                     }
-                }
-            
-                if ( value === undefined && kineticObj instanceof Kinetic.Ring ) {
-                    
-                    switch ( propertyName ) {
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon ) {
                         
-                        case "innerRadius":
-                            value = kineticObj.innerRadius();
-                            break;
+                        switch ( propertyName ) {
+                            
+                            case "sides":
+                                value = kineticObj.sides();
+                                break;
 
-                        case "outerRadius":
-                            value = kineticObj.outerRadius();
-                            break;
+                            case "radius":
+                                value = kineticObj.radius();
+                                break;
+                        }
                     }
-                }
                 
-                if ( value === undefined && kineticObj instanceof Kinetic.Sprite ) {
-                    
-                    switch ( propertyName ) {
+                    if ( value === undefined && kineticObj instanceof Kinetic.Ring ) {
                         
-                        case "animation":
-                            value = kineticObj.animation();
-                            break;
+                        switch ( propertyName ) {
+                            
+                            case "innerRadius":
+                                value = kineticObj.innerRadius();
+                                break;
 
-                        case "animations":
-                            value = JSON.stringify( kineticObj.animations() );
-                            break;
-
-                        case "frameIndex":
-                            value = kineticObj.frameIndex();
-                            break;
-
-                        case "image":
-                            var imageObj = kineticObj.image();
-                            if ( imageObj !== undefined ) {
-                                value = imageObj.src;    
-                            }
-                            break;
-
-                        case "scaleOnLoad":
-                                //value = node.scaleOnLoad;
-                            break;
+                            case "outerRadius":
+                                value = kineticObj.outerRadius();
+                                break;
+                        }
                     }
-                }
-
-                if ( value === undefined && kineticObj instanceof Kinetic.Star ) {
                     
-                    switch ( propertyName ) {
+                    if ( value === undefined && kineticObj instanceof Kinetic.Sprite ) {
                         
-                        case "numPoints":
-                            value = kineticObj.animation();
-                            break;
+                        switch ( propertyName ) {
+                            
+                            case "animation":
+                                value = kineticObj.animation();
+                                break;
 
-                        case "innerRadius":
-                            value = kineticObj.innerRadius();
-                            break;
+                            case "animations":
+                                value = JSON.stringify( kineticObj.animations() );
+                                break;
 
-                        case "outerRadius":
-                            value = kineticObj.outerRadius();
-                            break;
+                            case "frameIndex":
+                                value = kineticObj.frameIndex();
+                                break;
+
+                            case "image":
+                                var imageObj = kineticObj.image();
+                                if ( imageObj !== undefined ) {
+                                    value = imageObj.src;    
+                                }
+                                break;
+
+                            case "scaleOnLoad":
+                                    //value = node.scaleOnLoad;
+                                break;
+                        }
                     }
-                }
 
-
-                if ( value === undefined && kineticObj instanceof Kinetic.Text ) {
-                    
-                    switch ( propertyName ) {
+                    if ( value === undefined && kineticObj instanceof Kinetic.Star ) {
                         
-                        case "fontFamily":
-                            value = kineticObj.fontFamily();
-                            break;
+                        switch ( propertyName ) {
+                            
+                            case "numPoints":
+                                value = kineticObj.animation();
+                                break;
 
-                        case "fontSize":
-                            value = kineticObj.fontSize();
-                            break;
+                            case "innerRadius":
+                                value = kineticObj.innerRadius();
+                                break;
 
-                        case "fontStyle":
-                            value = kineticObj.fontStyle();
-                            break;
-
-                        case "fontVariant":
-                            value = kineticObj.fontVariant();
-                            break;
-
-                        case "text":
-                            value = kineticObj.text();
-                            break;
-
-                        case "align":
-                            value = kineticObj.align();
-                            break;
-
-                        case "padding":
-                            value = kineticObj.padding();
-                            break;
-
-                        case "width":
-                            value = kineticObj.width();
-                            break;
-
-                        case "height":
-                            value = kineticObj.height();
-                            break; 
-
-                        case "lineHeight":
-                            value = kineticObj.lineHeight();
-                            break;
-
-                        case "wrap":
-                            value = kineticObj.wrap();
-                            break;
+                            case "outerRadius":
+                                value = kineticObj.outerRadius();
+                                break;
+                        }
                     }
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.TextPath ) {
-                    
-                    switch ( propertyName ) {
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Text ) {
                         
-                        case "fontFamily":
-                            value = kineticObj.fontFamily();
-                            break;
+                        switch ( propertyName ) {
+                            
+                            case "fontFamily":
+                                value = kineticObj.fontFamily();
+                                break;
 
-                        case "fontSize":
-                            value = kineticObj.fontSize();
-                            break;
+                            case "fontSize":
+                                value = kineticObj.fontSize();
+                                break;
 
-                        case "fontStyle":
-                            value = kineticObj.fontStyle();
-                            break;
+                            case "fontStyle":
+                                value = kineticObj.fontStyle();
+                                break;
 
-                        case "fontVariant":
-                            value = kineticObj.fontVariant();
-                            break;
+                            case "fontVariant":
+                                value = kineticObj.fontVariant();
+                                break;
 
-                        case "text":
-                            value = kineticObj.text();
-                            break;
+                            case "text":
+                                value = kineticObj.text();
+                                break;
 
-                        case "data":
-                            value = kineticObj.data();
-                            break;
+                            case "align":
+                                value = kineticObj.align();
+                                break;
+
+                            case "padding":
+                                value = kineticObj.padding();
+                                break;
+
+                            case "width":
+                                value = kineticObj.width();
+                                break;
+
+                            case "height":
+                                value = kineticObj.height();
+                                break; 
+
+                            case "lineHeight":
+                                value = kineticObj.lineHeight();
+                                break;
+
+                            case "wrap":
+                                value = kineticObj.wrap();
+                                break;
+                        }
                     }
-                }
 
-                if ( value === undefined && kineticObj instanceof Kinetic.Wedge ) {
-                    
-                    switch ( propertyName ) {
+                    if ( value === undefined && kineticObj instanceof Kinetic.TextPath ) {
                         
-                        case "angle":
-                            value = kineticObj.angle();
-                            break;
+                        switch ( propertyName ) {
+                            
+                            case "fontFamily":
+                                value = kineticObj.fontFamily();
+                                break;
 
-                        case "radius":
-                            value = kineticObj.radius();
-                            break;
+                            case "fontSize":
+                                value = kineticObj.fontSize();
+                                break;
 
-                        case "clockwise":
-                            kineticObj.clockwise();
-                            break;
+                            case "fontStyle":
+                                value = kineticObj.fontStyle();
+                                break;
+
+                            case "fontVariant":
+                                value = kineticObj.fontVariant();
+                                break;
+
+                            case "text":
+                                value = kineticObj.text();
+                                break;
+
+                            case "data":
+                                value = kineticObj.data();
+                                break;
+                        }
                     }
-                }
+
+                    if ( value === undefined && kineticObj instanceof Kinetic.Wedge ) {
+                        
+                        switch ( propertyName ) {
+                            
+                            case "angle":
+                                value = kineticObj.angle();
+                                break;
+
+                            case "radius":
+                                value = kineticObj.radius();
+                                break;
+
+                            case "clockwise":
+                                kineticObj.clockwise();
+                                break;
+                        }
+                    }
 
                     return value;
-            }
+                }
             };
 
             // turns on logger debugger console messages 

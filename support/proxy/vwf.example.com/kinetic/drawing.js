@@ -22,11 +22,8 @@ this.clientWatch = function() {
 };
 
 this.isValid = function( obj ) {
-
-
-
-        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
-        return ( objType != 'null' && objType != 'undefined' );
+    var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
+    return ( objType != 'null' && objType != 'undefined' );
 };
 
 this.clientJoin = function( moniker ) {
