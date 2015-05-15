@@ -677,7 +677,7 @@ define( [ "module",
                                             objectDef[ prop ] = propertyValue[ prop ];
                                             break;    
                                     }
-                                }   
+                                }
                             }
 
                             node.threeObject = createMaterial( objectDef );
@@ -1650,6 +1650,13 @@ define( [ "module",
                             }
                             value = uniforms;
                             threeObject.uniforms = value;
+                        } else if ( propertyName === "defines" ) {
+                            var names = Object.keys( propertyValue );
+                            var defines = {};
+                            for ( var i = 0; i < names.length; i++ ) {
+                                defines[ names[ i ] ] = propertyValue[ names[ i ] ];
+                            }
+                            threeObject.defines = defines;
                         } else if ( propertyName === "vertexShader" ) {
                             value = propertyValue;
                             threeObject.vertexShader = value;
@@ -1668,8 +1675,14 @@ define( [ "module",
                         } else if ( threeObject.uniforms.hasOwnProperty( propertyName ) ) {
                             var type = threeObject.uniforms[ propertyName ].type;
                             setUniformProperty( threeObject.uniforms, propertyName, type, propertyValue );
+                        // -----------
+                        // TODO: Defines are constants within the shader, do they need to be set in this way?
+                        // } else if ( threeObject.defines.hasOwnProperty( propertyName ) ) {
+                        //     value = propertyValue;
+                        //     threeObject.defines[ propertyName ] = value;
                         } else if ( propertyName.indexOf("_") === 0 ) {
-                            threeObject[ propertyName ] = propertyValue;
+                            value = propertyValue;
+                            threeObject[ propertyName ] = value;
                         }
                     }
                 }
@@ -2255,6 +2268,13 @@ define( [ "module",
                         } else {
                             value[ uni ] = threeObject.uniforms[ uni ];     
                         }
+                    }
+                    return value;
+                }
+                if ( propertyName === "defines" ) {
+                    value = {};
+                    for ( var def in threeObject.defines ) {
+                        value[ def ] = threeObject.defines[ def ];
                     }
                     return value;
                 }
@@ -5570,6 +5590,15 @@ define( [ "module",
                 }
                 obj[ prop ].value = textureArray;
                 break;
+            case 'v2v':
+                var vectorArray = [];
+                var vector;
+                for ( var i = 0; i < value.length; i++ ) {
+                    vector = value[ i ];
+                    vectorArray.push( new THREE.Vector2( vector[0], vector[1] ) );
+                }
+                obj[ prop ].value = vectorArray;
+                break;
         } 
     
     }
@@ -5603,6 +5632,14 @@ define( [ "module",
                 result = [];
                 for ( var i = 0; i < value.length; i++ ) {
                     result.push( loadTexture( undefined, value[ i ] ) );
+                }
+                break;
+            case 'v2v':
+                result = [];
+                var vector;
+                for ( var i = 0; i < value.length; i++ ) {
+                    vector = value[ i ];
+                    result.push( new THREE.Vector2( vector[0], vector[1] ) );
                 }
                 break;
         }
