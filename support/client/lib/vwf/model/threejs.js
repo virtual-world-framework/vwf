@@ -1656,6 +1656,7 @@ define( [ "module",
                                 defines[ names[ i ] ] = propertyValue[ names[ i ] ];
                             }
                             threeObject.defines = defines;
+                            threeObject.needsUpdate = true;
                         } else if ( propertyName === "vertexShader" ) {
                             value = propertyValue;
                             threeObject.vertexShader = value;
@@ -5609,6 +5610,13 @@ define( [ "module",
                     vectorArray.push( new THREE.Vector2( vector[0], vector[1] ) );
                 }
                 obj[ prop ].value = vectorArray;
+                break;
+            case 'iv1':
+                var intArray = [];
+                for ( var i = 0; i < value.length; i++ ) {
+                    intArray.push( Number( value[ i ] ) );
+                }
+                obj[ prop ].value = intArray;
                 break;
         } 
     
