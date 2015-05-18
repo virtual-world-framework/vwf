@@ -66,6 +66,9 @@ define( [ "module",
                     return found;
                 },
                 "setProperty": function( kineticObj, propertyName, propertyValue ) {
+
+                    console.info( "setProperty("+propertyName+", "+ propertyValue+")" );
+
                     var value = undefined;
 
                     if ( !kineticObj ) {
@@ -1636,7 +1639,7 @@ define( [ "module",
                 "parenting": false,
                 "deleting": false,
                 "properties": false,
-                "setting": false,
+                "setting": true,
                 "getting": false,
                 "methods": false,
                 "events": false,
@@ -1832,13 +1835,50 @@ define( [ "module",
             var value = undefined;
             if ( node && node.kineticObj && utility.validObject( propertyValue ) ) {
 
-                if ( node.model[ propertyName ] !== undefined ) {
-                    if ( this.kernel.client() === this.kernel.moniker() ) {
-                        //node.model[ propertyName ] = propertyValue;
-                        value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
-                    }                    
+                if ( node.model[ propertyName ] === undefined ) {
+                    this.logger.infox( "    - model value does not exist " );
+                    // Not unique-in-view
+                    value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
+
+                    if ( propertyName === "position" ) {
+                        node.model[ propertyName ] = 
+                        {
+                            "value":    propertyValue,
+                            "isStatic": false
+                        };
+                    }
+                //} else if ( !node.model[ propertyName ].isStatic ) {
+                    // Not unique-in-view
+                //    value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value );
+
                 } else {
-                    value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );     
+                    if ( propertyName === "position" ) {
+
+                        node.model[ propertyName ].value = propertyValue;
+
+                        if ( node.model[ propertyName ].ignoreNextPositionUpdate ) {
+                            this.logger.infox( "    - ignore position update this time " );
+                            node.model[ propertyName ].ignoreNextPositionUpdate = false;
+                        } else if ( !node.model[ propertyName ].isStatic ) {
+                            this.logger.infox( "    - set position to model value " );
+                            value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value ); 
+                        }
+
+                    } else if ( !node.model[ propertyName ].isStatic ) {
+                        this.logger.infox( "    - not unique in view, update property " );
+                        value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value );
+                    } else {
+                        this.logger.infox( "    - unique in view, update model only " );
+                       node.model[ propertyName ].value = propertyValue;
+                    }
+                    /*
+                    if ( this.kernel.client() === this.kernel.moniker() ) {
+                        node.model[ propertyName ].value = propertyValue;
+                        value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
+                    } else {
+                        node.model[ propertyName ].value = propertyValue;
+                    }
+                    */
                 }
                    
             }

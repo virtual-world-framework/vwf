@@ -31,6 +31,8 @@ properties:
   absoluteTransform:
   absoluteOpacity:
   absoluteZIndex:
+  modelX:
+  modelY:
   supportMouseEvents:
   supportTouchEvents:
   hasMouseEvents: false
