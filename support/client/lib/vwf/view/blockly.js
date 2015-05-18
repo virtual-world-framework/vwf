@@ -232,6 +232,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         // breaking synchronization.
 
                         if ( previousActiveNode === blocklyNode ) {
+                            setBlockXML( blocklyNode );
                             break;
                         }
 
@@ -248,11 +249,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             } else if ( app.toolbox !== undefined ) {
                                 loadToolbox( app.toolbox );
                             }
-                            if ( blocklyNode.defaultXml !== undefined ) {
-                                loadDefaultXml( blocklyNode.defaultXml );
-                            } else if ( app.defaultXml !== undefined ) {
-                                loadDefaultXml( app.defaultXml );
-                            }
+                            // if ( blocklyNode.defaultXml !== undefined ) {
+                            //     loadDefaultXml( blocklyNode.defaultXml );
+                            // } else if ( app.defaultXml !== undefined ) {
+                            //     loadDefaultXml( app.defaultXml );
+                            // }
                             this.state.blockly.node = blocklyNode;
                             setBlockXML( blocklyNode );
                             this.kernel.fireEvent( blocklyNode.ID, "blocklyVisibleChanged", [ getBlocklyUIVisibility() ] );
