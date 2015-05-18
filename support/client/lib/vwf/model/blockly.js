@@ -229,7 +229,11 @@ define( [ "module", "vwf/model", "vwf/utility",
                         break;
                     
                     case "blockly_xml":
-                        value = node.blocks = propertyValue;
+                        if ( propertyValue.indexOf('http://www.w3.org/1999/xhtml') !== -1 ) {
+                        } else {
+                           node.blocks = propertyValue;
+                           value = propertyValue; 
+                        }
                         break;
 
                      case "blockly_timeBetweenLines":
@@ -412,7 +416,6 @@ define( [ "module", "vwf/model", "vwf/utility",
                     if ( executeNextLine ) {
 
                         self.state.executionHalted = false;
-                        
                         nextStep( blocklyNode );
 
                         // Does this serve any real purpose? It's not handled in any application.
