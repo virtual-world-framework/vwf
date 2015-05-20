@@ -58,7 +58,7 @@ define( [ "module", "vwf/view", "vwf/utility", "jquery" ], function( module, vie
 
                 // Load the file and insert it into the main page.
 
-                var container = jQuery( "body" ).append( "<div />" ).children( ":last" );
+                var container = jQuery( "body" ).append( "<div id='vwf-content' />" ).children( ":last" );
 
                 container.load( "admin/chrome", function( responseText, textStatus ) {
 
