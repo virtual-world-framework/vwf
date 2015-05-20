@@ -38,9 +38,23 @@ define( [ "module", "vwf/view" ], function( module, view ) {
 
             // -- Read-write functions -------------------------------------------------------------
 
-            // TODO: setState
-            // TODO: getState
-            // TODO: hashState
+            case "setState":
+
+                return function( applicationState, when, callback /* */ ) {
+                    ...
+                };
+
+            case "getState":
+
+                return function( full, normalize, when, callback ) {
+                    ...
+                };
+
+            case "hashState":
+
+                return function( when, callback ) {
+                    ...
+                };
 
             case "createNode":
 
@@ -77,8 +91,23 @@ define( [ "module", "vwf/view" ], function( module, view ) {
                         undefined, when || 0, callback /* result */ );
                 };
 
-            // TODO: setNode
-            // TODO: getNode
+            case "setNode":
+
+                return function( nodeID, nodeComponent, when, callback /* nodeID */ ) {
+
+                };
+
+            case "getNode":
+
+                return function( nodeID, full, normalize, when, callback ) {
+                    ...
+                };
+
+            case "hashNode":
+
+                return function( nodeID, when, callback ) {
+                    ...
+                };
 
             case "createChild":
 
@@ -256,10 +285,17 @@ define( [ "module", "vwf/view" ], function( module, view ) {
             case "prototypes":
             case "behaviors":
 
+            case "globals":
+            case "global":
+            case "root":
+
             case "ancestors":
             case "parent":
             case "children":
+            case "child":
             case "descendants":
+
+            case "sequence":
 
             case "find":
             case "test":
