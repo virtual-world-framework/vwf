@@ -232,7 +232,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         // If the new node is the same as the old - exit early to prevent 
                         // breaking synchronization.
 
-                        if ( previousActiveNode === blocklyNode ) {
+                        if ( previousActiveNode && blocklyNode && previousActiveNode === blocklyNode ) {
                             setBlockXML( blocklyNode );
                             break;
                         }
