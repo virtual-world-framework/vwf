@@ -77,11 +77,11 @@ define( [ "module",
 
                     value = this.setNodeProperty( kineticObj, propertyName, propertyValue );
 
-                    if ( value === undefined ) {
+                    if ( value === undefined && ( kineticObj.nodeType === "Shape" ) ) {
                         value = this.setShapeProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined ) {
+                    if ( value === undefined && kineticObj instanceof Kinetic.Container ) {
                         value = this.setContainerProperty( kineticObj, propertyName, propertyValue );
                     }
 
@@ -1840,12 +1840,21 @@ define( [ "module",
                     // Not unique-in-view
                     value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
 
-                    if ( propertyName === "position" ) {
-                        node.model[ propertyName ] = 
-                        {
-                            "value":    propertyValue,
-                            "isStatic": false
-                        };
+                    switch ( propertyName ) {
+                        case "position":
+                        case "stroke":
+                        case "strokeWidth":
+                        case "fill":
+                        case "radius":
+                            node.model[ propertyName ] = 
+                            {
+                                "value":    propertyValue,
+                                "isStatic": false
+                            };
+                            break;
+
+                        default:
+                            break;
                     }
                 //} else if ( !node.model[ propertyName ].isStatic ) {
                     // Not unique-in-view
@@ -1866,6 +1875,7 @@ define( [ "module",
 
                     } else if ( !node.model[ propertyName ].isStatic ) {
                         this.logger.infox( "    - not unique in view, update property " );
+                        node.model[ propertyName ].value = propertyValue;
                         value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value );
                     } else {
                         this.logger.infox( "    - unique in view, update model only " );

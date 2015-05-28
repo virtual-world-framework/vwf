@@ -27,9 +27,9 @@ this.isValid = function( obj ) {
 };
 
 this.clientJoin = function( moniker ) {
-    if ( this.id === "http://vwf.example.com/kinetic/drawing.vwf" ){
-        return;
-    }
+    //if ( this.id === "http://vwf.example.com/kinetic/drawing.vwf" ){
+    //    return;
+    //}
 
     // mirrors the initial state of the toolbar
     if ( !this.isValid( this.drawing_clients ) ) {
@@ -48,7 +48,7 @@ this.clientJoin = function( moniker ) {
             "angle": 30
         };
     }
-    //this.drawing_clients = this.drawing_clients;
+    this.drawing_clients = this.drawing_clients;
 
 };
 
@@ -429,7 +429,7 @@ this.update = function( eventData, nodeData, upEvent ) {
                 var posY = eventPoint[ 1 ] - drawingObject.y;
                 
                 if ( isFirstStrokeOfNewLine ) {
-                    if ( Math.abs( posX ) + Math.abs( posY ) > 0 ) {
+                    if ( ( Math.abs( posX ) + Math.abs( posY ) ) > 0 ) {
                         drawingObject.points = [ 0, 0, posX, posY ];
                     } else {
                         pointAccepted = false;   
@@ -440,7 +440,7 @@ this.update = function( eventData, nodeData, upEvent ) {
                         posY - privateState.previousPoint[ 1 ] 
                     ];
 
-                    if ( Math.abs( dragDiff[0] ) + Math.abs( dragDiff[1] ) > 0 ) {
+                    if ( ( Math.abs( dragDiff[0] ) + Math.abs( dragDiff[1] ) ) > 0 ) {
                         drawingObject.points.push( posX );
                         drawingObject.points.push( posY );                        
                     } else {
