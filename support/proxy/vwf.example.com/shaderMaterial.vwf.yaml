@@ -35,3 +35,6 @@ methods:
       var defines = this.defines;
       defines[ name ] = value;
       this.defines = defines;
+  updateTexture:
+    parameters:
+      - textureName
