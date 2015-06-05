@@ -2631,6 +2631,16 @@ define( [ "module",
 
         callingMethod: function( nodeID, methodName, parameters /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
 
+            var node = this.state.nodes[ nodeID ];
+            if ( !node ) {
+                node = this.state.scenes[ nodeID ];
+            }
+
+            var threeObject;
+            if ( node ) {
+                threeObject = node.threeObject || node.threeScene;
+            }
+
             if ( methodName === "raycast" ) {
 
                 var origin, direction, near, far, recursive, objectIDs;
@@ -2761,6 +2771,20 @@ define( [ "module",
 
                 return results;
 
+            }
+
+            if ( threeObject instanceof THREE.ShaderMaterial ) {
+                if ( methodName === "updateTexture" ) {
+                    var textureName = parameters[ 0 ];
+                    var texture = threeObject.uniforms[ textureName ];
+                    if ( texture ) {
+                        texture.value.needsUpdate = true;
+                        threeObject.needsUpdate = true;
+                    } else {
+                        this.logger.warnx( nodeID + ".updateTexture", "Texture \""
+                            + textureName + "\" not found!" );
+                    }
+                }
             }
 
             return undefined;
@@ -5695,14 +5719,21 @@ define( [ "module",
         //console.log( [ "loadTexture: ", JSON.stringify( def ) ] );
 
         if ( utility.isString( def ) ) {
-            url = def;    
+            url = def;
         } else {
-            url = def.url;
+            if ( def.canvasID ) {
+                var canvas = document.getElementById( def.canvasID );
+                url = canvas;
+            } else {
+                url = def.url;
+            }
             mapping = def.mapping;
             wrapTexture = Boolean( def.wrapTexture );
         }
 
-        if ( mat === undefined ) {
+        if ( url instanceof HTMLElement && url.nodeName === "CANVAS" ) {
+            txt = new THREE.Texture( url );
+        } else if ( mat === undefined ) {
             if ( mapping === undefined ) {
                 txt = THREE.ImageUtils.loadTexture( url );    
             } else {
@@ -5710,6 +5741,13 @@ define( [ "module",
             }
         } else {
             txt = THREE.ImageUtils.loadTexture( url, mapping, onLoad, onError );            
+        }
+
+        if ( def instanceof Object ) {
+            var keys = Object.keys( def );
+            for ( var i = 0; i < keys.length; i++ ) {
+                setTextureProperty( txt, keys[ i ], def[ keys[ i ] ], true );
+            }
         }
 
         if ( wrapTexture ) {
@@ -5945,7 +5983,7 @@ define( [ "module",
         return value;
     }
 
-    function setTextureProperty( texture, propertyName, propertyValue ) {
+    function setTextureProperty( texture, propertyName, propertyValue, suppressUpdate ) {
         var value = propertyValue;
 
         if ( texture === undefined ) {
@@ -6127,7 +6165,7 @@ define( [ "module",
 
         }
 
-        if ( value !== undefined ) {
+        if ( value !== undefined && !suppressUpdate ) {
             texture.needsUpdate = true;
         }
 
