@@ -25,7 +25,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 var node = this.nodes[ childID ];
 
                 // Create the local copy of the node properties
-                if ( this.nodes[ childID ] === undefined ){
+                if ( this.nodes[ childID ] === undefined && childSource !== undefined ){
 
                     // Suspend the queue until the load is complete
                     callback( false );
