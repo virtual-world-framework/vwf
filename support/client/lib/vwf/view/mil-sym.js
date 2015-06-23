@@ -223,7 +223,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         var symUtil = renderer.utilities.SymbolUtilities;
         var modifiers = {};
 
-        self.logger.info(" Mil-SymJS  SymbolID before echelon and affiliation: " + symbolID );
+        //self.logger.info(" Mil-SymJS  SymbolID before echelon and affiliation: " + symbolID );
     
         if ( cws ) {
             updatedUnit = unit;
@@ -233,9 +233,9 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             
             // Add echelon
             if ( echelonID != undefined ) {
-                self.logger.info(" Mil-SymJS Adding Echelon: " + echelonID );            
+                //self.logger.info(" Mil-SymJS Adding Echelon: " + echelonID );            
                 updatedUnit.symbolID = cws.addEchelonToSymbolId( updatedUnit.symbolID, echelonID );
-                self.logger.info(" Mil-SymJS  SymbolID after echelon and affiliation: " + updatedUnit.symbolID );
+                //self.logger.info(" Mil-SymJS  SymbolID after echelon and affiliation: " + updatedUnit.symbolID );
             }
             
             // Add modifiers

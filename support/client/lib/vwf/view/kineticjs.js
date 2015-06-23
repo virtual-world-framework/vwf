@@ -106,7 +106,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //setViewProperty( node.ID, "position", [ xPos, yPos ] );
             ////setViewProperty( node.ID, "x", xPos );
             ////setViewProperty( node.ID, "y", yPos );
-            console.info( "dragstart( "+node.ID+", x: "+xPos+", y: "+yPos+" )" );
+            //console.info( "dragstart( "+node.ID+", x: "+xPos+", y: "+yPos+" )" );
 
             //viewDriver.state.draggingNodes[ node.ID ] = true;
             viewDriver.state.draggingNodes[ node.ID ] = node;
@@ -480,7 +480,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             // If users can drag this node and all clients should stay synchronized, we must 
             // pull the new node position out of kinetic and update the model with it
             if ( node.kineticObj ) {
-                console.info( "update( Node: "+nodeID+" )" );
+                //console.info( "update( Node: "+nodeID+" )" );
                 if ( node.kineticObj.draggable() && node.model && node.model.position && !node.model.position.isStatic )  { 
                     //( ( node.model.y !== undefined ) && !( node.model.y.isStatic ) ) )  {
                     var kineticX = node.kineticObj.x();
@@ -490,7 +490,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     // model property with the new value
                     if ( ( node.model.position.value[0] !== kineticX ) || 
                          ( node.model.position.value[1] !== kineticY ) ) {
-                        console.info( "- "+nodeID+", model position: "+node.model.position.value.x+", "+node.model.position.value.y+", kinetic position: "+kineticX+", "+kineticY );
+                        //console.info( "- "+nodeID+", model position: "+node.model.position.value.x+", "+node.model.position.value.y+", kinetic position: "+kineticX+", "+kineticY );
 
                         // Fire this event to notify the model that kinetic has already updated the
                         // view and it doesn't need to (if the model set the value, it would risk 
@@ -499,7 +499,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
                         viewDriver.kernel.setProperty( nodeID, "position", [ kineticX, kineticY ] );
                         //viewDriver.kernel.setProperty( nodeID, "position", [ kineticX, kineticY ] );
-                        console.info( "setProperty( "+nodeID+", position: kineticX: "+kineticX+", kineticY: "+kineticY+" )" );
+                        //console.info( "setProperty( "+nodeID+", position: kineticX: "+kineticX+", kineticY: "+kineticY+" )" );
 
                         // Tell the model not to update the view on the next position update because 
                         // kinetic has already done so
@@ -620,12 +620,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function setViewProperty( id, propertyName, propertyValue, isStatic ) {
         
-        console.info( "setViewProperty( "+id+", "+propertyName+", "+propertyValue+", "+isStatic+" )" );
+        //console.info( "setViewProperty( "+id+", "+propertyName+", "+propertyValue+", "+isStatic+" )" );
         node = viewDriver.state.nodes[ id ];
         if ( node && node.kineticObj ) {
             if ( utility.validObject( propertyValue ) ) {
                 if ( node.model[ propertyName ] === undefined ) {
-                    console.info( "- store property "+propertyName+" model value: "+viewDriver.state.getProperty( node.kineticObj, propertyName )+", isStatic: "+isStatic );
+                    //console.info( "- store property "+propertyName+" model value: "+viewDriver.state.getProperty( node.kineticObj, propertyName )+", isStatic: "+isStatic );
                     node.model[ propertyName ] = {
                         "value":    viewDriver.state.getProperty( node.kineticObj, propertyName ),
                         "isStatic": ( ( isStatic === undefined ) ? false : isStatic ) 
@@ -634,13 +634,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     node.model[ propertyName ].value = propertyValue;
                 }
                 viewDriver.state.setProperty( node.kineticObj, propertyName, propertyValue );
-                console.info( "- set kineticObject property: "+propertyName+" to: "+propertyValue );
+                //console.info( "- set kineticObject property: "+propertyName+" to: "+propertyValue );
             } else {
                 var modelValue = node.model[ propertyName ].value;
                 if ( modelValue !== undefined ) {
                     //delete node.model[ propertyName ]; 
                     viewDriver.state.setProperty( node.kineticObj, propertyName, modelValue );   
-                    console.info( "- deletes node.model and set kineticObject property: "+propertyName+" to: "+modelValue );
+                    //console.info( "- deletes node.model and set kineticObject property: "+propertyName+" to: "+modelValue );
                 }
             }
         }

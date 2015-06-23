@@ -40,7 +40,6 @@ define( [ "module",
                         "prototypes": undefined,
                         "kineticObj": undefined,
                         "stage": undefined,
-                        //"uniqueInView": false,
                         "hasMouseEvents": false,
                         "hasTouchEvents": false,
                         "model": {}                    };
@@ -67,7 +66,7 @@ define( [ "module",
                 },
                 "setProperty": function( kineticObj, propertyName, propertyValue ) {
 
-                    console.info( "setProperty("+propertyName+", "+ propertyValue+")" );
+                    //console.info( "setProperty("+propertyName+", "+ propertyValue+")" );
 
                     var value = undefined;
 
@@ -298,23 +297,6 @@ define( [ "module",
                             //     kineticObj.setAbsolutePosition( oldAbsolutePosition );
                             // }
                             break;
-
-                        // case "uniqueInView":
-                        //     node.uniqueInView = Boolean( propertyValue );
-
-                        //     // If we no longer have unique views, all view positions should be set
-                        //     // to the model value
-                        //     // Note: though this would be more appropriate to do in the view 
-                        //     // driver's satProperty, it is important that it be updated atomically 
-                        //     // with the model so there is no risk that "ticked" will discover the 
-                        //     // descrepancy between model and view values and assume that the user 
-                        //     // has dragged the node via kinetic (thus triggering it to set the model
-                        //     // value from the old view value)
-                        //     if ( !node.uniqueInView ) {
-                        //         kineticObj.x( kineticObj.modelX );
-                        //         kineticObj.y( kineticObj.modelY );
-                        //     }
-                        //     break;
 
                         case "dragBoundFunc":
                             var functionString = propertyValue;
@@ -1639,7 +1621,7 @@ define( [ "module",
                 "parenting": false,
                 "deleting": false,
                 "properties": false,
-                "setting": true,
+                "setting": false,
                 "getting": false,
                 "methods": false,
                 "events": false,
@@ -1836,7 +1818,7 @@ define( [ "module",
             if ( node && node.kineticObj && utility.validObject( propertyValue ) ) {
 
                 if ( node.model[ propertyName ] === undefined ) {
-                    this.logger.infox( "    - model value does not exist " );
+                    //this.logger.infox( "    - model value does not exist " );
                     // Not unique-in-view
                     value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
 
@@ -1866,20 +1848,20 @@ define( [ "module",
                         node.model[ propertyName ].value = propertyValue;
 
                         if ( node.model[ propertyName ].ignoreNextPositionUpdate ) {
-                            this.logger.infox( "    - ignore position update this time " );
+                            //this.logger.infox( "    - ignore position update this time " );
                             node.model[ propertyName ].ignoreNextPositionUpdate = false;
                         } else if ( !node.model[ propertyName ].isStatic ) {
-                            this.logger.infox( "    - set position to model value " );
+                            //this.logger.infox( "    - set position to model value " );
                             value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value ); 
                         }
 
                     } else if ( !node.model[ propertyName ].isStatic ) {
-                        this.logger.infox( "    - not unique in view, update property " );
+                        //this.logger.infox( "    - not unique in view, update property " );
                         node.model[ propertyName ].value = propertyValue;
                         value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value );
                     } else {
-                        this.logger.infox( "    - unique in view, update model only " );
-                       node.model[ propertyName ].value = propertyValue;
+                        //this.logger.infox( "    - unique in view, update model only " );
+                        node.model[ propertyName ].value = propertyValue;
                     }
                     /*
                     if ( this.kernel.client() === this.kernel.moniker() ) {
