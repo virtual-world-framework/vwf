@@ -444,7 +444,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             if ( eventName == "draggingFromView" ) {
 
                 // If the transform property was initially updated by this view....
-                if ( self.kernel.client() === viewDriver.kernel.moniker() ) {
+                if ( self.kernel.client() === self.kernel.moniker() ) {
 
                     // Tell the model not to update the view on the next position update because 
                     // kinetic has already done so
@@ -630,29 +630,22 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         "value":    viewDriver.state.getProperty( node.kineticObj, propertyName ),
                         "isStatic": ( ( isStatic === undefined ) ? false : isStatic ) 
                     };
-                } else if ( node.model[propertyName].isStatic ) {
-                    node.model[ propertyName ].value = propertyValue;
+                } else if ( node.model[propertyName].isStatic !== isStatic ) {
+                    node.model[propertyName].isStatic = ( ( isStatic === undefined ) ? false : isStatic );
+                }
+                if ( node.model[propertyName].isStatic ) {
+                    node.model[ propertyName ].value = propertyValue;                    
                 }
                 viewDriver.state.setProperty( node.kineticObj, propertyName, propertyValue );
                 //console.info( "- set kineticObject property: "+propertyName+" to: "+propertyValue );
             } else {
                 var modelValue = node.model[ propertyName ].value;
                 if ( modelValue !== undefined ) {
-                    //delete node.model[ propertyName ]; 
                     viewDriver.state.setProperty( node.kineticObj, propertyName, modelValue );   
                     //console.info( "- deletes node.model and set kineticObject property: "+propertyName+" to: "+modelValue );
                 }
             }
         }
-
-        /*
-                    if ( this.kernel.client() === this.kernel.moniker() ) {
-                        node.model[ propertyName ].value = propertyValue;
-                        value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
-                    } else {
-                        node.model[ propertyName ].value = propertyValue;
-                    }
-        */
     }
 
 });
