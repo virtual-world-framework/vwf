@@ -619,9 +619,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     }
 
     function setViewProperty( id, propertyName, propertyValue, isStatic ) {
-        
         //console.info( "setViewProperty( "+id+", "+propertyName+", "+propertyValue+", "+isStatic+" )" );
-        node = viewDriver.state.nodes[ id ];
+        var node = viewDriver.state.nodes[ id ];
         if ( node && node.kineticObj ) {
             if ( utility.validObject( propertyValue ) ) {
                 if ( node.model[ propertyName ] === undefined ) {
@@ -630,19 +629,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         "value":    viewDriver.state.getProperty( node.kineticObj, propertyName ),
                         "isStatic": ( ( isStatic === undefined ) ? false : isStatic ) 
                     };
-                } else if ( node.model[propertyName].isStatic !== isStatic ) {
-                    node.model[propertyName].isStatic = ( ( isStatic === undefined ) ? false : isStatic );
-                }
-                if ( node.model[propertyName].isStatic ) {
-                    node.model[ propertyName ].value = propertyValue;                    
+                } else if ( node.model[propertyName].isStatic ) {
+                    node.model[ propertyName ].value = propertyValue;
                 }
                 viewDriver.state.setProperty( node.kineticObj, propertyName, propertyValue );
                 //console.info( "- set kineticObject property: "+propertyName+" to: "+propertyValue );
             } else {
                 var modelValue = node.model[ propertyName ].value;
                 if ( modelValue !== undefined ) {
+                    //delete node.model[ propertyName ]; 
                     viewDriver.state.setProperty( node.kineticObj, propertyName, modelValue );   
-                    //console.info( "- deletes node.model and set kineticObject property: "+propertyName+" to: "+modelValue );
+                    console.info( "- deletes node.model and set kineticObject property: "+propertyName+" to: "+modelValue );
                 }
             }
         }

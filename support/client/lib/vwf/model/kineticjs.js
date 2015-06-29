@@ -156,7 +156,7 @@ define( [ "module",
                 "setNodeProperty": function( kineticObj, propertyName, propertyValue ) {
 
                     var value = propertyValue;
-          
+
                     switch ( propertyName ) {
 
                         case "x":
@@ -1828,11 +1828,13 @@ define( [ "module",
                         case "strokeWidth":
                         case "fill":
                         case "radius":
-                            node.model[ propertyName ] = 
-                            {
-                                "value":    propertyValue,
-                                "isStatic": false
-                            };
+							if ( node.kineticObj.nodeType !== "Stage" ) {
+								node.model[ propertyName ] = 
+								{
+									"value":    propertyValue,
+									"isStatic": false
+								};
+							}
                             break;
 
                         default:
