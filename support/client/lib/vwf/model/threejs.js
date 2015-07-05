@@ -4504,7 +4504,8 @@ define( [ "module",
             //In Analytic mode, run the equation for the position
             particleSystem.updateAnalytic = function( time )
             {
-                particleSystem.material.uniforms.time.value += time / 1000;
+                var timeInSeconds = time / 1000;
+                particleSystem.material.uniforms.time.value += timeInSeconds;
 
                 var inv = this.matrix.clone();
                 inv = inv.getInverse( inv );
@@ -4516,7 +4517,7 @@ define( [ "module",
                 while ( pCount-- ) 
                 {
                     var particle = particles.vertices[ pCount ];                   
-                    this.updateParticleAnalytic( particle, this.matrix, inv, time / 1000 );
+                    this.updateParticleAnalytic( particle, this.matrix, inv, timeInSeconds );
                 }
                     
                 //examples developed with faster tick - maxrate *33 is scale to make work 
@@ -4528,6 +4529,8 @@ define( [ "module",
                 //after dying
                 if ( this.timeSinceLastSpawn === undefined ) {
                     this.timeSinceLastSpawn = 0;
+                } else {
+                    this.timeSinceLastSpawn += timeInSeconds;
                 }
                 var maxParticlesToSpawn = Math.floor( this.timeSinceLastSpawn * this.maxRate );
                 var len = Math.min( this.regenParticles.length, maxParticlesToSpawn );
@@ -4536,11 +4539,11 @@ define( [ "module",
                     //setup with new random values, and move randomly forward in time one step  
                     var particle = this.regenParticles.shift();
                     this.setupParticle( particle, this.matrix, inv );
-                    this.updateParticleAnalytic( particle, this.matrix, inv, 0 );
+                    this.updateParticleAnalytic( particle, this.matrix, inv, Math.random() * timeInSeconds );
                     particle.waitForRegen = false;
                 }
 
-                this.timeSinceLastSpawn = Boolean( len ) ? 0 : this.timeSinceLastSpawn + ( time / 1000 );
+                this.timeSinceLastSpawn = Boolean( len ) ? 0 : this.timeSinceLastSpawn;
 
                 //only these things change, other properties are in the shader as they are linear WRT time  
                 this.geometry.verticesNeedUpdate  = true;
@@ -4621,7 +4624,7 @@ define( [ "module",
                 particle.age += delta_time;
                 
                 //Make the particle dead. Hide it until it can be reused
-                if ( particle.age >= particle.lifespan && !particle.waitForRegen )
+                if ( particle.age >= particle.lifespan ) // && !particle.waitForRegen )
                 {
                     this.regenParticles.push( particle );
                     particle.waitForRegen = true;
@@ -4793,26 +4796,28 @@ define( [ "module",
                         
             }
             //Change the system count. Note that this must be set before the first frame renders, cant be changed at runtime.
-            particleSystem.setParticleCount = function(newcount)
+            particleSystem.setParticleCount = function( newcount )
             {
                 var inv = this.matrix.clone();
-                inv = inv.getInverse(inv);
+                inv = inv.getInverse( inv );
                 
                 var particles = this.geometry;
-                while(this.geometry.vertices.length > newcount) 
+                particles.vertices.length = 0;
+                // while(this.geometry.vertices.length > newcount) 
+                // {
+                //     this.geometry.vertices.pop();
+                // }
+                this.regenParticles.length = 0;
+                while ( this.geometry.vertices.length < newcount ) 
                 {
-                    this.geometry.vertices.pop();
-                }
-                while(this.geometry.vertices.length < newcount) 
-                {
-                    var particle = particleSystem.createParticle(this.geometry.vertices.length);
-                    particleSystem.setupParticle(particle,particleSystem.matrix,inv);
+                    var particle = particleSystem.createParticle( this.geometry.vertices.length );
+                    particleSystem.setupParticle( particle, particleSystem.matrix, inv );
                     particle.age = Infinity;
-                    this.regenParticles.push(particle);
+                    this.regenParticles.push( particle );
                     particle.waitForRegen = true;
                 }
-                this.geometry.verticesNeedUpdate  = true;
-                this.geometry.colorsNeedUpdate  = true;
+                this.geometry.verticesNeedUpdate = true;
+                this.geometry.colorsNeedUpdate = true;
                 this.shaderMaterial_default.attributes.vertexColor.needsUpdate = true;
                 this.particleCount = newcount;
             }
