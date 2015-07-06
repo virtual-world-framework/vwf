@@ -3564,51 +3564,51 @@ define( [ "module",
 
     //walk the graph of an object, and set all materials to new material clones
     function cloneMaterials( nodein ) {
-	
-		    //sort the materials in the model, and when cloneing, make the new model share the same material setup as the old.
-	    	var materialMap = {};
-	
+    
+            //sort the materials in the model, and when cloneing, make the new model share the same material setup as the old.
+            var materialMap = {};
+    
         walkGraph( nodein, function( node ) {
             if(node.material) {
                 if ( node.material instanceof THREE.Material ) {
                     if(!materialMap[node.material.uuid]) {
-                				materialMap[node.material.uuid] = [];
+                                materialMap[node.material.uuid] = [];
                     }
-			       			  materialMap[node.material.uuid].push( [ node, -1 ] );
+                              materialMap[node.material.uuid].push( [ node, -1 ] );
                 }
                 else if ( node.material instanceof THREE.MeshFaceMaterial ) {
                     if ( node.material.materials ) {
                         for ( var index = 0; index < node.material.materials.length; index++ ) {
                             if ( node.material.materials[ index ] instanceof THREE.Material ) {
                                 if(!materialMap[node.material.materials[ index ].uuid]) {
-                				            materialMap[node.material.materials[ index ].uuid] = [];
+                                            materialMap[node.material.materials[ index ].uuid] = [];
                                 }
-			       	            		  materialMap[node.material.materials[ index ].uuid].push( [ node, index ] );
+                                          materialMap[node.material.materials[ index ].uuid].push( [ node, index ] );
                             }
                         }
                     }
                 }              
             }
         });
-		
-		    for(var i in materialMap)
-    		{
-		    	  var newmat;
+        
+            for(var i in materialMap)
+            {
+                  var newmat;
             if ( materialMap[ i ][ 0 ][ 1 ] < 0 ) {
                 newmat = materialMap[ i ][ 0 ][ 0 ].material.clone( );
             }
             else {
                 newmat = materialMap[ i ][ 0 ][ 0 ].material.materials[ materialMap[ i ][ 0 ][ 1 ] ].clone( );
             }
-			      for ( var j =0; j < materialMap[i].length; j++ ) {
+                  for ( var j =0; j < materialMap[i].length; j++ ) {
                 if ( materialMap[ i ][ j ][ 1 ] < 0 ) {
-    			     	    materialMap[ i ][ j ][ 0 ].material = newmat;
+                            materialMap[ i ][ j ][ 0 ].material = newmat;
                 }
                 else {
                     materialMap[ i ][ j ][ 0 ].material.materials[ materialMap[ i ][ j ][ 1 ] ] = newmat;
                 }
             }
-		    }
+            }
     }
 
     function loadAsset( parentNode, node, childType, propertyNotifyCallback ) {
@@ -3714,7 +3714,7 @@ define( [ "module",
             //find and bind the animations
             //NOTE: this would probably be better handled by walking and finding the animations and skins only on the 
             //property setter when needed.
-		
+        
             animatedMesh = [];
             walkGraph(nodeCopy.threeObject,function( node ){
                 if( node instanceof THREE.SkinnedMesh  || node instanceof THREE.MorphAnimMesh ) {
@@ -3929,7 +3929,7 @@ define( [ "module",
         //no download or parse necessary
         else if( reg.loaded == true && reg.pending == false ) {
             var asset = (reg.node.clone());
-		
+        
             // make sure the materails are unique
             cloneMaterials( asset );
             
@@ -4121,60 +4121,60 @@ define( [ "module",
                 
 
             //default material expects all computation done cpu side, just renders
-			// note that since the color, size, spin and orientation are just linear
-		    // interpolations, they can be done in the shader
+            // note that since the color, size, spin and orientation are just linear
+            // interpolations, they can be done in the shader
             var vertShader_default = 
             "attribute float size; \n"+
             "attribute vec4 vertexColor;\n"+
             "varying vec4 vColor;\n"+
-			"attribute vec4 random;\n"+
-			"varying vec4 vRandom;\n"+
-			"uniform float sizeRange;\n"+
-			"uniform vec4 colorRange;\n"+
+            "attribute vec4 random;\n"+
+            "varying vec4 vRandom;\n"+
+            "uniform float sizeRange;\n"+
+            "uniform vec4 colorRange;\n"+
             "void main() {\n"+
             "   vColor = vertexColor + (random -0.5) * colorRange;\n"+
             "   vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n"+
-			"   float psize = size + (random.y -0.5) * sizeRange;\n"+
+            "   float psize = size + (random.y -0.5) * sizeRange;\n"+
             "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n"+
             "   gl_Position = projectionMatrix * mvPosition;\n"+
-			 "   vRandom = random;"+
+             "   vRandom = random;"+
             "}    \n";
             var fragShader_default = 
             "uniform float useTexture;\n"+
             "uniform sampler2D texture;\n"+
             "varying vec4 vColor;\n"+
-			"varying vec4 vRandom;\n"+
-			"uniform float time;\n"+
+            "varying vec4 vRandom;\n"+
+            "uniform float time;\n"+
             "uniform float maxSpin;\n"+
             "uniform float minSpin;\n"+
-			"uniform float maxOrientation;\n"+
+            "uniform float maxOrientation;\n"+
             "uniform float minOrientation;\n"+
-			"uniform float textureTiles;\n"+
+            "uniform float textureTiles;\n"+
             "void main() {\n"+
-			            " vec2 coord = vec2(0.0,0.0);"+
-			" vec2 orig_coord = vec2(gl_PointCoord.s,1.0-gl_PointCoord.t);"+
+                        " vec2 coord = vec2(0.0,0.0);"+
+            " vec2 orig_coord = vec2(gl_PointCoord.s,1.0-gl_PointCoord.t);"+
             " float spin = mix(maxSpin,minSpin,vRandom.x);"+
             " float orientation = mix(maxOrientation,minOrientation,vRandom.y);"+
             " coord.s = (orig_coord.s-.5)*cos(time*spin+orientation)-(orig_coord.t-.5)*sin(time*spin+orientation);"+
             " coord.t = (orig_coord.t-.5)*cos(time*spin+orientation)+(orig_coord.s-.5)*sin(time*spin+orientation);"+
-			" coord = coord + vec2(.5,.5);\n"+
-			" coord = coord/textureTiles;\n"+
-			" coord.x = clamp(coord.x,0.0,1.0/textureTiles);\n"+
-			" coord.y = clamp(coord.y,0.0,1.0/textureTiles);\n"+
-			" coord += vec2(floor(vRandom.x*textureTiles)/textureTiles,floor(vRandom.y*textureTiles)/textureTiles);\n"+
+            " coord = coord + vec2(.5,.5);\n"+
+            " coord = coord/textureTiles;\n"+
+            " coord.x = clamp(coord.x,0.0,1.0/textureTiles);\n"+
+            " coord.y = clamp(coord.y,0.0,1.0/textureTiles);\n"+
+            " coord += vec2(floor(vRandom.x*textureTiles)/textureTiles,floor(vRandom.y*textureTiles)/textureTiles);\n"+
             "   vec4 outColor = (vColor * texture2D( texture, coord  )) *useTexture + vColor * (1.0-useTexture);\n"+
             
             "   gl_FragColor = outColor;\n"+
             "}\n";
-			
-			//the default shader - the one used by the analytic solver, just has some simple stuff
-			//note that this could be changed to do just life and lifespan, and calculate the 
-			//size and color from to uniforms. Im not going to bother
+            
+            //the default shader - the one used by the analytic solver, just has some simple stuff
+            //note that this could be changed to do just life and lifespan, and calculate the 
+            //size and color from to uniforms. Im not going to bother
             var attributes_default = {
                 size: { type: 'f', value: [] },
                 vertexColor:   {    type: 'v4', value: [] },
-				random:   { type: 'v4', value: [] },
-				
+                random:   { type: 'v4', value: [] },
+                
             };
             var uniforms_default = {
                 amplitude: { type: "f", value: 1.0 },
@@ -4182,14 +4182,14 @@ define( [ "module",
                 useTexture: { type: "f", value: 0.0 },
                 maxSpin: { type: "f", value: 0.0 },
                 minSpin: { type: "f", value: 0.0 },
-				maxOrientation: { type: "f", value: 0.0 },
+                maxOrientation: { type: "f", value: 0.0 },
                 minOrientation: { type: "f", value: 0.0 },
-				time: { type: "f", value: 0.0 },
-				fractime: { type: "f", value: 0.0 },
-				sizeRange: { type: "f", value: 0.0 },
-				textureTiles: { type: "f", value: 1.0 },
-				colorRange:   { type: 'v4', value: new THREE.Vector4(0,0,0,0) },
-				startColor:{type: "v4", value:new THREE.Vector4()},
+                time: { type: "f", value: 0.0 },
+                fractime: { type: "f", value: 0.0 },
+                sizeRange: { type: "f", value: 0.0 },
+                textureTiles: { type: "f", value: 1.0 },
+                colorRange:   { type: 'v4', value: new THREE.Vector4(0,0,0,0) },
+                startColor:{type: "v4", value:new THREE.Vector4()},
                 endColor:{type: "v4", value:new THREE.Vector4()},
                 startSize:{type:"f", value:1},
                 endSize:{type:"f", value:1},
@@ -4203,40 +4203,40 @@ define( [ "module",
 
             });
             
-			//the interpolate shader blends from one simulation step to the next on the shader
-			//this	allows for a complex sim to run at a low framerate, but still have smooth motion
-            //this is very efficient, as it only requires sending data up to the gpu on each sim tick		
-			//reuse the frag shader from the normal material	
+            //the interpolate shader blends from one simulation step to the next on the shader
+            //this  allows for a complex sim to run at a low framerate, but still have smooth motion
+            //this is very efficient, as it only requires sending data up to the gpu on each sim tick       
+            //reuse the frag shader from the normal material    
             var vertShader_interpolate = 
            
-			"attribute float age; \n"+
-			"attribute float lifespan; \n"+
-			"attribute vec3 previousPosition;\n"+
+            "attribute float age; \n"+
+            "attribute float lifespan; \n"+
+            "attribute vec3 previousPosition;\n"+
             "varying vec4 vColor;\n"+
-			"attribute vec4 random;\n"+
-			"varying vec4 vRandom;\n"+
-			"uniform float sizeRange;\n"+
-			"uniform vec4 colorRange;\n"+
-			"uniform float fractime;\n"+
-			"uniform float startSize;\n"+
+            "attribute vec4 random;\n"+
+            "varying vec4 vRandom;\n"+
+            "uniform float sizeRange;\n"+
+            "uniform vec4 colorRange;\n"+
+            "uniform float fractime;\n"+
+            "uniform float startSize;\n"+
             "uniform float endSize;\n"+
             "uniform vec4 startColor;\n"+
             "uniform vec4 endColor;\n"+
             "void main() {\n"+
             "   vColor = mix(startColor,endColor,(age+fractime*3.33)/lifespan) + (random -0.5) * colorRange;\n"+
             "   vec4 mvPosition = modelViewMatrix * vec4(mix(previousPosition,position,fractime), 1.0 );\n"+
-			"   float psize = mix(startSize,endSize,(age+fractime*3.33)/lifespan) + (random.y -0.5) * sizeRange;\n"+
+            "   float psize = mix(startSize,endSize,(age+fractime*3.33)/lifespan) + (random.y -0.5) * sizeRange;\n"+
             "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n"+
             "   gl_Position = projectionMatrix * mvPosition;\n"+
-			 "   vRandom = random;"+
+             "   vRandom = random;"+
             "}    \n";
             
-			//the interpolation does need to remember the previous position
-			var attributes_interpolate = {
-				random:   attributes_default.random,
-				previousPosition: { type: 'v3', value: [] },
-				age: { type: 'f', value: [] },
-				lifespan: { type: 'f', value: [] }
+            //the interpolation does need to remember the previous position
+            var attributes_interpolate = {
+                random:   attributes_default.random,
+                previousPosition: { type: 'v3', value: [] },
+                age: { type: 'f', value: [] },
+                lifespan: { type: 'f', value: [] }
             };
             var shaderMaterial_interpolate = new THREE.ShaderMaterial( {
                 uniforms:       uniforms_default,
@@ -4248,12 +4248,12 @@ define( [ "module",
             
             
             //analytic shader does entire simulation on GPU
-			//it cannot account for drag, gravity. nor can it generate new randomness. Each particle has it's randomness assigned and it 
-			//just repeats the same motion over and over. Also, the other solvers can hold a particle until 
-			//it can be reused based on the emitRate. This cannot, as the entire life of the particle must be 
-			//computed from an equation given just time t. It does offset them in time to avoid all the particles 
-			//being generated at once. Also, it does not account for emitter motion. 
-			//upside : very very efficient. No CPU intervention required
+            //it cannot account for drag, gravity. nor can it generate new randomness. Each particle has it's randomness assigned and it 
+            //just repeats the same motion over and over. Also, the other solvers can hold a particle until 
+            //it can be reused based on the emitRate. This cannot, as the entire life of the particle must be 
+            //computed from an equation given just time t. It does offset them in time to avoid all the particles 
+            //being generated at once. Also, it does not account for emitter motion. 
+            //upside : very very efficient. No CPU intervention required
             var vertShader_analytic = 
             "attribute float size; \n"+
             "attribute vec4 vertexColor;\n"+
@@ -4268,20 +4268,20 @@ define( [ "module",
             "uniform vec4 endColor;\n"+
             "varying vec4 vColor;\n"+
             "varying vec4 vRandom;\n"+
-			"uniform float sizeRange;\n"+
-			"uniform vec4 colorRange;\n"+
+            "uniform float sizeRange;\n"+
+            "uniform vec4 colorRange;\n"+
             "void main() {\n"+
-			//randomly offset in time
+            //randomly offset in time
             "   float lifetime = mod( random.x * lifespan + time, lifespan );"+
-			//solve for position
+            //solve for position
             "   vec3 pos2 = position.xyz + velocity*lifetime + (acceleration*lifetime*lifetime)/2.0;"+ // ;
             "   vec4 mvPosition = modelViewMatrix * vec4( pos2.xyz, 1.0 );\n"+
-			//find random size based on randomness, start and end size, and size range
-			"   float psize = mix(startSize,endSize,lifetime/lifespan) + (random.y -0.5) * sizeRange;\n"+
+            //find random size based on randomness, start and end size, and size range
+            "   float psize = mix(startSize,endSize,lifetime/lifespan) + (random.y -0.5) * sizeRange;\n"+
             "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n"+
             "   gl_Position = projectionMatrix * mvPosition;\n"+
-			" vec4 nR = (random -0.5);\n"+
-			//find random color based on start and endcolor, time and colorRange
+            " vec4 nR = (random -0.5);\n"+
+            //find random color based on start and endcolor, time and colorRange
             "   vColor = mix(startColor,endColor,lifetime/lifespan)  +  nR * colorRange;\n"+
             "   vRandom = random;"+
             "}    \n";
@@ -4293,27 +4293,27 @@ define( [ "module",
             "uniform float minSpin;\n"+
             "varying vec4 vColor;\n"+
             "varying vec4 vRandom;\n"+
-			"uniform float maxOrientation;\n"+
+            "uniform float maxOrientation;\n"+
             "uniform float minOrientation;\n"+
-			"uniform float textureTiles;\n"+
+            "uniform float textureTiles;\n"+
             "void main() {\n"+
            
-			//bit of drama for dividing into 4 or 9 'virtual' textures
-			//nice to be able to have different images on particles
- 		    " vec2 coord = vec2(0.0,0.0);"+
-			" vec2 orig_coord = vec2(gl_PointCoord.s,1.0-gl_PointCoord.t);"+
+            //bit of drama for dividing into 4 or 9 'virtual' textures
+            //nice to be able to have different images on particles
+            " vec2 coord = vec2(0.0,0.0);"+
+            " vec2 orig_coord = vec2(gl_PointCoord.s,1.0-gl_PointCoord.t);"+
             " float spin = mix(maxSpin,minSpin,vRandom.x);"+
             " float orientation = mix(maxOrientation,minOrientation,vRandom.y);"+
             " coord.s = (orig_coord.s-.5)*cos(time*spin+orientation)-(orig_coord.t-.5)*sin(time*spin+orientation);"+
             " coord.t = (orig_coord.t-.5)*cos(time*spin+orientation)+(orig_coord.s-.5)*sin(time*spin+orientation);"+
-			" coord = coord + vec2(.5,.5);\n"+
-			" coord = coord/textureTiles;\n"+
-			" coord.x = clamp(coord.x,0.0,1.0/textureTiles);\n"+
-			" coord.y = clamp(coord.y,0.0,1.0/textureTiles);\n"+
-			" coord += vec2(floor(vRandom.x*textureTiles)/textureTiles,floor(vRandom.y*textureTiles)/textureTiles);\n"+
+            " coord = coord + vec2(.5,.5);\n"+
+            " coord = coord/textureTiles;\n"+
+            " coord.x = clamp(coord.x,0.0,1.0/textureTiles);\n"+
+            " coord.y = clamp(coord.y,0.0,1.0/textureTiles);\n"+
+            " coord += vec2(floor(vRandom.x*textureTiles)/textureTiles,floor(vRandom.y*textureTiles)/textureTiles);\n"+
             
-			//get the color from the texture and blend with the vertexColor.
-			" vec4 outColor = (vColor * texture2D( texture, coord )) *useTexture + vColor * (1.0-useTexture);\n"+
+            //get the color from the texture and blend with the vertexColor.
+            " vec4 outColor = (vColor * texture2D( texture, coord )) *useTexture + vColor * (1.0-useTexture);\n"+
             
             "   gl_FragColor = outColor;\n"+
             "}\n";
@@ -4335,12 +4335,12 @@ define( [ "module",
             // create the particle system
             var particleSystem = new THREE.PointCloud( particles, shaderMaterial_default );
             
-			//keep track of the shaders
+            //keep track of the shaders
             particleSystem.shaderMaterial_analytic = shaderMaterial_analytic;
             particleSystem.shaderMaterial_default = shaderMaterial_default;
-			particleSystem.shaderMaterial_interpolate = shaderMaterial_interpolate;
+            particleSystem.shaderMaterial_interpolate = shaderMaterial_interpolate;
             
-			//setup all the default values
+            //setup all the default values
             particleSystem.minVelocity = [0,0,0];
             particleSystem.maxVelocity = [0,0,0];
             particleSystem.maxAcceleration = [0,0,0];
@@ -4357,54 +4357,54 @@ define( [ "module",
             particleSystem.damping = 0;
             particleSystem.startSize = 3;
             particleSystem.endSize = 3;
-			particleSystem.gravity = 0;
-			particleSystem.gravityCenter = [0,0,0];
+            particleSystem.gravity = 0;
+            particleSystem.gravityCenter = [0,0,0];
             particleSystem.velocityMode = 'cartesian';
-			particleSystem.temp = new THREE.Vector3();
+            particleSystem.temp = new THREE.Vector3();
            
-			//create a new particle. create and store all the values for vertex attributes in each shader
-		   particleSystem.createParticle = function(i)
+            //create a new particle. create and store all the values for vertex attributes in each shader
+           particleSystem.createParticle = function(i)
             {
                 var particle = new THREE.Vector3(0,0,0);
                 this.geometry.vertices.push(particle);
             
                 particle.i = i;
                 
-				//the world space position
+                //the world space position
                 particle.world = new THREE.Vector3();
-				//the previous !tick! (not frame) position
+                //the previous !tick! (not frame) position
                 particle.prevworld = new THREE.Vector3();
-				this.shaderMaterial_interpolate.attributes.previousPosition.value.push(particle.prevworld);
+                this.shaderMaterial_interpolate.attributes.previousPosition.value.push(particle.prevworld);
                 //the color
-				var color = new THREE.Vector4(1,1,1,1);
+                var color = new THREE.Vector4(1,1,1,1);
                 this.shaderMaterial_default.attributes.vertexColor.value.push(color);
-				//age
-				this.shaderMaterial_interpolate.attributes.age.value.push(1);
+                //age
+                this.shaderMaterial_interpolate.attributes.age.value.push(1);
                 particle.color = color;
-				
-				//the sise
+                
+                //the sise
                 this.shaderMaterial_default.attributes.size.value.push(1);
                 var self = this;
-				//set the size - stored per vertex
+                //set the size - stored per vertex
                 particle.setSize = function(s)
                 {
                     self.material.attributes.size.value[this.i] = s;
                 }
-				//set the age - stored per vertex
-				particle.setAge = function(a)
-				{
-					this.age = a;
-					self.shaderMaterial_interpolate.attributes.age.value[this.i] = this.age;
-				}
-				//the lifespan - stored per vertex
-				particle.setLifespan = function(a)
-				{
-					this.lifespan = a;
-					self.shaderMaterial_interpolate.attributes.lifespan.value[this.i] = this.a;
-				}
+                //set the age - stored per vertex
+                particle.setAge = function(a)
+                {
+                    this.age = a;
+                    self.shaderMaterial_interpolate.attributes.age.value[this.i] = this.age;
+                }
+                //the lifespan - stored per vertex
+                particle.setLifespan = function(a)
+                {
+                    this.lifespan = a;
+                    self.shaderMaterial_interpolate.attributes.lifespan.value[this.i] = this.a;
+                }
                 
-				//This looks like it could be computed from the start and end plus random on the shader
-				//doing this saves computetime on the shader at expense of gpu mem
+                //This looks like it could be computed from the start and end plus random on the shader
+                //doing this saves computetime on the shader at expense of gpu mem
                 shaderMaterial_analytic.attributes.acceleration.value.push(new THREE.Vector3());
                 shaderMaterial_analytic.attributes.velocity.value.push(new THREE.Vector3());
                 shaderMaterial_analytic.attributes.lifespan.value.push(1);
@@ -4412,17 +4412,17 @@ define( [ "module",
                 return particle;
             }
             
-			//Generate a new point in space based on the emitter type and size
+            //Generate a new point in space based on the emitter type and size
             particleSystem.generatePoint = function()
             {
-				//generate from a point
-				//TODO: specify point?
+                //generate from a point
+                //TODO: specify point?
                 if(this.emitterType.toLowerCase() == 'point')
                 {
                     return new THREE.Vector3(0,0,0);
                 }
-				//Generate in a box
-				//assumes centered at 0,0,0
+                //Generate in a box
+                //assumes centered at 0,0,0
                 if(this.emitterType.toLowerCase() == 'box')
                 {
                     var x = this.emitterSize[0] * Math.random() - this.emitterSize[0]/2;
@@ -4431,8 +4431,8 @@ define( [ "module",
                     
                     return new THREE.Vector3(x,y,z);
                 }
-				//Generate in a sphere
-				//assumes centered at 0,0,0
+                //Generate in a sphere
+                //assumes centered at 0,0,0
                 if(this.emitterType.toLowerCase() == 'sphere')
                 {
                     var u2 = Math.random();
@@ -4449,31 +4449,31 @@ define( [ "module",
                 }
             
             }
-			//setup the particles with new values
+            //setup the particles with new values
             particleSystem.rebuildParticles = function()
             {
-                for(var i = 0; i < this.geometry.vertices.length; i++)
+                for ( var i = 0; i < this.geometry.vertices.length; i++ )
                 {
-                    this.setupParticle(this.geometry.vertices[i],this.matrix);
+                    this.setupParticle( this.geometry.vertices[ i ], this.matrix );
                 }
             }
-			//set the particles initial values. Used when creating and resuing particles
-            particleSystem.setupParticle = function(particle,mat,inv)
+            //set the particles initial values. Used when creating and resuing particles
+            particleSystem.setupParticle = function( particle, mat, inv )
             {
                 
                 particle.x = 0;
                 particle.y = 0;
                 particle.z = 0;
                 
-				//generate a point in objects space, the move to world space
+                //generate a point in objects space, the move to world space
                 particle.world = this.generatePoint().applyMatrix4( mat );
                 
-				//back up initial (needed by the analyticShader)
+                //back up initial (needed by the analyticShader)
                 particle.initialx = particle.world.x;
                 particle.initialy = particle.world.y;
                 particle.initialz = particle.world.z;
                 
-				//start at initial pos
+                //start at initial pos
                 particle.x = particle.initialx;
                 particle.y = particle.initialy;
                 particle.z = particle.initialz;
@@ -4485,16 +4485,16 @@ define( [ "module",
                 particle.acceleration = new THREE.Vector3( 0,0,0);  
                 particle.lifespan = 1;  
                 
-				//Generate the initial velocity
-				//In this mode, you specify a min and max x,y,z
+                //Generate the initial velocity
+                //In this mode, you specify a min and max x,y,z
                 if(this.velocityMode == 'cartesian')
                 {
                     particle.velocity.x = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random();
                     particle.velocity.y = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random();
                     particle.velocity.z = this.minVelocity[2] + (this.maxVelocity[2] - this.minVelocity[2]) * Math.random();
                 }
-				//In this mode, you give a pitch and yaw from 0,1, and a min and max length.
-				//This is easier to emit into a circle, or a cone section
+                //In this mode, you give a pitch and yaw from 0,1, and a min and max length.
+                //This is easier to emit into a circle, or a cone section
                 if(this.velocityMode == 'spherical')
                 {
                 
@@ -4506,7 +4506,7 @@ define( [ "module",
                     particle.velocity.y = r * Math.sin(t)*Math.sin(w);
                     particle.velocity.z = r * Math.cos(t); */
                     
-					//better distribution
+                    //better distribution
                     var o = this.minVelocity[0] + (this.maxVelocity[0] - this.minVelocity[0]) * Math.random() * Math.PI*2;
                     var u = this.minVelocity[1] + (this.maxVelocity[1] - this.minVelocity[1]) * Math.random() * 2 - 1;
                     var u2 = Math.random();
@@ -4518,8 +4518,8 @@ define( [ "module",
                     particle.velocity.setLength(r);
                 }
                 
-				//The velocity should be in world space, but is generated in local space for 
-				//ease of use
+                //The velocity should be in world space, but is generated in local space for 
+                //ease of use
                 mat = mat.clone();
                 mat.elements[12] = 0;
                 mat.elements[13] = 0;
@@ -4532,13 +4532,13 @@ define( [ "module",
                 particle.acceleration.z = this.minAcceleration[2] + (this.maxAcceleration[2] - this.minAcceleration[2]) * Math.random();
                 particle.setLifespan(this.minLifeTime + (this.maxLifeTime - this.minLifeTime) * Math.random());
                 
-				//color is start color
-				particle.color.x = this.startColor[0];
+                //color is start color
+                particle.color.x = this.startColor[0];
                 particle.color.y = this.startColor[1];
                 particle.color.z = this.startColor[2];
                 particle.color.w = this.startColor[3];
                 
-				//save the values into the attributes
+                //save the values into the attributes
                 shaderMaterial_analytic.attributes.acceleration.value[particle.i] = (particle.acceleration);
                 shaderMaterial_analytic.attributes.velocity.value[particle.i] = (particle.velocity);
                 shaderMaterial_analytic.attributes.lifespan.value[particle.i] = (particle.lifespan);
@@ -4555,53 +4555,58 @@ define( [ "module",
 
             }
             
-			//when updating in AnalyticShader mode, is very simple, just inform the shader of new time.
-            particleSystem.updateAnalyticShader = function(time)
+            //when updating in AnalyticShader mode, is very simple, just inform the shader of new time.
+            particleSystem.updateAnalyticShader = function( time )
             {   
-                particleSystem.material.uniforms.time.value += time/1000;
+                particleSystem.material.uniforms.time.value += time / 1000;
             
             }
             
-			//In Analytic mode, run the equation for the position
-            particleSystem.updateAnalytic =function(time)
+            //In Analytic mode, run the equation for the position
+            particleSystem.updateAnalytic = function( time )
             {
-				particleSystem.material.uniforms.time.value += time/3333.0;
-				
-                var time_in_ticks = time/33.333;
+                var timeInSeconds = time / 1000;
+                particleSystem.material.uniforms.time.value += timeInSeconds;
 
                 var inv = this.matrix.clone();
-                inv = inv.getInverse(inv);
+                inv = inv.getInverse( inv );
                     
                 var particles = this.geometry;
-				
-				//update each particle
+                
+                //update each particle
                 var pCount = this.geometry.vertices.length;
-                while(pCount--) 
+                while ( pCount-- ) 
                 {
-                    var particle =particles.vertices[pCount];                   
-                    this.updateParticleAnalytic(particle,this.matrix,inv,time_in_ticks);
+                    var particle = particles.vertices[ pCount ];                   
+                    this.updateParticleAnalytic( particle, this.matrix, inv, timeInSeconds );
                 }
                     
                 //examples developed with faster tick - maxrate *33 is scale to make work 
                 //with new timing
-				//Reuse up to maxRate particles, sliced for delta_time
-				//Once a particle reaches it's end of life, its available to be regenerated.
-				//We hold extras in limbo with alpha 0 until they can be regenerated
-				//Note the maxRate never creates or destroys particles, just manages when they will restart
-				//after dying
-                var len = Math.min(this.regenParticles.length,this.maxRate*15*time_in_ticks);
-                for(var i =0; i < len; i++)
+                //Reuse up to maxRate particles, sliced for delta_time
+                //Once a particle reaches it's end of life, its available to be regenerated.
+                //We hold extras in limbo with alpha 0 until they can be regenerated
+                //Note the maxRate never creates or destroys particles, just manages when they will restart
+                //after dying
+                if ( this.timeSinceLastSpawn === undefined ) {
+                    this.timeSinceLastSpawn = 0;
+                } else {
+                    this.timeSinceLastSpawn += timeInSeconds;
+                }
+                var maxParticlesToSpawn = Math.floor( this.timeSinceLastSpawn * this.maxRate );
+                var len = Math.min( this.regenParticles.length, maxParticlesToSpawn );
+                for ( var i = 0; i < len; i++ )
                 {
-                        
-					//setup with new random values, and move randomly forward in time one step	
+                    //setup with new random values, and move randomly forward in time one step  
                     var particle = this.regenParticles.shift();
-                    this.setupParticle(particle,this.matrix,inv);
-                    this.updateParticleAnalytic(particle,this.matrix,inv,Math.random()*3.33);
+                    this.setupParticle( particle, this.matrix, inv );
+                    this.updateParticleAnalytic( particle, this.matrix, inv, Math.random() * timeInSeconds );
                     particle.waitForRegen = false;
                 }
-                    
-					
-				//only these things change, other properties are in the shader as they are linear WRT time	
+
+                this.timeSinceLastSpawn = Boolean( len ) ? 0 : this.timeSinceLastSpawn;
+
+                //only these things change, other properties are in the shader as they are linear WRT time  
                 this.geometry.verticesNeedUpdate  = true;
                 this.geometry.colorsNeedUpdate  = true;
                 this.material.attributes.vertexColor.needsUpdate = true;
@@ -4613,156 +4618,156 @@ define( [ "module",
             particleSystem.totaltime = 0;
             //timesliced Euler integrator
             //todo: switch to RK4 
-			//This can do more complex sim, maybe even a cloth sim or such. It ticks 10 times a second, and blends tick with previous via a shader
+            //This can do more complex sim, maybe even a cloth sim or such. It ticks 10 times a second, and blends tick with previous via a shader
             particleSystem.updateEuler = function(time)
             {
-				particleSystem.material.uniforms.time.value += time/3333.0;
+                particleSystem.material.uniforms.time.value += time/3333.0;
                 var time_in_ticks = time/100.0;
                 
                 if(this.lastTime === undefined) this.lastTime = 0;
 
                 this.lastTime += time_in_ticks;//ticks - Math.floor(ticks);
 
-				var inv = this.matrix.clone();
-				inv = inv.getInverse(inv);
-					
-				var particles = this.geometry;
-				
-				//timesliced tick give up after 5 steps - just cant go fast enough		
-				if(Math.floor(this.lastTime) > 5)
-					this.lastTime = 1;
-				for(var i=0; i < Math.floor(this.lastTime) ; i++)
-				{
-					this.lastTime--;
-					
-					var pCount = this.geometry.vertices.length;
-					while(pCount--) 
-					{
-						var particle =particles.vertices[pCount];					
-						this.updateParticleEuler(particle,this.matrix,inv,3.333);
-					}
-					
-					//examples developed with faster tick - maxrate *33 is scale to make work 
-					//with new timing
-					
-					//Reuse up to maxRate particles, sliced for delta_time
-					//Once a particle reaches it's end of life, its available to be regenerated.
-					//We hold extras in limbo with alpha 0 until they can be regenerated
-					//Note the maxRate never creates or destroys particles, just manages when they will restart
-					//after dying
-					var len = Math.min(this.regenParticles.length,this.maxRate*333);
-					for(var i =0; i < len; i++)
-					{
-						
-						particle.waitForRegen = false;
-						var particle = this.regenParticles.shift();
-						this.setupParticle(particle,this.matrix,inv);
-						this.updateParticleEuler(particle,this.matrix,inv,Math.random()*3.33);
-						this.material.attributes.lifespan.needsUpdate = true;
-					}
-					
-					//only need to send up the age, position, and previous position. other props handled in the shader
-					this.geometry.verticesNeedUpdate  = true;	
-					this.material.attributes.previousPosition.needsUpdate = true;
-					
-					this.material.attributes.age.needsUpdate = true;
-					
-				}
-				
-				//even if this is not a sim tick, we need to send the fractional time up to the shader for the interpolation
-				this.material.uniforms.fractime.value = this.lastTime;	
-				
-			}
-			
-			//Update a particle from the Analytic solver
-			particleSystem.updateParticleAnalytic = function(particle,mat,inv,delta_time)
-			{
-				particle.age += delta_time;
-				
-				//Make the particle dead. Hide it until it can be reused
-				if(particle.age >= particle.lifespan && !particle.waitForRegen)
-				{
-					this.regenParticles.push(particle);
-					particle.waitForRegen = true;
-					particle.x = 0;
-					particle.y = 0;
-					particle.z = 0;
-					particle.color.w = 0.0;
-				}else
-				{
-					//Run the formula to get position.
-					var percent = particle.age/particle.lifespan;
-					particle.world.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5*(particle.acceleration.x * particle.age * particle.age)
-					particle.world.y = particle.initialy + (particle.velocity.y * particle.age)  + 0.5*(particle.acceleration.y * particle.age * particle.age)
-					particle.world.z = particle.initialz + (particle.velocity.z * particle.age)  + 0.5*(particle.acceleration.z * particle.age * particle.age)
-					
-					this.temp.x = particle.world.x;
-					this.temp.y = particle.world.y;
-					this.temp.z = particle.world.z;
-					
-					//need to specify in object space, event though comptued in local
-					this.temp.applyMatrix4( inv );
-					particle.x = this.temp.x;
-					particle.y = this.temp.y;
-					particle.z = this.temp.z;
-					
-					//Should probably move this to the shader. Linear with time, no point in doing on CPU
-					particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
-					particle.color.y = this.startColor[1] + (this.endColor[1] - this.startColor[1]) * percent;
-					particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
-					particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
-					
-					particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
-				}
-			}
-			
-			//updtae a partilce with the Euler solver
-			particleSystem.updateParticleEuler = function(particle,mat,inv,step_dist)
-			{
-					particle.prevage = particle.age;
-					particle.age += step_dist;
-					particle.setAge(particle.age + step_dist);
-					
-					//If the particle is dead ,hide it unitl it can be reused
-					if(particle.age >= particle.lifespan && !particle.waitForRegen)
-					{
-						
-						this.regenParticles.push(particle);
-						particle.waitForRegen = true;
-						particle.x = 0;
-						particle.y = 0;
-						particle.z = 0;
-					    particle.world.x = 0;
-						particle.world.y = 0;
-						particle.world.z = 0;
-						particle.prevworld.x = 0;
-						particle.prevworld.y = 0;
-						particle.prevworld.z = 0;
-						particle.color.w = 1.0;
-						particle.size = 100;
-					}else
-					{
-					
-					
-						// and the position
-						particle.prevworld.x = particle.world.x;
-						particle.prevworld.y = particle.world.y;
-						particle.prevworld.z = particle.world.z;
-						
-						//find direction to center for gravity
-						var gravityAccel = new THREE.Vector3(particle.world.x,particle.world.y,particle.world.z);
-						gravityAccel.x -= this.gravityCenter[0];
-						gravityAccel.y -= this.gravityCenter[1];
-						gravityAccel.z -= this.gravityCenter[2];
-						var len = gravityAccel.length()+.1;
-						gravityAccel.normalize();
-						gravityAccel.multiplyScalar(-Math.min(1/(len*len),100));
-						gravityAccel.multiplyScalar(this.gravity);
-						
-						//update position
-						particle.world.x += particle.velocity.x * step_dist + (particle.acceleration.x + gravityAccel.x)* step_dist * step_dist;
-						particle.world.y += particle.velocity.y * step_dist + (particle.acceleration.y + gravityAccel.y )* step_dist * step_dist;;
-						particle.world.z += particle.velocity.z * step_dist + (particle.acceleration.z + gravityAccel.z )* step_dist * step_dist;;
+                var inv = this.matrix.clone();
+                inv = inv.getInverse(inv);
+                    
+                var particles = this.geometry;
+                
+                //timesliced tick give up after 5 steps - just cant go fast enough      
+                if(Math.floor(this.lastTime) > 5)
+                    this.lastTime = 1;
+                for(var i=0; i < Math.floor(this.lastTime) ; i++)
+                {
+                    this.lastTime--;
+                    
+                    var pCount = this.geometry.vertices.length;
+                    while(pCount--) 
+                    {
+                        var particle =particles.vertices[pCount];                   
+                        this.updateParticleEuler(particle,this.matrix,inv,3.333);
+                    }
+                    
+                    //examples developed with faster tick - maxrate *33 is scale to make work 
+                    //with new timing
+                    
+                    //Reuse up to maxRate particles, sliced for delta_time
+                    //Once a particle reaches it's end of life, its available to be regenerated.
+                    //We hold extras in limbo with alpha 0 until they can be regenerated
+                    //Note the maxRate never creates or destroys particles, just manages when they will restart
+                    //after dying
+                    var len = Math.min(this.regenParticles.length,this.maxRate*333);
+                    for(var i =0; i < len; i++)
+                    {
+                        
+                        particle.waitForRegen = false;
+                        var particle = this.regenParticles.shift();
+                        this.setupParticle(particle,this.matrix,inv);
+                        this.updateParticleEuler(particle,this.matrix,inv,Math.random()*3.33);
+                        this.material.attributes.lifespan.needsUpdate = true;
+                    }
+                    
+                    //only need to send up the age, position, and previous position. other props handled in the shader
+                    this.geometry.verticesNeedUpdate  = true;   
+                    this.material.attributes.previousPosition.needsUpdate = true;
+                    
+                    this.material.attributes.age.needsUpdate = true;
+                    
+                }
+                
+                //even if this is not a sim tick, we need to send the fractional time up to the shader for the interpolation
+                this.material.uniforms.fractime.value = this.lastTime;  
+                
+            }
+            
+            //Update a particle from the Analytic solver
+            particleSystem.updateParticleAnalytic = function( particle, mat, inv, delta_time )
+            {
+                particle.age += delta_time;
+                
+                //Make the particle dead. Hide it until it can be reused
+                if ( particle.age >= particle.lifespan ) // && !particle.waitForRegen )
+                {
+                    this.regenParticles.push( particle );
+                    particle.waitForRegen = true;
+                    particle.x = 0;
+                    particle.y = 0;
+                    particle.z = 0;
+                    particle.color.w = 0.0;
+                }else
+                {
+                    //Run the formula to get position.
+                    var percent = particle.age / particle.lifespan;
+                    particle.world.x = particle.initialx + ( particle.velocity.x * particle.age ) + 0.5 * ( particle.acceleration.x * particle.age * particle.age )
+                    particle.world.y = particle.initialy + ( particle.velocity.y * particle.age ) + 0.5 * ( particle.acceleration.y * particle.age * particle.age )
+                    particle.world.z = particle.initialz + ( particle.velocity.z * particle.age ) + 0.5 * ( particle.acceleration.z * particle.age * particle.age )
+                    
+                    this.temp.x = particle.world.x;
+                    this.temp.y = particle.world.y;
+                    this.temp.z = particle.world.z;
+                    
+                    //need to specify in object space, event though comptued in local
+                    this.temp.applyMatrix4( inv );
+                    particle.x = this.temp.x;
+                    particle.y = this.temp.y;
+                    particle.z = this.temp.z;
+                    
+                    //Should probably move this to the shader. Linear with time, no point in doing on CPU
+                    particle.color.x = this.startColor[ 0 ] + ( this.endColor[ 0 ] - this.startColor[ 0 ] ) * percent;
+                    particle.color.y = this.startColor[ 1 ] + ( this.endColor[ 1 ] - this.startColor[ 1 ] ) * percent;
+                    particle.color.z = this.startColor[ 2 ] + ( this.endColor[ 2 ] - this.startColor[ 2 ] ) * percent;
+                    particle.color.w = this.startColor[ 3 ] + ( this.endColor[ 3 ] - this.startColor[ 3 ] ) * percent;
+                    
+                    particle.setSize( this.startSize + ( this.endSize - this.startSize ) * percent );
+                }
+            }
+            
+            //updtae a partilce with the Euler solver
+            particleSystem.updateParticleEuler = function(particle,mat,inv,step_dist)
+            {
+                    particle.prevage = particle.age;
+                    particle.age += step_dist;
+                    particle.setAge(particle.age + step_dist);
+                    
+                    //If the particle is dead ,hide it unitl it can be reused
+                    if(particle.age >= particle.lifespan && !particle.waitForRegen)
+                    {
+                        
+                        this.regenParticles.push(particle);
+                        particle.waitForRegen = true;
+                        particle.x = 0;
+                        particle.y = 0;
+                        particle.z = 0;
+                        particle.world.x = 0;
+                        particle.world.y = 0;
+                        particle.world.z = 0;
+                        particle.prevworld.x = 0;
+                        particle.prevworld.y = 0;
+                        particle.prevworld.z = 0;
+                        particle.color.w = 1.0;
+                        particle.size = 100;
+                    }else
+                    {
+                    
+                    
+                        // and the position
+                        particle.prevworld.x = particle.world.x;
+                        particle.prevworld.y = particle.world.y;
+                        particle.prevworld.z = particle.world.z;
+                        
+                        //find direction to center for gravity
+                        var gravityAccel = new THREE.Vector3(particle.world.x,particle.world.y,particle.world.z);
+                        gravityAccel.x -= this.gravityCenter[0];
+                        gravityAccel.y -= this.gravityCenter[1];
+                        gravityAccel.z -= this.gravityCenter[2];
+                        var len = gravityAccel.length()+.1;
+                        gravityAccel.normalize();
+                        gravityAccel.multiplyScalar(-Math.min(1/(len*len),100));
+                        gravityAccel.multiplyScalar(this.gravity);
+                        
+                        //update position
+                        particle.world.x += particle.velocity.x * step_dist + (particle.acceleration.x + gravityAccel.x)* step_dist * step_dist;
+                        particle.world.y += particle.velocity.y * step_dist + (particle.acceleration.y + gravityAccel.y )* step_dist * step_dist;;
+                        particle.world.z += particle.velocity.z * step_dist + (particle.acceleration.z + gravityAccel.z )* step_dist * step_dist;;
 
                       //update velocity
                     particle.velocity.x += (particle.acceleration.x + gravityAccel.x) * step_dist * step_dist;
@@ -4770,30 +4775,30 @@ define( [ "module",
                     particle.velocity.z += (particle.acceleration.z + gravityAccel.z) * step_dist * step_dist
                     
                     var damping = 1-(this.damping * step_dist);
-					
-					//drag
+                    
+                    //drag
                     particle.velocity.x *= damping;
                     particle.velocity.y *= damping;
                     particle.velocity.z *= damping;
                     
-					
-					//move from world to local space
-					this.temp.x = particle.world.x ;
-					this.temp.y = particle.world.y ;
-					this.temp.z = particle.world.z;
-					this.temp.applyMatrix4( inv );
-					particle.x = this.temp.x;
-					particle.y = this.temp.y;
-					particle.z = this.temp.z;
-					//careful to have prev and current pos in same space!!!!
-					particle.prevworld.applyMatrix4( inv );
+                    
+                    //move from world to local space
+                    this.temp.x = particle.world.x ;
+                    this.temp.y = particle.world.y ;
+                    this.temp.z = particle.world.z;
+                    this.temp.applyMatrix4( inv );
+                    particle.x = this.temp.x;
+                    particle.y = this.temp.y;
+                    particle.z = this.temp.z;
+                    //careful to have prev and current pos in same space!!!!
+                    particle.prevworld.applyMatrix4( inv );
                 }
             }
            
             //Change the solver type for the system
             particleSystem.setSolverType =function(type)
             {
-				this.solver = type;
+                this.solver = type;
                 if(type == 'Euler')
                 {
                     particleSystem.update = particleSystem.updateEuler;
@@ -4815,63 +4820,65 @@ define( [ "module",
                 
             }
             
-			//If you move a system, all the particles need to be recomputed to look like they stick in world space
-			//not that we pointedly dont do this for the AnalyticShader. We could, but that solver is ment to  be very high performance, do we dont
+            //If you move a system, all the particles need to be recomputed to look like they stick in world space
+            //not that we pointedly dont do this for the AnalyticShader. We could, but that solver is ment to  be very high performance, do we dont
             particleSystem.updateTransform = function(newtransform)
             {
-				
-				//Get he current transform, and invert new one
-				var inv = new THREE.Matrix4();
-				var newt = new THREE.Matrix4();
-				inv.elements = matCpy(newtransform);
-				newt = newt.copy(this.matrix);
-				inv = inv.getInverse(inv);
-				
-				
-				//don't adjust for the high performance shader
-				if(particleSystem.solver == 'AnalyticShader')
-				{
-					return;
-				}
-				
-				//Move all particles out of old space to world, then back into new space.
-				//this will make it seem like they stay at the correct position in the world, though
-				//acutally they change position
-				//note that it would actually be more efficient to leave the matrix as identity, and change the position of the 
-				//emitters for this...... Could probably handle it in the model setter actually... would be much more efficient, but linking 
-				//a system to a moving object would break.
-				for(var i =0; i < this.geometry.vertices.length; i++)
-				{
-						this.geometry.vertices[ i ].applyMatrix4( inv );
-						this.shaderMaterial_interpolate.attributes.previousPosition.value[ i ].applyMatrix4( inv );
-						this.geometry.vertices[ i ].applyMatrix4( newt );
-						this.shaderMaterial_interpolate.attributes.previousPosition.value[ i ].applyMatrix4( newt );
-				}
-				this.geometry.verticesNeedUpdate  = true;	
-				this.shaderMaterial_interpolate.attributes.previousPosition.needsUpdate = true;
-						
-            }
-			//Change the system count. Note that this must be set before the first frame renders, cant be changed at runtime.
-            particleSystem.setParticleCount = function(newcount)
-            {
-                var inv = this.matrix.clone();
+                
+                //Get he current transform, and invert new one
+                var inv = new THREE.Matrix4();
+                var newt = new THREE.Matrix4();
+                inv.elements = matCpy(newtransform);
+                newt = newt.copy(this.matrix);
                 inv = inv.getInverse(inv);
                 
-                var particles = this.geometry;
-                while(this.geometry.vertices.length > newcount) 
+                
+                //don't adjust for the high performance shader
+                if(particleSystem.solver == 'AnalyticShader')
                 {
-                    this.geometry.vertices.pop();
+                    return;
                 }
-                while(this.geometry.vertices.length < newcount) 
+                
+                //Move all particles out of old space to world, then back into new space.
+                //this will make it seem like they stay at the correct position in the world, though
+                //acutally they change position
+                //note that it would actually be more efficient to leave the matrix as identity, and change the position of the 
+                //emitters for this...... Could probably handle it in the model setter actually... would be much more efficient, but linking 
+                //a system to a moving object would break.
+                for(var i =0; i < this.geometry.vertices.length; i++)
                 {
-                    var particle = particleSystem.createParticle(this.geometry.vertices.length);
-                    particleSystem.setupParticle(particle,particleSystem.matrix,inv);
+                        this.geometry.vertices[ i ].applyMatrix4( inv );
+                        this.shaderMaterial_interpolate.attributes.previousPosition.value[ i ].applyMatrix4( inv );
+                        this.geometry.vertices[ i ].applyMatrix4( newt );
+                        this.shaderMaterial_interpolate.attributes.previousPosition.value[ i ].applyMatrix4( newt );
+                }
+                this.geometry.verticesNeedUpdate  = true;   
+                this.shaderMaterial_interpolate.attributes.previousPosition.needsUpdate = true;
+                        
+            }
+            //Change the system count. Note that this must be set before the first frame renders, cant be changed at runtime.
+            particleSystem.setParticleCount = function( newcount )
+            {
+                var inv = this.matrix.clone();
+                inv = inv.getInverse( inv );
+                
+                var particles = this.geometry;
+                particles.vertices.length = 0;
+                // while(this.geometry.vertices.length > newcount) 
+                // {
+                //     this.geometry.vertices.pop();
+                // }
+                this.regenParticles.length = 0;
+                while ( this.geometry.vertices.length < newcount ) 
+                {
+                    var particle = particleSystem.createParticle( this.geometry.vertices.length );
+                    particleSystem.setupParticle( particle, particleSystem.matrix, inv );
                     particle.age = Infinity;
-                    this.regenParticles.push(particle);
+                    this.regenParticles.push( particle );
                     particle.waitForRegen = true;
                 }
-                this.geometry.verticesNeedUpdate  = true;
-                this.geometry.colorsNeedUpdate  = true;
+                this.geometry.verticesNeedUpdate = true;
+                this.geometry.colorsNeedUpdate = true;
                 this.shaderMaterial_default.attributes.vertexColor.needsUpdate = true;
                 this.particleCount = newcount;
             }
@@ -5454,9 +5461,9 @@ define( [ "module",
         if(node.name && newnode)
             newnode.name = node.name;
             
-		if(newnode && newnode.children && newnode.children.length == 1 && isIdentityMatrix(newnode.matrix.elements))
-		return newnode.children[0];
-		
+        if(newnode && newnode.children && newnode.children.length == 1 && isIdentityMatrix(newnode.matrix.elements))
+        return newnode.children[0];
+        
         return newnode;
     }
     var blobsfound = 0;
