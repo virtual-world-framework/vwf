@@ -162,7 +162,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                                         Blockly.Xml.domToText( xmlDom ) );
                                 }
                                 self.kernel.setProperty( self.state.blockly.node.ID, "blockly_code", 
-                                    Blockly.JavaScript.workspaceToCode() );
+                                    Blockly.JavaScript.workspaceToCode( Blockly.getMainWorkspace() ) );
                             }
                             
                         }
@@ -370,7 +370,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         if ( xml ) { 
             node.blocks = Blockly.Xml.domToText( xml );
         }
-        node.code = Blockly.JavaScript.workspaceToCode();
+        node.code = Blockly.JavaScript.workspaceToCode( Blockly.getMainWorkspace() );
         Blockly.mainWorkspace.clear();
     }
 
@@ -455,7 +455,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         // SJF: Overlap not present in Blockly with categories enabled
 
         // var negateOverlap = 35;
-        Blockly.updateToolbox( xml );
+        Blockly.mainWorkspace.updateToolbox( xml );
         // Blockly.mainWorkspace.scrollX = Blockly.mainWorkspace.flyout_.width_ + negateOverlap;
         // var translation = 'translate( ' + Blockly.mainWorkspace.scrollX + ', 0 )';
         // Blockly.mainWorkspace.getCanvas().setAttribute('transform', translation);
@@ -464,7 +464,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     // domCopyToWorkspace copies the saved blocks to the workspace exactly
     // This preserves the stored block IDs
     function domCopyToWorkspace( workspace, xml ) {
-        var width = Blockly.svgSize().width;
+       //var width = Blockly.svgSize().width;
         for (var x = 0, xmlChild; xmlChild = xml.childNodes[x]; x++) {
             if (xmlChild.nodeName.toLowerCase() == 'block') {
                 var block = Blockly.Xml.domToBlock( workspace, xmlChild );
@@ -474,7 +474,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 var blockX = parseInt(xmlChild.getAttribute('x'), 10);
                 var blockY = parseInt(xmlChild.getAttribute('y'), 10);
                 if (!isNaN(blockX) && !isNaN(blockY)) {
-                    block.moveBy(Blockly.RTL ? width - blockX : blockX, blockY);
+                    //block.moveBy(Blockly.RTL ? width - blockX : blockX, blockY);
                 }
             }
         }
