@@ -1828,13 +1828,13 @@ define( [ "module",
                         case "strokeWidth":
                         case "fill":
                         case "radius":
-							if ( node.kineticObj.nodeType !== "Stage" ) {
-								node.model[ propertyName ] = 
-								{
-									"value":    propertyValue,
-									"isStatic": false
-								};
-							}
+                            if ( node.kineticObj.nodeType !== "Stage" ) {
+                                node.model[ propertyName ] = 
+                                {
+                                    "value":    propertyValue,
+                                    "isStatic": false
+                                };
+                            }
                             break;
 
                         default:
