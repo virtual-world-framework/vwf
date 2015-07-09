@@ -464,7 +464,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     // domCopyToWorkspace copies the saved blocks to the workspace exactly
     // This preserves the stored block IDs
     function domCopyToWorkspace( workspace, xml ) {
-       //var width = Blockly.svgSize().width;
+
+        var width = Blockly.svgSize( workspace.options.svg ).width;
         for (var x = 0, xmlChild; xmlChild = xml.childNodes[x]; x++) {
             if (xmlChild.nodeName.toLowerCase() == 'block') {
                 var block = Blockly.Xml.domToBlock( workspace, xmlChild );
@@ -474,7 +475,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 var blockX = parseInt(xmlChild.getAttribute('x'), 10);
                 var blockY = parseInt(xmlChild.getAttribute('y'), 10);
                 if (!isNaN(blockX) && !isNaN(blockY)) {
-                    //block.moveBy(Blockly.RTL ? width - blockX : blockX, blockY);
+                    block.moveBy(Blockly.RTL ? width - blockX : blockX, blockY);
                 }
             }
         }
