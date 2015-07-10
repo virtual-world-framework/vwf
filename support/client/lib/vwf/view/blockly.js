@@ -377,7 +377,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
     function setBlocklyUIVisibility( node, show ) {
         var div = document.getElementById( self.options.divParent );
-        
+
         div.style.visibility = show ? 'visible' : 'hidden';
         div.style.pointerEvents = show ? 'all' : 'none';
 
@@ -455,7 +455,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         // SJF: Overlap not present in Blockly with categories enabled
 
         // var negateOverlap = 35;
-        Blockly.mainWorkspace.updateToolbox( xml );
+        Blockly.updateToolbox( xml );
         // Blockly.mainWorkspace.scrollX = Blockly.mainWorkspace.flyout_.width_ + negateOverlap;
         // var translation = 'translate( ' + Blockly.mainWorkspace.scrollX + ', 0 )';
         // Blockly.mainWorkspace.getCanvas().setAttribute('transform', translation);
@@ -465,7 +465,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     // This preserves the stored block IDs
     function domCopyToWorkspace( workspace, xml ) {
 
-        var width = Blockly.svgSize( workspace.options.svg ).width;
+        var width = Blockly.svgSize().width;
         for (var x = 0, xmlChild; xmlChild = xml.childNodes[x]; x++) {
             if (xmlChild.nodeName.toLowerCase() == 'block') {
                 var block = Blockly.Xml.domToBlock( workspace, xmlChild );
