@@ -162,7 +162,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                                         Blockly.Xml.domToText( xmlDom ) );
                                 }
                                 self.kernel.setProperty( self.state.blockly.node.ID, "blockly_code", 
-                                    Blockly.JavaScript.workspaceToCode() );
+                                    Blockly.JavaScript.workspaceToCode( Blockly.getMainWorkspace() ) );
                             }
                             
                         }
@@ -370,14 +370,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
         if ( xml ) { 
             node.blocks = Blockly.Xml.domToText( xml );
         }
-        node.code = Blockly.JavaScript.workspaceToCode();
+        node.code = Blockly.JavaScript.workspaceToCode( Blockly.getMainWorkspace() );
         Blockly.mainWorkspace.clear();
     }
 
 
     function setBlocklyUIVisibility( node, show ) {
         var div = document.getElementById( self.options.divParent );
-        
+
         div.style.visibility = show ? 'visible' : 'hidden';
         div.style.pointerEvents = show ? 'all' : 'none';
 
@@ -464,6 +464,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
     // domCopyToWorkspace copies the saved blocks to the workspace exactly
     // This preserves the stored block IDs
     function domCopyToWorkspace( workspace, xml ) {
+
         var width = Blockly.svgSize().width;
         for (var x = 0, xmlChild; xmlChild = xml.childNodes[x]; x++) {
             if (xmlChild.nodeName.toLowerCase() == 'block') {
