@@ -188,7 +188,6 @@ this.down = function( eventData, nodeData, touch ) {
                 retObj.opacity = 1.0;
                 retObj.scaleOnLoad = true;
                 break;
-
             default:
                 retObj.fill = userState.drawing_color;
                 break;
@@ -226,7 +225,7 @@ this.down = function( eventData, nodeData, touch ) {
             "extends": groupExtends,
             "properties": {
                 "visible": false,
-                "listening": false,
+                "listening": "inherit",
                 "position": eventPointDown                
             },
             "children": {}
