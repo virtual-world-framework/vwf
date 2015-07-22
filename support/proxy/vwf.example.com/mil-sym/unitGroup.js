@@ -159,4 +159,14 @@ this.updateThreatShape = function() {
 
 }
 
+this.setAbsoluteMapPosition = function( mapPosition ) {
+  if ( mapPosition !== undefined ) {
+    this.mapPosition = mapPosition;
+    this.position = {
+      "x": this.mapPosition.x,
+      "y": this.mapPosition.y
+    };
+  }
+}
+
 //@ sourceURL=unitGroup.js
