@@ -1673,6 +1673,9 @@ define( [ "module",
                         } else if ( propertyName === "lights" ) {
                             value = propertyValue;
                             threeObject.lights = value;
+                        } else if ( propertyName === "fog" ) {
+                            value = propertyValue;
+                            threeObject.fog = value;
                         } else if ( threeObject.uniforms.hasOwnProperty( propertyName ) ) {
                             var type = threeObject.uniforms[ propertyName ].type;
                             setUniformProperty( threeObject.uniforms, propertyName, type, propertyValue );
