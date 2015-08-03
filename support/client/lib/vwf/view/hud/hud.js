@@ -13,6 +13,7 @@ define( function() {
         picks: undefined,
         canvas: undefined,
         visible: undefined,
+        enabled: undefined,
         defaultHandlers: undefined,
 
         initialize: function() {
@@ -25,6 +26,7 @@ define( function() {
             this.canvas.id = "HUDCanvas";
             gameCanvas.parentElement.appendChild( this.canvas );
             this.visible = true;
+            this.enabled = true;
             this.update();
             this.defaultHandlers = {};
             this.registerEventListeners( gameCanvas );
@@ -230,7 +232,7 @@ define( function() {
                     return;
             }
 
-            if ( topPick ) {
+            if ( this.enabled && topPick ) {
                 if ( topPick.enabled ) {
                     this.elements[ topPick.id ][ type ]( event );
                 }

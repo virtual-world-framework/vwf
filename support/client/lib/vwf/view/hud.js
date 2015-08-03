@@ -58,8 +58,11 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/view/hud/hud" ], function( 
             var value, node;
             if ( this.state.overlays[ nodeID ] ) {
                 node = this.state.overlays[ nodeID ];
-                if ( node.initialized && node.properties.hasOwnProperty( propertyName ) ) {
-                    node.viewObject[ propertyName ] = propertyValue;
+                if ( node.initialized ) {
+                    if ( node.properties.hasOwnProperty( propertyName ) ||
+                        node.drawProperties.hasOwnProperty( propertyName ) ) {
+                        node.viewObject[ propertyName ] = propertyValue;
+                    }
                 }
                 value = propertyValue;
             } else if ( this.state.elements[ nodeID ] ) {
