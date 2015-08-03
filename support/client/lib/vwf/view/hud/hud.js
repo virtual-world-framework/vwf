@@ -13,6 +13,7 @@ define( function() {
         picks: undefined,
         canvas: undefined,
         visible: undefined,
+        enabled: undefined,
         defaultHandlers: undefined,
 
         initialize: function() {
@@ -25,6 +26,7 @@ define( function() {
             this.canvas.id = "HUDCanvas";
             gameCanvas.parentElement.appendChild( this.canvas );
             this.visible = true;
+            this.enabled = true;
             this.update();
             this.defaultHandlers = {};
             this.registerEventListeners( gameCanvas );
@@ -208,31 +210,35 @@ define( function() {
         },
 
         handleEvent: function( event ) {
-            this.pick( event );
-            var topPick = this.picks[ 0 ];
-            var type;
+            if ( this.enabled ) {
+                this.pick( event );
+                var topPick = this.picks[ 0 ];
+                var type;
 
-            switch ( event.type ) {
-                case "click":
-                    type = "onClick";
-                    break;
-                case "mouseup":
-                    type = "onMouseUp";
-                    break;
-                case "mousedown":
-                    type = "onMouseDown";
-                    break;
-                case "mousemove":
-                    type = "onMouseMove";
-                    break;
-                default:
-                    console.log( "HUD.handleEvent - Unhandled event type: " + event.type );
-                    return;
-            }
+                switch ( event.type ) {
+                    case "click":
+                        type = "onClick";
+                        break;
+                    case "mouseup":
+                        type = "onMouseUp";
+                        break;
+                    case "mousedown":
+                        type = "onMouseDown";
+                        break;
+                    case "mousemove":
+                        type = "onMouseMove";
+                        break;
+                    default:
+                        console.log( "HUD.handleEvent - Unhandled event type: " + event.type );
+                        return;
+                }
 
-            if ( topPick ) {
-                if ( topPick.enabled ) {
-                    this.elements[ topPick.id ][ type ]( event );
+                if ( topPick ) {
+                    if ( topPick.enabled ) {
+                        this.elements[ topPick.id ][ type ]( event );
+                    }
+                } else if ( this.defaultHandlers[ type ] instanceof Function ) {
+                    this.defaultHandlers[ type ]( event );
                 }
             } else if ( this.defaultHandlers[ type ] instanceof Function ) {
                 this.defaultHandlers[ type ]( event );
