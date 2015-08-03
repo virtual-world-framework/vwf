@@ -25,6 +25,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     "properties": {
                         "visible": undefined
                     },
+                    "drawProperties" : {},
                     "elementPreDraw": undefined,
                     "elementPostDraw": undefined,
                     "globalPreDraw": undefined,
@@ -80,6 +81,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 if ( node.properties.hasOwnProperty( propertyName ) ) {
                     node.properties[ propertyName ] = propertyValue;
                     value = propertyValue;
+                } else {
+                    node.drawProperties[ propertyName ] = propertyValue;
                 }
             } else if ( this.state.elements[ nodeID ] ) {
                 node = this.state.elements[ nodeID ];
