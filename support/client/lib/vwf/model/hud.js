@@ -29,7 +29,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     "name": childName,
                     "elements": {},
                     "properties": {
-                        "visible": undefined
+                        "visible": undefined,
+                        "enabled": undefined
                     },
                     "drawProperties" : {},
                     "elementPreDraw": undefined,
