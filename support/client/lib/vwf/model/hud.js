@@ -47,7 +47,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         "alignH": undefined,
                         "alignV": undefined,
                         "offsetH": undefined,
-                        "offsetV": undefined
+                        "offsetV": undefined,
+                        "drawOrder": undefined
                     },
                     "drawProperties": {},
                     "initialized": false

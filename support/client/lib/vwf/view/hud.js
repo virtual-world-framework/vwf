@@ -142,7 +142,7 @@ define( [ "module", "vwf/model", "vwf/utility", "vwf/view/hud/hud" ], function( 
         for ( var i = 0; i < keys.length; i++ ) {
             element = node.elements[ keys[ i ] ];
             props = element.properties;
-            overlay.add( element.viewObject, props.alignH, props.alignV, props.offsetH, props.offsetV );
+            overlay.add( element.viewObject, props.alignH, props.alignV, props.offsetH, props.offsetV, props.drawOrder );
         }
         return overlay;
     }
