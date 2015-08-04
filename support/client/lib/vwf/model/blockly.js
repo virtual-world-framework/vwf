@@ -63,7 +63,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         "defaultXml": undefined,
                         "code": undefined,
                         "lastLineExeTime": undefined,
-                        "timeBetweenLines": 1,
+                        "timeBetweenLines": 0.5,
                         "baseExecutionSpeed": 1,
                         "interpreter": undefined,
                         "interpreterStatus": ""
