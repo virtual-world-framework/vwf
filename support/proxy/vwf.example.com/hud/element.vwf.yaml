@@ -9,6 +9,7 @@ properties:
   alignV:
   offsetH:
   offsetV:
+  drawOrder:
 methods:
   draw:
 events:

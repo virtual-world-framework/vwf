@@ -96,7 +96,7 @@ define( function() {
 
         },
 
-        add: function( element, alignH, alignV, offsetH, offsetV ) {
+        add: function( element, alignH, alignV, offsetH, offsetV, drawOrder ) {
 
             // Add the element to the HUD's elements list
             // Initialize the offset position
@@ -134,7 +134,12 @@ define( function() {
             }
 
             this.countElements();
-            newElement[ "drawOrder" ] = this.elementCount;
+            if ( isNaN( drawOrder ) ) {
+                newElement[ "drawOrder" ] = this.elementCount;
+            } else {
+                newElement[ "drawOrder" ] = drawOrder;
+            }
+            
         },
 
         sortFunction: function( a, b ) {
