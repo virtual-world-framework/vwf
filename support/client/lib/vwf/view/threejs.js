@@ -49,6 +49,7 @@ define( [ "module",
     var boundingBox = undefined;
     var userObjectRequested = false;
     var usersShareView = true;
+    var enableRenderer = true;
     var degreesToRadians = Math.PI / 180;
     var movingForward = false;
     var movingBack = false;
@@ -297,6 +298,8 @@ define( [ "module",
                     setActiveCamera.call( this, this.state.scenes[ sceneRootID ].camera.ID );
                 } else if ( propertyName == "usersShareView" ) {
                     usersShareView = propertyValue;
+                } else if ( propertyName == "enableRenderer" ) {
+                    enableRenderer = propertyValue;
                 }
             } 
 
@@ -1119,6 +1122,11 @@ define( [ "module",
             window.requestAnimationFrame( renderScene ); 
 
             if ( !self.state.appInitialized ) {
+                return;
+            }
+
+            // Return if rendering is suppressed in the application scene.
+            if ( ! enableRenderer ) {
                 return;
             }
 
