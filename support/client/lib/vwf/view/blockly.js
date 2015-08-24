@@ -290,13 +290,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                         var clientThatSetProperty = this.kernel.client();
                         var me = this.kernel.moniker();
                         if ( clientThatSetProperty !== me ) {
-                            //var xmlText = propertyValue;
+                            var xmlText = propertyValue;
                             handleChangeEvents = false;
-                            //setWorkspaceFromXmlText( xmlText, true );
+                            setWorkspaceFromXmlText( xmlText, true );
                         }
                         var xmlText = propertyValue;
                         setWorkspaceFromXmlText( xmlText, true );
-
+                        
                         break;
                     default:
                         break;
@@ -496,7 +496,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
     function setWorkspaceFromXmlText( xmlText, clearBeforeSet ) {
         var xmlDom = null;
-        console.log(xmlText);
+        
         try {
             xmlDom = Blockly.Xml.textToDom( xmlText );
         } catch ( e ) {
