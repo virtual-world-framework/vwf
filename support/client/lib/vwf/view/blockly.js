@@ -293,7 +293,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             var xmlText = propertyValue;
                             handleChangeEvents = false;
                             setWorkspaceFromXmlText( xmlText, true );
-                        }
+                        } else {
+                            if ( propertyValue !== undefined ) {
+                                var xmlText = propertyValue;
+                                setWorkspaceFromXmlText( xmlText, true );
+                            }
+                        } 
                         break;
                     default:
                         break;
@@ -493,13 +498,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
     function setWorkspaceFromXmlText( xmlText, clearBeforeSet ) {
         var xmlDom = null;
+        console.log(xmlText);
         try {
             xmlDom = Blockly.Xml.textToDom( xmlText );
         } catch ( e ) {
-            var q = window.confirm( "XML is invalid" );
-            if ( !q ) {
-                return;
-            }
+            //var q = window.confirm( "XML is invalid" );
+            //if ( !q ) {
+            //    return;
+            //}
         }
         if ( xmlDom ) {
             clearBeforeSet && Blockly.mainWorkspace.clear();
