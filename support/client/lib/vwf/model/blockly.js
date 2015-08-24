@@ -227,14 +227,15 @@ define( [ "module", "vwf/model", "vwf/utility",
                     case  "blockly_code":
                         value = node.code = propertyValue;
                         break;
-                    
-                    case "blockly_xml":
-                        if ( propertyValue.indexOf('http://www.w3.org/1999/xhtml') !== -1 ) {
-                           //SJF: Invalid XML being passed in as default on Blockly clear sometimes
-                        } else {
+
+                    case "new_xml":
                            node.blocks = propertyValue;
                            value = propertyValue; 
-                        }
+                        break;
+
+                    case "blockly_xml":
+                           node.blocks = propertyValue;
+                           value = propertyValue; 
                         break;
 
                      case "blockly_timeBetweenLines":
