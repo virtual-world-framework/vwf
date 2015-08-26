@@ -61,7 +61,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                 if ( createBlocklyDivs ) {
                     this.state.scenes[ childID ] = {
                         "toolbox": undefined,
-                        "defaultXml": undefined
+                        "defaultXml": undefined,
                     }
 
                     if ( this.options.createButton ) {
@@ -163,6 +163,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                                 }
                                 self.kernel.setProperty( self.state.blockly.node.ID, "blockly_code", 
                                     Blockly.JavaScript.workspaceToCode( Blockly.getMainWorkspace() ) );
+
+                                var blocks = Blockly.mainWorkspace.getAllBlocks();
+                                var blockCount = blocks.length;
+                                var topBlockCount = Blockly.mainWorkspace.topBlocks_.length;
+                                
+                                self.kernel.fireEvent( self.kernel.application(), "blocklyContentChanged", [ true ] );
+                                self.kernel.setProperty( self.state.blockly.node.ID, "blockly_blockCount", blockCount );
+                                self.kernel.setProperty( self.state.blockly.node.ID, "blockly_topBlockCount", topBlockCount );
                             }
                             
                         }
@@ -295,6 +303,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
                             setWorkspaceFromXmlText( xmlText, true );
                         }
                         break;
+                    case "new_xml":
+                        var xmlText = propertyValue;
+                        handleChangeEvents = false;
+                        setWorkspaceFromXmlText( xmlText, true );
+                        break;
                     default:
                         break;
                 }
@@ -361,6 +374,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
             blocksInWorkspace[ blocks[ i ].id ] = { "id": blocks[ i ].id, "type": blocks[ i ].type };
         }
 
+        self.kernel.fireEvent( self.kernel.application(), "blocklyContentChanged", [ true ] );
         self.kernel.setProperty( node.ID, "blockly_blockCount", blockCount );
         self.kernel.setProperty( node.ID, "blockly_topBlockCount", topBlockCount );     
     }
@@ -493,13 +507,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/model/blockly/JS-Interpreter/acor
 
     function setWorkspaceFromXmlText( xmlText, clearBeforeSet ) {
         var xmlDom = null;
+        
         try {
             xmlDom = Blockly.Xml.textToDom( xmlText );
         } catch ( e ) {
-            var q = window.confirm( "XML is invalid" );
-            if ( !q ) {
-                return;
-            }
+            //var q = window.confirm( "XML is invalid" );
+            //if ( !q ) {
+            //    return;
+            //}
         }
         if ( xmlDom ) {
             clearBeforeSet && Blockly.mainWorkspace.clear();
