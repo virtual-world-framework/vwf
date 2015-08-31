@@ -6,7 +6,6 @@ properties:
   
   mapPosition:
     set: |
-      debugger;
       if ( value !== undefined ) {
         //this.mapPosition = { "x": value.x, "y": value.y };
         this.mapPosition = value;

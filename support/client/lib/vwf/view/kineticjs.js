@@ -5,8 +5,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     var viewDriver;
     var stageContainer;
-    var stageWidth = 800;
-    var stageHeight = 600;
+    var stageWidth = ( window && window.innerWidth ) ? window.innerWidth : 800;
+    var stageHeight = ( window && window.innerHeight ) ? window.innerHeight : 600;
 
     function attachMouseEvents( node ) {
 
