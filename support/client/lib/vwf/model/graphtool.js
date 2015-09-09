@@ -86,6 +86,15 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             "renderTop": undefined
                         };
                         break;
+                    case "pointline":
+                        node.objectProperties = {
+                            "points": undefined,
+                            "color": undefined,
+                            "opacity": undefined,
+                            "lineThickness": undefined,
+                            "renderTop": undefined
+                        };
+                        break;
                     case "plane":
                         node.objectProperties = {
                             "origin": undefined,
@@ -252,10 +261,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         // -- gettingProperty ----------------------------------------------------------------------
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
-            var node = this.state.objects[ nodeID ];
-
-            if ( node ) {
-            }
         },
 
         // -- creatingMethod -----------------------------------------------------------------------
@@ -350,6 +355,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             for ( var i = 0; i < prototypes.length && !foundObject; i++ ) {
                 foundObject = ( prototypes[i] == "http://vwf.example.com/graphtool/graphline.vwf" ) ||
                     ( prototypes[i] == "http://vwf.example.com/graphtool/graphlinefunction.vwf" ) ||
+                    ( prototypes[i] == "http://vwf.example.com/graphtool/graphpointline.vwf" ) ||
                     ( prototypes[i] == "http://vwf.example.com/graphtool/graphplane.vwf" ) ||
                     ( prototypes[i] == "http://vwf.example.com/graphtool/graphgroup.vwf" );
             }
@@ -366,6 +372,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     return "line";
                 } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphlinefunction.vwf" ) {
                     return "function";
+                } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphpointline.vwf" ) {
+                    return "pointline";
                 } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphplane.vwf" ) {
                     return "plane";
                 } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphgroup.vwf" ) {
@@ -427,6 +435,17 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     props.startValue,
                     props.endValue,
                     props.pointCount,
+                    props.color,
+                    props.opacity,
+                    props.lineThickness,
+                    props.renderTop
+                );
+                break;
+
+            case "pointline":
+                obj = generatePointLine(
+                    graphScale,
+                    props.points,
                     props.color,
                     props.opacity,
                     props.lineThickness,
@@ -728,6 +747,68 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         return mesh;
 
+    }
+
+    function generatePointLine( graphScale, linepoints, color, opacity, thickness, renderTop ) {
+        var geometry = new THREE.Geometry();
+        var points = new Array();
+        var point, direction, planePoints, i, j;
+
+        for ( i = 0; i < linepoints.length; i++ ) {
+            point = new THREE.Vector3(
+                linepoints[ i ][ 0 ],
+                linepoints[ i ][ 1 ],
+                linepoints[ i ][ 2 ]
+            );
+            if ( i === linepoints.length - 1 ) {
+                direction = point.clone();
+            } else {
+                direction = new THREE.Vector3(
+                    linepoints[ i + 1 ][ 0 ],
+                    linepoints[ i + 1 ][ 1 ],
+                    linepoints[ i + 1 ][ 2 ]
+                );
+            }
+            if ( i === 0 ) {
+                direction.sub( point.clone() );
+            } else {
+                direction.sub( new THREE.Vector3(
+                    linepoints[ i - 1 ][ 0 ],
+                    linepoints[ i - 1 ][ 1 ],
+                    linepoints[ i - 1 ][ 2 ]
+                ) );
+            }
+            var planePoints = generateLineVertices( direction, point, thickness / 2 );
+            for ( j = 0; j < planePoints.length; j++ ) {
+                points.push( planePoints[ j ] );
+            }
+        }
+
+        geometry.vertices = points;
+
+        for ( i = 0; i < points.length; i++ ) {
+            if ( points[ i + 4 ] !== undefined ) {
+                geometry.faces.push( new THREE.Face3( i, i + 4, i + 1 ) );
+                geometry.faces.push( new THREE.Face3( i, i + 3, i + 4 ) );
+            }
+        }
+
+        var last = points.length - 1;
+        geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+        geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
+        geometry.faces.push( new THREE.Face3( last, last - 1, last - 3 ) );
+        geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
+
+        var transparent = renderTop || opacity < 1;
+        var vwfColor = new utility.color( color );
+        color = vwfColor.getHex();
+        var meshMaterial = new THREE.MeshBasicMaterial( 
+                { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop } 
+            );
+        var mesh = new THREE.Mesh( geometry, meshMaterial );
+        mesh.renderDepth = renderTop ? DEPTH_OBJECTS : null;
+
+        return mesh;
     }
 
     function generatePlane( graphScale, origin, normal, rotationAngle, size, color, opacity, doubleSided, renderTop ) {
