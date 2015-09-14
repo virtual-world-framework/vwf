@@ -203,17 +203,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
             var node;
-
             if ( this.state.graphs[ nodeID ] ) {
-
                 node = this.state.graphs[ nodeID ];
-
                 if ( node.graphProperties.hasOwnProperty( propertyName ) ) {
-
                     node.graphProperties[ propertyName ] = propertyValue;
-
                     if ( node.initialized ) {
-
                         switch ( propertyName ) {
                             case "xAxisVisible":
                             case "yAxisVisible":
@@ -234,27 +228,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 redrawGraph( node );
                                 break;
                         }
-
                     }
-
                 }
-
             } else if ( this.state.objects[ nodeID ] ) {
-
                 node = this.state.objects[ nodeID ];
-
                 if ( node.objectProperties.hasOwnProperty( propertyName ) ) {
-
                     node.objectProperties[ propertyName ] = propertyValue;
-
                     if ( node.initialized ) {
-
                         redrawObject( node );
-
                     }
-
                 }
-
             }
         },
 
@@ -756,26 +739,26 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         for ( i = 0; i < linepoints.length; i++ ) {
             point = new THREE.Vector3(
-                linepoints[ i ][ 0 ],
-                linepoints[ i ][ 1 ],
-                linepoints[ i ][ 2 ]
+                linepoints[ i ][ 0 ] * graphScale,
+                linepoints[ i ][ 1 ] * graphScale,
+                linepoints[ i ][ 2 ] * graphScale
             );
             if ( i === linepoints.length - 1 ) {
                 direction = point.clone();
             } else {
                 direction = new THREE.Vector3(
-                    linepoints[ i + 1 ][ 0 ],
-                    linepoints[ i + 1 ][ 1 ],
-                    linepoints[ i + 1 ][ 2 ]
+                    linepoints[ i + 1 ][ 0 ] * graphScale,
+                    linepoints[ i + 1 ][ 1 ] * graphScale,
+                    linepoints[ i + 1 ][ 2 ] * graphScale
                 );
             }
             if ( i === 0 ) {
                 direction.sub( point.clone() );
             } else {
                 direction.sub( new THREE.Vector3(
-                    linepoints[ i - 1 ][ 0 ],
-                    linepoints[ i - 1 ][ 1 ],
-                    linepoints[ i - 1 ][ 2 ]
+                    linepoints[ i - 1 ][ 0 ] * graphScale,
+                    linepoints[ i - 1 ][ 1 ] * graphScale,
+                    linepoints[ i - 1 ][ 2 ] * graphScale
                 ) );
             }
             var planePoints = generateLineVertices( direction, point, thickness / 2 );

@@ -12,3 +12,7 @@ methods:
       - x
       - y
       - z
+    body: |
+      var points = this.points.slice();
+      points.push( [ x, y, z ] );
+      this.points = points;
