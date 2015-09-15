@@ -5,6 +5,7 @@ properties:
   color: undefined
   opacity: undefined
   lineThickness: undefined
+  isLoop: undefined
   renderTop: undefined
 methods:
   addPoint:
