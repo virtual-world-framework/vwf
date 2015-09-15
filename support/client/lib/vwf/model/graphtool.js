@@ -92,6 +92,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             "color": undefined,
                             "opacity": undefined,
                             "lineThickness": undefined,
+                            "isLoop": undefined,
                             "renderTop": undefined
                         };
                         break;
@@ -432,6 +433,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     props.color,
                     props.opacity,
                     props.lineThickness,
+                    props.isLoop,
                     props.renderTop
                 );
                 break;
@@ -732,7 +734,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     }
 
-    function generatePointLine( graphScale, linepoints, color, opacity, thickness, renderTop ) {
+    function generatePointLine( graphScale, linepoints, color, opacity, thickness, isLoop, renderTop ) {
         var geometry = new THREE.Geometry();
         var points = new Array();
         var point, direction, planePoints, i, j;
@@ -773,14 +775,23 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             if ( points[ i + 4 ] !== undefined ) {
                 geometry.faces.push( new THREE.Face3( i, i + 4, i + 1 ) );
                 geometry.faces.push( new THREE.Face3( i, i + 3, i + 4 ) );
+            } else if ( isLoop ) {
+                var i4, i3, i1;
+                i4 = i + 4 >= points.length ? i + 4 - points.length : i + 4;
+                i3 = i + 3 >= points.length ? i + 3 - points.length : i + 3;
+                i1 = i + 1 >= points.length ? i + 1 - points.length : i + 1;
+                geometry.faces.push( new THREE.Face3( i, i4, i1 ) );
+                geometry.faces.push( new THREE.Face3( i, i3, i4 ) );
             }
         }
 
-        var last = points.length - 1;
-        geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
-        geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
-        geometry.faces.push( new THREE.Face3( last, last - 1, last - 3 ) );
-        geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
+        if ( !isLoop ) {
+            var last = points.length - 1;
+            geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+            geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
+            geometry.faces.push( new THREE.Face3( last, last - 1, last - 3 ) );
+            geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
+        }
 
         var transparent = renderTop || opacity < 1;
         var vwfColor = new utility.color( color );
