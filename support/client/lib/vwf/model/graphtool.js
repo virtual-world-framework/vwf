@@ -723,16 +723,25 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     function generatePointLine( graphScale, linepoints, color, opacity, thickness, isLoop, renderTop ) {
         var geometry = new THREE.Geometry();
         var points = new Array();
-        var point, direction, planePoints, i, j;
+        var point, direction, planePoints, i, j, lng;
+        lng = linepoints.length;
 
-        for ( i = 0; i < linepoints.length; i++ ) {
+        for ( i = 0; i < lng; i++ ) {
             point = new THREE.Vector3(
                 linepoints[ i ][ 0 ] * graphScale,
                 linepoints[ i ][ 1 ] * graphScale,
                 linepoints[ i ][ 2 ] * graphScale
             );
-            if ( i === linepoints.length - 1 ) {
-                direction = point.clone();
+            if ( i === lng - 1 ) {
+                if ( isLoop ) {
+                    direction = new THREE.Vector3(
+                        linepoints[ 0 ][ 0 ] * graphScale,
+                        linepoints[ 0 ][ 1 ] * graphScale,
+                        linepoints[ 0 ][ 2 ] * graphScale
+                    )
+                } else {
+                    direction = point.clone();
+                }
             } else {
                 direction = new THREE.Vector3(
                     linepoints[ i + 1 ][ 0 ] * graphScale,
@@ -741,6 +750,13 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 );
             }
             if ( i === 0 ) {
+                if ( isLoop ) {
+                    direction.sub( new THREE.Vector3(
+                        linepoints[ lng - 1 ][ 0 ] * graphScale,
+                        linepoints[ lng - 1 ][ 1 ] * graphScale,
+                        linepoints[ lng - 1 ][ 2 ] * graphScale
+                    ) );
+                }
                 direction.sub( point.clone() );
             } else {
                 direction.sub( new THREE.Vector3(
@@ -783,7 +799,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         var vwfColor = new utility.color( color );
         color = vwfColor.getHex();
         var meshMaterial = new THREE.MeshBasicMaterial( 
-                { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop } 
+                { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop, "wireframe": true } 
             );
         var mesh = new THREE.Mesh( geometry, meshMaterial );
         mesh.renderDepth = renderTop ? DEPTH_OBJECTS : null;
