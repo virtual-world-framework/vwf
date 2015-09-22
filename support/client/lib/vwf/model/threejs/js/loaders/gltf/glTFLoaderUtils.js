@@ -81,7 +81,7 @@ THREE.GLTFLoaderUtils = Object.create(Object, {
 	xhr.responseType = (type === this.ARRAY_BUFFER) ? "arraybuffer" : "text";
 
             //if this is not specified, 1 "big blob" scenes fails to load.
-	xhr.setRequestHeader("If-Modified-Since", "Sat, 01 Jan 1970 00:00:00 GMT");
+	//xhr.setRequestHeader("If-Modified-Since", "Sat, 01 Jan 1970 00:00:00 GMT");
 	xhr.addEventListener( 'load', function ( event ) {
 		delegate.streamAvailable(path, xhr.response);
 	}, false );
