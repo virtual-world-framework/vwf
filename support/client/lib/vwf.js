@@ -282,34 +282,34 @@
 
             var requireConfig = {
                 shim: {
-                    "vwf/model/threejs/three": {
+                    "vwf/model/threejs/three.min": {
                         exports: "THREE",
                     },
                     "vwf/model/threejs/js/loaders/ColladaLoader": {
-                        deps: [ "vwf/model/threejs/three" ],
+                        deps: [ "vwf/model/threejs/three.min" ],
                         exports: "THREE.ColladaLoader",
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTFLoader": {
-                        deps: [ "vwf/model/threejs/three" ],
+                        deps: [ "vwf/model/threejs/three.min" ],
                         exports: "THREE.glTFLoader",
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTF-parser": {
-                        deps: [ "vwf/model/threejs/three" ],
+                        deps: [ "vwf/model/threejs/three.min" ],
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTFLoaderUtils": {
-                        deps: [ "vwf/model/threejs/three" ],
+                        deps: [ "vwf/model/threejs/three.min" ],
                     },
                     "vwf/model/threejs/js/loaders/gltf/glTFAnimation": {
-                        deps: [ "vwf/model/threejs/three" ],
+                        deps: [ "vwf/model/threejs/three.min" ],
                     },
                     "vwf/model/threejs/js/stereo/DeviceOrientationControls": {
-                        deps: [ "vwf/model/threejs/three" ],
+                        deps: [ "vwf/model/threejs/three.min" ],
                     },
                     "vwf/model/threejs/js/stereo/OrbitControls": {
-                        deps: [ "vwf/model/threejs/three" ],
+                        deps: [ "vwf/model/threejs/three.min" ],
                     },
                     "vwf/model/threejs/js/stereo/StereoEffect": {
-                        deps: [ "vwf/model/threejs/three" ],
+                        deps: [ "vwf/model/threejs/three.min" ],
                     },
                     "vwf/model/blockly/blockly_compressed": {
                         exports: "Blockly"
@@ -346,7 +346,7 @@
                     active: false 
                 },
                 { library: "vwf/model/threejs", linkedLibraries: [
-                    "vwf/model/threejs/three",
+                    "vwf/model/threejs/three.min",
                     "vwf/model/threejs/js/loaders/ColladaLoader",
                     "vwf/model/threejs/js/loaders/gltf/glTF-parser",
                     "vwf/model/threejs/js/loaders/gltf/glTFLoader",
@@ -416,7 +416,7 @@
                 { library: "vwf/kernel/utility", active: true },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
-                { library: "vwf/model/threejs/three", active: false },
+                { library: "vwf/model/threejs/three.min", active: false },
                 { library: "vwf/model/threejs/js/loaders/ColladaLoader", active: false },
                 { library: "vwf/model/threejs/js/loaders/gltf/glTF-parser", active: false },
                 { library: "vwf/model/threejs/js/loaders/gltf/glTFLoader", active: false },
@@ -572,7 +572,7 @@
                 if(Object.keys(userLibraries["model"]).length == 0 && Object.keys(userLibraries["view"]).length == 0) {
                     requireArray["vwf/model/threejs"].active = true;
                     requireArray["vwf/view/threejs"].active = true;
-                    requireArray["vwf/model/threejs/three"].active = true;
+                    requireArray["vwf/model/threejs/three.min"].active = true;
                     requireArray["vwf/model/threejs/js/loaders/ColladaLoader"].active = true;
                     requireArray["vwf/model/threejs/js/loaders/gltf/glTF-parser"].active = true;
                     requireArray["vwf/model/threejs/js/loaders/gltf/glTFLoader"].active = true;
