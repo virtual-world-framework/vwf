@@ -120,6 +120,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                 node.initialized = false;
 
+            } else if ( protos && isMaterial( protos ) && this.state.objects[ nodeID ] ) {
+                var obj = this.state.objects[ nodeID ];
+                obj.materialObject = getThreeJSModel().state.nodes[ childID ];
             }
         },
 
@@ -129,19 +132,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             childSource, childType, childIndex, childName ) {
             
             var node;
-
             if ( this.state.graphs[ childID ] ) {
-
                 node = this.state.graphs[ childID ];
                 createGraph( node );
                 node.initialized = true;
-
             } else if ( this.state.objects[ childID ] ) {
-
                 node = this.state.objects[ childID ];
                 createObject( node );
                 node.initialized = true;
-
             }
         },
 
@@ -149,7 +147,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         deletingNode: function( nodeID ) {
 
-            if( nodeID ) {
+            if ( nodeID ) {
                 var childNode = this.state.objects[ nodeID ];
                 if( childNode ) {
                     var threeObject = childNode.threeObject;
@@ -234,7 +232,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             } else if ( this.state.objects[ nodeID ] ) {
                 node = this.state.objects[ nodeID ];
                 if ( node.objectProperties.hasOwnProperty( propertyName ) ) {
-                    node.objectProperties[ propertyName ] = propertyValue;
+                    switch ( propertyName ) {
+                        default:
+                            node.objectProperties[ propertyName ] = propertyValue;
+                            break;
+                    }
                     if ( node.initialized ) {
                         redrawObject( node );
                     }
@@ -348,6 +350,18 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         return foundObject;
     }
 
+    function isMaterial( prototypes ) {
+        var foundMaterial = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundMaterial; i++ ) {
+                foundMaterial = ( prototypes[i] == "http://vwf.example.com/material.vwf" ) ||
+                    ( prototypes[i] == "http://vwf.example.com/shaderMaterial.vwf" );
+            }
+        }
+
+        return foundMaterial;
+    }
+
     function getObjectType( prototypes ) {
 
         if ( prototypes ) {
@@ -434,6 +448,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     props.opacity,
                     props.lineThickness,
                     props.isLoop,
+                    node.materialObject,
                     props.renderTop
                 );
                 break;
@@ -485,6 +500,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function redrawObject( obj ) {
         var oldObj = obj.threeObject.children[ 0 ];
+        var material = oldObj.material;
         obj.threeObject.remove( oldObj );
         if ( oldObj.children.length > 0 ) {
             disposeObject( oldObj );
@@ -660,6 +676,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         geometry.faces.push( new THREE.Face3( last, last - 1, last - 3 ) );
         geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
 
+        calcUVs( geometry );
+
         var transparent = renderTop || opacity < 1;
         var vwfColor = new utility.color( color );
         color = vwfColor.getHex();
@@ -721,6 +739,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         geometry.faces.push( new THREE.Face3( last, last - 1, last - 3 ) );
         geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
 
+        calcUVs( geometry );
+
         var transparent = renderTop || opacity < 1;
         var vwfColor = new utility.color( color );
         color = vwfColor.getHex();
@@ -734,7 +754,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     }
 
-    function generatePointLine( graphScale, linepoints, color, opacity, thickness, isLoop, renderTop ) {
+    function generatePointLine( graphScale, linepoints, color, opacity, thickness, isLoop, material, renderTop ) {
         var geometry = new THREE.Geometry();
         var points = new Array();
         var point, direction, planePoints, i, j, lng;
@@ -770,8 +790,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                         linepoints[ lng - 1 ][ 1 ] * graphScale,
                         linepoints[ lng - 1 ][ 2 ] * graphScale
                     ) );
+                } else {
+                    direction.sub( point.clone() );
                 }
-                direction.sub( point.clone() );
             } else {
                 direction.sub( new THREE.Vector3(
                     linepoints[ i - 1 ][ 0 ] * graphScale,
@@ -809,13 +830,22 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
         }
 
-        var transparent = renderTop || opacity < 1;
-        var vwfColor = new utility.color( color );
-        color = vwfColor.getHex();
-        var meshMaterial = new THREE.MeshBasicMaterial( 
-                { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop, "wireframe": true } 
+        calcUVs( geometry );
+
+        var meshMaterial, vwfColor, transparent, mesh;
+
+        if ( material && material.threeObject ) {
+            meshMaterial = material.threeObject.clone();
+        } else {
+            transparent = renderTop || opacity < 1;
+            vwfColor = new utility.color( color );
+            color = vwfColor.getHex();
+            meshMaterial = new THREE.MeshBasicMaterial( 
+                { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop } 
             );
-        var mesh = new THREE.Mesh( geometry, meshMaterial );
+        }
+
+        mesh = new THREE.Mesh( geometry, meshMaterial );
         mesh.renderDepth = renderTop ? DEPTH_OBJECTS : null;
 
         return mesh;
@@ -835,6 +865,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
         geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
+
+        calcUVs( geometry );
 
         var transparent = renderTop || opacity < 1;
         var vwfColor = new utility.color( color );
@@ -1088,6 +1120,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }
             return true;
         } )();
+    }
+
+    function calcUVs( geometry ) {
+        geometry.computeBoundingBox();
+        var max = geometry.boundingBox.max;
+        var min = geometry.boundingBox.min;
+        var offset = new THREE.Vector2( 0 - min.x, 0 - min.y );
+        var range = new THREE.Vector2( max.x - min.x, max.y - min.y );
+        geometry.faceVertexUvs[ 0 ] = [];
+        var faces = geometry.faces;
+        for ( var i = 0; i < geometry.faces.length ; i++ ) {
+            var v1 = geometry.vertices[ faces[ i ].a ];
+            var v2 = geometry.vertices[ faces[ i ].b ];
+            var v3 = geometry.vertices[ faces[ i ].c ];
+            geometry.faceVertexUvs[0].push( [
+                new THREE.Vector2( ( v1.x + offset.x ) / range.x , ( v1.y + offset.y ) / range.y ),
+                new THREE.Vector2( ( v2.x + offset.x ) / range.x , ( v2.y + offset.y ) / range.y ),
+                new THREE.Vector2( ( v3.x + offset.x ) / range.x , ( v3.y + offset.y ) / range.y )
+            ] );
+        }
+        geometry.uvsNeedUpdate = true;
     }
 
 } );
