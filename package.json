@@ -20,6 +20,7 @@
   "dependencies": {
     "async": "0.2.x",
     "crypto": "0.0.x",
+    "express": "^4.13.3",
     "formidable": "1.0.x",
     "fs-extra": "0.8.x",
     "js-yaml": "2.1.x",
