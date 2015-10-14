@@ -5644,6 +5644,9 @@ define( [ "module",
                     vectorArray.push( new THREE.Vector2( vector[0], vector[1] ) );
                 }
                 obj[ prop ].value = vectorArray;
+                if ( obj[ prop ]._array && obj[ prop ]._array.length !== vectorArray.length * 2 ) {
+                    obj[ prop ]._array = undefined;
+                }
                 break;
             case 'iv1':
                 var intArray = [];
