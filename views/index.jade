@@ -31,26 +31,27 @@ block scenarios
       -
         var scenario = scenario_session.scenario,
           session = scenario_session.session;
-      tr
-        td= scenario.state.title
+      if session || user.instructor
+        tr
+          td= scenario.state.title
+            if session
+              br
+              span.small instructor, n students
           if session
-            br
-            span.small instructor, n students
-        if session
-          td= session.state.classroom.company
-          td= session.state.classroom.platoon
-          td= session.state.classroom.unit
-        else
+            td= session.state.classroom.company
+            td= session.state.classroom.platoon
+            td= session.state.classroom.unit
+          else
+            td &nbsp;
+            td &nbsp;
+            td &nbsp;
           td &nbsp;
-          td &nbsp;
-          td &nbsp;
-        td &nbsp;
-        if session
-          td &nbsp;
-          td: a(href=session.instance) Join
-        else
-          td: a(href=scenario.document.uri) Edit
-          td: a(href=scenario.document.uri) Launch
+          if session
+            td &nbsp;
+            td: a(href=session.instance) Join
+          else
+            td: a(href=scenario.document.uri) Edit
+            td: a(href=scenario.document.uri) Launch
 
 block sessions
 

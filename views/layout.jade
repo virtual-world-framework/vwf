@@ -12,10 +12,20 @@ block content
         a.navbar-brand(href="#") TDG
       .collapse.navbar-collapse#navbar
         ul.nav.navbar-nav
-          li.active: a(href="#scenarios" data-toggle="tab") Scenarios
-          li: a(href="#sessions" data-toggle="tab") Sessions
+          if user.instructor
+            li.active: a(href="#scenarios" data-toggle="tab") Scenarios
+            li: a(href="#sessions" data-toggle="tab") Sessions
+        form.navbar-form.navbar-right(method="post" action="/logout")
+          button.btn.btn-link(type="submit") Logout
+        -
+          name =
+            ( user.last_name || "" ) + ( user.last_name && ( user.first_name || user.middle_initial ) ? ", " : "" )  +
+            ( user.first_name || "" ) + ( user.first_name && user.middle_initial ? " " : "" )  +
+            ( user.middle_initial || "" ) + ( user.middle_initial ? "." : "" )
+        p.navbar-text.navbar-right= name
   .tab-content
     .tab-pane.active#scenarios(role="tabpanel")
       block scenarios
-    .tab-pane#sessions(role="tabpanel")
-      block sessions
+    if user.instructor
+      .tab-pane#sessions(role="tabpanel")
+        block sessions
