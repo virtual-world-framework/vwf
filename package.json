@@ -20,6 +20,7 @@
   "dependencies": {
     "async": "0.2.x",
     "body-parser": "^1.14.1",
+    "config": "^1.16.0",
     "cookie-parser": "^1.4.0",
     "cookie-session": "^2.0.0-alpha.1",
     "crypto": "0.0.x",

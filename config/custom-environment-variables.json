@@ -1,0 +1,5 @@
+{
+  "session": {
+    "secret": "VWF_SESSION_SECRET"
+  }
+}

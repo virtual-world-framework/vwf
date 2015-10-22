@@ -1,0 +1,10 @@
+{
+
+  // Secret for signed sessions. Generate a new secret with
+  // `node -e 'console.log( require( "crypto" ).randomBytes( 32 ).toString( "hex" ) )'`
+
+  "session": {
+    "secret": "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+  }
+
+}
