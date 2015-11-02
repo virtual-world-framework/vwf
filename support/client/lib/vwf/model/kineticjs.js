@@ -1684,25 +1684,30 @@ define( [ "module",
                 node = this.state.nodes[ childID ];
                 
                 node.prototypes = protos;
-               
-                node.kineticObj = createKineticObject( node );
 
-                // if ( node.kineticObj instanceof Kinetic.Stage ) {
-                //     node.model.scale = { "value": 1, "type": "static" };
-                //     node.model.scaleX = { "value": 1, "type": "static" };
-                //     node.model.scaleY = { "value": 1, "type": "static" };
-                //     node.model.x = { "value": 0, "type": "static" };
-                //     node.model.y = { "value": 0, "type": "static" };
-                //     node.model.position = { "value": [ 0, 0 ], "type": "static" };
-                //     node.model.absolutePosition = { "value": [ 0, 0 ], "type": "static" };
-                //     node.model.absoluteTransform = { "value": [ 1, 0, 0, 1 ], "type": "static" };
-                // }
+                var creatingClient = this.kernel.client();
+                var thisClient     = this.kernel.moniker();
 
-                // If the kineticObj was created, attach it to the parent kineticObj, if it is a 
-                // kinetic container
-                // (if a kineticObj is created asynchronously ... like an Image, it will be
-                // undefined here, but will be added to its parent in the appropriate callback)
-                addNodeToHierarchy( node );
+                if ( !this.kernel.client() || ( this.kernel.client() === this.kernel.moniker() ) ) {                   
+                    node.kineticObj = createKineticObject( node );
+
+                    // if ( node.kineticObj instanceof Kinetic.Stage ) {
+                    //     node.model.scale = { "value": 1, "type": "static" };
+                    //     node.model.scaleX = { "value": 1, "type": "static" };
+                    //     node.model.scaleY = { "value": 1, "type": "static" };
+                    //     node.model.x = { "value": 0, "type": "static" };
+                    //     node.model.y = { "value": 0, "type": "static" };
+                    //     node.model.position = { "value": [ 0, 0 ], "type": "static" };
+                    //     node.model.absolutePosition = { "value": [ 0, 0 ], "type": "static" };
+                    //     node.model.absoluteTransform = { "value": [ 1, 0, 0, 1 ], "type": "static" };
+                    // }
+
+                    // If the kineticObj was created, attach it to the parent kineticObj, if it is a 
+                    // kinetic container
+                    // (if a kineticObj is created asynchronously ... like an Image, it will be
+                    // undefined here, but will be added to its parent in the appropriate callback)
+                    addNodeToHierarchy( node );
+                }
 
             }
            
@@ -1815,64 +1820,67 @@ define( [ "module",
             var node = this.state.nodes[ nodeID ];
             var imageObj;
             var value = undefined;
-            if ( node && node.kineticObj && utility.validObject( propertyValue ) ) {
-
-                if ( node.model[ propertyName ] === undefined ) {
-                    //this.logger.infox( "    - model value does not exist " );
-                    // Not unique-in-view
-                    value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
-
-                    switch ( propertyName ) {
-                        case "position":
-                        case "stroke":
-                        case "strokeWidth":
-                        case "fill":
-                        case "radius":
-                            if ( node.kineticObj.nodeType !== "Stage" ) {
-                                node.model[ propertyName ] = 
-                                {
-                                    "value":    propertyValue,
-                                    "isStatic": false
-                                };
-                            }
-                            break;
-
-                        default:
-                            break;
-                    }
-                //} else if ( !node.model[ propertyName ].isStatic ) {
-                    // Not unique-in-view
-                //    value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value );
-
-                } else {
-                    if ( propertyName === "position" ) {
-
-                        node.model[ propertyName ].value = propertyValue;
-
-                        if ( node.model[ propertyName ].ignoreNextPositionUpdate ) {
-                            //this.logger.infox( "    - ignore position update this time " );
-                            node.model[ propertyName ].ignoreNextPositionUpdate = false;
-                        } else if ( !node.model[ propertyName ].isStatic ) {
-                            //this.logger.infox( "    - set position to model value " );
-                            value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value ); 
-                        }
-
-                    } else if ( !node.model[ propertyName ].isStatic ) {
-                        //this.logger.infox( "    - not unique in view, update property " );
-                        node.model[ propertyName ].value = propertyValue;
-                        value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value );
-                    } else {
-                        //this.logger.infox( "    - unique in view, update model only " );
-                        node.model[ propertyName ].value = propertyValue;
-                    }
-                    /*
-                    if ( this.kernel.client() === this.kernel.moniker() ) {
-                        node.model[ propertyName ].value = propertyValue;
+            if ( node && utility.validObject( propertyValue ) ) {
+                if ( node.kineticObj ) {
+                    if ( node.model[ propertyName ] === undefined ) {
+                        //this.logger.infox( "    - model value does not exist " );
+                        // Not unique-in-view
                         value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
+
+                        switch ( propertyName ) {
+                            case "position":
+                            case "stroke":
+                            case "strokeWidth":
+                            case "fill":
+                            case "radius":
+                                if ( node.kineticObj.nodeType !== "Stage" ) {
+                                    node.model[ propertyName ] = 
+                                    {
+                                        "value":    propertyValue,
+                                        "isStatic": false
+                                    };
+                                }
+                                break;
+
+                            default:
+                                break;
+                        }
+                    //} else if ( !node.model[ propertyName ].isStatic ) {
+                        // Not unique-in-view
+                    //    value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value );
+
                     } else {
-                        node.model[ propertyName ].value = propertyValue;
+                        if ( propertyName === "position" ) {
+
+                            node.model[ propertyName ].value = propertyValue;
+
+                            if ( node.model[ propertyName ].ignoreNextPositionUpdate ) {
+                                //this.logger.infox( "    - ignore position update this time " );
+                                node.model[ propertyName ].ignoreNextPositionUpdate = false;
+                            } else if ( !node.model[ propertyName ].isStatic ) {
+                                //this.logger.infox( "    - set position to model value " );
+                                value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value ); 
+                            }
+
+                        } else if ( !node.model[ propertyName ].isStatic ) {
+                            //this.logger.infox( "    - not unique in view, update property " );
+                            node.model[ propertyName ].value = propertyValue;
+                            value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value );
+                        } else {
+                            //this.logger.infox( "    - unique in view, update model only " );
+                            node.model[ propertyName ].value = propertyValue;
+                        }
+                        /*
+                        if ( this.kernel.client() === this.kernel.moniker() ) {
+                            node.model[ propertyName ].value = propertyValue;
+                            value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
+                        } else {
+                            node.model[ propertyName ].value = propertyValue;
+                        }
+                        */
                     }
-                    */
+                } else {
+                    node.model[ propertyName ] = propertyValue;
                 }
                    
             }

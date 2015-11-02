@@ -420,10 +420,13 @@ this.update = function( eventData, nodeData, upEvent ) {
                 break;
 
             case "freeDraw":
+                //debugger;
                 drawingObject.stroke = userState.drawing_color;
                 drawingObject.strokeWidth = userState.drawing_width;
 
                 var isFirstStrokeOfNewLine = ( drawingObject.points.length === 0 );
+                
+                console.info( "MODEL: Event point: [ " + eventPoint[0] + ", " + eventPoint[1] + " ], Drawing object x, y: [ " + drawingObject.x + ", " + drawingObject.y + " ]");
                 var posX = eventPoint[ 0 ] - drawingObject.x;
                 var posY = eventPoint[ 1 ] - drawingObject.y;
                 
@@ -554,6 +557,9 @@ this.update = function( eventData, nodeData, upEvent ) {
 
         if ( pointAccepted ) {
             privateState.previousPoint = eventPoint;
+            // Update the view to keep pace with user input
+            //console.info( drawingObject.id + " updated, sending update event." );
+            this.privateDrawingUpdated( drawingObject.id );
         }
 
     }   
