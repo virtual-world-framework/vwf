@@ -21,20 +21,18 @@ this.clientWatch = function() {
 
 };
 
-// this.isValid = function( obj ) {
-//     var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
-//     return ( objType != 'null' && objType != 'undefined' );
-// }; 
+this.isValid = function( obj ) {
+    var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
+    return ( objType != 'null' && objType != 'undefined' );
+};
 
 this.clientJoin = function( moniker ) {
-
-    function isValid( obj ) {
-        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
-        return ( objType != 'null' && objType != 'undefined' );
-    };
+    //if ( this.id === "http://vwf.example.com/kinetic/drawing.vwf" ){
+    //    return;
+    //}
 
     // mirrors the initial state of the toolbar
-    if ( !isValid( this.drawing_clients ) ) {
+    if ( !this.isValid( this.drawing_clients ) ) {
         this.drawing_clients = {};
     }
     if ( this.drawing_clients[ moniker ] === undefined ) {
@@ -82,15 +80,10 @@ this.setUpPrivate = function( moniker ) {
 
 this.setClientUIState = function( stateObj ) {
 
-    function isValid( obj ) {
-        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
-        return ( objType != 'null' && objType != 'undefined' );
-    };
-
     //console.info( "setClientUIState " + JSON.stringify( stateObj ) );
     if ( stateObj !== undefined ) {
-        if ( !isValid( this.drawing_clients ) || 
-             !isValid( this.drawing_clients[ this.client ] ) ) {
+        if ( !this.isValid( this.drawing_clients ) || 
+             !this.isValid( this.drawing_clients[ this.client ] ) ) {
             this.clientJoin( this.client );
         } 
         var clients = this.drawing_clients;
@@ -104,16 +97,12 @@ this.setClientUIState = function( stateObj ) {
 
 this.down = function( eventData, nodeData, touch ) {
 
-    function isValid( obj ) {
-        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
-        return ( objType != 'null' && objType != 'undefined' );
-    };
-    if ( !isValid( this.drawing_clients ) || 
-         !isValid( this.drawing_clients[ this.client ] ) ) {
+    if ( !this.isValid( this.drawing_clients ) || 
+         !this.isValid( this.drawing_clients[ this.client ] ) ) {
         this.clientJoin( this.client );
     } 
-    if ( !isValid( this.drawing_private ) || 
-         !isValid( this.drawing_private[ this.client ] ) ) {
+    if ( !this.isValid( this.drawing_private ) || 
+         !this.isValid( this.drawing_private[ this.client ] ) ) {
         this.setUpPrivate( this.client );
     }
 
@@ -199,7 +188,6 @@ this.down = function( eventData, nodeData, touch ) {
                 retObj.opacity = 1.0;
                 retObj.scaleOnLoad = true;
                 break;
-
             default:
                 retObj.fill = userState.drawing_color;
                 break;
@@ -237,7 +225,7 @@ this.down = function( eventData, nodeData, touch ) {
             "extends": groupExtends,
             "properties": {
                 "visible": false,
-                "listening": false,
+                "listening": "inherit",
                 "position": eventPointDown                
             },
             "children": {}
@@ -290,13 +278,9 @@ this.down = function( eventData, nodeData, touch ) {
 
 this.move = function( eventData, nodeData, touch ) {
 
-    function isValid( obj ) {
-        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
-        return ( objType != 'null' && objType != 'undefined' );
-    };
 
-    if ( !isValid( this.drawing_clients ) || 
-         !isValid( this.drawing_clients[ this.client ] ) ) {
+    if ( !this.isValid( this.drawing_clients ) || 
+         !this.isValid( this.drawing_clients[ this.client ] ) ) {
         this.clientJoin( this.client );
     } 
     if ( this.drawing_private === undefined || 
@@ -353,15 +337,10 @@ this.up = function( eventData, nodeData, touch ) {
 };
 
 this.update = function( eventData, nodeData, upEvent ) {
-
-    function isValid( obj ) {
-        var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
-        return ( objType != 'null' && objType != 'undefined' );
-    };
     
     if ( this.drawing_private === undefined || 
          this.drawing_private[ this.client ] === undefined || 
-         !isValid( this.drawing_clients ) ) {
+         !this.isValid( this.drawing_clients ) ) {
         return;
     }
 
@@ -449,7 +428,7 @@ this.update = function( eventData, nodeData, upEvent ) {
                 var posY = eventPoint[ 1 ] - drawingObject.y;
                 
                 if ( isFirstStrokeOfNewLine ) {
-                    if ( Math.abs( posX ) + Math.abs( posY ) > 0 ) {
+                    if ( ( Math.abs( posX ) + Math.abs( posY ) ) > 0 ) {
                         drawingObject.points = [ 0, 0, posX, posY ];
                     } else {
                         pointAccepted = false;   
@@ -460,7 +439,7 @@ this.update = function( eventData, nodeData, upEvent ) {
                         posY - privateState.previousPoint[ 1 ] 
                     ];
 
-                    if ( Math.abs( dragDiff[0] ) + Math.abs( dragDiff[1] ) > 0 ) {
+                    if ( ( Math.abs( dragDiff[0] ) + Math.abs( dragDiff[1] ) ) > 0 ) {
                         drawingObject.points.push( posX );
                         drawingObject.points.push( posY );                        
                     } else {

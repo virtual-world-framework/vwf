@@ -4874,6 +4874,9 @@ define( function(){
         },
         
         "aliasModifiers": { 
+            "echelon":             { modifier:  "B_ECHELON",
+                                     type:      "ModifiersUnits",
+                                     valueType: "Text" },
             "quantity":            { modifier:  "C_QUANTITY",
                                      type:      "ModifiersUnits",
                                      valueType: "Number" },

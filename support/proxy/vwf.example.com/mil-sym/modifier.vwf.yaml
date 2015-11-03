@@ -5,6 +5,7 @@ properties:
   icon: true
   keepUnitRatio: 
   symbologyStandard: 
+  echelon:
   quantity:
   additionalInfo1:
   additionalInfo2:

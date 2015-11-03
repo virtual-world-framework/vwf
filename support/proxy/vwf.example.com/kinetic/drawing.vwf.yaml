@@ -14,7 +14,7 @@ methods:
   clientLeave:
   setUpPrivate:
   setClientUIState:
-  #isValid:
+  isValid:
   getStageRelativePoint:
 events:
   pointerDown:

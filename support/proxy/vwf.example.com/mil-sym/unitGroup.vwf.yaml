@@ -7,14 +7,15 @@ properties:
   mapPosition:
     set: |
       if ( value !== undefined ) {
+        //this.mapPosition = { "x": value.x, "y": value.y };
         this.mapPosition = value;
         if ( this.icon && this.icon.symbolCenter ) {
           this.position = {
-            "x": this.mapPosition.x - this.icon.symbolCenter.x,
-            "y": this.mapPosition.y - this.icon.symbolCenter.y
+            "x": ( this.mapPosition.absolute ? this.mapPosition.x : this.mapPosition.x - this.icon.symbolCenter.x ),
+            "y": ( this.mapPosition.absolute ? this.mapPosition.y : this.mapPosition.y - this.icon.symbolCenter.y )
           };
         } else {
-          this.position = value;
+          this.position = { "x": value.x, "y": value.y };
         } 
       }
     value: { "x": 0, "y": 0 }
