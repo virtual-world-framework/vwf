@@ -9,7 +9,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var stageHeight = ( window && window.innerHeight ) ? window.innerHeight : 600;
     var drawing_private = {};
     var drawing_client = {  
-            "drawing_mode": 'none',
+            "drawing_mode": 'freeDraw',
             "drawing_visible": 'inherit',
             "drawing_color": 'black',
             "drawing_width": 4,
@@ -30,7 +30,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         node.kineticObj.on( "mousemove", function( evt ) {
             var eData = processEvent( evt, node, false );
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerMove', eData.eventData, eData.eventNodeData );
-            viewDriver.kernel.fireEvent( node.ID, 'pointerMove', eData.eventData );
+            //viewDriver.kernel.fireEvent( node.ID, 'pointerMove', eData.eventData );
+            drawMove( node.ID, eData.eventData[0], node, false );
         } );
 
         node.kineticObj.on( "mouseout", function( evt ) {
@@ -54,14 +55,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var eData = processEvent( evt, node, false );
             mouseDown = true;
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
-            viewDriver.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
+            //viewDriver.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
+
+            drawDown( node.ID, eData.eventData[0], node, false );
         } );
 
         node.kineticObj.on( "mouseup", function( evt ) {
             var eData = processEvent( evt, node, false );
             mouseDown = false;
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerUp', eData.eventData, eData.eventNodeData );
-            viewDriver.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
+            //viewDriver.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
+            drawUp( node.ID, eData.eventData[0], node, true ); 
 
             if ( node.kineticObj.mouseDragging ) {
                 viewDriver.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
@@ -93,7 +97,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             viewDriver.kernel.fireEvent( node.ID, 'pointerDoubleClick', eData.eventData );
         } );
 
-        /*
+        /*draw
         node.kineticObj.on( "dragstart", function( evt ) {
             var eData = processEvent( evt, node, false );
             viewDriver.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
@@ -402,12 +406,20 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         kineticObj.scaleY( node.model.scaleX );
                     }
                     break;
+
+                case "activeLayerID":
+                    if ( this.kernel.client() === this.kernel.moniker() ) {
+                        drawing_client.drawing_parentID = propertyValue;
+                    }
+                    break;
             }            
 
         },
 
         calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
             
+            console.info( "methodName = " + methodName );
+
             if ( this.kernel.client() === this.kernel.moniker() ) {
                 var prop, value, t;
                 switch ( methodName ) {
@@ -423,6 +435,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     case "setClientUIState":
                         setClientUIState( methodParameters[0] );
                         break;
+
                 }
             }
 
@@ -921,6 +934,35 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
     };
 
+    function addNodeToHierarchy( node ) {
+        
+        console.info( "addNodeToHierarchy ID: " + node.ID + "    parentID: " + node.parentID );
+
+        if ( node.kineticObj ) {
+            
+            debugger;
+
+            if ( modelDriver.state.nodes[ node.parentID ] !== undefined ) {
+                var parent = modelDriver.state.nodes[ node.parentID ];
+                if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
+                    
+                    if ( parent.children === undefined ) {
+                        parent.children = [];    
+                    }
+                    parent.children.push( node.ID );
+                    //console.info( "Adding child: " + childID + " to " + nodeID );
+                    parent.kineticObj.add( node.kineticObj );    
+                }
+            }
+            node.kineticObj.setId( node.ID ); 
+            node.kineticObj.name( node.name ); 
+
+            node.stage = findStage( node.kineticObj );
+        }
+
+    } 
+
+
     function drawMove( nodeID, eventData, nodeData, touch ) {
 
         var node = viewDriver.state.nodes[ nodeID ];
@@ -1283,12 +1325,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         var extendsID = objDef[ "extends" ];
         //var protos = getPrototypes( viewDriver.kernel, extendsID );
 
+        console.info( "createLocalKineticNode" );
+
         var node = viewDriver.state.createLocalNode( parentID, drawingID, extendsID, implementsID, source, type, drawing_index, name );
         node.prototypes = [];
         node.prototypes.push( extendsID );
 
         var kineticObj = createKineticObject( node, objDef.properties );
         node.kineticObject = kineticObj;
+
+        addNodeToHierarchy( node );
 
         return node;
     }
