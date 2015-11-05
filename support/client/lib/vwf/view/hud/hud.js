@@ -215,29 +215,27 @@ define( function() {
         },
 
         handleEvent: function( event ) {
+            var type;
+            switch ( event.type ) {
+                case "click":
+                    type = "onClick";
+                    break;
+                case "mouseup":
+                    type = "onMouseUp";
+                    break;
+                case "mousedown":
+                    type = "onMouseDown";
+                    break;
+                case "mousemove":
+                    type = "onMouseMove";
+                    break;
+                default:
+                    console.log( "HUD.handleEvent - Unhandled event type: " + event.type );
+                    return;
+            }
             if ( this.enabled ) {
                 this.pick( event );
                 var topPick = this.picks[ 0 ];
-                var type;
-
-                switch ( event.type ) {
-                    case "click":
-                        type = "onClick";
-                        break;
-                    case "mouseup":
-                        type = "onMouseUp";
-                        break;
-                    case "mousedown":
-                        type = "onMouseDown";
-                        break;
-                    case "mousemove":
-                        type = "onMouseMove";
-                        break;
-                    default:
-                        console.log( "HUD.handleEvent - Unhandled event type: " + event.type );
-                        return;
-                }
-
                 if ( topPick ) {
                     if ( topPick.enabled ) {
                         this.elements[ topPick.id ][ type ]( event );
