@@ -12,46 +12,73 @@ block scenarios
       var sessions = ( scenario.sessions || [] ).filter( function( session ) {
         return session.instance;
       } );
-      return scenario_sessions.concat( ( [ undefined ].concat( sessions ) ).map( function( session ) {
+      return scenario_sessions.concat( sessions.map( function( session ) {
         return { scenario: scenario, session: session };
-      } ) );
+      } ) ).concat( { scenario: scenario, session: undefined } );
     }, [] );
 
-  table.table
+  table.table#scenarios
     thead
       tr
         th.col-sm-5 Scenario
         th.col-sm-1 Company
         th.col-sm-1 Platoon
         th.col-sm-1 Unit
-        th.col-sm-2 &nbsp;
+        th.col-sm-3 &nbsp;
         th.col-sm-1 &nbsp;
-        th.col-sm-1 &nbsp;
-    tbody: each scenario_session in scenario_sessions
-      -
-        var scenario = scenario_session.scenario,
-          session = scenario_session.session;
-      if session || user.instructor
-        tr
-          td= scenario.state.title
-            if session
+    tbody
+      each scenario_session in scenario_sessions
+        -
+          var scenario = scenario_session.scenario,
+            session = scenario_session.session;
+        if session
+          tr.session
+            td= scenario.state.title
               br
               span.small instructor, n students
-          if session
             td= session.state.classroom.company
             td= session.state.classroom.platoon
             td= session.state.classroom.unit
-          else
             td &nbsp;
+            td: a.btn.join(href=session.instance) Join
+        else if user.instructor
+          tr.scenario
+            td= scenario.state.title
+            td.company: input.form-control.input-sm
+            td.platoon: input.form-control.input-sm
+            td.unit: input.form-control.input-sm
             td &nbsp;
-            td &nbsp;
-          td &nbsp;
-          if session
-            td &nbsp;
-            td: a(href=session.instance) Join
-          else
-            td: a(href=scenario.document.uri) Edit
-            td: a(href=scenario.document.uri) Launch
+            td
+              a.btn.edit(href=scenario.document.uri) Edit
+              a.btn.launch.hidden(href=scenario.document.uri) Launch
+      tr.application
+        td.title(colspan=4): input(placeholder="Title").form-control.input-sm
+        td &nbsp;
+        td: a.btn.create.disabled(href=scenarios.application) Create
+    script.
+      document.addEventListener( "DOMContentLoaded", function() {
+        $( "table#scenarios" ).on( "input", "tr.scenario", function() {
+          var this$ = $( this ), filled = this$.find( ".company input" ).val() &&
+            this$.find( ".platoon input" ).val() &&
+            this$.find( ".unit input" ).val();
+          if ( filled ) {
+            this$.find( "a.edit" ).addClass( "hidden" );
+            this$.find( "a.launch" ).removeClass( "hidden" );
+          } else {
+            this$.find( "a.edit" ).removeClass( "hidden" );
+            this$.find( "a.launch" ).addClass( "hidden" );
+          }
+        } );
+        $( "table#scenarios" ).on( "input", "tr.application", function() {
+          var this$ = $( this ),
+            filled = this$.find( ".title input" ).val();
+          if ( filled ) {
+            this$.find( "a.create" ).removeClass( "disabled" );
+          } else {
+            this$.find( "a.create" ).addClass( "disabled" );
+          }
+        } );
+      } );
 
 block sessions
 
@@ -69,7 +96,7 @@ block sessions
       return b.session.document.timestamp - a.session.document.timestamp;
     } );
 
-  table.table
+  table.table#sessions
     thead
       tr
         th.col-sm-5 Scenario
@@ -88,4 +115,4 @@ block sessions
         td= session.state.classroom.platoon
         td= session.state.classroom.unit
         td= ( new Date( session.document.timestamp ) ).toISOString()
-        td: a(href=session.document.uri) Review
+        td: a.btn.review(href=session.document.uri) Review
