@@ -6,8 +6,10 @@ block scenarios
   //- and joinable sessions (with instances).
 
   -
+    var application = "/TDG/index.vwf",
+      scenarios = manifest[ application ] || [];
     var scenario_sessions = scenarios.filter( function( scenario ) {
-      return scenario.document;
+      return scenario.scenario.document;
     } ).reduce( function( scenario_sessions, scenario ) {
       var sessions = ( scenario.sessions || [] ).filter( function( session ) {
         return session.instance;
@@ -33,7 +35,7 @@ block scenarios
             session = scenario_session.session;
         if session
           tr.session
-            td= scenario.state.title
+            td= scenario.scenario.state.title
               br
               span.small instructor, n students
             td= session.state.classroom.company
@@ -43,19 +45,19 @@ block scenarios
             td: a.btn.join(href=session.instance) Join
         else if user.instructor
           tr.scenario
-            td= scenario.state.title
+            td= scenario.scenario.state.title
             td.company: input.form-control.input-sm
             td.platoon: input.form-control.input-sm
             td.unit: input.form-control.input-sm
             td &nbsp;
             td
-              a.btn.edit(href=scenario.document.uri) Edit
-              a.btn.launch.hidden(href=scenario.document.uri) Launch
+              a.btn.edit(href=scenario.scenario.document.uri) Edit
+              a.btn.launch.hidden(href=scenario.scenario.document.uri) Launch
       if user.instructor
         tr.application
           td.title(colspan=4): input(placeholder="Title").form-control.input-sm
           td &nbsp;
-          td: a.btn.create.disabled(href=scenarios.application) Create
+          td: a.btn.create.disabled(href=application) Create
     script.
       document.addEventListener( "DOMContentLoaded", function() {
         $( "table#scenarios" ).on( "input", "tr.scenario", function() {
@@ -86,6 +88,8 @@ block sessions
   //- Join each scenario with its sessions. Select only completed sessions (with documents).
 
   -
+    var application = "/TDG/index.vwf",
+      scenarios = manifest[ application ] || [];
     var scenario_sessions = scenarios.reduce( function( scenario_sessions, scenario ) {
       var sessions = ( scenario.sessions || [] ).filter( function( session ) {
         return session.document;

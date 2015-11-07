@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "async": "0.2.x",
+    "bluebird": "^3.0.5",
     "body-parser": "^1.14.1",
     "bootstrap": "^3.3.5",
     "config": "^1.16.0",
@@ -32,10 +33,12 @@
     "jade": "^1.11.0",
     "jquery": "^2.1.4",
     "js-yaml": "2.1.x",
+    "lodash": "^3.10.1",
     "mime": "1.2.x",
     "optimist": "0.6.x",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
+    "request-promise": "^1.0.2",
     "socket.io": "0.9.x",
     "util": "0.10.x"
   },
