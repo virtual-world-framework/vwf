@@ -51,10 +51,11 @@ block scenarios
             td
               a.btn.edit(href=scenario.document.uri) Edit
               a.btn.launch.hidden(href=scenario.document.uri) Launch
-      tr.application
-        td.title(colspan=4): input(placeholder="Title").form-control.input-sm
-        td &nbsp;
-        td: a.btn.create.disabled(href=scenarios.application) Create
+      if user.instructor
+        tr.application
+          td.title(colspan=4): input(placeholder="Title").form-control.input-sm
+          td &nbsp;
+          td: a.btn.create.disabled(href=scenarios.application) Create
     script.
       document.addEventListener( "DOMContentLoaded", function() {
         $( "table#scenarios" ).on( "input", "tr.scenario", function() {
