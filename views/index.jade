@@ -17,8 +17,8 @@ block scenarios
         return session.instance;
       } );
       return scenario_sessions.concat( sessions.map( function( session ) {
-        return { scenario: scenario, session: session };
-      } ) ).concat( { scenario: scenario, session: undefined } );
+        return { scenario: scenario.scenario, session: session };
+      } ) ).concat( { scenario: scenario.scenario, session: undefined } );
     }, [] );
 
   table.table#scenarios
@@ -37,7 +37,7 @@ block scenarios
             session = scenario_session.session;
         if session
           tr.session
-            td= scenario.scenario.state.title
+            td= scenario.state.title
               br
               span.small instructor, n students
             td= session.state.classroom.company
@@ -47,14 +47,14 @@ block scenarios
             td: a.btn.join(href=session.instance) Join
         else if user.instructor
           tr.scenario
-            td= scenario.scenario.state.title
+            td= scenario.state.title
             td.company: input.form-control.input-sm
             td.platoon: input.form-control.input-sm
             td.unit: input.form-control.input-sm
             td &nbsp;
             td
-              a.btn.edit(href=scenario.scenario.document.uri) Edit
-              a.btn.launch.hidden(href=scenario.scenario.document.uri) Launch
+              a.btn.edit(href=scenario.document.uri) Edit
+              a.btn.launch.hidden(href=scenario.document.uri) Launch
       if user.instructor
         tr.application
           td.title(colspan=4): input(placeholder="Title").form-control.input-sm
@@ -99,7 +99,7 @@ block sessions
         return session.document;
       } );
       return scenario_sessions.concat( sessions.map( function( session ) {
-        return { scenario: scenario, session: session };
+        return { scenario: scenario.scenario, session: session };
       } ) );
     }, [] ).sort( function( a, b ) {
       return b.session.document.timestamp - a.session.document.timestamp;
@@ -123,5 +123,5 @@ block sessions
         td= session.state.classroom.company
         td= session.state.classroom.platoon
         td= session.state.classroom.unit
-        td= ( new Date( session.document.timestamp ) ).toISOString()
+        td= dateFormat( session.document.timestamp )
         td: a.btn.review(href=session.document.uri) Review
