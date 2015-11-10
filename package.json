@@ -29,8 +29,6 @@
     "util": "0.10.x"
   },
   "devDependencies": {
-    "node-inspector": "x.x.x",
-    "nodebug": "x.x.x",
     "mocha": "x.x.x",
     "should": "x.x.x"
   },
