@@ -910,18 +910,7 @@
                 // Start a timer to monitor the incoming queue and dispatch the messages as though
                 // they were received from the server.
 
-                this.dispatch();
-
-                setInterval( function() {
-
-                    var fields = {
-                        time: vwf.now + 0.010, // TODO: there will be a slight skew here since the callback intervals won't be exactly 10 ms; increment using the actual delta time; also, support play/pause/stop and different playback rates as with connected mode.
-                        origin: "reflector",
-                    };
-
-                    queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
-
-                }, 10 );
+                startInternalTicks();
 
             }
 
@@ -990,9 +979,14 @@
 
                     vwf.logger.infox( "-socket", "disconnected" );
 
-                    // Reload to rejoin the application.
+                    // In single-user mode, continue using a local tick source. In collaborative
+                    // mode, reload to rejoin the application.
 
-                    window.location = window.location.href;
+                    if ( vwf.configuration[ "single-user" ] ) {
+                        startInternalTicks();
+                    } else {
+                        window.location = window.location.href;
+                    }
 
                 } );
 
@@ -1024,6 +1018,23 @@
             } else {  // TODO: also do this if component_uri_or_json_or_object was invalid and createNode() failed
 
                 // TODO: show a selection dialog
+
+            }
+
+            // For single-user mode, start an internal timer to schedule ticks.
+
+            function startInternalTicks() {
+
+                setInterval( function() {
+
+                    var fields = {
+                        time: vwf.now + 0.010,
+                        origin: "reflector",
+                    };
+
+                    queue.insert( fields, true ); // may invoke dispatch(), so call last before returning to the host
+
+                }, 10 );
 
             }
 
@@ -1185,6 +1196,14 @@
             // Return the result.
 
             respond && this.respond( nodeID, actionName, memberName, parameters, result );
+
+            // If the application is configured for single-user mode, drop the reflector connection
+            // once the application has loaded.
+
+            if ( this.configuration[ "single-user" ] && this.application() && socket ) {
+                socket.disconnect();
+                socket = undefined;
+            }
 
             // origin == "reflector" ?
             //     this.logger.infou() : this.logger.debugu();

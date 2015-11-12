@@ -175,6 +175,7 @@ define( function() {
             "humanize-ids": false,                // append recognizable strings to node IDs
             "preserve-script-closures": false,    // retain method/event closures by not serializing functions (breaks replication, persistence)
             "load-timeout": 10,                   // resource load timeout in seconds
+            "single-user": false,                 // disconnect from the server and run locally
         },
 
         /// Changes for production environments.
