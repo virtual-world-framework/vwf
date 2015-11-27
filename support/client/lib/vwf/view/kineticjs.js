@@ -9,7 +9,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var stageHeight = ( window && window.innerHeight ) ? window.innerHeight : 600;
     var drawing_private = {};
     var drawing_client = {  
-            "drawing_mode": 'freeDraw',
+            "drawing_mode": 'none',
             "drawing_visible": 'inherit',
             "drawing_color": 'black',
             "drawing_width": 4,
@@ -18,10 +18,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             "drawing_opacity": 1.0,
             "nameIndex": 1,
             "fontSize": 16,
-            "angle": 30
+            "angle": 30,
+            "lineCap": 'round'
         };
     var drawing_index = 0;
     var private_node = undefined;
+    var activelyDrawing = false;
+    var clearBeforeDraw = false;
 
     function attachMouseEvents( node ) {
 
@@ -31,7 +34,20 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var eData = processEvent( evt, node, false );
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerMove', eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'pointerMove', eData.eventData );
-            drawMove( node.ID, eData.eventData[0], node, false );
+            //activelyDrawing = mouseDown;
+
+            //var userState = drawing_client;
+            //if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
+                //activelyDrawing = true;
+            //    drawMove( node.ID, eData.eventData[0], node, false );
+            //}
+            drawMove( node.ID, eData.eventData[0], node, false ); 
+
+            var userState = drawing_client;
+            if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
+                activelyDrawing = true;
+            }
+
         } );
 
         node.kineticObj.on( "mouseout", function( evt ) {
@@ -57,15 +73,37 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
 
-            drawDown( node.ID, eData.eventData[0], node, false );
+            var userState = drawing_client;
+            //if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
+            //    activelyDrawing = true;
+            //    console.info( "VIEW: drawDown" );
+            //    drawDown( node.ID, eData.eventData[0], node, false );
+            //}
+            drawDown( node.ID, eData.eventData[0], node, false ); 
+
+            var userState = drawing_client;
+            if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
+                activelyDrawing = true;
+            }
+
         } );
 
         node.kineticObj.on( "mouseup", function( evt ) {
             var eData = processEvent( evt, node, false );
             mouseDown = false;
+
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerUp', eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
             drawUp( node.ID, eData.eventData[0], node, true ); 
+
+            activelyDrawing = false;
+
+            //var userState = drawing_client;
+            //if ( activelyDrawing ) {
+             //   console.info( "VIEW: drawUp" );
+             //   drawUp( node.ID, eData.eventData[0], node, true ); 
+            //}
+            //activelyDrawing = false;
 
             if ( node.kineticObj.mouseDragging ) {
                 viewDriver.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
@@ -176,6 +214,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //viewDriver.kernel.dispatchEvent( node.ID, "touchStart", eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'touchStart', eData.eventData );
             drawDown( node.ID, eData.eventData[0], node, false ); 
+
+            var userState = drawing_client;
+            if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
+                activelyDrawing = true;
+            }
+
         } );
 
         node.kineticObj.on( "touchmove", function( evt ) {
@@ -183,6 +227,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //viewDriver.kernel.dispatchEvent( node.ID, "touchMove", eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'touchMove', eData.eventData );
             drawMove( node.ID, eData.eventData[0], node, false ); 
+
+            var userState = drawing_client;
+            if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
+                activelyDrawing = true;
+            }
+
         } );
 
         node.kineticObj.on( "touchend", function( evt ) {
@@ -190,6 +240,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //viewDriver.kernel.dispatchEvent( node.ID, "touchEnd", eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'touchEnd', eData.eventData );
             drawUp( node.ID, eData.eventData[0], node, true ); 
+
+            activelyDrawing = false;
         } );
 
         node.kineticObj.on( "tap", function( evt ) {
@@ -499,9 +551,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         var node = this.state.nodes[ eventData[0] ];
                         if ( node ) {
                             var kineticObj = node.kineticObj;
-                            if ( kineticObj ) {
+                            if ( kineticObj && activelyDrawing ) {
                                 //kineticObj.drawScene();
-                                kineticObj.draw();
+                                //kineticObj.draw();
                             }
                         }
                         /*
@@ -581,7 +633,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function renderScene( stage ) {
         //window.requestAnimationFrame( renderScene( stage ) );
-        if ( stage !== undefined ) {
+        if ( stage !== undefined && !activelyDrawing ) {
             stage.batchDraw();    
         }
     }
@@ -707,9 +759,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     setUpPrivate = function() {
         
-        if ( drawing_private === undefined ) {
-            drawing_private = {};
-        }
+        //if ( drawing_private === undefined ) {
+        //    drawing_private = {};
+        //}
         if ( drawing_private === undefined ) {
             drawing_private = {
                 "drawingObject": null,
@@ -880,39 +932,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //    drawing_private.drawingObject = child;
             //} );
             private_node = createLocalKineticNode( section.ID, childID, groupDef, [], undefined, undefined, name );
-            drawing_private.drawingObject = private_node.kineticObject;
+            drawing_private.drawingObject = private_node.kineticObj;
+            drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
 
 
         } else if ( compExtends !== undefined ) {
 
             privateState.initialDownPoint = eventPointDown;
-            //var parentPath = userState.drawing_parentPath + section;
-            //var parents = node.find( parentPath );
-            //var parents = this.find( parentPath );
-            //var parents = viewDriver.state.nodes.find( parentPath );
-
-            // find was failing 9/2/14, and the code below 
-            // was a backup, going to leave this in until we feel good
-            // about the issues we saw are no longer a problem
-            //if ( parents === undefined ) {
-            //    parents = [ node.findChild( this, parentPath.split( '/' ) ) ];
-            //}
-            
-            //var parent = parents.length > 0 ? parents[ 0 ] : this;
             var parentPath = userState.drawing_parentID;
             //var parentNode = viewDriver.state.nodes[ parentPath ];
             var section = findSection( parentPath, section );
             var parent = section ? section : node;
-            //var parents = this.find( parentPath );
-
-            // find was failing 9/2/14, and the code below 
-            // was a backup, going to leave this in until we feel good
-            // about the issues we saw are no longer a problem        
-            //if ( parents === undefined ) {
-            //    parents = [ node.findChild( this, parentPath.split( '/' ) ) ];
-            //}
-
-            //var parent = viewDriver.state.nodes[ parentPath ] ? viewDriver.state.nodes[ parentPath ] : node;
 
             var shapeDef = {
                 "extends": compExtends,
@@ -924,12 +954,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var name = drawingMode + drawing_index;
             drawing_index = drawing_index + 1;
             var childID = section.ID + ":" + name;
-            //drawing_private.drawingObject = createLocalKineticNode( section.ID, childID, shapeDef, [], undefined, undefined, name );
             private_node = createLocalKineticNode( section.ID, childID, shapeDef, [], undefined, undefined, name );
-            drawing_private.drawingObject = private_node.kineticObject;
-            //parent.children.create( name, shapeDef, function( child ) {
-            //    drawing_private.drawingObject = child;
-            //} );
+            drawing_private.drawingObject = private_node.kineticObj;
+            drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
 
         }
     };
@@ -940,10 +967,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         if ( node.kineticObj ) {
             
-            debugger;
+            //debugger;
 
-            if ( modelDriver.state.nodes[ node.parentID ] !== undefined ) {
-                var parent = modelDriver.state.nodes[ node.parentID ];
+            if ( viewDriver.state.nodes[ node.parentID ] !== undefined ) {
+                var parent = viewDriver.state.nodes[ node.parentID ];
                 if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
                     
                     if ( parent.children === undefined ) {
@@ -980,7 +1007,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             return;
         }
 
-        drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
+        if ( drawing_private.drawingObject ) {
+           drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
+        }
     };
 
     function drawUp( nodeID, eventData, nodeData, touch ) {
@@ -992,7 +1021,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var drawingObject = drawing_private.drawingObject;
             drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, true );
             
-            node.drawingObjectCreated( drawingObject.id );
+            //node.drawingObjectCreated( drawingObject.id );
 
             var userState = drawing_client;
             if ( node.moniker === node.client ) {
@@ -1021,7 +1050,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             } 
 
-            drawing_private.drawingObject = null;
+            propagateNodeToModel();
+            //drawing_private.drawingObject = null;
         }    
     };
 
@@ -1055,9 +1085,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var height = diffY;
             var dist = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
 
-            //console.info( "== "+userState.drawing_mode +" ==" );
-            //console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
-
             // this keeps the pos as the top left corner for the 
             // rectangular objects
             switch ( userState.drawing_mode ) {
@@ -1066,6 +1093,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "arrow":
                 case "thickArrow":
                 case "freeDraw":
+                case "borderRect":
                     break;
 
                 default:
@@ -1083,54 +1111,59 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;          
             }
 
-            //console.info( "== pos: " + pos + "   diffX: " + diffX + "   diffY: " + diffY );
-
             switch ( userState.drawing_mode ) {
                 
                 case "arc":
                     drawingObject.angle = userState.angle ? userState.angle : 30;
                     if ( dist > node.drawing_width ) {
-                        drawingObject.innerRadius = dist - node.drawing_width;
-                        drawingObject.outerRadius = dist;
+                        drawingObject.innerRadius( dist - node.drawing_width );
+                        drawingObject.outerRadius( dist );
                     }
+                    clearBeforeDraw = true;
                     break;
 
                 case "ellipse":         
-                    drawingObject.radius = { "x": width * 0.5, "y": height * 0.5 };
+                    drawingObject.radius( { "x": width * 0.5, "y": height * 0.5 } );
+                    clearBeforeDraw = true;
                     break;
 
                 case "circle":
-                    drawingObject.radius = dist;
+                    drawingObject.radius( dist );
+                    clearBeforeDraw = true;
                     break;
 
                 case "line":
-                    drawingObject.stroke = userState.drawing_color;
-                    drawingObject.strokeWidth = userState.drawing_width;
-                    drawingObject.points = [ 0, 0, diffX, diffY ];
+                    drawingObject.stroke( userState.drawing_color );
+                    drawingObject.strokeWidth( userState.drawing_width );
+                    drawingObject.points( [ 0, 0, diffX, diffY ] );
+                    drawingObject.lineCap( "round" );
+                    clearBeforeDraw = true;
                     break;
 
                 case "freeDraw":
-                    //debugger;
-                    drawingObject.stroke = userState.drawing_color;
-                    drawingObject.strokeWidth = userState.drawing_width;
+                    drawingObject.stroke( userState.drawing_color );
+                    drawingObject.strokeWidth( userState.drawing_width );
+                    drawingObject.lineCap( "round" );
+                    drawingObject.lineJoin( "round" );
+                    var points = drawingObject.points();
+                    var isFirstStrokeOfNewLine = false;
 
-                    if ( drawingObject.points === undefined ) {
-                        drawingObject[ "points" ] = [];
+                    if ( drawingObject.points() === undefined ) {
+                        points = [ 0, 0, diffX, diffY ];
+                        isFirstStrokeOfNewLine = true;
                     }
-
-                    var isFirstStrokeOfNewLine = ( drawingObject.points.length === 0 );
-
-                    console.info( "VIEW: Event point: [ " + eventPoint[0] + ", " + eventPoint[1] + " ], Drawing object x, y: [ " + drawingObject.x() + ", " + drawingObject.y() + " ]");
 
                     var posX = eventPoint[ 0 ] - drawingObject.x();
                     var posY = eventPoint[ 1 ] - drawingObject.y();
                     
                     if ( isFirstStrokeOfNewLine ) {
                         if ( ( Math.abs( posX ) + Math.abs( posY ) ) > 0 ) {
-                            drawingObject.points = [ 0, 0, posX, posY ];
+                            points = [ 0, 0, posX, posY ];
+                            privateState[ "previousPoint" ] = [ posX, posY ];
                         } else {
                             pointAccepted = false;   
                         }
+                        privateState.previousPoint = [ posX, posY ];
                     } else  {
                         var dragDiff = [ 
                             posX - privateState.previousPoint[ 0 ], 
@@ -1138,12 +1171,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         ];
 
                         if ( ( Math.abs( dragDiff[0] ) + Math.abs( dragDiff[1] ) ) > 0 ) {
-                            drawingObject.points.push( posX );
-                            drawingObject.points.push( posY );                        
+                            points.push( posX );
+                            points.push( posY );
+                            privateState.previousPoint = [ posX, posY ];
                         } else {
                             pointAccepted = false;    
                         }
+
                     }
+                    points.push( posX );
+                    points.push( posY );
+                    drawingObject.points( points );
                     break;
 
                 case "regularPolygon":
@@ -1152,40 +1190,46 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 case "ring":
                     if ( dist > userState.drawing_width ) {
-                        drawingObject.innerRadius = dist - userState.drawing_width;
-                        drawingObject.outerRadius = dist;
+                        drawingObject.innerRadius( dist - userState.drawing_width );
+                        drawingObject.outerRadius( dist );
+                        clearBeforeDraw = true;
                     }
                     break;
 
                 case "star":
-                    drawingObject.points = 5;
-                    drawingObject.innerRadius = dist * 80;
-                    drawingObject.outerRadius = dist;
+                    drawingObject.points( 5 );
+                    drawingObject.innerRadius( dist * 80 );
+                    drawingObject.outerRadius( dist );
+                    clearBeforeDraw = true;
                     break;
 
                 case "wedge":
                     // needs defining
-                    drawingObject.angle = userState.angle ? userState.angle : 30;
-                    drawingObject.radius = dist;
-                    drawingObject.clockwise = false;
+                    drawingObject.angle( userState.angle ? userState.angle : 30 );
+                    drawingObject.radius( dist );
+                    drawingObject.clockwise( false );
+                    clearBeforeDraw = true;
                     break;
 
                 case "borderRect":
-                    drawingObject.stroke = userState.drawing_color;
-                    drawingObject.strokeWidth = userState.drawing_width;
-                    drawingObject.points = [ 0, 0, width, 0, width, height, 0, height, 0, 0 ];
+                    drawingObject.stroke( userState.drawing_color );
+                    drawingObject.strokeWidth( userState.drawing_width );
+                    drawingObject.points( [ 0, 0, width, 0, width, height, 0, height, 0, 0 ] );
+                    drawingObject.lineCap( "round" );
+                    drawingObject.lineJoin( "round" );
+                    clearBeforeDraw = true;
                     break;
 
                 case "arrow":
-                    drawingObject.x = drawingObject.position[ 0 ];
-                    drawingObject.y = drawingObject.position[ 1 ]; 
+                    drawingObject.x( drawingObject.position[ 0 ] );
+                    drawingObject.y( drawingObject.position[ 1 ] ); 
 
-                    drawingObject.line.stroke = userState.drawing_color;
-                    drawingObject.line.strokeWidth = userState.drawing_width;
-                    drawingObject.line.position = [ 0, 0 ];
+                    drawingObject.line.stroke( userState.drawing_color );
+                    drawingObject.line.strokeWidth( userState.drawing_width );
+                    drawingObject.line.position( [ 0, 0 ] );
                     
-                    drawingObject.head.sides = 3;
-                    drawingObject.head.radius = userState.drawing_width * 3;
+                    drawingObject.head.sides( 3 );
+                    drawingObject.head.radius( userState.drawing_width * 3 );
 
                     var endPoint = goog.vec.Vec2.createFloat32FromValues( 0, 0 );
                     var relativeXDiff = eventPoint[ 0 ] - drawingObject.x;
@@ -1195,11 +1239,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     var len = goog.vec.Vec2.distance( goog.vec.Vec2.createFloat32FromValues( 0, 0 ), dir );
                     goog.vec.Vec2.normalize( dir, dir );
 
-                    drawingObject.head.rotation = Math.atan2( dir[1], dir[0] ) * ( 180 / Math.PI ) - 30;
+                    drawingObject.head.rotation( Math.atan2( dir[1], dir[0] ) * ( 180 / Math.PI ) - 30 );
                     goog.vec.Vec2.scale( dir, len - ( userState.drawing_width * 3 ), endPoint );
-                    drawingObject.head.position = [ endPoint[0], endPoint[1] ];
+                    drawingObject.head.position( [ endPoint[0], endPoint[1] ] );
                     goog.vec.Vec2.scale( dir, len - ( ( userState.drawing_width * 3 ) + headOffset ), endPoint );
-                    drawingObject.line.points = [ 0, 0, endPoint[0], endPoint[1] ];
+                    drawingObject.line.points( [ 0, 0, endPoint[0], endPoint[1] ] );
+                    clearBeforeDraw = true;
                     break;
                 
                 case "thickArrow":
@@ -1230,33 +1275,59 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 case "sprite":
                 case "image":
-                    drawingObject.border.stroke = userState.drawing_color;
-                    drawingObject.border.strokeWidth = 4;
-                    drawingObject.border.points = [ 0, 0, width, 0, width, height, 0, height, 0, 0 ];
-                    drawingObject.content.width = width;
-                    drawingObject.content.height = height;
+                    drawingObject.border.stroke( userState.drawing_color );
+                    drawingObject.border.strokeWidth( 4 );
+                    drawingObject.border.points( [ 0, 0, width, 0, width, height, 0, height, 0, 0 ] );
+                    drawingObject.content.width( width );
+                    drawingObject.content.height( height );
+                    clearBeforeDraw = true;
                     break;
 
                 case "text":
-                    drawingObject.border.stroke = userState.drawing_color;
-                    drawingObject.border.strokeWidth = 4;
-                    drawingObject.border.points = [ 0, 0, width, 0, width, height, 0, height, 0, 0 ];
-                    drawingObject.content.fontSize = userState.fontSize ? userState.fontSize : 16;
+                    drawingObject.border.stroke( userState.drawing_color );
+                    drawingObject.border.strokeWidth( 4 );
+                    drawingObject.border.points( [ 0, 0, width, 0, width, height, 0, height, 0, 0 ] );
+                    drawingObject.content.fontSize( userState.fontSize ? userState.fontSize : 16 );
+                    clearBeforeDraw = true;
                     break;
 
                 case "rect":
+                    drawingObject.x( pos[ 0 ] );
+                    drawingObject.y( pos[ 1 ] ); 
+                    drawingObject.stroke( userState.drawing_color );
+                    drawingObject.strokeWidth( userState.drawing_width );
+                    drawingObject.fill( userState.drawing_color );
+                    drawingObject.size( { "width": width, "height": height} );
+                    drawingObject.lineCap( "round" );
+                    drawingObject.lineJoin( "round" );
+                    clearBeforeDraw = true;                    
+                    break;
+
                 default:
                     break;
 
             }
 
             if ( pointAccepted ) {
-                privateState.previousPoint = eventPoint;
+                //privateState.previousPoint = eventPoint;
                 // Update the view to keep pace with user input
                 //console.info( drawingObject.id + " updated, sending update event." );
                 //node.privateDrawingUpdated( drawingObject.id );
-                if ( drawingObject ) {
-                    drawingObject.drawScene();
+                if ( drawingObject && activelyDrawing ) {
+                    console.info( "VIEW: draw object " );
+                    if ( clearBeforeDraw ) {
+                        // Draw the full layer
+                        var layer = findLayer( drawingObject );
+                        if ( layer ) { 
+                            layer.draw();
+                        } else {
+                            // Should never happen - object should always be a descendent of a layer
+                            drawingObject.draw();
+                        }
+                        clearBeforeDraw = false;
+                    } else {
+                        drawingObject.draw();
+                    }
                 }
             }
 
@@ -1284,7 +1355,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
     };
 
-    this.findChild = function( parent, names ) {
+    function findChild( parent, names ) {
         if ( names.length > 0 ) {
             var childName = names.shift();
             while ( childName === "" ) {
@@ -1332,7 +1403,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         node.prototypes.push( extendsID );
 
         var kineticObj = createKineticObject( node, objDef.properties );
-        node.kineticObject = kineticObj;
+        node.kineticObj = kineticObj;
 
         addNodeToHierarchy( node );
 
@@ -1430,5 +1501,67 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 
         return prototypes;
     }
+
+    function isContainerDefinition( prototypes ) {
+        var found = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                found = ( prototypes[i] == "http://vwf.example.com/kinetic/container.vwf" );
+            }
+        }
+        return found;
+    }
+
+    function findStage( kineticObj ) {
+
+        var stage = undefined
+        var parent = kineticObj;
+        while ( parent !== undefined && stage === undefined ) {
+            if ( parent.nodeType === "Stage" ) {
+                stage = parent;
+            }
+            parent = parent.parent;
+        }
+        return stage;
+        
+    }
+
+    function findLayer( kineticObj ) {
+
+        var layer = undefined
+        var parent = kineticObj;
+        while ( parent !== undefined && layer === undefined ) {
+            if ( parent.nodeType === "Layer" ) {
+                layer = parent;
+            }
+            parent = parent.parent;
+        }
+        return layer;
+        
+    }
+
+    function propagateNodeToModel() {
+
+        // Send data about this node so the global node can be created and propagated
+        //viewDriver.kernel.callMethod( private_node.parentID, "propagateKineticNode", [ appID, private_node ] );
+        var appID = viewDriver.kernel.kernel.application();
+
+        viewDriver.kernel.kernel.callMethod( appID, "propagateKineticNode", [ private_node ] );
+
+        viewDriver.kernel.kernel.createNode( private_node.extendsID, undefined, private_node.ID, null );
+
+
+        // Delete the private node - we no longer need it
+        drawing_private = {};
+        //delete private_node;
+        private_node = undefined;
+
+        //callMethod();
+
+        //kineticNode = private_node.kineticObj;
+
+
+    }
+
 
 });

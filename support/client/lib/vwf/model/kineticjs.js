@@ -1922,6 +1922,14 @@ define( [ "module",
             if ( this.debug.methods ) {
                 this.logger.infox( "   M === callingMethod ", nodeID, methodName );
             }
+
+            switch( methodName ) {
+                case "propagateKineticNode":
+                    if ( methodParameters.length > 0 ) {
+                        propagateKineticNode( methodParameters[0] );
+                    }
+                    break;
+            }
         },
 
         // -- executing ------------------------------------------------------------------------------
@@ -2040,6 +2048,31 @@ define( [ "module",
         }
         return stage;
         
+    }
+
+    function propagateKineticNode( nodeObj ) {
+        //if ( modelDriver.state.isKineticComponent( nodeObj.prototypes ) ) {
+
+            //if ( modelDriver.debug.native ) {
+            //    modelDriver.logger.infox( "propagateKineticNode", nodeObj.parentID, nodeObj.ID, nodeObj.extendsID, nodeObj.implementsIDs, nodeObj.source, nodeObj.type, undefined, nodeObj.name );
+            //}
+            
+            // Create the local copy of the node properties
+            if ( modelDriver.state.nodes[ nodeObj.ID ] === undefined ){
+                modelDriver.state.nodes[ nodeObj.ID ] = 
+                    modelDriver.state.createLocalNode( nodeObj.parentID, nodeObj.ID, nodeObj.extendsID, nodeObj.implementsIDs,
+                            nodeObj.source, nodeObj.type, undefined, nodeObj.name, null );
+            }
+
+            // Add the kinetic object to the node properties
+            node = modelDriver.state.nodes[ nodeObj.ID ];
+            
+            node.prototypes = nodeObj.prototypes;
+            node.kineticObj = nodeObj.kineticObj;
+
+            // Add the node to the hierarchy
+            addNodeToHierarchy( node );
+        //}
     }
 
     function addNodeToHierarchy( node ) {
