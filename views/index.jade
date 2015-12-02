@@ -37,7 +37,7 @@ block scenarios
             session = scenario_session.session;
         if session
           tr.session
-            td= scenario.state.title
+            td= scenario.state.scenarioTitle
               br
               span.small instructor, n students
             td= session.state.classroom.company
@@ -47,7 +47,7 @@ block scenarios
             td: a.btn.join(href=session.instance) Join
         else if user.instructor
           tr.scenario
-            td= scenario.state.title
+            td= scenario.state.scenarioTitle
             td.company: input.form-control.input-sm
             td.platoon: input.form-control.input-sm
             td.unit: input.form-control.input-sm
@@ -119,7 +119,7 @@ block sessions
         var scenario = scenario_session.scenario,
           session = scenario_session.session;
       tr
-        td= scenario.state.title
+        td= session.state.scenarioTitle
         td= session.state.classroom.company
         td= session.state.classroom.platoon
         td= session.state.classroom.unit
