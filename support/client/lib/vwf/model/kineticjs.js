@@ -2153,40 +2153,57 @@ define( [ "module",
         return found;
     }
 
+    function isSymbolDefinition( prototypes ) {
+        var found = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                found = ( prototypes[i] == "http://vwf.example.com/mil-sym/unitIcon.vwf" );
+            }
+        }
+        return found;
+    }
+
     function loadImage( kineticObj, url ) {
         
-            var imageObj = kineticObj.image();
-            var validImage = ( imageObj !== undefined ); 
-            var width = kineticObj.width();
-            var height = kineticObj.height();
-            
+        var imageObj = kineticObj.image();
+        var validImage = ( imageObj !== undefined ); 
+        var width = kineticObj.width();
+        var height = kineticObj.height();
+        var nodeID = kineticObj.id();
+        var node = modelDriver.state.nodes[ nodeID ];
+
+        if ( isSymbolDefinition( node.prototypes ) ) {
+            kineticObj.setZIndex( 16 );
+        }
+        
+        if ( !validImage ) {
+            imageObj = new Image();    
+        }
+
+        imageObj.onload = function() {
             if ( !validImage ) {
-                imageObj = new Image();    
+                kineticObj.image( imageObj );
             }
+            if ( node.scaleOnLoad ) {
 
-            imageObj.onload = function() {
-                if ( !validImage ) {
-                    kineticObj.image( imageObj );
+                if ( width > height ) {
+                    kineticObj.scale( { "x": width / imageObj.width ,"y": width / imageObj.width } );
+                } else {
+                    kineticObj.scale( { "x": height / imageObj.height ,"y": height / imageObj.height } );
                 }
-                if ( node.scaleOnLoad ) {
-
-                    if ( width > height ) {
-                        kineticObj.scale( { "x": width / imageObj.width ,"y": width / imageObj.width } );
-                    } else {
-                        kineticObj.scale( { "x": height / imageObj.height ,"y": height / imageObj.height } );
-                    }
-                }
-            modelDriver.kernel.fireEvent( node.ID, "imageLoaded", [ url ] );
             }
-            imageObj.onerror = function() {
+            //modelDriver.kernel.fireEvent( node.ID, "imageLoaded", [ url ] );
+            modelDriver.kernel.fireEvent( nodeID, "imageLoaded", [ url ] );
+        }
+        imageObj.onerror = function() {
             modelDriver.logger.errorx( "loadImage", "Invalid image url:", url );
                 imageObj.src = oldSrc;
-            modelDriver.kernel.fireEvent( node.ID, "imageLoadError", [ url ] );
-            }
-            var oldSrc = imageObj.src;
-            imageObj.src = url;
-    
- 
+            //modelDriver.kernel.fireEvent( node.ID, "imageLoadError", [ url ] );
+            modelDriver.kernel.fireEvent( nodeID, "imageLoadError", [ url ] );
+        }
+
+        var oldSrc = imageObj.src;
+        imageObj.src = url;
     }
 
 });

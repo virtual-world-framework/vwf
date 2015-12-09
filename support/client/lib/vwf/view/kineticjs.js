@@ -19,7 +19,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             "nameIndex": 1,
             "fontSize": 16,
             "angle": 30,
-            "lineCap": 'round'
+            "lineCap": 'round',
+            "lineJoin": 'round',
+            "dashLineStyle": null,
+            "fillStyle": null,
+            "zIndex": 4 
         };
     var drawing_index = 0;
     var private_node = undefined;
@@ -351,6 +355,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             
             var node = this.state.nodes[ nodeID ];
 
+            console.info( "kineticjs(view) satProperty. propertyName: " + propertyName + ", propertyValue: " + propertyValue + ", nodeID: " + nodeID );
+
+
             // If we don't have a record of this node, it is not a kinetic node, and we ignore it
             if ( !( node && node.kineticObj ) ) {
                 return;
@@ -464,6 +471,18 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         drawing_client.drawing_parentID = propertyValue;
                     }
                     break;
+
+                case "text":
+                    if ( drawing_private !== undefined && drawing_private.drawingObject ) {
+                        var drawingObject = drawing_private.drawingObject;
+                        if ( drawingObject.content.id() === nodeID ) {
+                            drawingObject.content.text( propertyValue );
+                            drawObject( drawingObject, true );
+                            propagateNodeToModel();
+                        }
+                    }
+                    break;
+
             }            
 
         },
@@ -486,6 +505,22 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                     case "setClientUIState":
                         setClientUIState( methodParameters[0] );
+                        break;
+
+                    case "setKineticProperty":
+                        if ( private_node && private_node.kineticObj ) {
+                            var propertyName = methodParameters[ 1 ];
+                            var propertyValue = methodParameters[ 2 ];
+                            setKineticProperty( private_node.kineticObj, propertyName, propertyValue );
+                        }
+                        /*
+                        var kineticNode =  viewDriver.state.nodes[ methodParameters[0] ];
+                        var propertyName = methodParameters[ 1 ];
+                        var propetyValue = methodParameters[ 2 ];
+                        if ( kineticNode && kineticNode.kineticObj ) {
+                            setKineticProperty( kineticNode.kineticObj, propertyName, propertyValue );
+                        }
+                        */
                         break;
 
                 }
@@ -561,6 +596,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                             viewDriver.state.stages[ id ].drawScene();                
                         } */
                     }
+                    break;
+
+                case "textValueUpdated":
+                    if ( drawing_private !== undefined && drawing_private.drawingObject ) {
+                        var drawingObject = drawing_private.drawingObject;
+                        if ( drawingObject.content.id() === eventData[0] ) {
+                            drawingObject.content.text( eventData[1] );
+                            drawObject( drawingObject, true );
+                            propagateNodeToModel();
+                        }
+                    }                    
                     break;
 
                 default:
@@ -815,34 +861,30 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 break;
 
             case "sprite":            
-            case "text":
             case "image":
+                /*
                 groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
                 compExtends = { 
                     "border": "http://vwf.example.com/kinetic/line.vwf", 
+                    "content": [ "http://vwf.example.com/kinetic/", drawingMode, ".vwf" ].join('')
+                };*/
+                compExtends = [ "http://vwf.example.com/kinetic/", drawingMode, ".vwf" ].join('') 
+                break;
+
+            case "text":
+                groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
+                compExtends = { 
+                    "border": "http://vwf.example.com/kinetic/rect.vwf", 
                     "content": [ "http://vwf.example.com/kinetic/", drawingMode, ".vwf" ].join('') 
                 };
                 break;
 
-            case "arrow":
-                groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
-                compExtends = { 
-                    "line": "http://vwf.example.com/kinetic/line.vwf", 
-                    "head": "http://vwf.example.com/kinetic/regularPolygon.vwf" 
-                };
-                break;
-
-            case "thickArrow":
-                groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
-                compExtends = { 
-                    "line": "http://vwf.example.com/kinetic/line.vwf", 
-                    "head": "http://vwf.example.com/kinetic/regularPolygon.vwf"
-                };
-                break;
-
-            case "borderRect":
-            case "line":
             case "freeDraw":
+            case "polygon":
+            case "line":
+            case "borderRect":
+            case "arrow":
+            case "thickArrow":
                 compExtends = "http://vwf.example.com/kinetic/line.vwf";
                 break;
 
@@ -857,12 +899,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 "visible": 'inherit',
                 "listening": 'inherit',
                 "opacity": userState.drawing_opacity,
-                "z-index": 4
+                "index": 4
             };
 
             switch( drawingMode ) {
                 case "sprite":
-                //case "text":
+                case "text":
                 case "image":
                     retObj.opacity = 1.0;
                     retObj.scaleOnLoad = true;
@@ -909,30 +951,46 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var groupDef = {
                 "extends": groupExtends,
                 "properties": {
-                    "visible": false,
+                    "visible": "inherit",
                     "listening": "inherit",
                     "position": eventPointDown                
                 },
                 "children": {}
             };
 
-            for ( var def in compExtends ) {
-                groupDef.children[ def ] = {
-                    "extends": compExtends[ def ],
-                    "properties": getDefaultProperties( drawingMode, true, eventPointDown )
-                } 
-            }
-
             var self = this;
             var selfMoniker = node.client;
             var name = drawingMode + drawing_index;
             drawing_index = drawing_index + 1;
+            var childID = section.ID + ":" + name;
+
+            private_node = createLocalKineticNode( section.ID, childID, groupDef, [], undefined, undefined, name );
+            drawing_private.drawingObject = private_node.kineticObj;
+
+            // Define the component objects of this group object
+            for ( var def in compExtends ) {
+                groupDef.children[ def ] = {
+                    "extends": compExtends[ def ],
+                    "properties": getDefaultProperties( drawingMode, false, eventPointDown )
+                }
+                var compID    = childID + ":" + def;
+                var compChild =  createLocalKineticNode( childID, compID, groupDef.children[ def ], [], undefined, undefined, def );
+                drawing_private.drawingObject[ def ] = compChild.kineticObj;
+                drawing_private.drawingObject.children.push( drawing_private.drawingObject[ def ] );
+                //drawing_private.children.push( compID );
+            }
+
+            //var self = this;
+            //var selfMoniker = node.client;
+            //var name = drawingMode + drawing_index;
+            //drawing_index = drawing_index + 1;
+            //var childID = section.ID + ":" + name;
 
             //parent.children.create( name, groupDef, function( child ) {
             //    drawing_private.drawingObject = child;
             //} );
-            private_node = createLocalKineticNode( section.ID, childID, groupDef, [], undefined, undefined, name );
-            drawing_private.drawingObject = private_node.kineticObj;
+            //private_node = createLocalKineticNode( section.ID, childID, groupDef, [], undefined, undefined, name );
+            //drawing_private.drawingObject = private_node.kineticObj;
             drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
 
 
@@ -1015,43 +1073,77 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     function drawUp( nodeID, eventData, nodeData, touch ) {
 
         var node = viewDriver.state.nodes[ nodeID ];
+        var appID = viewDriver.kernel.application();
+        var drawAndPropagate = false;
 
         if ( drawing_private !== undefined && 
              drawing_private.drawingObject ) {
             var drawingObject = drawing_private.drawingObject;
-            drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, true );
+            drawUpdate( drawingObject.ID, eventData, nodeData, true );
             
             //node.drawingObjectCreated( drawingObject.id );
+            viewDriver.kernel.fireEvent( appID, 'drawingObjectCreated', [ drawingObject.id() ] );
 
             var userState = drawing_client;
-            if ( node.moniker === node.client ) {
-                 
-                switch( userState.drawing_mode ) {
-                    
-                    case "text":
-                        node.textCreated( drawingObject.content.id );
-                        break;
-                    
-                    case "sprite":
-                    case "image":
-                        node.imageCreated( drawingObject.content.id );
-                        break;
-
-                } 
-            }
+            drawingObject.setZIndex( userState.zIndex );
 
             switch( userState.drawing_mode ) {
                 
                 case "text":
-                case "sprite":
-                case "image":
-                    drawingObject.border.visible = false;
+                    drawingObject.border.visible( false );
+                    viewDriver.kernel.fireEvent( appID, 'textCreated', [ drawingObject.content.id() ] );
                     break;
 
+                case "sprite":
+                case "image":
+                    //drawingObject.border.visible( false );
+                    drawingObject.stroke( null );
+                    viewDriver.kernel.fireEvent( appID, 'imageCreated', [ drawingObject.id() ] );
+                    drawAndPropagate = true;
+                    break;
+
+                case "line":
+                    drawAndPropagate = true;
+                    break;
+
+                case "freeDraw":
+                case "polygon":
+                case "circle":
+                case "ellipse":
+                case "rect":
+                case "arrow":
+                case "thickArrow":
+                    drawingObject.dash( userState.dashLineStyle );
+                    switch ( userState.fillStyle ) {
+                        case 'noFill':
+                            drawingObject.fill( null );
+                            break;
+
+                        case 'solidFill':
+                        case 'transparentFill':
+                            var colorRGB = Kinetic.Util.getRGB( userState.drawing_color );
+                            var alpha = ( userState.fillStyle === 'transparentFill' ? 0.5 : 1.0 );
+                            drawingObject.fillRed( colorRGB.r );
+                            drawingObject.fillGreen( colorRGB.g );
+                            drawingObject.fillBlue( colorRGB.b );
+                            drawingObject.fillAlpha( alpha );
+                            break;
+
+                        default:
+                            break;
+                    }
+                    drawAndPropagate = true;
+                    break;
+
+                default:
+                    break;
             } 
 
-            propagateNodeToModel();
-            //drawing_private.drawingObject = null;
+            if ( drawAndPropagate ) {
+                drawObject( drawingObject, true );
+                propagateNodeToModel();
+                //drawing_private.drawingObject = null;
+            }
         }    
     };
 
@@ -1084,6 +1176,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var width = diffX;  
             var height = diffY;
             var dist = Math.sqrt( ( diffX * diffX ) + ( diffY * diffY ) );
+            var angleDeg = Math.atan2( diffY, diffX ) * 180.0 / Math.PI;
 
             // this keeps the pos as the top left corner for the 
             // rectangular objects
@@ -1093,6 +1186,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "arrow":
                 case "thickArrow":
                 case "freeDraw":
+                case "polygon":
                 case "borderRect":
                     break;
 
@@ -1105,9 +1199,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         pos[ 1 ] += diffY;  
                         height = Math.abs( diffY );
                     } 
-                    drawingObject.position = pos;
-                    drawingObject.width = width;
-                    drawingObject.height = height;  
+                    drawingObject.position( privateState.initialDownPoint );
+                    drawingObject.width( width );
+                    drawingObject.height( height );  
                     break;          
             }
 
@@ -1124,11 +1218,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 case "ellipse":         
                     drawingObject.radius( { "x": width * 0.5, "y": height * 0.5 } );
+                    drawingObject.stroke( userState.drawing_color );
+                    drawingObject.strokeWidth( userState.drawing_width );
+                    drawingObject.fill( null );
                     clearBeforeDraw = true;
                     break;
 
                 case "circle":
                     drawingObject.radius( dist );
+                    drawingObject.stroke( userState.drawing_color );
+                    drawingObject.strokeWidth( userState.drawing_width );
+                    drawingObject.fill( null );
                     clearBeforeDraw = true;
                     break;
 
@@ -1136,15 +1236,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     drawingObject.stroke( userState.drawing_color );
                     drawingObject.strokeWidth( userState.drawing_width );
                     drawingObject.points( [ 0, 0, diffX, diffY ] );
-                    drawingObject.lineCap( "round" );
+                    drawingObject.lineCap( userState.lineCap );
+                    drawingObject.dash( userState.dashLineStyle );
                     clearBeforeDraw = true;
                     break;
 
                 case "freeDraw":
+                case "polygon":
                     drawingObject.stroke( userState.drawing_color );
                     drawingObject.strokeWidth( userState.drawing_width );
-                    drawingObject.lineCap( "round" );
-                    drawingObject.lineJoin( "round" );
+                    drawingObject.lineCap( userState.lineCap );
+                    drawingObject.lineJoin( userState.lineJoin );
                     var points = drawingObject.points();
                     var isFirstStrokeOfNewLine = false;
 
@@ -1182,6 +1284,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     points.push( posX );
                     points.push( posY );
                     drawingObject.points( points );
+
+                    if ( userState.drawing_mode === 'polygon' ) {
+                        drawingObject.closed( true );
+                        drawingObject.fill( null );
+                        clearBeforeDraw = true;
+                    }
                     break;
 
                 case "regularPolygon":
@@ -1215,79 +1323,74 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     drawingObject.stroke( userState.drawing_color );
                     drawingObject.strokeWidth( userState.drawing_width );
                     drawingObject.points( [ 0, 0, width, 0, width, height, 0, height, 0, 0 ] );
-                    drawingObject.lineCap( "round" );
-                    drawingObject.lineJoin( "round" );
+                    drawingObject.lineCap( userState.lineCap );
+                    drawingObject.lineJoin( userState.lineJoin );
+                    drawingObject.dash( userState.dashLineStyle );
                     clearBeforeDraw = true;
                     break;
 
                 case "arrow":
+                case "thickArrow":
+                    var arrowWidthMult = ( userState.drawing_mode === 'arrow' ? 3 : 8 );
+
                     drawingObject.x( drawingObject.position[ 0 ] );
                     drawingObject.y( drawingObject.position[ 1 ] ); 
 
-                    drawingObject.line.stroke( userState.drawing_color );
-                    drawingObject.line.strokeWidth( userState.drawing_width );
-                    drawingObject.line.position( [ 0, 0 ] );
-                    
-                    drawingObject.head.sides( 3 );
-                    drawingObject.head.radius( userState.drawing_width * 3 );
-
-                    var endPoint = goog.vec.Vec2.createFloat32FromValues( 0, 0 );
-                    var relativeXDiff = eventPoint[ 0 ] - drawingObject.x;
-                    var relativeYDiff = eventPoint[ 1 ] - drawingObject.y;
-                    var headOffset = ( userState.drawing_width * 3 ) * Math.sin( Math.PI / 6 );
-                    var dir = goog.vec.Vec2.createFloat32FromValues( relativeXDiff, relativeYDiff );
-                    var len = goog.vec.Vec2.distance( goog.vec.Vec2.createFloat32FromValues( 0, 0 ), dir );
-                    goog.vec.Vec2.normalize( dir, dir );
-
-                    drawingObject.head.rotation( Math.atan2( dir[1], dir[0] ) * ( 180 / Math.PI ) - 30 );
-                    goog.vec.Vec2.scale( dir, len - ( userState.drawing_width * 3 ), endPoint );
-                    drawingObject.head.position( [ endPoint[0], endPoint[1] ] );
-                    goog.vec.Vec2.scale( dir, len - ( ( userState.drawing_width * 3 ) + headOffset ), endPoint );
-                    drawingObject.line.points( [ 0, 0, endPoint[0], endPoint[1] ] );
+                    drawingObject.stroke( userState.drawing_color );
+                    drawingObject.strokeWidth( userState.drawing_width );
+                    drawingObject.lineCap( userState.lineCap );
+                    drawingObject.lineJoin( userState.lineJoin );
+                    drawingObject.dash( null );
+                    drawingObject.fill( null );
+                    drawingObject.position( [ 0, 0 ] );
+                    drawingObject.closed( true );
+                    var arrowThickness = userState.drawing_width * arrowWidthMult;
+                    var headWidth = userState.drawing_width * arrowWidthMult * 2;
+                    var headLength = userState.drawing_width * arrowWidthMult * 2;
+                    var arrowLength = dist;
+                    var arrowShaft = arrowLength - headLength;
+                    var arrowPts = [ 0, 0, 0, arrowThickness, arrowShaft, arrowThickness, arrowShaft, headWidth, arrowLength, 0, arrowShaft, (-1 * headWidth), arrowShaft, (-1 * arrowThickness), 0, (-1 * arrowThickness) ];
+                    drawingObject.points( arrowPts );
+                    drawingObject.rotation( angleDeg );
                     clearBeforeDraw = true;
                     break;
                 
-                case "thickArrow":
-                    drawingObject.x = drawingObject.position[ 0 ];
-                    drawingObject.y = drawingObject.position[ 1 ]; 
-
-                    drawingObject.line.stroke = userState.drawing_color;
-                    drawingObject.line.strokeWidth = userState.drawing_width * 8;
-                    drawingObject.line.position = [ 0, 0 ];
-                    
-                    drawingObject.head.sides = 3;
-                    drawingObject.head.radius = userState.drawing_width * 8;
-
-                    var endPoint = goog.vec.Vec2.createFloat32FromValues( 0, 0 );
-                    var relativeXDiff = eventPoint[ 0 ] - drawingObject.x;
-                    var relativeYDiff = eventPoint[ 1 ] - drawingObject.y;
-                    var headOffset = ( userState.drawing_width * 8 ) * Math.sin( Math.PI / 6 );
-                    var dir = goog.vec.Vec2.createFloat32FromValues( relativeXDiff, relativeYDiff );
-                    var len = goog.vec.Vec2.distance( goog.vec.Vec2.createFloat32FromValues( 0, 0 ), dir );
-                    goog.vec.Vec2.normalize( dir, dir );
-
-                    drawingObject.head.rotation = Math.atan2( dir[1], dir[0] ) * ( 180 / Math.PI ) - 30;
-                    goog.vec.Vec2.scale( dir, len - ( userState.drawing_width * 8 ), endPoint );
-                    drawingObject.head.position = [ endPoint[0], endPoint[1] ];
-                    goog.vec.Vec2.scale( dir, len - ( ( userState.drawing_width * 8 ) + headOffset ), endPoint );
-                    drawingObject.line.points = [ 0, 0, endPoint[0], endPoint[1] ];
-                    break; 
-
                 case "sprite":
                 case "image":
+                    /*
                     drawingObject.border.stroke( userState.drawing_color );
-                    drawingObject.border.strokeWidth( 4 );
+                    drawingObject.border.strokeWidth( 2 );
                     drawingObject.border.points( [ 0, 0, width, 0, width, height, 0, height, 0, 0 ] );
+                    drawingObject.border.lineCap( userState.lineCap );
+                    drawingObject.border.lineJoin( userState.lineJoin );
+                    drawingObject.border.dash( [ 2, 5 ] );
                     drawingObject.content.width( width );
                     drawingObject.content.height( height );
+                    */
+                    drawingObject.x( pos[ 0 ] );
+                    drawingObject.y( pos[ 1 ] ); 
+                    drawingObject.stroke( userState.drawing_color );
+                    drawingObject.strokeWidth( 2 );
+                    //drawingObject.points( [ 0, 0, width, 0, width, height, 0, height, 0, 0 ] );
+                    drawingObject.lineCap( userState.lineCap );
+                    drawingObject.lineJoin( userState.lineJoin );
+                    drawingObject.dash( [ 2, 5 ] );
+                    drawingObject.width( width );
+                    drawingObject.height( height );
                     clearBeforeDraw = true;
                     break;
 
                 case "text":
                     drawingObject.border.stroke( userState.drawing_color );
-                    drawingObject.border.strokeWidth( 4 );
-                    drawingObject.border.points( [ 0, 0, width, 0, width, height, 0, height, 0, 0 ] );
+                    drawingObject.border.strokeWidth( 2 );
+                    drawingObject.border.width( width );
+                    drawingObject.border.height( height );
+                    drawingObject.border.lineCap( userState.lineCap );
+                    drawingObject.border.lineJoin( userState.lineJoin );
+                    drawingObject.border.dash( [ 2, 5 ] );
+                    drawingObject.border.fill( null );
                     drawingObject.content.fontSize( userState.fontSize ? userState.fontSize : 16 );
+                    drawingObject.content.fontStyle( 'bold' );
                     clearBeforeDraw = true;
                     break;
 
@@ -1296,10 +1399,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     drawingObject.y( pos[ 1 ] ); 
                     drawingObject.stroke( userState.drawing_color );
                     drawingObject.strokeWidth( userState.drawing_width );
-                    drawingObject.fill( userState.drawing_color );
+                    drawingObject.fill( null );
                     drawingObject.size( { "width": width, "height": height} );
-                    drawingObject.lineCap( "round" );
-                    drawingObject.lineJoin( "round" );
+                    drawingObject.lineCap( userState.lineCap );
+                    drawingObject.lineJoin( userState.lineJoin );
                     clearBeforeDraw = true;                    
                     break;
 
@@ -1314,20 +1417,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 //console.info( drawingObject.id + " updated, sending update event." );
                 //node.privateDrawingUpdated( drawingObject.id );
                 if ( drawingObject && activelyDrawing ) {
-                    console.info( "VIEW: draw object " );
-                    if ( clearBeforeDraw ) {
-                        // Draw the full layer
-                        var layer = findLayer( drawingObject );
-                        if ( layer ) { 
-                            layer.draw();
-                        } else {
-                            // Should never happen - object should always be a descendent of a layer
-                            drawingObject.draw();
-                        }
-                        clearBeforeDraw = false;
-                    } else {
-                        drawingObject.draw();
-                    }
+                    //console.info( "VIEW: draw object " );
+                    drawObject( drawingObject, clearBeforeDraw );
+                    clearBeforeDraw = false;
                 }
             }
 
@@ -1427,6 +1519,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/fastLayer.vwf" ) ) {
             kineticObj = new Kinetic.FastLayer( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/group.vwf" ) ) {
+            kineticObj = new Kinetic.Group( config || {} );
+        } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/drawingGroup.vwf" ) ) {
             kineticObj = new Kinetic.Group( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/image.vwf" ) ) {
             var imageObj = new Image();
@@ -1552,6 +1646,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
 
         // Delete the private node - we no longer need it
+        drawing_private.drawingObject = null;
         drawing_private = {};
         //delete private_node;
         private_node = undefined;
@@ -1562,6 +1657,48 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
 
     }
+
+    function drawObject( kineticObject, clearBefore ) {
+
+        if ( clearBefore ) {
+            // Draw the full layer
+            var layer = findLayer( kineticObject );
+            if ( layer ) { 
+                layer.draw();
+            } else {
+                // Should never happen - object should always be a descendent of a layer
+                kineticObject.draw();
+            }
+        } else {
+            kineticObject.draw();
+        }
+    }
+
+    function setKineticProperty( kineticObj, propertyName, propertyValue ) {
+
+        var userState = drawing_client;
+
+        switch ( propertyName ) {
+
+            case "text":
+                kineticObj.content.text( propertyValue );
+                //kineticObj.content.stroke( userState.drawing_color );
+                kineticObj.content.fill( userState.drawing_color );
+                drawObject( kineticObj, true );
+                propagateNodeToModel();
+                 break;
+
+            case "image":
+                kineticObj.image( propertyValue );
+                break;
+
+            default:
+                break;
+
+        }
+
+    }
+
 
 
 });
