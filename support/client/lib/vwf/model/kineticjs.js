@@ -79,75 +79,75 @@ define( [ "module",
                         value = this.setShapeProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Container ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Container ) {
                         value = this.setContainerProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Arc ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Arc ) {
                         value = this.setArcProperty( kineticObj, propertyName, propertyValue );
                     }
 
                     if ( value === undefined && 
-                        ( kineticObj instanceof Kinetic.BaseLayer || 
-                          kineticObj instanceof Kinetic.FastLayer ||
-                          kineticObj instanceof Kinetic.Layer
+                        ( kineticObj instanceof Konva.BaseLayer || 
+                          kineticObj instanceof Konva.FastLayer ||
+                          kineticObj instanceof Konva.Layer
                         ) ) {
                         value = this.setLayerProperty( kineticObj, propertyName, propertyValue );                  
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Canvas ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Canvas ) {
                         value = this.setCanvasProperty( kineticObj, propertyName, propertyValue );  
                     }                
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Circle ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Circle ) {
                         value = this.setCircleProperty( kineticObj, propertyName, propertyValue );                   
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Ellipse ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Ellipse ) {
                         value = this.setEllipseProperty( kineticObj, propertyName, propertyValue )                   
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Image ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Image ) {
                         value = this.setImageProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Line ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Line ) {
                         value = this.setLineProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Path ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Path ) {
                         value = this.setPathProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Rect ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Rect ) {
                         value = this.setRectProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon ) {
+                    if ( value === undefined && kineticObj instanceof Konva.RegularPolygon ) {
                         value = this.setRegularPolygonProperty( kineticObj, propertyName, propertyValue );
                     }
             
-                    if ( value === undefined && kineticObj instanceof Kinetic.Ring ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Ring ) {
                         value = this.setRingProperty( kineticObj, propertyName, propertyValue );
                     }
                 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Sprite ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Sprite ) {
                         value = this.setSpriteProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Star ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Star ) {
                         value = this.setStarProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Text ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Text ) {
                         value = this.setTextProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.TextPath ) {
+                    if ( value === undefined && kineticObj instanceof Konva.TextPath ) {
                         value = this.setTextPathProperty( kineticObj, propertyName, propertyValue );
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Wedge ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Wedge ) {
                         value = this.setWedgeProperty( kineticObj, propertyName, propertyValue );
                     }
                     return value;                    
@@ -1305,7 +1305,7 @@ define( [ "module",
                     // this is causing the editor to cause a infinite loop
                     // need to understand why, but no time now
 
-                    // if ( value === undefined && kineticObj instanceof Kinetic.Stage ) {
+                    // if ( value === undefined && kineticObj instanceof Konva.Stage ) {
                         
                     //     switch ( propertyName ) {
                             
@@ -1315,7 +1315,7 @@ define( [ "module",
                     //     }
                     // }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Arc ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Arc ) {
                         
                         switch ( propertyName ) {
                             
@@ -1338,9 +1338,9 @@ define( [ "module",
                     }
 
                     if ( value === undefined && 
-                        ( kineticObj instanceof Kinetic.BaseLayer || 
-                          kineticObj instanceof Kinetic.FastLayer ||
-                          kineticObj instanceof Kinetic.Layer
+                        ( kineticObj instanceof Konva.BaseLayer || 
+                          kineticObj instanceof Konva.FastLayer ||
+                          kineticObj instanceof Konva.Layer
                         ) ) {
                        
                         switch ( propertyName ) {
@@ -1351,7 +1351,7 @@ define( [ "module",
                         }                    
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Canvas ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Canvas ) {
                         
                         switch ( propertyName ) {
 
@@ -1369,7 +1369,7 @@ define( [ "module",
                         }  
                     }                
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Circle ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Circle ) {
                         
                         switch ( propertyName ) {
 
@@ -1381,7 +1381,7 @@ define( [ "module",
                     }
 
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Ellipse ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Ellipse ) {
                         
                         switch ( propertyName ) {
 
@@ -1391,7 +1391,7 @@ define( [ "module",
                         }                    
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Image ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Image ) {
                         
                         switch ( propertyName ) {
 
@@ -1413,7 +1413,7 @@ define( [ "module",
                         }                    
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Line ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Line ) {
                         
                         switch ( propertyName ) {
                             
@@ -1431,7 +1431,7 @@ define( [ "module",
                         }
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Path ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Path ) {
                         
                         switch ( propertyName ) {
                             
@@ -1442,7 +1442,7 @@ define( [ "module",
                         }
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Rect ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Rect ) {
                         
                         switch ( propertyName ) {
                             
@@ -1452,7 +1452,7 @@ define( [ "module",
                         }
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.RegularPolygon ) {
+                    if ( value === undefined && kineticObj instanceof Konva.RegularPolygon ) {
                         
                         switch ( propertyName ) {
                             
@@ -1466,7 +1466,7 @@ define( [ "module",
                         }
                     }
                 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Ring ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Ring ) {
                         
                         switch ( propertyName ) {
                             
@@ -1480,7 +1480,7 @@ define( [ "module",
                         }
                     }
                     
-                    if ( value === undefined && kineticObj instanceof Kinetic.Sprite ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Sprite ) {
                         
                         switch ( propertyName ) {
                             
@@ -1509,7 +1509,7 @@ define( [ "module",
                         }
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Star ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Star ) {
                         
                         switch ( propertyName ) {
                             
@@ -1528,7 +1528,7 @@ define( [ "module",
                     }
 
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Text ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Text ) {
                         
                         switch ( propertyName ) {
                             
@@ -1578,7 +1578,7 @@ define( [ "module",
                         }
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.TextPath ) {
+                    if ( value === undefined && kineticObj instanceof Konva.TextPath ) {
                         
                         switch ( propertyName ) {
                             
@@ -1608,7 +1608,7 @@ define( [ "module",
                         }
                     }
 
-                    if ( value === undefined && kineticObj instanceof Kinetic.Wedge ) {
+                    if ( value === undefined && kineticObj instanceof Konva.Wedge ) {
                         
                         switch ( propertyName ) {
                             
@@ -1702,7 +1702,6 @@ define( [ "module",
                 
                 node.prototypes = protos;
 
-                //if ( !this.kernel.client() || ( this.kernel.client() === this.kernel.moniker() ) ) {                   
                 if ( !isNodeInHierarchy( node ) ) {
                     node.kineticObj = createKineticObject( node );
 
@@ -2011,44 +2010,44 @@ define( [ "module",
         var kineticObj = undefined;
 
         if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/arc.vwf" ) ) {
-            kineticObj = new Kinetic.Arc( config || {} );
+            kineticObj = new Konva.Arc( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/baseLayer.vwf" ) ) {
-            kineticObj = new Kinetic.BaseLayer( config || {} );
+            kineticObj = new Konva.BaseLayer( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/canvas.vwf" ) ) {
-            kineticObj = new Kinetic.Canvas( config || {} );
+            kineticObj = new Konva.Canvas( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/circle.vwf" ) ) {
-            kineticObj = new Kinetic.Circle( config || {} );
+            kineticObj = new Konva.Circle( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/ellipse.vwf" ) ) {
-            kineticObj = new Kinetic.Ellipse( config || {} );
+            kineticObj = new Konva.Ellipse( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/fastLayer.vwf" ) ) {
-            kineticObj = new Kinetic.FastLayer( config || {} );
+            kineticObj = new Konva.FastLayer( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/group.vwf" ) ) {
-            kineticObj = new Kinetic.Group( config || {} );
+            kineticObj = new Konva.Group( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/image.vwf" ) ) {
             var imageObj = new Image();
             node.scaleOnLoad = false;
-            kineticObj = new Kinetic.Image( {
+            kineticObj = new Konva.Image( {
                 image: imageObj
             } );
             if ( node.source !== undefined ) {
                 imageObj.src = node.source;    
             }
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/layer.vwf" ) ) {
-            kineticObj = new Kinetic.Layer( config || {} );
+            kineticObj = new Konva.Layer( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/line.vwf" ) ) {
-            kineticObj = new Kinetic.Line( config || { "points": [] } );
+            kineticObj = new Konva.Line( config || { "points": [] } );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/path.vwf" ) ) {
-            kineticObj = new Kinetic.Path( config || {} );
+            kineticObj = new Konva.Path( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/rect.vwf" ) ) {
-            kineticObj = new Kinetic.Rect( config || {} );
+            kineticObj = new Konva.Rect( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/regularPolygon.vwf" ) ) {
-            kineticObj = new Kinetic.RegularPolygon( config || {} );
+            kineticObj = new Konva.RegularPolygon( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/ring.vwf" ) ) {
-            kineticObj = new Kinetic.Ring( config || {} );
+            kineticObj = new Konva.Ring( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/sprite.vwf" ) ) {
             var imageObj = new Image();
             node.scaleOnLoad = false;
-            kineticObj = new Kinetic.Sprite( {
+            kineticObj = new Konva.Sprite( {
                 image: imageObj
             } );
             if ( node.source !== undefined ) {
@@ -2065,22 +2064,22 @@ define( [ "module",
                 "width": stageWidth, 
                 "height": stageHeight 
             };
-            kineticObj = new Kinetic.Stage( stageDef );
+            kineticObj = new Konva.Stage( stageDef );
             modelDriver.state.stages[ node.ID ] = kineticObj;
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/star.vwf" ) ) {
-            kineticObj = new Kinetic.Star( config || {} );
+            kineticObj = new Konva.Star( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/text.vwf" ) ) {
-            kineticObj = new Kinetic.Text( config || {} );
+            kineticObj = new Konva.Text( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/textPath.vwf" ) ) {
-            kineticObj = new Kinetic.TextPath( config || {} );
+            kineticObj = new Konva.TextPath( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/wedge.vwf" ) ) {
-            kineticObj = new Kinetic.Wedge( config || {} );
+            kineticObj = new Konva.Wedge( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/shape.vwf" ) ) {
-            kineticObj = new Kinetic.Shape( config || {} );
+            kineticObj = new Konva.Shape( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/container.vwf" ) ) {
-            kineticObj = new Kinetic.Container( config || {} );
+            kineticObj = new Konva.Container( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/node.vwf" ) ) {
-            kineticObj = new Kinetic.Node( config || {} );
+            kineticObj = new Konva.Node( config || {} );
         }
 
         return kineticObj;
