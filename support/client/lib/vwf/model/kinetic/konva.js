@@ -1,9 +1,9 @@
 
 /*
- * Konva JavaScript Framework v0.8.0
+ * Konva JavaScript Framework v0.9.0
  * http://konvajs.github.io/
  * Licensed under the MIT or GPL Version 2 licenses.
- * Date: 2015-02-04
+ * Date: 2015-02-27
  *
  * Original work Copyright (C) 2011 - 2013 by Eric Rowell (KineticJS)
  * Modified work Copyright (C) 2014 - 2015 by Anton Lavrenov (Konva)
@@ -36,7 +36,7 @@ var Konva = {};
 
     Konva = {
         // public
-        version: '0.8.0',
+        version: '0.9.0',
 
         // private
         stages: [],
@@ -180,6 +180,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -510,18 +512,11 @@ var Konva = {};
             }
         },
         _addName: function(node, name) {
-            if(name !== undefined) {
-
-                var names = name.split(/\s/g);
-                for(var n = 0; n < names.length; n++) {
-                    var subname = names[n];
-                    if (subname) {
-                        if(this.names[subname] === undefined) {
-                            this.names[subname] = [];
-                        }
-                        this.names[subname].push(node);
-                    }
+            if(name) {
+                if(!this.names[name]) {
+                    this.names[name] = [];
                 }
+                this.names[name].push(node);
             }
         },
         _removeName: function(name, _id) {
@@ -730,7 +725,7 @@ var Konva = {};
 
     /*
     * The usage of this class was inspired by some of the work done by a forked
-    * project, KonvaJS-Ext by Wappworks, which is based on Simon's Transform
+    * project, KineticJS-Ext by Wappworks, which is based on Simon's Transform
     * class.  Modified by Eric Rowell
     */
 
@@ -937,26 +932,155 @@ var Konva = {};
         KONVA_ERROR = 'Konva error: ',
         RGB_PAREN = 'rgb(',
         COLORS = {
-            aqua: [0,255,255],
-            lime: [0,255,0],
-            silver: [192,192,192],
-            black: [0,0,0],
-            maroon: [128,0,0],
-            teal: [0,128,128],
-            blue: [0,0,255],
-            navy: [0,0,128],
-            white: [255,255,255],
-            fuchsia: [255,0,255],
-            olive:[128,128,0],
-            yellow: [255,255,0],
-            orange: [255,165,0],
-            gray: [128,128,128],
-            purple: [128,0,128],
-            green: [0,128,0],
-            red: [255,0,0],
-            pink: [255,192,203],
-            cyan: [0,255,255],
-            transparent: [255,255,255,0]
+            aliceblue: [240, 248, 255],
+            antiquewhite: [250, 235, 215],
+            aqua: [0, 255, 255],
+            aquamarine: [127, 255, 212],
+            azure: [240, 255, 255],
+            beige: [245, 245, 220],
+            bisque: [255, 228, 196],
+            black: [0, 0, 0],
+            blanchedalmond: [255, 235, 205],
+            blue: [0, 0, 255],
+            blueviolet: [138, 43, 226],
+            brown: [165, 42, 42],
+            burlywood: [222, 184, 135],
+            cadetblue: [95, 158, 160],
+            chartreuse: [127, 255, 0],
+            chocolate: [210, 105, 30],
+            coral: [255, 127, 80],
+            cornflowerblue: [100, 149, 237],
+            cornsilk: [255, 248, 220],
+            crimson: [220, 20, 60],
+            cyan: [0, 255, 255],
+            darkblue: [0, 0, 139],
+            darkcyan: [0, 139, 139],
+            darkgoldenrod: [184, 132, 11],
+            darkgray: [169, 169, 169],
+            darkgreen: [0, 100, 0],
+            darkgrey: [169, 169, 169],
+            darkkhaki: [189, 183, 107],
+            darkmagenta: [139, 0, 139],
+            darkolivegreen: [85, 107, 47],
+            darkorange: [255, 140, 0],
+            darkorchid: [153, 50, 204],
+            darkred: [139, 0, 0],
+            darksalmon: [233, 150, 122],
+            darkseagreen: [143, 188, 143],
+            darkslateblue: [72, 61, 139],
+            darkslategray: [47, 79, 79],
+            darkslategrey: [47, 79, 79],
+            darkturquoise: [0, 206, 209],
+            darkviolet: [148, 0, 211],
+            deeppink: [255, 20, 147],
+            deepskyblue: [0, 191, 255],
+            dimgray: [105, 105, 105],
+            dimgrey: [105, 105, 105],
+            dodgerblue: [30, 144, 255],
+            firebrick: [178, 34, 34],
+            floralwhite: [255, 255, 240],
+            forestgreen: [34, 139, 34],
+            fuchsia: [255, 0, 255],
+            gainsboro: [220, 220, 220],
+            ghostwhite: [248, 248, 255],
+            gold: [255, 215, 0],
+            goldenrod: [218, 165, 32],
+            gray: [128, 128, 128],
+            green: [0, 128, 0],
+            greenyellow: [173, 255, 47],
+            grey: [128, 128, 128],
+            honeydew: [240, 255, 240],
+            hotpink: [255, 105, 180],
+            indianred: [205, 92, 92],
+            indigo: [75, 0, 130],
+            ivory: [255, 255, 240],
+            khaki: [240, 230, 140],
+            lavender: [230, 230, 250],
+            lavenderblush: [255, 240, 245],
+            lawngreen: [124, 252, 0],
+            lemonchiffon: [255, 250, 205],
+            lightblue: [173, 216, 230],
+            lightcoral: [240, 128, 128],
+            lightcyan: [224, 255, 255],
+            lightgoldenrodyellow: [250, 250, 210],
+            lightgray: [211, 211, 211],
+            lightgreen: [144, 238, 144],
+            lightgrey: [211, 211, 211],
+            lightpink: [255, 182, 193],
+            lightsalmon: [255, 160, 122],
+            lightseagreen: [32, 178, 170],
+            lightskyblue: [135, 206, 250],
+            lightslategray: [119, 136, 153],
+            lightslategrey: [119, 136, 153],
+            lightsteelblue: [176, 196, 222],
+            lightyellow: [255, 255, 224],
+            lime: [0, 255, 0],
+            limegreen: [50, 205, 50],
+            linen: [250, 240, 230],
+            magenta: [255, 0, 255],
+            maroon: [128, 0, 0],
+            mediumaquamarine: [102, 205, 170],
+            mediumblue: [0, 0, 205],
+            mediumorchid: [186, 85, 211],
+            mediumpurple: [147, 112, 219],
+            mediumseagreen: [60, 179, 113],
+            mediumslateblue: [123, 104, 238],
+            mediumspringgreen: [0, 250, 154],
+            mediumturquoise: [72, 209, 204],
+            mediumvioletred: [199, 21, 133],
+            midnightblue: [25, 25, 112],
+            mintcream: [245, 255, 250],
+            mistyrose: [255, 228, 225],
+            moccasin: [255, 228, 181],
+            navajowhite: [255, 222, 173],
+            navy: [0, 0, 128],
+            oldlace: [253, 245, 230],
+            olive: [128, 128, 0],
+            olivedrab: [107, 142, 35],
+            orange: [255, 165, 0],
+            orangered: [255, 69, 0],
+            orchid: [218, 112, 214],
+            palegoldenrod: [238, 232, 170],
+            palegreen: [152, 251, 152],
+            paleturquoise: [175, 238, 238],
+            palevioletred: [219, 112, 147],
+            papayawhip: [255, 239, 213],
+            peachpuff: [255, 218, 185],
+            peru: [205, 133, 63],
+            pink: [255, 192, 203],
+            plum: [221, 160, 203],
+            powderblue: [176, 224, 230],
+            purple: [128, 0, 128],
+            rebeccapurple: [102, 51, 153],
+            red: [255, 0, 0],
+            rosybrown: [188, 143, 143],
+            royalblue: [65, 105, 225],
+            saddlebrown: [139, 69, 19],
+            salmon: [250, 128, 114],
+            sandybrown: [244, 164, 96],
+            seagreen: [46, 139, 87],
+            seashell: [255, 245, 238],
+            sienna: [160, 82, 45],
+            silver: [192, 192, 192],
+            skyblue: [135, 206, 235],
+            slateblue: [106, 90, 205],
+            slategray: [119, 128, 144],
+            slategrey: [119, 128, 144],
+            snow: [255, 255, 250],
+            springgreen: [0, 255, 127],
+            steelblue: [70, 130, 180],
+            tan: [210, 180, 140],
+            teal: [0, 128, 128],
+            thistle: [216, 191, 216],
+            transparent: [255,255,255,0],
+            tomato: [255, 99, 71],
+            turquoise: [64, 224, 208],
+            violet: [238, 130, 238],
+            wheat: [245, 222, 179],
+            white: [255, 255, 255],
+            whitesmoke: [245, 245, 245],
+            yellow: [255, 255, 0],
+            yellowgreen: [154, 205, 5]
         },
 
         RGB_REGEX = /rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)/;
@@ -1214,6 +1338,78 @@ var Konva = {};
                 };
             }
         },
+        // convert any color string to RGBA object
+        // from https://github.com/component/color-parser
+        colorToRGBA : function(str) {
+            str = str || 'black';
+            return Konva.Util._namedColorToRBA(str)
+                || Konva.Util._hex3ColorToRGBA(str)
+                || Konva.Util._hex6ColorToRGBA(str)
+                || Konva.Util._rgbColorToRGBA(str)
+                || Konva.Util._rgbaColorToRGBA(str);
+        },
+        // Parse named css color. Like "green"
+        _namedColorToRBA : function(str) {
+            var c = COLORS[str.toLowerCase()];
+            if (!c) {
+                return;
+            }
+            return {
+                r: c[0],
+                g: c[1],
+                b: c[2],
+                a: 1
+            };
+        },
+        // Parse rgb(n, n, n)
+        _rgbColorToRGBA : function(str) {
+            if (str.indexOf('rgb(') === 0) {
+                str = str.match(/rgb\(([^)]+)\)/)[1];
+                var parts = str.split(/ *, */).map(Number);
+                return {
+                    r: parts[0],
+                    g: parts[1],
+                    b: parts[2],
+                    a: 1
+                };
+            }
+        },
+        // Parse rgba(n, n, n, n)
+        _rgbaColorToRGBA : function(str) {
+            if (str.indexOf('rgba(') === 0) {
+                str = str.match(/rgba\(([^)]+)\)/)[1];
+                var parts = str.split(/ *, */).map(Number);
+                return {
+                    r: parts[0],
+                    g: parts[1],
+                    b: parts[2],
+                    a: parts[3]
+                };
+            }
+
+        },
+        // Parse #nnnnnn
+        _hex6ColorToRGBA : function(str) {
+            if ((str[0] === '#') && (str.length === 7)) {
+                return {
+                    r: parseInt(str.slice(1, 3), 16),
+                    g: parseInt(str.slice(3, 5), 16),
+                    b: parseInt(str.slice(5, 7), 16),
+                    a: 1
+                };
+            }
+        },
+        // Parse #nnn
+        _hex3ColorToRGBA : function(str) {
+            if ((str[0] === '#') && (str.length === 4)) {
+                return {
+                    r: parseInt(str[1] + str[1], 16),
+                    g: parseInt(str[2] + str[2], 16),
+                    b: parseInt(str[3] + str[3], 16),
+                    a: 1
+                };
+            }
+        },
         // o1 takes precedence over o2
         _merge: function(o1, o2) {
             var retObj = this._clone(o2);
@@ -1409,15 +1605,16 @@ var Konva = {};
          * @memberof Konva.Canvas.prototype
          * @param {Number} pixelRatio KonvaJS automatically handles pixel ratio adustments in order to render crisp drawings 
          *  on all devices. Most desktops, low end tablets, and low end phones, have device pixel ratios
-         *  of 1.  Some high end tablets and phones, like iPhones and iPads (not the mini) have a device pixel ratio 
+         *  of 1.  Some high end tablets and phones, like iPhones and iPads have a device pixel ratio
          *  of 2.  Some Macbook Pros, and iMacs also have a device pixel ratio of 2.  Some high end Android devices have pixel 
          *  ratios of 2 or 3.  Some browsers like Firefox allow you to configure the pixel ratio of the viewport.  Unless otherwise
          *  specificed, the pixel ratio will be defaulted to the actual device pixel ratio.  You can override the device pixel
          *  ratio for special situations, or, if you don't want the pixel ratio to be taken into account, you can set it to 1.
          */
         setPixelRatio: function(pixelRatio) {
+            var previousRatio = this.pixelRatio;
             this.pixelRatio = pixelRatio;
-            this.setSize(this.getWidth(), this.getHeight());
+            this.setSize(this.getWidth() / previousRatio, this.getHeight() / previousRatio);
         },
         /**
          * set width
@@ -1429,6 +1626,10 @@ var Konva = {};
             // take into account pixel ratio
             this.width = this._canvas.width = width * this.pixelRatio;
             this._canvas.style.width = width + 'px';
+
+            var pixelRatio = this.pixelRatio,
+                _context = this.getContext()._context;
+            _context.scale(pixelRatio, pixelRatio);
         },
         /**
          * set height
@@ -1440,6 +1641,9 @@ var Konva = {};
             // take into account pixel ratio
             this.height = this._canvas.height = height * this.pixelRatio;
             this._canvas.style.height = height + 'px';
+            var pixelRatio = this.pixelRatio,
+                _context = this.getContext()._context;
+            _context.scale(pixelRatio, pixelRatio);
         },
         /**
          * get width
@@ -1506,29 +1710,13 @@ var Konva = {};
         this.setSize(width, height);
     };
 
-    Konva.SceneCanvas.prototype = {
-        setWidth: function(width) {
-            var pixelRatio = this.pixelRatio,
-                _context = this.getContext()._context;
-
-            Konva.Canvas.prototype.setWidth.call(this, width);
-            _context.scale(pixelRatio, pixelRatio);
-        },
-        setHeight: function(height) {
-            var pixelRatio = this.pixelRatio,
-                _context = this.getContext()._context;
-
-            Konva.Canvas.prototype.setHeight.call(this, height);
-            _context.scale(pixelRatio, pixelRatio);
-        }
-    };
     Konva.Util.extend(Konva.SceneCanvas, Konva.Canvas);
 
     Konva.HitCanvas = function(config) {
         var conf = config || {};
         var width = conf.width || 0,
             height = conf.height || 0;
-            
+
         Konva.Canvas.call(this, conf);
         this.context = new Konva.HitContext(this);
         this.setSize(width, height);
@@ -1740,7 +1928,7 @@ var Konva = {};
                 this.clearRect(bounds.x || 0, bounds.y || 0, bounds.width || 0, bounds.height || 0);
             }
             else {
-                this.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+                this.clearRect(0, 0, canvas.getWidth() / canvas.pixelRatio, canvas.getHeight() / canvas.pixelRatio);
             }
         },
         _applyLineCap: function(shape) {
@@ -1920,7 +2108,11 @@ var Konva = {};
                     that[methodName] = function() {
                         args = _simplifyArray(Array.prototype.slice.call(arguments, 0));
                         ret = origMethod.apply(that, arguments);
-           
+
+                        if (methodName === 'clearRect') {
+                            args[2] = args[2] / that.canvas.getPixelRatio();
+                            args[3] = args[3] / that.canvas.getPixelRatio();
+                        }
                         that._trace({
                             method: methodName,
                             args: args
@@ -2075,7 +2267,9 @@ var Konva = {};
                         blue: shape.strokeBlue(),
                         alpha: shape.strokeAlpha()
                     }));
-
+                if (!shape.getShadowForStrokeEnabled()) {
+                    this.setAttr('shadowColor', 'rgba(0,0,0,0)');
+                }
                 shape._strokeFunc(this);
                 
                 if (!strokeScaleEnabled) {
@@ -2085,23 +2279,20 @@ var Konva = {};
         },
         _applyShadow: function(shape) {
             var util = Konva.Util,
-                absOpacity = shape.getAbsoluteOpacity(),
-                color = util.get(shape.getShadowColor(), 'black'),
+                color = util.get(shape.getShadowRGBA(), 'black'),
                 blur = util.get(shape.getShadowBlur(), 5),
-                shadowOpacity = util.get(shape.getShadowOpacity(), 1),
                 offset = util.get(shape.getShadowOffset(), {
                     x: 0,
                     y: 0
-                });
-
-            if(shadowOpacity) {
-                this.setAttr('globalAlpha', shadowOpacity * absOpacity);
-            }
+                }),
+                m = shape.getAbsoluteTransform().m,
+                scaleX = m[0],
+                scaleY = m[3];
 
             this.setAttr('shadowColor', color);
             this.setAttr('shadowBlur', blur);
-            this.setAttr('shadowOffsetX', offset.x);
-            this.setAttr('shadowOffsetY', offset.y);
+            this.setAttr('shadowOffsetX', offset.x * scaleX);
+            this.setAttr('shadowOffsetY', offset.y * scaleY);
         
         }
     };
@@ -2382,15 +2573,18 @@ var Konva = {};
             return this;
         },
         /**
-        * cache node to improve drawing performance, apply filters, or create more accurate
-        *  hit regions
+        *  cache node to improve drawing performance, apply filters, or create more accurate
+        *  hit regions. For all basic shapes size of cache canvas will be automatically detected.
+        *  If you need to cache your custom `Konva.Shape` instance you have to pass shape's bounding box
+        *  properties. Look at [link to demo page](link to demo page) for more information.
         * @method
         * @memberof Konva.Node.prototype
-        * @param {Object} config
+        * @param {Object} [config]
         * @param {Number} [config.x]
         * @param {Number} [config.y]
         * @param {Number} [config.width]
         * @param {Number} [config.height]
+        * @param {Number} [config.offset]  increase canvas size by `offset` pixel in all directions.
         * @param {Boolean} [config.drawBorder] when set to true, a red border will be drawn around the cached
         *  region for debugging purposes
         * @returns {Konva.Node}
@@ -2415,37 +2609,46 @@ var Konva = {};
         *   y: -30,
         *   width: 100,
         *   height: 200,
+        *   offset : 10,
         *   drawBorder: true
         * });
         */
         cache: function(config) {
             var conf = config || {},
-                x = conf.x || 0,
-                y = conf.y || 0,
-                width = conf.width || this.width(),
-                height = conf.height || this.height(),
+                rect = this.getClientRect(true),
+                width = conf.width || rect.width,
+                height = conf.height || rect.height,
+                x = conf.x || rect.x,
+                y = conf.y || rect.y,
+                offset = conf.offset || 0,
                 drawBorder = conf.drawBorder || false;
 
-            if (width === 0 || height === 0) {
-                Konva.Util.warn('Width or height of caching configuration equals 0. Cache is ignored.');
-                return;
+            if (!width || !height) {
+                throw new Error('Width or height of caching configuration equals 0.');
             }
+
+            width += offset * 2;
+            height += offset * 2;
+
+            x -= offset;
+            y -= offset;
+
+
             var cachedSceneCanvas = new Konva.SceneCanvas({
-                    pixelRatio: 1,
-                    width: width,
-                    height: height
-                }),
-                cachedFilterCanvas = new Konva.SceneCanvas({
-                    pixelRatio: 1,
-                    width: width,
-                    height: height
-                }),
-                cachedHitCanvas = new Konva.HitCanvas({
-                    width: width,
-                    height: height
-                }),
-                sceneContext = cachedSceneCanvas.getContext(),
-                hitContext = cachedHitCanvas.getContext();
+                width: width,
+                height: height
+            }),
+            cachedFilterCanvas = new Konva.SceneCanvas({
+                width: width,
+                height: height
+            }),
+            cachedHitCanvas = new Konva.HitCanvas({
+                pixelRatio : 1,
+                width: width,
+                height: height
+            }),
+            sceneContext = cachedSceneCanvas.getContext(),
+            hitContext = cachedHitCanvas.getContext();
 
             cachedHitCanvas.isCache = true;
 
@@ -2453,6 +2656,15 @@ var Konva = {};
    
             sceneContext.save();
             hitContext.save();
+
+            sceneContext.translate(-x, -y);
+            hitContext.translate(-x, -y);
+
+            this.drawScene(cachedSceneCanvas, this, true);
+            this.drawHit(cachedHitCanvas, this, true);
+
+            sceneContext.restore();
+            hitContext.restore();
 
             // this will draw a red border around the cached box for
             // debugging purposes
@@ -2467,34 +2679,103 @@ var Konva = {};
                 sceneContext.restore();
             }
 
-            sceneContext.translate(x * -1, y * -1);
-            hitContext.translate(x * -1, y * -1);
-
-            // don't need to translate canvas if shape is not added to layer
-            if (this.nodeType === 'Shape') {
-                sceneContext.translate(this.x() * -1, this.y() * -1);
-                hitContext.translate(this.x() * -1, this.y() * -1);
-            }
-
-            this.drawScene(cachedSceneCanvas, this);
-            this.drawHit(cachedHitCanvas, this);
-
-            sceneContext.restore();
-            hitContext.restore();
-
             this._cache.canvas = {
                 scene: cachedSceneCanvas,
                 filter: cachedFilterCanvas,
-                hit: cachedHitCanvas
+                hit: cachedHitCanvas,
+                x : x,
+                y : y
             };
 
             return this;
         },
+        /**
+         * return client rectangle (x, y, width, height) of node. This rectangle also include all styling (strokes, shadows, etc).
+         * This rectangle relative to parent container.
+         * @method
+         * @memberof Konva.Node.prototype
+         * @param {Boolean} [skipTransform] flag should we skip transformation to rectangle
+         * @returns {Object} rect with {x, y, width, height} properties
+         * @example
+         * var rect = new Konva.Rect({
+         *      width : 100,
+         *      height : 100,
+         *      x : 50,
+         *      y : 50,
+         *      strokeWidth : 4,
+         *      stroke : 'black',
+         *      offsetX : 50,
+         *      scaleY : 2
+         * });
+         *
+         * // get client rect without think off transformations (position, rotation, scale, offset, etc)
+         * rect.getClientRect(true);
+         * // returns {
+         * //     x : -2,   // two pixels for stroke / 2
+         * //     y : -2,
+         * //     width : 104, // increased by 4 for stroke
+         * //     height : 104
+         * //}
+         *
+         * // get client rect with transformation applied
+         * rect.getClientRect();
+         * // returns Object {x: -2, y: 46, width: 104, height: 208}
+         */
+        getClientRect : function() {
+            // abstract method
+            // redefine in Container and Shape
+            throw 'abstract "getClientRect" method call';
+        },
+        _transformedRect : function(rect) {
+            var points = [
+                {x : rect.x, y : rect.y},
+                {x : rect.x + rect.width, y : rect.y},
+                {x : rect.x + rect.width, y : rect.y + rect.height},
+                {x : rect.x, y : rect.y + rect.height}
+            ];
+            var minX, minY, maxX, maxY;
+            var trans = this.getTransform();
+            points.forEach(function(point) {
+                var transformed = trans.point(point);
+                if (minX === undefined) {
+                    minX = maxX = transformed.x;
+                    minY = maxY = transformed.y;
+                }
+                minX = Math.min(minX, transformed.x);
+                minY = Math.min(minY, transformed.y);
+                maxX = Math.max(maxX, transformed.x);
+                maxY = Math.max(maxY, transformed.y);
+            });
+            return {
+                x : Math.round(minX),
+                y : Math.round(minY),
+                width : Math.round(maxX - minX),
+                height : Math.round(maxY - minY)
+            };
+        },
         _drawCachedSceneCanvas: function(context) {
             context.save();
-            this.getLayer()._applyTransform(this, context);
             context._applyOpacity(this);
-            context.drawImage(this._getCachedSceneCanvas()._canvas, 0, 0);
+            context.translate(
+                this._cache.canvas.x,
+                this._cache.canvas.y
+            );
+
+            var cacheCanvas = this._getCachedSceneCanvas();
+            var ratio = context.canvas.pixelRatio;
+
+            context.drawImage(cacheCanvas._canvas, 0, 0, cacheCanvas.width / ratio, cacheCanvas.height /ratio);
+            context.restore();
+        },
+        _drawCachedHitCanvas: function(context) {
+            var cachedCanvas = this._cache.canvas,
+                hitCanvas = cachedCanvas.hit;
+            context.save();
+            context.translate(
+                this._cache.canvas.x,
+                this._cache.canvas.y
+            );
+            context.drawImage(hitCanvas._canvas, 0, 0);
             context.restore();
         },
         _getCachedSceneCanvas: function() {
@@ -2533,15 +2814,6 @@ var Konva = {};
             else {
                 return sceneCanvas;
             }
-        },
-        _drawCachedHitCanvas: function(context) {
-            var cachedCanvas = this._cache.canvas,
-                hitCanvas = cachedCanvas.hit;
-
-            context.save();
-            this.getLayer()._applyTransform(this, context);
-            context.drawImage(hitCanvas._canvas, 0, 0);
-            context.restore();
         },
         /**
          * bind events to the node. KonvaJS supports mouseover, mousemove,
@@ -3625,6 +3897,9 @@ var Konva = {};
                 height: this.getHeight()
             };
         },
+        getTransformedSize : function() {
+
+        },
         getWidth: function() {
             return this.attrs.width || 0;
         },
@@ -3697,12 +3972,82 @@ var Konva = {};
             return this;
         },
         setName: function(name) {
-            var oldName = this.getName();
+            var oldNames = (this.getName() || '').split(/\s/g);
+            var newNames = (name || '').split(/\s/g);
+            var subname, i;
+            // remove all subnames
+            for(i = 0; i < oldNames.length; i++) {
+                subname = oldNames[i];
+                if ((newNames.indexOf(subname)) === -1 && subname) {
+                    Konva._removeName(subname, this._id);
+                }
+            }
 
-            Konva._removeName(oldName, this._id);
-            Konva._addName(this, name);
+            // add new names
+            for(i = 0; i < newNames.length; i++) {
+                subname = newNames[i];
+                if ((oldNames.indexOf(subname) === -1) && subname) {
+                    Konva._addName(this, subname);
+                }
+            }
+
             this._setAttr(NAME, name);
             return this;
+        },
+        // naming methods
+        /**
+         * add name to node
+         * @method
+         * @memberof Konva.Node.prototype
+         * @param {String} name
+         * @returns {Konva.Node}
+         * @example
+         * node.name('red');
+         * node.addName('selected');
+         * node.name(); // return 'red selected'
+         */
+        addName : function(name) {
+            if (!this.hasName(name)) {
+                var oldName = this.name();
+                var newName = oldName ? (oldName + ' ' + name) : name;
+                this.setName(newName);
+            }
+            return this;
+        },
+        /**
+         * check is node has name
+         * @method
+         * @memberof Konva.Node.prototype
+         * @param {String} name
+         * @returns {Boolean}
+         * @example
+         * node.name('red');
+         * node.hasName('red');   // return true
+         * node.hasName('selected'); // return false
+         */
+        hasName : function(name) {
+            var names = (this.name() || '').split(/\s/g);
+            return names.indexOf(name) !== -1;
+        },
+        /**
+         * remove name from node
+         * @method
+         * @memberof Konva.Node.prototype
+         * @param {String} name
+         * @returns {Konva.Node}
+         * @example
+         * node.name('red selected');
+         * node.removeName('selected');
+         * node.hasName('selected'); // return false
+         * node.name(); // return 'red'
+         */
+        removeName : function(name) {
+            var names = (this.name() || '').split(/\s/g);
+            var index = names.indexOf(name);
+            if (index !== -1) {
+                names.splice(index, 1);
+                this.setName(names.join(' '));
+            }
         },
         /**
          * set attr
@@ -6415,7 +6760,8 @@ var Konva = {};
     PLAYING = 2,
     REVERSING = 3,
 
-    idCounter = 0;
+    idCounter = 0,
+    colorAttrs = ['fill', 'stroke', 'shadowColor'];
 
     /**
      * Tween constructor.  Tweens enable you to animate a node between the current state and a new state.
@@ -6519,9 +6865,16 @@ var Konva = {};
                 for (n=0; n<len; n++) {
                     diff.push(end[n] - start[n]);
                 }
-
-            }
-            else {
+            } else if (colorAttrs.indexOf(key) !== -1) {
+                start = Konva.Util.colorToRGBA(start);
+                var endRGBA = Konva.Util.colorToRGBA(end);
+                diff = {
+                    r : endRGBA.r - start.r,
+                    g : endRGBA.g - start.g,
+                    b : endRGBA.b - start.b,
+                    a : endRGBA.a - start.a
+                };
+            } else {
                 diff = end - start;
             }
 
@@ -6547,8 +6900,13 @@ var Konva = {};
                     for (n=0; n<len; n++) {
                         newVal.push(start[n] + (diff[n] * i));
                     }
-                }
-                else {
+                }  else if (colorAttrs.indexOf(key) !== -1) {
+                    newVal = 'rgba(' +
+                            Math.round(start.r + diff.r * i) + ',' +
+                            Math.round(start.g + diff.g * i) + ',' +
+                            Math.round(start.b + diff.b * i) + ',' +
+                            Math.round(start.a + diff.a * i) + ')';
+                } else {
                     newVal = start + (diff * i);
                 }
 
@@ -6661,6 +7019,30 @@ var Konva = {};
 
             delete Konva.Tween.attrs[nodeId][thisId];
         }
+    };
+
+    /**
+     * Tween node properties. Shorter usage of {@link Konva.Tween} object.
+     *
+     * @method Konva.Node#to
+     * @memberof Konva.Node
+     * @param {Object} [params] tween params
+     * @example
+     *
+     * circle.to({
+     *  x : 50,
+     *  duration : 0.5
+     * });
+     */
+    Konva.Node.prototype.to = function(params) {
+        var onFinish = params.onFinish;
+        params.node = this;
+        params.onFinish = function() {
+            tween.destroy();
+            onFinish();
+        };
+        var tween = new Konva.Tween(params);
+        tween.play();
     };
 
     var Tween = function(prop, propFunc, func, begin, finish, duration, yoyo) {
@@ -7614,7 +7996,7 @@ var Konva = {};
                 child.index = n;
             });
         },
-        drawScene: function(can, top) {
+        drawScene: function(can, top, caching) {
             var layer = this.getLayer(),
                 canvas = can || (layer && layer.getCanvas()),
                 context = canvas && canvas.getContext(),
@@ -7622,8 +8004,11 @@ var Konva = {};
                 cachedSceneCanvas = cachedCanvas && cachedCanvas.scene;
 
             if (this.isVisible()) {
-                if (cachedSceneCanvas) {
+                if (!caching && cachedSceneCanvas) {
+                    context.save();
+                    layer._applyTransform(this, context, top);
                     this._drawCachedSceneCanvas(context);
+                    context.restore();
                 }
                 else {
                     this._drawChildren(canvas, 'drawScene', top);
@@ -7631,7 +8016,7 @@ var Konva = {};
             }
             return this;
         },
-        drawHit: function(can, top) {
+        drawHit: function(can, top, caching) {
             var layer = this.getLayer(),
                 canvas = can || (layer && layer.hitCanvas),
                 context = canvas && canvas.getContext(),
@@ -7642,8 +8027,11 @@ var Konva = {};
                 if (layer) {
                     layer.clearHitCache();
                 }
-                if (cachedHitCanvas) {
+                if (!caching && cachedHitCanvas) {
+                    context.save();
+                    layer._applyTransform(this, context, top);
                     this._drawCachedHitCanvas(context);
+                    context.restore();
                 }
                 else {
                     this._drawChildren(canvas, 'drawHit', top);
@@ -7685,6 +8073,27 @@ var Konva = {};
             var layerUnderDrag = dd && Konva.isDragging() && (Konva.DD.anim.getLayers().indexOf(layer) !== -1);
             return  (canvas && canvas.isCache) || (layer && layer.hitGraphEnabled())
                 && this.isVisible() && !layerUnderDrag;
+        },
+        getClientRect : function(skipTransform) {
+            var minX, minY, maxX, maxY;
+            this.children.each(function(child) {
+                var rect = child.getClientRect();
+                minX = Math.min(minX, rect.x) || rect.x;
+                minY = Math.min(minY, rect.y) || rect.y;
+                maxX = Math.max(maxX, rect.x + rect.width) || (rect.x + rect.width);
+                maxY = Math.max(maxY, rect.y + rect.height) || (rect.y + rect.height);
+            });
+
+            var rect = {
+                x : minX,
+                y : minY,
+                width : maxX - minX,
+                height : maxY - minY
+            };
+            if (!skipTransform) {
+                return this._transformedRect(rect);
+            }
+            return rect;
         }
     });
 
@@ -7786,6 +8195,7 @@ var Konva = {};
 })();
 ;(function() {
     var HAS_SHADOW = 'hasShadow';
+    var SHADOW_RGBA = 'shadowRGBA';
 
     function _fillFunc(context) {
         context.fill();
@@ -7802,6 +8212,10 @@ var Konva = {};
 
     function _clearHasShadowCache() {
         this._clearCache(HAS_SHADOW);
+    }
+
+    function _clearGetShadowRGBACache() {
+        this._clearCache(SHADOW_RGBA);
     }
 
     Konva.Util.addMethods(Konva.Shape, {
@@ -7830,6 +8244,8 @@ var Konva = {};
             Konva.Node.call(this, config);
 
             this.on('shadowColorChange.konva shadowBlurChange.konva shadowOffsetChange.konva shadowOpacityChange.konva shadowEnabledChange.konva', _clearHasShadowCache);
+
+            this.on('shadowColorChange.konva shadowOpacityChange.konva shadowEnabledChange.konva', _clearGetShadowRGBACache);
         },
         hasChildren: function() {
             return false;
@@ -7866,6 +8282,15 @@ var Konva = {};
         },
         _hasShadow: function() {
             return this.getShadowEnabled() && (this.getShadowOpacity() !== 0 && !!(this.getShadowColor() || this.getShadowBlur() || this.getShadowOffsetX() || this.getShadowOffsetY()));
+        },
+        getShadowRGBA: function() {
+            return this._getCache(SHADOW_RGBA, this._getShadowRGBA);
+        },
+        _getShadowRGBA: function() {
+            if (this.hasShadow()) {
+                var rgba = Konva.Util.colorToRGBA(this.shadowColor());
+                return 'rgba(' + rgba.r + ',' + rgba.g + ',' + rgba.b + ',' + (rgba.a * (this.getShadowOpacity() || 1)) + ')';
+            }
         },
         /**
          * returns whether or not the shape will be filled
@@ -7912,28 +8337,88 @@ var Konva = {};
             Konva.Node.prototype.destroy.call(this);
             delete Konva.shapes[this.colorKey];
         },
-        _useBufferCanvas: function() {
-//            return false;
-            return ((this.getAbsoluteOpacity() !== 1) && this.hasFill() && this.hasStroke()) ||
-               this.hasShadow() && (this.getAbsoluteOpacity() !== 1) && this.hasFill() && this.hasStroke() && this.getStage();
+        _useBufferCanvas: function(caching) {
+            return !caching && (this.perfectDrawEnabled() && (this.getAbsoluteOpacity() !== 1) && this.hasFill() && this.hasStroke() && this.getStage()) ||
+                   (this.perfectDrawEnabled() && this.hasShadow() && (this.getAbsoluteOpacity() !== 1) && this.hasFill() && this.hasStroke() && this.getStage());
         },
-        drawScene: function(can, top) {
+        /**
+         * return self rectangle (x, y, width, height) of shape.
+         * This method are not taken into account transformation and styles.
+         * @method
+         * @memberof Konva.Node.prototype
+         * @returns {Object} rect with {x, y, width, height} properties
+         * @example
+         *
+         * rect.getSelfRect();  // return {x:0, y:0, width:rect.width(), height:rect.height()}
+         * circle.getSelfRect();  // return {x: - circle.width() / 2, y: - circle.height() / 2, width:circle.width(), height:circle.height()}
+         *
+         */
+        getSelfRect : function() {
+            var size = this.getSize();
+            return {
+                x : this._centroid ? Math.round(-size.width / 2) : 0,
+                y : this._centroid ? Math.round(-size.height / 2) : 0,
+                width : size.width,
+                height : size.height
+            };
+        },
+        getClientRect : function(skipTransform) {
+            var fillRect = this.getSelfRect();
+
+            var strokeWidth = (this.hasStroke() && this.strokeWidth()) || 0;
+            var fillAndStrokeWidth = fillRect.width + strokeWidth;
+            var fillAndStrokeHeight = fillRect.height + strokeWidth;
+
+            var shadowOffsetX = this.shadowOffsetX();
+            var shadowOffsetY = this.shadowOffsetY();
+
+            var preWidth = fillAndStrokeWidth + Math.abs(shadowOffsetX);
+            var preHeight = fillAndStrokeHeight + Math.abs(shadowOffsetY);
+
+            var blurRadius = (this.hasShadow() && this.shadowBlur() || 0);
+
+            var width = preWidth + blurRadius * 2;
+            var height = preHeight + blurRadius * 2;
+
+            // if stroke, for example = 3
+            // we need to set x to 1.5, but after Math.round it will be 2
+            // as we have additional offset we need to increase width and height by 1 pixel
+            var roundingOffset = 0;
+            if (Math.round(strokeWidth / 2) !== strokeWidth / 2) {
+                roundingOffset = 1;
+            }
+            var rect = {
+                width : width + roundingOffset,
+                height : height + roundingOffset,
+                x : -Math.round(strokeWidth / 2 + blurRadius) + Math.min(shadowOffsetX, 0) + fillRect.x,
+                y : -Math.round(strokeWidth / 2 + blurRadius) + Math.min(shadowOffsetY, 0) + fillRect.y
+            };
+            if (!skipTransform) {
+                return this._transformedRect(rect);
+            }
+            return rect;
+        },
+        drawScene: function(can, top, caching) {
             var layer = this.getLayer(),
                 canvas = can || layer.getCanvas(),
                 context = canvas.getContext(),
                 cachedCanvas = this._cache.canvas,
                 drawFunc = this.sceneFunc(),
                 hasShadow = this.hasShadow(),
+                hasStroke = this.hasStroke(),
                 stage, bufferCanvas, bufferContext;
 
             if(this.isVisible()) {
                 if (cachedCanvas) {
+                    context.save();
+                    layer._applyTransform(this, context, top);
                     this._drawCachedSceneCanvas(context);
+                    context.restore();
                 }
                 else if (drawFunc) {
                     context.save();
                     // if buffer canvas is needed
-                    if (this._useBufferCanvas()) {
+                    if (this._useBufferCanvas(caching)) {
                         stage = this.getStage();
                         bufferCanvas = stage.bufferCanvas;
                         bufferContext = bufferCanvas.getContext();
@@ -7941,35 +8426,24 @@ var Konva = {};
                         bufferContext.save();
                         bufferContext._applyLineJoin(this);
                         // layer might be undefined if we are using cache before adding to layer
-                        if (layer) {
-                            layer._applyTransform(this, bufferContext, top);
-                        } else {
-                            var m = this.getAbsoluteTransform(top).getMatrix();
-                            context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+                        if (!caching) {
+                            if (layer) {
+                                layer._applyTransform(this, bufferContext, top);
+                            } else {
+                                var m = this.getAbsoluteTransform(top).getMatrix();
+                                context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+                            }
                         }
                      
                         drawFunc.call(this, bufferContext);
                         bufferContext.restore();
 
                         if (hasShadow && !canvas.hitCanvas) {
-//                            if (this.getShadowBlur()) {
-//                                context.save();
-////                                bufferContext.clear();
-//                                var buffer2 = stage.bufferCanvas2;
-//                                buffer2.getContext()._applyShadow(this);
-//                                buffer2.getContext().drawImage(bufferCanvas._canvas);
-//                                buffer2.getContext().fill();
-////                                drawFunc.call(this, bufferContext);
-////                                context._applyOpacity(this);
-//                                context.drawImage(buffer2._canvas, 0, 0);
-//                                context.restore();
-//                            } else {
                                 context.save();
                                 context._applyShadow(this);
                                 context._applyOpacity(this);
                                 context.drawImage(bufferCanvas._canvas, 0, 0);
                                 context.restore();
-//                            }
                         } else {
                             context._applyOpacity(this);
                             context.drawImage(bufferCanvas._canvas, 0, 0);
@@ -7979,33 +8453,44 @@ var Konva = {};
                     else {
                         context._applyLineJoin(this);
                         // layer might be undefined if we are using cache before adding to layer
-                        if (layer) {
-                            layer._applyTransform(this, context, top);
-                        } else {
-                            var o = this.getAbsoluteTransform(top).getMatrix();
-                            context.transform(o[0], o[1], o[2], o[3], o[4], o[5]);
+                        if (!caching) {
+                            if (layer) {
+                                layer._applyTransform(this, context, top);
+                            } else {
+                                var o = this.getAbsoluteTransform(top).getMatrix();
+                                context.transform(o[0], o[1], o[2], o[3], o[4], o[5]);
+                            }
                         }
 
-                        if (hasShadow && !canvas.hitCanvas) {
+                        if (hasShadow && hasStroke && !canvas.hitCanvas) {
                             context.save();
+                            // apply shadow
+                            if (!caching) {
+                                context._applyOpacity(this);
+                            }
                             context._applyShadow(this);
                             drawFunc.call(this, context);
                             context.restore();
+                            // if shape has stroke we need to redraw shape
+                            // otherwise we will see a shadow under stroke (and over fill)
+                            // but I think this is unexpected behavior
+                            if (this.hasFill() && this.getShadowForStrokeEnabled()) {
+                                drawFunc.call(this, context);
+                            }
+                        } else if (hasShadow && !canvas.hitCanvas) {
+                            context.save();
+                            if (!caching) {
+                                context._applyOpacity(this);
+                            }
+                            context._applyShadow(this);
+                            drawFunc.call(this, context);
+                            context.restore();
+                        } else {
+                            if (!caching) {
+                                context._applyOpacity(this);
+                            }
+                            drawFunc.call(this, context);
                         }
-
-                        context._applyOpacity(this);
-                        drawFunc.call(this, context);
-
-//                        // clear stroke shadow
-//                        if (hasShadow && !canvas.hitCanvas) {
-//                            context.setAttr('shadowBlur', 0);
-//                            context.setAttr('shadowColor', 0);
-//                            context.setAttr('shadowOffsetX', 0);
-//                            context.setAttr('shadowOffsetY', 0);
-//                            context.stroke();
-//                        }
-
-
                     }
                     context.restore();
                 }
@@ -8013,7 +8498,7 @@ var Konva = {};
 
             return this;
         },
-        drawHit: function(can, top) {
+        drawHit: function(can, top, caching) {
             var layer = this.getLayer(),
                 canvas = can || layer.hitCanvas,
                 context = canvas.getContext(),
@@ -8026,16 +8511,21 @@ var Konva = {};
                     layer.clearHitCache();
                 }
                 if (cachedHitCanvas) {
+                    context.save();
+                    layer._applyTransform(this, context, top);
                     this._drawCachedHitCanvas(context);
+                    context.restore();
                 }
                 else if (drawFunc) {
                     context.save();
                     context._applyLineJoin(this);
-                    if (layer) {
-                        layer._applyTransform(this, context, top);
-                    } else {
-                        var m = this.getAbsoluteTransform(top).getMatrix();
-                        context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+                    if (!caching) {
+                        if (layer) {
+                            layer._applyTransform(this, context, top);
+                        } else {
+                            var o = this.getAbsoluteTransform(top).getMatrix();
+                            context.transform(o[0], o[1], o[2], o[3], o[4], o[5]);
+                        }
                     }
                    
                     drawFunc.call(this, context);
@@ -8233,6 +8723,45 @@ var Konva = {};
      *
      * // set strokeHitEnabled
      * shape.strokeHitEnabled();
+     */
+
+    Konva.Factory.addGetterSetter(Konva.Shape, 'perfectDrawEnabled', true);
+
+    /**
+     * get/set perfectDrawEnabled. If a shape has fill, stroke and opacity you may set `perfectDrawEnabled` to improve performance.
+     * See http://konvajs.github.io/docs/performance/Disable_Perfect_Draw.html for more information.
+     * Default value is true
+     * @name perfectDrawEnabled
+     * @method
+     * @memberof Konva.Shape.prototype
+     * @param {Boolean} perfectDrawEnabled
+     * @returns {Boolean}
+     * @example
+     * // get perfectDrawEnabled
+     * var perfectDrawEnabled = shape.perfectDrawEnabled();
+     *
+     * // set perfectDrawEnabled
+     * shape.perfectDrawEnabled();
+     */
+
+    Konva.Factory.addGetterSetter(Konva.Shape, 'shadowForStrokeEnabled', true);
+
+    /**
+     * get/set shadowForStrokeEnabled. Useful for performance optimization.
+     * You may set `shape.shadowForStrokeEnabled(false)`. In this case stroke will be no draw shadow for stroke.
+     * Remember if you set `shadowForStrokeEnabled = false` for non closed line - that line with have no shadow!.
+     * Default value is true
+     * @name shadowForStrokeEnabled
+     * @method
+     * @memberof Konva.Shape.prototype
+     * @param {Boolean} shadowForStrokeEnabled
+     * @returns {Boolean}
+     * @example
+     * // get shadowForStrokeEnabled
+     * var shadowForStrokeEnabled = shape.shadowForStrokeEnabled();
+     *
+     * // set shadowForStrokeEnabled
+     * shape.shadowForStrokeEnabled();
      */
 
     Konva.Factory.addGetterSetter(Konva.Shape, 'lineJoin');
@@ -9716,7 +10245,7 @@ var Konva = {};
             }
         },
         _mouseup: function(evt) {
-        
+
             // workaround for mobile IE to force touch event when unhandled pointer event elevates into a mouse event       
             if (Konva.UA.ieMobile) {
                 return this._touchend(evt);
@@ -9903,8 +10432,8 @@ var Konva = {};
                 // throws a JS warning.  layerX and layerY are required for FF
                 // when the container is transformed via CSS.
                 else if (Konva.UA.browser === 'mozilla') {
-                    x = evt.layerX;
-                    y = evt.layerY;
+                    x = evt.layerX || (evt.clientX - contentPosition.left);
+                    y = evt.layerY || (evt.clientY - contentPosition.top);
                 }
                 // if clientX is defined, assume that clientY is defined as well
                 else if (clientX !== undefined && contentPosition) {
@@ -10055,7 +10584,6 @@ var Konva = {};
          */
         clear: function(bounds) {
             this.getContext().clear(bounds);
-            this.getHitCanvas().getContext().clear(bounds);
             return this;
         },
         clearHitCache: function() {
@@ -10236,7 +10764,9 @@ var Konva = {};
         ____init: function(config) {
             this.nodeType = 'Layer';
             this.canvas = new Konva.SceneCanvas();
-            this.hitCanvas = new Konva.HitCanvas();
+            this.hitCanvas = new Konva.HitCanvas({
+                pixelRatio : 1
+            });
             // call super constructor
             Konva.BaseLayer.call(this, config);
         },
@@ -10318,10 +10848,10 @@ var Konva = {};
             ];
         },
         _getIntersection: function(pos) {
-            var p = this.hitCanvas.context.getImageData(pos.x, pos.y, 1, 1).data,
+            var ratio = this.hitCanvas.pixelRatio;
+            var p = this.hitCanvas.context.getImageData(Math.round(pos.x * ratio), Math.round(pos.y * ratio), 1, 1).data,
                 p3 = p[3],
                 colorKey, shape;
-
             // fully opaque pixel
             if(p3 === 255) {
                 colorKey = Konva.Util._rgbToHex(p[0], p[1], p[2]);
@@ -10387,26 +10917,8 @@ var Konva = {};
             this.imageData = null; // Clear imageData cache
             return this;
         },
-        /**
-         * clear scene and hit canvas contexts tied to the layer
-         * @method
-         * @memberof Konva.Layer.prototype
-         * @param {Object} [bounds]
-         * @param {Number} [bounds.x]
-         * @param {Number} [bounds.y]
-         * @param {Number} [bounds.width]
-         * @param {Number} [bounds.height]
-         * @example
-         * layer.clear();
-         * layer.clear({
-         *   x : 0,
-         *   y : 0,
-         *   width : 100,
-         *   height : 100
-         * });
-         */
         clear: function(bounds) {
-            this.getContext().clear(bounds);
+            Konva.BaseLayer.prototype.clear.call(this, bounds);
             this.getHitCanvas().getContext().clear(bounds);
             this.imageData = null; // Clear getImageData cache
             return this;
@@ -10524,28 +11036,6 @@ var Konva = {};
             this.drawScene();
             return this;
         },
-        /**
-         * clear scene and hit canvas contexts tied to the layer
-         * @method
-         * @memberof Konva.FastLayer.prototype
-         * @param {Object} [bounds]
-         * @param {Number} [bounds.x]
-         * @param {Number} [bounds.y]
-         * @param {Number} [bounds.width]
-         * @param {Number} [bounds.height]
-         * @example
-         * layer.clear();
-         * layer.clear({
-         *   x : 0,
-         *   y : 0,
-         *   width : 100,
-         *   height : 100
-         * });
-         */
-        clear: function(bounds) {
-            this.getContext().clear(bounds);
-            return this;
-        },
         // extend Node.prototype.setVisible
         setVisible: function(visible) {
             Konva.Node.prototype.setVisible.call(this, visible);
@@ -10629,6 +11119,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -10790,6 +11282,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -10844,6 +11338,7 @@ var Konva = {};
     };
 
     Konva.Circle.prototype = {
+        _centroid : true,
         ___init: function(config) {
             // call super constructor
             Konva.Shape.call(this, config);
@@ -10877,17 +11372,12 @@ var Konva = {};
             if (this.radius() !== height / 2) {
                 this.setRadius(height / 2);
             }
-        },
-        setRadius : function(val) {
-            this._setAttr('radius', val);
-            this.setWidth(val * 2);
-            this.setHeight(val * 2);
         }
     };
     Konva.Util.extend(Konva.Circle, Konva.Shape);
 
     // add getters setters
-    Konva.Factory.addGetter(Konva.Circle, 'radius', 0);
+    Konva.Factory.addGetterSetter(Konva.Circle, 'radius', 0);
     Konva.Factory.addOverloadedGetterSetter(Konva.Circle, 'radius');
 
     /**
@@ -10934,6 +11424,7 @@ var Konva = {};
     };
 
     Konva.Ellipse.prototype = {
+        _centroid : true,
         ___init: function(config) {
             // call super constructor
             Konva.Shape.call(this, config);
@@ -11089,6 +11580,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -11143,6 +11636,7 @@ var Konva = {};
     };
 
     Konva.Ring.prototype = {
+        _centroid : true,
         ___init: function(config) {
             // call super constructor
             Konva.Shape.call(this, config);
@@ -11275,6 +11769,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -11331,6 +11827,7 @@ var Konva = {};
     };
 
     Konva.Wedge.prototype = {
+        _centroid : true,
         ___init: function(config) {
             // call super constructor
             Konva.Shape.call(this, config);
@@ -11343,6 +11840,28 @@ var Konva = {};
             context.lineTo(0, 0);
             context.closePath();
             context.fillStrokeShape(this);
+        },
+        // implements Shape.prototype.getWidth()
+        getWidth: function() {
+            return this.getRadius() * 2;
+        },
+        // implements Shape.prototype.getHeight()
+        getHeight: function() {
+            return this.getRadius() * 2;
+        },
+        // implements Shape.prototype.setWidth()
+        setWidth: function(width) {
+            Konva.Node.prototype.setWidth.call(this, width);
+            if (this.radius() !== width / 2) {
+                this.setRadius(width / 2);
+            }
+        },
+        // implements Shape.prototype.setHeight()
+        setHeight: function(height) {
+            Konva.Node.prototype.setHeight.call(this, height);
+            if (this.radius() !== height / 2) {
+                this.setRadius(height / 2);
+            }
         }
     };
     Konva.Util.extend(Konva.Wedge, Konva.Shape);
@@ -11461,6 +11980,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -11518,6 +12039,7 @@ var Konva = {};
     };
 
     Konva.Arc.prototype = {
+        _centroid : true,
         ___init: function(config) {
             // call super constructor
             Konva.Shape.call(this, config);
@@ -11533,6 +12055,28 @@ var Konva = {};
             context.arc(0, 0, this.getInnerRadius(), angle, 0, !clockwise);
             context.closePath();
             context.fillStrokeShape(this);
+        },
+        // implements Shape.prototype.getWidth()
+        getWidth: function() {
+            return this.getOuterRadius() * 2;
+        },
+        // implements Shape.prototype.getHeight()
+        getHeight: function() {
+            return this.getOuterRadius() * 2;
+        },
+        // implements Shape.prototype.setWidth()
+        setWidth: function(width) {
+            Konva.Node.prototype.setWidth.call(this, width);
+            if (this.getOuterRadius() !== width / 2) {
+                this.setOuterRadius(width / 2);
+            }
+        },
+        // implements Shape.prototype.setHeight()
+        setHeight: function(height) {
+            Konva.Node.prototype.setHeight.call(this, height);
+            if (this.getOuterRadius() !== height / 2) {
+                this.setOuterRadius(height / 2);
+            }
         }
     };
     Konva.Util.extend(Konva.Arc, Konva.Shape);
@@ -11665,6 +12209,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -11749,7 +12295,7 @@ var Konva = {};
                 }
             }
 
-            if (this.hasFill() || this.hasStroke() || this.hasShadow()) {
+            if (this.hasFill() || this.hasStroke()) {
                 context.beginPath();
                 context.rect(0, 0, width, height);
                 context.closePath();
@@ -11974,6 +12520,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -12072,6 +12620,7 @@ var Konva = {};
                 n;
 
             context.setAttr('font', this._getContextFont());
+
             context.setAttr('textBaseline', MIDDLE);
             context.setAttr('textAlign', LEFT);
             context.save();
@@ -12099,6 +12648,7 @@ var Konva = {};
                 }
 
                 this.partialText = text;
+
                 context.fillStrokeShape(this);
                 context.restore();
                 context.translate(0, lineHeightPx);
@@ -12503,6 +13053,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -12671,6 +13223,39 @@ var Konva = {};
                 ]);
                     
             return tp;
+        },
+        getWidth : function() {
+            return this.getSelfRect().width;
+        },
+        getHeight : function() {
+            return this.getSelfRect().height;
+        },
+        // overload size detection
+        getSelfRect : function() {
+            var points;
+            if (this.getTension() !== 0) {
+                points = this._getTensionPoints();
+            } else {
+                points = this.getPoints();
+            }
+            var minX = points[0];
+            var maxX = points[0];
+            var minY = points[0];
+            var maxY = points[0];
+            var x,y;
+            for (var i = 0; i<points.length / 2; i++) {
+                x = points[i * 2]; y = points[i * 2 + 1];
+                minX = Math.min(minX, x);
+                maxX = Math.max(maxX, x);
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+            }
+            return {
+                x : Math.round(minX),
+                y : Math.round(minY),
+                width : Math.round(maxX - minX),
+                height : Math.round(maxY - minY)
+            };
         }
     };
     Konva.Util.extend(Konva.Line, Konva.Shape);
@@ -12786,6 +13371,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -13202,6 +13789,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -13322,6 +13911,30 @@ var Konva = {};
             else {
                 context.strokeShape(this);
             }
+        },
+        getSelfRect : function() {
+            var points = [];
+            this.dataArray.forEach(function(data) {
+                points = points.concat(data.points);
+            });
+            var minX = points[0];
+            var maxX = points[0];
+            var minY = points[0];
+            var maxY = points[0];
+            var x,y;
+            for (var i = 0; i<points.length / 2; i++) {
+                x = points[i * 2]; y = points[i * 2 + 1];
+                minX = Math.min(minX, x);
+                maxX = Math.max(maxX, x);
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+            }
+            return {
+                x : Math.round(minX),
+                y : Math.round(minY),
+                width : Math.round(maxX - minX),
+                height : Math.round(maxY - minY)
+            };
         }
     };
     Konva.Util.extend(Konva.Path, Konva.Shape);
@@ -13914,6 +14527,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -14257,6 +14872,35 @@ var Konva = {};
                 });
                 p0 = p1;
             }
+        },
+        getSelfRect : function() {
+            var points = [];
+            var fontSize = this.fontSize();
+
+            this.glyphInfo.forEach(function(info) {
+                points.push(info.p0.x);
+                points.push(info.p0.y);
+                points.push(info.p1.x);
+                points.push(info.p1.y);
+            });
+            var minX = points[0];
+            var maxX = points[0];
+            var minY = points[0];
+            var maxY = points[0];
+            var x,y;
+            for (var i = 0; i<points.length / 2; i++) {
+                x = points[i * 2]; y = points[i * 2 + 1];
+                minX = Math.min(minX, x);
+                maxX = Math.max(maxX, x);
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+            }
+            return {
+                x : Math.round(minX) - fontSize,
+                y : Math.round(minY) - fontSize,
+                width : Math.round(maxX - minX) + fontSize * 2,
+                height : Math.round(maxY - minY) + fontSize * 2
+            };
         }
     };
 
@@ -14395,6 +15039,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -14451,6 +15097,7 @@ var Konva = {};
     };
 
     Konva.RegularPolygon.prototype = {
+        _centroid : true,
         ___init: function(config) {
             // call super constructor
             Konva.Shape.call(this, config);
@@ -14472,6 +15119,27 @@ var Konva = {};
             }
             context.closePath();
             context.fillStrokeShape(this);
+        },
+        getWidth: function() {
+            return this.getRadius() * 2;
+        },
+        // implements Shape.prototype.getHeight()
+        getHeight: function() {
+            return this.getRadius() * 2;
+        },
+        // implements Shape.prototype.setWidth()
+        setWidth: function(width) {
+            Konva.Node.prototype.setWidth.call(this, width);
+            if (this.radius() !== width / 2) {
+                this.setRadius(width / 2);
+            }
+        },
+        // implements Shape.prototype.setHeight()
+        setHeight: function(height) {
+            Konva.Node.prototype.setHeight.call(this, height);
+            if (this.radius() !== height / 2) {
+                this.setRadius(height / 2);
+            }
         }
     };
     Konva.Util.extend(Konva.RegularPolygon, Konva.Shape);
@@ -14564,6 +15232,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
@@ -14621,6 +15291,7 @@ var Konva = {};
     };
 
     Konva.Star.prototype = {
+        _centroid : true,
         ___init: function(config) {
             // call super constructor
             Konva.Shape.call(this, config);
@@ -14644,6 +15315,28 @@ var Konva = {};
             context.closePath();
 
             context.fillStrokeShape(this);
+        },
+        // implements Shape.prototype.getWidth()
+        getWidth: function() {
+            return this.getOuterRadius() * 2;
+        },
+        // implements Shape.prototype.getHeight()
+        getHeight: function() {
+            return this.getOuterRadius() * 2;
+        },
+        // implements Shape.prototype.setWidth()
+        setWidth: function(width) {
+            Konva.Node.prototype.setWidth.call(this, width);
+            if (this.outerRadius() !== width / 2) {
+                this.setOuterRadius(width / 2);
+            }
+        },
+        // implements Shape.prototype.setHeight()
+        setHeight: function(height) {
+            Konva.Node.prototype.setHeight.call(this, height);
+            if (this.outerRadius() !== height / 2) {
+                this.setOuterRadius(height / 2);
+            }
         }
     };
     Konva.Util.extend(Konva.Star, Konva.Shape);
@@ -14964,6 +15657,34 @@ var Konva = {};
 
             context.closePath();
             context.fillStrokeShape(this);
+        },
+        getSelfRect : function() {
+            var x = 0,
+                y = 0,
+                pointerWidth = this.getPointerWidth(),
+                pointerHeight = this.getPointerHeight(),
+                direction = this.pointerDirection(),
+                width = this.getWidth(),
+                height = this.getHeight();
+
+            if (direction === UP) {
+                y -= pointerHeight;
+                height += pointerHeight;
+            }  else if (direction === DOWN) {
+                height += pointerHeight;
+            } else if (direction === LEFT) {
+                // ARGH!!! I have no idea why should I used magic 1.5!!!!!!!!!
+                x -= pointerWidth * 1.5;
+                width += pointerWidth;
+            } else if (direction === RIGHT) {
+                width += pointerWidth  * 1.5;
+            }
+            return {
+                x : x,
+                y : y,
+                width : width,
+                height : height
+            };
         }
     };
 
@@ -15092,6 +15813,8 @@ var Konva = {};
      * @param {Integer} [config.strokeAlpha] set stroke alpha component
      * @param {Number} [config.strokeWidth] stroke width
      * @param {Boolean} [config.strokeHitEnabled] flag which enables or disables stroke hit region.  The default is true
+     * @param {Boolean} [config.perfectDrawEnabled] flag which enables or disables using buffer canvas.  The default is true
+     * @param {Boolean} [config.shadowForStrokeEnabled] flag which enables or disables shasow for stroke.  The default is true
      * @param {Boolean} [config.strokeScaleEnabled] flag which enables or disables stroke scale.  The default is true
      * @param {Boolean} [config.strokeEnabled] flag which enables or disables the stroke.  The default value is true
      * @param {String} [config.lineJoin] can be miter, round, or bevel.  The default
