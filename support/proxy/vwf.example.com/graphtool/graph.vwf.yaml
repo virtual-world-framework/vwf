@@ -78,6 +78,33 @@ methods:
       }
       name = name || "function" + this.functioncount++;
       this.children.create( name, functionDef );
+  graphPointLine:
+    parameters:
+      - points
+      - color
+      - opacity
+      - lineThickness
+      - renderTop
+      - name
+      - optionalProperties
+    body: |
+      var pointLineDef = {
+        "extends": "http://vwf.example.com/graphtool/graphpointline.vwf",
+        "properties": {
+          "points": points,
+          "color": color,
+          "opacity": opacity,
+          "lineThickness": lineThickness,
+          "renderTop": renderTop
+        }
+      }
+      if ( optionalProperties ) {
+        for ( var key in optionalProperties ) {
+          pointLineDef.properties[ key ] = optionalProperties[ key ];
+        }
+      }
+      name = name || "pointLine" + this.pointLineCount++;
+      this.children.create( name, pointLineDef );
   graphPlane:
     parameters:
       - origin
@@ -135,5 +162,6 @@ methods:
 scripts: |
   this.lineCount = 0;
   this.functioncount = 0;
+  this.pointLineCount = 0;
   this.planecount = 0;
   this.groupcount = 0;

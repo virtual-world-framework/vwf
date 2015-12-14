@@ -84,6 +84,16 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                             "renderTop": undefined
                         };
                         break;
+                    case "pointline":
+                        node.objectProperties = {
+                            "points": undefined,
+                            "color": undefined,
+                            "opacity": undefined,
+                            "lineThickness": undefined,
+                            "isLoop": undefined,
+                            "renderTop": undefined
+                        };
+                        break;
                     case "plane":
                         node.objectProperties = {
                             "origin": undefined,
@@ -108,6 +118,9 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
                 node.initialized = false;
 
+            } else if ( protos && isMaterial( protos ) && this.state.objects[ nodeID ] ) {
+                var obj = this.state.objects[ nodeID ];
+                obj.materialObject = getThreeJSModel().state.nodes[ childID ];
             }
         },
 
@@ -117,19 +130,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             childSource, childType, childIndex, childName ) {
             
             var node;
-
             if ( this.state.graphs[ childID ] ) {
-
                 node = this.state.graphs[ childID ];
                 createGraph( node );
                 node.initialized = true;
-
             } else if ( this.state.objects[ childID ] ) {
-
                 node = this.state.objects[ childID ];
                 createObject( node );
                 node.initialized = true;
-
             }
         },
 
@@ -137,7 +145,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         deletingNode: function( nodeID ) {
 
-            if( nodeID ) {
+            if ( nodeID ) {
                 var childNode = this.state.objects[ nodeID ];
                 if( childNode ) {
                     var threeObject = childNode.threeObject;
@@ -192,17 +200,11 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         settingProperty: function( nodeID, propertyName, propertyValue ) {
             var node;
-
             if ( this.state.graphs[ nodeID ] ) {
-
                 node = this.state.graphs[ nodeID ];
-
                 if ( node.graphProperties.hasOwnProperty( propertyName ) ) {
-
                     node.graphProperties[ propertyName ] = propertyValue;
-
                     if ( node.initialized ) {
-
                         switch ( propertyName ) {
                             case "xAxisVisible":
                             case "yAxisVisible":
@@ -223,37 +225,26 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                                 redrawGraph( node );
                                 break;
                         }
-
                     }
-
                 }
-
             } else if ( this.state.objects[ nodeID ] ) {
-
                 node = this.state.objects[ nodeID ];
-
                 if ( node.objectProperties.hasOwnProperty( propertyName ) ) {
-
-                    node.objectProperties[ propertyName ] = propertyValue;
-
-                    if ( node.initialized ) {
-
-                        redrawObject( node );
-
+                    switch ( propertyName ) {
+                        default:
+                            node.objectProperties[ propertyName ] = propertyValue;
+                            break;
                     }
-
+                    if ( node.initialized ) {
+                        redrawObject( node );
+                    }
                 }
-
             }
         },
 
         // -- gettingProperty ----------------------------------------------------------------------
 
         gettingProperty: function( nodeID, propertyName, propertyValue ) {
-            var node = this.state.objects[ nodeID ];
-
-            if ( node ) {
-            }
         },
 
         // -- creatingMethod -----------------------------------------------------------------------
@@ -336,12 +327,25 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             for ( var i = 0; i < prototypes.length && !foundObject; i++ ) {
                 foundObject = ( prototypes[i] == "http://vwf.example.com/graphtool/graphline.vwf" ) ||
                     ( prototypes[i] == "http://vwf.example.com/graphtool/graphlinefunction.vwf" ) ||
+                    ( prototypes[i] == "http://vwf.example.com/graphtool/graphpointline.vwf" ) ||
                     ( prototypes[i] == "http://vwf.example.com/graphtool/graphplane.vwf" ) ||
                     ( prototypes[i] == "http://vwf.example.com/graphtool/graphgroup.vwf" );
             }
         }
 
         return foundObject;
+    }
+
+    function isMaterial( prototypes ) {
+        var foundMaterial = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !foundMaterial; i++ ) {
+                foundMaterial = ( prototypes[i] == "http://vwf.example.com/material.vwf" ) ||
+                    ( prototypes[i] == "http://vwf.example.com/shaderMaterial.vwf" );
+            }
+        }
+
+        return foundMaterial;
     }
 
     function getObjectType( prototypes ) {
@@ -352,6 +356,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                     return "line";
                 } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphlinefunction.vwf" ) {
                     return "function";
+                } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphpointline.vwf" ) {
+                    return "pointline";
                 } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphplane.vwf" ) {
                     return "plane";
                 } else if ( prototypes[i] == "http://vwf.example.com/graphtool/graphgroup.vwf" ) {
@@ -420,6 +426,19 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
                 );
                 break;
 
+            case "pointline":
+                obj = generatePointLine(
+                    graphScale,
+                    props.points,
+                    props.color,
+                    props.opacity,
+                    props.lineThickness,
+                    props.isLoop,
+                    node.materialObject,
+                    props.renderTop
+                );
+                break;
+
             case "plane":
                 obj = generatePlane(
                     graphScale,
@@ -467,6 +486,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
     function redrawObject( obj ) {
         var oldObj = obj.threeObject.children[ 0 ];
+        var material = oldObj.material;
         obj.threeObject.remove( oldObj );
         if ( oldObj.children.length > 0 ) {
             disposeObject( oldObj );
@@ -642,6 +662,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         geometry.faces.push( new THREE.Face3( last, last - 1, last - 3 ) );
         geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
 
+        calcUVs( geometry );
+
         var transparent = renderTop || opacity < 1;
         var vwfColor = new utility.color( color );
         color = vwfColor.getHex();
@@ -703,6 +725,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         geometry.faces.push( new THREE.Face3( last, last - 1, last - 3 ) );
         geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
 
+        calcUVs( geometry );
+
         var transparent = renderTop || opacity < 1;
         var vwfColor = new utility.color( color );
         color = vwfColor.getHex();
@@ -714,6 +738,103 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         return mesh;
 
+    }
+
+    function generatePointLine( graphScale, linepoints, color, opacity, thickness, isLoop, material, renderTop ) {
+        var geometry = new THREE.Geometry();
+        var points = new Array();
+        var point, direction, planePoints, i, j, lng;
+        lng = linepoints.length;
+
+        for ( i = 0; i < lng; i++ ) {
+            point = new THREE.Vector3(
+                linepoints[ i ][ 0 ] * graphScale,
+                linepoints[ i ][ 1 ] * graphScale,
+                linepoints[ i ][ 2 ] * graphScale
+            );
+            if ( i === lng - 1 ) {
+                if ( isLoop ) {
+                    direction = new THREE.Vector3(
+                        linepoints[ 0 ][ 0 ] * graphScale,
+                        linepoints[ 0 ][ 1 ] * graphScale,
+                        linepoints[ 0 ][ 2 ] * graphScale
+                    )
+                } else {
+                    direction = point.clone();
+                }
+            } else {
+                direction = new THREE.Vector3(
+                    linepoints[ i + 1 ][ 0 ] * graphScale,
+                    linepoints[ i + 1 ][ 1 ] * graphScale,
+                    linepoints[ i + 1 ][ 2 ] * graphScale
+                );
+            }
+            if ( i === 0 ) {
+                if ( isLoop ) {
+                    direction.sub( new THREE.Vector3(
+                        linepoints[ lng - 1 ][ 0 ] * graphScale,
+                        linepoints[ lng - 1 ][ 1 ] * graphScale,
+                        linepoints[ lng - 1 ][ 2 ] * graphScale
+                    ) );
+                } else {
+                    direction.sub( point.clone() );
+                }
+            } else {
+                direction.sub( new THREE.Vector3(
+                    linepoints[ i - 1 ][ 0 ] * graphScale,
+                    linepoints[ i - 1 ][ 1 ] * graphScale,
+                    linepoints[ i - 1 ][ 2 ] * graphScale
+                ) );
+            }
+            var planePoints = generateLineVertices( direction, point, thickness / 2 );
+            for ( j = 0; j < planePoints.length; j++ ) {
+                points.push( planePoints[ j ] );
+            }
+        }
+
+        geometry.vertices = points;
+
+        for ( i = 0; i < points.length; i++ ) {
+            if ( points[ i + 4 ] !== undefined ) {
+                geometry.faces.push( new THREE.Face3( i, i + 4, i + 1 ) );
+                geometry.faces.push( new THREE.Face3( i, i + 3, i + 4 ) );
+            } else if ( isLoop ) {
+                var i4, i3, i1;
+                i4 = i + 4 >= points.length ? i + 4 - points.length : i + 4;
+                i3 = i + 3 >= points.length ? i + 3 - points.length : i + 3;
+                i1 = i + 1 >= points.length ? i + 1 - points.length : i + 1;
+                geometry.faces.push( new THREE.Face3( i, i4, i1 ) );
+                geometry.faces.push( new THREE.Face3( i, i3, i4 ) );
+            }
+        }
+
+        if ( !isLoop ) {
+            var last = points.length - 1;
+            geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
+            geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
+            geometry.faces.push( new THREE.Face3( last, last - 1, last - 3 ) );
+            geometry.faces.push( new THREE.Face3( last - 1, last - 2, last - 3 ) );
+        }
+
+        calcUVs( geometry );
+
+        var meshMaterial, vwfColor, transparent, mesh;
+
+        if ( material && material.threeObject ) {
+            meshMaterial = material.threeObject.clone();
+        } else {
+            transparent = renderTop || opacity < 1;
+            vwfColor = new utility.color( color );
+            color = vwfColor.getHex();
+            meshMaterial = new THREE.MeshBasicMaterial( 
+                { "color": color, "transparent": transparent, "opacity": opacity, "depthTest": !renderTop } 
+            );
+        }
+
+        mesh = new THREE.Mesh( geometry, meshMaterial );
+        mesh.renderDepth = renderTop ? DEPTH_OBJECTS : null;
+
+        return mesh;
     }
 
     function generatePlane( graphScale, origin, normal, rotationAngle, size, color, opacity, doubleSided, renderTop ) {
@@ -730,6 +851,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
 
         geometry.faces.push( new THREE.Face3( 0, 1, 2 ) );
         geometry.faces.push( new THREE.Face3( 0, 2, 3 ) );
+
+        calcUVs( geometry );
 
         var transparent = renderTop || opacity < 1;
         var vwfColor = new utility.color( color );
@@ -983,6 +1106,27 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             }
             return true;
         } )();
+    }
+
+    function calcUVs( geometry ) {
+        geometry.computeBoundingBox();
+        var max = geometry.boundingBox.max;
+        var min = geometry.boundingBox.min;
+        var offset = new THREE.Vector2( 0 - min.x, 0 - min.y );
+        var range = new THREE.Vector2( max.x - min.x, max.y - min.y );
+        geometry.faceVertexUvs[ 0 ] = [];
+        var faces = geometry.faces;
+        for ( var i = 0; i < geometry.faces.length ; i++ ) {
+            var v1 = geometry.vertices[ faces[ i ].a ];
+            var v2 = geometry.vertices[ faces[ i ].b ];
+            var v3 = geometry.vertices[ faces[ i ].c ];
+            geometry.faceVertexUvs[0].push( [
+                new THREE.Vector2( ( v1.x + offset.x ) / range.x , ( v1.y + offset.y ) / range.y ),
+                new THREE.Vector2( ( v2.x + offset.x ) / range.x , ( v2.y + offset.y ) / range.y ),
+                new THREE.Vector2( ( v3.x + offset.x ) / range.x , ( v3.y + offset.y ) / range.y )
+            ] );
+        }
+        geometry.uvsNeedUpdate = true;
     }
 
 } );
