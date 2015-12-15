@@ -63,7 +63,8 @@ define( [ "module", "vwf/model", "vwf/utility",
                         "defaultXml": undefined,
                         "code": undefined,
                         "lastLineExeTime": undefined,
-                        "timeBetweenLines": 1,
+                        "timeBetweenLines": 0.5,
+                        "baseExecutionSpeed": 1,
                         "interpreter": undefined,
                         "interpreterStatus": ""
                     };
@@ -226,9 +227,30 @@ define( [ "module", "vwf/model", "vwf/utility",
                     case  "blockly_code":
                         value = node.code = propertyValue;
                         break;
-                    
+
+                    case "new_xml":
+                           node.blocks = propertyValue;
+                           value = propertyValue; 
+                        break;
+
                     case "blockly_xml":
-                        value = node.blocks = propertyValue;
+                           node.blocks = propertyValue;
+                           value = propertyValue; 
+                        break;
+
+                     case "blockly_timeBetweenLines":
+                        this.state.blockly.node.timeBetweenLines = propertyValue;
+                        break;
+
+                    case "blockly_baseExecutionSpeed":
+
+                        if ( propertyValue > 0 && propertyValue <= 10 ) {
+                            this.state.blockly.node.baseExecutionSpeed = propertyValue;
+                        } else {
+                            this.logger.errorx("baseExecutionSpeed", "Blockly node with", nodeID, 
+                                "must be in the range (0,10).");
+                        }
+                        
                         break;
 
                     case "blockly_executing":
@@ -307,7 +329,7 @@ define( [ "module", "vwf/model", "vwf/utility",
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        callingMethod: function( nodeID, methodName, methodParameters ) { 
             var node = this.state.nodes[ nodeID ];
 
             if ( this.debug.methods ) {
@@ -317,7 +339,7 @@ define( [ "module", "vwf/model", "vwf/utility",
             if ( nodeID == this.kernel.application() ) {
                 
                 switch ( methodName ) {
-                    
+                        
                     case "stopAllExecution":
                         for ( var id in this.state.executingBlocks ) {
                             this.state.executingBlocks[ id ].interpreterStatus = "completed";
@@ -332,8 +354,6 @@ define( [ "module", "vwf/model", "vwf/utility",
                             this.kernel.fireEvent( id, "blocklyStarted", [ true ] );
                         }  
                         break;
-
-
                 }
             } else if ( node !== undefined ) {
                 switch ( methodName ) {
@@ -343,6 +363,17 @@ define( [ "module", "vwf/model", "vwf/utility",
                             Blockly.mainWorkspace.clear();
                             this.kernel.setProperty( nodeID, "blockly_xml", '<xml></xml>' );
                         }
+                        break;
+                    case "stopExecution":
+                        var currBlockly3Node = this.state.executingBlocks[ nodeID ];
+                        if ( currBlockly3Node ) {
+                            currBlockly3Node.interpreterStatus = "completed";
+                            this.kernel.setProperty( nodeID, 'blockly_executing', false );
+                            this.kernel.fireEvent( nodeID, "blocklyStopped", [ true ] );
+                        } else {
+                            this.logger.errorx("stopExecutionForNode", "Node with", nodeID, 
+                                "is not currently executing Blockly!");
+                        } 
                         break;
                 }
             }
@@ -367,8 +398,9 @@ define( [ "module", "vwf/model", "vwf/utility",
                 for ( var nodeID in this.state.executingBlocks ) {
 
                     blocklyNode = this.state.executingBlocks[ nodeID ];
-                    var executeNextLine = false;
 
+                    var executeNextLine = false;
+                    
                     if ( blocklyNode.interpreter === undefined ||
                          blocklyNode.interpreterStatus === "completed" ) {
                         blocklyNode.interpreter = createInterpreter( acorn, blocklyNode.code );
@@ -377,7 +409,7 @@ define( [ "module", "vwf/model", "vwf/utility",
                         executeNextLine = true;
                     } else {
                         var elaspedTime = vwfTime - blocklyNode.lastLineExeTime;
-                        if ( elaspedTime >= blocklyNode.timeBetweenLines ) {
+                        if ( elaspedTime >= ( blocklyNode.timeBetweenLines * blocklyNode.baseExecutionSpeed ) ) {
                             executeNextLine = true;
                             blocklyNode.lastLineExeTime = vwfTime;
                         } 
@@ -386,10 +418,11 @@ define( [ "module", "vwf/model", "vwf/utility",
                     if ( executeNextLine ) {
 
                         self.state.executionHalted = false;
-                        
                         nextStep( blocklyNode );
 
-                        this.kernel.fireEvent( nodeID, "blocklyExecuted", [ blocklyNode.interpreter.value ] ); 
+                        // Does this serve any real purpose? It's not handled in any application.
+                        // Certain blocks, such as repeat blocks, break with the recursive node reference changes.
+                        // this.kernel.fireEvent( nodeID, "blocklyExecuted", [ blocklyNode.interpreter.value ] ); 
                     }
                 } 
             }
@@ -397,18 +430,6 @@ define( [ "module", "vwf/model", "vwf/utility",
         }        
 
     } );
-
-    function getPrototypes( extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = self.kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
 
     function isBlockly3Node( nodeID ) {
         return self.kernel.test( nodeID,
