@@ -1355,8 +1355,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             if ( drawAndPropagate ) {
                 drawObject( drawingObject, true );
+
+                // Create a node in the model so it gets replicated on all clients
                 propagateNodeToModel();
-                //drawing_private.drawingObject = null;
             }
         }    
     };
@@ -1881,8 +1882,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         //callMethod();
 
         //kineticNode = private_node.kineticObj;
-
-
     }
 
     function drawObject( kineticObject, clearBefore ) {
