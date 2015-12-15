@@ -1,0 +1,21 @@
+extends: http://vwf.example.com/node.vwf
+properties:
+  images:
+  width:
+  height:
+  visible:
+  enabled:
+  alignH:
+  alignV:
+  offsetH:
+  offsetV:
+  drawOrder:
+methods:
+  draw:
+events:
+  onClick:
+  onMouseDown:
+  onMouseUp:
+  onMouseMove:
+  onMouseOver:
+  onMouseOut:
