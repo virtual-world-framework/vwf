@@ -1,0 +1,19 @@
+---
+extends: http://vwf.example.com/node3.vwf
+properties:
+  points: undefined
+  color: undefined
+  opacity: undefined
+  lineThickness: undefined
+  isLoop: undefined
+  renderTop: undefined
+methods:
+  addPoint:
+    parameters:
+      - x
+      - y
+      - z
+    body: |
+      var points = this.points.slice();
+      points.push( [ x, y, z ] );
+      this.points = points;
