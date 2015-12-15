@@ -1,0 +1,28 @@
+# Copyright 2014 Lockheed Martin Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may 
+# not use this file except in compliance with the License. You may obtain 
+# a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software 
+# distributed under the License is distributed on an "AS IS" BASIS, 
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and 
+# limitations under the License.
+
+---
+
+methods:
+
+  # A C++ style assert
+  # NOTE: these only fire if you have the console open.
+  # Arguments: 
+  #   value     - the value we're checking.  If true, we log and halt.
+  #   message   - the message to log if the assert fails.  Optional.
+  #   dontHalt  - if true, we just log the message.  Optional.
+  assert:
+
+scripts:
+- source: "http://vwf.example.com/assert.js"

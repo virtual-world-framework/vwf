@@ -18,7 +18,18 @@ properties:
   scene:
     get: |
       if ( !this.scene ) {
-        this.scene = this.find( this.scenePath || "/" )[ 0 ];
+        var sp = this.scenePath || "/";
+        this.scene = this.find( sp )[ 0 ];
+        // If this is the prototype object then it will think that it is the 
+        //  scene (because it is directly attached to the root) - in that case, 
+        //  we want to make sure that we don't incorrectly set this.scene, so 
+        //  just short-circuit and return undefined.
+        if ( this.scene === this ) {
+          this.scene  = undefined;
+        } else if ( !this.scene ) {
+          this.logger.errorx( "scene.get", 
+                              "Could not find scene node: '" + sp + "'" );
+        }
       }
       return this.scene;
       //@ sourceURL=sceneGetter.scene.get
@@ -31,3 +42,32 @@ properties:
       // Nullify the current scene so that next time it is gotten, it will find it from the new path
       this.scene = null;
       //@ sourceURL=sceneGetter.scenePath.set
+
+methods:
+
+  # A helper that does basically what Find does, except that it handles some of
+  #   the busywork (and assumes that we'll be looking in the scene).
+  # NOTE: THIS ONLY GETS THE FIRST OBJECT FOUND.  If you want the whole array,
+  #   you'll need to extend this function (or write another).
+  # Arguments: 
+  #   objectName      - the name of the object to search for
+  #   errorOnNotFound - if true (the default) we log an error if the object is
+  #                     not found.
+  #   warnOnTooMany   - if true (the default) we log a warning if more than one
+  #                     object is found.
+  findInScene:
+
+  # Same as findInScene, except that this looks by type rather than by name.
+  # NOTE: THIS ONLY GETS THE FIRST OBJECT FOUND.  If you want the whole array,
+  #   you'll need to extend this function (or write another).
+  # Arguments: 
+  #   typeName        - the type to search for (where the "type" is the filename 
+  #                     that the object extends).
+  #   errorOnNotFound - if true (the default) we log an error if the object is
+  #                     not found.
+  #   warnOnTooMany   - if true (the default) we log a warning if more than one
+  #                     object is found.
+  findTypeInScene:
+
+scripts:
+- source: "http://vwf.example.com/sceneGetter.js"
