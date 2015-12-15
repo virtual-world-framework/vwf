@@ -2173,7 +2173,7 @@ define( [ "module",
         var node = modelDriver.state.nodes[ nodeID ];
 
         if ( isSymbolDefinition( node.prototypes ) ) {
-            kineticObj.setZIndex( 16 );
+            kineticObj.setZIndex( 100 );
         }
         
         if ( !validImage ) {

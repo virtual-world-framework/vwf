@@ -25,6 +25,8 @@ properties:
       }
     value: { "x": 16, "y": 16 }
 
+  zIndex: 20
+
 events:
 
   imageChanged:

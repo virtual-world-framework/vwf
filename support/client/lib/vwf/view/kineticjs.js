@@ -30,12 +30,156 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var activelyDrawing = false;
     var clearBeforeDraw = false;
 
+    // Object implements tapHold behavior (kineticJS doesn't have a built-in one)
+    var tapHold = { 
+        "node":             null,
+        "initialPosition":  [ 0, 0],
+        "timeout":          1500,       // timeout in milliseconds
+        "moveThreshold":    64,         // Square of the threshold
+        "timerId":          null,
+        "protoFilter":      null,
+        "isListening":      false,             
+        "start":            function( node, position ) {
+            if ( this.isListening && !this.node && this.matchesProtoFilter( node.prototypes ) ) {
+                this.node = node;
+                this.initialPosition = position.client;
+                this.timerId = setTimeout( function(){ fireTapHold(); }, this.timeout );
+            }
+        },
+        "moved":            function( node, position ) {
+            if ( node === this.node ) {
+                console.info( " tapHold moved for node: " + this.node.ID + " at position: [ " + position.client[0] + ", " +  position.client[1] + " ], timerId = " + this.timerId );
+                if ( this.timerId ) {
+                    var deltaPos = [ ( position.client[0] - this.initialPosition[0] ),
+                                     ( position.client[1] - this.initialPosition[1] ) ];
+                    var distanceSquared = ( ( deltaPos[0] * deltaPos[0] ) + ( deltaPos[1] * deltaPos[1] ) );
+                    if ( distanceSquared > this.moveThreshold ) {
+                        this.cancel();
+                    }
+                }
+            }
+        },  
+        "cancel":           function() {
+            if ( this.timerId ) {
+                console.info( " Cancel tapHold for node: " + this.node.ID );
+                clearTimeout( this.timerId );
+            }
+            this.node = null;
+            this.initialPosition = [ 0, 0 ];
+            this.timerId = null;
+        },  
+        "matchesProtoFilter": function( prototypes ) {
+            var found = false;
+            if ( this.protoFilter ) { 
+                if ( prototypes ) {
+                    var kIndex;
+                    for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                        for ( var j = 0; j < this.protoFilter.length && !found; j++ ) {
+                            found = ( prototypes[ i ] === this.protoFilter[ j ] ); 
+                        }
+                    }
+                }
+            } else {
+                found = true;  // Not filtering anything
+            } 
+            return found;
+        },
+        "registerForTapHoldEvents": function( protoFilters ) {
+            console.info( " Registering for tapHold events for: ");
+            for ( var i = 0; i < protoFilters.length; i++ ) {
+                console.info( i + ". " + protoFilters[i] );
+            }
+            this.protoFilter = protoFilters;
+        },
+        "listenForTapHold":         function( listen ) {
+            this.isListening = listen;
+            if ( !listen ) {
+                tapHold.cancel();
+            }
+        } 
+
+    };
+
+    function fireTapHold() {
+        if ( tapHold.node ) {
+            console.info( " tapHold event firing for node: " + tapHold.node.ID );
+            viewDriver.kernel.fireEvent( tapHold.node.ID, 'tapHold', [ tapHold.initialPosition ] );
+            tapHold.cancel();
+        }
+    }
+
+    var swipe = {
+        "protoFilter":     null,
+        "isListening":     false,
+        "parentFilter":    null,
+        "touchStartIsTap": null,  
+        "swipedAcross": function( node, isTouchStart, eventData ) {
+            if ( this.isListening && this.isSwipe( node ) ) {
+                console.info( " swiped across node: " + node.ID );
+                if ( isTouchStart && this.touchStartIsTap ) {
+                    viewDriver.kernel.fireEvent( node.ID, 'tap', eventData );
+                } else {
+                    viewDriver.kernel.fireEvent( node.ID, 'swipe', [ ] );
+                }
+            }
+        },  
+        "isSwipe":      function( node ) {
+            var found      = false;
+            var prototypes = node.prototypes;
+            if ( this.parentFilter && ( !isChildOf( node.kineticObj, this.parentFilter ) ) ) {
+                return found;
+            } 
+            if ( this.protoFilter ) { 
+                if ( prototypes ) {
+                    var kIndex;
+                    for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                        for ( var j = 0; j < this.protoFilter.length && !found; j++ ) {
+                            found = ( prototypes[ i ] === this.protoFilter[ j ] ); 
+                        }
+                    }
+                }
+            } else {
+                found = true;  // Not filtering anything
+            } 
+            return found;            
+        },
+        "registerForSwipeEvents":   function( protoFilters ) {
+            console.info( " Registering for swipe events for: ");
+            for ( var i = 0; i < protoFilters.length; i++ ) {
+                console.info( i + ". " + protoFilters[i] );
+            }
+            this.protoFilter = protoFilters;
+        },
+        "listenForSwipes":          function( params ) {
+            this.isListening      = params.listen;
+            this.parentFilter     = params[ "parent" ];
+            this.touchStartIsTap  = params[ "touchStartIsTap" ];
+        } 
+    };
+
+    // Find the parent of the kinetic node
+    function findParent( kineticNode, protoID ) {
+
+        if ( kineticNode !== undefined ) {
+            if ( kineticNode.prototypeID === protoID )
+                return kineticNode;
+            else 
+                return findParent( _kineticComponents[ kineticNode.parentID ], protoID );       
+        }
+        return undefined;
+    }
+
+    // Attach handlers for mouse events
     function attachMouseEvents( node ) {
 
         var mouseDown = false;
 
         node.kineticObj.on( "mousemove", function( evt ) {
             var eData = processEvent( evt, node, false );
+
+            // Cancel tapHold event (if any)
+            tapHold.cancel();
+
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerMove', eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'pointerMove', eData.eventData );
             //activelyDrawing = mouseDown;
@@ -62,21 +206,33 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         node.kineticObj.on( "mouseenter", function( evt ) {
             var eData = processEvent( evt, node, false );
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerEnter', eData.eventData, eData.eventNodeData );
-            viewDriver.kernel.fireEvent( node.ID, 'pointerEnter', eData.eventData );
+            //if ( mouseDown ) {
+                swipe.swipedAcross( node );
+            //}
+            //viewDriver.kernel.fireEvent( node.ID, 'pointerEnter', eData.eventData );
         } );
 
         node.kineticObj.on( "mouseleave", function( evt ) {
             var eData = processEvent( evt, node, false );
             // viewDriver.kernel.dispatchEvent( node.ID, 'pointerLeave', eData.eventData, eData.eventNodeData );
-            viewDriver.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
+            //if ( mouseDown ) {
+                swipe.swipedAcross( node );
+            //}
+            //viewDriver.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
         } );
 
         node.kineticObj.on( "mousedown", function( evt ) { 
             var eData = processEvent( evt, node, false );
+
+            // Cancel tapHold event (if any)
+            tapHold.cancel();
+
+            // Track mouseDown so we know we're holding the button during a move/drag
             mouseDown = true;
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerDown', eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'pointerDown', eData.eventData );
 
+            // Process drawing (if actively drawing)
             var userState = drawing_client;
             //if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
             //    activelyDrawing = true;
@@ -95,6 +251,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         node.kineticObj.on( "mouseup", function( evt ) {
             var eData = processEvent( evt, node, false );
             mouseDown = false;
+
+            // Cancel tapHold event (if any)
+            tapHold.cancel();
 
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerUp', eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'pointerUp', eData.eventData );
@@ -129,12 +288,20 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         node.kineticObj.on( "click", function( evt ) {
             var eData = processEvent( evt, node, false );
+
+            // Cancel tapHold event (if any)
+            tapHold.cancel();
+
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerClick', eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'pointerClick', eData.eventData );
         } );
 
         node.kineticObj.on( "dblclick", function( evt ) {
             var eData = processEvent( evt, node, false );
+
+            // Cancel tapHold event (if any)
+            tapHold.cancel();
+
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerDoubleClick', eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'pointerDoubleClick', eData.eventData );
         } );
@@ -172,10 +339,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //viewDriver.state.draggingNodes[ node.ID ] = true;
             viewDriver.state.draggingNodes[ node.ID ] = node;
             node.kineticObj.mouseDragging = true;
+
+            swipe.swipedAcross( node );
+
         } );
         
         node.kineticObj.on( "dragmove", function( evt ) {
             var eData = processEvent( evt, node, false );
+
+            tapHold.moved( node, eData.eventData[0] );
             //viewDriver.kernel.dispatchEvent( node.ID, "dragMove", eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
 
@@ -193,6 +365,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         // in dragstart and mouseup (Eric - 11/18/14)
         node.kineticObj.on( "dragend", function( evt ) {
             var eData = processEvent( evt, node, false );
+
+            //tapHold.cancel();
             //viewDriver.kernel.dispatchEvent( node.ID, "dragEnd", eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
 
@@ -209,12 +383,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     }
 
+    // Attach handlers for touch events
     function attachTouchEvents( node ) {
 
         var TOUCH_EVENT = true;
 
         node.kineticObj.on( "touchstart", function( evt ) {
             var eData = processEvent( evt, node, false );
+
+            // Start tapHold
+            tapHold.start( node, eData.eventData[0].touches[0] );
+
             //viewDriver.kernel.dispatchEvent( node.ID, "touchStart", eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'touchStart', eData.eventData );
             drawDown( node.ID, eData.eventData[0], node, false ); 
@@ -224,10 +403,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 activelyDrawing = true;
             }
 
+            swipe.swipedAcross( node, true, eData.eventData );
+
         } );
 
         node.kineticObj.on( "touchmove", function( evt ) {
             var eData = processEvent( evt, node, false );
+
+            // If tapHold started, check that we haven't moved too much
+            tapHold.moved( node, eData.eventData[0].touches[0] );
+
             //viewDriver.kernel.dispatchEvent( node.ID, "touchMove", eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'touchMove', eData.eventData );
             drawMove( node.ID, eData.eventData[0], node, false ); 
@@ -237,10 +422,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 activelyDrawing = true;
             }
 
+            //swipe.swipedAcross( node );
         } );
 
         node.kineticObj.on( "touchend", function( evt ) {
             var eData = processEvent( evt, node, false );
+
+            // Cancel tapHold event (if any)
+            tapHold.cancel();
+
             //viewDriver.kernel.dispatchEvent( node.ID, "touchEnd", eData.eventData, eData.eventNodeData );
             //viewDriver.kernel.fireEvent( node.ID, 'touchEnd', eData.eventData );
             drawUp( node.ID, eData.eventData[0], node, true ); 
@@ -250,12 +440,20 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         node.kineticObj.on( "tap", function( evt ) {
             var eData = processEvent( evt, node, false );
+
+            // Cancel tapHold event (if any)
+            tapHold.cancel();
+
             //viewDriver.kernel.dispatchEvent( node.ID, "tap", eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'tap', eData.eventData );
         } );
 
         node.kineticObj.on( "dbltap", function( evt ) {
             var eData = processEvent( evt, node, false );
+
+            // Cancel tapHold event (if any)
+            tapHold.cancel();
+
             //viewDriver.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'doubleTap', eData.eventData );
         } );
@@ -355,7 +553,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             
             var node = this.state.nodes[ nodeID ];
 
-            console.info( "kineticjs(view) satProperty. propertyName: " + propertyName + ", propertyValue: " + propertyValue + ", nodeID: " + nodeID );
+            //console.info( "kineticjs(view) satProperty. propertyName: " + propertyName + ", propertyValue: " + propertyValue + ", nodeID: " + nodeID );
 
 
             // If we don't have a record of this node, it is not a kinetic node, and we ignore it
@@ -523,6 +721,22 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         */
                         break;
 
+                    case "registerForTapHoldEvents":
+                        tapHold.registerForTapHoldEvents( methodParameters );
+                        break;
+
+                    case "listenForTapHold":
+                        tapHold.listenForTapHold( methodParameters[0] );
+                        break;
+
+                    case "registerForSwipeEvents":
+                        swipe.registerForSwipeEvents( methodParameters );
+                        break;
+
+                    case "listenForSwipes":
+                        swipe.listenForSwipes( methodParameters[0] );
+                        break;
+
                 }
             }
 
@@ -575,7 +789,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         // (this event is fired right before this driver sets the model property, so we 
                         // can be sure that the very next set of the position property is from us)
                         var node = this.state.nodes[ nodeID ];
-                        node.model.position.viewIgnoreNextPositionUpdate = true;
+                        node.model.position.ignoreNextPositionUpdate = true;
                     }
                     break;
 
@@ -1608,7 +1822,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function findStage( kineticObj ) {
 
-        var stage = undefined
+        var stage = undefined;
         var parent = kineticObj;
         while ( parent !== undefined && stage === undefined ) {
             if ( parent.nodeType === "Stage" ) {
@@ -1622,7 +1836,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function findLayer( kineticObj ) {
 
-        var layer = undefined
+        var layer = undefined;
         var parent = kineticObj;
         while ( parent !== undefined && layer === undefined ) {
             if ( parent.nodeType === "Layer" ) {
@@ -1632,6 +1846,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
         return layer;
         
+    }
+
+    function isChildOf( kineticObj, parentID ) {
+
+        var foundParent = false;
+        var parent = kineticObj;
+        while ( parent !== undefined && !foundParent ) {
+            if ( parent.id() === parentID ) {
+                foundParent = true;
+            }
+            parent = parent.parent;
+        }
+        return foundParent;
     }
 
     function propagateNodeToModel() {
