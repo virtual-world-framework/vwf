@@ -6,6 +6,11 @@ properties:
   ## @name shaderMaterial.vwf#uniforms
   ## @property
   uniforms:
+  ## defines
+  ## 
+  ## @name shaderMaterial.vwf#defines
+  ## @property
+  defines:
   ## Vertex Shader
   ## 
   ## @name shaderMaterial.vwf#vertexShader
@@ -21,4 +26,15 @@ properties:
   ## @name shaderMaterial.vwf#updateFunction
   ## @property
   updateFunction:
-  
+methods:
+  setDefine:
+    parameters:
+      - name
+      - value
+    body: |
+      var defines = this.defines;
+      defines[ name ] = value;
+      this.defines = defines;
+  updateTexture:
+    parameters:
+      - textureName

@@ -677,7 +677,7 @@ define( [ "module",
                                             objectDef[ prop ] = propertyValue[ prop ];
                                             break;    
                                     }
-                                }   
+                                }
                             }
 
                             node.threeObject = createMaterial( objectDef );
@@ -1608,7 +1608,7 @@ define( [ "module",
                         }
                     }
                 }
-                if ( threeObject instanceof THREE.Material ) {
+                if ( threeObject instanceof THREE.Material && !( threeObject instanceof THREE.ShaderMaterial ) ) {
 
                     value = setMaterialProperty( threeObject, propertyName, propertyValue );
 
@@ -1635,25 +1635,58 @@ define( [ "module",
                 if ( threeObject instanceof THREE.ShaderMaterial ) {
                     
                     if ( utility.validObject( propertyValue ) ) {
-                        
                         if ( propertyName === "uniforms" ) {
-                            value = propertyValue;
+                            // Copy uniforms to prevent uniforms being shared across shaders
+                            var names = Object.keys( propertyValue );
+                            var uniforms = {};
+                            for ( var i = 0; i < names.length; i++ ) {
+                                var type, value;
+                                type = propertyValue[ names[ i ] ].type;
+                                value = propertyValue[ names[ i ] ].value;
+                                uniforms[ names[ i ] ] = {
+                                    "type": type,
+                                    "value": getUniformValueByType( type, value )
+                                }
+                            }
+                            value = uniforms;
                             threeObject.uniforms = value;
-                        }
-                        if ( propertyName === "vertexShader" ) {
+                        } else if ( propertyName === "defines" ) {
+                            var names = Object.keys( propertyValue );
+                            var defines = {};
+                            for ( var i = 0; i < names.length; i++ ) {
+                                defines[ names[ i ] ] = propertyValue[ names[ i ] ];
+                            }
+                            threeObject.defines = defines;
+                            threeObject.needsUpdate = true;
+                        } else if ( propertyName === "vertexShader" ) {
                             value = propertyValue;
                             threeObject.vertexShader = value;
-                        }
-                        if ( propertyName === "fragmentShader" ) {
+                        } else if ( propertyName === "fragmentShader" ) {
                             value = propertyValue;
                             threeObject.fragmentShader = value;
-                        }
-                        if ( propertyName === "updateFunction" ) {
+                        } else if ( propertyName === "updateFunction" ) {
                             value = propertyValue;
                             threeObject.updateFunction = value;
                             threeObject.update = function() {
                                 eval( this.updateFunction );
                             }
+                        } else if ( propertyName === "lights" ) {
+                            value = propertyValue;
+                            threeObject.lights = value;
+                        } else if ( propertyName === "fog" ) {
+                            value = propertyValue;
+                            threeObject.fog = value;
+                        } else if ( threeObject.uniforms.hasOwnProperty( propertyName ) ) {
+                            var type = threeObject.uniforms[ propertyName ].type;
+                            setUniformProperty( threeObject.uniforms, propertyName, type, propertyValue );
+                        // -----------
+                        // TODO: Defines are constants within the shader, do they need to be set in this way?
+                        // } else if ( threeObject.defines.hasOwnProperty( propertyName ) ) {
+                        //     value = propertyValue;
+                        //     threeObject.defines[ propertyName ] = value;
+                        } else if ( propertyName.indexOf("_") === 0 ) {
+                            value = propertyValue;
+                            threeObject[ propertyName ] = value;
                         }
                     }
                 }
@@ -2242,6 +2275,13 @@ define( [ "module",
                     }
                     return value;
                 }
+                if ( propertyName === "defines" ) {
+                    value = {};
+                    for ( var def in threeObject.defines ) {
+                        value[ def ] = threeObject.defines[ def ];
+                    }
+                    return value;
+                }
                 if ( propertyName === "vertexShader" ) {
                     value = threeObject.vertexShader;
                     return value;
@@ -2594,6 +2634,16 @@ define( [ "module",
 
         callingMethod: function( nodeID, methodName, parameters /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
 
+            var node = this.state.nodes[ nodeID ];
+            if ( !node ) {
+                node = this.state.scenes[ nodeID ];
+            }
+
+            var threeObject;
+            if ( node ) {
+                threeObject = node.threeObject || node.threeScene;
+            }
+
             if ( methodName === "raycast" ) {
 
                 var origin, direction, near, far, recursive, objectIDs;
@@ -2701,6 +2751,20 @@ define( [ "module",
                 var intersects = raycaster.intersectObjects( objects, recursive );
                 return intersects;
 
+            }
+
+            if ( threeObject instanceof THREE.ShaderMaterial ) {
+                if ( methodName === "updateTexture" ) {
+                    var textureName = parameters[ 0 ];
+                    var texture = threeObject.uniforms[ textureName ];
+                    if ( texture ) {
+                        texture.value.needsUpdate = true;
+                        threeObject.needsUpdate = true;
+                    } else {
+                        this.logger.warnx( nodeID + ".updateTexture", "Texture \""
+                            + textureName + "\" not found!" );
+                    }
+                }
             }
 
             return undefined;
@@ -5547,8 +5611,77 @@ define( [ "module",
                 obj[ prop ].src = value;
                 obj[ prop ].value = loadTexture( undefined, value );
                 break;
+            case 'tv':
+                var textureArray = [];
+                for ( var i = 0; i < value.length; i++ ) {
+                    textureArray.push( loadTexture( undefined, value[ i ] ) );
+                }
+                obj[ prop ].value = textureArray;
+                break;
+            case 'v2v':
+                var vectorArray = [];
+                var vector;
+                for ( var i = 0; i < value.length; i++ ) {
+                    vector = value[ i ];
+                    vectorArray.push( new THREE.Vector2( vector[0], vector[1] ) );
+                }
+                obj[ prop ].value = vectorArray;
+                if ( obj[ prop ]._array && obj[ prop ]._array.length !== vectorArray.length * 2 ) {
+                    obj[ prop ]._array = undefined;
+                }
+                break;
+            case 'iv1':
+                var intArray = [];
+                for ( var i = 0; i < value.length; i++ ) {
+                    intArray.push( Number( value[ i ] ) );
+                }
+                obj[ prop ].value = intArray;
+                break;
         } 
     
+    }
+    function getUniformValueByType( type, value ) {
+        var result = value;
+        switch ( type ) {
+            case 'i':
+                result = Number( value );
+                break
+            case 'f':
+                result = parseFloat( value );
+                break;
+            case 'c':
+                result = new THREE.Color( value );
+                break;
+            case 'v2':
+                result = new THREE.Vector2( value[0], value[1] );
+                break;
+            case 'v3':
+                result = new THREE.Vector3( value[0], value[1], value[2] );
+                break;
+            case 'v4':
+                result = new THREE.Vector4( value[0], value[1], value[2], value[3] );
+                break;
+            case 't':
+                if ( value ) {
+                    result = loadTexture( undefined, value );
+                }
+                break;
+            case 'tv':
+                result = [];
+                for ( var i = 0; i < value.length; i++ ) {
+                    result.push( loadTexture( undefined, value[ i ] ) );
+                }
+                break;
+            case 'v2v':
+                result = [];
+                var vector;
+                for ( var i = 0; i < value.length; i++ ) {
+                    vector = value[ i ];
+                    result.push( new THREE.Vector2( vector[0], vector[1] ) );
+                }
+                break;
+        }
+        return result;
     }
     function decompress(dataencoded)
     {
@@ -5566,6 +5699,7 @@ define( [ "module",
         var txt = undefined;
         var url = undefined;
         var mapping = undefined;
+        var wrapTexture = false;
         var onLoad = function( texture ) {
             if ( mat ) {
                 mat.map = texture;
@@ -5580,13 +5714,21 @@ define( [ "module",
         //console.log( [ "loadTexture: ", JSON.stringify( def ) ] );
 
         if ( utility.isString( def ) ) {
-            url = def;    
+            url = def;
         } else {
-            url = def.url;
+            if ( def.canvasID ) {
+                var canvas = document.getElementById( def.canvasID );
+                url = canvas;
+            } else {
+                url = def.url;
+            }
             mapping = def.mapping;
+            wrapTexture = Boolean( def.wrapTexture );
         }
 
-        if ( mat === undefined ) {
+        if ( url instanceof HTMLElement && url.nodeName === "CANVAS" ) {
+            txt = new THREE.Texture( url );
+        } else if ( mat === undefined ) {
             if ( mapping === undefined ) {
                 txt = THREE.ImageUtils.loadTexture( url );    
             } else {
@@ -5594,6 +5736,17 @@ define( [ "module",
             }
         } else {
             txt = THREE.ImageUtils.loadTexture( url, mapping, onLoad, onError );            
+        }
+
+        if ( def instanceof Object ) {
+            var keys = Object.keys( def );
+            for ( var i = 0; i < keys.length; i++ ) {
+                setTextureProperty( txt, keys[ i ], def[ keys[ i ] ], true );
+            }
+        }
+
+        if ( wrapTexture ) {
+            txt.wrapS = txt.wrapT = THREE.RepeatWrapping;
         }
 
         return txt;
@@ -5825,7 +5978,7 @@ define( [ "module",
         return value;
     }
 
-    function setTextureProperty( texture, propertyName, propertyValue ) {
+    function setTextureProperty( texture, propertyName, propertyValue, suppressUpdate ) {
         var value = propertyValue;
 
         if ( texture === undefined ) {
@@ -6007,7 +6160,7 @@ define( [ "module",
 
         }
 
-        if ( value !== undefined ) {
+        if ( value !== undefined && !suppressUpdate ) {
             texture.needsUpdate = true;
         }
 
