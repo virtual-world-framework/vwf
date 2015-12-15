@@ -7,14 +7,8 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
     return model.load( module, {
 
         initialize: function() {
-            var lastKernel;
             this.state.overlays = {};
             this.state.elements = {};
-            lastKernel = this.kernel;
-            while ( lastKernel.kernel ) {
-                lastKernel = lastKernel.kernel;
-            }
-            this.state.kernel = lastKernel;
             logger = this.logger;
         },
 
@@ -22,7 +16,7 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
             childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
 
             var node;
-            var protos = getPrototypes.call( this, this.state.kernel, childExtendsID );
+            var protos = this.kernel.prototypes( childID );
             if ( protos && isOverlay( protos ) ) {
                 node = this.state.overlays[ childID ] = {
                     "id": childID,
@@ -152,16 +146,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 
     } );
-
-    function getPrototypes( kernel, extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = kernel.prototype( id );
-        }
-        return prototypes;
-    }
 
     function isOverlay( prototypes ) {
         var foundOverlay = false;
