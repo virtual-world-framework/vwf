@@ -1929,6 +1929,29 @@ define( [ "module",
                         propagateKineticNode( methodParameters[0] );
                     }
                     break;
+                case "moveToTop":
+                case "moveToBottom":
+                    var node = this.state.nodes[ nodeID ];
+                    if ( node ) {
+                        if ( node.kineticObj ) {
+                            node.kineticObj.moveToTop();
+                            if ( ( methodParameters.length > 0 ) && ( node.kineticObj.children.length > 0 ) ) {
+                                // Search for children with these names and elevate them to top
+                                for ( var i = 0; i < methodParameters.length; i++ ) {
+                                    for ( var j = 0; j < node.kineticObj.children.length; j++ ) {
+                                        if ( node.kineticObj.children[ j ] && ( node.kineticObj.children[ j ].name() === methodParameters[ i ] ) ) {
+                                            if ( methodName === "moveToTop" ) {
+                                                node.kineticObj.children[ j ].moveToTop();
+                                            } else {
+                                                node.kineticObj.children[ j ].moveToBottom();                                                
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
             }
         },
 

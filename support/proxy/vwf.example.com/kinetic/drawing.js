@@ -5,6 +5,8 @@ this.initialize = function() {
 
 this.clientWatch = function() {
     
+    debugger;
+
     var clients = this.find( "doc('http://vwf.example.com/clients.vwf')" )[0];
 
     if ( clients !== undefined ) {
@@ -27,6 +29,8 @@ this.isValid = function( obj ) {
 };
 
 this.clientJoin = function( moniker ) {
+
+    debugger;
     //if ( this.id === "http://vwf.example.com/kinetic/drawing.vwf" ){
     //    return;
     //}
@@ -53,6 +57,8 @@ this.clientJoin = function( moniker ) {
 };
 
 this.clientLeave = function( moniker ) {
+    debugger;
+
     if ( this.drawing_clients[ moniker ] !== undefined ) {
         delete this.drawing_clients[ moniker ]; 
         this.drawing_clients = this.drawing_clients;
