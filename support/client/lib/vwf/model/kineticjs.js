@@ -1688,7 +1688,8 @@ define( [ "module",
                 var creatingClient = this.kernel.client();
                 var thisClient     = this.kernel.moniker();
 
-                if ( !this.kernel.client() || ( this.kernel.client() === this.kernel.moniker() ) ) {                   
+                //if ( !this.kernel.client() || ( this.kernel.client() === this.kernel.moniker() ) ) {                   
+                if ( !isNodeInHierarchy( node ) ) {
                     node.kineticObj = createKineticObject( node );
 
                     // if ( node.kineticObj instanceof Kinetic.Stage ) {
@@ -1932,7 +1933,7 @@ define( [ "module",
                 case "moveToTop":
                 case "moveToBottom":
                     var node = this.state.nodes[ nodeID ];
-                    if ( node ) {
+                    if ( node && ( this.kernel.client() === this.kernel.moniker() ) ) {
                         if ( node.kineticObj ) {
                             node.kineticObj.moveToTop();
                             if ( ( methodParameters.length > 0 ) && ( node.kineticObj.children.length > 0 ) ) {
@@ -2120,6 +2121,21 @@ define( [ "module",
         }
 
     } 
+
+    function isNodeInHierarchy( node ) {
+        var foundNode = false;
+
+        if ( modelDriver.state.nodes[ node.parentID ] ) {
+            var parent = modelDriver.state.nodes[ node.parentID ];
+            if ( parent.children ) {
+                for ( var i = 0; i < parent.children.length && !foundNode; i++ ) {
+                    foundNode = ( parent.children[ i ] === node.ID );
+                }
+            }
+        }
+
+        return foundNode;
+    }
 
     function isStageDefinition( prototypes ) {
         var found = false;
