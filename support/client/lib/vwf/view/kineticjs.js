@@ -812,25 +812,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     }
                     break;
 
-                case "privateDrawingUpdated":
-                    // User is actively drawing on the local client
-                    // make sure the drawing is displayed as the user draws it.
-                    if ( self.kernel.client() === self.kernel.moniker() )  {
-                        var node = this.state.nodes[ eventData[0] ];
-                        if ( node ) {
-                            var kineticObj = node.kineticObj;
-                            if ( kineticObj && activelyDrawing ) {
-                                //kineticObj.drawScene();
-                                //kineticObj.draw();
-                            }
-                        }
-                        /*
-                        for ( var id in viewDriver.state.stages ){
-                            viewDriver.state.stages[ id ].drawScene();                
-                        } */
-                    }
-                    break;
-
                 case "textValueUpdated":
                     if ( drawing_private !== undefined && drawing_private.drawingObject ) {
                         var drawingObject = drawing_private.drawingObject;
@@ -1671,7 +1652,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 //privateState.previousPoint = eventPoint;
                 // Update the view to keep pace with user input
                 //console.info( drawingObject.id + " updated, sending update event." );
-                //node.privateDrawingUpdated( drawingObject.id );
                 if ( drawingObject && activelyDrawing ) {
                     //console.info( "VIEW: draw object " );
                     drawObject( drawingObject, clearBeforeDraw );

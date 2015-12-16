@@ -559,9 +559,6 @@ this.update = function( eventData, nodeData, upEvent ) {
 
         if ( pointAccepted ) {
             privateState.previousPoint = eventPoint;
-            // Update the view to keep pace with user input
-            //console.info( drawingObject.id + " updated, sending update event." );
-            this.privateDrawingUpdated( drawingObject.id );
         }
 
     }   

@@ -27,6 +27,5 @@ events:
   textCreated:
   imageCreated:
   findChild:
-  privateDrawingUpdated:
 scripts:
 - source: "http://vwf.example.com/kinetic/drawing.js"
