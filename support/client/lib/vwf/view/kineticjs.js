@@ -7,7 +7,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var stageContainer;
     var stageWidth = ( window && window.innerWidth ) ? window.innerWidth : 800;
     var stageHeight = ( window && window.innerHeight ) ? window.innerHeight : 600;
-    var drawing_private = {};
+    var drawing_private = {
+            "drawingObject": null,
+            "initialDownPoint": [ -1, -1 ],
+            "previousPoint": [ -1, -1 ],
+            "mouseDown": false
+    };
     var drawing_client = {  
             "drawing_mode": 'none',
             "drawing_visible": 'inherit',
@@ -1026,33 +1031,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
     }
 
-    setUpPrivate = function() {
-        
-        //if ( drawing_private === undefined ) {
-        //    drawing_private = {};
-        //}
-        if ( drawing_private === undefined ) {
-            drawing_private = {
-                "drawingObject": null,
-                "initialDownPoint": [ -1, -1 ],
-                "previousPoint": [ -1, -1 ],
-                "mouseDown": false
-            };  
-        }
-
-    };
-
     function drawDown( nodeID, eventData, nodeData, touch ) {
 
         var node = viewDriver.state.nodes[ nodeID ];
-
-        //if ( !isValid( node.drawing_clients ) || 
-        //     !isValid( node.drawing_clients[ node.client ] ) ) {
-        //    node.clientJoin( node.client );
-        //} 
-        if ( !isValid( drawing_private ) ) {
-            setUpPrivate();
-        }
 
         var userState = drawing_client;
         var privateState = drawing_private;
@@ -1274,14 +1255,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     function drawMove( nodeID, eventData, nodeData, touch ) {
 
         var node = viewDriver.state.nodes[ nodeID ];
-
-        //if ( !isValid( node.drawing_clients ) || 
-        //     !isValid( node.drawing_clients[ node.client ] ) ) {
-        //    node.clientJoin( node.client );
-        //} 
-        if ( drawing_private === undefined ) {
-            setUpPrivate( );
-        }
 
         var userState = drawing_client;
         if ( userState.drawing_mode === 'none' ) {
