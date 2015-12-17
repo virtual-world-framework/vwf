@@ -1685,9 +1685,6 @@ define( [ "module",
                 
                 node.prototypes = protos;
 
-                var creatingClient = this.kernel.client();
-                var thisClient     = this.kernel.moniker();
-
                 //if ( !this.kernel.client() || ( this.kernel.client() === this.kernel.moniker() ) ) {                   
                 if ( !isNodeInHierarchy( node ) ) {
                     node.kineticObj = createKineticObject( node );
