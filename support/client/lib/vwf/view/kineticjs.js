@@ -29,6 +29,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var private_node = undefined;
     var activelyDrawing = false;
     var clearBeforeDraw = false;
+    var lastRenderTime = 0;     // last time whole scene was rendered
+    var renderTimeout = 100;    // ms between renders
+    var dt = new Date();
 
     // Object implements tapHold behavior (kineticJS doesn't have a built-in one)
     var tapHold = { 
@@ -192,8 +195,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             drawMove( node.ID, eData.eventData[0], node, false ); 
 
             var userState = drawing_client;
-            if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
-                activelyDrawing = true;
+            if ( !userState[ "drawing_mode" ] || ( userState[ "drawing_mode" ] === "none" ) ) {
+                activelyDrawing = false;
             }
 
         } );
@@ -260,6 +263,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             drawUp( node.ID, eData.eventData[0], node, true ); 
 
             activelyDrawing = false;
+            render( node.kineticObj, true );
 
             //var userState = drawing_client;
             //if ( activelyDrawing ) {
@@ -291,6 +295,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
+            activelyDrawing = false;
+            render( node.kineticObj, true );
 
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerClick', eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'pointerClick', eData.eventData );
@@ -301,6 +307,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
+            activelyDrawing = false;
+            render( node.kineticObj, true );
 
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerDoubleClick', eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'pointerDoubleClick', eData.eventData );
@@ -350,6 +358,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             tapHold.moved( node, eData.eventData[0] );
             //viewDriver.kernel.dispatchEvent( node.ID, "dragMove", eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
+            activelyDrawing = false;
 
             if ( node.kineticObj.mouseDragging ) {
                 var xPos = viewDriver.state.getProperty( node.kineticObj, "x" );
@@ -369,6 +378,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //tapHold.cancel();
             //viewDriver.kernel.dispatchEvent( node.ID, "dragEnd", eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
+            activelyDrawing = false;
 
             node.kineticObj.mouseDragging = false;
             if ( viewDriver.state.draggingNodes[ node.ID ] !== undefined ) {
@@ -399,8 +409,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             drawDown( node.ID, eData.eventData[0], node, false ); 
 
             var userState = drawing_client;
-            if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
-                activelyDrawing = true;
+            if ( !userState[ "drawing_mode" ] || ( userState[ "drawing_mode" ] === "none" ) ) {
+                activelyDrawing = false;
             }
 
             swipe.swipedAcross( node, true, eData.eventData );
@@ -436,6 +446,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             drawUp( node.ID, eData.eventData[0], node, true ); 
 
             activelyDrawing = false;
+            render( node.kineticObj, true );
         } );
 
         node.kineticObj.on( "tap", function( evt ) {
@@ -443,9 +454,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
+            activelyDrawing = false;
 
             //viewDriver.kernel.dispatchEvent( node.ID, "tap", eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'tap', eData.eventData );
+            render( node.kineticObj, true );
         } );
 
         node.kineticObj.on( "dbltap", function( evt ) {
@@ -453,9 +466,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
+            activelyDrawing = false;
 
             //viewDriver.kernel.dispatchEvent( node.ID, "dragStart", eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'doubleTap', eData.eventData );
+            render( node.kineticObj, true );
         } );
     }
 
@@ -495,6 +510,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var protos = node.prototypes;
             if ( viewDriver.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
                 var stage = this.state.stage = node.kineticObj;
+                render( node.kineticObj );
             }
                
         },
@@ -521,13 +537,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 viewDriver.kernel.getProperty( childID, "supportMouseEvents" );
                 viewDriver.kernel.getProperty( childID, "supportTouchEvents" );
 
+                render( node.kineticObj );
             }
 
          },
  
         // -- deletedNode ------------------------------------------------------------------------------
 
-        //deletedNode: function( nodeID ) { },
+        deletedNode: function( nodeID ) { 
+
+            for ( var id in viewDriver.state.stages ) {
+                renderScene( viewDriver.state.stages[ id ], true );                
+            } 
+        },
 
         // -- addedChild -------------------------------------------------------------------------------
 
@@ -891,10 +913,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         } 
     }
 
-    function renderScene( stage ) {
+    function renderScene( stage, force ) {
         //window.requestAnimationFrame( renderScene( stage ) );
-        if ( stage !== undefined && !activelyDrawing ) {
-            stage.batchDraw();    
+        if ( stage && !activelyDrawing ) {
+            //stage.batchDraw();
+            render( stage, force );
+        }
+    }
+
+    function render( kineticObj, force ) {
+        var now = Date.now();
+        if ( kineticObj && ( ( ( now - lastRenderTime ) > renderTimeout ) || force ) ) {
+            kineticObj.draw();
+            lastRenderTime = now;
         }
     }
 

@@ -1933,19 +1933,23 @@ define( [ "module",
                 case "moveToTop":
                 case "moveToBottom":
                     var node = this.state.nodes[ nodeID ];
+                    var toTop = ( methodName === "moveToTop" );
+                    var params = null;
+                    if ( methodParameters.length > 0 ) {
+                        params = methodParameters[0];
+                    }
                     if ( node && ( this.kernel.client() === this.kernel.moniker() ) ) {
                         if ( node.kineticObj ) {
-                            node.kineticObj.moveToTop();
-                            if ( ( methodParameters.length > 0 ) && ( node.kineticObj.children.length > 0 ) ) {
+                            if ( params && params[ "includeParent" ] && node.kineticObj.parent ) {
+                               ( toTop ? node.kineticObj.parent.moveToTop() : node.kineticObj.parent.moveToBottom() );
+                            }
+                            ( toTop ? node.kineticObj.moveToTop() : node.kineticObj.moveToBottom() );
+                            if ( params && ( params[ "orderChildren" ].length > 0 ) && ( node.kineticObj.children.length > 0 ) ) {
                                 // Search for children with these names and elevate them to top
-                                for ( var i = 0; i < methodParameters.length; i++ ) {
+                                for ( var i = 0; i < params.orderChildren.length; i++ ) {
                                     for ( var j = 0; j < node.kineticObj.children.length; j++ ) {
-                                        if ( node.kineticObj.children[ j ] && ( node.kineticObj.children[ j ].name() === methodParameters[ i ] ) ) {
-                                            if ( methodName === "moveToTop" ) {
-                                                node.kineticObj.children[ j ].moveToTop();
-                                            } else {
-                                                node.kineticObj.children[ j ].moveToBottom();                                                
-                                            }
+                                        if ( node.kineticObj.children[ j ] && ( node.kineticObj.children[ j ].name() === params.orderChildren[ i ] ) ) {
+                                            ( toTop ? node.kineticObj.children[ j ].moveToTop() : node.kineticObj.children[ j ].moveToBottom() );
                                         }
                                     }
                                 }
