@@ -9,6 +9,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var stageHeight = ( window && window.innerHeight ) ? window.innerHeight : 600;
     var drawing_private = {
             "drawingObject": null,
+            "drawingDef": null,
             "initialDownPoint": [ -1, -1 ],
             "previousPoint": [ -1, -1 ],
             "mouseDown": false
@@ -1033,8 +1034,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function drawDown( nodeID, eventData, nodeData, touch ) {
 
-        var node = viewDriver.state.nodes[ nodeID ];
-
         var userState = drawing_client;
         var privateState = drawing_private;
         var drawingMode = userState.drawing_mode;
@@ -1045,10 +1044,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         var compExtends = undefined;
         var groupExtends = undefined;
-        var section = "shapes";
+        var section = "/shapes";
 
         if ( drawingMode === "freeDraw" ) {
-            section = "lines";        
+            section = "/lines";        
         }
 
         switch ( drawingMode ) {
@@ -1135,23 +1134,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         if ( groupExtends !== undefined ) {
 
             privateState.initialDownPoint = eventPointDown;
-            //var parentPath = userState.drawing_parentPath + section ;
-            var parentPath = userState.drawing_parentID;
-            //var parentNode = viewDriver.state.nodes[ parentPath ];
-            var section = findSection( parentPath, section );
-            var parent = section ? section : node;
-            //var parents = this.find( parentPath );
+            var parentPath = userState.drawing_parentPath + section ;
+            var parentIDs = viewDriver.kernel.find( viewDriver.kernel.application(), parentPath );
 
-            // find was failing 9/2/14, and the code below 
-            // was a backup, going to leave this in until we feel good
-            // about the issues we saw are no longer a problem        
-            //if ( parents === undefined ) {
-            //    parents = [ node.findChild( this, parentPath.split( '/' ) ) ];
-            //}
-
-            //var parent = viewDriver.state.nodes[ parentPath ] ? viewDriver.state.nodes[ parentPath ] : node;
-
-            //var parent = parents.length > 0 ? parents[ 0 ] : this;
+            var parentID = parentIDs.length > 0 ? parentIDs[ 0 ] : viewDriver.kernel.application();
             var groupDef = {
                 "extends": groupExtends,
                 "properties": {
@@ -1162,13 +1148,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 "children": {}
             };
 
-            var self = this;
-            var selfMoniker = node.client;
             var name = drawingMode + drawing_index;
             drawing_index = drawing_index + 1;
-            var childID = section.ID + ":" + name;
 
-            private_node = createLocalKineticNode( section.ID, childID, groupDef, [], undefined, undefined, name );
+            var childID = parentID + ":" + name;
+
+            private_node = createLocalKineticNode( parentID, childID, groupDef, [], undefined, undefined, name );
             drawing_private.drawingObject = private_node.kineticObj;
 
             // Define the component objects of this group object
@@ -1181,43 +1166,32 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 var compChild =  createLocalKineticNode( childID, compID, groupDef.children[ def ], [], undefined, undefined, def );
                 drawing_private.drawingObject[ def ] = compChild.kineticObj;
                 drawing_private.drawingObject.children.push( drawing_private.drawingObject[ def ] );
-                //drawing_private.children.push( compID );
             }
 
-            //var self = this;
-            //var selfMoniker = node.client;
-            //var name = drawingMode + drawing_index;
-            //drawing_index = drawing_index + 1;
-            //var childID = section.ID + ":" + name;
+            drawing_private.drawingDef = groupDef;
 
-            //parent.children.create( name, groupDef, function( child ) {
-            //    drawing_private.drawingObject = child;
-            //} );
-            //private_node = createLocalKineticNode( section.ID, childID, groupDef, [], undefined, undefined, name );
-            //drawing_private.drawingObject = private_node.kineticObj;
             drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
-
 
         } else if ( compExtends !== undefined ) {
 
             privateState.initialDownPoint = eventPointDown;
-            var parentPath = userState.drawing_parentID;
-            //var parentNode = viewDriver.state.nodes[ parentPath ];
-            var section = findSection( parentPath, section );
-            var parent = section ? section : node;
+            var parentPath = userState.drawing_parentPath + section;
+            var parentIDs = viewDriver.kernel.find( viewDriver.kernel.application(), parentPath );
 
+            var parentID = parentIDs.length > 0 ? parentIDs[ 0 ] : viewDriver.kernel.application();
             var shapeDef = {
                 "extends": compExtends,
                 "properties": getDefaultProperties( drawingMode, false, eventPointDown )
             };
 
-            var self = this;
-            var selfMoniker = node.client;
             var name = drawingMode + drawing_index;
             drawing_index = drawing_index + 1;
-            var childID = section.ID + ":" + name;
-            private_node = createLocalKineticNode( section.ID, childID, shapeDef, [], undefined, undefined, name );
+            var childID = parentID + ":" + name ;
+            private_node = createLocalKineticNode( parentID, childID, shapeDef, [], undefined, undefined, name );
             drawing_private.drawingObject = private_node.kineticObj;
+
+            drawing_private.drawingDef = shapeDef;
+
             drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
 
         }
