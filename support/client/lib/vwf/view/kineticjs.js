@@ -10,6 +10,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var drawing_private = {
             "drawingObject": null,
             "drawingDef": null,
+            "drawingParentID": undefined,
+            "drawingChildName": "",
             "initialDownPoint": [ -1, -1 ],
             "previousPoint": [ -1, -1 ],
             "mouseDown": false
@@ -1168,7 +1170,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 drawing_private.drawingObject.children.push( drawing_private.drawingObject[ def ] );
             }
 
+            // Save data to be used to create the node in the model
             drawing_private.drawingDef = groupDef;
+            drawing_private.drawingParentID = parentID;
+            drawing_private.drawingChildName = name;
 
             drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
 
@@ -1190,7 +1195,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             private_node = createLocalKineticNode( parentID, childID, shapeDef, [], undefined, undefined, name );
             drawing_private.drawingObject = private_node.kineticObj;
 
+            // Save data to be used to create the node in the model
             drawing_private.drawingDef = shapeDef;
+            drawing_private.drawingParentID = parentID;
+            drawing_private.drawingChildName = name;
 
             drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
 
@@ -1831,6 +1839,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     }
 
     function propagateNodeToModel() {
+
+        // Create the node in the model
+        viewDriver.kernel.createChild( drawing_private.drawingParentID, drawing_private.drawingChildName, drawing_private.drawingDef );
+
 
         // Delete the private node - we no longer need it
         // Remove the kinetic object from the tree and destroy the object
