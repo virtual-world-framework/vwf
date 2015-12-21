@@ -1905,14 +1905,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
 
         // Delete the private node - we no longer need it
+        // Remove the kinetic object from the tree and destroy the object
+        drawing_private.drawingObject.destroy();
         drawing_private.drawingObject = null;
         drawing_private = {};
-        //delete private_node;
         private_node = undefined;
 
-        //callMethod();
-
-        //kineticNode = private_node.kineticObj;
     }
 
     function drawObject( kineticObject, clearBefore ) {
