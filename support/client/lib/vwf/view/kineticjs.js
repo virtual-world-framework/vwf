@@ -1858,15 +1858,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function propagateNodeToModel() {
 
-        // Send data about this node so the global node can be created and propagated
-        //viewDriver.kernel.callMethod( private_node.parentID, "propagateKineticNode", [ appID, private_node ] );
-        var appID = viewDriver.kernel.kernel.application();
-
-        viewDriver.kernel.kernel.callMethod( appID, "propagateKineticNode", [ private_node ] );
-
-        viewDriver.kernel.kernel.createNode( private_node.extendsID, undefined, private_node.ID, null );
-
-
         // Delete the private node - we no longer need it
         // Remove the kinetic object from the tree and destroy the object
         var nodeID = drawing_private.drawingObject.id();
