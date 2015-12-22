@@ -31,6 +31,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var clearBeforeDraw = false;
     var lastRenderTime = 0;     // last time whole scene was rendered
     var renderTimeout = 100;    // ms between renders
+    var mouseDown = false;
 
     // Object implements tapHold behavior (kineticJS doesn't have a built-in one)
     var tapHold = { 
@@ -174,8 +175,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     // Attach handlers for mouse events
     function attachMouseEvents( node ) {
 
-        var mouseDown = false;
-
         node.kineticObj.on( "mousemove", function( evt ) {
             var eData = processEvent( evt, node, false );
 
@@ -208,18 +207,18 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         node.kineticObj.on( "mouseenter", function( evt ) {
             var eData = processEvent( evt, node, false );
             //viewDriver.kernel.dispatchEvent( node.ID, 'pointerEnter', eData.eventData, eData.eventNodeData );
-            //if ( mouseDown ) {
+            if ( mouseDown ) {
                 swipe.swipedAcross( node );
-            //}
+            }
             //viewDriver.kernel.fireEvent( node.ID, 'pointerEnter', eData.eventData );
         } );
 
         node.kineticObj.on( "mouseleave", function( evt ) {
             var eData = processEvent( evt, node, false );
             // viewDriver.kernel.dispatchEvent( node.ID, 'pointerLeave', eData.eventData, eData.eventNodeData );
-            //if ( mouseDown ) {
+            if ( mouseDown ) {
                 swipe.swipedAcross( node );
-            //}
+            }
             //viewDriver.kernel.fireEvent( node.ID, 'pointerLeave', eData.eventData );
         } );
 
