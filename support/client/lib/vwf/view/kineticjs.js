@@ -1600,7 +1600,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     drawingObject.lineJoin( userState.lineJoin );
                     drawingObject.dash( null );
                     drawingObject.fill( null );
-                    drawingObject.position( [ 0, 0 ] );
                     drawingObject.closed( true );
                     var arrowThickness = userState.drawing_width * arrowWidthMult;
                     var headWidth = userState.drawing_width * arrowWidthMult * 2;
