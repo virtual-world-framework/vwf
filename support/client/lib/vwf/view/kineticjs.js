@@ -31,7 +31,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var clearBeforeDraw = false;
     var lastRenderTime = 0;     // last time whole scene was rendered
     var renderTimeout = 100;    // ms between renders
-    var dt = new Date();
 
     // Object implements tapHold behavior (kineticJS doesn't have a built-in one)
     var tapHold = { 
@@ -545,7 +544,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         // -- deletedNode ------------------------------------------------------------------------------
 
         deletedNode: function( nodeID ) { 
-
             for ( var id in viewDriver.state.stages ) {
                 renderScene( viewDriver.state.stages[ id ], true );                
             } 
@@ -1320,6 +1318,20 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         var node = viewDriver.state.nodes[ nodeID ];
         var appID = viewDriver.kernel.application();
         var drawAndPropagate = false;
+        var debugOn = true;
+
+        if ( debugOn ) {
+            console.info( ' ' );
+            console.info( ' === Nodes listening and visibility states ===' );
+            for(var key in viewDriver.state.nodes) {
+                var kNode = viewDriver.state.nodes[ key ];
+                var listening = ( kNode.kineticObj.listening instanceof Function ? kNode.kineticObj.listening() : undefined );
+                var visible = ( kNode.kineticObj.visible instanceof Function ? kNode.kineticObj.visible() : undefined );
+                console.info( '     Node: ' + kNode.kineticObj.id() + ', listening: ' + listening + ', visibility: ' + visible );
+            }
+            console.info( ' === End ===' );
+            console.info( ' ' );
+        }
 
         if ( drawing_private !== undefined && 
              drawing_private.drawingObject ) {
@@ -1906,10 +1918,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         // Delete the private node - we no longer need it
         // Remove the kinetic object from the tree and destroy the object
+        var nodeID = drawing_private.drawingObject.id();
         drawing_private.drawingObject.destroy();
         drawing_private.drawingObject = null;
         drawing_private = {};
         private_node = undefined;
+        if ( viewDriver.state.nodes[ nodeID ] ) {
+            delete viewDriver.state.nodes[ nodeID ];
+        }
 
     }
 

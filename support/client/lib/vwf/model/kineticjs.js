@@ -1957,6 +1957,29 @@ define( [ "module",
                         }
                     }
                     break;
+                case "childListening":
+                    var node = this.state.nodes[ nodeID ];
+                    var params = null;
+                    if ( methodParameters.length > 0 ) {
+                        params = methodParameters[0];
+                    }
+                    if ( node && ( this.kernel.client() === this.kernel.moniker() ) ) {
+                        if ( node.kineticObj ) {
+                            if ( params ) {
+                                if ( ( params[ "children" ].length > 0 ) && ( node.kineticObj.children.length > 0 ) ) {
+                                    // Search for children with these names and set their listening values
+                                    for ( var i = 0; i < params.children.length; i++ ) {
+                                        for ( var j = 0; j < node.kineticObj.children.length; j++ ) {
+                                            if ( node.kineticObj.children[ j ] && ( node.kineticObj.children[ j ].name() === params.children[ i ] ) ) {
+                                                node.kineticObj.children[ j ].listening( params.listening );
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    break;
             }
         },
 
