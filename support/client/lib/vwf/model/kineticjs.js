@@ -315,6 +315,11 @@ define( [ "module",
                         case "absoluteZIndex":
                             modelDriver.logger.errorx( "settingProperty", "Cannot set property ", propertyName );
                             value = undefined;
+                            break;
+
+                        case "attributes":
+                            kineticObj.setAttrs( propertyValue || {} );
+                            break;
 
                         default:
                             value = undefined;
@@ -1280,6 +1285,10 @@ define( [ "module",
 
                             case "absoluteZIndex":
                                 value = kineticObj.getAbsoluteZIndex();
+                                break;
+
+                            case "attributes":
+                                value = kineticObj.getAttrs();
                                 break;
 
                         }
