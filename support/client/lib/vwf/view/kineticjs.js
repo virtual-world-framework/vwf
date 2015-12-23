@@ -1841,6 +1841,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     function propagateNodeToModel() {
 
         // Create the node in the model
+
+        drawing_private.drawingDef.properties = {
+            "attributes": $.extend( {}, drawing_private.drawingObject.getAttrs() )
+        };
+
+        delete drawing_private.drawingDef.properties.attributes.id;
+        delete drawing_private.drawingDef.properties.attributes.name;
+
         viewDriver.kernel.createChild( drawing_private.drawingParentID, drawing_private.drawingChildName, drawing_private.drawingDef );
 
 
