@@ -1840,21 +1840,20 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function propagateNodeToModel() {
 
+        // Update the VWF node descriptor with attributes from the intermediate Kinetic nodes used
+        // while editing
+
+        updateVWFdescriptor( drawing_private.drawingDef, drawing_private.drawingObject );
+
+        if ( drawing_private.drawingDef.children ) {
+            for ( var def in drawing_private.drawingDef.children ) {
+                if ( drawing_private.drawingObject[ def ] ) {
+                    updateVWFdescriptor( drawing_private.drawingDef.children[ def ], drawing_private.drawingObject[ def ] );
+                }
+            }
+        }
+
         // Create the node in the model
-
-        drawing_private.drawingDef.properties = {
-            "attributes": $.extend( {}, drawing_private.drawingObject.getAttrs() )
-        };
-
-        delete drawing_private.drawingDef.properties.attributes.id;
-        delete drawing_private.drawingDef.properties.attributes.name;
-
-        // Ensure that the radius is the last property since width or height will override radius if
-        // both are provided.
-
-        var radius = drawing_private.drawingDef.properties.attributes.radius;
-        delete drawing_private.drawingDef.properties.attributes.radius;
-        drawing_private.drawingDef.properties.attributes.radius = radius;
 
         viewDriver.kernel.createChild( drawing_private.drawingParentID, drawing_private.drawingChildName, drawing_private.drawingDef );
 
@@ -1868,6 +1867,29 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         private_node = undefined;
         if ( viewDriver.state.nodes[ nodeID ] ) {
             delete viewDriver.state.nodes[ nodeID ];
+        }
+
+
+        // Set a VWF descriptor's `properties` to describe a Kinetic node using its attributes
+
+        function updateVWFdescriptor( vwfDescriptor, kineticNode ) {
+
+            var properties = vwfDescriptor.properties = {
+                "attributes": $.extend( {}, kineticNode.getAttrs() )
+            };
+
+            // Remove attributes related to editing with the intermediate node.
+
+            delete properties.attributes.id;
+            delete properties.attributes.name;
+
+            // Ensure that `radius` is the last attribute since `width` or `height` will override
+            // `radius` if both are provided.
+
+            var radius = properties.attributes.radius;
+            delete properties.attributes.radius;
+            properties.attributes.radius = radius;
+
         }
 
     }
