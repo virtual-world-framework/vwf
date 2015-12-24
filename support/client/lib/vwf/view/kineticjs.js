@@ -33,7 +33,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             "fillStyle": null,
             "zIndex": 4 
         };
-    var drawing_index = 0;
     var private_node = undefined;
     var activelyDrawing = false;
     var clearBeforeDraw = false;
@@ -1150,8 +1149,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 "children": {}
             };
 
-            var name = drawingMode + drawing_index;
-            drawing_index = drawing_index + 1;
+            var name = drawingMode + "-" + randomSuffix();
 
             var childID = parentID + ":" + name;
 
@@ -1189,8 +1187,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 "properties": getDefaultProperties( drawingMode, false, eventPointDown )
             };
 
-            var name = drawingMode + drawing_index;
-            drawing_index = drawing_index + 1;
+            var name = drawingMode + "-" + randomSuffix();
             var childID = parentID + ":" + name ;
             private_node = createLocalKineticNode( parentID, childID, shapeDef, [], undefined, undefined, name );
             drawing_private.drawingObject = private_node.kineticObj;
@@ -1202,6 +1199,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
 
+        }
+
+        // Return a hex string representing a random 32-bit integer.
+
+        function randomSuffix() {
+            return ( "00000000" + Math.floor( Math.random() * 0x100000000 ).toString( 16 ) ).substr( -8 );
         }
     };
 
@@ -1681,7 +1684,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         console.info( "createLocalKineticNode" );
 
-        var node = viewDriver.state.createLocalNode( parentID, drawingID, extendsID, implementsID, source, type, drawing_index, name );
+        var node = viewDriver.state.createLocalNode( parentID, drawingID, extendsID, implementsID, source, type, null, name );
         node.prototypes = [];
         node.prototypes.push( extendsID );
 
