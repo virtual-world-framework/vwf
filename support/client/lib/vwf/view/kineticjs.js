@@ -1849,6 +1849,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         delete drawing_private.drawingDef.properties.attributes.id;
         delete drawing_private.drawingDef.properties.attributes.name;
 
+        // Ensure that the radius is the last property since width or height will override radius if
+        // both are provided.
+
+        var radius = drawing_private.drawingDef.properties.attributes.radius;
+        delete drawing_private.drawingDef.properties.attributes.radius;
+        drawing_private.drawingDef.properties.attributes.radius = radius;
+
         viewDriver.kernel.createChild( drawing_private.drawingParentID, drawing_private.drawingChildName, drawing_private.drawingDef );
 
 
