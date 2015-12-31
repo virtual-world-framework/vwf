@@ -699,8 +699,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "text":
                     if ( drawing_private !== undefined && drawing_private.drawingObject ) {
                         var drawingObject = drawing_private.drawingObject;
-                        if ( drawingObject.content.id() === nodeID ) {
-                            drawingObject.content.text( propertyValue );
+                        if ( drawingObject.id() === nodeID ) {
+                            drawingObject.text( propertyValue );
                             drawObject( drawingObject, true );
                             propagateNodeToModel();
                         }
@@ -822,8 +822,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "textValueUpdated":
                     if ( drawing_private !== undefined && drawing_private.drawingObject ) {
                         var drawingObject = drawing_private.drawingObject;
-                        if ( drawingObject.content.id() === eventData[0] ) {
-                            drawingObject.content.text( eventData[1] );
+                        if ( drawingObject.id() === eventData[0] ) {
+                            drawingObject.text( eventData[1] );
                             drawObject( drawingObject, true );
                             propagateNodeToModel();
                         }
@@ -1076,11 +1076,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 break;
 
             case "text":
-                groupExtends = "http://vwf.example.com/kinetic/drawingGroup.vwf";
-                compExtends = { 
-                    "border": "http://vwf.example.com/kinetic/rect.vwf", 
-                    "content": [ "http://vwf.example.com/kinetic/", drawingMode, ".vwf" ].join('') 
-                };
+                compExtends = "http://vwf.example.com/kinetic/rect.vwf";
                 break;
 
             case "freeDraw":
@@ -1097,39 +1093,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 break;
 
         }
-
-        var getDefaultProperties = function( drawingMode, groupParent, eventPoint ) {
-            var retObj = {
-                "visible": 'inherit',
-                "listening": 'inherit',
-                "opacity": userState.drawing_opacity,
-                "index": 4
-            };
-
-            switch( drawingMode ) {
-                case "sprite":
-                case "text":
-                case "image":
-                    retObj.opacity = 1.0;
-                    retObj.scaleOnLoad = true;
-                    break;
-                default:
-                    retObj.fill = userState.drawing_color;
-                    break;
-            }
-
-            if ( groupParent ) {
-                retObj.x = 0;
-                retObj.y = 0;
-                retObj.position = [ 0, 0 ];
-            } else {
-                retObj.x = eventPoint[ 0 ];
-                retObj.y = eventPoint[ 1 ];
-                retObj.position = eventPoint;
-            }
-
-            return retObj; 
-        };
 
         var eventPointDown = eventData.stageRelative;
         if ( groupExtends !== undefined ) {
@@ -1285,8 +1248,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             switch( userState.drawing_mode ) {
                 
                 case "text":
-                    drawingObject.border.visible( false );
-                    viewDriver.kernel.fireEvent( appID, 'textCreated', [ drawingObject.content.id() ] );
+                    //drawingObject.border.visible( false );
+                    //drawingObject.visible( false );
+                    viewDriver.kernel.fireEvent( appID, 'textCreated', [ drawingObject.id() ] );
                     break;
 
                 case "sprite":
@@ -1576,16 +1540,20 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
 
                 case "text":
-                    drawingObject.border.stroke( userState.drawing_color );
-                    drawingObject.border.strokeWidth( 2 );
-                    drawingObject.border.width( width );
-                    drawingObject.border.height( height );
-                    drawingObject.border.lineCap( userState.lineCap );
-                    drawingObject.border.lineJoin( userState.lineJoin );
-                    drawingObject.border.dash( [ 2, 5 ] );
-                    drawingObject.border.fill( null );
-                    drawingObject.content.fontSize( userState.fontSize ? userState.fontSize : 16 );
-                    drawingObject.content.fontStyle( 'bold' );
+                    drawingObject.x( pos[ 0 ] );
+                    drawingObject.y( pos[ 1 ] ); 
+                    drawingObject.size( { "width": width, "height": height} );
+                    drawingObject.stroke( userState.drawing_color );
+                    drawingObject.strokeWidth( 2 );
+                    //drawingObject.border.width( width );
+                    //drawingObject.border.height( height );
+                    drawingObject.lineCap( userState.lineCap );
+                    drawingObject.lineJoin( userState.lineJoin );
+                    drawingObject.dash( [ 2, 5 ] );
+                    drawingObject.fill( null );
+                    //drawingObject.visible( true );
+                    //drawingObject.content.fontSize( userState.fontSize ? userState.fontSize : 16 );
+                    //drawingObject.content.fontStyle( 'bold' );
                     clearBeforeDraw = true;
                     break;
 
@@ -1920,10 +1888,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         switch ( propertyName ) {
 
             case "text":
-                kineticObj.content.text( propertyValue );
+                createTextObject();
+                drawing_private.drawingObject.fontSize( userState.fontSize ? userState.fontSize : 16 );
+                drawing_private.drawingObject.fontStyle( 'bold' );
+                drawing_private.drawingObject.text( propertyValue );
                 //kineticObj.content.stroke( userState.drawing_color );
-                kineticObj.content.fill( userState.drawing_color );
-                drawObject( kineticObj, true );
+                drawing_private.drawingObject.fill( userState.drawing_color );
+                drawObject( drawing_private.drawingObject, true );
                 propagateNodeToModel();
                  break;
 
@@ -1938,6 +1909,70 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     }
 
+    function getDefaultProperties( drawingMode, groupParent, eventPoint ) {
 
+        var userState = drawing_client;
+
+        var retObj = {
+            "visible": 'inherit',
+            "listening": 'inherit',
+            "opacity": userState.drawing_opacity,
+            "index": 4
+        };
+
+        switch( drawingMode ) {
+            case "sprite":
+            case "text":
+            case "image":
+                retObj.opacity = 1.0;
+                retObj.scaleOnLoad = true;
+                break;
+            default:
+                retObj.fill = userState.drawing_color;
+                break;
+        }
+
+        if ( groupParent ) {
+            retObj.x = 0;
+            retObj.y = 0;
+            retObj.position = [ 0, 0 ];
+        } else {
+            retObj.x = eventPoint[ 0 ];
+            retObj.y = eventPoint[ 1 ];
+            retObj.position = eventPoint;
+        }
+
+        return retObj; 
+    }
+
+    function createTextObject() {
+
+        // Get the location and dimensions from the border rectangle
+        var position = [ drawing_private.drawingObject.x(), drawing_private.drawingObject.y() ];
+        var width = drawing_private.drawingObject.width();
+        var height = drawing_private.drawingObject.height();
+        var childID = drawing_private.drawingObject.id();
+        var parentID = drawing_private.drawingObject.parent.id();
+        var name = drawing_private.drawingObject.name();
+        var compExtends = "http://vwf.example.com/kinetic/text.vwf";
+        var shapeDef = {
+            "extends": compExtends,
+            "properties": getDefaultProperties( "text", false, position )
+        };
+
+        // Delete the border rectangle
+        var nodeID = drawing_private.drawingObject.id();
+        drawing_private.drawingObject.destroy();
+        drawing_private.drawingObject = null;
+        drawing_private.drawingDef = shapeDef;
+        if ( viewDriver.state.nodes[ nodeID ] ) {
+            delete viewDriver.state.nodes[ nodeID ];
+        }
+
+        // Create the text object
+        private_node = createLocalKineticNode( parentID, childID, shapeDef, [], undefined, undefined, name );
+        drawing_private.drawingObject = private_node.kineticObj;
+
+    }
 
 });
