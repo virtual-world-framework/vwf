@@ -1888,15 +1888,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         switch ( propertyName ) {
 
             case "text":
-                createTextObject();
-                drawing_private.drawingObject.fontSize( userState.fontSize ? userState.fontSize : 16 );
-                drawing_private.drawingObject.fontStyle( 'bold' );
-                drawing_private.drawingObject.text( propertyValue );
-                //kineticObj.content.stroke( userState.drawing_color );
-                drawing_private.drawingObject.fill( userState.drawing_color );
-                drawObject( drawing_private.drawingObject, true );
-                propagateNodeToModel();
-                 break;
+                if ( createTextObject( propertyValue ) ) {
+                    drawing_private.drawingObject.fontSize( userState.fontSize ? userState.fontSize : 16 );
+                    drawing_private.drawingObject.fontStyle( 'bold' );
+                    drawing_private.drawingObject.text( propertyValue );
+                    //kineticObj.content.stroke( userState.drawing_color );
+                    drawing_private.drawingObject.fill( userState.drawing_color );
+                    drawObject( drawing_private.drawingObject, true );
+                    propagateNodeToModel();
+                }
+                break;
 
             case "image":
                 kineticObj.image( propertyValue );
@@ -1945,7 +1946,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         return retObj; 
     }
 
-    function createTextObject() {
+    function createTextObject( textValue ) {
+
+        var textCreated = false;
 
         // Get the location and dimensions from the border rectangle
         var position = [ drawing_private.drawingObject.x(), drawing_private.drawingObject.y() ];
@@ -1970,9 +1973,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
 
         // Create the text object
-        private_node = createLocalKineticNode( parentID, childID, shapeDef, [], undefined, undefined, name );
-        drawing_private.drawingObject = private_node.kineticObj;
+        if ( textValue && ( textValue !== "" ) ) {
+            private_node = createLocalKineticNode( parentID, childID, shapeDef, [], undefined, undefined, name );
+            drawing_private.drawingObject = private_node.kineticObj;
+            textCreated = true;
+        } else {
+            drawing_private = {};
+            private_node = undefined;            
+        }
 
+        return textCreated;
     }
 
 });
