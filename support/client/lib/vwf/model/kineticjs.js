@@ -318,7 +318,12 @@ define( [ "module",
                             break;
 
                         case "attributes":
-                            kineticObj.setAttrs( propertyValue || {} );
+                            // Special case for images, don't overwrite a valid image with a bogus object
+                            var attrs = propertyValue;
+                            if ( ( kineticObj instanceof Kinetic.Image ) && ( kineticObj.image() instanceof Image ) && propertyValue.image && !( propertyValue.image instanceof Image ) ) {
+                                attrs.image = kineticObj.image();
+                            }
+                            kineticObj.setAttrs( attrs || {} );
                             break;
 
                         default:
@@ -2208,7 +2213,7 @@ define( [ "module",
     function loadImage( kineticObj, url ) {
         
         var imageObj = kineticObj.image();
-        var validImage = ( imageObj !== undefined ); 
+        var validImage = ( imageObj && ( imageObj !== undefined ) && ( imageObj instanceof Image ) ); 
         var width = kineticObj.width();
         var height = kineticObj.height();
         var nodeID = kineticObj.id();
@@ -2245,7 +2250,9 @@ define( [ "module",
         }
 
         var oldSrc = imageObj.src;
-        imageObj.src = url;
+        if ( url !== oldSrc ) {
+            imageObj.src = url;
+        }
     }
 
 });
