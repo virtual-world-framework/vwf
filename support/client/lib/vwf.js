@@ -1565,11 +1565,10 @@
 
                     if ( componentIsURI( nodeComponent ) ) { // URI  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
-                        // Resolve relative URIs, but leave host-relative, locally-absolute
-                        // references intact.
+                        // Resolve relative URIs, but express local resources as host-relative.
 
-                        nodeURI = nodeComponent[0] == "/" ?
-                            nodeComponent : require( "vwf/utility" ).resolveURI( nodeComponent, baseURI );
+                        nodeURI = require( "vwf/utility" ).resolveURI( nodeComponent, baseURI,
+                            document.location.protocol + "//" + document.location.host + "/dummypath/" );
 
                         // Load the document if we haven't seen this URI yet. Mark the components
                         // list to indicate that this component is loading.
