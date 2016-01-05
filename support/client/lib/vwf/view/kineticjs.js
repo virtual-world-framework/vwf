@@ -1875,6 +1875,21 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 imageObj.onload = function() {
                     drawing_private.imageDataURL = dataURL;
                     var nodeID = drawing_private.drawingObject.id();
+
+                    // Set the width and height to maintain aspect ratio
+                    var imgAspectRatio = imageObj.width / imageObj.height;
+                    var width = drawing_private.drawingObject.width();
+                    var height = drawing_private.drawingObject.height();
+
+                    // Use the larger dimension to set the width and height
+                    if ( width >= height ) {
+                        height = width / imgAspectRatio;
+                    } else {
+                        width = height * imgAspectRatio;
+                    }
+                    drawing_private.drawingObject.width( width );
+                    drawing_private.drawingObject.height( height );
+
                     // Propagate the node to the model
                     propagateNodeToModel();
                 };
