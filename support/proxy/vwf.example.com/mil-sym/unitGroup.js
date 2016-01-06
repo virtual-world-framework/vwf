@@ -45,6 +45,8 @@ this.initialize = function() {
 
 this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
     
+    this.zIndex = 20;
+
     if ( this.threatArea ) {
         this.threatArea.position = this.icon.symbolCenter;    
     }

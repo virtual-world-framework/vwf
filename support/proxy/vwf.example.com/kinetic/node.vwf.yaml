@@ -39,6 +39,7 @@ properties:
   hasMouseEvents: false
   hasTouchEvents: false
   dragProperty: "position"
+  attributes:
 methods:
   toggleVisibility:
   toggleListening:
