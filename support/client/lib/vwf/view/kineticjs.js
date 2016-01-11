@@ -302,7 +302,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         
         node.kineticObj.on( "dragstart", function( evt ) {
             var eData = processEvent( evt, node, false );
-            viewDriver.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
+            //viewDriver.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
 
             var xPos = viewDriver.state.getProperty( node.kineticObj, "x" );
             var yPos = viewDriver.state.getProperty( node.kineticObj, "y" );
@@ -317,7 +317,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var eData = processEvent( evt, node, false );
 
             tapHold.moved( node, eData.eventData[0] );
-            viewDriver.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
+            //viewDriver.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
             activelyDrawing = false;
 
             if ( node.kineticObj.mouseDragging ) {
@@ -330,7 +330,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         node.kineticObj.on( "dragend", function( evt ) {
             var eData = processEvent( evt, node, false );
 
-            viewDriver.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
+            //viewDriver.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
             activelyDrawing = false;
 
             node.kineticObj.mouseDragging = false;
@@ -453,7 +453,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var protos = node.prototypes;
             if ( viewDriver.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
                 var stage = this.state.stage = node.kineticObj;
-                render( node.kineticObj );
+                render( node.kineticObj, false );
             }
                
         },
@@ -480,7 +480,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 viewDriver.kernel.getProperty( childID, "supportMouseEvents" );
                 viewDriver.kernel.getProperty( childID, "supportTouchEvents" );
 
-                render( node.kineticObj );
+				if ( node.kineticObj.isVisible() ) {
+					render( node.kineticObj, false );
+				}
             }
 
          },
@@ -489,7 +491,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         deletedNode: function( nodeID ) { 
             for ( var id in viewDriver.state.stages ) {
-                renderScene( viewDriver.state.stages[ id ], true );                
+                renderScene( viewDriver.state.stages[ id ], false );                
             } 
         },
 
@@ -693,6 +695,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         swipe.listenForSwipes( methodParameters[0] );
                         break;
 
+                    case "enableLayerHitGraph":
+                        var layers = methodParameters[ 0 ];
+                        for ( var id in layers ) {
+                            var layer = this.state.nodes[ nodeID ];
+                            if ( layer && ( layer.nodeType === "Layer" ) && layer.kineticObj ) {
+                                ( layers[ id ] ? layer.kineticObj.enableHitGraph() : layer.kineticObj.disableHitGraph() );
+                            }
+                        }
+                        break;
+
                 }
             }
 
@@ -823,26 +835,43 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         }
 
-        for ( var id in viewDriver.state.stages ){
-            renderScene( viewDriver.state.stages[ id ] );                
+        for ( var id in viewDriver.state.stages ) {
+            renderScene( viewDriver.state.stages[ id ], false, true );                
         } 
     }
 
-    function renderScene( stage, force ) {
+    function renderScene( stage, force, drawHit ) {
         //window.requestAnimationFrame( renderScene( stage ) );
         if ( stage && !activelyDrawing ) {
-            //stage.batchDraw();
-            render( stage, force );
+            //var now = Date.now();
+            //if ( ( ( ( now - lastRenderTime ) > renderTimeout ) || force ) ) {
+                //stage.batchDraw();
+				if ( stage.batchDraw instanceof Function ) {
+					batchRender( stage, force );
+				} else {
+					render( stage, force, drawHit );
+				}
+                //lastRenderTime = now;
+            //}
         }
     }
 
-    function render( kineticObj, force ) {
+    function render( kineticObj, force, drawHit ) {
         var now = Date.now();
         if ( kineticObj && ( ( ( now - lastRenderTime ) > renderTimeout ) || force ) ) {
-            kineticObj.draw();
+			( drawHit ? kineticObj.draw() : kineticObj.drawScene() );
+            //kineticObj.draw();
             lastRenderTime = now;
         }
     }
+	
+	function batchRender( kineticObj, force ) {
+        var now = Date.now();
+        if ( kineticObj && ( ( ( now - lastRenderTime ) > renderTimeout ) || force ) ) {
+            kineticObj.batchDraw();
+            lastRenderTime = now;
+        }
+	}
 
     function processEvent( e, node, propagate ) {
         var returnData = { eventData: undefined, eventNodeData: undefined };
@@ -1147,8 +1176,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             console.info( ' === Nodes listening and visibility states ===' );
             for(var key in viewDriver.state.nodes) {
                 var kNode = viewDriver.state.nodes[ key ];
-                var listening = ( kNode.kineticObj.listening instanceof Function ? kNode.kineticObj.listening() : undefined );
-                var visible = ( kNode.kineticObj.visible instanceof Function ? kNode.kineticObj.visible() : undefined );
+                var listening = ( kNode.kineticObj.isListening instanceof Function ? kNode.kineticObj.isListening() : undefined );
+                var visible = ( kNode.kineticObj.isVisible instanceof Function ? kNode.kineticObj.isVisible() : undefined );
                 console.info( '     Node: ' + kNode.kineticObj.id() + ', listening: ' + listening + ', visibility: ' + visible );
             }
             console.info( ' === End ===' );
