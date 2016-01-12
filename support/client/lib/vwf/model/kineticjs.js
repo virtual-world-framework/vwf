@@ -746,6 +746,10 @@ define( [ "module",
                             kineticObj.clearBeforeDraw( Boolean( propertyValue ) );
                             break;
                         
+                        case "hitGraphEnabled":
+                            kineticObj.hitGraphEnabled( Boolean(propertyValue) );
+                            break;
+
                         default:
                             value = undefined;
                             break;
