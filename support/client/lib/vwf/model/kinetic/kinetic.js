@@ -10208,6 +10208,11 @@ var Kinetic = {};
                         else if (obj.antialiased) {
                             continueSearch = true;
                         }
+                        // stop search if found empty pixel
+                        else {
+                            continueSearch = false;
+                            break;
+                        }
                     }
                     // if no shape, and no antialiased pixel, we should end searching 
                     if (!continueSearch) {
