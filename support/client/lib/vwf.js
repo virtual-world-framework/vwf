@@ -879,7 +879,7 @@
                         // timeout is controlled by the server.)
 
                         transportOptions: {
-                            "websocket": { timeout: 90000 },
+                            "websocket": { timeout: 600000 },
                         },
 
                     } );

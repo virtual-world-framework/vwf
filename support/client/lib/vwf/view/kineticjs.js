@@ -60,7 +60,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         },
         "moved":            function( node, position ) {
             if ( node === this.node ) {
-                console.info( " tapHold moved for node: " + this.node.ID + " at position: [ " + position.client[0] + ", " +  position.client[1] + " ], timerId = " + this.timerId );
+                //console.info( " tapHold moved for node: " + this.node.ID + " at position: [ " + position.client[0] + ", " +  position.client[1] + " ], timerId = " + this.timerId );
                 if ( this.timerId ) {
                     var deltaPos = [ ( position.client[0] - this.initialPosition[0] ),
                                      ( position.client[1] - this.initialPosition[1] ) ];
@@ -73,7 +73,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         },  
         "cancel":           function() {
             if ( this.timerId ) {
-                console.info( " Cancel tapHold for node: " + this.node.ID );
+                //console.info( " Cancel tapHold for node: " + this.node.ID );
                 clearTimeout( this.timerId );
             }
             this.node = null;
@@ -97,7 +97,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             return found;
         },
         "registerForTapHoldEvents": function( protoFilters ) {
-            console.info( " Registering for tapHold events for: ");
+            //console.info( " Registering for tapHold events for: ");
             for ( var i = 0; i < protoFilters.length; i++ ) {
                 console.info( i + ". " + protoFilters[i] );
             }
@@ -114,7 +114,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function fireTapHold() {
         if ( tapHold.node ) {
-            console.info( " tapHold event firing for node: " + tapHold.node.ID );
+            //console.info( " tapHold event firing for node: " + tapHold.node.ID );
             viewDriver.kernel.fireEvent( tapHold.node.ID, 'tapHold', [ tapHold.initialPosition ] );
             tapHold.cancel();
         }
@@ -127,7 +127,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         "touchStartIsTap": null,  
         "swipedAcross": function( node, isTouchStart, eventData ) {
             if ( this.isListening && this.isSwipe( node ) ) {
-                console.info( " swiped across node: " + node.ID );
+                //console.info( " swiped across node: " + node.ID );
                 if ( isTouchStart && this.touchStartIsTap ) {
                     viewDriver.kernel.fireEvent( node.ID, 'tap', eventData );
                 } else {
@@ -156,10 +156,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             return found;            
         },
         "registerForSwipeEvents":   function( protoFilters ) {
-            console.info( " Registering for swipe events for: ");
-            for ( var i = 0; i < protoFilters.length; i++ ) {
-                console.info( i + ". " + protoFilters[i] );
-            }
+            //console.info( " Registering for swipe events for: ");
+            //for ( var i = 0; i < protoFilters.length; i++ ) {
+            //    console.info( i + ". " + protoFilters[i] );
+            //}
             this.protoFilter = protoFilters;
         },
         "listenForSwipes":          function( params ) {
@@ -469,13 +469,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             if ( !node ) {
                 return;
             }
-
+            /*
             var protos = node.prototypes;
             if ( viewDriver.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
                 var stage = this.state.stage = node.kineticObj;
                 render( node.kineticObj, false );
             }
-               
+            */   
         },
 
         initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -499,11 +499,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 //vwf_view.kernel.getProperty( childID, "supportTouchEvents" );
                 viewDriver.kernel.getProperty( childID, "supportMouseEvents" );
                 viewDriver.kernel.getProperty( childID, "supportTouchEvents" );
-
+                /*
 				if ( node.kineticObj.isVisible() && !activelyDrawing ) {
                     drawObject( node.kineticObj, false );
 					//render( node.kineticObj, false );
 				}
+                */
             }
 
          },
@@ -511,9 +512,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         // -- deletedNode ------------------------------------------------------------------------------
 
         deletedNode: function( nodeID ) { 
-            for ( var id in viewDriver.state.stages ) {
-                renderScene( viewDriver.state.stages[ id ], false );                
-            } 
+            //for ( var id in viewDriver.state.stages ) {
+            //    renderScene( viewDriver.state.stages[ id ], false );                
+            //} 
         },
 
         // -- addedChild -------------------------------------------------------------------------------
@@ -686,7 +687,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
             
-            console.info( "methodName = " + methodName );
+            //console.info( "methodName = " + methodName );
 
             if ( this.kernel.client() === this.kernel.moniker() ) {
                 var prop, value, t;
@@ -1025,7 +1026,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 var modelValue = node.model[ propertyName ].value;
                 if ( modelValue !== undefined ) {
                     viewDriver.state.setProperty( node.kineticObj, propertyName, modelValue );   
-                    console.info( "- deletes node.model and set kineticObject property: "+propertyName+" to: "+modelValue );
+                    //console.info( "- deletes node.model and set kineticObject property: "+propertyName+" to: "+modelValue );
                 }
             }
         }
@@ -1165,7 +1166,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function addNodeToHierarchy( node ) {
         
-        console.info( "addNodeToHierarchy ID: " + node.ID + "    parentID: " + node.parentID );
+        //console.info( "addNodeToHierarchy ID: " + node.ID + "    parentID: " + node.parentID );
 
         if ( node.kineticObj ) {
             
@@ -1209,7 +1210,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         var node = viewDriver.state.nodes[ nodeID ];
         var appID = viewDriver.kernel.application();
         var drawAndPropagate = false;
-        var debugOn = true;
+        var debugOn = false;
 
         if ( debugOn ) {
             console.info( ' ' );
@@ -1827,13 +1828,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             // Draw the full layer
             var layer = findLayer( kineticObject );
             if ( layer ) { 
-                layer.drawScene();
+                layer.batchDraw();
             } else {
                 // Should never happen - object should always be a descendent of a layer
-                kineticObject.drawScene();
+                kineticObject.draw();
             }
         } else {
-            kineticObject.drawScene();
+            kineticObject.draw();
         }
     }
 
@@ -1976,6 +1977,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function deletePrivateNode( fullyDelete ) {
         var nodeID = drawing_private.drawingObject.id();
+        var layer = findLayer( drawing_private.drawingObject );
         drawing_private.drawingObject.destroy();
         drawing_private.drawingObject = null;
         if ( viewDriver.state.nodes[ nodeID ] ) {
@@ -1986,6 +1988,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         if ( fullyDelete ) {
             drawing_private = {};
             private_node = undefined;            
+        }
+
+        if ( layer ) {
+            layer.batchDraw();
         }
     }
 

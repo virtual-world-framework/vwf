@@ -287,7 +287,7 @@ if (typeof window != 'undefined'){
   Transport = io.Transport = function(base, options){
     this.base = base;
     this.options = {
-      timeout: 15000 // based on heartbeat interval default
+      timeout: 300000 // based on heartbeat interval default
     };
     io.util.merge(this.options, options);
   };
@@ -1480,13 +1480,13 @@ if (typeof window != 'undefined'){
       transports: ['websocket', 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling', 'jsonp-polling'],
       transportOptions: {
         'xhr-polling': {
-          timeout: 25000 // based on polling duration default
+          timeout: 60000 // based on polling duration default
         },
         'jsonp-polling': {
-          timeout: 25000
+          timeout: 60000
         }
       },
-      connectTimeout: 5000,
+      connectTimeout: 15000,
       tryTransportsOnConnectTimeout: true,
       reconnect: true,
       reconnectionDelay: 500,
