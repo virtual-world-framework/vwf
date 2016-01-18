@@ -1752,6 +1752,7 @@ define( [ "module",
                 var node = this.state.nodes[ nodeID ];
                 if ( node.kineticObj !== undefined ) {
                     // removes and destroys object
+                    node.kineticObj.remove();
                     node.kineticObj.destroy();
                     node.kineticObj = undefined;    
                 }                

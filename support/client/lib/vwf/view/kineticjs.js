@@ -1978,6 +1978,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     function deletePrivateNode( fullyDelete ) {
         var nodeID = drawing_private.drawingObject.id();
         var layer = findLayer( drawing_private.drawingObject );
+        drawing_private.drawingObject.remove();
         drawing_private.drawingObject.destroy();
         drawing_private.drawingObject = null;
         if ( viewDriver.state.nodes[ nodeID ] ) {
