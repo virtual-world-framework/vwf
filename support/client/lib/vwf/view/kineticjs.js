@@ -1818,9 +1818,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             // Ensure that `radius` is the last attribute since `width` or `height` will override
             // `radius` if both are provided.
-            var radius = properties.attributes.radius;
-            delete properties.attributes.radius;
-            properties.attributes.radius = radius;
+            switch ( kineticNode.className ) {
+                case "Circle":
+                case "Ellipse":
+                    delete properties.attributes.height;
+                    delete properties.attributes.width;                    
+                    var radius = properties.attributes.radius;
+                    delete properties.attributes.radius;
+                    properties.attributes.radius = radius;
+                    break;
+            }
 
         }
 
