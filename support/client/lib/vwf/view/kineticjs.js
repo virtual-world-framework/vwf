@@ -201,13 +201,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         node.kineticObj.on( "mouseout", function( evt ) {
             var eData = processEvent( evt, node, false );
-            viewDriver.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
+            //viewDriver.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
+            if ( mouseDown || ( evt.evt.buttons ) ) {
+                swipe.swipedAcross( node );
+            }
         } );
 
         node.kineticObj.on( "mouseenter", function( evt ) {
             var eData = processEvent( evt, node, false );
 
-            if ( mouseDown ) {
+            if ( mouseDown || ( evt.evt.buttons ) ) {
                 swipe.swipedAcross( node );
             }
         } );
@@ -215,7 +218,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         node.kineticObj.on( "mouseleave", function( evt ) {
             var eData = processEvent( evt, node, false );
 
-            if ( mouseDown ) {
+            if ( mouseDown || ( evt.evt.buttons ) ) {
                 swipe.swipedAcross( node );
             }
 
@@ -415,6 +418,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             //viewDriver.kernel.dispatchEvent( node.ID, "tap", eData.eventData, eData.eventNodeData );
             viewDriver.kernel.fireEvent( node.ID, 'tap', eData.eventData );
+            swipe.swipedAcross( node, true, eData.eventData );
             //render( node.kineticObj, true );
             //batchRender( node.kineticObj, true );
             //drawObject( node.kineticObj, false );
