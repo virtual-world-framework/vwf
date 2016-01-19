@@ -1273,6 +1273,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         case 'transparentFill':
                             var colorRGB = Kinetic.Util.getRGB( userState.drawing_color );
                             var alpha = ( userState.fillStyle === 'transparentFill' ? 0.5 : 1.0 );
+                            if ( ( colorRGB.r + colorRGB.g + colorRGB.b) === 0 ) {
+                                colorRGB.r = 1;
+                                colorRGB.g = 1;
+                                colorRGB.b = 1;
+                            }
                             drawingObject.fillRed( colorRGB.r );
                             drawingObject.fillGreen( colorRGB.g );
                             drawingObject.fillBlue( colorRGB.b );
@@ -1432,8 +1437,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         }
 
                     }
-                    points.push( posX );
-                    points.push( posY );
                     drawingObject.points( points );
 
                     if ( userState.drawing_mode === 'polygon' ) {
