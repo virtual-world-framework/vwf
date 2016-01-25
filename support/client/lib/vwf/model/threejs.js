@@ -498,7 +498,7 @@ define( [ "module",
             // If we do not have a load a model for this node, then we are almost done, so we can update all
             // the driver properties w/ the stop-gap function below.
             // Else, it will be called at the end of the assetLoaded callback
-            if ( ! supportedFileType( childType ) ) {
+            if ( node && node.threeObject && !supportedFileType( childType ) ) {
                 notifyDriverOfPrototypeAndBehaviorProps();
             }
 
