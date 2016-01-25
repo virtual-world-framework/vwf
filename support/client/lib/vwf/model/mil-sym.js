@@ -106,7 +106,7 @@ define( [ "module",
                 return;                
             }
 
-            var protos = getPrototypes( childExtendsID );
+            var protos = this.kernel.prototypes( childID );
             var node = this.state.nodes[ childID ];
 
             if ( node === undefined ) {
@@ -423,18 +423,6 @@ define( [ "module",
 
 
     } );
-
-    function getPrototypes( extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = modelDriver.kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
 
     function isUnitNode( prototypes ) {
         var found = false;

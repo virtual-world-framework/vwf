@@ -18,14 +18,14 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback ) {
 
-            var protos = getPrototypes( this.kernel, childExtendsID );
+            var protos = this.kernel.prototypes( childID );
 
             if ( isHeightmap( protos ) ) {
                 
                 var node = this.nodes[ childID ];
 
                 // Create the local copy of the node properties
-                if ( this.nodes[ childID ] === undefined ){
+                if ( this.nodes[ childID ] === undefined && childSource !== undefined ){
 
                     // Suspend the queue until the load is complete
                     callback( false );
@@ -85,18 +85,6 @@ define( [ "module", "vwf/model", "vwf/utility" ], function( module, model, utili
         }
 
     } );
-
-    function getPrototypes( kernel, extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
 
     function isHeightmap( prototypes ) {
         var found = false;

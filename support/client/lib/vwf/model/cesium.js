@@ -306,7 +306,7 @@ define( [ "module",
             }
             
             var node = undefined, parentNode, sceneNode;
-            var protos = getPrototypes.call( this, childExtendsID );
+            var protos = this.kernel.prototypes( childID );
 
             var createNode = function() {
                 return {
@@ -626,7 +626,7 @@ define( [ "module",
             //       there, too
             function notifyDriverOfPrototypeAndBehaviorProps() {
                 var ptPropValue;
-                var protos = getPrototypes.call( self, childExtendsID );
+                var protos = self.kernel.prototypes( childID );
                 protos.forEach( function( prototypeID ) {
                     for ( var propertyName in kernel.getProperties( prototypeID ) ) {
                         //console.info( " 1    getting "+propertyName+" of: " + childExtendsID  );
@@ -2011,18 +2011,6 @@ define( [ "module",
     }
     
 
-    function getPrototypes( extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = this.kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
-
     function findParent( ID ) {
         var retNode = this.state.nodes[ ID ];
         if ( retNode === undefined ) {
@@ -2037,7 +2025,7 @@ define( [ "module",
         var protos = undefined;
         var parent = findParent.call( this, parentID );
         while ( parent && sceneNode === undefined ) {
-            protos = getPrototypes.call( this, parent.extendsID );
+            protos = this.kernel.prototypes( parent.ID );
             if ( protos && isCesium.call( this, protos ) ) {
                 sceneNode = parent;
             } else {

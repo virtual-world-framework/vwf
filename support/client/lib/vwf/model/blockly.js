@@ -398,18 +398,6 @@ define( [ "module", "vwf/model", "vwf/utility",
 
     } );
 
-    function getPrototypes( extendsID ) {
-        var prototypes = [];
-        var id = extendsID;
-
-        while ( id !== undefined ) {
-            prototypes.push( id );
-            id = self.kernel.prototype( id );
-        }
-                
-        return prototypes;
-    }
-
     function isBlockly3Node( nodeID ) {
         return self.kernel.test( nodeID,
             "self::element(*,'http://vwf.example.com/blockly/controller.vwf')",

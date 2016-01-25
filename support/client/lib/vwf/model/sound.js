@@ -356,8 +356,9 @@ define( [ "module", "vwf/model" ], function( module, model ) {
             }
 
             if ( !this.allowMultiplay && this.isPlaying() ) {
+                var instance = Object.keys( this.playingInstances )[ 0 ];
                 return { soundName: this.name, 
-                         instanceID: this.playingInstances[ 0 ] };
+                         instanceID: this.playingInstances[ instance ].id };
             }
 
             var id = this.instanceIDCounter;
