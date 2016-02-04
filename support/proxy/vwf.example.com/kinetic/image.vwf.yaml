@@ -5,7 +5,7 @@ extends: http://vwf.example.com/kinetic/shape.vwf
 properties:
   image:
   crop:
-  scaleOnLoad: false
+  scaleOnLoad: true
 events:
   imageLoaded:
   imageLoadError:
