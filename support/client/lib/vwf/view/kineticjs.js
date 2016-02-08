@@ -828,9 +828,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     } );
 
     function update( vwfTime ) {
-        
+               
         // switch to update, when the tickless branch is merged to development
         var nodeIDs = Object.keys( viewDriver.state.draggingNodes );
+        var renderLayers = {};
+        var doRenderLayers = false;
         
         for ( var i = 0; i < nodeIDs.length; i++ ) {
         
@@ -868,25 +870,33 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         //if ( viewDriver.kernel.client() === viewDriver.kernel.moniker() ) {
                         //    node.model.position.ignoreNextPositionUpdate = true;
                         //}
-                        doRenderScene = true;
+                        //doRenderScene = true;
+                        doRenderLayers = true;
+                        var layer = findLayer( node.kineticObj );
+                        renderLayers[ layer.id() ] = layer;
                     }
                 }
             }
 
         }
-
+        
         doRenderScene =  !viewDriver.state[ "renderOverride" ] && ( doRenderScene || ( ( Date.now() - lastRenderTime ) > renderTimeout) );
 
         if ( doRenderScene ) {
             for ( var id in viewDriver.state.stages ) {
                 renderScene( viewDriver.state.stages[ id ], false, true );
             } 
-        }
+        } else if ( doRenderLayers ) {
+            for ( var id in renderLayers ) {
+                render( renderLayers[ id ], false, true );
+                console.info( "Render layer: " + id );
+            }             
+        } 
     }
 
     function renderScene( stage, force, drawHit ) {
         //window.requestAnimationFrame( renderScene( stage ) );
-        if ( stage && !activelyDrawing ) {
+        if ( stage && ( !activelyDrawing || force ) ) {
             //var now = Date.now();
             //if ( ( ( ( now - lastRenderTime ) > renderTimeout ) || force ) ) {
                 //stage.batchDraw();
