@@ -441,6 +441,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         } );
     }
 
+    // Create and return the view driver object ----------------------------------------------------
+
     return view.load( module, {
 
         initialize: function( options ) {
@@ -696,15 +698,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             if ( this.kernel.client() === this.kernel.moniker() ) {
                 var prop, value, t;
                 switch ( methodName ) {
-                    
-                    case "setViewProperty":
-                        prop = methodParameters[ 0 ];
-                        value = methodParameters[ 1 ];
-                        var isStatic = methodParameters.length > 1 ? methodParameters[ 2 ] : false ;
-                        
-                        setViewProperty( nodeID, prop, value, isStatic );
-                        doRenderScene = true;
-                        break;
 
                     case "setClientUIState":
                         setClientUIState( methodParameters[0] );
@@ -822,10 +815,33 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         ticked: function( vwfTime ) {
             update( vwfTime );
+        },
+
+        // This is intended to be called directly from the application view
+        setViewProperty: function( id, propertyName, propertyValue, isStatic ) {
+            var node = viewDriver.state.nodes[ id ];
+            if ( node && node.kineticObj ) {
+                if ( utility.validObject( propertyValue ) ) {
+                    if ( node.model[ propertyName ] === undefined ) {
+                        node.model[ propertyName ] = {
+                            "value":    viewDriver.state.getProperty( node.kineticObj, propertyName ),
+                            "isStatic": ( ( isStatic === undefined ) ? false : isStatic ) 
+                        };
+                    } else if ( node.model[propertyName].isStatic ) {
+                        node.model[ propertyName ].value = propertyValue;
+                    }
+                    viewDriver.state.setProperty( node.kineticObj, propertyName, propertyValue );
+                } else {
+                    var modelValue = node.model[ propertyName ].value;
+                    if ( modelValue !== undefined ) {
+                        viewDriver.state.setProperty( node.kineticObj, propertyName, modelValue );
+                    }
+                }
+            }
         }
-    
-    
     } );
+
+    // Private helper functions --------------------------------------------------------------------
 
     function update( vwfTime ) {
                
@@ -1018,32 +1034,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             ];    
         }
         return vwfEventData;
-    }
-
-    function setViewProperty( id, propertyName, propertyValue, isStatic ) {
-        //console.info( "setViewProperty( "+id+", "+propertyName+", "+propertyValue+", "+isStatic+" )" );
-        var node = viewDriver.state.nodes[ id ];
-        if ( node && node.kineticObj ) {
-            if ( utility.validObject( propertyValue ) ) {
-                if ( node.model[ propertyName ] === undefined ) {
-                    //console.info( "- store property "+propertyName+" model value: "+viewDriver.state.getProperty( node.kineticObj, propertyName )+", isStatic: "+isStatic );
-                    node.model[ propertyName ] = {
-                        "value":    viewDriver.state.getProperty( node.kineticObj, propertyName ),
-                        "isStatic": ( ( isStatic === undefined ) ? false : isStatic ) 
-                    };
-                } else if ( node.model[propertyName].isStatic ) {
-                    node.model[ propertyName ].value = propertyValue;
-                }
-                viewDriver.state.setProperty( node.kineticObj, propertyName, propertyValue );
-                //console.info( "- set kineticObject property: "+propertyName+" to: "+propertyValue );
-            } else {
-                var modelValue = node.model[ propertyName ].value;
-                if ( modelValue !== undefined ) {
-                    viewDriver.state.setProperty( node.kineticObj, propertyName, modelValue );   
-                    //console.info( "- deletes node.model and set kineticObject property: "+propertyName+" to: "+modelValue );
-                }
-            }
-        }
     }
 
     function drawDown( nodeID, eventData, nodeData, touch ) {
@@ -2019,5 +2009,4 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             layer.batchDraw();
         }
     }
-
-});
+} );
