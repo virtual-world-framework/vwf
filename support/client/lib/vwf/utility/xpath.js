@@ -375,10 +375,10 @@ define( [ "module" ], function( module ) {
 
         regex: ( function() {
 
-            var name = "[A-Za-z_][A-Za-z_0-9.-]*",              // XPath QName: http://www.w3.org/TR/xpath20/#prod-xpath-QName
-                singleQuotedName = "'(?:[^'\\\\]|\\'|\\\\)+'",  // Single-quoted QName (VWF extension)
-                doubleQuotedName = '"(?:[^"\\\\]|\\"|\\\\)+"',  // Double-quoted QName (VWF extension)
-                wildcard = "\\*";                               // XPath Wildcard: http://www.w3.org/TR/xpath20/#prod-xpath-Wildcard
+            var name = "[A-Za-z_][A-Za-z_0-9.-]*",                    // XPath QName: http://www.w3.org/TR/xpath20/#prod-xpath-QName
+                singleQuotedName = "'(?:[^'\\\\]|\\\\'|\\\\\\\\)+'",  // Single-quoted QName (VWF extension)
+                doubleQuotedName = '"(?:[^"\\\\]|\\\\"|\\\\\\\\)+"',  // Double-quoted QName (VWF extension)
+                wildcard = "\\*";                                     // XPath Wildcard: http://www.w3.org/TR/xpath20/#prod-xpath-Wildcard
 
             /// @field
 
