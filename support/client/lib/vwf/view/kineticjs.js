@@ -234,10 +234,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             mouseDown = true;
 
             // Process drawing (if actively drawing)
-            var userState = drawing_client;
-
             drawDown( node.ID, eData.eventData[0], node, false ); 
-
             var userState = drawing_client;
             if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
                 activelyDrawing = true;
@@ -1047,12 +1044,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
 
         var compExtends = undefined;
-        var groupExtends = undefined;
-        var section = "/shapes";
-
-        if ( drawingMode === "freeDraw" ) {
-            section = "/lines";        
-        }
+        var section = ( drawingMode === "freeDraw" ) ? "/lines" : "/shapes";
 
         switch ( drawingMode ) {
             
@@ -1064,9 +1056,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             case "ring":
             case "star":
             case "wedge":
-                compExtends = [ "http://vwf.example.com/kinetic/", drawingMode, ".vwf" ].join(''); 
-                break;
-
             case "sprite":            
             case "image":
                 compExtends = [ "http://vwf.example.com/kinetic/", drawingMode, ".vwf" ].join('') 
@@ -1092,56 +1081,20 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
 
         var eventPointDown = eventData.stageRelative;
-        if ( groupExtends !== undefined ) {
 
-            privateState.initialDownPoint = eventPointDown;
-            var parentPath = userState.drawing_parentPath + section ;
-            var parentIDs = viewDriver.kernel.find( viewDriver.kernel.application(), parentPath );
-
-            var parentID = parentIDs.length > 0 ? parentIDs[ 0 ] : viewDriver.kernel.application();
-            var groupDef = {
-                "extends": groupExtends,
-                "properties": {
-                    "visible": "inherit",
-                    "listening": "inherit",
-                    "position": eventPointDown                
-                },
-                "children": {}
-            };
-
-            var name = drawingMode + "-" + randomSuffix();
-
-            var childID = parentID + ":" + name;
-
-            private_node = createLocalKineticNode( parentID, childID, groupDef, [], undefined, undefined, name );
-            drawing_private.drawingObject = private_node.kineticObj;
-
-            // Define the component objects of this group object
-            for ( var def in compExtends ) {
-                groupDef.children[ def ] = {
-                    "extends": compExtends[ def ],
-                    "properties": getDefaultProperties( drawingMode, false, eventPointDown )
-                }
-                var compID    = childID + ":" + def;
-                var compChild =  createLocalKineticNode( childID, compID, groupDef.children[ def ], [], undefined, undefined, def );
-                drawing_private.drawingObject[ def ] = compChild.kineticObj;
-                drawing_private.drawingObject.children.push( drawing_private.drawingObject[ def ] );
-            }
-
-            // Save data to be used to create the node in the model
-            drawing_private.drawingDef = groupDef;
-            drawing_private.drawingParentID = parentID;
-            drawing_private.drawingChildName = name;
-
-            drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
-
-        } else if ( compExtends !== undefined ) {
+        if ( compExtends !== undefined ) {
 
             privateState.initialDownPoint = eventPointDown;
             var parentPath = userState.drawing_parentPath + section;
             var parentIDs = viewDriver.kernel.find( viewDriver.kernel.application(), parentPath );
 
-            var parentID = parentIDs.length > 0 ? parentIDs[ 0 ] : viewDriver.kernel.application();
+            if ( parentIDs.length === 0 ) {
+                view.logger.errorx( "drawDown", "Could not find parent node '", parentPath, "'",
+                    " - Cannot create drawn line" );
+                return;
+            }
+
+            var parentID = parentIDs[ 0 ];
             var shapeDef = {
                 "extends": compExtends,
                 "properties": getDefaultProperties( drawingMode, false, eventPointDown )
