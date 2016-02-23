@@ -1044,7 +1044,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
 
         var compExtends = undefined;
-        var section = ( drawingMode === "freeDraw" ) ? "/lines" : "/shapes";
+        var section = ( drawingMode === "freeDraw" || drawingMode === "line") ? "/lines" : "/shapes";
 
         switch ( drawingMode ) {
             
