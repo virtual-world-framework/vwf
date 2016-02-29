@@ -3,5 +3,4 @@
 --- 
 extends: http://vwf.example.com/kinetic/group.vwf
 properties:
-  supportMouseEvents: true
-  supportTouchEvents: true
+  supportMouseAndTouchEvents: true

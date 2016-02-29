@@ -62,5 +62,4 @@ properties:
   dashEnabled:
   x: 0
   y: 0
-  supportMouseEvents: true
-  supportTouchEvents: true
+  supportMouseAndTouchEvents: true

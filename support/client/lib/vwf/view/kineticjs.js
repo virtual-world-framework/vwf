@@ -498,16 +498,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             if ( node.kineticObj ) {
 
                 // Attach the mouse and/or touch events based on property settings
-                //vwf_view.kernel.getProperty( childID, "supportMouseEvents" );
-                //vwf_view.kernel.getProperty( childID, "supportTouchEvents" );
-                viewDriver.kernel.getProperty( childID, "supportMouseEvents" );
-                viewDriver.kernel.getProperty( childID, "supportTouchEvents" );
-                /*
-				if ( node.kineticObj.isVisible() && !activelyDrawing ) {
-                    drawObject( node.kineticObj, false );
-					//render( node.kineticObj, false );
-				}
-                */
+                viewDriver.kernel.getProperty( childID, "supportMouseAndTouchEvents" );
             }
 
          },
@@ -555,14 +546,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             var kineticObj = node.kineticObj;
             switch ( propertyName ) {
-                case "supportMouseEvents":
+                case "supportMouseAndTouchEvents":
                     if ( propertyValue === true ) {
                         attachMouseEvents( node );
-                    }
-                    break;
-                    
-                case "supportTouchEvents":
-                    if ( propertyValue === true ) {
                         attachTouchEvents( node );
                     }
                     break;
@@ -750,19 +736,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             }
 
             switch ( propertyName ) {
-                case "supportMouseEvents":
-                    if ( ( propertyValue === true ) && ( !node.hasMouseEvents ) ) {
+                case "supportMouseAndTouchEvents":
+                    if ( ( propertyValue === true ) && ( !node.hasMouseAndTouchEvents ) ) {
                         attachMouseEvents( node );
-                        node.hasMouseEvents = true;
-                        eventsAdded = node.hasMouseEvents;
-                    }
-                    break;
-                    
-                case "supportTouchEvents":
-                    if ( ( propertyValue === true ) && ( !node.hasTouchEvents ) ) {
                         attachTouchEvents( node );
-                        node.hasTouchEvents = true;
-                        eventsAdded = node.hasTouchEvents;
+                        node.hasMouseAndTouchEvents = true;
+                        eventsAdded = node.hasMouseEvents;
                     }
                     break;
 
