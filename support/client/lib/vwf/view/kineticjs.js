@@ -312,10 +312,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         
         node.kineticObj.on( "dragstart", function( evt ) {
             var eData = processEvent( evt, node, false );
-            //viewDriver.kernel.fireEvent( node.ID, 'dragStart', eData.eventData );
 
+            // TODO: Candidate for deletion?  It doesn't look like it does anything
+            //       Eric - 3/3/16
             var xPos = viewDriver.state.getProperty( node.kineticObj, "x" );
             var yPos = viewDriver.state.getProperty( node.kineticObj, "y" );
+
             viewDriver.state.draggingNodes[ node.ID ] = node;
             node.kineticObj.mouseDragging = true;
 
@@ -330,6 +332,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //viewDriver.kernel.fireEvent( node.ID, 'dragMove', eData.eventData );
             activelyDrawing = false;
 
+            // TODO: Candidate for deletion?  It doesn't look like it does anything
+            //       Eric - 3/3/16
             if ( node.kineticObj.mouseDragging ) {
                 var xPos = viewDriver.state.getProperty( node.kineticObj, "x" );
                 var yPos = viewDriver.state.getProperty( node.kineticObj, "y" );
@@ -910,10 +914,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         if ( isTouchEvent ) {
             returnData.eventData[ 0 ].touches = [];
             for ( var i = 0; i < e.evt.touches.length; i++ ) {
-                returnData.eventData[ 0 ].touches[ i ] = convertBrowserEventDataToVwf( 
-                    e.evt.touches[ i ], 
-                    stage 
-                );
+                returnData.eventData[ 0 ].touches[ i ] =
+                    convertBrowserEventDataToVwf( e.evt.touches[ i ], stage );
             }    
         }
 
