@@ -8,4 +8,3 @@ properties:
   closed: false
   stroke: "#000000"
   strokeWidth: 1
-  supportMouseAndTouchEvents: true

@@ -34,7 +34,7 @@ properties:
   absoluteZIndex:
   modelX:
   modelY:
-  supportMouseAndTouchEvents:
+  supportMouseAndTouchEvents: false
   hasMouseAndTouchEvents: false
   dragProperty: "position"
   attributes:

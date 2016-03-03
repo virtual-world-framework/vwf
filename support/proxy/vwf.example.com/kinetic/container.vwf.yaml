@@ -4,7 +4,6 @@
 extends: http://vwf.example.com/kinetic/node.vwf
 properties: 
   clipFunc:
-  supportMouseAndTouchEvents: false
 method:
   deleteChildNode:
 scripts:
