@@ -319,7 +319,7 @@ define( [ "module",
                         case "attributes":
                             // Special case for images, don't overwrite a valid image with a bogus object
                             var attrs = propertyValue;
-                            if ( ( kineticObj instanceof Kinetic.Image ) && ( kineticObj.image() instanceof Image ) && propertyValue.image && !( propertyValue.image instanceof Image ) ) {
+                            if ( ( kineticObj instanceof Konva.Image ) && ( kineticObj.image() instanceof Image ) && propertyValue.image && !( propertyValue.image instanceof Image ) ) {
                                 attrs.image = kineticObj.image();
                             }
                             kineticObj.setAttrs( attrs || {} );
@@ -1706,19 +1706,8 @@ define( [ "module",
                 if ( !isNodeInHierarchy( node ) ) {
                     node.kineticObj = createKineticObject( node );
 
-                    // if ( node.kineticObj instanceof Kinetic.Stage ) {
-                    //     node.model.scale = { "value": 1, "type": "static" };
-                    //     node.model.scaleX = { "value": 1, "type": "static" };
-                    //     node.model.scaleY = { "value": 1, "type": "static" };
-                    //     node.model.x = { "value": 0, "type": "static" };
-                    //     node.model.y = { "value": 0, "type": "static" };
-                    //     node.model.position = { "value": [ 0, 0 ], "type": "static" };
-                    //     node.model.absolutePosition = { "value": [ 0, 0 ], "type": "static" };
-                    //     node.model.absoluteTransform = { "value": [ 1, 0, 0, 1 ], "type": "static" };
-                    // }
-
-                    // If the kineticObj was created, attach it to the parent kineticObj, if it is a 
-                    // kinetic container
+                    // If the kineticObj was created, attach it to the parent kineticObj
+                    // (if the parent is a kinetic container)
                     // (if a kineticObj is created asynchronously ... like an Image, it will be
                     // undefined here, but will be added to its parent in the appropriate callback)
                     addNodeToHierarchy( node );

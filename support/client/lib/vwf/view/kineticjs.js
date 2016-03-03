@@ -1162,7 +1162,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                         case 'solidFill':
                         case 'transparentFill':
-                            var colorRGB = Kinetic.Util.getRGB( userState.drawing_color );
+                            var colorRGB = Konva.Util.getRGB( userState.drawing_color );
                             var alpha = ( userState.fillStyle === 'transparentFill' ? 0.5 : 1.0 );
                             if ( ( colorRGB.r + colorRGB.g + colorRGB.b) === 0 ) {
                                 colorRGB.r = 1;
@@ -1534,46 +1534,46 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         var kineticObj = undefined;
 
         if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/arc.vwf" ) ) {
-            kineticObj = new Kinetic.Arc( config || {} );
+            kineticObj = new Konva.Arc( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/baseLayer.vwf" ) ) {
-            kineticObj = new Kinetic.BaseLayer( config || {} );
+            kineticObj = new Konva.BaseLayer( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/canvas.vwf" ) ) {
-            kineticObj = new Kinetic.Canvas( config || {} );
+            kineticObj = new Konva.Canvas( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/circle.vwf" ) ) {
-            kineticObj = new Kinetic.Circle( config || {} );
+            kineticObj = new Konva.Circle( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/ellipse.vwf" ) ) {
-            kineticObj = new Kinetic.Ellipse( config || {} );
+            kineticObj = new Konva.Ellipse( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/fastLayer.vwf" ) ) {
-            kineticObj = new Kinetic.FastLayer( config || {} );
+            kineticObj = new Konva.FastLayer( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/group.vwf" ) ) {
-            kineticObj = new Kinetic.Group( config || {} );
+            kineticObj = new Konva.Group( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/drawingGroup.vwf" ) ) {
-            kineticObj = new Kinetic.Group( config || {} );
+            kineticObj = new Konva.Group( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/image.vwf" ) ) {
             var imageObj = new Image();
             node.scaleOnLoad = false;
-            kineticObj = new Kinetic.Image( {
+            kineticObj = new Konva.Image( {
                 image: imageObj
             } );
             if ( node.source !== undefined ) {
                 imageObj.src = node.source;    
             }
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/layer.vwf" ) ) {
-            kineticObj = new Kinetic.Layer( config || {} );
+            kineticObj = new Konva.Layer( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/line.vwf" ) ) {
-            kineticObj = new Kinetic.Line( config || { "points": [] } );
+            kineticObj = new Konva.Line( config || { "points": [] } );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/path.vwf" ) ) {
-            kineticObj = new Kinetic.Path( config || {} );
+            kineticObj = new Konva.Path( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/rect.vwf" ) ) {
-            kineticObj = new Kinetic.Rect( config || {} );
+            kineticObj = new Konva.Rect( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/regularPolygon.vwf" ) ) {
-            kineticObj = new Kinetic.RegularPolygon( config || {} );
+            kineticObj = new Konva.RegularPolygon( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/ring.vwf" ) ) {
-            kineticObj = new Kinetic.Ring( config || {} );
+            kineticObj = new Konva.Ring( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/sprite.vwf" ) ) {
             var imageObj = new Image();
             node.scaleOnLoad = false;
-            kineticObj = new Kinetic.Sprite( {
+            kineticObj = new Konva.Sprite( {
                 image: imageObj
             } );
             if ( node.source !== undefined ) {
@@ -1590,22 +1590,22 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 "width": stageWidth, 
                 "height": stageHeight 
             };
-            kineticObj = new Kinetic.Stage( stageDef );
+            kineticObj = new Konva.Stage( stageDef );
             viewDriver.state.stages[ node.ID ] = kineticObj;
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/star.vwf" ) ) {
-            kineticObj = new Kinetic.Star( config || {} );
+            kineticObj = new Konva.Star( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/text.vwf" ) ) {
-            kineticObj = new Kinetic.Text( config || {} );
+            kineticObj = new Konva.Text( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/textPath.vwf" ) ) {
-            kineticObj = new Kinetic.TextPath( config || {} );
+            kineticObj = new Konva.TextPath( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/wedge.vwf" ) ) {
-            kineticObj = new Kinetic.Wedge( config || {} );
+            kineticObj = new Konva.Wedge( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/shape.vwf" ) ) {
-            kineticObj = new Kinetic.Shape( config || {} );
+            kineticObj = new Konva.Shape( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/container.vwf" ) ) {
-            kineticObj = new Kinetic.Container( config || {} );
+            kineticObj = new Konva.Container( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/node.vwf" ) ) {
-            kineticObj = new Kinetic.Node( config || {} );
+            kineticObj = new Konva.Node( config || {} );
         }
 
         return kineticObj;
