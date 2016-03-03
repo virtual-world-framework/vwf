@@ -1,9 +1,9 @@
 
 /*
- * Konva JavaScript Framework v0.10.0
+ * Konva JavaScript Framework v0.11.1
  * http://konvajs.github.io/
  * Licensed under the MIT or GPL Version 2 licenses.
- * Date: Tue Oct 27 2015
+ * Date: Sat Jan 16 2016
  *
  * Original work Copyright (C) 2011 - 2013 by Eric Rowell (KineticJS)
  * Modified work Copyright (C) 2014 - 2015 by Anton Lavrenov (Konva)
@@ -27,17 +27,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/**
- * @namespace Konva
- */
-var Konva = {};
-(function(root) {
+
+// runtime check for already included Konva
+(function(){
     'use strict';
+    /**
+     * @namespace Konva
+     */
+
     var PI_OVER_180 = Math.PI / 180;
 
-    Konva = {
+    var Konva = {
         // public
-        version: '0.10.0',
+        version: '0.11.1',
 
         // private
         stages: [],
@@ -198,31 +200,25 @@ var Konva = {};
         UA: undefined
     };
 
-    Konva.UA = Konva._parseUA((root.navigator && root.navigator.userAgent) || '');
+    var global =
+        typeof window !== 'undefined' ? window :
+        typeof global !== 'undefined' ? global :
+        typeof WorkerGlobalScope !== 'undefined' ? self : {};
 
-})(this);
 
-// Uses Node, AMD or browser globals to create a module.
+    Konva.UA = Konva._parseUA((global.navigator && global.navigator.userAgent) || '');
 
-// If you want something that will work in other stricter CommonJS environments,
-// or if you need to create a circular dependency, see commonJsStrict.js
+    if (global.Konva) {
+        console.error(
+            'Konva instance is already exist in current eviroment. ' +
+            'Please use only one instance.'
+        );
+    }
+    global.Konva = Konva;
+    Konva.global = global;
 
-// Defines a module "returnExports" that depends another module called "b".
-// Note that the name of the module is implied by the file name. It is best
-// if the file name and the exported global have matching names.
 
-// If the 'b' module also uses this type of boilerplate, then
-// in the browser, it will create a global .b that is used below.
-
-// If you do not want to support the browser global path, then you
-// can remove the `root` use and the passing `this` as the first arg to
-// the top function.
-
-// if the module has no dependencies, the above pattern can be simplified to
-( function(root, factory) {
-    'use strict';
     if( typeof exports === 'object') {
-        var KonvaJS = factory();
         // runtime-check for browserify and nw.js (node-webkit)
         if(global.window && global.window.document) {
             Konva.document = global.window.document;
@@ -239,25 +235,18 @@ var Konva = {};
             Konva.window.Image = Canvas.Image;
             Konva._nodeCanvas = Canvas;
         }
-
-        Konva.root = root;
-        module.exports = KonvaJS;
+        module.exports = Konva;
         return;
     }
     else if( typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(factory);
+        define(function() {
+            return Konva;
+        });
     }
     Konva.document = document;
     Konva.window = window;
-    Konva.root = root;
-}(this, function() {
-    'use strict';
-    // Just return a value to define the module export.
-    // This example returns an object, but the module
-    // can return a function as the exported value.
-    return Konva;
-}));
+})();
 
 /*eslint-disable  eqeqeq, no-cond-assign, no-empty*/
 (function() {
@@ -800,6 +789,13 @@ var Konva = {};
             }
             return names.length > 0;
         },
+        isValidSelector: function(selector) {
+            if (typeof selector !== 'string') {
+                return false;
+            }
+            var firstChar = selector[0];
+            return firstChar === '#' || firstChar === '.' || firstChar === firstChar.toUpperCase();
+        },
         createCanvasElement: function() {
             var canvas = Konva.document.createElement('canvas');
             // on some environments canvas.style is readonly
@@ -1099,7 +1095,7 @@ var Konva = {};
              * IE9 on Windows7 64bit will throw a JS error
              * if we don't use window.console in the conditional
              */
-            if(Konva.root.console && console.warn && Konva.showWarnings) {
+            if(Konva.global.console && console.warn && Konva.showWarnings) {
                 console.warn(KONVA_WARNING + str);
             }
         },
@@ -2658,8 +2654,18 @@ var Konva = {};
          *   var oldVal = evt.oldVal;
          *   var newVal = evt.newVal;
          * });
+         *
+         * // get event targets
+         * // with event delegations
+         * layer.on('click', 'Group', function(evt) {
+         *   var shape = evt.target;
+         *   var group = evtn.currentTarger;
+         * });
          */
         on: function(evtStr, handler) {
+            if (arguments.length === 3) {
+                return this._delegate.apply(this, arguments);
+            }
             var events = evtStr.split(SPACE),
                 len = events.length,
                 n, event, parts, baseEvent, name;
@@ -2747,15 +2753,30 @@ var Konva = {};
               evt: evt
             };
             this.fire(evt.type, e);
+            return this;
         },
         addEventListener: function(type, handler) {
             // we have to pass native event to handler
             this.on(type, function(evt){
                 handler.call(this, evt.evt);
             });
+            return this;
         },
         removeEventListener: function(type) {
             this.off(type);
+            return this;
+        },
+        // like node.on
+        _delegate: function(event, selector, handler) {
+            var stopNode = this;
+            this.on(event, function(evt) {
+                var targets = evt.target.findAncestors(selector, true, stopNode);
+                for(var i = 0; i < targets.length; i++) {
+                    evt = Konva.Util.cloneObject(evt);
+                    evt.currentTarget = targets[i];
+                    handler.call(targets[i], evt);
+                }
+            });
         },
         /**
          * remove self from parent, but don't destroy
@@ -2797,6 +2818,7 @@ var Konva = {};
             Konva._removeName(this.getName(), this._id);
 
             this.remove();
+            return this;
         },
         /**
          * get attr
@@ -3070,12 +3092,14 @@ var Konva = {};
         },
         /**
          * get absolute position relative to the top left corner of the stage container div
+         * or relative to passed node
          * @method
+         * @param {Object} [top] optional parent node
          * @memberof Konva.Node.prototype
          * @returns {Object}
          */
-        getAbsolutePosition: function() {
-            var absoluteMatrix = this.getAbsoluteTransform().getMatrix(),
+        getAbsolutePosition: function(top) {
+            var absoluteMatrix = this.getAbsoluteTransform(top).getMatrix(),
                 absoluteTransform = new Konva.Transform(),
                 offset = this.offset();
 
@@ -3409,6 +3433,84 @@ var Konva = {};
             return this.parent;
         },
         /**
+         * get all ancestros (parent then parent of the parent, etc) of the node
+         * @method
+         * @memberof Konva.Node.prototype
+         * @param {String} [selector] selector for search
+         * @param {Boolean} [includeSelf] show we think that node is ancestro itself?
+         * @param {Konva.Node} [stopNode] optional node where we need to stop searching (one of ancestors)
+         * @returns {Array} [ancestors]
+         * @example
+         * // get one of the parent group
+         * var parentGroups = node.findAncestors('Group');
+         */
+        findAncestors: function(selector, includeSelf, stopNode) {
+            var res = [];
+
+            if (includeSelf && this._isMatch(selector)) {
+                res.push(this);
+            }
+            var ancestor = this.parent;
+            while(ancestor) {
+                if (ancestor === stopNode) {
+                    return res;
+                }
+                if (ancestor._isMatch(selector)) {
+                    res.push(ancestor);
+                }
+                ancestor = ancestor.parent;
+            }
+            return res;
+        },
+        /**
+         * get ancestor (parent or parent of the parent, etc) of the node that match passed selector
+         * @method
+         * @memberof Konva.Node.prototype
+         * @param {String} [selector] selector for search
+         * @param {Boolean} [includeSelf] show we think that node is ancestro itself?
+         * @param {Konva.Node} [stopNode] optional node where we need to stop searching (one of ancestors)
+         * @returns {Konva.Node} ancestor
+         * @example
+         * // get one of the parent group
+         * var group = node.findAncestors('.mygroup');
+         */
+        findAncestor: function(selector, includeSelf, stopNode) {
+            return this.findAncestors(selector, includeSelf, stopNode)[0];
+        },
+        // is current node match passed selector?
+        _isMatch: function(selector) {
+            if (!selector) {
+                return false;
+            }
+            var selectorArr = selector.replace(/ /g, '').split(','),
+                len = selectorArr.length,
+                n, sel;
+
+            for (n = 0; n < len; n++) {
+                sel = selectorArr[n];
+                if (!Konva.Util.isValidSelector(sel)) {
+                    Konva.Util.warn('Selector "' + sel + '" is invalid. Allowed selectors examples are "#foo", ".bar" or "Group".');
+                    Konva.Util.warn('If you have a custom shape with such className, please change it to start with upper letter like "Triangle".');
+                    Konva.Util.warn('Konva is awesome, right?');
+                }
+                // id selector
+                if(sel.charAt(0) === '#') {
+                    if (this.id() === sel.slice(1)) {
+                        return true;
+                    }
+                }
+                // name selector
+                else if(sel.charAt(0) === '.') {
+                    if (this.hasName(sel.slice(1))) {
+                        return true;
+                    }
+                } else if (this._get(sel).length !== 0) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        /**
          * get layer ancestor
          * @method
          * @memberof Konva.Node.prototype
@@ -3461,13 +3563,15 @@ var Konva = {};
          * node.fire('click', null, true);
          */
         fire: function(eventType, evt, bubble) {
+            evt = evt || {};
+            evt.target = evt.target || this;
             // bubble
             if (bubble) {
-                this._fireAndBubble(eventType, evt || {});
+                this._fireAndBubble(eventType, evt);
             }
             // no bubble
             else {
-                this._fire(eventType, evt || {});
+                this._fire(eventType, evt);
             }
             return this;
         },
@@ -3836,6 +3940,7 @@ var Konva = {};
                 names.splice(index, 1);
                 this.setName(names.join(' '));
             }
+            return this;
         },
         /**
          * set attr
@@ -3864,6 +3969,9 @@ var Konva = {};
             var oldVal;
             if(val !== undefined) {
                 oldVal = this.attrs[key];
+                if (oldVal === val) {
+                    return;
+                }
                 this.attrs[key] = val;
                 this._fireChangeEvent(key, oldVal, val);
             }
@@ -3900,7 +4008,7 @@ var Konva = {};
 
                 // simulate event bubbling
                 var stopBubble = (eventType === MOUSEENTER || eventType === MOUSELEAVE) && ((compareShape && compareShape.isAncestorOf && compareShape.isAncestorOf(this)) || !!(compareShape && compareShape.isAncestorOf));
-                if(evt && !evt.cancelBubble && this.parent && this.parent.isListening() && (!stopBubble)) {
+                if((evt && !evt.cancelBubble || !evt) && this.parent && this.parent.isListening() && (!stopBubble)) {
                     if(compareShape && compareShape.parent) {
                         this._fireAndBubble.call(this.parent, eventType, evt, compareShape.parent);
                     }
@@ -3914,6 +4022,8 @@ var Konva = {};
             var events = this.eventListeners[eventType],
                 i;
 
+            evt = Konva.Util.cloneObject(evt || {});
+            evt.currentTarget = this;
             evt.type = eventType;
 
             if (events) {
@@ -4914,201 +5024,201 @@ var Konva = {};
 
 /*eslint-disable  max-depth */
 (function() {
-	'use strict';
-	function pixelAt(idata, x, y) {
-		var idx = (y * idata.width + x) * 4;
-		var d = [];
-		d.push(idata.data[idx++], idata.data[idx++], idata.data[idx++], idata.data[idx++]);
-		return d;
-	}
+    'use strict';
+    function pixelAt(idata, x, y) {
+        var idx = (y * idata.width + x) * 4;
+        var d = [];
+        d.push(idata.data[idx++], idata.data[idx++], idata.data[idx++], idata.data[idx++]);
+        return d;
+    }
 
-	function rgbDistance(p1, p2) {
-		return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2) + Math.pow(p1[2] - p2[2], 2));
-	}
+    function rgbDistance(p1, p2) {
+        return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2) + Math.pow(p1[2] - p2[2], 2));
+    }
 
-	function rgbMean(pTab) {
-		var m = [0, 0, 0];
+    function rgbMean(pTab) {
+        var m = [0, 0, 0];
 
-		for (var i = 0; i < pTab.length; i++) {
-			m[0] += pTab[i][0];
-			m[1] += pTab[i][1];
-			m[2] += pTab[i][2];
-		}
+        for (var i = 0; i < pTab.length; i++) {
+            m[0] += pTab[i][0];
+            m[1] += pTab[i][1];
+            m[2] += pTab[i][2];
+        }
 
-		m[0] /= pTab.length;
-		m[1] /= pTab.length;
-		m[2] /= pTab.length;
+        m[0] /= pTab.length;
+        m[1] /= pTab.length;
+        m[2] /= pTab.length;
 
-		return m;
-	}
+        return m;
+    }
 
-	function backgroundMask(idata, threshold) {
-		var rgbv_no = pixelAt(idata, 0, 0);
-		var rgbv_ne = pixelAt(idata, idata.width - 1, 0);
-		var rgbv_so = pixelAt(idata, 0, idata.height - 1);
-		var rgbv_se = pixelAt(idata, idata.width - 1, idata.height - 1);
+    function backgroundMask(idata, threshold) {
+        var rgbv_no = pixelAt(idata, 0, 0);
+        var rgbv_ne = pixelAt(idata, idata.width - 1, 0);
+        var rgbv_so = pixelAt(idata, 0, idata.height - 1);
+        var rgbv_se = pixelAt(idata, idata.width - 1, idata.height - 1);
 
 
-		var thres = threshold || 10;
-		if (rgbDistance(rgbv_no, rgbv_ne) < thres && rgbDistance(rgbv_ne, rgbv_se) < thres && rgbDistance(rgbv_se, rgbv_so) < thres && rgbDistance(rgbv_so, rgbv_no) < thres) {
+        var thres = threshold || 10;
+        if (rgbDistance(rgbv_no, rgbv_ne) < thres && rgbDistance(rgbv_ne, rgbv_se) < thres && rgbDistance(rgbv_se, rgbv_so) < thres && rgbDistance(rgbv_so, rgbv_no) < thres) {
 
-			// Mean color
-			var mean = rgbMean([rgbv_ne, rgbv_no, rgbv_se, rgbv_so]);
+            // Mean color
+            var mean = rgbMean([rgbv_ne, rgbv_no, rgbv_se, rgbv_so]);
 
-			// Mask based on color distance
-			var mask = [];
-			for (var i = 0; i < idata.width * idata.height; i++) {
-				var d = rgbDistance(mean, [idata.data[i * 4], idata.data[i * 4 + 1], idata.data[i * 4 + 2]]);
-				mask[i] = (d < thres) ? 0 : 255;
-			}
+            // Mask based on color distance
+            var mask = [];
+            for (var i = 0; i < idata.width * idata.height; i++) {
+                var d = rgbDistance(mean, [idata.data[i * 4], idata.data[i * 4 + 1], idata.data[i * 4 + 2]]);
+                mask[i] = (d < thres) ? 0 : 255;
+            }
 
-			return mask;
-		}
-	}
+            return mask;
+        }
+    }
 
-	function applyMask(idata, mask) {
-		for (var i = 0; i < idata.width * idata.height; i++) {
-			idata.data[4 * i + 3] = mask[i];
-		}
-	}
+    function applyMask(idata, mask) {
+        for (var i = 0; i < idata.width * idata.height; i++) {
+            idata.data[4 * i + 3] = mask[i];
+        }
+    }
 
-	function erodeMask(mask, sw, sh) {
+    function erodeMask(mask, sw, sh) {
 
-		var weights = [1, 1, 1, 1, 0, 1, 1, 1, 1];
-		var side = Math.round(Math.sqrt(weights.length));
-		var halfSide = Math.floor(side / 2);
+        var weights = [1, 1, 1, 1, 0, 1, 1, 1, 1];
+        var side = Math.round(Math.sqrt(weights.length));
+        var halfSide = Math.floor(side / 2);
 
-		var maskResult = [];
-		for (var y = 0; y < sh; y++) {
-			for (var x = 0; x < sw; x++) {
+        var maskResult = [];
+        for (var y = 0; y < sh; y++) {
+            for (var x = 0; x < sw; x++) {
 
-				var so = y * sw + x;
-				var a = 0;
-				for (var cy = 0; cy < side; cy++) {
-					for (var cx = 0; cx < side; cx++) {
-						var scy = y + cy - halfSide;
-						var scx = x + cx - halfSide;
+                var so = y * sw + x;
+                var a = 0;
+                for (var cy = 0; cy < side; cy++) {
+                    for (var cx = 0; cx < side; cx++) {
+                        var scy = y + cy - halfSide;
+                        var scx = x + cx - halfSide;
 
-						if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
+                        if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
 
-							var srcOff = scy * sw + scx;
-							var wt = weights[cy * side + cx];
+                            var srcOff = scy * sw + scx;
+                            var wt = weights[cy * side + cx];
 
-							a += mask[srcOff] * wt;
-						}
-					}
-				}
+                            a += mask[srcOff] * wt;
+                        }
+                    }
+                }
 
-				maskResult[so] = (a === 255 * 8) ? 255 : 0;
-			}
-		}
+                maskResult[so] = (a === 255 * 8) ? 255 : 0;
+            }
+        }
 
-		return maskResult;
-	}
+        return maskResult;
+    }
 
-	function dilateMask(mask, sw, sh) {
+    function dilateMask(mask, sw, sh) {
 
-		var weights = [1, 1, 1, 1, 1, 1, 1, 1, 1];
-		var side = Math.round(Math.sqrt(weights.length));
-		var halfSide = Math.floor(side / 2);
+        var weights = [1, 1, 1, 1, 1, 1, 1, 1, 1];
+        var side = Math.round(Math.sqrt(weights.length));
+        var halfSide = Math.floor(side / 2);
 
-		var maskResult = [];
-		for (var y = 0; y < sh; y++) {
-			for (var x = 0; x < sw; x++) {
+        var maskResult = [];
+        for (var y = 0; y < sh; y++) {
+            for (var x = 0; x < sw; x++) {
 
-				var so = y * sw + x;
-				var a = 0;
-				for (var cy = 0; cy < side; cy++) {
-					for (var cx = 0; cx < side; cx++) {
-						var scy = y + cy - halfSide;
-						var scx = x + cx - halfSide;
+                var so = y * sw + x;
+                var a = 0;
+                for (var cy = 0; cy < side; cy++) {
+                    for (var cx = 0; cx < side; cx++) {
+                        var scy = y + cy - halfSide;
+                        var scx = x + cx - halfSide;
 
-						if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
+                        if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
 
-							var srcOff = scy * sw + scx;
-							var wt = weights[cy * side + cx];
+                            var srcOff = scy * sw + scx;
+                            var wt = weights[cy * side + cx];
 
-							a += mask[srcOff] * wt;
-						}
-					}
-				}
+                            a += mask[srcOff] * wt;
+                        }
+                    }
+                }
 
-				maskResult[so] = (a >= 255 * 4) ? 255 : 0;
-			}
-		}
+                maskResult[so] = (a >= 255 * 4) ? 255 : 0;
+            }
+        }
 
-		return maskResult;
-	}
+        return maskResult;
+    }
 
-	function smoothEdgeMask(mask, sw, sh) {
+    function smoothEdgeMask(mask, sw, sh) {
 
-		var weights = [1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9];
-		var side = Math.round(Math.sqrt(weights.length));
-		var halfSide = Math.floor(side / 2);
+        var weights = [1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9];
+        var side = Math.round(Math.sqrt(weights.length));
+        var halfSide = Math.floor(side / 2);
 
-		var maskResult = [];
-		for (var y = 0; y < sh; y++) {
-			for (var x = 0; x < sw; x++) {
+        var maskResult = [];
+        for (var y = 0; y < sh; y++) {
+            for (var x = 0; x < sw; x++) {
 
-				var so = y * sw + x;
-				var a = 0;
-				for (var cy = 0; cy < side; cy++) {
-					for (var cx = 0; cx < side; cx++) {
-						var scy = y + cy - halfSide;
-						var scx = x + cx - halfSide;
+                var so = y * sw + x;
+                var a = 0;
+                for (var cy = 0; cy < side; cy++) {
+                    for (var cx = 0; cx < side; cx++) {
+                        var scy = y + cy - halfSide;
+                        var scx = x + cx - halfSide;
 
-						if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
+                        if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
 
-							var srcOff = scy * sw + scx;
-							var wt = weights[cy * side + cx];
+                            var srcOff = scy * sw + scx;
+                            var wt = weights[cy * side + cx];
 
-							a += mask[srcOff] * wt;
-						}
-					}
-				}
+                            a += mask[srcOff] * wt;
+                        }
+                    }
+                }
 
-				maskResult[so] = a;
-			}
-		}
+                maskResult[so] = a;
+            }
+        }
 
-		return maskResult;
-	}
+        return maskResult;
+    }
 
-	/**
-	 * Mask Filter
-	 * @function
-	 * @name Mask
-	 * @memberof Konva.Filters
-	 * @param {Object} imageData
-	 * @example
+    /**
+     * Mask Filter
+     * @function
+     * @name Mask
+     * @memberof Konva.Filters
+     * @param {Object} imageData
+     * @example
      * node.cache();
      * node.filters([Konva.Filters.Mask]);
      * node.threshold(200);
-	 */
-	Konva.Filters.Mask = function(imageData) {
-		// Detect pixels close to the background color
-		var threshold = this.threshold(),
+     */
+    Konva.Filters.Mask = function(imageData) {
+        // Detect pixels close to the background color
+        var threshold = this.threshold(),
         mask = backgroundMask(imageData, threshold);
-		if (mask) {
-			// Erode
-			mask = erodeMask(mask, imageData.width, imageData.height);
+        if (mask) {
+            // Erode
+            mask = erodeMask(mask, imageData.width, imageData.height);
 
-			// Dilate
-			mask = dilateMask(mask, imageData.width, imageData.height);
+            // Dilate
+            mask = dilateMask(mask, imageData.width, imageData.height);
 
-			// Gradient
-			mask = smoothEdgeMask(mask, imageData.width, imageData.height);
+            // Gradient
+            mask = smoothEdgeMask(mask, imageData.width, imageData.height);
 
-			// Apply mask
-			applyMask(imageData, mask);
+            // Apply mask
+            applyMask(imageData, mask);
 
-			// todo : Update hit region function according to mask
-		}
+            // todo : Update hit region function according to mask
+        }
 
-		return imageData;
-	};
+        return imageData;
+    };
 
-	Konva.Factory.addGetterSetter(Konva.Node, 'threshold', 0, null, Konva.Factory.afterSetFilter);
+    Konva.Factory.addGetterSetter(Konva.Node, 'threshold', 0, null, Konva.Factory.afterSetFilter);
 })();
 
 (function () {
@@ -6377,14 +6487,6 @@ var Konva = {};
 
 (function() {
     'use strict';
-
-    function isValidSelector(selector) {
-        if (typeof selector !== 'string') {
-            return false;
-        }
-        var firstChar = selector[0];
-        return firstChar === '#' || firstChar === '.' || firstChar === firstChar.toUpperCase();
-    }
     /**
      * Container constructor.&nbsp; Containers are used to contain nodes or other containers
      * @constructor
@@ -6550,6 +6652,7 @@ var Konva = {};
             }
             // then destroy self
             Konva.Node.prototype.destroy.call(this);
+            return this;
         },
         /**
          * return a {@link Konva.Collection} of nodes that match the selector.  Use '#' for id selections
@@ -6583,7 +6686,7 @@ var Konva = {};
 
             for (n = 0; n < len; n++) {
                 sel = selectorArr[n];
-                if (!isValidSelector(sel)) {
+                if (!Konva.Util.isValidSelector(sel)) {
                     Konva.Util.warn('Selector "' + sel + '" is invalid. Allowed selectors examples are "#foo", ".bar" or "Group".');
                     Konva.Util.warn('If you have a custom shape with such className, please change it to start with upper letter like "Triangle".');
                     Konva.Util.warn('Konva is awesome, right?');
@@ -7195,6 +7298,7 @@ var Konva = {};
         destroy: function() {
             Konva.Node.prototype.destroy.call(this);
             delete Konva.shapes[this.colorKey];
+            return this;
         },
         _useBufferCanvas: function(caching) {
             return !caching && (this.perfectDrawEnabled() && (this.getAbsoluteOpacity() !== 1) && this.hasFill() && this.hasStroke() && this.getStage()) ||
@@ -8472,6 +8576,7 @@ var Konva = {};
         CONTENT_TOUCHSTART = 'contentTouchstart',
         CONTENT_TOUCHEND = 'contentTouchend',
         CONTENT_DBL_TAP = 'contentDbltap',
+        CONTENT_TAP = 'contentTap',
         CONTENT_TOUCHMOVE = 'contentTouchmove',
 
         DIV = 'div',
@@ -8644,6 +8749,7 @@ var Konva = {};
             if (index > -1) {
                 Konva.stages.splice(index, 1);
             }
+            return this;
         },
         /**
          * get pointer position which can be a touch position or mouse position
@@ -8750,16 +8856,21 @@ var Konva = {};
          * @param {Object} pos
          * @param {Number} pos.x
          * @param {Number} pos.y
-         * @returns {Konva.Shape}
+         * @param {String} [selector]
+         * @returns {Konva.Node}
+         * @example
+         * var shape = stage.getIntersection({x: 50, y: 50});
+         * // or if you interested in shape parent:
+         * var group = stage.getIntersection({x: 50, y: 50}, 'Group');
          */
-        getIntersection: function(pos) {
+        getIntersection: function(pos, selector) {
             var layers = this.getChildren(),
                 len = layers.length,
                 end = len - 1,
                 n, shape;
 
             for(n = end; n >= 0; n--) {
-                shape = layers[n].getIntersection(pos);
+                shape = layers[n].getIntersection(pos, selector);
                 if (shape) {
                     return shape;
                 }
@@ -9045,8 +9156,9 @@ var Konva = {};
                 }
             }
             // content events
+            this._fire(CONTENT_TOUCHEND, {evt: evt});
             if (Konva.listenClickTap) {
-                this._fire(CONTENT_TOUCHEND, {evt: evt});
+                this._fire(CONTENT_TAP, {evt: evt});
                 if(fireDblClick) {
                     this._fire(CONTENT_DBL_TAP, {evt: evt});
                 }
@@ -9108,23 +9220,9 @@ var Konva = {};
             }
             // mouse events
             else {
-                if (!contentPosition) {
-                    x = evt.offsetX;
-                    y = evt.offetY;
-                }
-                // we unfortunately have to use UA detection here because accessing
-                // the layerX or layerY properties in newer versions of Chrome
-                // throws a JS warning.  layerX and layerY are required for FF
-                // when the container is transformed via CSS.
-                else if (Konva.UA.browser === 'mozilla') {
-                    x = evt.layerX || (evt.clientX - contentPosition.left);
-                    y = evt.layerY || (evt.clientY - contentPosition.top);
-                } else {
-                    x = evt.clientX - contentPosition.left;
-                    y = evt.clientY - contentPosition.top;
-                }
+                x = evt.clientX - contentPosition.left;
+                y = evt.clientY - contentPosition.top;
             }
-
             if (x !== null && y !== null) {
                 this.pointerPos = {
                     x: x,
@@ -9334,16 +9432,17 @@ var Konva = {};
                 stage.content.removeChild(this.getCanvas()._canvas);
                 stage.content.appendChild(this.getCanvas()._canvas);
             }
+            return this;
         },
         // extend Node.prototype.moveUp
         moveUp: function() {
             var moved = Konva.Node.prototype.moveUp.call(this);
             if (!moved){
-                return;
+                return this;
             }
             var stage = this.getStage();
             if(!stage) {
-                return;
+                return this;
             }
             stage.content.removeChild(this.getCanvas()._canvas);
 
@@ -9352,6 +9451,7 @@ var Konva = {};
             } else {
                 stage.content.appendChild(this.getCanvas()._canvas);
             }
+            return this;
         },
         // extend Node.prototype.moveDown
         moveDown: function() {
@@ -9363,6 +9463,7 @@ var Konva = {};
                     stage.content.insertBefore(this.getCanvas()._canvas, children[this.index + 1].getCanvas()._canvas);
                 }
             }
+            return this;
         },
         // extend Node.prototype.moveToBottom
         moveToBottom: function() {
@@ -9374,6 +9475,7 @@ var Konva = {};
                     stage.content.insertBefore(this.getCanvas()._canvas, children[1].getCanvas()._canvas);
                 }
             }
+            return this;
         },
         getLayer: function() {
             return this;
@@ -9393,6 +9495,7 @@ var Konva = {};
         },
         setSize: function(width, height) {
             this.canvas.setSize(width, height);
+            return this;
         },
         /**
          * get/set width of layer.getter return width of stage. setter doing nothing.
@@ -9556,14 +9659,20 @@ var Konva = {};
         /**
          * get visible intersection shape. This is the preferred
          * method for determining if a point intersects a shape or not
+         * also you may pass optional selector parametr to return ancestor of intersected shape
          * @method
          * @memberof Konva.Layer.prototype
          * @param {Object} pos
          * @param {Number} pos.x
          * @param {Number} pos.y
-         * @returns {Konva.Shape}
+         * @param {String} [selector]
+         * @returns {Konva.Node}
+         * @example
+         * var shape = layer.getIntersection({x: 50, y: 50});
+         * // or if you interested in shape parent:
+         * var group = layer.getIntersection({x: 50, y: 50}, 'Group');
          */
-        getIntersection: function(pos) {
+        getIntersection: function(pos, selector) {
             var obj, i, intersectionOffset, shape;
 
             if(!this.hitGraphEnabled() || !this.isVisible()) {
@@ -9582,7 +9691,9 @@ var Konva = {};
                         y: pos.y + intersectionOffset.y * spiralSearchDistance
                     });
                     shape = obj.shape;
-                    if (shape) {
+                    if (shape && selector) {
+                        return shape.findAncestor(selector, true);
+                    } else if (shape) {
                         return shape;
                     }
                     // we should continue search if we found antialiased pixel
@@ -9720,6 +9831,7 @@ var Konva = {};
         setSize: function(width, height) {
             Konva.BaseLayer.prototype.setSize.call(this, width, height);
             this.hitCanvas.setSize(width, height);
+            return this;
         }
     });
     Konva.Util.extend(Konva.Layer, Konva.BaseLayer);
@@ -9896,9 +10008,9 @@ var Konva = {};
     var BATCH_DRAW_STOP_TIME_DIFF = 500;
 
     var now = (function() {
-        if (Konva.root.performance && Konva.root.performance.now) {
+        if (Konva.global.performance && Konva.global.performance.now) {
             return function() {
-                return Konva.root.performance.now();
+                return Konva.global.performance.now();
             };
         }
 
@@ -9912,18 +10024,18 @@ var Konva = {};
     }
 
     var RAF = (function(){
-        return Konva.root.requestAnimationFrame
-            || Konva.root.webkitRequestAnimationFrame
-            || Konva.root.mozRequestAnimationFrame
-            || Konva.root.oRequestAnimationFrame
-            || Konva.root.msRequestAnimationFrame
+        return Konva.global.requestAnimationFrame
+            || Konva.global.webkitRequestAnimationFrame
+            || Konva.global.mozRequestAnimationFrame
+            || Konva.global.oRequestAnimationFrame
+            || Konva.global.msRequestAnimationFrame
             || FRAF;
     })();
 
 
 
     function requestAnimFrame() {
-        return RAF.apply(Konva.root, arguments);
+        return RAF.apply(Konva.global, arguments);
     }
 
     /**
@@ -10159,11 +10271,6 @@ var Konva = {};
             this.animRunning = true;
             this._animationLoop();
         }
-    };
-
-    var moveTo = Konva.Node.prototype.moveTo;
-    Konva.Node.prototype.moveTo = function(container) {
-        moveTo.call(this, container);
     };
 
     /**
@@ -15703,10 +15810,14 @@ var Konva = {};
                 pointerDirection = this.getPointerDirection(),
                 pointerWidth = this.getPointerWidth(),
                 pointerHeight = this.getPointerHeight(),
-                cornerRadius = this.getCornerRadius();
+                cornerRadius = Math.min(this.getCornerRadius(), width / 2, height / 2);
 
             context.beginPath();
-            context.moveTo(0, 0);
+            if (!cornerRadius) {
+                context.moveTo(0, 0);
+            } else {
+                context.moveTo(cornerRadius, 0);
+            }
 
             if (pointerDirection === UP) {
                 context.lineTo((width - pointerWidth) / 2, 0);
@@ -15968,6 +16079,7 @@ var Konva = {};
             this.className = 'Arrow';
         },
         _sceneFunc: function(ctx) {
+            Konva.Line.prototype._sceneFunc.apply(this, arguments);
             var PI2 = Math.PI * 2;
             var points = this.points();
             var n = points.length;
@@ -15994,14 +16106,12 @@ var Konva = {};
                 dy = points[3] - points[1];
                 ctx.rotate((Math.atan2(-dy, -dx) + PI2) % PI2);
                 ctx.moveTo(0, 0);
-                ctx.lineTo(-10, 6);
-                ctx.lineTo(-10, -6);
+                ctx.lineTo(-length, width / 2);
+                ctx.lineTo(-length, -width / 2);
                 ctx.closePath();
                 ctx.restore();
             }
-
             ctx.fillStrokeShape(this);
-            Konva.Line.prototype._sceneFunc.apply(this, arguments);
         }
     };
 
@@ -16060,4 +16170,3 @@ var Konva = {};
     Konva.Collection.mapMethods(Konva.Arrow);
 
 })();
-
