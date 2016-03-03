@@ -1,6 +1,15 @@
 this.initialize = function() {
     this.previousVisible = undefined;
     this.previousListening = undefined;
+
+    // If the value of supportMouseAndTouchEvents is true, this code ensures that the view receives
+    // an initializedProperty or satProperty call for it.
+    // This is needed for the view to set up mouse and touch event handlers.
+    // We do this here to avoid making the view issue a getProperty to the reflector for every
+    // node in order to know its property value.
+    if ( this.supportMouseAndTouchEvents ) {
+        this.supportMouseAndTouchEvents = true;
+    }
 }
 
 this.toggleVisibility = function() {

@@ -481,27 +481,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             */   
         },
 
-        initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-               childSource, childType, childIndex, childName, callback ) {
-            
-            var node = this.state.nodes[ childID ];
-            
-            // If the "nodes" object does not have this object in it, it must not be one that
-            // this driver cares about
-            if ( !node ) {
-
-                //var stage = this.state.stages[ childID ];
-                //renderScene( stage );
-                return;
-            }
-
-            if ( node.kineticObj ) {
-
-                // Attach the mouse and/or touch events based on property settings
-                viewDriver.kernel.getProperty( childID, "supportMouseAndTouchEvents" );
-            }
-
-         },
+        // initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+        //        childSource, childType, childIndex, childName, callback ) { },
  
         // -- deletedNode ------------------------------------------------------------------------------
 
@@ -525,7 +506,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         // -- initializedProperty ----------------------------------------------------------------------
 
-        //initializedProperty: function (nodeID, propertyName, propertyValue) { },
+        initializedProperty: function ( nodeID, propertyName, propertyValue ) { 
+            this.satProperty( nodeID, propertyName, propertyValue );
+        },
 
         // TODO: deletedProperty
 
@@ -547,9 +530,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var kineticObj = node.kineticObj;
             switch ( propertyName ) {
                 case "supportMouseAndTouchEvents":
-                    if ( propertyValue === true ) {
+                    if ( ( propertyValue === true ) && ( !node.hasMouseAndTouchEvents ) ) {
                         attachMouseEvents( node );
                         attachTouchEvents( node );
+                        node.hasMouseAndTouchEvents = true;
                     }
                     break;
                     
@@ -725,32 +709,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         },
 
-        gotProperty: function( nodeID, propertyName, propertyValue ) {
- 
-            var node = this.state.nodes[ nodeID ];
-            var eventsAdded = false;
-
-            // If we don't have a record of this node, it is not a kinetic node, and we ignore it
-            if ( !( node && node.kineticObj ) ) {
-                return eventsAdded;
-            }
-
-            switch ( propertyName ) {
-                case "supportMouseAndTouchEvents":
-                    if ( ( propertyValue === true ) && ( !node.hasMouseAndTouchEvents ) ) {
-                        attachMouseEvents( node );
-                        attachTouchEvents( node );
-                        node.hasMouseAndTouchEvents = true;
-                        eventsAdded = node.hasMouseEvents;
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-
-            return eventsAdded;
-        },
+        // gotProperty: function( nodeID, propertyName, propertyValue ) { },
 
         firedEvent: function( nodeID, eventName, eventData ) {
             switch ( eventName ) {

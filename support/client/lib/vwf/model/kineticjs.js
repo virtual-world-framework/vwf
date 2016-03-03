@@ -40,8 +40,7 @@ define( [ "module",
                         "prototypes": undefined,
                         "kineticObj": undefined,
                         "stage": undefined,
-                        "hasMouseEvents": false,
-                        "hasTouchEvents": false,
+                        "hasMouseAndTouchEvents": false,
                         "model": {}                    };
                 },
                 "isKineticClass": function( prototypes, classID ) {
@@ -301,7 +300,7 @@ define( [ "module",
                         case "dragBoundFunc":
                             var functionString = propertyValue;
                             if ( !utility.isString( functionString ) ) {
-                                modelDriver.logger.errorx( "settingProperty", 
+                                modelDriver.logger.errorx( "setNodeProperty", 
                                     "The value of dragBoundFunc should be a string of the " +
                                     "function to be used." );
                                 break;
@@ -313,7 +312,7 @@ define( [ "module",
                         case "absoluteTransform":
                         case "absoluteOpacity":
                         case "absoluteZIndex":
-                            modelDriver.logger.errorx( "settingProperty", "Cannot set property ", propertyName );
+                            modelDriver.logger.errorx( "setNodeProperty", "Cannot set property ", propertyName );
                             value = undefined;
                             break;
 
