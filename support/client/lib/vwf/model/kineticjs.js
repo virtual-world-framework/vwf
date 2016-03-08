@@ -1849,10 +1849,6 @@ define( [ "module",
                             default:
                                 break;
                         }
-                    //} else if ( !node.model[ propertyName ].isStatic ) {
-                        // Not unique-in-view
-                    //    value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value );
-
                     } else {
                         if ( propertyName === "position" ) {
 
@@ -1874,14 +1870,6 @@ define( [ "module",
                             //this.logger.infox( "    - unique in view, update model only " );
                             node.model[ propertyName ].value = propertyValue;
                         }
-                        /*
-                        if ( this.kernel.client() === this.kernel.moniker() ) {
-                            node.model[ propertyName ].value = propertyValue;
-                            value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
-                        } else {
-                            node.model[ propertyName ].value = propertyValue;
-                        }
-                        */
                     }
                 } else {
                     node.model[ propertyName ] = propertyValue;
@@ -2101,25 +2089,25 @@ define( [ "module",
 
     function addNodeToHierarchy( node ) {
         
-        if ( node.kineticObj ) {
-            if ( modelDriver.state.nodes[ node.parentID ] !== undefined ) {
-                var parent = modelDriver.state.nodes[ node.parentID ];
-                if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
-                    
-                    if ( parent.children === undefined ) {
-                        parent.children = [];    
-                    }
-                    parent.children.push( node.ID );
-                    //console.info( "Adding child: " + childID + " to " + nodeID );
-                    parent.kineticObj.add( node.kineticObj );    
-                }
-            }
-            node.kineticObj.setId( node.ID ); 
-            node.kineticObj.name( node.name ); 
-
-            node.stage = findStage( node.kineticObj );
+        if ( !node.kineticObj ) {
+            console.error( "addNodeToHierarchy: Node does not have a konva object to add" );
+            return;
         }
 
+        // Initialize node
+        node.kineticObj.setId( node.ID ); 
+        node.kineticObj.name( node.name ); 
+        node.stage = findStage( node.kineticObj );
+
+        // If parent is a konva container, add the node to it
+        var parent = modelDriver.state.nodes[ node.parentID ];
+        var parentIsKonvaContainer =
+            parent && parent.kineticObj && isContainerDefinition( parent.prototypes );
+        if ( parentIsKonvaContainer ) {
+            parent.children = parent.children || [];    
+            parent.children.push( node.ID );
+            parent.kineticObj.add( node.kineticObj );    
+        }
     } 
 
     function isNodeInHierarchy( node ) {
