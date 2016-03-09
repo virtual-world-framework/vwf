@@ -1084,10 +1084,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                                 colorRGB.g = 1;
                                 colorRGB.b = 1;
                             }
-                            drawingObject.fillRed( colorRGB.r );
-                            drawingObject.fillGreen( colorRGB.g );
-                            drawingObject.fillBlue( colorRGB.b );
-                            drawingObject.fillAlpha( alpha );
+                            var rgbaText = 'rgba( ' + colorRGB.r + ', ' + colorRGB.g + ', ' + colorRGB.b + ', ' + alpha + ' )';
+                            drawingObject.fill( rgbaText );
                             break;
 
                         default:
@@ -1212,7 +1210,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     var points = drawingObject.points();
                     var isFirstStrokeOfNewLine = false;
 
-                    if ( drawingObject.points() === undefined ) {
+                    if ( !drawingObject.points() || ( drawingObject.points().length === 0 ) ) {
                         points = [ 0, 0, diffX, diffY ];
                         isFirstStrokeOfNewLine = true;
                     }
