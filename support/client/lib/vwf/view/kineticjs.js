@@ -1079,11 +1079,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         case 'transparentFill':
                             var colorRGB = Konva.Util.getRGB( userState.drawing_color );
                             var alpha = ( userState.fillStyle === 'transparentFill' ? 0.5 : 1.0 );
-                            if ( ( colorRGB.r + colorRGB.g + colorRGB.b) === 0 ) {
-                                colorRGB.r = 1;
-                                colorRGB.g = 1;
-                                colorRGB.b = 1;
-                            }
                             var rgbaText = 'rgba( ' + colorRGB.r + ', ' + colorRGB.g + ', ' + colorRGB.b + ', ' + alpha + ' )';
                             drawingObject.fill( rgbaText );
                             break;
@@ -1210,7 +1205,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     var points = drawingObject.points();
                     var isFirstStrokeOfNewLine = false;
 
-                    if ( !drawingObject.points() || ( drawingObject.points().length === 0 ) ) {
+                    if ( !points || ( points.length === 0 ) ) {
                         points = [ 0, 0, diffX, diffY ];
                         isFirstStrokeOfNewLine = true;
                     }
