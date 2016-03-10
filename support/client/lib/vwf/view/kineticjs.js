@@ -1639,11 +1639,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     delete properties.attributes.height;
                     delete properties.attributes.width;
 
-                    // TODO: What is the goal of this code?  It looks like it deletes a property and
-                    //       puts it back                
-                    var radius = properties.attributes.radius;
-                    delete properties.attributes.radius;
-                    properties.attributes.radius = radius;
+                    // TODO: Verify that this code is no longer needed to ensure that circles and
+                    //       ellipses are rendered the same size on all client and then remove it                
+                    // var radius = properties.attributes.radius;
+                    // delete properties.attributes.radius;
+                    // properties.attributes.radius = radius;
                     break;
             }
 
