@@ -447,10 +447,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             if ( privateNodesForThisParent ) {
                 var privateDrawing = privateNodesForThisParent[ childName ];
                 if ( privateDrawing ) {
-                    privateDrawing.imageDataURL = null;
-                    privateDrawing.drawingObject.remove();
-                    privateDrawing.drawingObject.destroy();
-                    privateDrawing.drawingObject = null;
+                    clearPrivateDrawing( privateDrawing );
                     delete privateNodesForThisParent[ childName ];
                     if ( !Object.keys( privateNodesForThisParent ).length ) {
                         delete privateNodesToDelete[ nodeID ];
@@ -617,10 +614,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
 
                 case "text":
-                    var drawingObject = drawing_private && drawing_private.drawingObject;
-                    var nodeIsCurrentDrawingObject =
-                        drawingObject && ( nodeID === drawingObject.id() );
-                    if ( nodeIsCurrentDrawingObject ) {
+                    if ( isDrawingObject( nodeID ) ) {
+                        var drawingObject = drawing_private.drawingObject;
                         drawingObject.text( propertyValue );
                         drawObject( drawingObject, true );
                         propagateNodeToModel();
@@ -707,13 +702,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
 
                 case "textValueUpdated":
-                    if ( drawing_private !== undefined && drawing_private.drawingObject ) {
+                    if ( isDrawingObject( eventData[ 0 ] ) ) {
                         var drawingObject = drawing_private.drawingObject;
-                        if ( drawingObject.id() === eventData[0] ) {
-                            drawingObject.text( eventData[1] );
-                            drawObject( drawingObject, true );
-                            propagateNodeToModel();
-                        }
+                        drawingObject.text( eventData[ 1 ] );
+                        drawObject( drawingObject, true );
+                        propagateNodeToModel();
                     }                    
                     break;
 
@@ -1812,12 +1805,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     }
 
     function deletePrivateNode( fullyDelete ) {
-        var nodeID = drawing_private.drawingObject.id();
+
+        // Find this object's layer so we can redraw it once we have cleared the private object
         var layer = findLayer( drawing_private.drawingObject );
-        drawing_private.drawingObject.remove();
-        drawing_private.drawingObject.destroy();
-        drawing_private.drawingObject = null;
-        drawing_private.imageDataURL = null;
+
+        clearPrivateDrawing( drawing_private );
 
         if ( fullyDelete ) {
             drawing_private = {};
@@ -1842,5 +1834,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         // Unset the private drawing node
         drawing_private = {};
         private_node = undefined;            
+    }
+
+    function isDrawingObject( nodeID ) {
+        var drawingObject = drawing_private && drawing_private.drawingObject;
+        return drawingObject && ( nodeID === drawingObject.id() );
+    }
+
+    function clearPrivateDrawing( privateDrawingState ) {
+        privateDrawingState.drawingObject.remove();
+        privateDrawingState.drawingObject.destroy();
+        privateDrawingState.drawingObject = null;
+        privateDrawingState.imageDataURL = null;
     }
 } );
