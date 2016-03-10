@@ -1627,6 +1627,33 @@ define( [ "module",
                     }
 
                     return value;
+                },
+                "addNodeToHierarchy": function addNodeToHierarchy( node ) {
+        
+                    // This function adds a node to the konva hierarchy so it can be rendered
+                    // It does not affect the model state,
+                    // so can be called from the model or view drivers
+
+                    if ( !node.kineticObj ) {
+                        modelDriver.logger.errorx( "addNodeToHierarchy",
+                            "Node does not have a konva object to add" );
+                        return;
+                    }
+
+                    // Initialize node
+                    node.kineticObj.setId( node.ID ); 
+                    node.kineticObj.name( node.name ); 
+                    node.stage = findStage( node.kineticObj );
+
+                    // If parent is a konva container, add the node to it
+                    var parent = modelDriver.state.nodes[ node.parentID ];
+                    var parentIsKonvaContainer =
+                        parent && parent.kineticObj && isContainerDefinition( parent.prototypes );
+                    if ( parentIsKonvaContainer ) {
+                        parent.children = parent.children || [];    
+                        parent.children.push( node.ID );
+                        parent.kineticObj.add( node.kineticObj );    
+                    }
                 }
             };
 
@@ -1709,7 +1736,7 @@ define( [ "module",
                     // (if the parent is a kinetic container)
                     // (if a kineticObj is created asynchronously ... like an Image, it will be
                     // undefined here, but will be added to its parent in the appropriate callback)
-                    addNodeToHierarchy( node );
+                    this.state.addNodeToHierarchy( node );
                 }
 
             }
@@ -2085,29 +2112,6 @@ define( [ "module",
         }
         return stage;
         
-    }
-
-    function addNodeToHierarchy( node ) {
-        
-        if ( !node.kineticObj ) {
-            console.error( "addNodeToHierarchy: Node does not have a konva object to add" );
-            return;
-        }
-
-        // Initialize node
-        node.kineticObj.setId( node.ID ); 
-        node.kineticObj.name( node.name ); 
-        node.stage = findStage( node.kineticObj );
-
-        // If parent is a konva container, add the node to it
-        var parent = modelDriver.state.nodes[ node.parentID ];
-        var parentIsKonvaContainer =
-            parent && parent.kineticObj && isContainerDefinition( parent.prototypes );
-        if ( parentIsKonvaContainer ) {
-            parent.children = parent.children || [];    
-            parent.children.push( node.ID );
-            parent.kineticObj.add( node.kineticObj );    
-        }
     } 
 
     function isNodeInHierarchy( node ) {
