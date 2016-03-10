@@ -35,6 +35,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             "zIndex": 4 
         };
     var private_node = undefined;
+    var privateNodesToDelete = {};
     var activelyDrawing = false;
     var clearBeforeDraw = false;
     var lastRenderTime = 0;     // last time whole scene was rendered
@@ -439,13 +440,23 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             if ( !node ) {
                 return;
             }
-            /*
-            var protos = node.prototypes;
-            if ( viewDriver.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
-                var stage = this.state.stage = node.kineticObj;
-                render( node.kineticObj, false );
+            
+            // If this node represents the public version of a private drawing that we hold locally,
+            // delete the private drawing (now that it exists publicly)
+            var privateNodesForThisParent = privateNodesToDelete[ nodeID ];
+            if ( privateNodesForThisParent ) {
+                var privateDrawing = privateNodesForThisParent[ childName ];
+                if ( privateDrawing ) {
+                    privateDrawing.imageDataURL = null;
+                    privateDrawing.drawingObject.remove();
+                    privateDrawing.drawingObject.destroy();
+                    privateDrawing.drawingObject = null;
+                    delete privateNodesForThisParent[ childName ];
+                    if ( !Object.keys( privateNodesForThisParent ).length ) {
+                        delete privateNodesToDelete[ nodeID ];
+                    }
+                }
             }
-            */   
         },
 
         // initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -606,13 +617,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
 
                 case "text":
-                    if ( drawing_private !== undefined && drawing_private.drawingObject ) {
-                        var drawingObject = drawing_private.drawingObject;
-                        if ( drawingObject.id() === nodeID ) {
-                            drawingObject.text( propertyValue );
-                            drawObject( drawingObject, true );
-                            propagateNodeToModel();
-                        }
+                    var drawingObject = drawing_private && drawing_private.drawingObject;
+                    var nodeIsCurrentDrawingObject =
+                        drawingObject && ( nodeID === drawingObject.id() );
+                    if ( nodeIsCurrentDrawingObject ) {
+                        drawingObject.text( propertyValue );
+                        drawObject( drawingObject, true );
+                        propagateNodeToModel();
                     }
                     break;
                 default:
@@ -1018,33 +1029,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             return ( "00000000" + Math.floor( Math.random() * 0x100000000 ).toString( 16 ) ).substr( -8 );
         }
     };
-
-    function addNodeToHierarchy( node ) {
-        
-        //console.info( "addNodeToHierarchy ID: " + node.ID + "    parentID: " + node.parentID );
-
-        if ( node.kineticObj ) {
-            
-            if ( viewDriver.state.nodes[ node.parentID ] !== undefined ) {
-                var parent = viewDriver.state.nodes[ node.parentID ];
-                if ( parent.kineticObj && isContainerDefinition( parent.prototypes ) ) {
-                    
-                    if ( parent.children === undefined ) {
-                        parent.children = [];    
-                    }
-                    parent.children.push( node.ID );
-                    //console.info( "Adding child: " + childID + " to " + nodeID );
-                    parent.kineticObj.add( node.kineticObj );    
-                }
-            }
-            node.kineticObj.setId( node.ID ); 
-            node.kineticObj.name( node.name ); 
-
-            node.stage = findStage( node.kineticObj );
-        }
-
-    } 
-
 
     function drawMove( nodeID, eventData, nodeData, touch ) {
 
@@ -1472,19 +1456,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function createLocalKineticNode( parentID, drawingID, objDef, implementsID, source, type, name ) {
 
-        var extendsID = objDef[ "extends" ];
-        //var protos = getPrototypes( viewDriver.kernel, extendsID );
-
-        console.info( "createLocalKineticNode" );
+        var extendsID = objDef.extends;
 
         var node = viewDriver.state.createLocalNode( parentID, drawingID, extendsID, implementsID, source, type, null, name );
         node.prototypes = [];
         node.prototypes.push( extendsID );
 
-        var kineticObj = createKineticObject( node, objDef.properties );
-        node.kineticObj = kineticObj;
+        node.kineticObj = createKineticObject( node, objDef.properties );
 
-        addNodeToHierarchy( node );
+        viewDriver.state.addNodeToHierarchy( node );
 
         return node;
     }
@@ -1593,20 +1573,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         return found;
     }
 
-    function findStage( kineticObj ) {
-
-        var stage = undefined;
-        var parent = kineticObj;
-        while ( parent !== undefined && stage === undefined ) {
-            if ( parent.nodeType === "Stage" ) {
-                stage = parent;
-            }
-            parent = parent.parent;
-        }
-        return stage;
-        
-    }
-
     function findLayer( kineticObj ) {
 
         var layer = undefined;
@@ -1643,17 +1609,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         if ( drawing_private.drawingDef.children ) {
             for ( var def in drawing_private.drawingDef.children ) {
                 if ( drawing_private.drawingObject[ def ] ) {
-                    updateVWFdescriptor( drawing_private.drawingDef.children[ def ], drawing_private.drawingObject[ def ] );
+                    updateVWFdescriptor( drawing_private.drawingDef.children[ def ],
+                        drawing_private.drawingObject[ def ] );
                 }
             }
         }
 
         // Create the node in the model
-        viewDriver.kernel.createChild( drawing_private.drawingParentID, drawing_private.drawingChildName, drawing_private.drawingDef );
+        viewDriver.kernel.createChild( drawing_private.drawingParentID,
+            drawing_private.drawingChildName, drawing_private.drawingDef );
 
         // Delete the private node - we no longer need it
         // Remove the kinetic object from the tree and destroy the object
-        deletePrivateNode( true );
+        markPrivateDrawingNodeForDeletion();
 
         // Set a VWF descriptor's `properties` to describe a Kinetic node using its attributes
         function updateVWFdescriptor( vwfDescriptor, kineticNode ) {
@@ -1663,7 +1631,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             };
 
             if ( drawing_private.imageDataURL ) {
-                properties[ "image" ] = drawing_private.imageDataURL;
+                properties.image = drawing_private.imageDataURL;
             }
 
             // Remove attributes related to editing with the intermediate node.
@@ -1676,7 +1644,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "Circle":
                 case "Ellipse":
                     delete properties.attributes.height;
-                    delete properties.attributes.width;                    
+                    delete properties.attributes.width;
+
+                    // TODO: What is the goal of this code?  It looks like it deletes a property and
+                    //       puts it back                
                     var radius = properties.attributes.radius;
                     delete properties.attributes.radius;
                     properties.attributes.radius = radius;
@@ -1846,9 +1817,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         drawing_private.drawingObject.remove();
         drawing_private.drawingObject.destroy();
         drawing_private.drawingObject = null;
-        if ( viewDriver.state.nodes[ nodeID ] ) {
-            delete viewDriver.state.nodes[ nodeID ];
-        }
         drawing_private.imageDataURL = null;
 
         if ( fullyDelete ) {
@@ -1859,5 +1827,20 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         if ( layer ) {
             layer.batchDraw();
         }
+    }
+
+    function markPrivateDrawingNodeForDeletion() {
+
+        // Mark this private drawing object for deletion
+        // It will be deleted when createdNode notifies us that
+        // the public version of the drawing has been created
+        var parentID = drawing_private.drawingParentID;
+        var nodeName = drawing_private.drawingChildName;
+        privateNodesToDelete[ parentID ] = privateNodesToDelete[ parentID ] || {};
+        privateNodesToDelete[ parentID ][ nodeName ] = drawing_private;
+
+        // Unset the private drawing node
+        drawing_private = {};
+        private_node = undefined;            
     }
 } );
