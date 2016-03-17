@@ -249,6 +249,11 @@
         }
       }
     },
+    "formidable": {
+      "version": "1.0.17",
+      "from": "formidable@1.0.17",
+      "resolved": "http://registry.npmjs.org/formidable/-/formidable-1.0.17.tgz"
+    },
     "fs-extra": {
       "version": "0.8.1",
       "from": "fs-extra@>=0.8.0 <0.9.0",
@@ -467,6 +472,18 @@
           "version": "0.7.3",
           "from": "redis@0.7.3",
           "resolved": "https://registry.npmjs.org/redis/-/redis-0.7.3.tgz"
+        }
+      }
+    },
+    "util": {
+      "version": "0.10.3",
+      "from": "util@0.10.3",
+      "resolved": "http://registry.npmjs.org/util/-/util-0.10.3.tgz",
+      "dependencies": {
+        "inherits": {
+          "version": "2.0.1",
+          "from": "inherits@2.0.1",
+          "resolved": "http://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
         }
       }
     }
