@@ -1625,16 +1625,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     function drawObject( kineticObject, clearBefore ) {
 
         if ( clearBefore ) {
+
             // Draw the full layer
+            // (we need only draw an object if it is a child of a layer -
+            //  otherwise, it is the stage itself and doesn't need redrawing)
             var layer = findLayer( kineticObject );
-            if ( layer ) { 
-                layer.batchDraw();
-            } else {
-                // Should never happen - object should always be a descendent of a layer
-                viewDriver.logger.errorx( "drawObject",
-                    "Could not find the layer for konva object '", kineticObject.name, "'" );
-                kineticObject.draw();
-            }
+            layer && layer.batchDraw();
         } else {
             kineticObject.draw();
         }
