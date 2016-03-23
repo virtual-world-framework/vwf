@@ -1053,9 +1053,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 case "sprite":
                 case "image":
-                    drawingObject.stroke( null );
-                    viewDriver.kernel.fireEvent( appID, 'imageCreated', [ drawingObject.id() ] );
-                    drawAndPropagate = false;
+                    var stroke = drawingObject.stroke();
+                    if ( stroke ) {
+                        viewDriver.kernel.fireEvent( appID, 'imageCreated', [ drawingObject.id() ] );
+                        drawAndPropagate = false;
+                    }
+
                     break;
 
                 case "line":
@@ -1737,7 +1740,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     function setImage( dataURL ) {
 
         if ( drawing_private.drawingObject ) {
-
+            drawing_private.drawingObject.stroke( null );
             if ( dataURL ) {
                 var imageObj = new Image();
                 imageObj.onload = function() {
