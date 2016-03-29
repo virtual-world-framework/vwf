@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "async": "0.2.x",
+    "body-parser": "^1.14.1",
+    "cookie-parser": "^1.4.0",
     "crypto": "0.0.x",
     "express": "^4.13.3",
     "formidable": "1.0.x",
