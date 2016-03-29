@@ -21,6 +21,7 @@
     "async": "0.2.x",
     "body-parser": "^1.14.1",
     "cookie-parser": "^1.4.0",
+    "cookie-session": "^2.0.0-alpha.1",
     "crypto": "0.0.x",
     "express": "^4.13.3",
     "formidable": "1.0.x",
