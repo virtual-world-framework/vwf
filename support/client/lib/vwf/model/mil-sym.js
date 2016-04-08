@@ -349,25 +349,13 @@ define( [ "module",
                 switch ( propertyName ) {
 
                     case "symbolID":
-                        value = node.symbolID;
-                        break;
-
                     case "image":
-                        value = node.image;
-                        break;
-
                     case "description":
-                        value = node.description;
-                        break;
-
                     case "fullName":
-                        value = node.fullName;
-                        break;
-
                     case "tagName":
-                        value = node.tagName;
+                    case "echelon":
+                        value = node[ propertyName ];
                         break;
-
                 }
 
             } else if ( node.nodeType === "modifier" ) {
