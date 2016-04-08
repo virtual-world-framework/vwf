@@ -361,8 +361,6 @@ define( [ "module",
             } else if ( node.nodeType === "modifier" ) {
                 
                 var unit = this.state.nodes[ node.parentID ];
-                var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-                var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
 
                 if ( unit === undefined ) {
                     return undefined;
