@@ -5,6 +5,12 @@
 
   "session": {
     "secret": "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+  },
+
+  // TDG instructor password.
+
+  "tdg": {
+    "password": "insecure"
   }
 
 }

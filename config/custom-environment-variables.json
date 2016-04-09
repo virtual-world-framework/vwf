@@ -1,5 +1,8 @@
 {
   "session": {
     "secret": "VWF_SESSION_SECRET"
+  },
+  "tdg": {
+    "password": "VWF_TDG_PASSWORD"
   }
 }
