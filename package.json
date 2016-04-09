@@ -25,6 +25,7 @@
     "cookie-session": "^2.0.0-alpha.1",
     "crypto": "0.0.x",
     "express": "^4.13.3",
+    "flash": "^1.1.0",
     "formidable": "1.0.x",
     "fs-extra": "0.8.x",
     "js-yaml": "2.1.x",
