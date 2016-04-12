@@ -20,6 +20,12 @@ block content
                | Password
               .col-sm-10
                 input.form-control#password(type="password" placeholder="Password" name="password")
+            .form-group
+              .col-sm-offset-2.col-sm-10
+                .checkbox
+                  label
+                    input#instructor(type="checkbox" data-toggle="collapse" data-target="#password-group" value="instructor" name="instructor")
+                    | Instructor
             .form-group.form-group-sm
               .col-sm-12
                 while message = flash.shift()
