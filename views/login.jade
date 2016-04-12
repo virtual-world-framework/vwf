@@ -1,0 +1,29 @@
+extend bootstrap
+
+block content
+  .modal.show
+    .modal-dialog
+      .modal-content
+        form.form-horizontal(method="post")
+          .modal-header
+            h3.modal-title TDG
+          .modal-body
+            .form-group
+              label.col-sm-2.control-label(for="username")
+                | Username
+              .col-sm-10
+                input.form-control#username(type="text" placeholder="Select a username" name="username")
+            .form-group.collapse#password-group
+              style(scoped).
+                .form-group { transition: height 0.1s }
+              label.col-sm-2.control-label(for="password")
+               | Password
+              .col-sm-10
+                input.form-control#password(type="password" placeholder="Password" name="password")
+            .form-group.form-group-sm
+              .col-sm-12
+                while message = flash.shift()
+                  div.alert(class="alert-" + message.type role="alert")= message.message
+          .modal-footer
+            button.btn.btn-primary(type="submit")
+              | Login
