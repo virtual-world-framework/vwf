@@ -1,0 +1,37 @@
+--- 
+extends: http://vwf.example.com/node.vwf
+properties:
+  posture: 
+    set: |
+      if ( this.posture !== value ) {
+        this.posture = value;
+      }
+    value: 'standing'
+
+  formation: 
+    set: |
+      if ( this.formation !== value ) {
+        this.formation = value;
+      }
+    value: 'wedge'
+
+  weaponStatus: 
+    set: |
+      if ( this.weaponStatus !== value ) {
+        this.weaponStatus = value;
+      }
+    value: 'weaponsTight'
+
+  pov: 
+    set: |
+      if ( this.pov !== value ) {
+        this.pov = value;
+      }
+    value: false
+
+events:
+methods:
+scripts:
+- |
+  this.initialize = function() {
+  } //@ sourceURL=unitSimData.vwf
