@@ -28,10 +28,3 @@ properties:
         this.pov = value;
       }
     value: false
-
-events:
-methods:
-scripts:
-- |
-  this.initialize = function() {
-  } //@ sourceURL=unitSimData.vwf
