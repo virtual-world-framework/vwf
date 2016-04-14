@@ -287,7 +287,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             viewDriver.state.draggingNodes[ node.ID ] = node;
             node.kineticObj.mouseDragging = true;
 
-            if ( node[ "dragToTop" ] ) {
+            if ( node.dragToTop ) {
                 node.kineticObj.moveToTop();
             }
 
@@ -601,6 +601,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
 
                 case "dragToTop":
+                    // TODO: Currently getting from object driver.
+                    //       In future, this should be moved to model driver.
                     node.dragToTop = propertyValue;
                     break;
 
