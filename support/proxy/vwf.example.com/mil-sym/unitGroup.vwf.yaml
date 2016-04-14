@@ -4,7 +4,8 @@ properties:
   supportMouseAndTouchEvents: true
   index: 8
   zIndex: 8
-  
+  dragToTop: true
+
   mapPosition:
     set: |
       if ( value !== undefined ) {

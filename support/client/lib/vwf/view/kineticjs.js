@@ -157,10 +157,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             return found;            
         },
         "registerForSwipeEvents":   function( protoFilters ) {
-            //console.info( " Registering for swipe events for: ");
-            //for ( var i = 0; i < protoFilters.length; i++ ) {
-            //    console.info( i + ". " + protoFilters[i] );
-            //}
             this.protoFilter = protoFilters;
         },
         "listenForSwipes":          function( params ) {
@@ -290,6 +286,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             viewDriver.state.draggingNodes[ node.ID ] = node;
             node.kineticObj.mouseDragging = true;
+
+            if ( node.dragToTop ) {
+                node.kineticObj.moveToTop();
+            }
 
             swipe.swipedAcross( node );
 
@@ -599,6 +599,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         propagateNodeToModel();
                     }
                     break;
+
+                case "dragToTop":
+                    // TODO: Currently getting from object driver.
+                    //       In future, this should be moved to model driver.
+                    node.dragToTop = propertyValue;
+                    break;
+
                 default:
                     drawThis = !activelyDrawing;
             }
@@ -789,7 +796,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         } else if ( doRenderLayers ) {
             for ( var id in renderLayers ) {
                 render( renderLayers[ id ], false, true );
-                console.info( "Render layer: " + id );
+                //console.info( "Render layer: " + id );
             }             
         } 
     }
