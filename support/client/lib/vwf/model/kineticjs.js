@@ -2097,6 +2097,12 @@ define( [ "module",
             kineticObj = new Konva.Node( config || {} );
         }
 
+        // TODO: Allow the app to determine which nodes it would like to scale
+        // If this object is not the stage, disable scaling on it
+        if ( !modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/stage.vwf" ) ) {
+            kineticObj.transformsEnabled( "position" );
+        }
+
         return kineticObj;
     }
 
