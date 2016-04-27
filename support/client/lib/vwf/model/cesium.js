@@ -1368,7 +1368,7 @@ define( [ "module",
                             } );                            
 
                             if ( node.imageProvider !== undefined ) {
-                                scene.globe.imageryLayers().addImageryProvider( node.imageProvider );
+                                scene.globe.imageryLayers.addImageryProvider( node.imageProvider );
                                 node.imageryProviderValue = requestedType;
                             }
                             value = undefined;
