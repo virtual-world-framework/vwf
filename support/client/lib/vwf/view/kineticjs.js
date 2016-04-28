@@ -608,7 +608,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
 
                 case "visible":
-                    if ( renderOverride ) {
+                    if ( pauseRendering ) {
                         drawThis = false;
                     }
                     else {
@@ -619,13 +619,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     }
                     break;
 
-                case "renderOverride":
+                case "pauseRendering":
                 case "drawing_clients":
                     drawThis = false;
                     break;
 
                 default:
-                    if ( renderOverride ) {
+                    if ( pauseRendering ) {
                         drawThis = false;
                     } else {
                         drawThis = !activelyDrawing;
@@ -659,7 +659,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         break;
 
                     case "refreshState":
-                        if ( !renderOverride ) {
+                        if ( !pauseRendering ) {
                             refreshState();
                         }
                         break;
