@@ -258,7 +258,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     delete viewDriver.state.draggingNodes[ node.ID ]; 
                 }
             }
-                     
+
         } );
 
         node.kineticObj.on( "click", function( evt ) {
@@ -294,7 +294,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             swipe.swipedAcross( node );
 
         } );
-        
+
         node.kineticObj.on( "dragmove", function( evt ) {
             var eData = processEvent( evt, node, false );
 
@@ -302,7 +302,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             activelyDrawing = false;
 
         } );
-        
+
         node.kineticObj.on( "dragend", function( evt ) {
             var eData = processEvent( evt, node, false );
 
@@ -483,6 +483,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             }
 
             var drawThis = false;
+            var clearBefore = false;
             var kineticObj = node.kineticObj;
 
             switch ( propertyName ) {
@@ -556,7 +557,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                             // remove handlers
                             stage.off( 'contentMousedown' );
                             stage.off( 'contentMousemove' );
-                            stage.off( 'contentMouseup' );                           
+                            stage.off( 'contentMouseup' );
                         }
                     }
                     break;
@@ -606,13 +607,34 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     node.dragToTop = propertyValue;
                     break;
 
+                case "visible":
+                    if ( pauseRendering ) {
+                        drawThis = false;
+                    }
+                    else {
+                        drawThis = !activelyDrawing;
+                        if ( !propertyValue ) {
+                            clearBefore = !propertyValue;
+                        }
+                    }
+                    break;
+
+                case "pauseRendering":
+                case "drawing_clients":
+                    drawThis = false;
+                    break;
+
                 default:
-                    drawThis = !activelyDrawing;
+                    if ( pauseRendering ) {
+                        drawThis = false;
+                    } else {
+                        drawThis = !activelyDrawing;
+                    }
             }
 
             if ( drawThis ) {
-                drawObject( kineticObj, false );
-            }            
+                drawObject( kineticObj, clearBefore );
+            }
 
         },
 
@@ -633,6 +655,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                             var propertyName = methodParameters[ 1 ];
                             var propertyValue = methodParameters[ 2 ];
                             setKineticProperty( private_node.kineticObj, propertyName, propertyValue );
+                        }
+                        break;
+
+                    case "refreshState":
+                        if ( !pauseRendering ) {
+                            refreshState();
                         }
                         break;
 
@@ -664,6 +692,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                 }
             }
+            // for methods that all clients need to execute
+            switch ( methodName ) {
+
+                case "refreshLayer":
+                    refreshLayer( methodParameters );
+                    break;
+
+            }
 
         },
 
@@ -692,11 +728,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         drawingObject.text( eventData[ 1 ] );
                         drawObject( drawingObject, true );
                         propagateNodeToModel();
-                    }                    
+                    }
                     break;
 
                 default:
-                    break;                    
+                    break;
             }
 
         },
@@ -735,11 +771,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     // Private helper functions --------------------------------------------------------------------
 
     function update( vwfTime ) {
-               
         // switch to update, when the tickless branch is merged to development
         var nodeIDs = Object.keys( viewDriver.state.draggingNodes );
-        var renderLayers = {};
-        var doRenderLayers = false;
+        var renderNodes = {};
+        var doRenderNodes = false;
         
         for ( var i = 0; i < nodeIDs.length; i++ ) {
         
@@ -778,27 +813,20 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         //    node.model.position.ignoreNextPositionUpdate = true;
                         //}
                         //doRenderScene = true;
-                        doRenderLayers = true;
-                        var layer = findLayer( node.kineticObj );
-                        renderLayers[ layer.id() ] = layer;
+                        doRenderNodes = true;
+                        renderNodes[ nodeID ] = node.kineticObj;
                     }
                 }
             }
 
         }
         
-        doRenderScene =  !viewDriver.state[ "renderOverride" ] && ( doRenderScene || ( ( Date.now() - lastRenderTime ) > renderTimeout) );
-
-        if ( doRenderScene ) {
-            for ( var id in viewDriver.state.stages ) {
-                renderScene( viewDriver.state.stages[ id ], false, true );
-            } 
-        } else if ( doRenderLayers ) {
-            for ( var id in renderLayers ) {
-                render( renderLayers[ id ], false, true );
-                //console.info( "Render layer: " + id );
-            }             
-        } 
+        if ( doRenderNodes ) {
+            for ( var id in renderNodes ) {
+                render( renderNodes[ id ], false, true );
+                console.info( "Render node: " + id );
+            }
+        }
     }
 
     function renderScene( stage, force, drawHit ) {
@@ -807,11 +835,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //var now = Date.now();
             //if ( ( ( ( now - lastRenderTime ) > renderTimeout ) || force ) ) {
                 //stage.batchDraw();
-				if ( stage.batchDraw instanceof Function ) {
-					batchRender( stage, force );
-				} else {
-					render( stage, force, drawHit );
-				}
+                if ( stage.batchDraw instanceof Function ) {
+                    batchRender( stage, force );
+                } else {
+                    render( stage, force, drawHit );
+                }
                 //lastRenderTime = now;
             //}
             doRenderScene = false;
@@ -821,19 +849,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     function render( kineticObj, force, drawHit ) {
         var now = Date.now();
         if ( kineticObj && ( ( ( now - lastRenderTime ) > renderTimeout ) || force ) ) {
-			( drawHit ? kineticObj.draw() : kineticObj.drawScene() );
+            ( drawHit ? kineticObj.draw() : kineticObj.drawScene() );
             //kineticObj.draw();
             lastRenderTime = now;
         }
     }
-	
-	function batchRender( kineticObj, force ) {
+
+    function batchRender( kineticObj, force ) {
         var now = Date.now();
         if ( kineticObj && ( ( ( now - lastRenderTime ) > renderTimeout ) || force ) ) {
             kineticObj.batchDraw();
             lastRenderTime = now;
         }
-	}
+    }
 
     function processEvent( e, node, propagate ) {
         var returnData = { eventData: undefined, eventNodeData: undefined };
@@ -1387,22 +1415,35 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         if ( stateObj !== undefined ) {
             var userState = drawing_client;
             for ( var property in stateObj ) {
-                userState[ property ] = stateObj[ property ];       
+                userState[ property ] = stateObj[ property ];
             }
         }
     };
+
+    function refreshState() {
+        for ( var id in viewDriver.state.stages ) {
+            renderScene( viewDriver.state.stages[ id ], true );
+        }
+    }
+
+    function refreshLayer( layerID ) {
+        var layer = viewDriver.state.nodes[ layerID ];
+        if ( layer && layer.kineticObj ) {
+            drawObject( layer.kineticObj, true );
+        }
+    }
 
     function findChild( parent, names ) {
         if ( names.length > 0 ) {
             var childName = names.shift();
             while ( childName === "" ) {
-                childName = names.shift();            
+                childName = names.shift();
             }
             if ( parent.children[ childName ] ) {
                 if ( names.length === 0 ) {
                     return parent.children[ childName ];
                 } else {
-                    return this.findChild( parent.children[ childName ], names );                
+                    return this.findChild( parent.children[ childName ], names );
                 }
             }
             else {
@@ -1641,6 +1682,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             //  otherwise, it is the stage itself and doesn't need redrawing)
             var layer = findLayer( kineticObject );
             layer && layer.batchDraw();
+        } else if ( kineticObject.batchDraw instanceof Function ) {
+            kineticObject.batchDraw();
+            console.log( "Warning: drawObject called on state" );
         } else {
             kineticObject.draw();
         }
