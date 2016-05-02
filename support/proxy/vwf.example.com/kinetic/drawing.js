@@ -190,6 +190,10 @@ this.down = function( eventData, nodeData, touch ) {
                 retObj.opacity = 1.0;
                 retObj.scaleOnLoad = true;
                 break;
+            case "arrow":
+            case "thickArrow":
+                retObj.disableScaleAndRotationForSpeed = false;
+                break;
             default:
                 retObj.fill = userState.drawing_color;
                 break;
@@ -276,6 +280,8 @@ this.down = function( eventData, nodeData, touch ) {
         } );
 
     }
+
+    //# sourceURL=kinetic.drawing.down
 };
 
 this.move = function( eventData, nodeData, touch ) {
@@ -607,5 +613,3 @@ this.findChild = function( parent, names ) {
     }
     return undefined;
 }
-
-//@ sourceURL=kinetic_drawing.js
