@@ -15,6 +15,7 @@ properties:
   id:
   name:
   opacity:
+  disableScaleAndRotationForSpeed: true
   scale:
   scaleX:
   scaleY:

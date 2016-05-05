@@ -4,6 +4,7 @@
 extends: http://vwf.example.com/kinetic/container.vwf
 properties:
   container:
+  disableScaleAndRotationForSpeed: false
   supportMouseAndTouchEvents: true
   enableEvents:
 events:

@@ -438,8 +438,29 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             }
         },
 
-        // initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
-        //        childSource, childType, childIndex, childName, callback ) { },
+        initializedNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
+               childSource, childType, childIndex, childName, callback ) {
+
+            var node = this.state.nodes[ childID ];
+            
+            // If the "nodes" object does not have this object in it, it must not be one that
+            // this driver cares about
+            if ( !node ) {
+                return;
+            }
+
+            var objectDriver = getKernel().models.object;
+            var disableScaleAndRotationForSpeed =
+                objectDriver.gettingProperty( childID, "disableScaleAndRotationForSpeed" );
+            var prototypeID = objectDriver.prototype( childID );
+            while ( ( disableScaleAndRotationForSpeed === undefined ) && ( prototypeID ) ) {
+                disableScaleAndRotationForSpeed =
+                    objectDriver.gettingProperty( prototypeID, "disableScaleAndRotationForSpeed" );
+                prototypeID = objectDriver.prototype( prototypeID );
+            }
+            var transformsEnabled = disableScaleAndRotationForSpeed ? "position" : "all";
+            node.kineticObj.transformsEnabled( transformsEnabled );
+        },
  
         // -- deletedNode ------------------------------------------------------------------------------
 
@@ -563,6 +584,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
                 case "position":
                     drawObject( kineticObj, true );
+                    break;
+                case "disableScaleAndRotationForSpeed":
+                    kineticObj.transformsEnabled( propertyValue ? "position" : "all" );
                     break;
                 case "scale":
                     if ( node.model.scale !== undefined ) {
@@ -948,6 +972,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         return vwfEventData;
     }
 
+    // When the user begins a new part of a drawing,
+    // check to see if this is is for an existing drawing or the beginning of a new drawing.
+    // If it is the beginning of a new drawing, populate the drawing_private object with
+    // a new konva object and a VWF descriptor that will be used to create a model object
+    // when the user is done drawing
     function drawDown( nodeID, eventData, nodeData, touch ) {
 
         var userState = drawing_client;
@@ -1641,9 +1670,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         // Set a VWF descriptor's `properties` to describe a Kinetic node using its attributes
         function updateVWFdescriptor( vwfDescriptor, kineticNode ) {
 
-            var properties = vwfDescriptor.properties = {
+            var properties = vwfDescriptor.properties = $.extend( vwfDescriptor.properties || {}, {
                 "attributes": $.extend( {}, kineticNode.getAttrs() )
-            };
+            } );
 
             if ( drawing_private.imageDataURL ) {
                 properties.image = drawing_private.imageDataURL;
@@ -1735,6 +1764,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             case "image":
                 retObj.opacity = 1.0;
                 retObj.scaleOnLoad = true;
+                break;
+            case "arrow":
+            case "thickArrow":
+                retObj.disableScaleAndRotationForSpeed = false;
                 break;
             default:
                 retObj.fill = userState.drawing_color;
