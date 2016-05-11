@@ -1398,7 +1398,7 @@ define( [ "module",
                             case "image":
                                 var imageObj = kineticObj.image();
                                 if ( imageObj !== undefined ) {
-                                    value = imageObj.src;    
+                                    value = imageObj.attributes['src'].value;
                                 }
                                 break;
 
