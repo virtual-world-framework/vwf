@@ -8,4 +8,4 @@ this.deleteChildNode = function( id ) {
 	if ( child ) {
 		this.children.delete( child );
 	}
-} //@ sourceURL=kinetic_container.js
+} //# sourceURL=kinetic_container.js

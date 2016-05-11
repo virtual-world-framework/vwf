@@ -54,4 +54,4 @@ this.toggleListening = function() {
 
 }
 
-//@ sourceURL=kinetic_node.js
+//# sourceURL=kinetic_node.js

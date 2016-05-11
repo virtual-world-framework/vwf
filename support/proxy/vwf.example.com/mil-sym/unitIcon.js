@@ -34,4 +34,4 @@ this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
         this.parent.handleRender( img, iconSize, symbolCenter, symbolBounds );
     }
 }
-//@ sourceURL=unitIcon.js
+//# sourceURL=unitIcon.js
