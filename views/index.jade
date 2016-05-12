@@ -6,7 +6,7 @@ block scenarios
   //- and joinable sessions (with instances).
 
   -
-    var application = "/TDG/index.vwf",
+    var application = "/ITDG/index.vwf",
       scenarios = manifest[ application ] || [];
     var scenario_sessions = _.sortBy( scenarios, function( scenario, name ) {
       return name;
@@ -90,7 +90,7 @@ block sessions
   //- Join each scenario with its sessions. Select only completed sessions (with documents).
 
   -
-    var application = "/TDG/index.vwf",
+    var application = "/ITDG/index.vwf",
       scenarios = manifest[ application ] || [];
     var scenario_sessions = _.sortBy( scenarios, function( scenario, name ) {
       return name;
