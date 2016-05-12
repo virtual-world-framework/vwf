@@ -171,4 +171,4 @@ this.setAbsoluteMapPosition = function( mapPosition ) {
   }
 }
 
-//@ sourceURL=unitGroup.js
+//# sourceURL=unitGroup.js
