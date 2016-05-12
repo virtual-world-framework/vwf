@@ -980,9 +980,10 @@
 
                 } );
 
-                socket.on( "error", function() { 
+                socket.on( "error", function( error ) { 
 
                     //Overcome by compatibility.js websockets check
+                    console.error( "socket.error:", error );
                     jQuery('body').html("<div class='vwf-err'>WebSockets connections are currently being blocked. Please check your proxy server settings.</div>"); 
 
                 } );
