@@ -1110,7 +1110,7 @@
                 action: actionName,
                 member: memberName,
                 parameters: require( "vwf/utility" ).transform( parameters, require( "vwf/utility" ).transforms.transit ),
-                result: require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ),
+                result: require( "vwf/utility" ).transform( result === undefined ? null : result, require( "vwf/utility" ).transforms.transit ),
             };
 
             if ( socket ) {
