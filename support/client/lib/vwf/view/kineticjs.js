@@ -632,28 +632,26 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
 
                 case "visible":
-                    if ( pauseRendering ) {
+                    var visible = propertyValue;
+                    if ( this.state.pauseRendering ) {
                         drawThis = false;
-                    }
-                    else {
+                    } else {
                         drawThis = !activelyDrawing;
-                        if ( !propertyValue ) {
-                            clearBefore = !propertyValue;
-                        }
+                        clearBefore = visible ? clearBefore : false;
                     }
                     break;
 
                 case "pauseRendering":
+                    this.state.pauseRendering = propertyValue;
+                    drawThis = false;
+                    break;
+
                 case "drawing_clients":
                     drawThis = false;
                     break;
 
                 default:
-                    if ( pauseRendering ) {
-                        drawThis = false;
-                    } else {
-                        drawThis = !activelyDrawing;
-                    }
+                    drawThis = this.state.pauseRendering ? false : !activelyDrawing;
             }
 
             if ( drawThis ) {
@@ -683,7 +681,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         break;
 
                     case "refreshState":
-                        if ( !pauseRendering ) {
+                        if ( !this.state.pauseRendering ) {
                             refreshState();
                         }
                         break;
