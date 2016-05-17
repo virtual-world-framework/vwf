@@ -846,7 +846,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         if ( doRenderNodes ) {
             for ( var id in renderNodes ) {
                 render( renderNodes[ id ], false, true );
-                console.info( "Render node: " + id );
             }
         }
     }
