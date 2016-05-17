@@ -52,9 +52,8 @@ this.clientLeave = function( moniker ) {
         delete this.drawing_clients[ moniker ]; 
         this.drawing_clients = this.drawing_clients;
     }
-    if ( this.drawing_private[ moniker ] !== undefined ) {
-        delete this.drawing_private[ moniker ]; 
-    }
+    
+    //# sourceURL=drawing.clientLeave
 };
 
 
