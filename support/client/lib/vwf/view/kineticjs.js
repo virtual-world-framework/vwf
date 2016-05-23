@@ -653,10 +653,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 var prop, value, t;
                 switch ( methodName ) {
 
-                    case "setClientUIState":
-                        setClientUIState( methodParameters[0] );
-                        break;
-
                     case "setKineticProperty":
                         if ( private_node && private_node.kineticObj ) {
                             var propertyName = methodParameters[ 1 ];
@@ -767,6 +763,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     if ( modelValue !== undefined ) {
                         viewDriver.state.setProperty( node.kineticObj, propertyName, modelValue );
                     }
+                }
+            }
+        },
+
+        setClientUIState: function ( stateObj ) {
+            if ( stateObj !== undefined ) {
+                var userState = drawing_client;
+                for ( var property in stateObj ) {
+                    userState[ property ] = stateObj[ property ];
                 }
             }
         }
@@ -1401,15 +1406,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     function isValid( obj ) {
         var objType = ( {} ).toString.call( obj ).match( /\s([a-zA-Z]+)/ )[ 1 ].toLowerCase();
         return ( objType != 'null' && objType != 'undefined' );
-    };
-
-    function setClientUIState( stateObj ) {
-        if ( stateObj !== undefined ) {
-            var userState = drawing_client;
-            for ( var property in stateObj ) {
-                userState[ property ] = stateObj[ property ];
-            }
-        }
     };
 
     function refreshState() {
