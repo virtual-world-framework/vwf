@@ -767,7 +767,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             }
         },
 
-        setClientUIState: function ( stateObj ) {
+        setDrawingState: function ( stateObj ) {
             if ( stateObj !== undefined ) {
                 var userState = drawing_client;
                 for ( var property in stateObj ) {
