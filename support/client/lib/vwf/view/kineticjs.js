@@ -157,8 +157,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         },
         "listenForSwipes":          function( params ) {
             this.isListening      = params.listen;
-            this.parentFilter     = params[ "parent" ];
-            this.touchStartIsTap  = params[ "touchStartIsTap" ];
+            this.parentFilter     = params.parent;
+            this.touchStartIsTap  = params.touchStartIsTap;
         } 
     };
 
@@ -667,22 +667,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         }
                         break;
 
-                    case "registerForTapHoldEvents":
-                        tapHold.registerForTapHoldEvents( methodParameters );
-                        break;
-
-                    case "listenForTapHold":
-                        tapHold.listenForTapHold( methodParameters[0] );
-                        break;
-
-                    case "registerForSwipeEvents":
-                        swipe.registerForSwipeEvents( methodParameters );
-                        break;
-
-                    case "listenForSwipes":
-                        swipe.listenForSwipes( methodParameters[0] );
-                        break;
-
                     case "enableLayerHitGraph":
                         var layers = methodParameters[ 0 ];
                         for ( var id in layers ) {
@@ -774,6 +758,22 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     userState[ property ] = stateObj[ property ];
                 }
             }
+        },
+
+        registerForTapHoldEvents: function( protoFilters ) {
+            tapHold.registerForTapHoldEvents( protoFilters );
+        },
+
+        listenForTapHold: function( listen ) {
+            tapHold.listenForTapHold( listen );
+        },
+
+        registerForSwipeEvents: function( protoFilters ) {
+            swipe.registerForSwipeEvents( protoFilters );
+        },
+
+        listenForSwipes: function( params ) {
+            swipe.listenForSwipes( params );
         }
     } );
 
