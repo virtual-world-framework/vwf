@@ -8,32 +8,32 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var stageWidth = ( window && window.innerWidth ) ? window.innerWidth : 800;
     var stageHeight = ( window && window.innerHeight ) ? window.innerHeight : 600;
     var drawing_private = {
-            "drawingObject": null,
-            "drawingDef": null,
-            "drawingParentID": undefined,
-            "drawingChildName": "",
-            "initialDownPoint": [ -1, -1 ],
-            "previousPoint": [ -1, -1 ],
-            "mouseDown": false,
-            "imageDataURL": null
+        "drawingObject": null,
+        "drawingDef": null,
+        "drawingParentID": undefined,
+        "drawingChildName": "",
+        "initialDownPoint": [ -1, -1 ],
+        "previousPoint": [ -1, -1 ],
+        "mouseDown": false,
+        "imageDataURL": null
     };
     var drawing_client = {  
-            "drawing_mode": 'none',
-            "drawing_visible": 'inherit',
-            "drawing_color": 'black',
-            "drawing_width": 4,
-            "drawing_parentPath": '/',
-            "drawing_parentID": undefined,
-            "drawing_opacity": 1.0,
-            "nameIndex": 1,
-            "fontSize": 16,
-            "angle": 30,
-            "lineCap": 'round',
-            "lineJoin": 'round',
-            "dashLineStyle": null,
-            "fillStyle": null,
-            "zIndex": 4 
-        };
+        "drawing_mode": 'none',
+        "drawing_visible": 'inherit',
+        "drawing_color": 'black',
+        "drawing_width": 4,
+        "drawing_parentPath": '/',
+        "drawing_parentID": undefined,
+        "drawing_opacity": 1.0,
+        "nameIndex": 1,
+        "fontSize": 16,
+        "angle": 30,
+        "lineCap": 'round',
+        "lineJoin": 'round',
+        "dashLineStyle": null,
+        "fillStyle": null,
+        "zIndex": 4 
+    };
     var private_node = undefined;
     var privateNodesToDelete = {};
     var activelyDrawing = false;
@@ -74,7 +74,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         },  
         "cancel":           function() {
             if ( this.timerId ) {
-                //console.info( " Cancel tapHold for node: " + this.node.ID );
                 clearTimeout( this.timerId );
             }
             this.node = null;
@@ -98,7 +97,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             return found;
         },
         "registerForTapHoldEvents": function( protoFilters ) {
-            //console.info( " Registering for tapHold events for: ");
             for ( var i = 0; i < protoFilters.length; i++ ) {
                 console.info( i + ". " + protoFilters[i] );
             }
@@ -115,7 +113,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function fireTapHold() {
         if ( tapHold.node ) {
-            //console.info( " tapHold event firing for node: " + tapHold.node.ID );
             viewDriver.kernel.fireEvent( tapHold.node.ID, 'tapHold', [ tapHold.initialPosition ] );
             tapHold.cancel();
         }
@@ -128,7 +125,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         "touchStartIsTap": null,  
         "swipedAcross": function( node, isTouchStart, eventData ) {
             if ( this.isListening && this.isSwipe( node ) ) {
-                //console.info( " swiped across node: " + node.ID );
                 if ( isTouchStart && this.touchStartIsTap ) {
                     viewDriver.kernel.fireEvent( node.ID, 'tap', eventData );
                 } else {
@@ -198,7 +194,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         node.kineticObj.on( "mouseout", function( evt ) {
             var eData = processEvent( evt, node, false );
-            //viewDriver.kernel.fireEvent( node.ID, 'pointerOut', eData.eventData );
             if ( mouseDown || ( evt.evt.buttons ) ) {
                 swipe.swipedAcross( node );
             }
@@ -464,11 +459,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
  
         // -- deletedNode ------------------------------------------------------------------------------
 
-        deletedNode: function( nodeID ) { 
-            //for ( var id in viewDriver.state.stages ) {
-            //    renderScene( viewDriver.state.stages[ id ], false );                
-            //} 
-        },
+        // deletedNode: function( nodeID ) { },
 
         // -- addedChild -------------------------------------------------------------------------------
 
@@ -488,15 +479,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             this.satProperty( nodeID, propertyName, propertyValue );
         },
 
-        // TODO: deletedProperty
-
         // -- satProperty ------------------------------------------------------------------------------
 
         satProperty: function( nodeID, propertyName, propertyValue ) {
             
             var node = this.state.nodes[ nodeID ];
-
-            //console.info( "kineticjs(view) satProperty. propertyName: " + propertyName + ", propertyValue: " + propertyValue + ", nodeID: " + nodeID );
 
             // If we don't have a record of this node, it is not a kinetic node, and we ignore it
             if ( !( node && node.kineticObj ) ) {
@@ -632,28 +619,26 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     break;
 
                 case "visible":
-                    if ( pauseRendering ) {
+                    var visible = propertyValue;
+                    if ( this.state.pauseRendering ) {
                         drawThis = false;
-                    }
-                    else {
+                    } else {
                         drawThis = !activelyDrawing;
-                        if ( !propertyValue ) {
-                            clearBefore = !propertyValue;
-                        }
+                        clearBefore = visible ? clearBefore : false;
                     }
                     break;
 
                 case "pauseRendering":
+                    this.state.pauseRendering = propertyValue;
+                    drawThis = false;
+                    break;
+
                 case "drawing_clients":
                     drawThis = false;
                     break;
 
                 default:
-                    if ( pauseRendering ) {
-                        drawThis = false;
-                    } else {
-                        drawThis = !activelyDrawing;
-                    }
+                    drawThis = this.state.pauseRendering ? false : !activelyDrawing;
             }
 
             if ( drawThis ) {
@@ -663,8 +648,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         },
 
         calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
-            
-            //console.info( "methodName = " + methodName );
 
             if ( this.kernel.client() === this.kernel.moniker() ) {
                 var prop, value, t;
@@ -683,7 +666,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         break;
 
                     case "refreshState":
-                        if ( !pauseRendering ) {
+                        if ( !this.state.pauseRendering ) {
                             refreshState();
                         }
                         break;
@@ -727,8 +710,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         },
 
-        // gotProperty: function( nodeID, propertyName, propertyValue ) { },
-
         firedEvent: function( nodeID, eventName, eventData ) {
             switch ( eventName ) {
 
@@ -761,8 +742,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         },
 
-        // firedEvent: function( nodeID, eventName ) {
-        // },
+        // firedEvent: function( nodeID, eventName ) { },
 
         ticked: function( vwfTime ) {
             update( vwfTime );
@@ -808,9 +788,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             // If users can drag this node and all clients should stay synchronized, we must 
             // pull the new node position out of kinetic and update the model with it
             if ( node.kineticObj ) {
-                //console.info( "update( Node: "+nodeID+" )" );
                 if ( node.kineticObj.draggable() && node.model && node.model.position && !node.model.position.isStatic )  { 
-                    //( ( node.model.y !== undefined ) && !( node.model.y.isStatic ) ) )  {
                     var kineticX = node.kineticObj.x();
                     var kineticY = node.kineticObj.y();
 
@@ -818,7 +796,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     // model property with the new value
                     if ( ( node.model.position.value[0] !== kineticX ) || 
                          ( node.model.position.value[1] !== kineticY ) ) {
-                        //console.info( "- "+nodeID+", model position: "+node.model.position.value.x+", "+node.model.position.value.y+", kinetic position: "+kineticX+", "+kineticY );
 
                         // Fire this event to notify the model that kinetic has already updated the
                         // view and it doesn't need to (if the model set the value, it would risk 
@@ -826,8 +803,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         // jitter while the user is dragging the node)
                         viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
                         viewDriver.kernel.setProperty( nodeID, "position", [ kineticX, kineticY ] );
-                        //viewDriver.kernel.setProperty( nodeID, "position", [ kineticX, kineticY ] );
-                        //console.info( "setProperty( "+nodeID+", position: kineticX: "+kineticX+", kineticY: "+kineticY+" )" );
 
                         // Tell the model not to update the view on the next position update because 
                         // kinetic has already done so
@@ -848,24 +823,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         if ( doRenderNodes ) {
             for ( var id in renderNodes ) {
                 render( renderNodes[ id ], false, true );
-                console.info( "Render node: " + id );
             }
         }
     }
 
     function renderScene( stage, force, drawHit ) {
-        //window.requestAnimationFrame( renderScene( stage ) );
         if ( stage && ( !activelyDrawing || force ) ) {
-            //var now = Date.now();
-            //if ( ( ( ( now - lastRenderTime ) > renderTimeout ) || force ) ) {
-                //stage.batchDraw();
-                if ( stage.batchDraw instanceof Function ) {
-                    batchRender( stage, force );
-                } else {
-                    render( stage, force, drawHit );
-                }
-                //lastRenderTime = now;
-            //}
+            if ( stage.batchDraw instanceof Function ) {
+                batchRender( stage, force );
+            } else {
+                render( stage, force, drawHit );
+            }
             doRenderScene = false;
         }
     }
@@ -874,7 +842,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         var now = Date.now();
         if ( kineticObj && ( ( ( now - lastRenderTime ) > renderTimeout ) || force ) ) {
             ( drawHit ? kineticObj.draw() : kineticObj.drawScene() );
-            //kineticObj.draw();
             lastRenderTime = now;
         }
     }
@@ -1420,11 +1387,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             }
 
             if ( pointAccepted ) {
-                //privateState.previousPoint = eventPoint;
+
                 // Update the view to keep pace with user input
-                //console.info( drawingObject.id + " updated, sending update event." );
                 if ( drawingObject && activelyDrawing ) {
-                    //console.info( "VIEW: draw object " );
                     drawObject( drawingObject, clearBeforeDraw );
                     clearBeforeDraw = false;
                 }
@@ -1439,8 +1404,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     };
 
     function setClientUIState( stateObj ) {
-
-        //console.info( "setClientUIState " + JSON.stringify( stateObj ) );
         if ( stateObj !== undefined ) {
             var userState = drawing_client;
             for ( var property in stateObj ) {
@@ -1689,12 +1652,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "Ellipse":
                     delete properties.attributes.height;
                     delete properties.attributes.width;
-
-                    // TODO: Verify that this code is no longer needed to ensure that circles and
-                    //       ellipses are rendered the same size on all client and then remove it                
-                    // var radius = properties.attributes.radius;
-                    // delete properties.attributes.radius;
-                    // properties.attributes.radius = radius;
                     break;
             }
 
