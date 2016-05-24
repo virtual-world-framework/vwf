@@ -786,15 +786,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 return;
             }
 
-            if ( ( childNames.length > 0 ) && ( node.kineticObj.children.length > 0 ) ) {
-                // Search for children with these names and set their listening values
-                for ( var i = 0; i < childNames.length; i++ ) {
-                    for ( var j = 0; j < kineticObj.children.length; j++ ) {
-                        if ( kineticObj.children[ j ] && ( kineticObj.children[ j ].name() === childNames[ i ] ) ) {
-                            kineticObj.children[ j ].listening( listen );
-                        }
-                    }
-                }
+            var children = kineticObj.children;
+            for ( var i = 0; i < children.length; i++ ) {
+                var child = children[ i ];
+                var childWasRequested = child && ( childNames.indexOf( child.name() ) > -1 );
+                childWasRequested && child.listening( listen );
             }
         }
     } );
