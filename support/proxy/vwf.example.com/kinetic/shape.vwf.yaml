@@ -4,10 +4,6 @@
 extends: http://vwf.example.com/kinetic/node.vwf
 properties:
   fill:
-  fillRed:
-  fillGreen:
-  fillBlue:
-  fillAlpha:
   fillPatternImage:
   fillPatternX:
   fillPatternY:
@@ -38,20 +34,12 @@ properties:
   fillEnabled:
   fillPriority:
   stroke:
-  strokeRed:
-  strokeGreen:
-  strokeBlue:
-  strokeAlpha:
   strokeWidth:
   strokeScaleEnabled:
   strokeEnabled:
   lineJoin:
   lineCap:
   shadowColor:
-  shadowRed:
-  shadowGreen:
-  shadowBlue:
-  shadowAlpha:
   shadowBlur:
   shadowOffset:
   shadowOffsetX:

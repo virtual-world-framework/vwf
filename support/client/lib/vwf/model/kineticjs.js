@@ -343,22 +343,6 @@ define( [ "module",
                             }
                             break;
 
-                        case "fillRed":
-                            kineticObj.fillRed( Number( propertyValue ) );
-                            break;
-
-                        case "fillGreen":
-                            kineticObj.fillGreen( Number( propertyValue ) );
-                            break;
-
-                        case "fillBlue":
-                            kineticObj.fillGreen( Number( propertyValue ) );
-                            break;
-
-                        case "fillAlpha":
-                            kineticObj.fillAlpha( parseFloat( propertyValue ) );
-                            break;
-
                         case "fillPatternImage":
                             if ( utility.validObject( propertyValue ) ) {
                                 var imageObj = kineticObj.fillPatternImage();
@@ -542,22 +526,6 @@ define( [ "module",
                             }
                             break;
 
-                        case "strokeRed":
-                            kineticObj.strokeRed( Number( propertyValue ) );
-                            break;
-
-                        case "strokeGreen":
-                            kineticObj.strokeGreen( Number( propertyValue ) );
-                            break;
-
-                        case "strokeBlue":
-                            kineticObj.strokeBlue( Number( propertyValue ) );
-                            break;
-
-                        case "strokeAlpha":
-                            kineticObj.strokeAlpha( parseFloat( propertyValue ) );
-                            break; 
-
                         case "strokeWidth":
                             kineticObj.strokeWidth( Number( propertyValue ) );
                             break;
@@ -605,22 +573,6 @@ define( [ "module",
                             if ( vwfColor ) {
                                 kineticObj.shadowColor( vwfColor.toString() );
                             }
-                            break;
-
-                        case "shadowRed":
-                            kineticObj.shadowRed( Number( propertyValue ) );
-                            break;
-
-                        case "shadowGreen":
-                            kineticObj.shadowGreen( Number( propertyValue ) );
-                            break;
-
-                        case "shadowBlue":
-                            kineticObj.shadowBlue( Number( propertyValue ) );
-                            break;
-
-                        case "shadowBlue":
-                            kineticObj.shadowBlue( parseFloat( propertyValue ) );
                             break;
 
                         case "shadowBlur":

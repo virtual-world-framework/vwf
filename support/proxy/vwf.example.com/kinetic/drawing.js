@@ -52,8 +52,5 @@ this.clientLeave = function( moniker ) {
         delete this.drawing_clients[ moniker ]; 
         this.drawing_clients = this.drawing_clients;
     }
-    
-    //# sourceURL=drawing.clientLeave
 };
-
 
