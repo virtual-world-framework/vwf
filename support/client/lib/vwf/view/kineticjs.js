@@ -18,8 +18,23 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         "imageDataURL": null
     };
     var drawing_client = {  
-            "zIndex": 4,
-			"shadows": {} 
+        "drawing_mode": 'none',
+        "drawing_visible": 'inherit',
+        "drawing_color": 'black',
+        "drawing_width": 4,
+        "drawing_parentPath": '/',
+        "drawing_parentID": undefined,
+        "drawing_opacity": 1.0,
+        "nameIndex": 1,
+        "fontSize": 16,
+        "angle": 30,
+        "lineCap": 'round',
+        "lineJoin": 'round',
+        "dashLineStyle": null,
+        "fillStyle": null,
+        "zIndex": 4,
+        "shadows": {} 
+    };
     var private_node = undefined;
     var privateNodesToDelete = {};
     var activelyDrawing = false;
