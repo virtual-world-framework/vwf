@@ -32,7 +32,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         "lineJoin": 'round',
         "dashLineStyle": null,
         "fillStyle": null,
-        "zIndex": 4 
+        "zIndex": 4,
+        "shadows": {} 
     };
     var private_node = undefined;
     var privateNodesToDelete = {};
@@ -1710,6 +1711,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             "opacity": userState.drawing_opacity,
             "index": 4
         };
+
+        if ( userState.shadows ) {
+            for ( var shadowProp in userState.shadows ) {
+                retObj[ shadowProp ] = userState.shadows[ shadowProp ];
+            }
+        }
 
         switch( drawingMode ) {
             case "sprite":
