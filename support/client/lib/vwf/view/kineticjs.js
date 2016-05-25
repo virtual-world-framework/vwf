@@ -775,6 +775,24 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         listenForSwipes: function( params ) {
             swipe.listenForSwipes( params );
+        },
+
+        setChildListening: function( nodeID, childNames, listen ) {
+            var node = this.state.nodes[ nodeID ];
+
+            var kineticObj = node && node.kineticObj;
+            if ( !kineticObj ) {
+                view.logger.errorx( "setChildListening",
+                    "Node '", nodeID, "' is not a konva node" );
+                return;
+            }
+
+            var children = kineticObj.children;
+            for ( var i = 0; i < children.length; i++ ) {
+                var child = children[ i ];
+                var childWasRequested = child && ( childNames.indexOf( child.name() ) > -1 );
+                childWasRequested && child.listening( listen );
+            }
         }
     } );
 
