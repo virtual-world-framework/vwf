@@ -31,6 +31,7 @@
     "flash": "^1.1.0",
     "formidable": "1.0.x",
     "fs-extra": "0.8.x",
+    "glob": "^7.0.3",
     "jade": "^1.11.0",
     "jquery": "^2.1.4",
     "js-yaml": "2.1.x",
