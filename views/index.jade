@@ -44,7 +44,7 @@ block scenarios
             td= session.state.classroom.platoon
             td= session.state.classroom.unit
             td &nbsp;
-            td: a.btn.join(href=session.instance) Join
+            td: a.btn.join(href=session.instance target="_blank") Join
         else if user.instructor
           tr.scenario
             td= scenario.state.scenarioTitle
@@ -53,7 +53,7 @@ block scenarios
             td.unit: input.form-control.input-sm
             td &nbsp;
             td
-              a.btn.edit(href=scenario.document.uri) Edit
+              a.btn.edit(href=scenario.document.uri target="_blank") Edit
               a.btn.launch.hidden(href=scenario.document.uri) Launch
       if user.instructor
         tr.application
@@ -124,4 +124,4 @@ block sessions
         td= session.state.classroom.platoon
         td= session.state.classroom.unit
         td= dateFormat( session.document.timestamp )
-        td: a.btn.review(href=session.document.uri) Review
+        td: a.btn.review(href=session.document.uri target="_blank") Review
