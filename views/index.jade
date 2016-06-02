@@ -44,22 +44,23 @@ block scenarios
             td= session.state.classroom.platoon
             td= session.state.classroom.unit
             td &nbsp;
-            td: a.btn.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
+            td: a.btn.btn-sm.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
         else if user.instructor
           tr.scenario
             td= scenario.state.scenarioTitle
-            td.company: input.form-control.input-sm
-            td.platoon: input.form-control.input-sm
-            td.unit: input.form-control.input-sm
-            td &nbsp;
+            td.company: input.form-control.input-sm(name="company" type="text" maxlength="8")
+            td.platoon: input.form-control.input-sm(name="platoon" type="number" min="1" max="9" step="1")
+            td.unit: input.form-control.input-sm(name="unit" type="number" min="1" max="9" step="1")
+            td.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
             td
-              a.btn.edit(href=scenario.instance||scenario.document.uri target="_blank") Edit
-              a.btn.launch.hidden(href=scenario.document.uri) Launch
+              a.btn.btn-sm.edit(href=scenario.instance||scenario.document.uri target="_blank") Edit
+              button.btn.btn-sm.create.hidden Create
       if user.instructor
         tr.application
-          td.title(colspan=4): input(placeholder="Title").form-control.input-sm
+          td.title: input.form-control.input-sm(name="title" type="text" placeholder="Scenario Title")
+          td.name(colspan=3): input.form-control.input-sm(name="name" type="text" placeholder="Scenario Name")
           td &nbsp;
-          td: a.btn.create.disabled(href=application) Create
+          td: button.btn.btn-sm.create.disabled Create
     script.
       document.addEventListener( "DOMContentLoaded", function() {
         $( "table#scenarios" ).on( "input", "tr.scenario", function() {
@@ -67,21 +68,37 @@ block scenarios
             this$.find( ".platoon input" ).val() &&
             this$.find( ".unit input" ).val();
           if ( filled ) {
-            this$.find( "a.edit" ).addClass( "hidden" );
-            this$.find( "a.launch" ).removeClass( "hidden" );
+            this$.find( ".btn.edit" ).addClass( "hidden" );
+            this$.find( ".btn.create" ).removeClass( "hidden" );
           } else {
-            this$.find( "a.edit" ).removeClass( "hidden" );
-            this$.find( "a.launch" ).addClass( "hidden" );
+            this$.find( ".btn.edit" ).removeClass( "hidden" );
+            this$.find( ".btn.create" ).addClass( "hidden" );
           }
+        } );
+        $( "table#scenarios" ).on( "click", "tr.scenario .btn.create", function() {
+          var row$ = $( this ).parents( "tr.scenario" ), properties = {
+               name: row$.find( ".name input" ).val(),
+            company: row$.find( ".company input" ).val(),
+            platoon: row$.find( ".platoon input" ).val(),
+               unit: row$.find( ".unit input" ).val(),
+          };
+          // $.post( "...", properties );
         } );
         $( "table#scenarios" ).on( "input", "tr.application", function() {
           var this$ = $( this ),
             filled = this$.find( ".title input" ).val();
           if ( filled ) {
-            this$.find( "a.create" ).removeClass( "disabled" );
+            this$.find( ".btn.create" ).removeClass( "disabled" );
           } else {
-            this$.find( "a.create" ).addClass( "disabled" );
+            this$.find( ".btn.create" ).addClass( "disabled" );
           }
+        } );
+        $( "table#scenarios" ).on( "click", "tr.application .btn.create", function() {
+          var row$ = $( this ).parents( "tr.application" ), properties = {
+             name: row$.find( ".name input" ).val(),
+            title: row$.find( ".title input" ).val(),
+          };
+          // $.post( "...", properties );
         } );
       } );
 
@@ -124,4 +141,4 @@ block sessions
         td= session.state.classroom.platoon
         td= session.state.classroom.unit
         td= dateFormat( session.document.timestamp )
-        td: a.btn.review(href=session.instance||session.document.uri target="_blank") Review
+        td: a.btn.btn-sm.review(href=session.instance||session.document.uri target="_blank") Review
