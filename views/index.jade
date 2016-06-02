@@ -89,6 +89,7 @@ block scenarios
             filled = this$.find( ".title input" ).val();
           if ( filled ) {
             this$.find( ".btn.create" ).removeClass( "disabled" );
+            this$.find( ".name input" ).val( this$.find( ".title input" ).val().replace( /[^0-9A-Za-z]+/g, "-" ) );
           } else {
             this$.find( ".btn.create" ).addClass( "disabled" );
           }
