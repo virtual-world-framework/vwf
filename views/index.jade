@@ -80,7 +80,9 @@ block scenarios
             platoon: row$.find( ".platoon input" ).val(),
                unit: row$.find( ".unit input" ).val(),
           };
-          // $.post( "...", properties );
+          $.post( "sessions", properties ).
+            done( function() { document.location.reload() } ).
+            fail( function() {} );
         } );
         $( "table#scenarios" ).on( "input", "tr.application", function() {
           var this$ = $( this ),
@@ -97,7 +99,9 @@ block scenarios
              name: row$.find( ".name input" ).val(),
             title: row$.find( ".title input" ).val(),
           };
-          // $.post( "...", properties );
+          $.post( "scenarios", properties ).
+            done( function() { document.location.reload() } ).
+            fail( function() {} );
         } );
       } );
 
