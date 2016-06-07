@@ -290,7 +290,8 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                 updatedUnit.image["selected"] = {
                     "url": img.toDataUrl(),
                     "width": imgBounds.width,
-                    "height": imgBounds.height
+                    "height": imgBounds.height,
+                    "center": img.getCenterPoint()
                 }
             }
         }

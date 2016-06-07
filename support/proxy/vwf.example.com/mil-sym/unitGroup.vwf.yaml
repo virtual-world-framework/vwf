@@ -9,7 +9,6 @@ properties:
   mapPosition:
     set: |
       if ( value !== undefined ) {
-        //this.mapPosition = { "x": value.x, "y": value.y };
         this.mapPosition = value;
         if ( this.icon && this.icon.symbolCenter ) {
           this.position = {
@@ -41,18 +40,6 @@ properties:
       }
       return false;      
     value: false 
-
-  showBorder:
-    set: |
-      if ( this.border !== undefined ) {
-        this.border.visible = value;
-      }
-    get: |
-      if ( this.border !== undefined ) {
-        return this.border.visible;
-      }
-      return false;      
-    value: false
 
 methods:
   updateThreatShape:
