@@ -28,15 +28,6 @@ this.initialize = function() {
             if ( this.threatArea ) {
                 this.threatArea.position = this.icon.symbolCenter;    
             }
-            if ( this.border ) {
-                this.border.points = [ 
-                    0, 0, 
-                    iconSize.width, 0, 
-                    iconSize.width, iconSize.height, 
-                    0, iconSize.height, 
-                    0, 0 
-                ];    
-            }
 
         }, this );
     }
@@ -49,16 +40,6 @@ this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
 
     if ( this.threatArea ) {
         this.threatArea.position = this.icon.symbolCenter;    
-    }
-
-    if ( this.border ) {
-        this.border.points = [ 
-            0, 0, 
-            iconSize.width, 0, 
-            iconSize.width, iconSize.height, 
-            0, iconSize.height, 
-            0, 0 
-        ];    
     }
 
 }
