@@ -1376,6 +1376,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     drawingObject.dash( [ 2, 5 ] );
                     drawingObject.width( width );
                     drawingObject.height( height );
+                    drawingObject.transformsEnabled( "all" );
                     drawingObject.image( null );
                     clearBeforeDraw = true;
                     break;
@@ -1513,7 +1514,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             kineticObj = new Konva.Group( config || {} );
         } else if ( viewDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/image.vwf" ) ) {
             var imageObj = new Image();
-            node.scaleOnLoad = false;
+            node.scaleOnLoad = true;
             kineticObj = new Konva.Image( {
                 image: imageObj
             } );

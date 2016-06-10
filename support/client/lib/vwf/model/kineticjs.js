@@ -535,7 +535,9 @@ define( [ "module",
                         case "stroke":
                             var vwfColor = new utility.color( propertyValue );
                             if ( vwfColor ) {
+                                var strokeEnabled = kineticObj.strokeEnabled();
                                 kineticObj.stroke( vwfColor.toString() );
+                                kineticObj.strokeEnabled( strokeEnabled );
                             }
                             break;
 
@@ -1372,7 +1374,7 @@ define( [ "module",
                                 break;
 
                             case "scaleOnLoad":
-                                    //value = node.scaleOnLoad;
+                                //value = node.scaleOnLoad;
                                 break;
                             
                         }                    
@@ -1982,7 +1984,7 @@ define( [ "module",
             kineticObj = new Konva.Group( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/image.vwf" ) ) {
             var imageObj = new Image();
-            node.scaleOnLoad = false;
+            //node.scaleOnLoad = true;
             kineticObj = new Konva.Image( {
                 image: imageObj
             } );
