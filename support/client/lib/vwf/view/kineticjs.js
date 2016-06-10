@@ -1803,6 +1803,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         if ( drawing_private.drawingObject ) {
             drawing_private.drawingObject.stroke( null );
+            drawing_private.drawingObject.strokeEnabled( false );
             if ( dataURL ) {
                 var imageObj = new Image();
                 imageObj.onload = function() {

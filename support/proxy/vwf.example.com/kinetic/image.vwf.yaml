@@ -6,6 +6,7 @@ properties:
   image:
   crop:
   scaleOnLoad: true
+  strokeEnabled: false
 events:
   imageLoaded:
   imageLoadError:

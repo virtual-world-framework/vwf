@@ -308,6 +308,19 @@ define( [ "module",
                             kineticObj.dragBoundFunc( eval( "(" + functionString + ")" ) );
                             break;
 
+                        case "transformsEnabled":
+                            switch ( propertyValue ) {
+                                case "all":
+                                case "none":
+                                case "position":
+                                    kineticObj.transformsEnabled( propertyValue );
+                                    break;
+                                default:
+                                    modelDriver.logger.errorx( "setNodeProperty", "Property ", propertyName, " set to invalid value ", propertyValue );
+                                    break;
+                            }
+                            break;
+
                         case "transform":
                         case "absoluteTransform":
                         case "absoluteOpacity":
