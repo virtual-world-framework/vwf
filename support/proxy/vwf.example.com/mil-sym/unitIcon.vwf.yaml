@@ -25,6 +25,8 @@ properties:
       }
     value: { "x": 16, "y": 16 }
 
+  strokeEnabled: false
+  transformsEnabled: "position"
   zIndex: 20
 
 events:

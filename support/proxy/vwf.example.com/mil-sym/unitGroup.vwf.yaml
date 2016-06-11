@@ -5,6 +5,7 @@ properties:
   index: 8
   zIndex: 8
   dragToTop: true
+  transformsEnabled: "position"
 
   mapPosition:
     set: |

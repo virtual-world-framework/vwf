@@ -534,11 +534,7 @@ define( [ "module",
 
                         case "stroke":
                             var vwfColor = new utility.color( propertyValue );
-                            if ( vwfColor ) {
-                                var strokeEnabled = kineticObj.strokeEnabled();
-                                kineticObj.stroke( vwfColor.toString() );
-                                kineticObj.strokeEnabled( strokeEnabled );
-                            }
+                            kineticObj.stroke( vwfColor.toString() );
                             break;
 
                         case "strokeWidth":
@@ -1829,6 +1825,7 @@ define( [ "module",
                             case "position":
                             case "stroke":
                             case "strokeWidth":
+                            case "strokeEnabled":
                             case "fill":
                             case "radius":
                                 if ( node.kineticObj.nodeType !== "Stage" ) {
