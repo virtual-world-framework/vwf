@@ -534,7 +534,7 @@ define( [ "module",
 
                         case "stroke":
                             var vwfColor = new utility.color( propertyValue );
-                            kineticObj.stroke( vwfColor.toString() );
+                            kineticObj.stroke( ( vwfColor ? vwfColor.toString() : null ) );
                             break;
 
                         case "strokeWidth":
