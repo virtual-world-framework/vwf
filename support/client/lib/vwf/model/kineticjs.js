@@ -308,6 +308,19 @@ define( [ "module",
                             kineticObj.dragBoundFunc( eval( "(" + functionString + ")" ) );
                             break;
 
+                        case "transformsEnabled":
+                            switch ( propertyValue ) {
+                                case "all":
+                                case "none":
+                                case "position":
+                                    kineticObj.transformsEnabled( propertyValue );
+                                    break;
+                                default:
+                                    modelDriver.logger.errorx( "setNodeProperty", "Property ", propertyName, " set to invalid value ", propertyValue );
+                                    break;
+                            }
+                            break;
+
                         case "transform":
                         case "absoluteTransform":
                         case "absoluteOpacity":
@@ -521,9 +534,7 @@ define( [ "module",
 
                         case "stroke":
                             var vwfColor = new utility.color( propertyValue );
-                            if ( vwfColor ) {
-                                kineticObj.stroke( vwfColor.toString() );
-                            }
+                            kineticObj.stroke( ( vwfColor ? vwfColor.toString() : null ) );
                             break;
 
                         case "strokeWidth":
@@ -1359,7 +1370,7 @@ define( [ "module",
                                 break;
 
                             case "scaleOnLoad":
-                                    //value = node.scaleOnLoad;
+                                //value = node.scaleOnLoad;
                                 break;
                             
                         }                    
@@ -1814,6 +1825,7 @@ define( [ "module",
                             case "position":
                             case "stroke":
                             case "strokeWidth":
+                            case "strokeEnabled":
                             case "fill":
                             case "radius":
                                 if ( node.kineticObj.nodeType !== "Stage" ) {
@@ -1969,7 +1981,7 @@ define( [ "module",
             kineticObj = new Konva.Group( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/image.vwf" ) ) {
             var imageObj = new Image();
-            node.scaleOnLoad = false;
+            //node.scaleOnLoad = true;
             kineticObj = new Konva.Image( {
                 image: imageObj
             } );
