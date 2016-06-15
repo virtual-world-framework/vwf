@@ -13,7 +13,7 @@ module.exports.scenarioScenarioSessions = function( scenarios ) {
     return scenario.scenario.document;
   } ).reduce( function( scenario_sessions, scenario ) {
     var sessions = ( scenario.sessions || [] ).filter( function( session ) {
-      return true; // TODO: select only incomplete sessions
+      return ! sessionCompleted( session );
     } );
     return scenario_sessions.concat( sessions.map( function( session ) {
       return { scenario: scenario.scenario, session: session };
@@ -32,7 +32,7 @@ module.exports.sessionScenarioSessions = function( scenarios ) {
     return name;
   } ).reduce( function( scenario_sessions, scenario ) {
     var sessions = ( scenario.sessions || [] ).filter( function( session ) {
-      return session.document;  // TODO: select only complete sessions
+      return sessionCompleted( session );
     } );
     return scenario_sessions.concat( sessions.map( function( session ) {
       return { scenario: scenario.scenario, session: session };
@@ -43,6 +43,44 @@ module.exports.sessionScenarioSessions = function( scenarios ) {
 
 };
 
+// Generate the Instructor/Students annotation for a session.
+
+module.exports.instructorStudentsLabel = function( session ) {
+
+  var instanceCounts = session.completion.instance || { instructors: 0, students: 0 },
+    label = "";
+
+  if ( instanceCounts.instructors > 0 || instanceCounts.students > 0 ) {
+
+    if ( instanceCounts.instructors > 0 ) {
+      label += "Instructor, ";
+    }
+
+    if ( instanceCounts.students === 1 ) {
+      label += instanceCounts.students + " student";
+    } else {
+      label += instanceCounts.students + " students";
+    }
+
+  }
+
+  return label;
+
+}
+
 // `dateformat` module.
 
 module.exports.dateFormat = require( "dateformat" );
+
+// Determine if a session is completed. Completed sessions are those saved in a document containing
+// student content and having no student instances. A session will become completed once it has been
+// saved and the last student leaves.
+
+function sessionCompleted( session ) {
+
+  var documentCounts = session.completion.document || { instructors: 0, students: 0 };
+  var instanceCounts = session.completion.instance || { instructors: 0, students: 0 };
+
+  return documentCounts.students > 0 && instanceCounts.students === 0;
+
+}
