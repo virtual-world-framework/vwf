@@ -24,15 +24,16 @@ block scenarios
           var scenario = scenario_session.scenario,
             session = scenario_session.session;
         if session
-          tr.session
-            td= session.state.scenarioTitle
-              br
-              span.small= instructorStudentsLabel( session )
-            td= session.state.classroom.company
-            td= session.state.classroom.platoon
-            td= session.state.classroom.unit
-            td &nbsp;
-            td: a.btn.btn-sm.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
+          if session.instance || user.instructor
+            tr.session
+              td= session.state.scenarioTitle
+                br
+                span.small= instructorStudentsLabel( session )
+              td= session.state.classroom.company
+              td= session.state.classroom.platoon
+              td= session.state.classroom.unit
+              td &nbsp;
+              td: a.btn.btn-sm.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
         else if user.instructor
           tr.scenario
             td= scenario.state.scenarioTitle
