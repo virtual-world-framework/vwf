@@ -8,13 +8,13 @@ var _ = require( "lodash" );
 module.exports.scenarioScenarioSessions = function( scenarios ) {
 
   return _.sortBy( scenarios, function( scenario, name ) {
-    return name;
+    return name.toLowerCase();
   } ).filter( function( scenario ) {
     return scenario.scenario.document;
   } ).reduce( function( scenario_sessions, scenario ) {
     var sessions = ( scenario.sessions || [] ).filter( function( session ) {
       return ! sessionCompleted( session );
-    } );
+    } ).sort( sessionComparator );
     return scenario_sessions.concat( sessions.map( function( session ) {
       return { scenario: scenario.scenario, session: session };
     } ) ).concat( { scenario: scenario.scenario, session: undefined } );
@@ -29,7 +29,7 @@ module.exports.scenarioScenarioSessions = function( scenarios ) {
 module.exports.sessionScenarioSessions = function( scenarios ) {
 
   return _.sortBy( scenarios, function( scenario, name ) {
-    return name;
+    return name.toLowerCase();
   } ).reduce( function( scenario_sessions, scenario ) {
     var sessions = ( scenario.sessions || [] ).filter( function( session ) {
       return sessionCompleted( session );
@@ -82,5 +82,43 @@ function sessionCompleted( session ) {
   var instanceCounts = session.completion.instance || { instructors: 0, students: 0 };
 
   return documentCounts.students > 0 && instanceCounts.students === 0;
+
+}
+
+// `Array#sort` comparison function to sort sessions by company, then platoon, then unit.
+
+function sessionComparator( sessionA, sessionB ) {
+
+  var stateA = sessionA.state || {},
+    classroomA = stateA.classroom || {},
+    companyA = ( classroomA.company || "" ).toLowerCase(),
+    platoonA = Number( classroomA.platoon ),
+    unitA = Number( classroomA.unit );
+
+  var stateB = sessionB.state || {},
+    classroomB = stateB.classroom || {},
+    companyB = ( classroomB.company || "" ).toLowerCase(),
+    platoonB = Number( classroomB.platoon ),
+    unitB = Number( classroomB.unit );
+
+  if ( companyA < companyB ) {
+    return -1;
+  } else if ( companyA > companyB ) {
+    return 1;
+  }
+
+  if ( platoonA < platoonB ) {
+    return -1;
+  } else if ( platoonA > platoonB ) {
+    return 1;
+  }
+
+  if ( unitA < unitB ) {
+    return -1;
+  } else if ( unitA > unitB ) {
+    return 1;
+  }
+
+  return 0;
 
 }
