@@ -777,6 +777,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             swipe.listenForSwipes( params );
         },
 
+        setListening: function( nodeID, listen ) {
+            this.state.nodes[ nodeID ].kineticObj.listening( listen );
+        },
+
         setChildListening: function( nodeID, childNames, listen ) {
             var node = this.state.nodes[ nodeID ];
 
