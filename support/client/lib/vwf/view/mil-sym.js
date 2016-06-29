@@ -108,12 +108,6 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                             addInsertableUnits( methodParameters[ 0 ] );
                         }
                         break;
-
-                    case "getUnitSymbol":
-                        if ( clientThatCalledMethod === me ) {
-                            getUnitSymbol( methodParameters[ 0 ], methodParameters[ 1 ], methodParameters[ 2 ], methodParameters[ 3 ], methodParameters[ 4 ], methodParameters[ 5 ] );
-                        }
-                        break;
                 }
             } 
         },
@@ -128,7 +122,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         // ticked: function() {
         // },
 
-
+        getUnitSymbol: getUnitSymbol
     } );
 
     function addInsertableUnits( units ) {
