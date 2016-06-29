@@ -216,8 +216,6 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         var rs = renderer.utilities.RendererSettings;
         var symUtil = renderer.utilities.SymbolUtilities;
         var modifiers = {};
-
-        //self.logger.info(" Mil-SymJS  SymbolID before echelon and affiliation: " + symbolID );
     
         if ( cws ) {
             updatedUnit = unit;
@@ -226,10 +224,8 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             updatedUnit.symbolID = cws.addAffiliationToSymbolId( symbolID, affiliation );
             
             // Add echelon
-            if ( echelonID != undefined ) {
-                //self.logger.info(" Mil-SymJS Adding Echelon: " + echelonID );            
+            if ( echelonID != undefined ) {          
                 updatedUnit.symbolID = cws.addEchelonToSymbolId( updatedUnit.symbolID, echelonID );
-                //self.logger.info(" Mil-SymJS  SymbolID after echelon and affiliation: " + updatedUnit.symbolID );
             }
             
             // Add modifiers
@@ -300,14 +296,6 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                     } else {
                         self.kernel.fireEvent( appID, unitEvent, [ '', options.unitID, updatedUnit ] );                        
                     }
-                    break;
-                case "addFavoriteUnit":
-                    unitEvent = "favoriteUnitAdded";
-                    self.kernel.fireEvent( appID, unitEvent, [ options.unitID, updatedUnit ] );
-                    break;
-                case "addRecentUnit":
-                    var unitEvent = "recentUnitAdded";
-                    self.kernel.fireEvent( appID, unitEvent, [ options.unitID, updatedUnit ] );
                     break;
                 case "renderSelectedUnit":
                 default:
