@@ -288,19 +288,6 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
             }
         }
 
-        if ( (options.request) && (options.unitID) ) {
-            switch ( options.request ) {
-                case "addQuickUnit":
-                    var unitEvent = "quickUnitAdded";
-                    if ( options.role ) {
-                        self.kernel.fireEvent( appID, unitEvent, [ options.role, options.unitID, updatedUnit ] );
-                    } else {
-                        self.kernel.fireEvent( appID, unitEvent, [ '', options.unitID, updatedUnit ] );                        
-                    }
-                    break;
-            }
-        }
-
         return updatedUnit;
     }
     
