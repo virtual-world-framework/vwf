@@ -10,7 +10,7 @@
   // TDG instructor password.
 
   "tdg": {
-    "password": "insecure"
+    "password": "password"
   }
 
 }
