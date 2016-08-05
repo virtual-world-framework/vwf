@@ -9,7 +9,6 @@ properties:
   height:
   visible:
   isVisible:
-  isGloballyVisible: false
   listening:
   isListening:
   id:
