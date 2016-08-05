@@ -541,7 +541,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         // but then we added the events for the individual objects
                         // which appeared to work better.  We were getting duplicate events
                         // which is why I moved these events down inside a property
-                        // just in case they were needed for another apllication that
+                        // just in case they were needed for another application that
                         // is set up differently
 
                         if ( Boolean( propertyValue ) ) {
