@@ -748,26 +748,39 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         },
 
         // This is intended to be called directly from the application view
-        setViewProperty: function( id, propertyName, propertyValue, isStatic ) {
+        setViewProperty: function( id, propertyName, propertyValue, modelChangeShouldUpdateView ) {
             var node = viewDriver.state.nodes[ id ];
-            if ( node && node.kineticObj ) {
-                if ( utility.validObject( propertyValue ) ) {
-                    if ( node.model[ propertyName ] === undefined ) {
-                        node.model[ propertyName ] = {
-                            "value":    viewDriver.state.getProperty( node.kineticObj, propertyName ),
-                            "isStatic": ( ( isStatic === undefined ) ? false : isStatic ) 
-                        };
-                    } else if ( node.model[propertyName].isStatic ) {
-                        node.model[ propertyName ].value = propertyValue;
-                    }
-                    viewDriver.state.setProperty( node.kineticObj, propertyName, propertyValue );
-                } else {
-                    var modelValue = node.model[ propertyName ].value;
-                    if ( modelValue !== undefined ) {
-                        viewDriver.state.setProperty( node.kineticObj, propertyName, modelValue );
-                    }
-                }
+            var kineticObj = ( node || {} ).kineticObj;
+            
+            if ( !kineticObj ) {
+                console.error(
+                    "konva.setViewProperty: Attempted to set view property on a non-konva object" );
+                return;
             }
+
+            if ( !utility.validObject( propertyValue ) ) {
+                console.error(
+                    "konva.setViewProperty: Attempted to set view property with an invalid value" );
+                return;
+            }
+
+            // If we have not yet saved off the model value
+            // to keep it safe from unique-in-view property changes, do that now
+            if ( node.model[ propertyName ] === undefined ) {
+                node.model[ propertyName ] = {
+                    "value": viewDriver.state.getProperty( node.kineticObj, propertyName ),
+                    "modelChangeShouldUpdateView": !!modelChangeShouldUpdateView
+                };
+            } else {
+
+                // If we had already saved off the model value,
+                // honor the new value that the caller has passed in for modelChangeShouldUpdateView
+                node.model[ propertyName ].modelChangeShouldUpdateView =
+                    !!modelChangeShouldUpdateView;
+            }
+
+            // Set the konva object property to use the unique-in-view value
+            viewDriver.state.setProperty( kineticObj, propertyName, propertyValue );
         },
 
         setDrawingState: function ( stateObj ) {
@@ -837,15 +850,22 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             // If users can drag this node and all clients should stay synchronized, we must 
             // pull the new node position out of kinetic and update the model with it
-            if ( node.kineticObj ) {
-                if ( node.kineticObj.draggable() && node.model && node.model.position && !node.model.position.isStatic )  { 
-                    var kineticX = node.kineticObj.x();
-                    var kineticY = node.kineticObj.y();
+            var kineticObj = node.kineticObj;
+            if ( kineticObj ) {
+                var draggable = kineticObj.draggable();
+
+                var positionProperty = ( node.model || {} ).position;
+                var modelChangeShouldUpdateView =
+                    ( positionProperty || {} ).modelChangeShouldUpdateView;
+
+                if ( draggable && modelChangeShouldUpdateView )  { 
+                    var kineticX = kineticObj.x();
+                    var kineticY = kineticObj.y();
 
                     // If the position of this node has changed since its last model value, set the
                     // model property with the new value
-                    if ( ( node.model.position.value[0] !== kineticX ) || 
-                         ( node.model.position.value[1] !== kineticY ) ) {
+                    if ( ( positionProperty.value[0] !== kineticX ) || 
+                         ( positionProperty.value[1] !== kineticY ) ) {
 
                         // Fire this event to notify the model that kinetic has already updated the
                         // view and it doesn't need to (if the model set the value, it would risk 
@@ -854,16 +874,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
                         viewDriver.kernel.setProperty( nodeID, "position", [ kineticX, kineticY ] );
 
-                        // Tell the model not to update the view on the next position update because 
-                        // kinetic has already done so
-                        // (this event is fired right before this driver sets the model property, so we 
-                        // can be sure that the very next set of the position property is from us) 
-                        //if ( viewDriver.kernel.client() === viewDriver.kernel.moniker() ) {
-                        //    node.model.position.ignoreNextPositionUpdate = true;
-                        //}
-                        //doRenderScene = true;
                         doRenderNodes = true;
-                        renderNodes[ nodeID ] = node.kineticObj;
+                        renderNodes[ nodeID ] = kineticObj;
                     }
                 }
             }

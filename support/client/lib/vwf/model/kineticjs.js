@@ -1812,27 +1812,26 @@ define( [ "module",
                 this.logger.infox( "    S === settingProperty ", nodeID, propertyName, propertyValue );
             }          
             var node = this.state.nodes[ nodeID ];
-            var imageObj;
             var value = undefined;
             if ( node && utility.validObject( propertyValue ) ) {
                 if ( node.kineticObj ) {
+
+                    // If we don't have a specially stored model value for this property,
+                    //  then the model and view are in sync,
+                    //  and we can update the konva object directly (seen by the view)
+                    // Else, the view has diverged from the model, and we handle that specially
                     if ( node.model[ propertyName ] === undefined ) {
-                        //this.logger.infox( "    - model value does not exist " );
-                        // Not unique-in-view
                         value = this.state.setProperty( node.kineticObj, propertyName, propertyValue );
 
+                        // We automatically create a "model" copy of the position property
+                        // because it is used with ignoreNextPositionUpdate
+                        // to remove latency from the view
                         switch ( propertyName ) {
                             case "position":
-                            case "stroke":
-                            case "strokeWidth":
-                            case "strokeEnabled":
-                            case "fill":
-                            case "radius":
                                 if ( node.kineticObj.nodeType !== "Stage" ) {
-                                    node.model[ propertyName ] = 
-                                    {
-                                        "value":    propertyValue,
-                                        "isStatic": false
+                                    node.model[ propertyName ] = {
+                                        "value": propertyValue,
+                                        "modelChangeShouldUpdateView": true
                                     };
                                 }
                                 break;
@@ -1841,25 +1840,15 @@ define( [ "module",
                                 break;
                         }
                     } else {
-                        if ( propertyName === "position" ) {
-
-                            node.model[ propertyName ].value = propertyValue;
-
-                            if ( node.model[ propertyName ].ignoreNextPositionUpdate ) {
-                                //this.logger.infox( "    - ignore position update this time " );
-                                node.model[ propertyName ].ignoreNextPositionUpdate = false;
-                            } else if ( !node.model[ propertyName ].isStatic ) {
-                                //this.logger.infox( "    - set position to model value " );
-                                value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value ); 
-                            }
-
-                        } else if ( !node.model[ propertyName ].isStatic ) {
-                            //this.logger.infox( "    - not unique in view, update property " );
-                            node.model[ propertyName ].value = propertyValue;
-                            value = this.state.setProperty( node.kineticObj, propertyName, node.model[ propertyName ].value );
-                        } else {
-                            //this.logger.infox( "    - unique in view, update model only " );
-                            node.model[ propertyName ].value = propertyValue;
+                        var property = node.model[ propertyName ];
+                        property.value = propertyValue;
+                        if ( property.ignoreNextPositionUpdate ) {
+                            property.ignoreNextPositionUpdate = false;
+                        } else if ( property.modelChangeShouldUpdateView ) {
+                            value = this.state.setProperty(
+                                node.kineticObj,
+                                propertyName,
+                                property.value );
                         }
                     }
                 } else {
