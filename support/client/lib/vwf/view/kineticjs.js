@@ -43,6 +43,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     var renderTimeout = 1000;    // ms between renders
     var mouseDown = false;
     var doRenderScene = false;
+    var eventHandlers = {};
 
     // Object implements tapHold behavior (kineticJS doesn't have a built-in one)
     var tapHold = { 
@@ -114,7 +115,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function fireTapHold() {
         if ( tapHold.node ) {
-            viewDriver.kernel.fireEvent( tapHold.node.ID, 'tapHold', [ tapHold.initialPosition ] );
+            fireViewEvent( "tapHold", {
+                nodeID: tapHold.node.ID,
+                initialPosition: tapHold.initialPosition
+            } );
             tapHold.cancel();
         }
     }
@@ -127,9 +131,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         "swipedAcross": function( node, isTouchStart, eventData ) {
             if ( this.isListening && this.isSwipe( node ) ) {
                 if ( isTouchStart && this.touchStartIsTap ) {
-                    viewDriver.kernel.fireEvent( node.ID, 'tap', eventData );
+                    fireViewEvent( "tap", {
+                        nodeID: node.ID,
+                        eventData: eventData[ 0 ]
+                    } );
                 } else {
-                    viewDriver.kernel.fireEvent( node.ID, 'swipe', [ ] );
+                    fireViewEvent( "swipe", {
+                        nodeID: node.ID
+                    } );
                 }
             }
         },  
@@ -264,7 +273,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             tapHold.cancel();
             activelyDrawing = false;
 
-            viewDriver.kernel.fireEvent( node.ID, 'pointerClick', eData.eventData );
+            fireViewEvent( "pointerClick", {
+                nodeID: node.ID,
+                eventData: eData.eventData[ 0 ]
+            } );
         } );
 
         node.kineticObj.on( "dblclick", function( evt ) {
@@ -274,7 +286,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             tapHold.cancel();
             activelyDrawing = false;
 
-            viewDriver.kernel.fireEvent( node.ID, 'pointerDoubleClick', eData.eventData );
+            fireViewEvent( "pointerDoubleClick", {
+                nodeID: node.ID,
+                eventData: eData.eventData[ 0 ]
+            } );
         } );
         
         node.kineticObj.on( "dragstart", function( evt ) {
@@ -369,7 +384,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             tapHold.cancel();
             activelyDrawing = false;
 
-            viewDriver.kernel.fireEvent( node.ID, 'tap', eData.eventData );
+            fireViewEvent( "tap", {
+                nodeID: node.ID,
+                eventData: eData.eventData[ 0 ]
+            } );
             swipe.swipedAcross( node, true, eData.eventData );
         } );
 
@@ -523,7 +541,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         // but then we added the events for the individual objects
                         // which appeared to work better.  We were getting duplicate events
                         // which is why I moved these events down inside a property
-                        // just in case they were needed for another apllication that
+                        // just in case they were needed for another application that
                         // is set up differently
 
                         if ( Boolean( propertyValue ) ) {
@@ -797,6 +815,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 var childWasRequested = child && ( childNames.indexOf( child.name() ) > -1 );
                 childWasRequested && child.listening( listen );
             }
+        },
+
+        on: function( eventName, callback ) {
+            eventHandlers[ eventName ] = callback;
         }
     } );
 
@@ -1886,5 +1908,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         privateDrawingState.drawingObject.destroy();
         privateDrawingState.drawingObject = null;
         privateDrawingState.imageDataURL = null;
+    }
+
+    function fireViewEvent( eventName, parameters ) {
+        var eventHandler = eventHandlers[ eventName ];
+        if ( typeof eventHandler === "function" ) {
+            eventHandler( parameters );
+        }
     }
 } );

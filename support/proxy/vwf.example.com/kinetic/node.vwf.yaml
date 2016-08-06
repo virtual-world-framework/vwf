@@ -44,20 +44,10 @@ methods:
   toggleListening:
 events:
   pointerMove:
-  pointerOut:
-  pointerEnter:
-  pointerLeave:
   pointerDown:
   pointerUp:
   pointerClick:
-  pointerDoubleClick:
-  touchStart:
-  touchMove:
-  touchEnd:
-  tap:
   doubleTap:
-  dragStart:
-  dragMove:
   dragEnd:
   draggingFromView:
 scripts:
