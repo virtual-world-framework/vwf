@@ -1133,7 +1133,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             var drawingObject = drawing_private.drawingObject;
             drawUpdate( drawingObject.ID, eventData, nodeData, true );
             
-            viewDriver.kernel.fireEvent( appID, 'drawingObjectCreated', [ drawingObject.id() ] );
+            fireViewEvent( "drawingObjectCreated", {
+                nodeID: drawingObject.id()
+            } );
 
             var userState = drawing_client;
             drawingObject.setZIndex( userState.zIndex );
@@ -1141,14 +1143,18 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             switch( userState.drawing_mode ) {
                 
                 case "text":
-                    viewDriver.kernel.fireEvent( appID, 'textCreated', [ drawingObject.id() ] );
+                    fireViewEvent( "textCreated", {
+                        nodeID: drawingObject.id()
+                    } );
                     break;
 
                 case "sprite":
                 case "image":
                     var stroke = drawingObject.stroke();
                     if ( stroke ) {
-                        viewDriver.kernel.fireEvent( appID, 'imageCreated', [ drawingObject.id() ] );
+                        fireViewEvent( "imageCreated", {
+                            nodeID: drawingObject.id()
+                        } );
                         drawAndPropagate = false;
                     }
 
