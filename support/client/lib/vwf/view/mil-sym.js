@@ -17,6 +17,7 @@
 define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, view, cws, $ ) {
 
     var self;
+    var eventHandlers = {};
     
     return view.load( module, {
 
@@ -122,7 +123,11 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         // ticked: function() {
         // },
 
-        renderUnitSymbol: renderUnitSymbol
+        renderUnitSymbol: renderUnitSymbol,
+
+        on: function( eventName, callback ) {
+            eventHandlers[ eventName ] = callback;
+        }
     } );
 
     function addInsertableUnits( units ) {
@@ -196,15 +201,16 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
                                 "image": image    
                             };
 
-                            self.kernel.fireEvent( appID, "insertableUnitAdded", [ unitDef ] );
+                            fireViewEvent( "insertableUnitAdded", {
+                                unit: unitDef
+                            } );
                         }
                     } else {
                         self.logger.warnx( "Unable to find: " + unitsToAdd[ i ] + " in " + battleDivision );
                     }
                 }
             }
-
-            self.kernel.fireEvent( appID, "unitLoadingComplete", [ true ] );
+            fireViewEvent( "unitLoadingComplete" );
         }    
     }
 
@@ -306,6 +312,13 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
             return img.toDataUrl();
         } else {
             return "";
+        }
+    }
+
+    function fireViewEvent( eventName, parameters ) {
+        var eventHandler = eventHandlers[ eventName ];
+        if ( typeof eventHandler === "function" ) {
+            eventHandler( parameters );
         }
     }
 
