@@ -721,7 +721,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "draggingFromView":
 
                     // If the transform property was initially updated by this view....
-                    if ( self.kernel.client() === self.kernel.moniker() ) {
+                    var kernel = viewDriver.kernel;
+                    if ( kernel.client() === kernel.moniker() ) {
 
                         // Tell the model not to update the view on the next position update because 
                         // kinetic has already done so
