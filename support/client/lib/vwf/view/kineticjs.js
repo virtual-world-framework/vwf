@@ -256,7 +256,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             activelyDrawing = false;
 
             if ( node.kineticObj.mouseDragging ) {
-                viewDriver.kernel.fireEvent( node.ID, 'dragEnd', eData.eventData );
+                fireViewEvent( "dragEnd", {
+                    nodeID: node.ID,
+                    eventData: eData.eventData[ 0 ]
+                } );
                 node.kineticObj.mouseDragging = false;
             
                 if ( viewDriver.state.draggingNodes[ node.ID ] !== undefined ) {
@@ -398,7 +401,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             tapHold.cancel();
             activelyDrawing = false;
 
-            viewDriver.kernel.fireEvent( node.ID, 'doubleTap', eData.eventData );
+            fireViewEvent( "doubleTap", {
+                nodeID: node.ID,
+                eventData: eData.eventData[ 0 ]
+            } );
         } );
     }
 
