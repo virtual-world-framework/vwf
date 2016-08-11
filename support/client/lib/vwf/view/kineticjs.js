@@ -1159,7 +1159,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "image":
                     var stroke = drawingObject.stroke();
                     if ( stroke ) {
-                        fireViewEvent( "imageCreated", {
+                        fireViewEvent( "imageLocationSelected", {
                             nodeID: drawingObject.id()
                         } );
                         drawAndPropagate = false;
@@ -1853,42 +1853,45 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
     function setImage( dataURL ) {
 
-        if ( drawing_private.drawingObject ) {
-            drawing_private.drawingObject.stroke( null );
-            drawing_private.drawingObject.strokeEnabled( false );
-            if ( dataURL ) {
-                var imageObj = new Image();
-                imageObj.onload = function() {
-                    drawing_private.imageDataURL = dataURL;
-                    var nodeID = drawing_private.drawingObject.id();
-
-                    // Set the width and height to maintain aspect ratio
-                    var imgAspectRatio = imageObj.width / imageObj.height;
-                    var width = drawing_private.drawingObject.width();
-                    var height = drawing_private.drawingObject.height();
-
-                    // Use the larger dimension to set the width and height
-                    if ( width >= height ) {
-                        height = width / imgAspectRatio;
-                    } else {
-                        width = height * imgAspectRatio;
-                    }
-                    drawing_private.drawingObject.width( width );
-                    drawing_private.drawingObject.height( height );
-
-                    // Propagate the node to the model
-                    propagateNodeToModel();
-                };
-                imageObj.onerror = function() {
-                    deletePrivateNode( true );
-                };
-                imageObj.src = dataURL;
-            } else {
-                deletePrivateNode( true );
-            }
-
+        var drawingObject = drawing_private.drawingObject;
+        if ( !drawingObject ) {
+            console.error( "setImage: There is no drawing object on which to set an image" );
+            return;
         }
+        drawingObject.stroke( null );
+        drawingObject.strokeEnabled( false );
+        if ( dataURL ) {
+            var imageObj = new Image();
 
+            imageObj.onload = function() {
+                drawing_private.imageDataURL = dataURL;
+
+                // Set the width and height to maintain aspect ratio
+                var imgAspectRatio = imageObj.width / imageObj.height;
+                var width = drawingObject.width();
+                var height = drawingObject.height();
+
+                // Use the larger dimension to set the width and height
+                if ( width >= height ) {
+                    height = width / imgAspectRatio;
+                } else {
+                    width = height * imgAspectRatio;
+                }
+                drawingObject.width( width );
+                drawingObject.height( height );
+
+                // Propagate the node to the model
+                propagateNodeToModel();
+            };
+
+            imageObj.onerror = function() {
+                deletePrivateNode( true );
+            };
+            
+            imageObj.src = dataURL;
+        } else {
+            deletePrivateNode( true );
+        }
     }
 
     function deletePrivateNode( fullyDelete ) {
