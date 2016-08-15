@@ -172,18 +172,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         } 
     };
 
-    // Find the parent of the kinetic node
-    function findParent( kineticNode, protoID ) {
-
-        if ( kineticNode !== undefined ) {
-            if ( kineticNode.prototypeID === protoID )
-                return kineticNode;
-            else 
-                return findParent( _kineticComponents[ kineticNode.parentID ], protoID );       
-        }
-        return undefined;
-    }
-
     // Attach handlers for mouse events
     function attachMouseEvents( node ) {
 
