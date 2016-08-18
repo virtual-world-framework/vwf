@@ -473,6 +473,11 @@ if ( ! object ) return;  // TODO: patch until full-graph sync is working; driver
 
         sequence: function( nodeID ) {
             var object = this.objects[nodeID];
+
+            if ( !object ) {
+                debugger;
+            }
+
             object.initialized && object.patches && ( object.patches.internals = true );
             return object && ++object.sequence;
         },
