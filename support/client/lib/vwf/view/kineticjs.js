@@ -663,16 +663,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
 
             if ( this.kernel.client() === this.kernel.moniker() ) {
-                var prop, value, t;
                 switch ( methodName ) {
-
-                    case "setKineticProperty":
-                        if ( private_node && private_node.kineticObj ) {
-                            var propertyName = methodParameters[ 1 ];
-                            var propertyValue = methodParameters[ 2 ];
-                            setKineticProperty( private_node.kineticObj, propertyName, propertyValue );
-                        }
-                        break;
 
                     case "refreshState":
                         if ( !this.state.pauseRendering ) {
@@ -827,7 +818,23 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
         on: function( eventName, callback ) {
             eventHandlers[ eventName ] = callback;
-        }
+        }, 
+
+        setText: function( text ) {
+            if ( !createTextObject( text ) ) {
+                console.error( "setText: Could not create text object" );
+                return;
+            }
+            var drawingObject = drawing_private.drawingObject;
+            drawingObject.fontSize( drawing_client.fontSize || 16 );
+            drawingObject.fontStyle( 'bold' );
+            drawingObject.text( text );
+            drawingObject.fill( drawing_client.drawing_color );
+            drawObject( drawingObject, true );
+            propagateNodeToModel();
+        },
+
+        setImage: setImage
     } );
 
     // Private helper functions --------------------------------------------------------------------
@@ -1731,34 +1738,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
     }
 
-    function setKineticProperty( kineticObj, propertyName, propertyValue ) {
-
-        var userState = drawing_client;
-
-        switch ( propertyName ) {
-
-            case "text":
-                if ( createTextObject( propertyValue ) ) {
-                    drawing_private.drawingObject.fontSize( userState.fontSize ? userState.fontSize : 16 );
-                    drawing_private.drawingObject.fontStyle( 'bold' );
-                    drawing_private.drawingObject.text( propertyValue );
-                    drawing_private.drawingObject.fill( userState.drawing_color );
-                    drawObject( drawing_private.drawingObject, true );
-                    propagateNodeToModel();
-                }
-                break;
-
-            case "image":
-                setImage( propertyValue );
-                break;
-
-            default:
-                break;
-
-        }
-
-    }
-
     function getDefaultProperties( drawingMode, groupParent, eventPoint ) {
 
         var userState = drawing_client;
@@ -1839,7 +1818,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         return textCreated;
     }
 
-    function setImage( dataURL ) {
+    function setImage( imageUrl ) {
 
         var drawingObject = drawing_private.drawingObject;
         if ( !drawingObject ) {
@@ -1848,11 +1827,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         }
         drawingObject.stroke( null );
         drawingObject.strokeEnabled( false );
-        if ( dataURL ) {
+        if ( imageUrl ) {
             var imageObj = new Image();
 
             imageObj.onload = function() {
-                drawing_private.imageDataURL = dataURL;
+                drawing_private.imageDataURL = imageUrl;
 
                 // Set the width and height to maintain aspect ratio
                 var imgAspectRatio = imageObj.width / imageObj.height;
@@ -1876,7 +1855,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 deletePrivateNode( true );
             };
             
-            imageObj.src = dataURL;
+            imageObj.src = imageUrl;
         } else {
             deletePrivateNode( true );
         }
