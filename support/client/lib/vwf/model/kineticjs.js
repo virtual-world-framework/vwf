@@ -2153,7 +2153,10 @@ define( [ "module",
                     kineticObj.scale( { "x": height / imageObj.height ,"y": height / imageObj.height } );
                 }
             }
-            //modelDriver.kernel.fireEvent( node.ID, "imageLoaded", [ url ] );
+
+            // Redraw the object now that it's image has loaded
+            kineticObj.draw();
+            
             modelDriver.kernel.fireEvent( nodeID, "imageLoaded", [ url ] );
         }
         imageObj.onerror = function() {

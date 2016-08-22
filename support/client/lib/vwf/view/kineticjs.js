@@ -720,7 +720,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         propagateNodeToModel();
                     }
                     break;
-
+                    
                 default:
                     break;
             }
