@@ -621,7 +621,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         var drawingObject = drawing_private.drawingObject;
                         drawingObject.text( propertyValue );
                         drawObject( drawingObject, true );
-                        propagateNodeToModel();
+                        propagateNodeToModel( drawing_private );
                     }
                     break;
 
@@ -717,10 +717,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         var drawingObject = drawing_private.drawingObject;
                         drawingObject.text( eventData[ 1 ] );
                         drawObject( drawingObject, true );
-                        propagateNodeToModel();
+                        propagateNodeToModel( drawing_private );
                     }
                     break;
-                    
+
                 default:
                     break;
             }
@@ -831,7 +831,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             drawingObject.text( text );
             drawingObject.fill( drawing_client.drawing_color );
             drawObject( drawingObject, true );
-            propagateNodeToModel();
+            propagateNodeToModel( drawing_private );
         },
 
         setImage: setImage
@@ -1201,7 +1201,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 drawObject( drawingObject, true );
 
                 // Create a node in the model so it gets replicated on all clients
-                propagateNodeToModel();
+                propagateNodeToModel( drawing_private );
             }
         }    
     };
@@ -1669,39 +1669,41 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         return foundParent;
     }
 
-    function propagateNodeToModel() {
+    function propagateNodeToModel( localDrawingInfo ) {
 
         // Update the VWF node descriptor with attributes from the intermediate Kinetic nodes used
         // while editing
-        updateVWFdescriptor( drawing_private.drawingDef, drawing_private.drawingObject );
+        var drawingDef = localDrawingInfo.drawingDef;
+        drawingDef.properties = 
+            createDrawingDefProperties( drawingDef.properties, localDrawingInfo.drawingObject );
 
-        if ( drawing_private.drawingDef.children ) {
-            for ( var def in drawing_private.drawingDef.children ) {
-                if ( drawing_private.drawingObject[ def ] ) {
-                    updateVWFdescriptor( drawing_private.drawingDef.children[ def ],
-                        drawing_private.drawingObject[ def ] );
-                }
+        var drawingDefChildren = drawingDef.children;
+        for ( var childName in drawingDefChildren ) {
+            var child = localDrawingInfo.drawingObject[ childName ];
+            if ( !child ) {
+                console.error( "propagateNodeToModel: No child named '", childName, "'" );
+                continue;
             }
+            var childDef = drawingDefChildren[ childName ];
+            childDef.properties = createDrawingDefProperties( childDef.properties, child );
         }
 
         // Create the node in the model
-        viewDriver.kernel.createChild( drawing_private.drawingParentID,
-            drawing_private.drawingChildName, drawing_private.drawingDef );
+        viewDriver.kernel.createChild( localDrawingInfo.drawingParentID,
+            localDrawingInfo.drawingChildName, drawingDef );
 
         // Delete the private node - we no longer need it
         // Remove the kinetic object from the tree and destroy the object
         markPrivateDrawingNodeForDeletion();
 
         // Set a VWF descriptor's `properties` to describe a Kinetic node using its attributes
-        function updateVWFdescriptor( vwfDescriptor, kineticNode ) {
+        function createDrawingDefProperties( startingProperties, kineticNode ) {
 
-            var properties = vwfDescriptor.properties = $.extend( vwfDescriptor.properties || {}, {
-                "attributes": $.extend( {}, kineticNode.getAttrs() )
+            var properties = $.extend( {}, startingProperties, {
+                "attributes": $.extend( {}, kineticNode.getAttrs() ),
             } );
 
-            if ( drawing_private.imageDataURL ) {
-                properties.image = drawing_private.imageDataURL;
-            }
+            properties.image = localDrawingInfo.imageDataURL || properties.image;
 
             // Remove attributes related to editing with the intermediate node.
             delete properties.attributes.id;
@@ -1716,6 +1718,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     delete properties.attributes.width;
                     break;
             }
+
+            return properties;
 
         }
 
@@ -1848,7 +1852,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 drawingObject.height( height );
 
                 // Propagate the node to the model
-                propagateNodeToModel();
+                propagateNodeToModel( drawing_private );
             };
 
             imageObj.onerror = function() {
