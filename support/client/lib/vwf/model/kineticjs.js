@@ -1467,7 +1467,7 @@ define( [ "module",
                                 break;
 
                             case "scaleOnLoad":
-                                    //value = node.scaleOnLoad;
+                                //value = node.scaleOnLoad;
                                 break;
                         }
                     }
@@ -1991,7 +1991,7 @@ define( [ "module",
             kineticObj = new Konva.Ring( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/sprite.vwf" ) ) {
             var imageObj = new Image();
-            node.scaleOnLoad = false;
+            //node.scaleOnLoad = false;
             kineticObj = new Konva.Sprite( {
                 image: imageObj
             } );
@@ -2153,7 +2153,10 @@ define( [ "module",
                     kineticObj.scale( { "x": height / imageObj.height ,"y": height / imageObj.height } );
                 }
             }
-            //modelDriver.kernel.fireEvent( node.ID, "imageLoaded", [ url ] );
+
+            // Redraw the object now that it's image has loaded
+            kineticObj.draw();
+            
             modelDriver.kernel.fireEvent( nodeID, "imageLoaded", [ url ] );
         }
         imageObj.onerror = function() {
