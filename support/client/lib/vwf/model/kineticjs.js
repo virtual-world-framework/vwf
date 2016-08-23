@@ -1467,7 +1467,7 @@ define( [ "module",
                                 break;
 
                             case "scaleOnLoad":
-                                    //value = node.scaleOnLoad;
+                                //value = node.scaleOnLoad;
                                 break;
                         }
                     }
@@ -1991,7 +1991,7 @@ define( [ "module",
             kineticObj = new Konva.Ring( config || {} );
         } else if ( modelDriver.state.isKineticClass( protos, "http://vwf.example.com/kinetic/sprite.vwf" ) ) {
             var imageObj = new Image();
-            node.scaleOnLoad = false;
+            //node.scaleOnLoad = false;
             kineticObj = new Konva.Sprite( {
                 image: imageObj
             } );
