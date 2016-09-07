@@ -47,9 +47,9 @@ block scenarios
       if user.instructor
         tr.application
           td.title: input.form-control.input-sm(name="title" type="text" placeholder="Scenario Title")
-          td.name(colspan=3): input.form-control.input-sm(name="name" type="text" placeholder="Scenario Name")
+          td.name(colspan=3): input.form-control.input-sm.hidden(name="name" type="text" placeholder="Scenario Name")
           td &nbsp;
-          td: button.btn.btn-sm.create.disabled Create
+          td: button.btn.btn-sm.create(disabled="disabled") Create
     script.
       document.addEventListener( "DOMContentLoaded", function() {
         $( "table#scenarios" ).on( "input", "tr.scenario", function() {
@@ -79,10 +79,10 @@ block scenarios
           var this$ = $( this ),
             filled = this$.find( ".title input" ).val();
           if ( filled ) {
-            this$.find( ".btn.create" ).removeClass( "disabled" );
+            this$.find( ".btn.create" ).removeAttr( 'disabled' );
             this$.find( ".name input" ).val( this$.find( ".title input" ).val().replace( /[^0-9A-Za-z]+/g, "-" ) );
           } else {
-            this$.find( ".btn.create" ).addClass( "disabled" );
+            this$.find( ".btn.create" ).add( 'disabled', '"disabled"' );
           }
         } );
         $( "table#scenarios" ).on( "click", "tr.application .btn.create", function() {
