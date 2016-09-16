@@ -9,7 +9,7 @@ block scenarios
     var scenario_sessions =
       scenarioScenarioSessions( manifest[ "/ITDG/index.vwf" ] || [] );
 
-  table.table#scenarios
+  table.table-striped.table#scenarios
     thead
       tr
         th.col-sm-5 Scenario
@@ -19,6 +19,12 @@ block scenarios
         th.col-sm-3 &nbsp;
         th.col-sm-1 &nbsp;
     tbody
+      if user.instructor
+        tr.application
+          td.col-sm-5.title: input.form-control.input-sm(name="title" type="text" placeholder="New Scenario Title")
+          td.col-sm-3.name(colspan=3): input.form-control.input-sm.hidden(name="name" type="text" placeholder="Scenario Name")
+          td.col-sm-3 &nbsp;
+          td.col-sm-1: button.btn.btn-sm.create(disabled="disabled") Create
       each scenario_session in scenario_sessions
         -
           var scenario = scenario_session.scenario,
@@ -26,30 +32,24 @@ block scenarios
         if session
           if session.instance || user.instructor
             tr.session
-              td= session.state.scenarioTitle
+              td.col-sm-5= session.state.scenarioTitle
                 br
                 span.small= instructorStudentsLabel( session )
-              td= session.state.classroom.company
-              td= session.state.classroom.platoon
-              td= session.state.classroom.unit
-              td &nbsp;
-              td: a.btn.btn-sm.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
+              td.col-sm-1= session.state.classroom.company
+              td.col-sm-1= session.state.classroom.platoon
+              td.col-sm-1= session.state.classroom.unit
+              td.col-sm-3 &nbsp;
+              td.col-sm-1: a.btn.btn-sm.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
         else if user.instructor
           tr.scenario
-            td= scenario.state.scenarioTitle
-            td.company: input.form-control.input-sm(name="company" type="text" maxlength="8")
-            td.platoon: input.form-control.input-sm(name="platoon" type="number" min="1" max="9" step="1")
-            td.unit: input.form-control.input-sm(name="unit" type="number" min="1" max="9" step="1")
-            td.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
-            td
+            td.col-sm-5= scenario.state.scenarioTitle
+            td.col-sm-1.company: input.form-control.input-sm(name="company" type="text" maxlength="8")
+            td.col-sm-1.platoon: input.form-control.input-sm(name="platoon" type="number" min="1" max="9" step="1")
+            td.col-sm-1.unit: input.form-control.input-sm(name="unit" type="number" min="1" max="9" step="1")
+            td.col-sm-3.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
+            td.col-sm-1
               a.btn.btn-sm.edit(href=scenario.instance||scenario.document.uri target="_blank") Edit
               button.btn.btn-sm.create.hidden Create
-      if user.instructor
-        tr.application
-          td.title: input.form-control.input-sm(name="title" type="text" placeholder="Scenario Title")
-          td.name(colspan=3): input.form-control.input-sm(name="name" type="text" placeholder="Scenario Name")
-          td &nbsp;
-          td: button.btn.btn-sm.create.disabled Create
     script.
       document.addEventListener( "DOMContentLoaded", function() {
         $( "table#scenarios" ).on( "input", "tr.scenario", function() {
@@ -79,10 +79,10 @@ block scenarios
           var this$ = $( this ),
             filled = this$.find( ".title input" ).val();
           if ( filled ) {
-            this$.find( ".btn.create" ).removeClass( "disabled" );
+            this$.find( ".btn.create" ).removeAttr( 'disabled' );
             this$.find( ".name input" ).val( this$.find( ".title input" ).val().replace( /[^0-9A-Za-z]+/g, "-" ) );
           } else {
-            this$.find( ".btn.create" ).addClass( "disabled" );
+            this$.find( ".btn.create" ).add( 'disabled', '"disabled"' );
           }
         } );
         $( "table#scenarios" ).on( "click", "tr.application .btn.create", function() {
@@ -104,7 +104,7 @@ block sessions
     var scenario_sessions =
       sessionScenarioSessions( manifest[ "/ITDG/index.vwf" ] || [] );
 
-  table.table#sessions
+  table.table-striped.table#sessions
     thead
       tr
         th.col-sm-5 Scenario
@@ -118,9 +118,9 @@ block sessions
         var scenario = scenario_session.scenario,
           session = scenario_session.session;
       tr
-        td= session.state.scenarioTitle
-        td= session.state.classroom.company
-        td= session.state.classroom.platoon
-        td= session.state.classroom.unit
-        td= dateFormat( session.document.timestamp )
-        td: a.btn.btn-sm.review(href=session.instance||session.document.uri target="_blank") Review
+        td.col-sm-5= session.state.scenarioTitle
+        td.col-sm-1= session.state.classroom.company
+        td.col-sm-1= session.state.classroom.platoon
+        td.col-sm-1= session.state.classroom.unit
+        td.col-sm-3= dateFormat( session.document.timestamp )
+        td.col-sm-1: a.btn.btn-sm.review(href=session.instance||session.document.uri target="_blank") Review
