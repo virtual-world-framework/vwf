@@ -1,5 +1,5 @@
 this.initialize = function() {
-
+    debugger;
     if ( this.icon !== undefined && this.icon.imageGenerator !== undefined ) {
 
         this.icon.imageGenerator.affiliationChanged = this.events.add( function( affiliation ) {
@@ -30,6 +30,7 @@ this.initialize = function() {
             }
 
         }, this );
+
     }
 
 }
@@ -45,7 +46,7 @@ this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
 }
 
 this.updateThreatShape = function() {
-
+    debugger;
     var visible = false;
     if ( this.threatArea ) {
         visible = this.threatArea.visible;
