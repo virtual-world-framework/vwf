@@ -4,5 +4,10 @@
   },
   "tdg": {
     "password": "VWF_TDG_PASSWORD"
+  },
+  "txs": {
+    "amqp_host": "VWF_TXS_AMQP_HOST",
+    "amqp_exchange": "VWF_TXS_AMQP_EXCHANGE",
+    "amqp_channel": "VWF_TXS_AMQP_CHANNEL"
   }
 }

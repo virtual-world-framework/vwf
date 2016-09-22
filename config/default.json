@@ -11,6 +11,14 @@
 
   "tdg": {
     "password": "password"
+  },
+
+  // AMQP parameters for the `/sim` route to publish to TXS.
+
+  "txs": {
+    "amqp_host": "localhost",
+    "amqp_exchange": "x_txs",
+    "amqp_channel": "itdg.loadMission"
   }
 
 }
