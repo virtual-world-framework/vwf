@@ -1440,7 +1440,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     drawingObject.fill( null );
                     drawingObject.rotation( angleDeg );
                     clearBeforeDraw = true;
-                    console.info( 'Text rect pos: {' + pos[0] + ', ' + pos[1] + '}, rot: ' + angleDeg + ' deg');
                     break;
 
                 case "rect":
