@@ -21,7 +21,7 @@ this.initialize = function() {
                         this.threatArea.fill = 'lime';
                         break;
                     case "friendly":
-                        this.threatArea.fill = 'lightblue';
+                        this.threatArea.fill = 'cyan';
                         break; 
                     default: 
                         this.threatArea.fill = 'yellow';
@@ -73,7 +73,7 @@ this.updateThreatShape = function() {
                 color = 'lime';
                 break;
             case "friendly":
-                color = 'lightblue';
+                color = 'cyan';
                 break; 
         };        
     }
