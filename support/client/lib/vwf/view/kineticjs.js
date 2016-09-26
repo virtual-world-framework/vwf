@@ -1247,6 +1247,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "freeDraw":
                 case "polygon":
                 case "borderRect":
+                case "text":
                     break;
 
                 default:
@@ -1430,13 +1431,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 case "text":
                     drawingObject.x( pos[ 0 ] );
                     drawingObject.y( pos[ 1 ] ); 
-                    drawingObject.size( { "width": width, "height": height} );
+                    drawingObject.size( { "width": dist, "height": drawing_client.fontSize} );
                     drawingObject.stroke( userState.drawing_color );
                     drawingObject.strokeWidth( 2 );
                     drawingObject.lineCap( userState.lineCap );
                     drawingObject.lineJoin( userState.lineJoin );
                     drawingObject.dash( [ 2, 5 ] );
                     drawingObject.fill( null );
+                    drawingObject.rotation( angleDeg );
                     clearBeforeDraw = true;
                     break;
 
@@ -1765,6 +1767,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             case "image":
                 retObj.opacity = 1.0;
                 retObj.scaleOnLoad = true;
+                if ( drawingMode === "text" ) {
+                    retObj.disableScaleAndRotationForSpeed = false;
+                }
                 break;
             case "arrow":
             case "thickArrow":
@@ -1804,6 +1809,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             "extends": compExtends,
             "properties": getDefaultProperties( "text", false, position )
         };
+        shapeDef.properties.rotation = drawing_private.drawingObject.rotation();
 
         // Delete the border rectangle
         deletePrivateNode( false );
