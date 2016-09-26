@@ -1,5 +1,13 @@
 this.initialize = function() {
-    debugger;
+
+    if ( !!this.threatArea ) {
+        if ( !this.threatArea.fill && !!this.threatArea.attributes && !!this.threatArea.attributes.fill ) {
+            this.threatArea.fill = this.threatArea.attributes.fill;
+        }
+
+        this.threatArea.draggable = false;
+    }
+
     if ( this.icon !== undefined && this.icon.imageGenerator !== undefined ) {
 
         this.icon.imageGenerator.affiliationChanged = this.events.add( function( affiliation ) {
@@ -46,7 +54,7 @@ this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
 }
 
 this.updateThreatShape = function() {
-    debugger;
+
     var visible = false;
     if ( this.threatArea ) {
         visible = this.threatArea.visible;
