@@ -27,38 +27,38 @@
 
     <meta name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 
-    <link rel="stylesheet" type="text/css" href="index.css" />
-    <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css" />
+    <link rel="stylesheet" type="text/css" href="index.css?mtime=timestamp" />
+    <link rel="stylesheet" type="text/css" href="vwf/view/editor/editor.css?mtime=timestamp" />
 
-    <script type="text/javascript" src="compatibilitycheck.js"></script>
+    <script type="text/javascript" src="compatibilitycheck.js?mtime=timestamp"></script>
 
-    <script type="text/javascript" src="socket.io.js"></script>
-    <script type="text/javascript" src="socket.io-sessionid-patch.js"></script>
+    <script type="text/javascript" src="socket.io.js?mtime=timestamp"></script>
+    <script type="text/javascript" src="socket.io-sessionid-patch.js?mtime=timestamp"></script>
 
-    <script type="text/javascript" src="require.js"></script>
+    <script type="text/javascript" src="require.js?mtime=timestamp"></script>
 
-    <script type="text/javascript" src="async.js"></script>
+    <script type="text/javascript" src="async.js?mtime=timestamp"></script>
 
-    <script type="text/javascript" src="closure/base.js"></script>
+    <script type="text/javascript" src="closure/base.js?mtime=timestamp"></script>
     <script type="text/javascript">goog.require('goog.vec.Vec2')</script>
     <script type="text/javascript">goog.require('goog.vec.Mat4')</script>
     <script type="text/javascript">goog.require('goog.vec.Quaternion')</script>
 
-    <script type="text/javascript" src="crypto.js"></script>
-    <script type="text/javascript" src="md5.js"></script>
+    <script type="text/javascript" src="crypto.js?mtime=timestamp"></script>
+    <script type="text/javascript" src="md5.js?mtime=timestamp"></script>
 
-    <script type="text/javascript" src="alea.js"></script>
-    <script type="text/javascript" src="mash.js"></script>
+    <script type="text/javascript" src="alea.js?mtime=timestamp"></script>
+    <script type="text/javascript" src="mash.js?mtime=timestamp"></script>
 
-    <script type="text/javascript" src="Class.create.js"></script>
-    <script type="text/javascript" src="rAF.js"></script>
-    <script type="text/javascript" src="performance.now-polyfill.js"></script>
+    <script type="text/javascript" src="Class.create.js?mtime=timestamp"></script>
+    <script type="text/javascript" src="rAF.js?mtime=timestamp"></script>
+    <script type="text/javascript" src="performance.now-polyfill.js?mtime=timestamp"></script>
 
     <!-- This is the main client library. vwf.js creates a framework manager and attaches it to  -->
     <!-- the global window object as window.vwf. All access to the framework is through that     -->
     <!-- reference, and no other objects are globally visible.                                   -->
 
-    <script type="text/javascript" src="vwf.js"></script>
+    <script type="text/javascript" src="vwf.js?mtime=timestamp"></script>
 
     <!-- The core framework manages the simulation and synchronizes it across worlds shared by   -->
     <!-- multiple users. But, the manner in which the simulation is expressed is controlled by   -->
@@ -78,6 +78,7 @@
         var match;
         var application;
         var regex = /([^&=]+)=?([^&]*)/g;
+        var version = "2.5";
 
         var requireConfig = {
             paths: {
@@ -95,7 +96,9 @@
                     deps: ["jquery"],
                     exports: "Hammer"
                 }
-            }
+            },
+            // used to bust the cache
+            urlArgs: "v="+version // only use this for debug (new Date()).getTime()
         };
         require(requireConfig, ["jquery", "jquery-encoder-0.1.0"], function($) {
             while(match = regex.exec(queryString)) {
