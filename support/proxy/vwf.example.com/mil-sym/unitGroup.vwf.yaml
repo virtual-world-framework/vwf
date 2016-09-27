@@ -49,6 +49,6 @@ methods:
 
 events:
   threatShapeChanged:
-
+  
 scripts:
 - source: "unitGroup.js"

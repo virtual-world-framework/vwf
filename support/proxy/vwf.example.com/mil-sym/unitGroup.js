@@ -1,5 +1,13 @@
 this.initialize = function() {
 
+    if ( !!this.threatArea ) {
+        if ( !this.threatArea.fill && !!this.threatArea.attributes && !!this.threatArea.attributes.fill ) {
+            this.threatArea.fill = this.threatArea.attributes.fill;
+        }
+
+        this.threatArea.draggable = false;
+    }
+
     if ( this.icon !== undefined && this.icon.imageGenerator !== undefined ) {
 
         this.icon.imageGenerator.affiliationChanged = this.events.add( function( affiliation ) {
@@ -13,7 +21,7 @@ this.initialize = function() {
                         this.threatArea.fill = 'lime';
                         break;
                     case "friendly":
-                        this.threatArea.fill = 'lightblue';
+                        this.threatArea.fill = 'cyan';
                         break; 
                     default: 
                         this.threatArea.fill = 'yellow';
@@ -30,6 +38,7 @@ this.initialize = function() {
             }
 
         }, this );
+
     }
 
 }
@@ -64,7 +73,7 @@ this.updateThreatShape = function() {
                 color = 'lime';
                 break;
             case "friendly":
-                color = 'lightblue';
+                color = 'cyan';
                 break; 
         };        
     }
