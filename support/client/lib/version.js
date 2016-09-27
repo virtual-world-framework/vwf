@@ -19,7 +19,7 @@ define( function() {
 
     /// The version identifier has the following form:
     /// 
-    ///   major, minor, patch, release, build
+    ///   major, minor, patch, release, build, derivative [ app, major, minor, patch ]
     /// 
     /// Fields are defined according to [SemVer](http://semver.org). The `release` and `build`
     /// fields are optional, but they are given low-precedence values by default so that official
@@ -30,12 +30,13 @@ define( function() {
     /// particuarly clever about it. Take care to keep the comment and formatting intact when
     /// bumping the version number.
 
-    var version = [ 0, 8, 0, "development", "" ];  // version-identifier
+    var version = [ 0, 8, 0, "", "", [ "itdg", 2, 5, 0 ] ];  // version-identifier
 
     /// Render the version identifier as a SemVer-style string.
 
     version.toString = function() {
         return this.slice( 0, 3 ).join( "." ) +
+            ( this[ 5 ] ? "-" + this[ 5 ][0] + '.' + this[ 5 ].slice( 1, 4 ).join( "." ) : "" ) +
             ( this[ 3 ] ? "-" + this[ 3 ] : "" ) +
             ( this[ 4 ] ? "+" + this[ 4 ] : "" );
     };
