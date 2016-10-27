@@ -184,7 +184,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             drawMove( node.ID, eData.eventData[0], node, false ); 
 
             var userState = drawing_client;
-            if ( !userState[ "drawing_mode" ] || ( userState[ "drawing_mode" ] === "none" ) ) {
+
+            if ( !!userState[ "drawing_mode" ] ) {
+                switch ( userState[ "drawing_mode" ] ) {
+                    case 'none':
+                    case 'edit':
+                        activelyDrawing = false;
+                        break;
+                    default:
+                        break;
+                }
+            } else {
                 activelyDrawing = false;
             }
 
@@ -226,8 +236,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             // Process drawing (if actively drawing)
             drawDown( node.ID, eData.eventData[0], node, false ); 
             var userState = drawing_client;
-            if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
-                activelyDrawing = true;
+            if ( !!userState[ "drawing_mode" ] ) {
+                switch ( userState[ "drawing_mode" ] ) {
+                    case 'edit':
+                    case 'none':
+                        fireViewEvent( "pointerClick", {
+                            nodeID: node.ID,
+                            eventData: eData.eventData[ 0 ]
+                        } );
+                        break;
+                    default:
+                        activelyDrawing = true;
+                        break;
+                }
             }
 
         } );
@@ -244,7 +265,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             activelyDrawing = false;
 
             if ( node.kineticObj.mouseDragging ) {
-                fireViewEvent( "dragEnd", {
+                fireViewEvent( "dragend", {
                     nodeID: node.ID,
                     eventData: eData.eventData[ 0 ]
                 } );
@@ -253,6 +274,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 if ( viewDriver.state.draggingNodes[ node.ID ] !== undefined ) {
                     delete viewDriver.state.draggingNodes[ node.ID ]; 
                 }
+            } else {
+                fireViewEvent( "mouseup", {
+                    nodeID: node.ID,
+                    eventData: eData.eventData[ 0 ]
+                } );
             }
 
         } );
@@ -333,7 +359,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             drawDown( node.ID, eData.eventData[0], node, false ); 
 
             var userState = drawing_client;
-            if ( !userState[ "drawing_mode" ] || ( userState[ "drawing_mode" ] === "none" ) ) {
+            if ( !!userState[ "drawing_mode" ] ) {
+                switch ( userState[ "drawing_mode" ] ) {
+                    case 'none':
+                    case 'edit':
+                        activelyDrawing = false;
+                        break;
+                    default:
+                        break;
+                }
+            } else {
                 activelyDrawing = false;
             }
 
@@ -350,8 +385,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             drawMove( node.ID, eData.eventData[0], node, false ); 
 
             var userState = drawing_client;
-            if ( userState[ "drawing_mode" ] && ( userState[ "drawing_mode" ] !== "none" ) ) {
-                activelyDrawing = true;
+            if ( userState[ "drawing_mode" ] ) {           
+                switch ( userState[ "drawing_mode" ] ) {
+                    case 'edit':
+                    case 'none':
+                        break;
+                    default:
+                        activelyDrawing = true;
+                        break;
+                }
             }
 
             swipe.swipedAcross( node );
@@ -778,6 +820,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             }
         },
 
+        getDrawingState: function ( property ) {
+            if ( !!drawing_client ) {
+                return drawing_client[ property ];
+            }
+            return undefined;
+        },
+
         registerForTapHoldEvents: function( protoFilters ) {
             tapHold.registerForTapHoldEvents( protoFilters );
         },
@@ -1014,7 +1063,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         var privateState = drawing_private;
         var drawingMode = userState.drawing_mode;
 
-        if ( privateState.drawingObject || drawingMode === 'none' ) {
+        if ( privateState.drawingObject || drawingMode === 'none' || drawingMode === 'edit' ) {
             return;
         }
 
@@ -1049,7 +1098,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 compExtends = "http://vwf.example.com/kinetic/line.vwf";
                 break;
 
-            case 'none':
             default:
                 break;
 
@@ -1101,7 +1149,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         var node = viewDriver.state.nodes[ nodeID ];
 
         var userState = drawing_client;
-        if ( userState.drawing_mode === 'none' ) {
+        if ( ( userState.drawing_mode === 'none' ) || ( userState.drawing_mode === 'edit' ) ) {
             return;
         }
 
