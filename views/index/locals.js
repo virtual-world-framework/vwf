@@ -73,15 +73,16 @@ module.exports.instructorStudentsLabel = function( session ) {
 module.exports.dateFormat = require( "dateformat" );
 
 // Determine if a session is completed. Completed sessions are those saved in a document containing
-// student content and having no student instances. A session will become completed once it has been
-// saved and the last student leaves.
+// student content and having no student instances. A session will become completed an hour after it
+// has been saved and once the last student leaves.
 
 function sessionCompleted( session ) {
 
   var documentCounts = session.completion.document || { instructors: 0, students: 0 };
   var instanceCounts = session.completion.instance || { instructors: 0, students: 0 };
 
-  return documentCounts.students > 0 && instanceCounts.students === 0;
+  return documentCounts.students > 0 && instanceCounts.students === 0 &&
+    +new Date() - session.document.timestamp > 60*60*1000;
 
 }
 
