@@ -31,6 +31,34 @@ properties:
 
   image:
 
+  unitStatus:
+    set: |
+      if ( this.unitStatus !== value ) {
+        this.unitStatus = value;
+        this.unitStatusChanged( value ); 
+      } 
+
+  mobility:
+    set: |
+      if ( this.mobility !== value ) {
+        this.mobility = value;
+        this.mobilityChanged( value ); 
+      } 
+
+  taskForce:
+    set: |
+      if ( this.taskForce !== value ) {
+        this.taskForce = value;
+        this.taskForceChanged( value ); 
+      } 
+
+  installation:
+    set: |
+      if ( this.installation !== value ) {
+        this.installation = value;
+        this.installationChanged( value ); 
+      } 
+
 methods:
 
   render:
@@ -46,6 +74,14 @@ events:
   affiliationChanged:
   
   symbolIDChanged:
+
+  unitStatusChanged:
+
+  mobilityChanged:
+
+  taskForceChanged:
+
+  installationChanged:
 
 scripts:
 - source: "unit.js"
