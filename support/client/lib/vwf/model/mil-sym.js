@@ -285,6 +285,7 @@ define( [ "module",
                                             node.symbolID = cws.addEchelonToSymbolId( node.symbolID, propertyValue );
                                         }
                                         node.echelon = propertyValue;
+                                        node.installation = "none";
                                         renderImage = true;
                                         break;
 
@@ -358,6 +359,7 @@ define( [ "module",
                                             node.symbolID = cws.addMobilityToSymbolId( node.symbolID, propertyValue );
                                         }
                                         node.mobility = propertyValue;
+                                        node.installation = "none";
                                         renderImage = true;
                                         break;
 
@@ -383,6 +385,8 @@ define( [ "module",
                                             node.symbolID = cws.addTaskForceToSymbolId( node.symbolID, propertyValue );
                                         }
                                         node.taskForce = propertyValue;
+                                        node.installation = "none";
+
                                         renderImage = true;
                                         break;
 
@@ -403,6 +407,9 @@ define( [ "module",
                                             node.symbolID = cws.addInstallationToSymbolId( node.symbolID, propertyValue );
                                         }
                                         node.installation = propertyValue;
+                                        node.taskForce = "none";
+                                        node.echelon = "none";
+                                        node.mobility = "none";
                                         renderImage = true;
                                         break;
 

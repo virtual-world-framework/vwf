@@ -5181,9 +5181,11 @@ define( function(){
         "addEchelonToSymbolId": function( symbolID, value ) {
             var retStr = symbolID;
             var echelon = symbolID.charAt(10);
-            if ( echelon === '*' ) {
-                  echelon = "-";
+            // Override installation
+            if ( ( echelon === 'H' ) || ( echelon === '*' ) ) {
+                  echelon = '-';
             }
+
             switch( value ) {
                 
                 case "team":
@@ -5243,48 +5245,6 @@ define( function(){
             }  
             retStr = symbolID.substr( 0, 10 ) + echelon + symbolID.substr( 12 );
             return retStr;          
-        },
-        "team_crew": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "A" + symbolID.substr( 12 );
-        }, 
-        "squad": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "B" + symbolID.substr( 12 );
-        }, 
-        "section": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "C" + symbolID.substr( 12 );
-        }, 
-        "platoon_detachment": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "D" + symbolID.substr( 12 );
-        }, 
-        "company_battery_troop": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "E" + symbolID.substr( 12 );
-        }, 
-        "battalion_squadron": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "F" + symbolID.substr( 12 );
-        }, 
-        "regiment_group": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "G" + symbolID.substr( 12 );
-        }, 
-        "brigade": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "H" + symbolID.substr( 12 );
-        }, 
-        "division": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "I" + symbolID.substr( 12 );
-        }, 
-        "corps_mef": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "J" + symbolID.substr( 12 );
-        },
-        "army": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "K" + symbolID.substr( 12 );
-        },
-        "armyGroup_front": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "L" + symbolID.substr( 12 );
-        },
-        "region": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "M" + symbolID.substr( 12 );
-        },
-        "_null": function( symbolID ) {
-            return symbolID.substr( 0, 11 ) + "-" + symbolID.substr( 12 );
         },
         "addAffiliationToSymbolId": function( symbolID, value ) {
             var retStr = symbolID;
@@ -5394,6 +5354,13 @@ define( function(){
             var retStr = symbolID;
             if ( ( symbolID.charAt(0) === 'S' ) && ( symbolID.charAt(4) === 'U' ) ) {
                   var taskForce = symbolID.charAt(10);
+                  // Override installation
+                  var echelon   = symbolID.charAt(11);
+                  if ( symbolID.charAt(10) === "H" ) {
+                        taskForce = '-';
+                        echelon   = '-';
+                  }
+
                   switch ( value ) {
                       case "none":
                           taskForce = "-";
@@ -5420,7 +5387,7 @@ define( function(){
                           taskForce = "G";
                           break;
                   }
-                  retStr = symbolID.substr( 0, 10 ) + taskForce + symbolID.substr( 11 );
+                  retStr = symbolID.substr( 0, 10 ) + taskForce + echelon + symbolID.substr( 12 );
             }
             return retStr;
         },    
