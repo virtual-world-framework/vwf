@@ -6,7 +6,9 @@ properties:
   zIndex: 8
   dragToTop: true
   transformsEnabled: "position"
-
+  mirrorAll: false
+  isCopy: false
+  copyID: "NONE"
   mapPosition:
     set: |
       if ( value !== undefined ) {
