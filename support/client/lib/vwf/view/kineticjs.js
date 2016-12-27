@@ -314,7 +314,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
             viewDriver.state.draggingNodes[ node.ID ] = node;
             node.kineticObj.mouseDragging = true;
-
+            var prevPos;
+            if (node.kineticObj.attrs) {
+                prevPos = [node.kineticObj.attrs.x, node.kineticObj.attrs.y];
+            }
+            fireViewEvent( "dragstart", {
+                nodeID: node.ID,
+                prevPos: prevPos,
+                eventData: eData.eventData[ 0 ]
+            } );
             if ( node.dragToTop ) {
                 node.kineticObj.moveToTop();
             }
@@ -337,6 +345,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             activelyDrawing = false;
 
             node.kineticObj.mouseDragging = false;
+            fireViewEvent( "dragend", {
+                nodeID: node.ID,
+                eventData: eData.eventData[ 0 ]
+            } );
             if ( viewDriver.state.draggingNodes[ node.ID ] !== undefined ) {
                 delete viewDriver.state.draggingNodes[ node.ID ]; 
             }
@@ -1746,17 +1758,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             drawingInfo: localDrawingInfo,
             drawingDef: drawingDef
         };
-        action.Undo = function(action){
+        action.Undo = function(){
             // Delete the drawing from the model
-            if (action && action.drawingInfo) {
-                viewDriver.kernel.deleteChild( action.drawingInfo.drawingParentID,
-                    action.drawingInfo.drawingChildName);
+            if (this.drawingInfo) {
+                viewDriver.kernel.deleteChild( this.drawingInfo.drawingParentID,
+                    this.drawingInfo.drawingChildName);
             }
         };
-        action.Redo = function(action){
-            if (action && action.drawingInfo && action.drawingDef) {
-                viewDriver.kernel.createChild( action.drawingInfo.drawingParentID,
-                    action.drawingInfo.drawingChildName, action.drawingDef );
+        action.Redo = function(){
+            if (this.drawingInfo && this.drawingDef) {
+                viewDriver.kernel.createChild( this.drawingInfo.drawingParentID,
+                    this.drawingInfo.drawingChildName, this.drawingDef );
             }
         };
 
