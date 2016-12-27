@@ -1255,7 +1255,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     };
 
     function drawUpdate( nodeID, eventData, nodeData, upEvent ) {
-        
+
         var node = viewDriver.state.nodes[ nodeID ];
 
         if ( drawing_private === undefined || 
@@ -1720,7 +1720,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
     }
 
     function propagateNodeToModel( localDrawingInfo ) {
-
         // Update the VWF node descriptor with attributes from the intermediate Kinetic nodes used
         // while editing
         var drawingDef = localDrawingInfo.drawingDef;
@@ -1742,6 +1741,26 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         viewDriver.kernel.createChild( localDrawingInfo.drawingParentID,
             localDrawingInfo.drawingChildName, drawingDef );
 
+        var action = {
+            type: "drawing",
+            drawingInfo: localDrawingInfo,
+            drawingDef: drawingDef
+        };
+        action.Undo = function(action){
+            // Delete the drawing from the model
+            if (action && action.drawingInfo) {
+                viewDriver.kernel.deleteChild( action.drawingInfo.drawingParentID,
+                    action.drawingInfo.drawingChildName);
+            }
+        };
+        action.Redo = function(action){
+            if (action && action.drawingInfo && action.drawingDef) {
+                viewDriver.kernel.createChild( action.drawingInfo.drawingParentID,
+                    action.drawingInfo.drawingChildName, action.drawingDef );
+            }
+        };
+
+        fireViewEvent( "action", action );
         // Delete the private node - we no longer need it
         // Remove the kinetic object from the tree and destroy the object
         markPrivateDrawingNodeForDeletion();
