@@ -6,9 +6,6 @@ properties:
   zIndex: 8
   dragToTop: true
   transformsEnabled: "position"
-  mirrorAll: false
-  isCopy: false
-  copyID: "NONE"
   mapPosition:
     set: |
       if ( value !== undefined ) {
@@ -41,8 +38,12 @@ properties:
       if ( this.threatArea !== undefined ) {
         return this.threatArea.visible;
       }
-      return false;      
-    value: false 
+      return false;
+    value: false
+
+  mirrorAll: false
+  isCopy: false
+  copyID: "NONE"
 
 methods:
   updateThreatShape:
