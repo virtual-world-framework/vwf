@@ -18,8 +18,8 @@
     "url": "https://github.com/virtual-world-framework/vwf.git"
   },
   "dependencies": {
-    "amqplib": "^0.4.2",
-    "amdefine": "^1.0.0",
+    "amdefine": "^1.0.1",
+    "amqplib": "^0.5.1",
     "async": "0.2.x",
     "bluebird": "^3.0.5",
     "body-parser": "^1.14.1",
@@ -30,7 +30,7 @@
     "crypto": "0.0.x",
     "dateformat": "^1.0.11",
     "express": "^4.13.3",
-    "finalhandler": "^0.4.1",
+    "finalhandler": "^0.5.1",
     "flash": "^1.1.0",
     "formidable": "1.0.x",
     "fs-extra": "0.8.x",
