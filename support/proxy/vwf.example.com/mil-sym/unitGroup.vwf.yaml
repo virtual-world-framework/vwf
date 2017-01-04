@@ -42,9 +42,6 @@ properties:
     value: false
 
   mirrorAll: false
-  isCopy: false
-  copyID: "NONE"
-
 methods:
   updateThreatShape:
 
