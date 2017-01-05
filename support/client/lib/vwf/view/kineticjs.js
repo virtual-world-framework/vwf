@@ -383,7 +383,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             } else {
                 activelyDrawing = false;
             }
-
+            fireViewEvent( "dragstart", {
+                nodeID: node.ID,
+                prevPos: prevPos,
+                eventData: eData.eventData[ 0 ]
+            } );
             swipe.swipedAcross( node, true, eData.eventData );
 
         } );
@@ -418,7 +422,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             tapHold.cancel();
 
             drawUp( node.ID, eData.eventData[0], node, true ); 
-
+            fireViewEvent( "dragend", {
+                nodeID: node.ID,
+                eventData: eData.eventData[ 0 ]
+            } );
             activelyDrawing = false;
         } );
 
@@ -1758,14 +1765,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             drawingInfo: localDrawingInfo,
             drawingDef: drawingDef
         };
-        action.Undo = function(){
+        action.undo = function(){
             // Delete the drawing from the model
             if (this.drawingInfo) {
                 viewDriver.kernel.deleteChild( this.drawingInfo.drawingParentID,
                     this.drawingInfo.drawingChildName);
             }
         };
-        action.Redo = function(){
+        action.redo = function(){
             if (this.drawingInfo && this.drawingDef) {
                 viewDriver.kernel.createChild( this.drawingInfo.drawingParentID,
                     this.drawingInfo.drawingChildName, this.drawingDef );
