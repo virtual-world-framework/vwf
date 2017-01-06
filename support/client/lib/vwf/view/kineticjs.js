@@ -383,6 +383,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             } else {
                 activelyDrawing = false;
             }
+            var prevPos;
+            if (node.kineticObj.attrs) {
+                prevPos = [node.kineticObj.attrs.x, node.kineticObj.attrs.y];
+            }
             fireViewEvent( "dragstart", {
                 nodeID: node.ID,
                 prevPos: prevPos,
