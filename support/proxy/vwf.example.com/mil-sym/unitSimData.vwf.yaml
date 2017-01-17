@@ -34,4 +34,4 @@ properties:
       if ( this.trackingID !== value ) {
         this.trackingID = value;
       }
-    value: ''
+    value: 'none'
