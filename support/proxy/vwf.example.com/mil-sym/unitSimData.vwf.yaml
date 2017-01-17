@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/node.vwf
+extends: http://vwf.example.com/kinetic/group.vwf
 properties:
   posture: 
     set: |
@@ -35,3 +35,32 @@ properties:
         this.trackingID = value;
       }
     value: 'none'
+
+  trackingHistory: 
+    set: |
+      if ( this.trackingHistory !== value ) {
+        this.trackingHistory = value;
+        this.updateTrackGraph(); 
+      }
+    value: {}
+
+  showTrackGraph:
+    set: |
+      if ( this.trackGraph !== undefined ) {
+        this.trackGraph.visible = value;
+      }
+    get: |
+      if ( this.trackGraph !== undefined ) {
+        return this.trackGraph.visible;
+      }
+      return false;
+    value: false
+methods:
+  updateTrackGraph:
+  handleRender:
+
+events:
+  trackGraphChanged:
+  
+scripts:
+- source: "unitSimData.js"
