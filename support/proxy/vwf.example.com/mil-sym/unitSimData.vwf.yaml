@@ -28,3 +28,10 @@ properties:
         this.pov = value;
       }
     value: false
+
+  trackingID: 
+    set: |
+      if ( this.trackingID !== value ) {
+        this.trackingID = value;
+      }
+    value: ''
