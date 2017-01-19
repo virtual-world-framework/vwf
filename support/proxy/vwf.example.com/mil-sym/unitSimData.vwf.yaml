@@ -64,11 +64,11 @@ properties:
         return this.trackGraph.visible;
       }
       return false;
-    value: false
+    value: true
 methods:
-  updateTrackGraph:
+  
   handleRender:
-
+  updateTrackGraph:
 events:
   trackGraphChanged:
   

@@ -9,7 +9,7 @@ this.initialize = function() {
 
 this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
     
-    this.zIndex = 19;
+    //this.zIndex = 19;
 
     // if ( this.trackGraph ) {
     //     this.trackGraph.position = this.icon.symbolCenter;    
@@ -20,7 +20,6 @@ this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
 this.updateTrackGraph = function( currentTime ) {
 
     // TODO: If time is specified, only render the track up to a certain time
-
     var visible = false;
     if ( this.threatArea ) {
         visible = this.trackGraph.visible;
@@ -31,29 +30,44 @@ this.updateTrackGraph = function( currentTime ) {
     var newShape = undefined;
     var color = 'yellow';
 
-    // TODO: Loop through the trackingHistory property and render each element according to its type and value
-    // Keep track of the last gps location so you can draw a line between a new coordinate and the last coordinate.
-    
-    newShape = {                
-        "extends": "http://vwf.example.com/kinetic/circle.vwf",
-        "properties": {
-            "x": 16,
-            "y": 16,
-            "visible": visible,
-            "listening": false,
-            "radius": 32,
-            "opacity": 0.3,
-            "fill": color,
-            "fillEnabled": true, 
-            "draggable": false,
-            "zIndex": 2
-        }
-    };
+    // NOTE: We can assumpe this will be sorted by time (unix ms)
 
-    if ( newShape ) {
-        this.children.create( "trackGraph", newShape );
-        this.trackGraphChanged( this.trackGraph );
+    var lastCoordinate = undefined;
+
+    for ( var key in this.trackingHistory ) {
+        if ( entities.hasOwnProperty( key ) ) {
+            var time = key;
+            var trackingDataForTime = this.trackingHistory[ key ];
+            for ( var i = 0; i < trackingDataForTime.length; i++ ) {
+                if ( trackingDataForTime[ i ][ 'type' ] == 'location' ) {
+                    var stageCoordinate = trackingDataForTime[ i ][ 'stageCoordinate' ];
+                    newShape = {                
+                        "extends": "http://vwf.example.com/kinetic/circle.vwf",
+                        "properties": {
+                            "x": stageCoordinate[0],
+                            "y": stageCoordinate[1],
+                            "visible": visible,
+                            "listening": false,
+                            "radius": 10,
+                            "opacity": 0.3,
+                            "fill": color,
+                            "fillEnabled": true, 
+                            "draggable": false,
+                            "zIndex": 2
+                        }
+                    };
+                    this.children.create( "trackGraph", newShape );
+                    this.trackGraphChanged( this.trackGraph );
+                    if ( lastCoordinate != undefined ) {
+                        //TODO: Render lines
+                    }
+                    lastCoordinate = stageCoordinate;
+                }
+                
+            }
+        }
     }
+
 
 }
 
