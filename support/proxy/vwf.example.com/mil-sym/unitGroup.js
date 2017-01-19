@@ -50,6 +50,9 @@ this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
     if ( this.threatArea ) {
         this.threatArea.position = this.icon.symbolCenter;    
     }
+    if ( this.simData ) {
+        this.simData.position = this.icon.symbolCenter; 
+    }
 
 }
 
