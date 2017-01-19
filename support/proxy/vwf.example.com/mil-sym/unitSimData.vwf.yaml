@@ -34,7 +34,12 @@ properties:
       if ( this.trackingID !== value ) {
         this.trackingID = value;
       }
-    value: 'none'
+    get: |
+      if ( this.trackingID !== undefined ) {
+        return this.trackingID;
+      }
+      return {};
+    value: 'NONE'
 
   trackingHistory: 
     set: |
@@ -42,6 +47,11 @@ properties:
         this.trackingHistory = value;
         this.updateTrackGraph(); 
       }
+    get: |
+      if ( this.trackingHistory !== undefined ) {
+        return this.trackingHistory;
+      }
+      return {};
     value: {}
 
   showTrackGraph:
