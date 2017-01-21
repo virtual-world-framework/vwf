@@ -24,7 +24,7 @@ block scenarios
           td.col-sm-5.title: input.form-control.input-sm(name="title" type="text" placeholder="New Scenario Title")
           td.col-sm-3.name(colspan=3): input.form-control.input-sm.hidden(name="name" type="text" placeholder="Scenario Name")
           td.col-sm-3 &nbsp;
-          td.col-sm-1: button.btn.btn-sm.create(disabled="disabled") Create
+          td.col-sm-1: button.btn.btn-sm.create(disabled) Create
       each scenario_session in scenario_sessions
         -
           var scenario = scenario_session.scenario,
@@ -49,7 +49,7 @@ block scenarios
             td.col-sm-3.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
             td.col-sm-1
               a.btn.btn-sm.edit(href=scenario.instance||scenario.document.uri target="_blank") Edit
-              button.btn.btn-sm.create.hidden Create
+              button.btn.btn-sm.create.hidden(disabled) Create
     script.
       document.addEventListener( "DOMContentLoaded", function() {
         $( "table#scenarios" ).on( "input", "tr.scenario", function() {
@@ -59,9 +59,11 @@ block scenarios
           if ( filled ) {
             this$.find( ".btn.edit" ).addClass( "hidden" );
             this$.find( ".btn.create" ).removeClass( "hidden" );
+            this$.find( ".btn.create" ).prop( "disabled", false );
           } else {
             this$.find( ".btn.edit" ).removeClass( "hidden" );
             this$.find( ".btn.create" ).addClass( "hidden" );
+            this$.find( ".btn.create" ).prop( "disabled", true );
           }
         } );
         $( "table#scenarios" ).on( "click", "tr.scenario .btn.create", function() {
@@ -79,10 +81,10 @@ block scenarios
           var this$ = $( this ),
             filled = this$.find( ".title input" ).val();
           if ( filled ) {
-            this$.find( ".btn.create" ).removeAttr( 'disabled' );
+            this$.find( ".btn.create" ).prop( "disabled", false );
             this$.find( ".name input" ).val( this$.find( ".title input" ).val().replace( /[^0-9A-Za-z]+/g, "-" ) );
           } else {
-            this$.find( ".btn.create" ).add( 'disabled', '"disabled"' );
+            this$.find( ".btn.create" ).prop( "disabled", true );
           }
         } );
         $( "table#scenarios" ).on( "click", "tr.application .btn.create", function() {
