@@ -80,7 +80,7 @@ block scenarios
             filled = this$.find( ".title input" ).val();
           if ( filled ) {
             this$.find( ".btn.create" ).removeAttr( 'disabled' );
-            this$.find( ".name input" ).val( this$.find( ".title input" ).val().replace( /[^0-9A-Za-z]+/g, "-" ) );
+            this$.find( ".name input" ).val( this$.find( ".title input" ).val().trim().replace( /[^0-9A-Za-z]+/g, "-" ) );
           } else {
             this$.find( ".btn.create" ).add( 'disabled', '"disabled"' );
           }
