@@ -41,19 +41,6 @@ properties:
       return {};
     value: 'NONE'
 
-  trackingHistory: 
-    set: |
-      if ( this.trackingHistory !== value ) {
-        this.trackingHistory = value;
-        this.updateTrackGraph(); 
-      }
-    get: |
-      if ( this.trackingHistory !== undefined ) {
-        return this.trackingHistory;
-      }
-      return {};
-    value: {}
-
   showTrackGraph:
     set: |
       if ( this.trackGraph !== undefined ) {
