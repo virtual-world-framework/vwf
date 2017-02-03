@@ -26,7 +26,7 @@ define( [
         initialize: function() {
             mocha.setup( "bdd" );
             window.assert = chai.assert;
-            $( "body" ).append( " \
+            $( "body" ).append( "<script src='test/test.js'></script>" ).append( " \
                 <div class='modal' style='display: block;'> \
                     <div class='modal-dialog'> \
                         <div class='modal-content'> \
