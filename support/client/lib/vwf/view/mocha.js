@@ -24,9 +24,16 @@ define( [
         // -- initialize ---------------------------------------------------------------------------
 
         initialize: function() {
+
+            // Initialize mocha and chai
             mocha.setup( "bdd" );
             window.assert = chai.assert;
-            $( "body" ).append( "<script src='test/test.js'></script>" ).append( " \
+
+            // Load the stylesheet and create the mocha div in which it will place its results
+            $( "body" ).append( "<link>", {
+                rel: "stylesheet",
+                href: "vwf/view/mocha/mocha.css"
+            } ).append( " \
                 <div class='modal' style='display: block;'> \
                     <div class='modal-dialog'> \
                         <div class='modal-content'> \
@@ -38,7 +45,11 @@ define( [
                     </div><!-- /.modal-dialog --> \
                 </div><!-- /.modal --> \
             " );
-            mocha.run();
+
+            // Load the test file and run it
+            require( [ "test/index" ], function() {
+                mocha.run();
+            } );
         },
 
     } );
