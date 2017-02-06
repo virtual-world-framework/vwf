@@ -30,21 +30,9 @@ define( [
             window.assert = chai.assert;
 
             // Load the stylesheet and create the mocha div in which it will place its results
-            $( "body" ).append( "<link>", {
-                rel: "stylesheet",
-                href: "vwf/view/mocha/mocha.css"
-            } ).append( " \
-                <div class='modal' style='display: block;'> \
-                    <div class='modal-dialog'> \
-                        <div class='modal-content'> \
-                            <div class='modal-header'> \
-                                <h4 class='modal-title'>Test results</h4> \
-                            </div> \
-                            <div class='modal-body'><div id='mocha'></div></div> \
-                        </div><!-- /.modal-content --> \
-                    </div><!-- /.modal-dialog --> \
-                </div><!-- /.modal --> \
-            " );
+            $( "body" )
+                .append( "<link rel='stylesheet' href='vwf/view/mocha/mocha.css'>" )
+                .append( "<div id='mocha'></div>" );
 
             // Load the test file and run it
             require( [ "test/index" ], function() {
