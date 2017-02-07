@@ -323,6 +323,9 @@
                     "vwf/model/blockly/msg/js/en": {
                         deps: [ "vwf/model/blockly/blockly_compressed" ]
                     },
+                    "vwf/view/mocha/mocha": {
+                        exports: "mocha",
+                    },
                 }
             };
 
@@ -406,6 +409,13 @@
                 { library: "vwf/view/kineticjs", active: false },
                 { library: "vwf/view/mil-sym", active: false },
                 { library: "vwf/view/audio", active: false },
+                { library: "vwf/view/mocha",
+                    linkedLibraries: [
+                        "vwf/view/mocha/mocha",
+                        "vwf/view/chai/chai"
+                    ],
+                    active: false
+                },
                 { library: "vwf/kernel/utility", active: true },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
@@ -427,7 +437,9 @@
                 { library: "vwf/model/mil-sym/sm-bc.min", active: false }, 
                 { library: "vwf/model/buzz/buzz.min", active: false }, 
                 { library: "vwf/model/jPlayer.2.7.1/jquery.jplayer.min", active: false },
-                { library: "vwf/admin", active: true }
+                { library: "vwf/admin", active: true },
+                { library: "vwf/view/mocha/mocha", active:false },
+                { library: "vwf/view/chai/chai", active:false }
             ];
 
             var initializers = {
@@ -461,7 +473,8 @@
                     { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/mil-sym", active: false },
                     { library: "vwf/view/audio", active: false },
-                    { library: "vwf/view/webrtc", active: false}
+                    { library: "vwf/view/webrtc", active: false},
+                    { library: "vwf/view/mocha", active: false }
                 ]
             };
             mapLibraryName(requireArray);
