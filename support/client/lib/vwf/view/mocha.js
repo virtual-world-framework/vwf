@@ -12,8 +12,8 @@
 /// @requires vwf/view
 
 define( [
-    "module", "vwf/view", "jquery", "vwf/view/mocha/mocha", "vwf/view/chai/chai"
-], function( module, view, $, mocha, chai ) {
+    "module", "vwf/view", "jquery", "vwf/view/mocha/mocha", "vwf/view/chai/chai", "test/index"
+], function( module, view, $, mocha, chai, test ) {
 
     // vwf/view/mocha.js is a driver used for unit tests based on mocha + chai.
 
@@ -33,12 +33,14 @@ define( [
             $( "body" )
                 .append( "<link rel='stylesheet' href='vwf/view/mocha/mocha.css'>" )
                 .append( "<div id='mocha'></div>" );
-
-            // Load the test file and run it
-            require( [ "test/index" ], function() {
-                mocha.run();
-            } );
         },
+
+        initializedNode: function( nodeID, childID ) {
+            if ( childID === vwf_view.kernel.application() ) {
+                test();
+                mocha.run();
+            }
+        }
 
     } );
 

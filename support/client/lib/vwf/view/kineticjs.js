@@ -1033,19 +1033,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             if ( viewDriver && viewDriver.state.nodes[ pointerPickID ] ) {
                 var childID = pointerPickID;
                 var child = viewDriver.state.nodes[ childID ];
-                var parentID = child.parentID;
-                var parent = viewDriver.state.nodes[ child.parentID ];
                 while ( child ) {
 
                     returnData.eventNodeData[ childID ] = [ {
                         pickID: pointerPickID,
                     } ];
 
-                    childID = parentID;
+                    // Line up the next "child" up the hierarchy
+                    childID = child.parentID;
                     child = viewDriver.state.nodes[ childID ];
-                    parentID = child ? child.parentID : undefined;
-                    parent = parentID ? viewDriver.state.nodes[ child.parentID ] : undefined;
-
                 }
             }
         }
