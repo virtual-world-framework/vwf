@@ -18,6 +18,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
 
     var self;
     var eventHandlers = {};
+    var _rendererReady = false;
     
     return view.load( module, {
 
@@ -46,6 +47,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
             rs.setSymbologyStandard( rs.Symbology_2525C ); 
             rs.setTextOutlineWidth( 1 );
 
+            pollForFontsLoaded();
         },
 
         // createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -124,6 +126,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         // },
 
         renderUnitSymbol: renderUnitSymbol,
+        rendererReady: rendererReady,
 
         on: function( eventName, callback ) {
             eventHandlers[ eventName ] = callback;
@@ -314,6 +317,19 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         if ( typeof eventHandler === "function" ) {
             eventHandler( parameters );
         }
+    }
+
+    function pollForFontsLoaded() {
+        if ( armyc2.c2sd.renderer.utilities.RendererUtilities.fontsLoaded() ) {
+            _rendererReady = true;
+            fireViewEvent( "milSymRendererReady" );
+        } else {
+            setTimeout( pollForFontsLoaded, 500 );
+        }
+    }
+
+    function rendererReady() {
+        return _rendererReady;
     }
 
 } );
