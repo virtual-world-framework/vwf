@@ -19,16 +19,15 @@
   },
   "dependencies": {
     "crypto": "0.0.x",
-    "socket.io": "0.9.x",
-    "async": "0.2.x",
-    "mime": "1.2.x",
-    "js-yaml": "2.1.x",
+    "socket.io": "1.7.x",
+    "socket.io-client": "^1.7.x",
+    "async": "2.1.x",
+    "mime": "1.3.x",
+    "js-yaml": "3.8.x",
     "optimist": "0.6.x",
-    "fs-extra": "0.8.x"
+    "fs-extra": "2.0.x"
   },
   "devDependencies": {
-    "node-inspector": "x.x.x",
-    "nodebug": "x.x.x",
     "mocha": "x.x.x",
     "should": "x.x.x"
   },

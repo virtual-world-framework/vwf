@@ -808,11 +808,11 @@
             }
 
             // Test for WebSockets
-            if( window.io && !io.Transport.websocket.check() )
-            {
-                compatibilityStatus.compatible = false;
-                jQuery.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
-            }
+            // if( window.io && !io.Transport.websocket.check() )
+            // {
+            //     compatibilityStatus.compatible = false;
+            //     jQuery.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
+            // }
 
             if(callback) {
                 callback(compatibilityStatus);
@@ -839,7 +839,10 @@
 
                     // The socket is relative to the application path.
 
-                    resource: window.location.pathname.slice( 1,
+                    // resource: window.location.pathname.slice( 1,
+                    //     window.location.pathname.lastIndexOf("/") ),
+
+                    query: 'pathname=' + window.location.pathname.slice( 1,
                         window.location.pathname.lastIndexOf("/") ),
 
                     // Use a secure connection when the application comes from https.
@@ -849,7 +852,8 @@
                     // Don't attempt to reestablish lost connections. The client reloads after a
                     // disconnection to recreate the application from scratch.
 
-                    reconnect: false,
+                    reconnection: false,
+                    transports: ['websocket']
 
                 };
 
@@ -884,7 +888,7 @@
 
                     } );
 
-                    socket = new io.Socket( undefined, options );
+                    socket = io.connect( undefined, options );
                 }
 
             } catch ( e ) {
@@ -916,7 +920,8 @@
                     vwf.logger.infox( "-socket", "connected" );
 
                     if ( isSocketIO07() ) {
-                        vwf.moniker_ = this.json.namespace.socket.sessionid;                        
+                        //vwf.moniker_ = this.json.namespace.socket.sessionid;   
+                         vwf.moniker_ = this.id;                    
                     } else {  //Ruby Server
                         vwf.moniker_ = this.transport.sessionid;
                     }
@@ -4726,7 +4731,8 @@ if ( ! childComponent.source ) {
         // == Private functions ====================================================================
 
         var isSocketIO07 = function() {
-            return ( parseFloat( io.version ) >= 0.7 );
+            return true
+            //return ( parseFloat( io.version ) >= 0.7 );
         }
 
         // -- loadComponent ------------------------------------------------------------------------
