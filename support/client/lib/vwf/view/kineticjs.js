@@ -999,7 +999,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             e.evt.stopPropagation && e.evt.stopPropagation();
         }
 
-        var isTouchEvent = ( e.evt instanceof TouchEvent );
+        var isTouchEvent = !!e.evt.touches;
         var eventPosition = isTouchEvent ? e.evt.changedTouches[ 0 ] : e.evt;
 
         var stage = node && node.stage;
