@@ -32,7 +32,6 @@ this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
 
     if ( this.parent !== undefined ) {
         this.parent.handleRender( img, iconSize, symbolCenter, symbolBounds );
-        this.parent.simData.handleRender( img, iconSize, symbolCenter, symbolBounds );
     }
 }
 //# sourceURL=unitIcon.js

@@ -1,5 +1,5 @@
 --- 
-extends: http://vwf.example.com/kinetic/group.vwf
+extends: http://vwf.example.com/node.vwf
 properties:
   posture: 
     set: |
@@ -28,36 +28,3 @@ properties:
         this.pov = value;
       }
     value: false
-
-  trackingID: 
-    set: |
-      if ( this.trackingID !== value ) {
-        this.trackingID = value;
-      }
-    get: |
-      if ( this.trackingID !== undefined ) {
-        return this.trackingID;
-      }
-      return {};
-    value: 'NONE'
-
-  showTrackGraph:
-    set: |
-      if ( this.trackGraph !== undefined ) {
-        this.trackGraph.visible = value;
-      }
-    get: |
-      if ( this.trackGraph !== undefined ) {
-        return this.trackGraph.visible;
-      }
-      return false;
-    value: true
-methods:
-  
-  handleRender:
-  updateTrackGraph:
-events:
-  trackGraphChanged:
-  
-scripts:
-- source: "unitSimData.js"
