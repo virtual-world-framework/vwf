@@ -48,7 +48,7 @@ block scenarios
               td.col-sm-1.company: input.form-control.input-sm(name="company" type="text" maxlength="8")
               td.col-sm-1.platoon: input.form-control.input-sm(name="platoon" type="number" min="1" max="9" step="1")
               td.col-sm-1.unit: input.form-control.input-sm(name="unit" type="number" min="1" max="9" step="1")
-              td.col-sm-2.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
+              td.col-sm-3.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
               td.col-sm-1
                 a.btn.btn-sm.edit(href=scenario.instance||scenario.document.uri target="_blank") Edit
                 button.btn.btn-sm.create.hidden(type="submit" disabled) Create
