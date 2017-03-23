@@ -46,7 +46,8 @@
     "passport-local": "^1.0.0",
     "request-promise": "^1.0.2",
     "socket.io": "0.9.x",
-    "util": "0.10.x"
+    "util": "0.10.x",
+    "zip-folder": "^1.0.0"
   },
   "devDependencies": {
     "mocha": "x.x.x",
