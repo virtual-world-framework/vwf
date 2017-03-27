@@ -16,7 +16,8 @@ block scenarios
         th.col-sm-1 Company
         th.col-sm-1 Platoon
         th.col-sm-1 Unit
-        th.col-sm-3 &nbsp;
+        th.col-sm-2 &nbsp;
+        th.col-sm-1 &nbsp;
         th.col-sm-1 &nbsp;
     tbody
       if user.instructor
@@ -24,8 +25,10 @@ block scenarios
           form
             td.col-sm-5.title: input.form-control.input-sm(name="title" type="text" placeholder="New Scenario Title")
             td.col-sm-3.name(colspan=3): input.form-control.input-sm.hidden(name="name" type="text" placeholder="Scenario Name")
-            td.col-sm-3 &nbsp;
-            td.col-sm-1: button.btn.btn-sm.create(type="submit" disabled) Create
+            td.col-sm-2 &nbsp;
+            td.col-sm-1: button.btn.btn-sm.btn-default.create(type="submit" disabled) Create
+            td.col-sm-1: label.btn.btn-sm.btn-default.import Import
+              input(type="file" accept=".zip" style="display: none;")
       each scenario_session in scenario_sessions
         -
           var scenario = scenario_session.scenario,
@@ -39,8 +42,9 @@ block scenarios
               td.col-sm-1= session.state.classroom.company
               td.col-sm-1= session.state.classroom.platoon
               td.col-sm-1= session.state.classroom.unit
-              td.col-sm-3 &nbsp;
+              td.col-sm-2 &nbsp;
               td.col-sm-1: a.btn.btn-sm.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
+              th.col-sm-1 &nbsp;
         else if user.instructor
           tr.scenario
             form
@@ -48,10 +52,12 @@ block scenarios
               td.col-sm-1.company: input.form-control.input-sm(name="company" type="text" maxlength="8")
               td.col-sm-1.platoon: input.form-control.input-sm(name="platoon" type="number" min="1" max="9" step="1")
               td.col-sm-1.unit: input.form-control.input-sm(name="unit" type="number" min="1" max="9" step="1")
-              td.col-sm-3.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
+              td.col-sm-2.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
               td.col-sm-1
                 a.btn.btn-sm.edit(href=scenario.instance||scenario.document.uri target="_blank") Edit
                 button.btn.btn-sm.create.hidden(type="submit" disabled) Create
+              td.col-sm-1
+                a.btn.btn-sm.export(href="/export-scenarios?scenarioName=" + scenario.state.scenarioName) Export
     script.
       document.addEventListener( "DOMContentLoaded", function() {
         $( "table#scenarios" ).on( "input", "tr.scenario", function() {
@@ -99,6 +105,33 @@ block scenarios
             done( function() { document.location.reload() } ).
             fail( function() {} );
           return false;
+        } );
+        $( ".import" ).change( function() {
+
+          var file = $( this ).find( "input" ).prop( "files" )[ 0 ];
+
+          // If the user canceled the file selector, do nothing
+          if ( !file ) {
+            return;
+          }
+
+          var formData = new FormData();
+          formData.append( "file", file );
+
+          $.ajax( {
+            url: "/import-scenarios",
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function( data, textStatus, jqXHR ) {
+              location.reload();
+            },
+            error: function( jqXHR, textStatus, errorThrown ) {
+              var responseText = jqXHR.responseText || "Are you connected to the server?";
+              alert( "Uh oh ... we were unable to upload that file for import.\n" + responseText );
+            }
+          } );
         } );
       } );
 
