@@ -38,7 +38,7 @@ define( [
         initializedNode: function( nodeID, childID ) {
             if ( childID === vwf_view.kernel.application() ) {
                 test();
-                mocha.run();
+                window.runTests = mocha.run;
             }
         }
 
