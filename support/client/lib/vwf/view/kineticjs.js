@@ -711,10 +711,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     drawThis = false;
                     break;
 
-                case "drawing_clients":
-                    drawThis = false;
-                    break;
-
                 default:
                     drawThis = this.state.pauseRendering ? false : !activelyDrawing;
             }

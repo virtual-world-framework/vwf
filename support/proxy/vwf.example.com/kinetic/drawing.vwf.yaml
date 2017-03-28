@@ -1,13 +1,9 @@
 ---
-extends:
-  http://vwf.example.com/kinetic/stage.vwf
-properties:
-  drawing_clients:
+# Deprecated: This component has been left only for backward compatibility.
+#             It was deprecated in v2.6.5
+extends: http://vwf.example.com/node.vwf
 methods:
-  clientWatch:
   clientJoin:
   clientLeave:
-  isValid:
-events:
 scripts:
-- source: "http://vwf.example.com/kinetic/drawing.js"
+- source: http://vwf.example.com/kinetic/drawing.js
