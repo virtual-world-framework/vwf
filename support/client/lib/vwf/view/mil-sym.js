@@ -18,6 +18,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
 
     var self;
     var eventHandlers = {};
+    var _rendererReady = false;
     
     return view.load( module, {
 
@@ -46,6 +47,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
             rs.setSymbologyStandard( rs.Symbology_2525C ); 
             rs.setTextOutlineWidth( 1 );
 
+            pollForFontsLoaded();
         },
 
         // createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -124,6 +126,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         // },
 
         renderUnitSymbol: renderUnitSymbol,
+        rendererReady: rendererReady,
 
         on: function( eventName, callback ) {
             eventHandlers[ eventName ] = callback;
@@ -214,7 +217,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         }    
     }
 
-    function renderUnitSymbol( symbolID, affiliation, echelonID, modifierList, unit, options ) {
+    function renderUnitSymbol( symbolID, affiliation, echelonID, modifierList, unit ) {
         
         if ( !cws ) {
             self.logger.errorx( "cws is undefined - unable to render unit icon" );
@@ -227,7 +230,6 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         var msa = renderer.utilities.MilStdAttributes;
         var rs = renderer.utilities.RendererSettings;
         var symUtil = renderer.utilities.SymbolUtilities;
-        var modifiers = {};
         
         // Set affiliation in unit symbol id
         updatedUnit.symbolID = cws.addAffiliationToSymbolId( symbolID, affiliation );
@@ -237,30 +239,8 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
             updatedUnit.symbolID = cws.addEchelonToSymbolId( updatedUnit.symbolID, echelonID );
         }
         
-        // Add modifiers
-        modifiers[ msa.PixelSize ] = "60";
-        for ( var prop in modifierList ) {
-            if (modifierList[prop] != undefined) {
-                switch ( prop ) {
-                    case "pixelSize":
-                    case "PixelSize":
-                        modifiers[ msa.PixelSize ] = modifierList[ prop ];
-                        break;
-                    case "icon":
-                    case "Icon":
-                        modifiers[ msa.Icon ] = modifierList[ prop ];
-                        break;
-                    default:
-                        modifiers[ prop ] = modifierList[ prop ];
-                        break;
-                }
-            }
-        }
-        
         // Define the list of valid modifiers
-        updatedUnit.validModifiers = [];
-        
-        updatedUnit.validModifiers.push( "pixelSize" );
+        updatedUnit.validModifiers = [ "pixelSize" ];
         var aliases = Object.keys( cws.aliasModifiers );
         for ( var i = 0; i < aliases.length; i++ ) {
 
@@ -277,16 +257,33 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
 
         }
         
-        // Render the unit image
-        
-        // if icon == true then you'll get no modifiers
-        modifiers[ msa.Icon ] = false;
-        
+        // Gather the modifiers that will be passed into the render function
+        var modifiers = {};
+        modifiers[ msa.PixelSize ] = "60"; // default
+        for ( var prop in modifierList ) {
+            if (modifierList[prop] != undefined) {
+                switch ( prop.toLowerCase() ) {
+                    case "pixelsize":
+                        modifiers[ msa.PixelSize ] = modifierList[ prop ];
+                        break;
+                    case "icon":
+                        // We ignore this value - it must be "false" or we'll get no modifiers
+                        break;
+                    default:
+                        modifiers[ prop ] = modifierList[ prop ];
+                        break;
+                }
+            }
+        }
+        modifiers[ msa.Icon ] = false; // Override whatever value might have been passed in
         modifiers[ msa.SymbologyStandard ] = rs.Symbology_2525C;
+
+        // Render the image
         var img = renderer.MilStdIconRenderer.Render( updatedUnit.symbolID, modifiers );
         if ( img ) {
+            updatedUnit.image = updatedUnit.image || {};
             var imgBounds = img.getImageBounds();
-            updatedUnit.image["selected"] = {
+            updatedUnit.image.selected = {
                 "url": img.toDataUrl(),
                 "width": imgBounds.width,
                 "height": imgBounds.height,
@@ -320,6 +317,19 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         if ( typeof eventHandler === "function" ) {
             eventHandler( parameters );
         }
+    }
+
+    function pollForFontsLoaded() {
+        if ( armyc2.c2sd.renderer.utilities.RendererUtilities.fontsLoaded() ) {
+            _rendererReady = true;
+            fireViewEvent( "milSymRendererReady" );
+        } else {
+            setTimeout( pollForFontsLoaded, 500 );
+        }
+    }
+
+    function rendererReady() {
+        return _rendererReady;
     }
 
 } );

@@ -906,7 +906,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             propagateNodeToModel( drawing_private );
         },
 
-        setImage: setImage
+        setImage: setImage,
+        refreshLayer: refreshLayer
     } );
 
     // Private helper functions --------------------------------------------------------------------

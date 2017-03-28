@@ -50,7 +50,6 @@ this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
     if ( this.threatArea ) {
         this.threatArea.position = this.icon.symbolCenter;    
     }
-
 }
 
 this.updateThreatShape = function() {
