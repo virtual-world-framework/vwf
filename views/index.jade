@@ -33,31 +33,20 @@ block scenarios
         -
           var scenario = scenario_session.scenario,
             session = scenario_session.session;
-        if session
-          if session.instance || user.instructor
-            tr.session
-              td.col-sm-5= session.state.scenarioTitle
-                br
-                span.small= instructorStudentsLabel( session )
-              td.col-sm-1= session.state.classroom.company
-              td.col-sm-1= session.state.classroom.platoon
-              td.col-sm-1= session.state.classroom.unit
-              td.col-sm-2 &nbsp;
-              td.col-sm-1: a.btn.btn-sm.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
-              th.col-sm-1 &nbsp;
-        else if user.instructor
-          tr.scenario
-            form
-              td.col-sm-5= scenario.state.scenarioTitle
-              td.col-sm-1.company: input.form-control.input-sm(name="company" type="text" maxlength="8")
-              td.col-sm-1.platoon: input.form-control.input-sm(name="platoon" type="number" min="1" max="9" step="1")
-              td.col-sm-1.unit: input.form-control.input-sm(name="unit" type="number" min="1" max="9" step="1")
-              td.col-sm-2.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
-              td.col-sm-1
-                a.btn.btn-sm.edit(href=scenario.instance||scenario.document.uri target="_blank") Edit
-                button.btn.btn-sm.create.hidden(type="submit" disabled) Create
-              td.col-sm-1
-                a.btn.btn-sm.export(href="/export-scenarios?scenarioName=" + scenario.state.scenarioName) Export
+        unless session
+          if user.instructor
+            tr.scenario
+              form
+                td.col-sm-5= scenario.state.scenarioTitle
+                td.col-sm-1.company: input.form-control.input-sm(name="company" type="text" maxlength="8")
+                td.col-sm-1.platoon: input.form-control.input-sm(name="platoon" type="number" min="1" max="9" step="1")
+                td.col-sm-1.unit: input.form-control.input-sm(name="unit" type="number" min="1" max="9" step="1")
+                td.col-sm-2.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
+                td.col-sm-1
+                  a.btn.btn-sm.edit(href=scenario.instance||scenario.document.uri target="_blank") Edit
+                  button.btn.btn-sm.create.hidden(type="submit" disabled) Create
+                td.col-sm-1
+                  a.btn.btn-sm.export(href="/export-scenarios?scenarioName=" + scenario.state.scenarioName) Export
     script.
       document.addEventListener( "DOMContentLoaded", function() {
         $( "table#scenarios" ).on( "input", "tr.scenario", function() {
@@ -136,6 +125,37 @@ block scenarios
       } );
 
 block sessions
+  -
+    var scenario_sessions = scenarioScenarioSessions( manifest[ "/ITDG/index.vwf" ] || [] );
+
+  table.table-striped.table#sessions
+    thead
+      tr
+        th.col-sm-5 Scenario
+        th.col-sm-1 Company
+        th.col-sm-1 Platoon
+        th.col-sm-1 Unit
+        th.col-sm-3 &nbsp;
+        th.col-sm-1 &nbsp;
+    tbody
+      each scenario_session in scenario_sessions
+        -
+          var scenario = scenario_session.scenario,
+            session = scenario_session.session;
+        if session
+          if session.instance || user.instructor
+            tr.session
+              td.col-sm-5= session.state.scenarioTitle
+                br
+                span.small= instructorStudentsLabel( session )
+              td.col-sm-1= session.state.classroom.company
+              td.col-sm-1= session.state.classroom.platoon
+              td.col-sm-1= session.state.classroom.unit
+              td.col-sm-2 &nbsp;
+              td.col-sm-1: a.btn.btn-sm.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
+              th.col-sm-1 &nbsp;
+
+block review
 
   //- Join each scenario with its sessions. Select only completed sessions (with documents).
 
@@ -143,7 +163,7 @@ block sessions
     var scenario_sessions =
       sessionScenarioSessions( manifest[ "/ITDG/index.vwf" ] || [] );
 
-  table.table-striped.table#sessions
+  table.table-striped.table#review
     thead
       tr
         th.col-sm-5 Scenario
