@@ -44,7 +44,7 @@ block scenarios
                 td.col-sm-2.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
                 td.col-sm-1
                   a.btn.btn-sm.edit(href=scenario.instance||scenario.document.uri target="_blank") Edit
-                  button.btn.btn-sm.create.hidden(type="submit" disabled) Create
+                  button.btn.btn-sm.create.hidden(type="submit" disabled) Start
                 td.col-sm-1
                   a.btn.btn-sm.export(href="/export-scenarios?scenarioName=" + scenario.state.scenarioName) Export
     script.
