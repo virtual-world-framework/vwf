@@ -64,14 +64,25 @@ block scenarios
           }
         } );
         $( "table#scenarios" ).on( "submit", "tr.scenario form", function() {
-          var row$ = $( this ).parents( "tr.scenario" ), properties = {
+          
+          // Extract properties to send with the post request
+          var row$ = $( this ).parents( "tr.scenario" );
+          var properties = {
                name: row$.find( ".name input" ).val(),
             company: row$.find( ".company input" ).val(),
             platoon: row$.find( ".platoon input" ).val(),
                unit: row$.find( ".unit input" ).val(),
           };
+
+          // Create a redirection for which we will fill in the details later
+          var newTab = window.open( "", "_blank" );
+          newTab.document.write( "Loading..." );
+
           $.post( "sessions", properties ).
-            done( function() { document.location.reload() } ).
+            done( function( response ) {
+              newTab.location.href = response.document.uri + "/";
+              document.location.reload();
+            } ).
             fail( function() {} );
           return false;
         } );
