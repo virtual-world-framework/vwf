@@ -15,6 +15,7 @@ block content
           if user.instructor
             li.active: a(href="#scenarios" data-toggle="tab") Scenarios
             li: a(href="#sessions" data-toggle="tab") Sessions
+            li: a(href="#review" data-toggle="tab") Review
         form.navbar-form.navbar-right(method="post" action="/logout")
           button.btn.btn-link(type="submit") Logout
         -
@@ -24,8 +25,13 @@ block content
             ( user.middle_initial || "" ) + ( user.middle_initial ? "." : "" )
         p.navbar-text.navbar-right= name
   .tab-content
-    .tab-pane.active#scenarios(role="tabpanel")
-      block scenarios
     if user.instructor
+      .tab-pane.active#scenarios(role="tabpanel")
+        block scenarios
       .tab-pane#sessions(role="tabpanel")
+        block sessions
+      .tab-pane#review(role="tabpanel")
+        block review
+    else
+      .tab-pane.active#sessions(role="tabpanel")
         block sessions

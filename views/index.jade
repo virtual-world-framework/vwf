@@ -20,32 +20,19 @@ block scenarios
         th.col-sm-1 &nbsp;
         th.col-sm-1 &nbsp;
     tbody
-      if user.instructor
-        tr.application
-          form
-            td.col-sm-5.title: input.form-control.input-sm(name="title" type="text" placeholder="New Scenario Title")
-            td.col-sm-3.name(colspan=3): input.form-control.input-sm.hidden(name="name" type="text" placeholder="Scenario Name")
-            td.col-sm-2 &nbsp;
-            td.col-sm-1: button.btn.btn-sm.btn-default.create(type="submit" disabled) Create
-            td.col-sm-1: label.btn.btn-sm.btn-default.import Import
-              input(type="file" accept=".zip" style="display: none;")
+      tr.application
+        form
+          td.col-sm-5.title: input.form-control.input-sm(name="title" type="text" placeholder="New Scenario Title")
+          td.col-sm-3.name(colspan=3): input.form-control.input-sm.hidden(name="name" type="text" placeholder="Scenario Name")
+          td.col-sm-2 &nbsp;
+          td.col-sm-1: button.btn.btn-sm.btn-default.create(type="submit" disabled) Create
+          td.col-sm-1: label.btn.btn-sm.btn-default.import Import
+            input(type="file" accept=".zip" style="display: none;")
       each scenario_session in scenario_sessions
         -
           var scenario = scenario_session.scenario,
             session = scenario_session.session;
-        if session
-          if session.instance || user.instructor
-            tr.session
-              td.col-sm-5= session.state.scenarioTitle
-                br
-                span.small= instructorStudentsLabel( session )
-              td.col-sm-1= session.state.classroom.company
-              td.col-sm-1= session.state.classroom.platoon
-              td.col-sm-1= session.state.classroom.unit
-              td.col-sm-2 &nbsp;
-              td.col-sm-1: a.btn.btn-sm.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
-              th.col-sm-1 &nbsp;
-        else if user.instructor
+        unless session
           tr.scenario
             form
               td.col-sm-5= scenario.state.scenarioTitle
@@ -55,7 +42,7 @@ block scenarios
               td.col-sm-2.name: input(name="name" type="hidden" value=scenario.state.scenarioName)
               td.col-sm-1
                 a.btn.btn-sm.edit(href=scenario.instance||scenario.document.uri target="_blank") Edit
-                button.btn.btn-sm.create.hidden(type="submit" disabled) Create
+                button.btn.btn-sm.create.hidden(type="submit" disabled) Start
               td.col-sm-1
                 a.btn.btn-sm.export(href="/export-scenarios?scenarioName=" + scenario.state.scenarioName) Export
     script.
@@ -75,14 +62,25 @@ block scenarios
           }
         } );
         $( "table#scenarios" ).on( "submit", "tr.scenario form", function() {
-          var row$ = $( this ).parents( "tr.scenario" ), properties = {
+          
+          // Extract properties to send with the post request
+          var row$ = $( this ).parents( "tr.scenario" );
+          var properties = {
                name: row$.find( ".name input" ).val(),
             company: row$.find( ".company input" ).val(),
             platoon: row$.find( ".platoon input" ).val(),
                unit: row$.find( ".unit input" ).val(),
           };
+
+          // Create a redirection for which we will fill in the details later
+          var newTab = window.open( "", "_blank" );
+          newTab.document.write( "Loading..." );
+
           $.post( "sessions", properties ).
-            done( function() { document.location.reload() } ).
+            done( function( response ) {
+              newTab.location.href = response.document.uri + "/";
+              document.location.reload();
+            } ).
             fail( function() {} );
           return false;
         } );
@@ -136,6 +134,37 @@ block scenarios
       } );
 
 block sessions
+  -
+    var scenario_sessions = scenarioScenarioSessions( manifest[ "/ITDG/index.vwf" ] || [] );
+
+  table.table-striped.table#sessions
+    thead
+      tr
+        th.col-sm-5 Scenario
+        th.col-sm-1 Company
+        th.col-sm-1 Platoon
+        th.col-sm-1 Unit
+        th.col-sm-3 &nbsp;
+        th.col-sm-1 &nbsp;
+    tbody
+      each scenario_session in scenario_sessions
+        -
+          var scenario = scenario_session.scenario,
+            session = scenario_session.session;
+        if session
+          if session.instance || user.instructor
+            tr.session
+              td.col-sm-5= session.state.scenarioTitle
+                br
+                span.small= instructorStudentsLabel( session )
+              td.col-sm-1= session.state.classroom.company
+              td.col-sm-1= session.state.classroom.platoon
+              td.col-sm-1= session.state.classroom.unit
+              td.col-sm-2 &nbsp;
+              td.col-sm-1: a.btn.btn-sm.join(href=session.instance||session.document.uri target="_blank")= session.instance ? "Join" : "Start"
+              th.col-sm-1 &nbsp;
+
+block review
 
   //- Join each scenario with its sessions. Select only completed sessions (with documents).
 
@@ -143,7 +172,7 @@ block sessions
     var scenario_sessions =
       sessionScenarioSessions( manifest[ "/ITDG/index.vwf" ] || [] );
 
-  table.table-striped.table#sessions
+  table.table-striped.table#review
     thead
       tr
         th.col-sm-5 Scenario
