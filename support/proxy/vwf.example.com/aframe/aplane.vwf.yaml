@@ -1,0 +1,9 @@
+# https://aframe.io/docs/0.5.0/primitives/a-plane.html
+--- 
+extends: http://vwf.example.com/aframe/aentity.vwf
+type: "a-plane"
+properties:
+  height:
+  width:
+  src:
+  repeat:

@@ -1,0 +1,5 @@
+# <a-sky color="#ECECEC"></a-sky>
+--- 
+extends: http://vwf.example.com/aframe/aentity.vwf
+type: "a-sky"
+properties:

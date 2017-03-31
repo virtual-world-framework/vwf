@@ -1,0 +1,14 @@
+# https://aframe.io/docs/0.5.0/primitives/a-light.html
+--- 
+extends: http://vwf.example.com/aframe/aentity.vwf
+type: "a-light"
+properties:
+  angle:
+  color:
+  decay:
+  distance:
+  ground-color:
+  intensity:
+  penumbra:
+  type:
+  target:

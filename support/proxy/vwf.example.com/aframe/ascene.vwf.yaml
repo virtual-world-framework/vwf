@@ -1,0 +1,10 @@
+# https://aframe.io/docs/0.5.0/core/scene.html
+--- 
+extends: http://vwf.example.com/aframe/node.vwf
+type: "a-scene"
+properties:
+  fog:
+  assets:
+method:
+scripts:
+- source: "http://vwf.example.com/aframe/ascene.js"

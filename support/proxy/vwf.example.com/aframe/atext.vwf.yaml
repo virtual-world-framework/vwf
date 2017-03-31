@@ -1,0 +1,7 @@
+# https://aframe.io/docs/0.5.0/primitives/a-text.html
+--- 
+extends: http://vwf.example.com/aframe/aentity.vwf
+type: "a-text"
+properties:
+  value:
+  color:

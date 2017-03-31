@@ -1,0 +1,8 @@
+# https://aframe.io/docs/0.5.0/primitives/a-cursor.html
+---
+extends: http://vwf.example.com/aframe/aentity.vwf
+type: "a-cursor"
+properties:
+  fuse:
+  fuse-timeout:
+  max-distance:
