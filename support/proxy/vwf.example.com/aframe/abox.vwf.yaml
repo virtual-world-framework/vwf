@@ -1,0 +1,11 @@
+# https://aframe.io/docs/0.5.0/primitives/a-box.html
+--- 
+extends: http://vwf.example.com/aframe/aentity.vwf
+type: "a-box"
+properties:
+  depth:
+  height:
+  width:
+  segments-depth:
+  segments-height:
+  segments-width:

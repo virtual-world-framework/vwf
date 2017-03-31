@@ -366,6 +366,12 @@
                 { library: "vwf/model/sound", active: false },
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
+
+                 { library: "vwf/model/aframe", 
+                    linkedLibraries: [ "vwf/model/aframe/aframe-v0.5.0" ], 
+                    active: false 
+                },
+
                 { library: "vwf/model/kineticjs", 
                     linkedLibraries: [ "vwf/model/kinetic/kinetic.min" ], 
                     active: false 
@@ -403,6 +409,10 @@
                 { library: "vwf/view/sound", active: false },
                 { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
+
+                { library: "vwf/view/aframe", active: false },
+                { library: "vwf/model/aframe/aframe-v0.5.0", active: false },
+
                 { library: "vwf/view/kineticjs", active: false },
                 { library: "vwf/view/mil-sym", active: false },
                 { library: "vwf/view/audio", active: false },
@@ -440,6 +450,7 @@
                     { library: "vwf/model/blockly", active: false },
                     { library: "vwf/model/graphtool", active: false },
                     { library: "vwf/model/sound", active: false },
+                    { library: "vwf/model/aframe", active: false },
                     { library: "vwf/model/kineticjs", active: false },
                     { library: "vwf/model/mil-sym", active: false },
                     { library: "vwf/model/heightmap", active: false },
@@ -458,6 +469,7 @@
                     { library: "vwf/view/blockly", active: false },
                     { library: "vwf/view/sound", active: false },
                     { library: "vwf/view/touch", active: false },
+                    { library: "vwf/view/aframe", active: false },
                     { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/mil-sym", active: false },
                     { library: "vwf/view/audio", active: false },
@@ -808,11 +820,11 @@
             }
 
             // Test for WebSockets
-            if( window.io && !io.Transport.websocket.check() )
-            {
-                compatibilityStatus.compatible = false;
-                jQuery.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
-            }
+            // if( window.io && !io.Transport.websocket.check() )
+            // {
+            //     compatibilityStatus.compatible = false;
+            //     jQuery.extend(compatibilityStatus.errors, {"WS": "This browser is not compatible. VWF requires WebSockets."});
+            // }
 
             if(callback) {
                 callback(compatibilityStatus);
@@ -839,7 +851,10 @@
 
                     // The socket is relative to the application path.
 
-                    resource: window.location.pathname.slice( 1,
+                    // resource: window.location.pathname.slice( 1,
+                    //     window.location.pathname.lastIndexOf("/") ),
+
+                    query: 'pathname=' + window.location.pathname.slice( 1,
                         window.location.pathname.lastIndexOf("/") ),
 
                     // Use a secure connection when the application comes from https.
@@ -849,7 +864,8 @@
                     // Don't attempt to reestablish lost connections. The client reloads after a
                     // disconnection to recreate the application from scratch.
 
-                    reconnect: false,
+                    reconnection: false,
+                    transports: ['websocket']
 
                 };
 
@@ -884,7 +900,7 @@
 
                     } );
 
-                    socket = new io.Socket( undefined, options );
+                    socket = io.connect( undefined, options );
                 }
 
             } catch ( e ) {
@@ -916,7 +932,8 @@
                     vwf.logger.infox( "-socket", "connected" );
 
                     if ( isSocketIO07() ) {
-                        vwf.moniker_ = this.json.namespace.socket.sessionid;                        
+                        //vwf.moniker_ = this.json.namespace.socket.sessionid;   
+                         vwf.moniker_ = this.id;                    
                     } else {  //Ruby Server
                         vwf.moniker_ = this.transport.sessionid;
                     }
@@ -4726,7 +4743,8 @@ if ( ! childComponent.source ) {
         // == Private functions ====================================================================
 
         var isSocketIO07 = function() {
-            return ( parseFloat( io.version ) >= 0.7 );
+            return true
+            //return ( parseFloat( io.version ) >= 0.7 );
         }
 
         // -- loadComponent ------------------------------------------------------------------------
