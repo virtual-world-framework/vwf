@@ -1,0 +1,8 @@
+---
+info:
+  title: "VWF & AFrame Example App"
+model:
+  vwf/model/aframe:
+view:
+  vwf/view/aframe:
+  vwf/view/editor:

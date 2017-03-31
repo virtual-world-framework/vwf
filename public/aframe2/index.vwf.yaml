@@ -1,0 +1,121 @@
+# A-Frame & VWF simple scene
+# Copyright 2017 Krestianstvo.org project
+---
+extends: http://vwf.example.com/aframe/ascene.vwf
+properties:
+  fog: "type: linear; color: #ECECEC; far: 30; near: 0"
+  assets: "assets.json"
+children:
+  myLight:
+    extends: http://vwf.example.com/aframe/alight.vwf
+    properties:
+      type: "point"
+      color: "white"
+      position: [0, 10, 5]
+      rotation: [0, 0, 0]
+  model:
+    extends: http://vwf.example.com/aframe/acolladamodel.vwf
+    properties:
+      src: "#plane"
+      position: [-1.0, 1.7, -3]
+      rotation: [0, -45, 0]
+      scale: [10, 10, 10]
+  spaceText:
+    extends: http://vwf.example.com/aframe/atext.vwf
+    properties:
+      value: "Virtual World Framework & A-Frame"
+      color: "#ddd"
+      position: [-2, 2.5, -2]
+  spaceText2:
+    extends: http://vwf.example.com/aframe/atext.vwf
+    properties:
+      value: "Project by Krestianstvo.org"
+      color: "#aaa"
+      position: [1, 3, -4]
+  box:
+    extends: http://vwf.example.com/aframe/abox.vwf
+    properties:
+      position: [-1, 0.5, -3]
+      rotation: [0, -30, 0]
+      color: "#3c7249"
+      depth: 2
+      height: 1
+      width: 1
+      clickable: true
+    events:
+      clickEvent:
+    methods:
+      clickEventMethod:
+        body: |
+          if (this.clickable) {
+          let genColor = this.generateColor();
+          this.color = genColor 
+          }
+      generateColor:
+        body: |
+          var letters = '0123456789ABCDEF';
+          var color = '#';
+          for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(this.random() * 16)];
+          } return color 
+    scripts:
+      - |
+        this.clickEvent = function(){
+          this.clickEventMethod();
+         }
+  sphere:
+    extends: http://vwf.example.com/aframe/asphere.vwf
+    properties:
+      position: [1, 1.25, -4]
+      color: "#e0e014"
+      radius: 1
+      wireframe: true
+    children:
+      box2:
+        extends: http://vwf.example.com/aframe/abox.vwf
+        properties:
+          src: "#bg"
+          position: [2, -0.75, 0]
+          color: "#2167a5"
+          depth: 1
+        methods:
+          run:
+            body: |
+              var time = vwf.now;
+              this.position = [this.position[0], this.position[1], Math.sin(time)]
+              this.future( 0.05 ).run();  // schedule the next step
+  sky:
+    extends: http://vwf.example.com/aframe/asky.vwf
+    properties:
+      color: "#ECECEC"
+      src: "#sky"
+      fog: false
+  groundPlane:
+    extends: http://vwf.example.com/aframe/aplane.vwf
+    properties:
+      height: 50
+      width: 50
+      repeat: "10 10"
+      rotation: [-90, 0, 0]
+      color: "white"
+      wireframe: false
+      src: "#bg2"
+  camentity:
+    extends: http://vwf.example.com/aframe/aentity.vwf
+    properties:
+      position: [0, 0, 0]
+    children:
+      camera:
+        extends: http://vwf.example.com/aframe/acamera.vwf
+        properties:
+          look-controls-enabled: true
+          forAvatar: true
+        children:
+          cursor:
+            extends: http://vwf.example.com/aframe/acursor.vwf
+methods:
+  initialize:
+    body: |
+      var runBox = vwf_view.kernel.find("", "/sphere/box2")[0];
+      console.log(runBox);
+      vwf_view.kernel.callMethod(runBox, "run");

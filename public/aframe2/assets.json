@@ -1,0 +1,18 @@
+{
+    "bg":{
+        "tag": "img",
+        "src": "assets/bg.jpg"
+    },
+    "sky":{
+        "tag": "img",
+        "src": "assets/skyes/sky3.jpg"
+    },
+    "plane":{
+        "tag": "a-asset-item",
+        "src": "assets/plane.dae"
+    },
+     "bg2":{
+        "tag": "img",
+        "src": "assets/checker.jpg"
+    }
+}

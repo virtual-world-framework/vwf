@@ -1,0 +1,143 @@
+# A-Frame & VWF simple scene
+# Copyright 2017 Krestianstvo.org project
+---
+extends: http://vwf.example.com/aframe/ascene.vwf
+properties:
+    assets: "assets.json"
+methods:
+  initialize:
+    body: |
+      var calc = vwf_view.kernel.find("", "/calcResult")[0];
+      console.log(calc);
+      vwf_view.kernel.callMethod(calc, "calcMe");
+children:
+  groundPlane:
+    extends: http://vwf.example.com/aframe/aplane.vwf
+    properties:
+      height: 50
+      width: 50
+      repeat: "10 10"
+      rotation: [-90, 0, 0]
+      wireframe: false
+      src: "#bg2"
+  calcResult:
+    extends: http://vwf.example.com/aframe/atext.vwf
+    properties:
+      value: "no result"
+      color: "#1d7027"
+      position: [1, 2.5, -2]
+      scale: [3, 3, 3]
+    methods:
+      calcMe:
+        body: |
+          let match = this.parent.calcText.calcLang.grammar.match(this.parent.calcText.value);
+          if (match.succeeded()){
+          this.value = this.parent.calcText.calcLang.semantics(match).interpret()}
+          this.future( 0.1 ).calcMe();
+  calcText:
+    extends: http://vwf.example.com/aframe/atext.vwf
+    properties:
+      value: "1 * pi"
+      color: "#b74217"
+      position: [-1, 2.5, -2]
+      scale: [2, 2, 2]
+    children:
+      calcLang:
+        extends: http://vwf.example.com/ohm/node.vwf
+        properties:
+          grammar:
+          semantics:
+          ohmLang: |
+              Arithmetic {
+                    Exp
+                      = AddExp
+
+                    AddExp
+                      = AddExp "+" MulExp  -- plus
+                      | AddExp "-" MulExp  -- minus
+                      | MulExp
+
+                    MulExp
+                      = MulExp "*" ExpExp  -- times
+                      | MulExp "/" ExpExp  -- divide
+                      | ExpExp
+
+                    ExpExp
+                      = PriExp "^" ExpExp  -- power
+                      | PriExp
+
+                    PriExp
+                      = "(" Exp ")"  -- paren
+                      | "+" PriExp   -- pos
+                      | "-" PriExp   -- neg
+                      | ident
+                      | number
+                    ident  (an identifier)
+                      = letter alnum*
+
+                    number  (a number)
+                      = digit* "." digit+  -- fract
+                      | digit+             -- whole
+                  }
+        methods:
+          initLang:
+            body: |
+              console.log("add operations to semantics")
+              this.addOperationLang();
+          addOperationLang:
+            body: |
+              var constants = {pi: Math.PI, e: Math.E};
+              this.semantics.addOperation('interpret', {
+              Exp: function(e) {
+                   return e.interpret();  
+                },
+              AddExp: function(e) {
+                return e.interpret();
+              },
+              AddExp_plus: function(x, _, y) {
+                return x.interpret() + y.interpret();
+              },
+              AddExp_minus: function(x, _, y) {
+                return x.interpret() - y.interpret();
+              },
+              MulExp:        function(e)         { return e.interpret(); },
+              MulExp_times:  function(x, _, y)   { return x.interpret() * y.interpret(); },
+              MulExp_divide: function(x, _, y)   { return x.interpret() / y.interpret(); },
+              ExpExp:        function(e)         { return e.interpret(); },
+              ExpExp_power:  function(x, _, y)   { return Math.pow(x.interpret(), y.interpret()); },
+              PriExp:        function(e)         { return e.interpret(); },
+              PriExp_paren:  function(_l, e, _r) { return e.interpret(); },
+              PriExp_pos:    function(_, e)      { return e.interpret(); },
+              PriExp_neg:    function(_, e)      { return -e.interpret(); },
+              ident: function(_l, _ns) {
+              // Look up the value of a named constant, e.g., 'pi'.
+              return constants[this.sourceString] || 0;
+              },
+                number: function(_) {
+                  // Use `parseFloat` to convert (e.g.) the string '123' to the number 123.
+                  return parseFloat(this.sourceString);
+                }
+                  })
+          testLang:
+            body: |
+              var match = this.grammar.match('2+2');
+              console.log(match);
+              var res = this.semantics(match).interpret();
+              console.log(res);
+  sky:
+    extends: http://vwf.example.com/aframe/asky.vwf
+    properties:
+      color: "#ECECEC"
+  camentity:
+    extends: http://vwf.example.com/aframe/aentity.vwf
+    properties:
+      position: [0, 0, 0]
+    children:
+      camera:
+        extends: http://vwf.example.com/aframe/acamera.vwf
+        properties:
+          look-controls-enabled: true
+          forAvatar: true
+        children:
+          cursor:
+            extends: http://vwf.example.com/aframe/acursor.vwf
