@@ -1,0 +1,10 @@
+---
+info:
+  title: "Ohm calculator Example App"
+model:
+  vwf/model/aframe:
+  vwf/model/ohm:
+view:
+  vwf/view/aframe:
+  vwf/view/ohm:
+  vwf/view/editor-live:

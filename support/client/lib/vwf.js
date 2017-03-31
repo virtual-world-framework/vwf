@@ -367,6 +367,8 @@
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
 
+                { library: "vwf/model/ohm", active: false },
+
                  { library: "vwf/model/aframe", 
                     linkedLibraries: [ "vwf/model/aframe/aframe-v0.5.0" ], 
                     active: false 
@@ -392,6 +394,7 @@
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
             	{ library: "vwf/view/editor", active: false },
+                { library: "vwf/view/editor-live", active: false },
                 { library: "vwf/view/glge", 
                     disabledBy: ["vwf/model/threejs", "vwf/view/threejs"], 
                     active: false 
@@ -409,6 +412,8 @@
                 { library: "vwf/view/sound", active: false },
                 { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
+
+                { library: "vwf/view/ohm", active: false },
 
                 { library: "vwf/view/aframe", active: false },
                 { library: "vwf/model/aframe/aframe-v0.5.0", active: false },
@@ -450,6 +455,7 @@
                     { library: "vwf/model/blockly", active: false },
                     { library: "vwf/model/graphtool", active: false },
                     { library: "vwf/model/sound", active: false },
+                    { library: "vwf/model/ohm", active: false },
                     { library: "vwf/model/aframe", active: false },
                     { library: "vwf/model/kineticjs", active: false },
                     { library: "vwf/model/mil-sym", active: false },
@@ -463,12 +469,14 @@
                     { library: "vwf/view/threejs", parameters: {"application-root":"#vwf-root"}, active: false },
                     { library: "vwf/view/document", active: true },
                 	{ library: "vwf/view/editor", active: false },
+                    { library: "vwf/view/editor-live", active: false },
                     { library: "vwf/view/lesson", active: false},
                     { library: "vwf/view/google-earth", active: false },
                     { library: "vwf/view/cesium", active: false },
                     { library: "vwf/view/blockly", active: false },
                     { library: "vwf/view/sound", active: false },
                     { library: "vwf/view/touch", active: false },
+                    { library: "vwf/view/ohm", active: false },
                     { library: "vwf/view/aframe", active: false },
                     { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/mil-sym", active: false },
