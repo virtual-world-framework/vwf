@@ -1531,6 +1531,14 @@ define( function(){
                 "symbolID": "SUAPML----*****",  
                 "tag": "AIRTRK"   
             },
+            "WAR.AIRTRK.MIL.VIP": {
+                "symbolID": "SUAPMV----*****",  
+                "tag": "AIRTRK"   
+            },
+            "WAR.AIRTRK.MIL.ESCORT": {
+                "symbolID": "SUAPME----*****",  
+                "tag": "AIRTRK"   
+            },
             "WAR.AIRTRK.WPN": {
                 "symbolID": "SUAPW-----*****",
                 "tag": "WAR"     
@@ -3590,8 +3598,36 @@ define( function(){
                 "symbolID": "SUGPEVC---*****",  
                 "tag": "EQT"   
             },
+            "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.AUT": {
+                "symbolID": "SUGPEVCA--*****",  
+                "tag": "EQT"   
+            },
+            "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.OBTRK": {
+                "symbolID": "SUGPEVCO--*****",  
+                "tag": "EQT"   
+            },
+            "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.MPV": {
+                "symbolID": "SUGPEVCM--*****",  
+                "tag": "EQT"   
+            },
+            "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.UTYVEH": {
+                "symbolID": "SUGPEVCU--*****",  
+                "tag": "EQT"   
+            },
+            "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.JP": {
+                "symbolID": "SUGPEVCJ--*****",  
+                "tag": "EQT"   
+            },
+            "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRL": {
+                "symbolID": "SUGPEVCT--*****",  
+                "tag": "EQT"   
+            },
             "WAR.GRDTRK.EQT.GRDVEH.PKAN": {
                 "symbolID": "SUGPEVM---*****",
+                "tag": "EQT"     
+            },
+            "WAR.GRDTRK.EQT.GRDVEH.MSLSPT": {
+                "symbolID": "SUGPEVS---*****",
                 "tag": "EQT"     
             },
             "WAR.GRDTRK.EQT.SNS": {
@@ -4873,6 +4909,130 @@ define( function(){
             }
         },
         
+        // Emergency Management Services point graphics
+        "ems": {
+            "EMS.OPN.EMMED": {
+                "symbolID": "EUOPA-----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.EMOPN": {
+                "symbolID": "EUOPB-----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.FIRFT": {
+                "symbolID": "EUOPC-----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF": {
+                "symbolID": "EUOPD-----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.ATF": {
+                "symbolID": "EUOPDD----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.BDRPT": {
+                "symbolID": "EUOPDE----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.CSTM": {
+                "symbolID": "EUOPDF----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.DEA": {
+                "symbolID": "EUOPDG----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.DOJ": {
+                "symbolID": "EUOPDH----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.FBI": {
+                "symbolID": "EUOPDI----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.POL": {
+                "symbolID": "EUOPDJ----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.PRSN": {
+                "symbolID": "EUOPDK----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.SECSR": {
+                "symbolID": "EUOPDL----*****",
+                "tag": "EMS"     
+            },
+             "EMS.OPN.LAWENF.TSA": {
+                "symbolID": "EUOPDM----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.CSTGD": {
+                "symbolID": "EUOPDN----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.LAWENF.USMAR": {
+                "symbolID": "EUOPDO----*****",
+                "tag": "EMS"     
+            },
+            "EMS.OPN.SNS": {
+                "symbolID": "EUOPE-----*****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.AGFD": {
+                "symbolID": "EUFPA-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.BFI": {
+                "symbolID": "EUFPB-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.CMCL": {
+                "symbolID": "EUFPC-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.EDFAC": {
+                "symbolID": "EUFPD-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.ENGFAC": {
+                "symbolID": "EUFPE-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.GVTSTE": {
+                "symbolID": "EUFPF-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.MIL": {
+                "symbolID": "EUFPG-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.PSTSRV": {
+                "symbolID": "EUFPH-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.PUBVEN": {
+                "symbolID": "EUFPI-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.SPCNDS": {
+                "symbolID": "EUFPJ-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.TELCOM": {
+                "symbolID": "EUFPK-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.TSP": {
+                "symbolID": "EUFPL-----H****",
+                "tag": "EMS"     
+            },
+            "EMS.INFSTR.WS": {
+                "symbolID": "EUFPM-----H****",
+                "tag": "EMS"     
+            }
+       },
+        
         "aliasModifiers": { 
             "echelon":             { modifier:  "B_ECHELON",
                                      type:      "ModifiersUnits",
@@ -5020,106 +5180,71 @@ define( function(){
         },
         "addEchelonToSymbolId": function( symbolID, value ) {
             var retStr = symbolID;
+            var echelon = symbolID.charAt(10);
+            // Override installation
+            if ( ( echelon === 'H' ) || ( echelon === '*' ) ) {
+                  echelon = '-';
+            }
+
             switch( value ) {
                 
                 case "team":
                 case "crew":
-                    retStr = this.team_crew( symbolID );
+                    echelon += 'A';
                     break;
                 case "squad":
-                    retStr = this.squad( symbolID );
+                    echelon += 'B';
                     break;
                 case "section":
-                    retStr = this.section( symbolID );
+                    echelon += 'C';
                     break;                
                 case "platoon":
                 case "detachment":
-                    retStr = this.platoon_detachment( symbolID );
+                    echelon += 'D';
                     break;
                 case "company":
                 case "battery":
                 case "troop":
-                    retStr = this.company_battery_troop( symbolID );
+                    echelon += 'E';
                     break;                
                 case "battalion":
                 case "squadron":
-                    retStr = this.battalion_squadron( symbolID );
+                    echelon += 'F';
                     break;                
                 case "regiment":
                 case "group":
-                    retStr = this.regiment_group( symbolID );
+                    echelon += 'G';
                     break;  
                 case "brigade":
-                    retStr = this.brigade( symbolID );
+                    echelon += 'H';
                     break;  
                 case "division":
-                    retStr = this.division( symbolID );
+                    echelon += 'I';
                     break;  
                 case "corps":
                 case "mef":
-                    retStr = this.corps_mef( symbolID );
+                    echelon += 'J';
                     break;                  
                 case "army":
-                    retStr = this.army( symbolID );
+                    echelon += 'K';
                     break; 
                 case "armyGroup":
                 case "army group":
                 case "front":
-                    retStr = this.armyGroup_front( symbolID );
+                    echelon += 'L';
                     break; 
                 case "region":
-                    retStr = this.region( symbolID );
+                    echelon += 'M';
                     break; 
                 case "null":
                 case "none":
                 default:
-                    retStr = this._null( symbolID );
+                    echelon += '-';
                     break; 
 
             }  
+            retStr = symbolID.substr( 0, 10 ) + echelon + symbolID.substr( 12 );
             return retStr;          
-        },
-        "team_crew": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-A" + symbolID.substr( 12 );
-        }, 
-        "squad": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-B" + symbolID.substr( 12 );
-        }, 
-        "section": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-C" + symbolID.substr( 12 );
-        }, 
-        "platoon_detachment": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-D" + symbolID.substr( 12 );
-        }, 
-        "company_battery_troop": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-E" + symbolID.substr( 12 );
-        }, 
-        "battalion_squadron": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-F" + symbolID.substr( 12 );
-        }, 
-        "regiment_group": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-G" + symbolID.substr( 12 );
-        }, 
-        "brigade": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-H" + symbolID.substr( 12 );
-        }, 
-        "division": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-I" + symbolID.substr( 12 );
-        }, 
-        "corps_mef": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-J" + symbolID.substr( 12 );
-        },
-        "army": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-K" + symbolID.substr( 12 );
-        },
-        "armyGroup_front": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-L" + symbolID.substr( 12 );
-        },
-        "region": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "-M" + symbolID.substr( 12 );
-        },
-        "_null": function( symbolID ) {
-            return symbolID.substr( 0, 10 ) + "**" + symbolID.substr( 12 );
         },
         "addAffiliationToSymbolId": function( symbolID, value ) {
             var retStr = symbolID;
@@ -5151,6 +5276,140 @@ define( function(){
         "hostile": function( symbolID ) {
             return symbolID.substr( 0, 1 ) + "H" + symbolID.substr( 2 );
         },  
+        "addUnitStatusToSymbolId": function( symbolID, value ) {
+            var retStr = symbolID;
+            if ( symbolID.charAt(0) === 'S' ) {
+                  var unitStatus = symbolID.charAt(3);
+                  switch ( value ) {
+                      case "anticipated":
+                          unitStatus = "A";
+                          break;
+                      case "present":
+                          unitStatus = "P";
+                          break;
+                      case "capable":
+                          unitStatus = "C";
+                          break;
+                      case "damaged":
+                          unitStatus = "D";
+                          break;
+                      case "destroyed":
+                          unitStatus = "X";
+                          break;
+                      case "full":
+                          unitStatus = "F";
+                          break;
+                  }
+                  retStr = symbolID.substr( 0, 3 ) + unitStatus + symbolID.substr( 4 );
+            }
+            return retStr;
+        },    
+        "addMobilityToSymbolId": function( symbolID, value ) {
+            var retStr = symbolID;
+            if ( ( symbolID.charAt(0) === 'S' ) && ( symbolID.charAt(4) === 'E' ) ) {
+                  var mobility = symbolID.substr( 10, 2 );
+                  switch ( value ) {
+                      case "none":
+                          mobility = "**";
+                          break;
+                      case "wheeled limited cross-country":
+                          mobility = "MO";
+                          break;
+                      case "cross-country":
+                          mobility = "MP";
+                          break;
+                      case "tracked":
+                          mobility = "MQ";
+                          break;
+                      case "wheeled and tracked":
+                          mobility = "MR";
+                          break;
+                      case "towed":
+                          mobility = "MS";
+                          break;
+                      case "rail":
+                          mobility = "MT";
+                          break;
+                      case "over snow":
+                          mobility = "MU";
+                          break;
+                      case "sled":
+                          mobility = "MV";
+                          break;
+                      case "pack animals":
+                          mobility = "MW";
+                          break;
+                      case "barge":
+                          mobility = "MX";
+                          break;
+                      case "amphibious":
+                          mobility = "MY";
+                          break;
+                  }
+                  retStr = symbolID.substr( 0, 10 ) + mobility + symbolID.substr( 12 );
+            }
+            return retStr;
+        },    
+        "addTaskForceToSymbolId": function( symbolID, value ) {
+            var retStr = symbolID;
+            if ( ( symbolID.charAt(0) === 'S' ) && ( symbolID.charAt(4) === 'U' ) ) {
+                  var taskForce = symbolID.charAt(10);
+                  // Override installation
+                  var echelon   = symbolID.charAt(11);
+                  if ( symbolID.charAt(10) === "H" ) {
+                        taskForce = '-';
+                        echelon   = '-';
+                  }
+
+                  switch ( value ) {
+                      case "none":
+                          taskForce = "-";
+                          break;
+                      case "HQ":
+                          taskForce = "A";
+                          break;
+                      case "TF HQ":
+                          taskForce = "B";
+                          break;
+                      case "FD HQ":
+                          taskForce = "C";
+                          break;
+                      case "FD-TF HQ":
+                          taskForce = "D";
+                          break;
+                      case "TF":
+                          taskForce = "E";
+                          break;
+                      case "FD":
+                          taskForce = "F";
+                          break;
+                      case "FD-TF":
+                          taskForce = "G";
+                          break;
+                  }
+                  retStr = symbolID.substr( 0, 10 ) + taskForce + echelon + symbolID.substr( 12 );
+            }
+            return retStr;
+        },    
+        "addInstallationToSymbolId": function( symbolID, value ) {
+            var retStr = symbolID;
+            if ( symbolID.charAt(0) === 'S' ) {
+                  var installation = symbolID.substr(10, 2);
+                  switch ( value ) {
+                      case "none":
+                          installation = "--";
+                          break;
+                      case "installation":
+                          installation = "H-";
+                          break;
+                      case "feint-dummy":
+                          installation = "HB";
+                          break;
+                  }
+                  retStr = symbolID.substr( 0, 10 ) + installation + symbolID.substr( 12 );
+            }
+            return retStr;
+        },    
         "modifierByAlias": function( alias ) {
             var modifierObj = undefined;
                                 

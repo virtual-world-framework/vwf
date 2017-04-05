@@ -125,6 +125,10 @@ define( [ "module",
                     node.fullName = undefined;
                     node.echelon = undefined;
                     node.affiliation = undefined;
+                    node.unitStatus = undefined;
+                    node.mobility = undefined;
+                    node.taskForce = undefined;
+                    node.installation = undefined;
 
                 } else if ( isModifierNode( protos ) ) {
 
@@ -219,6 +223,18 @@ define( [ "module",
                             if ( node.affiliation !== undefined ) {
                                 node.symbolID = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
                             }
+                            if ( node.unitStatus !== undefined ) {
+                                node.symbolID = cws.addUnitStatusToSymbolId( node.symbolID, node.unitStatus );                                
+                            }
+                            if ( node.mobility !== undefined ) {
+                                node.symbolID = cws.addMobilityToSymbolId( node.symbolID, node.mobility );                                
+                            }
+                            if ( node.taskForce !== undefined ) {
+                                node.symbolID = cws.addTaskForceToSymbolId( node.symbolID, node.taskForce );                                
+                            }
+                            if ( node.installation !== undefined ) {
+                                node.symbolID = cws.addInstallationToSymbolId( node.symbolID, node.installation );                                
+                            }
                             renderImage = true;
                             break;
 
@@ -269,6 +285,7 @@ define( [ "module",
                                             node.symbolID = cws.addEchelonToSymbolId( node.symbolID, propertyValue );
                                         }
                                         node.echelon = propertyValue;
+                                        node.installation = "none";
                                         renderImage = true;
                                         break;
 
@@ -295,6 +312,109 @@ define( [ "module",
 
                                     default:
                                         this.logger.warnx( "incorrect affiliation property value: " + propertyValue );
+                                        break;
+                                }
+                            }
+                            break;
+
+                        case "unitStatus":
+                            if ( node.unitStatus !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    case "anticipated":
+                                    case "present":
+                                    case "capable":
+                                    case "damaged":
+                                    case "destroyed":
+                                    case "full":
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addUnitStatusToSymbolId( node.symbolID, propertyValue );
+                                        }
+                                        node.unitStatus = propertyValue;
+                                        renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect unitStatus property value: " + propertyValue );
+                                        break;
+                                }
+                            }
+                            break;
+
+                        case "mobility":
+                            if ( node.mobility !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    case "none":
+                                    case "wheeled limited cross-country":
+                                    case "cross-country":
+                                    case "tracked":
+                                    case "wheeled and tracked":
+                                    case "towed":
+                                    case "rail":
+                                    case "over snow":
+                                    case "sled":
+                                    case "pack animals":
+                                    case "barge":
+                                    case "amphibious":
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addMobilityToSymbolId( node.symbolID, propertyValue );
+                                        }
+                                        node.mobility = propertyValue;
+                                        node.installation = "none";
+                                        renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect mobility property value: " + propertyValue );
+                                        break;
+                                }
+                            }
+                            break;
+
+                        case "taskForce":
+                            if ( node.taskForce !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    case "none":
+                                    case "HQ":
+                                    case "TF HQ":
+                                    case "FD HQ":
+                                    case "FD-TF HQ":
+                                    case "TF":
+                                    case "FD":
+                                    case "FD-TF":
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addTaskForceToSymbolId( node.symbolID, propertyValue );
+                                        }
+                                        node.taskForce = propertyValue;
+                                        node.installation = "none";
+
+                                        renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect taskForce property value: " + propertyValue );
+                                        break;
+                                }
+                            }
+                            break;
+
+                        case "installation":
+                            if ( node.installation !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    case "none":
+                                    case "installation":
+                                    case "feint-dummy":
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addInstallationToSymbolId( node.symbolID, propertyValue );
+                                        }
+                                        node.installation = propertyValue;
+                                        node.taskForce = "none";
+                                        node.echelon = "none";
+                                        node.mobility = "none";
+                                        renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect installation property value: " + propertyValue );
                                         break;
                                 }
                             }
@@ -354,6 +474,11 @@ define( [ "module",
                     case "fullName":
                     case "tagName":
                     case "echelon":
+                    case "affiliation":
+                    case "unitStatus":
+                    case "mobility":
+                    case "taskForce":
+                    case "installation":
                         value = node[ propertyName ];
                         break;
                 }
