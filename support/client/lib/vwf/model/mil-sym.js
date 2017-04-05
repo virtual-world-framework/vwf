@@ -285,7 +285,9 @@ define( [ "module",
                                             node.symbolID = cws.addEchelonToSymbolId( node.symbolID, propertyValue );
                                         }
                                         node.echelon = propertyValue;
-                                        node.installation = "none";
+                                        if ( !!node.installation ) {
+                                            node.installation = "none";
+                                        }
                                         renderImage = true;
                                         break;
 
