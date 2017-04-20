@@ -2,10 +2,10 @@
 extends: http://vwf.example.com/kinetic/group.vwf
 properties: 
   supportMouseAndTouchEvents: true
+  disableScaleAndRotationForSpeed: false
   index: 8
   zIndex: 8
   dragToTop: true
-  transformsEnabled: "position"
   mapPosition:
     set: |
       if ( value !== undefined ) {
