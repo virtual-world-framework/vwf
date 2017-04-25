@@ -150,14 +150,28 @@ this.updateThreatShape = function() {
 
 }
 
-this.setAbsoluteMapPosition = function( mapPosition ) {
-  if ( mapPosition !== undefined ) {
-    this.mapPosition = mapPosition;
+this.setPositionFromMapPosition = function() {
+    var symbolCenter = ( this.icon || {} ).symbolCenter || {
+        x: 0,
+        y: 0
+    }
     this.position = {
-      "x": this.mapPosition.x,
-      "y": this.mapPosition.y
+        x: this.mapPosition.x - this.scaleX * symbolCenter.x,
+        y: this.mapPosition.y - this.scaleY * symbolCenter.y
     };
-  }
+}
+
+this.setMapPositionFromPosition = function( konvaObjectPosition ) {
+    var symbolCenter = ( this.icon || {} ).symbolCenter || {
+        x: 0,
+        y: 0
+    };
+    this.mapPosition = {
+        x: konvaObjectPosition.x + this.scaleX * symbolCenter.x,
+        y: konvaObjectPosition.y + this.scaleY * symbolCenter.y,
+    }
+
+    //# sourceURL=unitGroup.setMapPositionFromPosition
 }
 
 //# sourceURL=unitGroup.js

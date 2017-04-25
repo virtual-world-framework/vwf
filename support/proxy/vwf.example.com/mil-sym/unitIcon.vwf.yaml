@@ -29,6 +29,10 @@ properties:
   transformsEnabled: "position"
   zIndex: 20
 
+methods:
+  handleRender:
+  updateIcon:
+
 events:
 
   imageChanged:
@@ -36,10 +40,6 @@ events:
   iconSizeChanged:
 
   symbolCenterChanged:
-
-methods:
-
-  handleRender:
 
 scripts:
 - source: "unitIcon.js"
