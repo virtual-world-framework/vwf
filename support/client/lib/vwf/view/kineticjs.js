@@ -943,7 +943,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         // having the model set the view back to an old value, which results in 
                         // jitter while the user is dragging the node)
                         viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
-                        viewDriver.kernel.setProperty( nodeID, "position", [ kineticX, kineticY ] );
+                        viewDriver.kernel.callMethod( nodeID, "setMapPositionFromPosition", [ 
+                            {
+                                x: kineticX,
+                                y: kineticY
+                            }
+                        ] );
 
                         doRenderNodes = true;
                         renderNodes[ nodeID ] = kineticObj;

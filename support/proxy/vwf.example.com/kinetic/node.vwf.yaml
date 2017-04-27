@@ -36,7 +36,6 @@ properties:
   modelY:
   supportMouseAndTouchEvents: false
   hasMouseAndTouchEvents: false
-  dragProperty: "position"
   attributes:
 methods:
   toggleVisibility:

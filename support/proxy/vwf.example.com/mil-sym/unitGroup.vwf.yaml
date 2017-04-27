@@ -2,22 +2,15 @@
 extends: http://vwf.example.com/kinetic/group.vwf
 properties: 
   supportMouseAndTouchEvents: true
+  disableScaleAndRotationForSpeed: false
   index: 8
   zIndex: 8
   dragToTop: true
-  transformsEnabled: "position"
   mapPosition:
     set: |
       if ( value !== undefined ) {
         this.mapPosition = value;
-        if ( this.icon && this.icon.symbolCenter ) {
-          this.position = {
-            "x": ( this.mapPosition.absolute ? this.mapPosition.x : this.mapPosition.x - this.icon.symbolCenter.x ),
-            "y": ( this.mapPosition.absolute ? this.mapPosition.y : this.mapPosition.y - this.icon.symbolCenter.y )
-          };
-        } else {
-          this.position = { "x": value.x, "y": value.y };
-        } 
+        this.setPositionFromMapPosition();
       }
     value: { "x": 0, "y": 0 }
 
@@ -44,11 +37,11 @@ properties:
   mirrorAll: false
 methods:
   updateThreatShape:
-
   handleRender:
-
+  setPositionFromMapPosition:
+  setMapPositionFromPosition:
 events:
   threatShapeChanged:
-  
+  unitGroupDragged:
 scripts:
 - source: "unitGroup.js"
