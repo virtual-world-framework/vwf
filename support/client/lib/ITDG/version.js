@@ -26,7 +26,7 @@
 /// particuarly clever about it. Take care to keep the comment and formatting intact when
 /// bumping the version number.
 
-var version = [ 0, 8, 0, "", "", [ "ITDG", 2, 6, 5 ] ];  // version-identifier
+var version = [ 0, 8, 0, "", "", [ "ITDG", 2, 6, 6 ] ];  // version-identifier
 
 /// Render the version identifier as a SemVer-style string.
 
