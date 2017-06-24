@@ -161,14 +161,14 @@ this.setPositionFromMapPosition = function() {
     };
 }
 
-this.setMapPositionFromPosition = function( konvaObjectPosition ) {
+this.setMapPositionFromPosition = function( konvaObjectPosition, scale ) {
     var symbolCenter = ( this.icon || {} ).symbolCenter || {
         x: 0,
         y: 0
     };
     this.mapPosition = {
-        x: konvaObjectPosition.x + this.scaleX * symbolCenter.x,
-        y: konvaObjectPosition.y + this.scaleY * symbolCenter.y,
+        x: konvaObjectPosition.x + scale * symbolCenter.x,
+        y: konvaObjectPosition.y + scale * symbolCenter.y,
     }
 
     //# sourceURL=unitGroup.setMapPositionFromPosition
