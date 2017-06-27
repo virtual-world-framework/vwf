@@ -935,20 +935,22 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
 
                     // If the position of this node has changed since its last model value, set the
                     // model property with the new value
-                    if ( ( positionProperty.value[0] !== kineticX ) || 
-                         ( positionProperty.value[1] !== kineticY ) ) {
+                    if ( ( positionProperty.value.x !== kineticX ) || 
+                         ( positionProperty.value.y !== kineticY ) ) {
 
                         // Fire this event to notify the model that kinetic has already updated the
                         // view and it doesn't need to (if the model set the value, it would risk 
                         // having the model set the view back to an old value, which results in 
                         // jitter while the user is dragging the node)
                         viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
-                        viewDriver.kernel.callMethod( nodeID, "setMapPositionFromPosition", [ 
-                            {
-                                x: kineticX,
-                                y: kineticY
-                            }
-                        ] );
+                        viewDriver.kernel.callMethod( nodeID, "setMapPositionFromPosition",
+                            [ 
+                                {
+                                    x: kineticX,
+                                    y: kineticY
+                                },
+                                kineticObj.scaleX()
+                            ] );
 
                         doRenderNodes = true;
                         renderNodes[ nodeID ] = kineticObj;
