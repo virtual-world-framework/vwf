@@ -6,7 +6,11 @@ block content
       .modal-content
         form(method="post")
           .modal-header
-            h3.modal-title #{title}
+            .row
+              .form-group.col-sm-9
+                h2.modal-title #{title}
+              .form-group.col-sm-3
+                img.image.logo_img(src="/ONR_Logo.jpg")
           .modal-body
             .row
               .form-group.col-sm-5
@@ -36,3 +40,4 @@ block content
           .modal-footer
             button.btn.btn-primary(type="submit")
               | Login
+

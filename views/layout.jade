@@ -9,7 +9,11 @@ block content
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand(href="#") #{title}
+        a.navbar-brand(href="#") 
+          span
+            img.image.logo_img_small( src="/ONR_Logo.jpg" )
+          span &ensp;
+          span #{title}
       .collapse.navbar-collapse#navbar
         ul.nav.navbar-nav
           if user.instructor
