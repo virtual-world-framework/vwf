@@ -25,4 +25,12 @@ tbody {
 tr { display: table-row; }
 td { display: table-cell; }
 
+.logo_img {
+  width: 100%;
+  height: auto;
+}
 
+.logo_img_small {
+  width: 60px;
+  height: auto;
+}
