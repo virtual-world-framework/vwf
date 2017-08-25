@@ -127,6 +127,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
 
         renderUnitSymbol: renderUnitSymbol,
         rendererReady: rendererReady,
+        getUpdatedUnitSymbolID: getUpdatedUnitSymbolID,
 
         on: function( eventName, callback ) {
             eventHandlers[ eventName ] = callback;
@@ -294,6 +295,38 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         return updatedUnit;
     }
     
+    function getUpdatedUnitSymbolID( symbolID, affiliation, echelonID, status, mobility ) {
+
+        if ( !cws ) {
+            self.logger.errorx( "cws is undefined - unable to render unit icon" );
+            return;
+        }
+
+        var updatedUnitSymbolID = symbolID;
+        
+        // Set affiliation in unit symbol id
+        if ( !!affiliation ) {
+            updatedUnitSymbolID = cws.addAffiliationToSymbolId( symbolID, affiliation );
+        }
+        
+        // Add echelon
+        if ( !!echelonID ) {          
+            updatedUnitSymbolID = cws.addEchelonToSymbolId( updatedUnitSymbolID, echelonID );
+        }
+
+        // Add status
+        if ( !!status ) {
+            updatedUnitSymbolID = cws.addUnitStatusToSymbolId( updatedUnitSymbolID, status );
+        }
+
+        // Add mobility
+        if ( !!mobility ) {
+            updatedUnitSymbolID = cws.addMobilityToSymbolId( updatedUnitSymbolID, mobility );
+        }
+
+        return updatedUnitSymbolID;
+    } 
+
     function getUnitImage( symbolID ) {
         var renderer = armyc2.c2sd.renderer;
         var msa = renderer.utilities.MilStdAttributes;
