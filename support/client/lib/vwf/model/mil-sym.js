@@ -130,6 +130,21 @@ define( [ "module",
                     node.taskForce = undefined;
                     node.installation = undefined;
 
+                } else if ( isMissionGfxNode( protos ) ) {
+
+                    this.state.nodes[ childID ] = node = this.state.createNode( "unit", nodeID, childID, childExtendsID, childImplementsIDs,
+                                childSource, childType, childIndex, childName, callback );
+                    
+                    // additional members for the missionGfx components
+                    node.symbolID = undefined;
+                    node.modifiers = {};
+                    node.image = undefined;
+                    node.description = undefined;
+                    node.tagName = undefined;
+                    node.fullName = undefined;
+                    node.affiliation = undefined;
+                    node.controlPts = [];
+
                 } else if ( isModifierNode( protos ) ) {
 
                     this.state.nodes[ childID ] = node = this.state.createNode( "modifier", nodeID, childID, childExtendsID, childImplementsIDs,
@@ -211,7 +226,7 @@ define( [ "module",
             var renderImage = false;
 
             if ( node !== undefined && ( utility.validObject( propertyValue ) ) ) {
-                if ( node.nodeType === "unit" ) {
+                if ( ( node.nodeType === "unit" ) || ( node.nodeType === "missionGfx" ) ) {
                     
                     switch ( propertyName ) {
 
@@ -422,6 +437,12 @@ define( [ "module",
                             }
                             break;
 
+                        case "width":
+                        case "height":
+                        case "controlPts":
+                            renderImage = true;
+                            break;
+
                     }
 
                 } else if ( node.nodeType === "modifier" ) {
@@ -466,7 +487,7 @@ define( [ "module",
             //this driver has no representation of this node, so there is nothing to do.
             if( node === undefined ) return value;
 
-            if ( node.nodeType === "unit" ) {
+            if ( ( node.nodeType === "unit" ) || ( node.nodeType === "missionGfx" ) ) {
                 
                 switch ( propertyName ) {
 
@@ -559,6 +580,16 @@ define( [ "module",
        return found;
     } 
 
+    function isMissionGfxNode( prototypes ) {
+        var found = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                found = ( prototypes[i] == "http://vwf.example.com/mil-sym/missionGfx.vwf" );
+            }
+        }
+       return found;
+    } 
+
     function isModifierNode( prototypes ) {
         var found = false;
         if ( prototypes ) {
@@ -568,8 +599,6 @@ define( [ "module",
         }
        return found;
     } 
-
-
 
     function render( node ) {
 
@@ -597,7 +626,35 @@ define( [ "module",
             
             modelDriver.kernel.callMethod( node.ID, "handleRender", [ node.image, imgSize, centerPt, symbolBounds ] );
 
-        } 
+        } else if ( node !== undefined && node.nodeType === "missionGfx" && node.symbolID !== undefined ) {
+            if ( !!node.width && !!node.height && (!!node.controlPts && ( node.controlPts.length > 0 ) ) ) {
+                // Convert control points from Konva style array to mil-sym string
+                var controlPts;
+                if ( !!node.symbolType && node.symbolType === "DefinedMissionGraphic") {
+                   controlPts = getMilSymControlPts( computeRelativeControlPts( node.controlPts, node.width, node.height );                                     
+                } else {
+                   controlPts = getMilSymControlPts( node.controlPts ); 
+                }
+                var rendererMP = sec.web.renderer.SECWebRenderer;
+                var scale = 100.0;
+                var updatedUnit = $.extend( true, {}, unit );
+                var appID = self.kernel.application();
+                var renderer = armyc2.c2sd.renderer;
+                var msa = renderer.utilities.MilStdAttributes;
+                var rs = renderer.utilities.RendererSettings;
+                var symUtil = renderer.utilities.SymbolUtilities;
+                
+                // Set affiliation in symbol id
+                symbolCode = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
+                
+                var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, controlPts, node.width, node.height, null, node.modifiers, format);
+
+                if ( !!img && !!img.image ) {
+                    value = node.image = img.image.toDataURL();
+                }      
+
+            }
+        }
 
         return value;       
     }
@@ -686,5 +743,35 @@ define( [ "module",
         return value;
     }
 
+    function computeRelativeControlPts( controlPts, width, height ) {
+        var newControlPts = [];
+
+        if ( ( !!width && !!height ) && ( width > 0 ) && ( height > 0 ) ) {
+            // Some control points are computed relative to the width and height of the containing object
+            // Compute and return the adjusted control points in this instance
+            for ( var i = 0; i < controlPts.length; i+2 ) {
+                var x = konvaControlPts[i] * width;
+                var y = konvaControlPts[i+1] * height;
+                newControlPts.push( x );
+                newControlPts.push( y );
+            }
+        }
+
+        return newControlPts;
+    }
+
+    function getMilSymControlPts( konvaControlPts ) {
+        var milSymControlPts = "";
+        // konva-style is composed of an array where even numbered elements are x and odd are y
+        // mil-sym style is a string where pairs of x and y are separated by spaces
+        for ( var i = 0; i < konvaControlPts.length; i+2 ) {
+            milSymControlPts = milSymControlPts + konvaControlPts[i] + "," + konvaControlPts[i+1];
+            if ( i < konvaControlPts.length-2 ) {
+                milSymControlPts = milSymControlPts + " ";
+            }
+        }
+
+        return milSymControlPts;
+    }
     
 } );
