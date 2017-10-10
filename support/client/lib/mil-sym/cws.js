@@ -5033,100 +5033,87 @@ define( function(){
             }
        },
 
-       "tacticalTasks" {
+       "tacticalTasks": {
             "TACGRP.TSK.CNT": {
                   "symbolID": "G*TPJ-----****X",
                   "tag": "CONTAIN",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 1.0,0.5, 0.0,0.5, 0.5,0.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 100,50, 0,50, 50,0 ]
             },
             "TACGRP.TSK.BRH": {
                   "symbolID": "G*TPH-----****X",
                   "tag": "BREACH",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 1.0,0.0, 0.0,0.0, 0.5,1.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 100,0, 0,0, 50,100 ]
             },
             "TACGRP.TSK.BYS": {
                   "symbolID": "G*TPY-----****X",
                   "tag": "BYPASS",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 1.0,0.0, 0.0,0.0, 0.5,1.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 100,0, 0,0, 50,100 ]
             },
             "TACGRP.TSK.CNZ": {
                   "symbolID": "G*TPC-----****X",
                   "tag": "CANALIZE",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 1.0,0.0, 0.0,0.0, 0.5,1.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 100,0, 0,0, 50,100 ]
             },
             "TACGRP.TSK.CLR": {
                   "symbolID": "G*TPX-----****X",
                   "tag": "CLEAR",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 1.0,0.0, 0.0,0.0, 0.5,1.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 100,0, 0,0, 50,100 ]
             },
             "TACGRP.TSK.PNE": {
                   "symbolID": "G*TPP-----****X",
                   "tag": "PENETRATE",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 1.0,0.0, 0.0,0.0, 0.5,1.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 100,0, 0,0, 50,100 ]
             },
             "TACGRP.TSK.ISL": {
                   "symbolID": "G*TPE-----****X",
                   "tag": "ISOLATE",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 0.5,0.5, 0.0,0.5 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 50,50, 0,50 ]
             },
             "TACGRP.TSK.OCC": {
                   "symbolID": "G*TPO-----****X",
                   "tag": "OCCUPY",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 0.50,0.50, 0.0,0.50 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 50,50, 0,50 ]
             },
             "TACGRP.TSK.SCE": {
                   "symbolID": "G*TPS-----****X",
                   "tag": "SECURE",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 0.5,0.5, 0.0,0.5 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 50,50, 0,50 ]
             },
             "TACGRP.TSK.RTN": {
                   "symbolID": "G*TPQ-----****X",
                   "tag": "RETAIN",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 0.5,0.5, 0.0,0.5 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 50,50, 0,50 ]
             }
        },
 
-       "obstacleEffects" : {
+       "obstacleEffects": {
             "TACGRP.MOBSU.OBST.OBSEFT.BLK": {
                   "symbolID": "G*TPB-----****X",
                   "tag": "BLOCK",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 0.0,1.0, 0.0,0.0, 1.0,0.5 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 0,100, 0,0, 100,50 ]
             },
             "TACGRP.MOBSU.OBST.OBSEFT.DRT": {
                   "symbolID": "G*MPOED---****X",
                   "tag": "DISRUPT",
                   "symbolType": "DefinedMissionGraphic",
-                  "defaultControlPts": [ 0.0,0.0, 1.0,0.0, 1.0,1.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 0,0, 100,0, 100,100 ]
             },
             "TACGRP.MOBSU.OBST.OBSEFT.FIX": {
                   "symbolID": "G*MPOEF---****X",
                   "tag": "DISRUPT",
                   "symbolType": "DefinedMissionGraphic",
-                  "defaultControlPts": [ 0.0,0.0, 1.0,0.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 0,0, 100,0 ]
             }
        },
 
@@ -5135,22 +5122,19 @@ define( function(){
                   "symbolID": "G*GPOAS---****X",
                   "tag": "SUPPORT BY FIRE POSITION",
                   "symbolType": "DefinedMissionGraphic",                  
-                  "defaultControlPts": [ 0.2,0.4, 0.8,0.4, 0.0,1.0, 1.0,1.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 20,40, 80,40, 0,100, 100,100 ]
             },
             "TACGRP.C2GM.SPL.LNE.AMB": {
                   "symbolID": "G*GPSLA---****X",
                   "tag": "AMBUSH",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 0.5,1.0, 0.0,0.0, 1.0,0.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 50,100, 0,0, 100,0 ]
             },
             "TACGRP.C2GM.OFF.ARS.AFP": {
                   "symbolID": "G*GPOAF---****X",
                   "tag": "ATTACK BY FIRE POSITION",
                   "symbolType": "DefinedMissionGraphic", 
-                  "defaultControlPts": [ 0.5,1.0, 0.2,0.0, 0.8,0.0 ],
-                  "defaultDims": [100, 100]
+                  "defaultControlPts": [ 50,100, 20,0, 80,0 ]
             }
        },
         

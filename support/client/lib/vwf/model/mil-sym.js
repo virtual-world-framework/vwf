@@ -101,7 +101,7 @@ define( [ "module",
                     source: childSource, 
                     type: childType,
                     uri: childURI,
-                    name: childName,
+                    name: childName
                 };
                 return;                
             }
@@ -439,6 +439,7 @@ define( [ "module",
 
                         case "width":
                         case "height":
+                        case "rotation":
                         case "controlPts":
                             renderImage = true;
                             break;
@@ -631,7 +632,7 @@ define( [ "module",
                 // Convert control points from Konva style array to mil-sym string
                 var controlPts;
                 if ( !!node.symbolType && node.symbolType === "DefinedMissionGraphic") {
-                   controlPts = getMilSymControlPts( computeRelativeControlPts( node.controlPts, node.width, node.height );                                     
+                   controlPts = getMilSymControlPts( computeRelativeControlPts( node.controlPts, node.width, node.height ) );
                 } else {
                    controlPts = getMilSymControlPts( node.controlPts ); 
                 }

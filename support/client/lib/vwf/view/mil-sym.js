@@ -132,6 +132,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         renderUnitSymbol: renderUnitSymbol,
         rendererReady: rendererReady,
         getUpdatedUnitSymbolID: getUpdatedUnitSymbolID,
+        getMissionGraphicDefinition: getMissionGraphicDefinition,
 
         on: function( eventName, callback ) {
             eventHandlers[ eventName ] = callback;
@@ -385,11 +386,11 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
             return;
         }
 
-        if ( !!category && !!cws.category ) {
-            if ( !!fullName && !!cws.category.fullName ) {
-                missionGraphicDef = cws.category.fullName;
+        if ( !!category && !!cws[category] ) {
+            if ( !!fullName && !!cws[category][fullName] ) {
+                missionGraphicDef = cws[category][fullName];
             } else {
-                missionGraphicDef = cws.category;
+                missionGraphicDef = cws[category];
             }
         }
 
