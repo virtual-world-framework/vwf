@@ -5111,7 +5111,7 @@ define( function(){
             },
             "TACGRP.MOBSU.OBST.OBSEFT.FIX": {
                   "symbolID": "G*MPOEF---****X",
-                  "tag": "DISRUPT",
+                  "tag": "FIX",
                   "symbolType": "DefinedMissionGraphic",
                   "defaultControlPts": [ 0,0, 100,0 ]
             }

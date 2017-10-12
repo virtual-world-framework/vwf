@@ -1,64 +1,26 @@
 --- 
-extends: http://vwf.example.com/image.vwf
+extends: http://vwf.example.com/kinetic/image.vwf
 properties:
-  supportMouseAndTouchEvents: true
-  index: 8
-  zIndex: 8
-  dragToTop: true
-  transformsEnabled: "position"
-  mapPosition:
-    set: |
-      this.position = { "x": value.x, "y": value.y };
-      --if ( value !== undefined ) {
-      --  this.mapPosition = value;
-      --  if ( this.icon && this.icon.symbolCenter ) {
-      --    this.position = {
-      --      "x": ( this.mapPosition.absolute ? this.mapPosition.x : this.mapPosition.x - this.icon.symbolCenter.x ),
-      --      "y": ( this.mapPosition.absolute ? this.mapPosition.y : this.mapPosition.y - this.icon.symbolCenter.y )
-      --    };
-      --  } else {
-      --    this.position = { "x": value.x, "y": value.y };
-      --  } 
-      --}
-    value: { "x": 0, "y": 0 }
-
+  x: 0
+  y: 0
   width: 0
   height: 0
   rotation: 0
-  transformsEnabled: "all"
+  supportMouseAndTouchEvents: true
+  index: 8
+  zIndex: 8
   affiliation:
-    set: |
-      if ( this.affiliation !== value ) {
-        this.affiliation = value;
-        this.affiliationChanged( value ); 
-      } 
-
   fullName: 
   tagName:
   description:
   symbolID:
-    set: |
-      if ( this.symbolID !== value ) {
-        this.symbolID = value;
-        this.symbolIDChanged( value ); 
-      } 
-      
   symbolType: 
   controlPts: []
-
-methods:
-
-  render:
-
-  handleRender:
+  visible: 'inherit'
+  listening: 'inherit'
+  draggable: true
+  dragDistance: 4
+  dragToTop: true
+  disableScaleAndRotationForSpeed: false
 
 events:
-
-  imageRendered:
-
-  affiliationChanged:
-
-  symbolIDChanged:
-
-scripts:
-- source: "missionGfx.js"

@@ -132,7 +132,7 @@ define( [ "module",
 
                 } else if ( isMissionGfxNode( protos ) ) {
 
-                    this.state.nodes[ childID ] = node = this.state.createNode( "unit", nodeID, childID, childExtendsID, childImplementsIDs,
+                    this.state.nodes[ childID ] = node = this.state.createNode( "missionGfx", nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback );
                     
                     // additional members for the missionGfx components
@@ -144,6 +144,10 @@ define( [ "module",
                     node.fullName = undefined;
                     node.affiliation = undefined;
                     node.controlPts = [];
+                    //node.x = 0;
+                    //node.y = 0;
+                    //node.width = 100;
+                    //node.height = 100;
 
                 } else if ( isModifierNode( protos ) ) {
 
@@ -437,11 +441,16 @@ define( [ "module",
                             }
                             break;
 
+                        case "x":
+                        case "y":
                         case "width":
                         case "height":
                         case "rotation":
                         case "controlPts":
-                            renderImage = true;
+                            if ( node.nodeType === "missionGfx" ) {
+                                node[ propertyName ] = propertyValue;
+                                renderImage = true;
+                            }
                             break;
 
                     }
@@ -644,14 +653,19 @@ define( [ "module",
                 var msa = renderer.utilities.MilStdAttributes;
                 var rs = renderer.utilities.RendererSettings;
                 var symUtil = renderer.utilities.SymbolUtilities;
+                var symbolCode = symbolID;
                 
                 // Set affiliation in symbol id
-                symbolCode = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
+                if ( !!node.affiliation ) {
+                    symbolCode = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
+                }
                 
-                var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, controlPts, node.width, node.height, null, node.modifiers, format);
+                var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, node.controlPts, node.width, node.height, null, node.modifiers, format);
 
                 if ( !!img && !!img.image ) {
-                    value = node.image = img.image.toDataURL();
+                    value = img.image.toDataURL();
+                    node.image( value );
+                    node.draw();
                 }      
 
             }
