@@ -1,20 +1,13 @@
 --- 
 extends: http://vwf.example.com/kinetic/image.vwf
 properties:
-  x: 0
-  y: 0
-  width: 0
-  height: 0
-  rotation: 0
   supportMouseAndTouchEvents: true
-  index: 8
-  zIndex: 8
   affiliation:
-  fullName: 
+  fullName:
   tagName:
   description:
   symbolID:
-  symbolType: 
+  symbolType:
   controlPts: []
   visible: 'inherit'
   listening: 'inherit'
@@ -23,4 +16,12 @@ properties:
   dragToTop: true
   disableScaleAndRotationForSpeed: false
 
+  image:
+    set: |
+      if ( value !== undefined ) {
+        this.image = value;
+        this.imageChanged( value );
+      }
+
 events:
+  imageChanged:

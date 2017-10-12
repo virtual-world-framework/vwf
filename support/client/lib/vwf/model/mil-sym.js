@@ -60,13 +60,13 @@ define( [ "module",
 
             // turns on logger debugger console messages 
             this.debug = {
-                "creation": false,
-                "initializing": false,
+                "creation": true,
+                "initializing": true,
                 "parenting": false,
                 "deleting": false,
-                "properties": false,
-                "setting": false,
-                "getting": false,
+                "properties": true,
+                "setting": true,
+                "getting": true,
                 "prototypes": false
             };
 
@@ -144,10 +144,15 @@ define( [ "module",
                     node.fullName = undefined;
                     node.affiliation = undefined;
                     node.controlPts = [];
-                    //node.x = 0;
-                    //node.y = 0;
-                    //node.width = 100;
-                    //node.height = 100;
+                    node.x = 0;
+                    node.y = 0;
+                    node.width = 100;
+                    node.height = 100;
+                    node.visible = 'inherit';
+                    node.listening = 'inherit';
+                    node.supportMouseAndTouchEvents = true;
+                    node.draggable = true;
+                    node.dragDistance = 4;
 
                 } else if ( isModifierNode( protos ) ) {
 
@@ -445,9 +450,11 @@ define( [ "module",
                         case "y":
                         case "width":
                         case "height":
+                        case "dimensions":
+                        case "position":
                         case "rotation":
                         case "controlPts":
-                            if ( node.nodeType === "missionGfx" ) {
+                            if ( node.nodeType === "missionGfx" && !!propertyValue ) {
                                 node[ propertyName ] = propertyValue;
                                 renderImage = true;
                             }
@@ -512,7 +519,15 @@ define( [ "module",
                     case "mobility":
                     case "taskForce":
                     case "installation":
+                    case "x":
+                    case "y":
+                    case "width":
+                    case "height":
+                    case "controlPts":
+                    case "visible":
+                    case "listening":
                         value = node[ propertyName ];
+                        console.log( "Got property " + propertyName + " = " + value );
                         break;
                 }
 
@@ -637,35 +652,37 @@ define( [ "module",
             modelDriver.kernel.callMethod( node.ID, "handleRender", [ node.image, imgSize, centerPt, symbolBounds ] );
 
         } else if ( node !== undefined && node.nodeType === "missionGfx" && node.symbolID !== undefined ) {
-            if ( !!node.width && !!node.height && (!!node.controlPts && ( node.controlPts.length > 0 ) ) ) {
+            if ( !!node.symbolID && ( node.x !== undefined ) && ( node.y !== undefined ) && ( node.width !== undefined ) && ( node.height !== undefined ) && (!!node.controlPts && ( node.controlPts.length > 0 ) ) ) {
                 // Convert control points from Konva style array to mil-sym string
-                var controlPts;
-                if ( !!node.symbolType && node.symbolType === "DefinedMissionGraphic") {
-                   controlPts = getMilSymControlPts( computeRelativeControlPts( node.controlPts, node.width, node.height ) );
-                } else {
-                   controlPts = getMilSymControlPts( node.controlPts ); 
-                }
+                //var controlPts;
+                //if ( !!node.symbolType && node.symbolType === "DefinedMissionGraphic") {
+                //   controlPts = getMilSymControlPts( computeRelativeControlPts( node.controlPts, node.width, node.height ) );
+                //} else {
+                var controlPts = getMilSymControlPts( node.controlPts ); 
+                //}
                 var rendererMP = sec.web.renderer.SECWebRenderer;
                 var scale = 100.0;
-                var updatedUnit = $.extend( true, {}, unit );
-                var appID = self.kernel.application();
+                //var updatedUnit = $.extend( true, {}, unit );
+                //var appID = self.kernel.application();
                 var renderer = armyc2.c2sd.renderer;
                 var msa = renderer.utilities.MilStdAttributes;
                 var rs = renderer.utilities.RendererSettings;
                 var symUtil = renderer.utilities.SymbolUtilities;
-                var symbolCode = symbolID;
+                var symbolCode = node.symbolID;
+                var format = 3; // GeoCanvas
                 
                 // Set affiliation in symbol id
                 if ( !!node.affiliation ) {
                     symbolCode = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
                 }
                 
-                var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, node.controlPts, node.width, node.height, null, node.modifiers, format);
+                var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, controlPts, node.width, node.height, null, node.modifiers, format);
 
                 if ( !!img && !!img.image ) {
                     value = img.image.toDataURL();
-                    node.image( value );
-                    node.draw();
+                    console.info( "Rendered mission graphic: " + value );
+                    node.image = value;
+                    //node.draw();
                 }      
 
             }
@@ -779,7 +796,7 @@ define( [ "module",
         var milSymControlPts = "";
         // konva-style is composed of an array where even numbered elements are x and odd are y
         // mil-sym style is a string where pairs of x and y are separated by spaces
-        for ( var i = 0; i < konvaControlPts.length; i+2 ) {
+        for ( var i = 0; i < konvaControlPts.length; i=i+2 ) {
             milSymControlPts = milSymControlPts + konvaControlPts[i] + "," + konvaControlPts[i+1];
             if ( i < konvaControlPts.length-2 ) {
                 milSymControlPts = milSymControlPts + " ";
