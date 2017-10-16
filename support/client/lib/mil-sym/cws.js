@@ -5126,7 +5126,7 @@ define( function(){
                   "tag": "FIX",
                   "symbolType": "DefinedMissionGraphic",
                   "defaultControlPts": [ 100,0, 0,0, 100,100 ],
-                  "defaultDimensions": [100, 100]
+                  "defaultDimensions": [100, 20]
             }
        },
 
