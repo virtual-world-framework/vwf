@@ -137,6 +137,7 @@ define( [ "module",
                     
                     // additional members for the missionGfx components
                     node.symbolID = undefined;
+                    node.symbolType = undefined;
                     node.modifiers = {};
                     node.description = undefined;
                     node.tagName = undefined;
@@ -448,6 +449,8 @@ define( [ "module",
                         case "height":
                         case "rotation":
                         case "controlPts":
+                        case "symbolType":
+                        case "":
                             if ( node.nodeType === "missionGfx" && !!propertyValue ) {
                                 node[ propertyName ] = propertyValue;
                                 renderImage = basicPropertiesMet( node );
@@ -519,7 +522,6 @@ define( [ "module",
                     case "image":
                         if ( node.nodeType === "unit" ) {
                             value = node[ propertyName ];
-                            console.log( "Got property " + propertyName + " = " + value );
                         }
                         break;
 
@@ -540,8 +542,8 @@ define( [ "module",
                     case "controlPts":
                     case "visible":
                     case "listening":
+                    case "symbolType":
                         value = node[ propertyName ];
-                        console.log( "Got property " + propertyName + " = " + value );
                         break;
                 }
 
@@ -700,7 +702,7 @@ define( [ "module",
                 value = img.image.toDataURL();
             }
         }
-        
+
         return value;
     }
 
