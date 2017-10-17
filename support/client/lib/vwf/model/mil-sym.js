@@ -693,7 +693,7 @@ define( [ "module",
                 symbolCode = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
             }
             
-            var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, controlPts, node.width, node.height, null, node.modifiers, format);
+            var img = rendererMP.RenderSymbol2D(node.ID,node.fullName,node.description, symbolCode, controlPts, node.width, node.height, null, node.modifiers, format);
 
             if ( !!img && !!img.image ) {
                 value = img.image.toDataURL();
