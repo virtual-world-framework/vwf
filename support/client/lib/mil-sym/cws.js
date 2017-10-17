@@ -5130,6 +5130,23 @@ define( function(){
             }
        },
 
+       "obstacleBypass": {
+            "TACGRP.MOBSU.OBSTBP.DFTY.DFT": {
+                  "symbolID": "G*MPBDD---****X",
+                  "tag": "BYPASS DIFFICULT",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,100, 100,0, 0,50  ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.MOBSU.OBSTBP.DFTY.IMP": {
+                  "symbolID": "G*MPBDI---****X",
+                  "tag": "BYPASS IMPOSSIBLE",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,100, 100,0, 0,50  ],
+                  "defaultDimensions": [100, 100]
+            }
+       },
+
        "maneuvers": {
             "TACGRP.C2GM.OFF.ARS.SFP": {
                   "symbolID": "G*GPOAS---****X",
