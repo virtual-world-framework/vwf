@@ -406,8 +406,8 @@
                 { library: "vwf/view/sound", active: false },
                 { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
-                { library: "vwf/view/kineticjs", active: false },
                 { library: "vwf/view/mil-sym", active: false },
+                { library: "vwf/view/kineticjs", active: false },
                 { library: "vwf/view/audio", active: false },
                 { library: "vwf/view/mocha",
                     linkedLibraries: [
@@ -433,8 +433,8 @@
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
                 { library: "vwf/model/blockly/JS-Interpreter/interpreter.js", active: false },
-                { library: "vwf/model/kinetic/konva.min", active: false },                
                 { library: "vwf/model/mil-sym/sm-bc.min", active: false }, 
+                { library: "vwf/model/kinetic/konva.min", active: false },                
                 { library: "vwf/model/buzz/buzz.min", active: false }, 
                 { library: "vwf/model/jPlayer.2.7.1/jquery.jplayer.min", active: false },
                 { library: "vwf/admin", active: true },
@@ -452,8 +452,8 @@
                     { library: "vwf/model/blockly", active: false },
                     { library: "vwf/model/graphtool", active: false },
                     { library: "vwf/model/sound", active: false },
-                    { library: "vwf/model/kineticjs", active: false },
                     { library: "vwf/model/mil-sym", active: false },
+                    { library: "vwf/model/kineticjs", active: false },
                     { library: "vwf/model/heightmap", active: false },
                     { library: "vwf/model/buzz", active: false },
                     { library: "vwf/model/jPlayer", active: false },
@@ -470,8 +470,8 @@
                     { library: "vwf/view/blockly", active: false },
                     { library: "vwf/view/sound", active: false },
                     { library: "vwf/view/touch", active: false },
-                    { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/mil-sym", active: false },
+                    { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/audio", active: false },
                     { library: "vwf/view/webrtc", active: false},
                     { library: "vwf/view/mocha", active: false }
@@ -3392,7 +3392,6 @@ if ( ! childComponent.source ) {
                     // Ignore the result if reentry is disabled and the driver attempted to call
                     // back into the kernel. Kernel reentry is disabled during replication to 
                     // prevent coloring from accessor scripts.
-
                     if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
                         value = undefined;
                     }

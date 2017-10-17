@@ -5032,6 +5032,144 @@ define( function(){
                 "tag": "EMS"     
             }
        },
+
+       "tacticalTasks": {
+            "TACGRP.TSK.CNT": {
+                  "symbolID": "G*TPJ-----****X",
+                  "tag": "CONTAIN",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 50,100, 50,0, 100,50 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.BRH": {
+                  "symbolID": "G*TPH-----****X",
+                  "tag": "BREACH",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,100, 100,0, 0,50  ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.BYS": {
+                  "symbolID": "G*TPY-----****X",
+                  "tag": "BYPASS",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,100, 100,0, 0,50  ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.CNZ": {
+                  "symbolID": "G*TPC-----****X",
+                  "tag": "CANALIZE",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,100, 100,0, 0,50 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.CLR": {
+                  "symbolID": "G*TPX-----****X",
+                  "tag": "CLEAR",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,100, 100,0, 0,50 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.PNE": {
+                  "symbolID": "G*TPP-----****X",
+                  "tag": "PENETRATE",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,100, 100,0, 0,50 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.ISL": {
+                  "symbolID": "G*TPE-----****X",
+                  "tag": "ISOLATE",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 50,50, 0,50, 0,100, 100,100 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.OCC": {
+                  "symbolID": "G*TPO-----****X",
+                  "tag": "OCCUPY",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 50,50, 0,50, 0,100, 100,100 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.SCE": {
+                  "symbolID": "G*TPS-----****X",
+                  "tag": "SECURE",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 50,50, 0,50, 0,100, 100,100 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.RTN": {
+                  "symbolID": "G*TPQ-----****X",
+                  "tag": "RETAIN",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 50,50, 0,50, 0,100, 100,100 ],
+                  "defaultDimensions": [100, 100]
+            }
+       },
+
+       "obstacleEffects": {
+            "TACGRP.MOBSU.OBST.OBSEFT.BLK": {
+                  "symbolID": "G*TPB-----****X",
+                  "tag": "BLOCK",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,100, 100,0, 0,50 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.MOBSU.OBST.OBSEFT.DRT": {
+                  "symbolID": "G*MPOED---****X",
+                  "tag": "DISRUPT",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,0, 0,100, 100,0 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.MOBSU.OBST.OBSEFT.FIX": {
+                  "symbolID": "G*MPOEF---****X",
+                  "tag": "FIX",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 100,0, 0,0, 100,100 ],
+                  "defaultDimensions": [100, 20]
+            }
+       },
+
+       "obstacleBypass": {
+            "TACGRP.MOBSU.OBSTBP.DFTY.DFT": {
+                  "symbolID": "G*MPBDD---****X",
+                  "tag": "BYPASS DIFFICULT",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,100, 100,0, 0,50  ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.MOBSU.OBSTBP.DFTY.IMP": {
+                  "symbolID": "G*MPBDI---****X",
+                  "tag": "BYPASS IMPOSSIBLE",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,100, 100,0, 0,50  ],
+                  "defaultDimensions": [100, 100]
+            }
+       },
+
+       "maneuvers": {
+            "TACGRP.C2GM.OFF.ARS.SFP": {
+                  "symbolID": "G*GPOAS---****X",
+                  "tag": "SUPPORT BY FIRE POSITION",
+                  "symbolType": "DefinedMissionGraphic",                  
+                  "defaultControlPts": [ 0,80, 0,20, 100,100, 100,0 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.C2GM.SPL.LNE.AMB": {
+                  "symbolID": "G*GPSLA---****X",
+                  "tag": "AMBUSH",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,50, 0,100, 0,0 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.C2GM.OFF.ARS.AFP": {
+                  "symbolID": "G*GPOAF---****X",
+                  "tag": "ATTACK BY FIRE POSITION",
+                  "symbolType": "DefinedMissionGraphic", 
+                  "defaultControlPts": [ 100,50, 0,80, 0,20 ],
+                  "defaultDimensions": [100, 100]
+            }
+       },
         
         "aliasModifiers": { 
             "echelon":             { modifier:  "B_ECHELON",
@@ -5098,6 +5236,12 @@ define( function(){
                                       type:      "MilStdAttributes",
                                       valueType: "Number" },
             "fillColor":            { modifier:  "FillColor",                            
+                                      type:      "MilStdAttributes",
+                                      valueType: "Text" },
+            "lineColor":            { modifier:  "LineColor",                            
+                                      type:      "MilStdAttributes",
+                                      valueType: "Text" },
+            "lineWidth":            { modifier:  "LineWidth",                            
                                       type:      "MilStdAttributes",
                                       valueType: "Text" },
             "icon":                 { modifier:  "Icon",                            

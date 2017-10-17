@@ -101,7 +101,7 @@ define( [ "module",
                     source: childSource, 
                     type: childType,
                     uri: childURI,
-                    name: childName,
+                    name: childName
                 };
                 return;                
             }
@@ -129,6 +129,25 @@ define( [ "module",
                     node.mobility = undefined;
                     node.taskForce = undefined;
                     node.installation = undefined;
+
+                } else if ( isMissionGfxNode( protos ) ) {
+
+                    this.state.nodes[ childID ] = node = this.state.createNode( "missionGfx", nodeID, childID, childExtendsID, childImplementsIDs,
+                                childSource, childType, childIndex, childName, callback );
+                    
+                    // additional members for the missionGfx components
+                    node.symbolID = undefined;
+                    node.symbolType = undefined;
+                    node.modifiers = {};
+                    node.description = undefined;
+                    node.tagName = undefined;
+                    node.fullName = undefined;
+                    node.affiliation = undefined;
+                    node.controlPts = [];
+                    node.x = undefined;
+                    node.y = undefined;
+                    node.width = undefined;
+                    node.height = undefined;
 
                 } else if ( isModifierNode( protos ) ) {
 
@@ -211,7 +230,7 @@ define( [ "module",
             var renderImage = false;
 
             if ( node !== undefined && ( utility.validObject( propertyValue ) ) ) {
-                if ( node.nodeType === "unit" ) {
+                if ( ( node.nodeType === "unit" ) || ( node.nodeType === "missionGfx" ) ) {
                     
                     switch ( propertyName ) {
 
@@ -239,7 +258,9 @@ define( [ "module",
                             break;
 
                         case "image":
-                            value = node.image = propertyValue;
+                            if ( node.nodeType === "unit" ) {
+                                value = node.image = propertyValue;
+                            }
                             break;
 
                         case "description":
@@ -422,6 +443,33 @@ define( [ "module",
                             }
                             break;
 
+                        case "x":
+                        case "y":
+                        case "width":
+                        case "height":
+                        case "rotation":
+                        case "controlPts":
+                        case "symbolType":
+                            if ( node.nodeType === "missionGfx" && !!propertyValue ) {
+                                node[ propertyName ] = propertyValue;
+                                renderImage = basicPropertiesMet( node );
+                            }
+                            break;
+
+                        case "attributes":
+                            if ( node.nodeType === "missionGfx" && !!propertyValue ) {
+                                var attrs = propertyValue;
+                                var attrsChanged = ( attrs.width !== node.width) || ( attrs.height !== node.height);
+                                if ( attrsChanged ) {
+                                    node.width = attrs.width;
+                                    node.height= attrs.height;
+                                    attrs.image = renderMsnGfx( node );
+                                    modelDriver.kernel.setProperty( node.ID, propertyName, attrs );
+                                    //renderImage = basicPropertiesMet( node );
+                                    //value = propertyValue;
+                                }
+                            }
+                            break;
                     }
 
                 } else if ( node.nodeType === "modifier" ) {
@@ -466,12 +514,17 @@ define( [ "module",
             //this driver has no representation of this node, so there is nothing to do.
             if( node === undefined ) return value;
 
-            if ( node.nodeType === "unit" ) {
+            if ( ( node.nodeType === "unit" ) || ( node.nodeType === "missionGfx" ) ) {
                 
                 switch ( propertyName ) {
 
-                    case "symbolID":
                     case "image":
+                        if ( node.nodeType === "unit" ) {
+                            value = node[ propertyName ];
+                        }
+                        break;
+
+                    case "symbolID":
                     case "description":
                     case "fullName":
                     case "tagName":
@@ -481,6 +534,12 @@ define( [ "module",
                     case "mobility":
                     case "taskForce":
                     case "installation":
+                    case "x":
+                    case "y":
+                    case "width":
+                    case "height":
+                    case "controlPts":
+                    case "symbolType":
                         value = node[ propertyName ];
                         break;
                 }
@@ -559,6 +618,16 @@ define( [ "module",
        return found;
     } 
 
+    function isMissionGfxNode( prototypes ) {
+        var found = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                found = ( prototypes[i] == "http://vwf.example.com/mil-sym/missionGfx.vwf" );
+            }
+        }
+       return found;
+    } 
+
     function isModifierNode( prototypes ) {
         var found = false;
         if ( prototypes ) {
@@ -568,8 +637,6 @@ define( [ "module",
         }
        return found;
     } 
-
-
 
     function render( node ) {
 
@@ -597,9 +664,43 @@ define( [ "module",
             
             modelDriver.kernel.callMethod( node.ID, "handleRender", [ node.image, imgSize, centerPt, symbolBounds ] );
 
-        } 
+        } else if ( node !== undefined && node.nodeType === "missionGfx" && node.symbolID !== undefined ) {
+            if ( value = renderMsnGfx( node ) ) {
+                modelDriver.kernel.setProperty( node.ID, "image", value );
+            }
+        }
 
         return value;       
+    }
+
+    function renderMsnGfx( node ) {
+        var value = undefined;
+
+        if ( basicPropertiesMet( node ) ) {
+            // Convert control points from Konva style array to mil-sym string
+            var controlPts = getMilSymControlPts( node.controlPts ); 
+            var rendererMP = sec.web.renderer.SECWebRenderer;
+            var scale = 100.0;
+            var renderer = armyc2.c2sd.renderer;
+            var msa = renderer.utilities.MilStdAttributes;
+            var rs = renderer.utilities.RendererSettings;
+            var symUtil = renderer.utilities.SymbolUtilities;
+            var symbolCode = node.symbolID;
+            var format = 3; // GeoCanvas
+            
+            // Set affiliation in symbol id
+            if ( !!node.affiliation ) {
+                symbolCode = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
+            }
+            
+            var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, controlPts, node.width, node.height, null, node.modifiers, format);
+
+            if ( !!img && !!img.image ) {
+                value = img.image.toDataURL();
+            }
+        }
+
+        return value;
     }
 
     function setModifier( unit, modifierAlias, modifierValue ) {
@@ -686,5 +787,60 @@ define( [ "module",
         return value;
     }
 
+    function computeRelativeControlPts( controlPts, width, height ) {
+        var newControlPts = [];
+
+        if ( ( !!width && !!height ) && ( width > 0 ) && ( height > 0 ) ) {
+            // Some control points are computed relative to the width and height of the containing object
+            // Compute and return the adjusted control points in this instance
+            for ( var i = 0; i < controlPts.length; i+2 ) {
+                var x = konvaControlPts[i] * width;
+                var y = konvaControlPts[i+1] * height;
+                newControlPts.push( x );
+                newControlPts.push( y );
+            }
+        }
+
+        return newControlPts;
+    }
+
+    function getMilSymControlPts( konvaControlPts ) {
+        var milSymControlPts = "";
+        // konva-style is composed of an array where even numbered elements are x and odd are y
+        // mil-sym style is a string where pairs of x and y are separated by spaces
+        for ( var i = 0; i < konvaControlPts.length; i=i+2 ) {
+            milSymControlPts = milSymControlPts + konvaControlPts[i] + "," + konvaControlPts[i+1];
+            if ( i < konvaControlPts.length-2 ) {
+                milSymControlPts = milSymControlPts + " ";
+            }
+        }
+
+        return milSymControlPts;
+    }
+
+    function basicPropertiesMet( node ) {
+        var basicsMet = false;
+
+        if ( node !== undefined ) {
+            switch (node.nodeType) {
+                case "unit":
+                    break;
+                case "missionGfx":
+                    basicsMet = ( 
+                        ( node.symbolID !== undefined ) && 
+                        ( node.x !== undefined ) && 
+                        ( node.y !== undefined ) && 
+                        ( node.width !== undefined ) && 
+                        ( node.height !== undefined ) && 
+                        ( node.width > 0 ) && 
+                        ( node.height > 0 ) &&
+                        (!!node.controlPts && ( node.controlPts.length > 0 ) ) 
+                        );
+                        break;
+            }
+        }
+
+        return basicsMet;
+    }
     
 } );

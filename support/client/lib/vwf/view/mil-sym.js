@@ -19,6 +19,10 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
     var self;
     var eventHandlers = {};
     var _rendererReady = false;
+    var _graphicFormats = { "KML": 0,
+                            "GeoJSON": 2,
+                            "GeoCanvas": 3,
+                            "GeoSVG": 6};
     
     return view.load( module, {
 
@@ -128,6 +132,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         renderUnitSymbol: renderUnitSymbol,
         rendererReady: rendererReady,
         getUpdatedUnitSymbolID: getUpdatedUnitSymbolID,
+        getMissionGraphicDefinition: getMissionGraphicDefinition,
 
         on: function( eventName, callback ) {
             eventHandlers[ eventName ] = callback;
@@ -343,6 +348,53 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         } else {
             return "";
         }
+    }
+
+    function renderMissionGraphic( symbolID, affiliation, modifierList, controlPoints, bounds, msnGfx, format ) {
+        
+        if ( !cws ) {
+            self.logger.errorx( "cws is undefined - unable to render unit icon" );
+            return;
+        }
+
+        var rendererMP = sec.web.renderer.SECWebRenderer;
+        var scale = 100.0;
+        var updatedUnit = $.extend( true, {}, unit );
+        var appID = self.kernel.application();
+        var renderer = armyc2.c2sd.renderer;
+        var msa = renderer.utilities.MilStdAttributes;
+        var rs = renderer.utilities.RendererSettings;
+        var symUtil = renderer.utilities.SymbolUtilities;
+        
+        // Set affiliation in symbol id
+        symbolCode = cws.addAffiliationToSymbolId( symbolID, affiliation );
+        
+        var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, controlPoints, bounds.width, bounds.height, null, modifiers, format);
+
+        if ( !!img && !!img.image ) {  
+            return img.image;
+        }      
+    
+        return;
+    }
+
+    function getMissionGraphicDefinition( category, fullName ) {
+        var missionGraphicDef = {};
+
+        if ( !cws ) {
+            self.logger.errorx( "cws is undefined - unable to retrieve object" );
+            return;
+        }
+
+        if ( !!category && !!cws[category] ) {
+            if ( !!fullName && !!cws[category][fullName] ) {
+                missionGraphicDef = cws[category][fullName];
+            } else {
+                missionGraphicDef = cws[category];
+            }
+        }
+
+        return missionGraphicDef;
     }
 
     function fireViewEvent( eventName, parameters ) {
