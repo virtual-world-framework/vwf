@@ -450,7 +450,6 @@ define( [ "module",
                         case "rotation":
                         case "controlPts":
                         case "symbolType":
-                        case "":
                             if ( node.nodeType === "missionGfx" && !!propertyValue ) {
                                 node[ propertyName ] = propertyValue;
                                 renderImage = basicPropertiesMet( node );
@@ -540,8 +539,6 @@ define( [ "module",
                     case "width":
                     case "height":
                     case "controlPts":
-                    case "visible":
-                    case "listening":
                     case "symbolType":
                         value = node[ propertyName ];
                         break;
