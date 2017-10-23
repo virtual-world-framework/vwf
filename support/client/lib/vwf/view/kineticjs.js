@@ -208,6 +208,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
         } );
 
         node.kineticObj.on( "mouseenter", function( evt ) {
+            // Correct `mouseDown` if the button changed outside any node with an active "on mouseup"
+            mouseDown = !!( evt.evt.buttons & 1 );
+
             var eData = processEvent( evt, node, false );
 
             if ( mouseDown || ( evt.evt.buttons ) ) {
