@@ -5103,6 +5103,20 @@ define( function(){
                   "symbolType": "DefinedMissionGraphic", 
                   "defaultControlPts": [ 50,50, 0,50, 0,100, 100,100 ],
                   "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.FLWASS.FLWASS": {
+                  "symbolID": "G*TPA-----****X",
+                  "tag": "FOLLOW AND ASSUME",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,100, 100,0, 0,0 ],
+                  "defaultDimensions": [100, 20]
+            },
+            "TACGRP.TSK.FLWASS.FLWSUP": {
+                  "symbolID": "G*TPAS----****X",
+                  "tag": "FOLLOW AND SUPPORT",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,100, 100,0, 0,0 ],
+                  "defaultDimensions": [100, 20]
             }
        },
 
