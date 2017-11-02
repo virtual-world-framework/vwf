@@ -1,7 +1,7 @@
 "use strict";
 
-define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ], 
-    function( module, view, $, utility, color ) {
+define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "vwf/utility/vertexSimplify/simplify" ], 
+    function( module, view, $, utility, color, simplifyJs ) {
 
     var viewDriver;
     var stageContainer;
@@ -1260,6 +1260,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         default:
                             break;
                     }
+                    if ( ( userState.drawing_mode === "freeDraw" ) || ( userState.drawing_mode === "polygon" ) ) {
+                        // Optimize the number of vertices
+                        if ( simplifyJs ) {
+                            drawingObject.points( simplifyJs.simplifyKonvaPts( drawingObject.points() ) );
+                        }
+                    }
+
                     drawAndPropagate = true;
                     break;
 
