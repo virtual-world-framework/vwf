@@ -5184,6 +5184,127 @@ define( function(){
                   "defaultDimensions": [100, 100]
             }
        },
+
+       "lines": {
+            "TACGRP.C2GM.GNL.LNE.PHELNE": {
+                  "symbolID": "G*GPGLP---****X",
+                  "tag": "PHASE LINE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.OFF.LNE.PLD": {
+                  "symbolID": "G*GPOLP---****X",
+                  "tag": "PROBABLE LINE OF DEPLOYMENT",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.OFF.LNE.LD": {
+                  "symbolID": "G*GPOLT---****X",
+                  "tag": "LINE OF DEPARTURE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.OFF.LNE.LMTADV": {
+                  "symbolID": "G*GPOLL---****X",
+                  "tag": "LIMIT OF ADVANCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.OFF.LNE.LDLC": {
+                  "symbolID": "G*GPOLC---****X",
+                  "tag": "LINE OF DEPARTURE/LINE OF CONTACT",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.GNL.LNE.LOC": {
+                  "symbolID": "G*GPGLC---****X",
+                  "tag": "LINE OF CONTACT",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.GNL.LNE.FLOT": {
+                  "symbolID": "G*GPGLF---****X",
+                  "tag": "FORWARD LINE OF OWN TROOPS",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.DEF.LNE.FEBA": {
+                  "symbolID": "G*GPDLF---****X",
+                  "tag": "FORWARD EDGE OF BATTLE AREA",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.OFF.LNE.FCL": {
+                  "symbolID": "G*GPOLF---****X",
+                  "tag": "FINAL COORDINATION LINE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.FSUPP.LNE.C2LNE": {
+                  "symbolID": "G*FPLCF---****X",
+                  "tag": "FIRE SUPPORT COORDINATION LINE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.FSUPP.LNE.C2LNE.CFL": {
+                  "symbolID": "G*FPLCC---****X",
+                  "tag": "COORDINATED FIRE LINE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.FSUPP.LNE.C2LNE.NFL": {
+                  "symbolID": "G*FPLCN---****X",
+                  "tag": "NO-FIRE LINE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.FSUPP.LNE.C2LNE.RFL": {
+                  "symbolID": "G*FPLCR---****X",
+                  "tag": "RESTRICTIVE FIRE LINE",
+                  "symbolType": "MultiSegmentLine"
+            }
+       },
+
+       "wire-fence": {
+            "TACGRP.MOBSU.OBST.WREOBS.USP": {
+                  "symbolID": "G*MPOWU---****X",
+                  "tag": "WIRE OBSTACLE UNSPECIFIED",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.SNGFN": {
+                  "symbolID": "G*MPOWS---****X",
+                  "tag": "SINGLE FENCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.DBLFN": {
+                  "symbolID": "G*MPOWD---****X",
+                  "tag": "DOUBLE FENCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.DAFNC": {
+                  "symbolID": "G*MPOWA---****X",
+                  "tag": "DOUBLE APRON FENCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.LWFN": {
+                  "symbolID": "G*MPOWL---****X",
+                  "tag": "LOW WIRE FENCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.HWFN": {
+                  "symbolID": "G*MPOWH---****X",
+                  "tag": "HIGH WIRE FENCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.CCTA.S": {
+                  "symbolID": "G*MPOWCS--****X",
+                  "tag": "SINGLE CONCERTINA",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.CCTA.DBLSTD": {
+                  "symbolID": "G*MPOWCD--****X",
+                  "tag": "DOUBLE STRAND CONCERTINA",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.CCTA.TRISTD": {
+                  "symbolID": "G*MPOWCT--****X",
+                  "tag": "TRIPLE STRAND CONCERTINA",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.AVN.OHWIRE": {
+                  "symbolID": "G*MPOHO---****X",
+                  "tag": "OVERHEAD WIRE",
+                  "symbolType": "MultiSegmentLine"
+            }
+       },
         
         "aliasModifiers": { 
             "echelon":             { modifier:  "B_ECHELON",
