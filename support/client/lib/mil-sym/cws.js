@@ -5109,14 +5109,16 @@ define( function(){
                   "tag": "FOLLOW AND ASSUME",
                   "symbolType": "DefinedMissionGraphic",
                   "defaultControlPts": [ 0,100, 100,0, 0,0 ],
-                  "defaultDimensions": [100, 20]
+                  "defaultDimensions": [100, 20],
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.TSK.FLWASS.FLWSUP": {
                   "symbolID": "G*TPAS----****X",
                   "tag": "FOLLOW AND SUPPORT",
                   "symbolType": "DefinedMissionGraphic",
                   "defaultControlPts": [ 0,100, 100,0, 0,0 ],
-                  "defaultDimensions": [100, 20]
+                  "defaultDimensions": [100, 20],
+                  "validModifiers": [ "uniqueDesignation1" ]
             }
        },
 
@@ -5182,6 +5184,27 @@ define( function(){
                   "symbolType": "DefinedMissionGraphic", 
                   "defaultControlPts": [ 100,50, 0,80, 0,20 ],
                   "defaultDimensions": [100, 100]
+            },
+            "TACGRP.C2GM.OFF.LNE.DIRATK.GRD.MANATK": {
+                  "symbolID": "G*GPOLKGM-****X",
+                  "tag": "GROUND MAIN ATTACK",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 100,0, 0,0, 100,100 ],
+                  "defaultDimensions": [100, 20]
+            },
+            "TACGRP.C2GM.OFF.LNE.DIRATK.GRD.UPATK": {
+                  "symbolID": "G*GPOLKGS-****X",
+                  "tag": "GROUND SUPPORTING ATTACK",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 100,0, 0,0, 100,100 ],
+                  "defaultDimensions": [100, 20]
+            },
+            "TACGRP.C2GM.DCPN.DAFF": {
+                  "symbolID": "G*GPPF----****X",
+                  "tag": "DIRECTION OF ATTACK FOR FEINT",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 100,0, 0,0, 100,100 ],
+                  "defaultDimensions": [100, 20]
             }
        },
 
@@ -5189,27 +5212,38 @@ define( function(){
             "TACGRP.C2GM.GNL.LNE.PHELNE": {
                   "symbolID": "G*GPGLP---****X",
                   "tag": "PHASE LINE",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.GNL.LNE.LITLNE": {
+                  "symbolID": "G*GPGLL---****X",
+                  "tag": "LIGHT LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.C2GM.OFF.LNE.PLD": {
                   "symbolID": "G*GPOLP---****X",
                   "tag": "PROBABLE LINE OF DEPLOYMENT",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.C2GM.OFF.LNE.LD": {
                   "symbolID": "G*GPOLT---****X",
                   "tag": "LINE OF DEPARTURE",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.C2GM.OFF.LNE.LMTADV": {
                   "symbolID": "G*GPOLL---****X",
                   "tag": "LIMIT OF ADVANCE",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.C2GM.OFF.LNE.LDLC": {
                   "symbolID": "G*GPOLC---****X",
                   "tag": "LINE OF DEPARTURE/LINE OF CONTACT",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.C2GM.GNL.LNE.LOC": {
                   "symbolID": "G*GPGLC---****X",
@@ -5229,26 +5263,36 @@ define( function(){
             "TACGRP.C2GM.OFF.LNE.FCL": {
                   "symbolID": "G*GPOLF---****X",
                   "tag": "FINAL COORDINATION LINE",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.FSUPP.LNE.C2LNE": {
                   "symbolID": "G*FPLCF---****X",
                   "tag": "FIRE SUPPORT COORDINATION LINE",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
             },
             "TACGRP.FSUPP.LNE.C2LNE.CFL": {
                   "symbolID": "G*FPLCC---****X",
                   "tag": "COORDINATED FIRE LINE",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
             },
             "TACGRP.FSUPP.LNE.C2LNE.NFL": {
                   "symbolID": "G*FPLCN---****X",
                   "tag": "NO-FIRE LINE",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
             },
             "TACGRP.FSUPP.LNE.C2LNE.RFL": {
                   "symbolID": "G*FPLCR---****X",
                   "tag": "RESTRICTIVE FIRE LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
+            },
+            "TACGRP.MOBSU.SU.FTFDLN": {
+                  "symbolID": "G*MPSL----****X",
+                  "tag": "FORTIFIED LINE",
                   "symbolType": "MultiSegmentLine"
             }
        },
@@ -5305,8 +5349,69 @@ define( function(){
                   "symbolType": "MultiSegmentLine"
             }
        },
+
+       "obstacles": {
+            "TACGRP.MOBSU.OBST.GNL.LNE": {
+                  "symbolID": "G*MPOGL---****X",
+                  "tag": "LINEAR OBSTACLE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.ABS": {
+                  "symbolID": "G*MPOS----****X",
+                  "tag": "ABATIS",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.ATO.ATD.ATDUC": {
+                  "symbolID": "G*MPOADU--****X",
+                  "tag": "ANTITANK DITCH UNDER CONSTRUCTION",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.ATO.ATD.ATDC": {
+                  "symbolID": "G*MPOADC--****X",
+                  "tag": "ANTITANK DITCH COMPLETE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.ATO.ATD.ATDATM": {
+                  "symbolID": "G*MPOAR---****X",
+                  "tag": "ANTITANK DITCH REINFORCED WITH MINES",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.ATO.ATD.ATW": {
+                  "symbolID": "G*MPOAW---****X",
+                  "tag": "ANTITANK WALL",
+                  "symbolType": "MultiSegmentLine"
+            }
+       },
+
+       "supply": {
+            "TACGRP.CSS.LNE.SPLRUT.MSRUT": {
+                  "symbolID": "G*SPLRM---****X",
+                  "tag": "MAIN SUPPLY ROUTE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.CSS.LNE.SPLRUT.ASRUT": {
+                  "symbolID": "G*SPLRA---****X",
+                  "tag": "ALTERNATE SUPPLY ROUTE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.CSS.LNE.SPLRUT.1WYTRFF": {
+                  "symbolID": "G*SPLRO---****X",
+                  "tag": "SUPPLY ROUTE 1 WAY TRAFFIC",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.CSS.LNE.SPLRUT.ATRFF": {
+                  "symbolID": "G*SPLRT---****X",
+                  "tag": "SUPPLY ROUTE ALTERNATING TRAFFIC",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.CSS.LNE.SPLRUT.2WYTRFF": {
+                  "symbolID": "G*SPLRW---****X",
+                  "tag": "SUPPLY ROUTE 2 WAY TRAFFIC",
+                  "symbolType": "MultiSegmentLine"
+            }
+       },
         
-        "aliasModifiers": { 
+       "aliasModifiers": { 
             "echelon":             { modifier:  "B_ECHELON",
                                      type:      "ModifiersUnits",
                                      valueType: "Text" },
