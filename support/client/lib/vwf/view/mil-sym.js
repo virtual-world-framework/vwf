@@ -246,7 +246,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         }
         
         // Define the list of valid modifiers
-        updatedUnit.validModifiers = [ "pixelSize" ];
+        updatedUnit.validModifiers = [ "pixelSize", "iconcolor", "linecolor", "fillcolor" ];
         var aliases = Object.keys( cws.aliasModifiers );
         for ( var i = 0; i < aliases.length; i++ ) {
 
@@ -271,6 +271,15 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
                 switch ( prop.toLowerCase() ) {
                     case "pixelsize":
                         modifiers[ msa.PixelSize ] = modifierList[ prop ];
+                        break;
+                    case "linecolor":
+                        modifiers[ msa.LineColor ] = modifierList[ prop ];
+                        break;
+                    case "fillcolor":
+                        modifiers[ msa.FillColor ] = modifierList[ prop ];
+                        break;
+                    case "iconcolor":
+                        modifiers[ msa.IconColor ] = modifierList[ prop ];
                         break;
                     case "icon":
                         // We ignore this value - it must be "false" or we'll get no modifiers
