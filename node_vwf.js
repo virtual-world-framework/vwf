@@ -152,8 +152,8 @@ function startVWF() {
         'destroy buffer size': Infinity, // https://github.com/socketio/socket.io/issues/1592#issuecomment-45885463; should be fixed in socket.io 1.0
     } );
     socketManager.set( 'transports', [ 'websocket' ] );
-    socketManager.set( 'heartbeat timeout', 600 );
-    socketManager.set( 'close timeout', 60 );
+    socketManager.set( 'heartbeat timeout', 3600 ); // ! hour timeout
+    socketManager.set( 'close timeout', 3600 ); // 1 hour timeout
     socketManager.sockets.on( 'connection', reflector.OnConnection );
 }
 
