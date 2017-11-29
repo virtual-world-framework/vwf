@@ -465,8 +465,11 @@ define( [ "module",
                                 if ( attrsChanged ) {
                                     node.width = attrs.width;
                                     node.height= attrs.height;
-                                    attrs.image = renderMsnGfx( node );
-                                    modelDriver.kernel.setProperty( node.ID, propertyName, attrs );
+                                    var image = renderMsnGfx( node );
+                                    if ( !!image ) {
+                                        attrs.image = image.toDataURL();
+                                        modelDriver.kernel.setProperty( node.ID, propertyName, attrs );
+                                    }
                                 }
                             }
                             break;
@@ -675,7 +678,7 @@ define( [ "module",
 
         } else if ( node !== undefined && node.nodeType === "missionGfx" && node.symbolID !== undefined ) {
             if ( value = renderMsnGfx( node ) ) {
-                modelDriver.kernel.setProperty( node.ID, "image", value );
+                modelDriver.kernel.setProperty( node.ID, "image", value.toDataURL() );
             }
         }
 
@@ -705,7 +708,7 @@ define( [ "module",
             var img = rendererMP.RenderSymbol2D(node.ID,node.fullName,node.description, symbolCode, controlPts, node.width, node.height, null, node.modifiers, format);
 
             if ( !!img && !!img.image ) {
-                value = img.image.toDataURL();
+                value = img.image;
             }
         }
 
