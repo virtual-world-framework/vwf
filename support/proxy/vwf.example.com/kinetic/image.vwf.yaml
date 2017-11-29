@@ -3,9 +3,10 @@
 --- 
 extends: http://vwf.example.com/kinetic/shape.vwf
 properties:
-  image: 
+  image:
   crop:
-  scaleOnLoad: false
+  scaleOnLoad: true
+  strokeEnabled: false
 events:
   imageLoaded:
   imageLoadError:

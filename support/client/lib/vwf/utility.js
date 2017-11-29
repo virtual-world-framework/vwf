@@ -271,19 +271,22 @@ define( [ "module",
         ///   An optional URI that provides the reference for uri. If baseURI is not provided, uri
         ///   will be interpreted with respect to the document. If baseURI is relative, it will be
         ///   interpreted with respect to the document before resolving uri.
+        /// @param {Boolean|String} [relative]
+        ///   If set, express the result as relative to the document, or relative to the provided
+        ///   uri.
         /// 
         /// @returns {String}
         ///   uri as an absolute URI.
 
-        resolveURI: function( uri, baseURI ) {
+        resolveURI: function( uri, baseURI, relative ) {
 
-            var doc = document;
+            var doc = document, result;
+
+            // Create a temporary document anchored at baseURI.
 
             if ( baseURI ) {
 
-                // Create a temporary document anchored at baseURI.
-
-                var doc = document.implementation.createHTMLDocument( "resolveURI" );
+                doc = document.implementation.createHTMLDocument( "resolveURI" );
 
                 // Insert a <base/> with the reference URI: <head><base href=*baseURI*/></head>.
 
@@ -300,7 +303,29 @@ define( [ "module",
             var a = doc.createElement( "a" );
             a.href = uri;
 
-            return a.href;
+            result = a.href;
+
+            // Interpret the result with respect to the reference uri.
+
+            if ( relative ) {
+
+                var aref = doc.createElement( "a" );
+                aref.href = typeof relative === "string" ? relative : document.location.href;
+                aref.pathname = aref.pathname.replace( /[^/]*$/, "" );
+
+                var aref_ph = aref.protocol + "//" + aref.host;
+
+                if ( result.substring( 0, aref.href.length ) === aref.href ) {
+                    result = result.substring( aref.href.length );
+                } else if ( result.substring( 0, aref_ph.length ) === aref_ph ) {
+                    result = result.substring( aref_ph.length );
+                }
+
+            }
+
+            // Return the result.
+
+            return result;
         },
 
         // -- merge --------------------------------------------------------------------------------

@@ -1,0 +1,47 @@
+--- 
+extends: http://vwf.example.com/kinetic/group.vwf
+properties: 
+  supportMouseAndTouchEvents: true
+  disableScaleAndRotationForSpeed: false
+  index: 8
+  zIndex: 8
+  dragToTop: true
+  mapPosition:
+    set: |
+      if ( value !== undefined ) {
+        this.mapPosition = value;
+        this.setPositionFromMapPosition();
+      }
+    value: { "x": 0, "y": 0 }
+
+  threatShape: 
+    set: |
+      if ( this.threatShape !== value ) {
+        this.threatShape = value;
+        this.updateThreatShape();  
+      }
+    value: "circle"
+
+  showThreat:
+    set: |
+      if ( this.threatArea !== undefined ) {
+        this.threatArea.visible = value;
+      }
+    get: |
+      if ( this.threatArea !== undefined ) {
+        return this.threatArea.visible;
+      }
+      return false;
+    value: false
+
+  mirrorAll: false
+methods:
+  updateThreatShape:
+  handleRender:
+  setPositionFromMapPosition:
+  setMapPositionFromPosition:
+events:
+  threatShapeChanged:
+  unitGroupDragged:
+scripts:
+- source: "unitGroup.js"

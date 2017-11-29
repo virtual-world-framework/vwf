@@ -4,3 +4,5 @@
 extends: http://vwf.example.com/kinetic/container.vwf
 properties:
   clearBeforeDraw:
+  hitGraphEnabled: false
+  listening: false

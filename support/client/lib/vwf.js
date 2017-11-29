@@ -323,6 +323,9 @@
                     "vwf/model/blockly/msg/js/en": {
                         deps: [ "vwf/model/blockly/blockly_compressed" ]
                     },
+                    "vwf/view/mocha/mocha": {
+                        exports: "mocha",
+                    },
                 }
             };
 
@@ -367,7 +370,7 @@
                 { library: "vwf/model/object", active: true },
                 { library: "vwf/model/stage/log", active: true },
                 { library: "vwf/model/kineticjs", 
-                    linkedLibraries: [ "vwf/model/kinetic/kinetic.min" ], 
+                    linkedLibraries: [ "vwf/model/kinetic/konva.min" ], 
                     active: false 
                 },
                 { library: "vwf/model/mil-sym", 
@@ -403,9 +406,16 @@
                 { library: "vwf/view/sound", active: false },
                 { library: "vwf/view/touch", active: false },
                 { library: "vwf/view/cesium", active: false },
-                { library: "vwf/view/kineticjs", active: false },
                 { library: "vwf/view/mil-sym", active: false },
+                { library: "vwf/view/kineticjs", active: false },
                 { library: "vwf/view/audio", active: false },
+                { library: "vwf/view/mocha",
+                    linkedLibraries: [
+                        "vwf/view/mocha/mocha",
+                        "vwf/view/chai/chai"
+                    ],
+                    active: false
+                },
                 { library: "vwf/kernel/utility", active: true },
                 { library: "vwf/utility", active: true },
                 { library: "vwf/model/glge/glge-compiled", active: false },
@@ -423,11 +433,13 @@
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
                 { library: "vwf/model/blockly/JS-Interpreter/interpreter.js", active: false },
-                { library: "vwf/model/kinetic/kinetic.min", active: false },                
                 { library: "vwf/model/mil-sym/sm-bc.min", active: false }, 
+                { library: "vwf/model/kinetic/konva.min", active: false },                
                 { library: "vwf/model/buzz/buzz.min", active: false }, 
                 { library: "vwf/model/jPlayer.2.7.1/jquery.jplayer.min", active: false },
-                { library: "vwf/admin", active: true }
+                { library: "vwf/admin", active: true },
+                { library: "vwf/view/mocha/mocha", active:false },
+                { library: "vwf/view/chai/chai", active:false }
             ];
 
             var initializers = {
@@ -440,8 +452,8 @@
                     { library: "vwf/model/blockly", active: false },
                     { library: "vwf/model/graphtool", active: false },
                     { library: "vwf/model/sound", active: false },
-                    { library: "vwf/model/kineticjs", active: false },
                     { library: "vwf/model/mil-sym", active: false },
+                    { library: "vwf/model/kineticjs", active: false },
                     { library: "vwf/model/heightmap", active: false },
                     { library: "vwf/model/buzz", active: false },
                     { library: "vwf/model/jPlayer", active: false },
@@ -458,10 +470,11 @@
                     { library: "vwf/view/blockly", active: false },
                     { library: "vwf/view/sound", active: false },
                     { library: "vwf/view/touch", active: false },
-                    { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/mil-sym", active: false },
+                    { library: "vwf/view/kineticjs", active: false },
                     { library: "vwf/view/audio", active: false },
-                    { library: "vwf/view/webrtc", active: false}
+                    { library: "vwf/view/webrtc", active: false},
+                    { library: "vwf/view/mocha", active: false }
                 ]
             };
             mapLibraryName(requireArray);
@@ -879,7 +892,7 @@
                         // timeout is controlled by the server.)
 
                         transportOptions: {
-                            "websocket": { timeout: 90000 },
+                            "websocket": { timeout: 600000 },
                         },
 
                     } );
@@ -980,9 +993,10 @@
 
                 } );
 
-                socket.on( "error", function() { 
+                socket.on( "error", function( error ) { 
 
                     //Overcome by compatibility.js websockets check
+                    console.error( "socket.error:", error );
                     jQuery('body').html("<div class='vwf-err'>WebSockets connections are currently being blocked. Please check your proxy server settings.</div>"); 
 
                 } );
@@ -1109,7 +1123,7 @@
                 action: actionName,
                 member: memberName,
                 parameters: require( "vwf/utility" ).transform( parameters, require( "vwf/utility" ).transforms.transit ),
-                result: require( "vwf/utility" ).transform( result, require( "vwf/utility" ).transforms.transit ),
+                result: require( "vwf/utility" ).transform( result === undefined ? null : result, require( "vwf/utility" ).transforms.transit ),
             };
 
             if ( socket ) {
@@ -1565,11 +1579,10 @@
 
                     if ( componentIsURI( nodeComponent ) ) { // URI  // TODO: allow non-vwf URIs (models, images, etc.) to pass through to stage 2 and pass directly to createChild()
 
-                        // Resolve relative URIs, but leave host-relative, locally-absolute
-                        // references intact.
+                        // Resolve relative URIs, but express local resources as host-relative.
 
-                        nodeURI = nodeComponent[0] == "/" ?
-                            nodeComponent : require( "vwf/utility" ).resolveURI( nodeComponent, baseURI );
+                        nodeURI = require( "vwf/utility" ).resolveURI( nodeComponent, baseURI,
+                            document.location.protocol + "//" + document.location.host + "/dummypath/" );
 
                         // Load the document if we haven't seen this URI yet. Mark the components
                         // list to indicate that this component is loading.
@@ -3379,7 +3392,6 @@ if ( ! childComponent.source ) {
                     // Ignore the result if reentry is disabled and the driver attempted to call
                     // back into the kernel. Kernel reentry is disabled during replication to 
                     // prevent coloring from accessor scripts.
-
                     if ( this.models.kernel.blocked() ) {  // TODO: this might be better handled wholly in vwf/kernel/model by converting to a stage and clearing blocked results on the return
                         value = undefined;
                     }

@@ -4,3 +4,8 @@
 extends: http://vwf.example.com/kinetic/shape.vwf
 properties:
   cornerRadius:
+  shadowColor: 'rgba( 1, 1, 1, 0.5 )'
+  shadowBlur: 10
+  shadowOffsetX: 8
+  shadowOffsetY: 8
+  shadowEnabled: true

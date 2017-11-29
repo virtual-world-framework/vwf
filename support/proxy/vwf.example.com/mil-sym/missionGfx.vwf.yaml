@@ -1,0 +1,23 @@
+--- 
+extends: http://vwf.example.com/kinetic/image.vwf
+properties:
+  affiliation:
+  fullName:
+  tagName:
+  description:
+  symbolID:
+  symbolType:
+  controlPts: []
+  scaleOnLoad: false
+  disableScaleAndRotationForSpeed: false
+  isDraggable: false
+
+  image:
+    set: |
+      if ( value !== undefined ) {
+        this.image = value;
+        this.imageChanged( value );
+      }
+
+events:
+  imageChanged:
