@@ -38,7 +38,10 @@ define( [
         initializedNode: function( nodeID, childID ) {
             if ( childID === vwf_view.kernel.application() ) {
                 test();
-                window.runTests = mocha.run;
+                window.runTests = function() {
+                    $( "body" ).css( "overflowY", "scroll" );
+                    mocha.run();
+                };
             }
         }
 
