@@ -86,29 +86,66 @@ function Scenarioos( props ) {
   </React.Fragment>;
 }
 
-function Scenario( props ) {
-  const scenario = props.scenario,
-    session = props.session;
-  if ( !session ) {
-    return <tr>
-      <td>
-        { scenario.state.scenarioTitle }
-      </td><td>
-        <FormControl name="company" type="text" maxLength="8" bsSize="small"/>
-      </td><td>
-        <FormControl name="platoon" type="number" min="1" max="9" step="1" bsSize="small"/>
-      </td><td>
-        <FormControl name="unit" type="number" min="1" max="9" step="1" bsSize="small"/>
-      </td><td>
-        <FormControl name="name" type="hidden" value={ scenario.state.scenarioName }/>
-      </td><td>
-        <Button href={ scenario.instance || scenario.document.uri } target="_blank" bsSize="small"> Edit </Button>
-        <Button type="submit" disabled bsSize="small" className="hidden"> Start </Button>
-      </td><td>
-        <Button href={ "/export-scenarios?scenarioName=" + scenario.state.scenarioName } bsSize="small"> Export </Button>
-      </td>
-    </tr>;
-  } else {
-    return null;
+class Scenario extends React.Component {
+
+  static COMPANY_LENGTH = 8;
+  static PLATOON_MIN = 1;
+  static PLATOON_MAX = 9;
+  static UNIT_MIN = 1;
+  static UNIT_MAX = 9;
+
+  state = {
+    company: "",
+    platoon: "",
+    unit: "",
+  };
+
+  render() {
+    const scenario = this.props.scenario,
+      session = this.props.session;
+    if ( !session ) {
+      return <tr>
+        <td>
+          { scenario.state.scenarioTitle }
+        </td><td>
+          <FormControl name="company" type="text" maxLength={ Scenario.COMPANY_LENGTH } bsSize="small"
+            value={ this.state.company } onChange={ this.handleCompany }/>
+        </td><td>
+          <FormControl name="platoon" type="number" min={ Scenario.PLATOON_MIN } max={ Scenario.PLATOON_MAX } step="1" bsSize="small"
+            value={ this.state.platoon } onChange={ this.handlePlatoon }/>
+        </td><td>
+          <FormControl name="unit" type="number" min={ Scenario.UNIT_MIN } max={ Scenario.UNIT_MAX } step="1" bsSize="small"
+            value={ this.state.unit } onChange={ this.handleUnit }/>
+        </td><td>
+          <FormControl name="name" type="hidden" value={ scenario.state.scenarioName }/>
+        </td><td>
+          <Button href={ scenario.instance || scenario.document.uri } target="_blank" bsSize="small" className={ this.filled() && "hidden" }> Edit </Button>
+          <Button type="submit" disabled={ !this.filled() } bsSize="small" className={ !this.filled() && "hidden" }> Start </Button>
+        </td><td>
+          <Button href={ "/export-scenarios?scenarioName=" + scenario.state.scenarioName } bsSize="small"> Export </Button>
+        </td>
+      </tr>;
+    } else {
+      return null;
+    }
   }
+
+  handleCompany = event => {
+    this.setState( { company: event.target.value } );
+  }
+
+  handlePlatoon = event => {
+    this.setState( { platoon: event.target.value } );
+  }
+
+  handleUnit = event => {
+    this.setState( { unit: event.target.value } );
+  }
+
+  filled() {
+    return this.state.company.length > 0 &&
+      this.state.platoon.length > 0 &&
+      this.state.unit.length > 0;
+  }
+
 }
