@@ -47,6 +47,7 @@ class Application extends React.Component {
 
   render() {
     return <tr>
+      <Form onSubmit={ this.handleSubmit }>
       <td>
         <FormControl name="title" type="text" placeholder={ Application.TITLE_PLACEHOLDER } bsSize="small"
           value={ this.state.title } onChange={ this.handleTitle }/>
@@ -62,11 +63,22 @@ class Application extends React.Component {
           Import <FormControl type="file" accept=".zip" style={ { display: "none" } }/>
         </ControlLabel>
       </td>
+      </Form>
     </tr>;
   }
 
   handleTitle = event => {
     this.setState( { title: event.target.value } );
+  }
+
+  handleSubmit = event => {
+    let properties = {
+      name: this.name(),
+      title: this.state.title };
+    $.post( "scenarios", properties ).
+      done( function() { document.location.reload() } ).
+      fail( function() {} );
+    event.preventDefault();
   }
 
   name() {
@@ -106,6 +118,7 @@ class Scenario extends React.Component {
       session = this.props.session;
     if ( !session ) {
       return <tr>
+        <Form onSubmit={ this.handleSubmit }>
         <td>
           { scenario.state.scenarioTitle }
         </td><td>
@@ -125,6 +138,7 @@ class Scenario extends React.Component {
         </td><td>
           <Button href={ "/export-scenarios?scenarioName=" + scenario.state.scenarioName } bsSize="small"> Export </Button>
         </td>
+        </Form>
       </tr>;
     } else {
       return null;
@@ -141,6 +155,22 @@ class Scenario extends React.Component {
 
   handleUnit = event => {
     this.setState( { unit: event.target.value } );
+  }
+
+  handleSubmit = event => {
+    let properties = {
+      name: this.props.scenario.state.scenarioName,
+      company: this.state.company,
+      platoon: this.state.platoon,
+      unit: this.state.unit };
+    let newTab = window.open( "", "_blank" );
+      newTab.document.write( "Loading..." );
+    $.post( "sessions", properties ).
+      done( function( response ) {
+        newTab.location.href = response.document.uri + "/";
+        document.location.reload() } ).
+      fail( function() {} );
+    event.preventDefault();
   }
 
   filled() {
