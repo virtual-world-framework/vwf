@@ -35,22 +35,47 @@ function Head( props ) {
   </tr>;
 }
 
-function Application( props ) {
-  return <tr>
-    <td>
-      <FormControl name="title" type="text" placeholder="New Scenario Title" bsSize="small"/>
-    </td><td colSpan="3">
-      <FormControl name="name" type="text" placeholder="Scenario Name" bsSize="small" className="hidden"/>
-    </td><td>
-      &nbsp;
-    </td><td>
-      <Button type="submit" disabled bsSize="small"> Create </Button>
-    </td><td>
-      <ControlLabel className="btn" bsSize="small">
-        Import <FormControl type="file" accept=".zip" style={ { display: "none" } }/>
-      </ControlLabel>
-    </td>
-  </tr>;
+class Application extends React.Component {
+
+  static TITLE_PLACEHOLDER = "New Scenario Title";
+  static NAME_PLACEHOLDER = "Scenario Name";
+
+  state = {
+    title: ""
+  };
+
+  render() {
+    return <tr>
+      <td>
+        <FormControl name="title" type="text" placeholder={ Application.TITLE_PLACEHOLDER } bsSize="small"
+          value={ this.state.title } onChange={ this.handleTitle }/>
+      </td><td colSpan="3">
+        <FormControl name="name" type="text" placeholder={ Application.NAME_PLACEHOLDER } bsSize="small" className="hidden"
+          value={ this.name() } />
+      </td><td>
+        &nbsp;
+      </td><td>
+        <Button type="submit" disabled={ !this.filled() } bsSize="small"> Create </Button>
+      </td><td>
+        <ControlLabel className="btn" bsSize="small">
+          Import <FormControl type="file" accept=".zip" style={ { display: "none" } }/>
+        </ControlLabel>
+      </td>
+    </tr>;
+  }
+
+  handleTitle = event => {
+    this.setState( { title: event.target.value } );
+  }
+
+  name() {
+    return this.state.title.trim().replace( /[^0-9A-Za-z]+/g, "-" );
+  }
+
+  filled() {
+    return this.state.title.length > 0;
+  }
+
 }
 
 function Scenarioos( props ) {
