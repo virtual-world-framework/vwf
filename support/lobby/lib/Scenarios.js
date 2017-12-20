@@ -1,5 +1,6 @@
 import React from "react";
 import { Table, Form, FormControl, Button, ControlLabel } from "react-bootstrap";
+import $ from "jquery";
 
 import * as locals from "./locals";
 
