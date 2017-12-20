@@ -9,7 +9,7 @@ export default function Sessions( props ) {
       <Head/>
     </thead>
     <tbody>
-      <Sessioons/>
+      <Sessioons instructor={ props.instructor }/>
     </tbody>
   </Table>;
 }
@@ -36,14 +36,14 @@ function Sessioons( props ) {
   const records =
     locals.scenarioScenarioSessions( locals.manifest[ "/ITDG/index.vwf" ] || [] );
   return <React.Fragment>
-    { records.map( ( record, index ) => <Session key={ index } { ...record }/> ) }
+    { records.map( ( record, index ) => <Session key={ index } { ...record } instructor={ props.instructor }/> ) }
   </React.Fragment>;
 }
 
 function Session( props ) {
   const scenario = props.scenario,
     session = props.session;
-  if ( session && ( session.instance || locals.session.passport.user.instructor ) ) {
+  if ( session && ( session.instance || props.instructor ) ) {
     return <tr>
       <td>
         { session.state.scenarioTitle }
