@@ -2,8 +2,6 @@ import React from "react";
 import { Table, Form, FormControl, Button, ControlLabel } from "react-bootstrap";
 import $ from "jquery";
 
-import * as locals from "./locals";
-
 export default function Scenarios( props ) {
   return <Table striped>
     <thead>
@@ -11,7 +9,7 @@ export default function Scenarios( props ) {
     </thead>
     <tbody>
       <Application/>
-      <Scenarioos/>
+      <Scenarioos records={ props.records }/>
     </tbody>
   </Table>;
 }
@@ -114,10 +112,8 @@ class Application extends React.Component {
 }
 
 function Scenarioos( props ) {
-  const records =
-    locals.scenarioScenarioSessions( locals.manifest[ "/ITDG/index.vwf" ] || [] );
   return <React.Fragment>
-    { records.map( ( record, index ) => <Scenario key={ index } { ...record }/> ) }
+    { props.records.map( ( record, index ) => <Scenario key={ index } { ...record }/> ) }
   </React.Fragment>;
 }
 

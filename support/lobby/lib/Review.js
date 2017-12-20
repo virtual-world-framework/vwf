@@ -1,7 +1,6 @@
 import React from "react";
 import { Table, Button } from "react-bootstrap";
-
-import * as locals from "./locals";
+import dateFormat from "dateformat";
 
 export default function Reviews( props ) {
   return <Table striped>
@@ -9,7 +8,7 @@ export default function Reviews( props ) {
       <Head/>
     </thead>
     <tbody>
-      <Reviewws/>
+      <Reviewws records={ props.records }/>
     </tbody>
   </Table>;
 }
@@ -33,10 +32,8 @@ function Head( props ) {
 }
 
 function Reviewws( props ) {
-  const records =
-    locals.sessionScenarioSessions( locals.manifest[ "/ITDG/index.vwf" ] || [] );
   return <React.Fragment>
-    { records.map( ( record, index ) => <Review key={ index } { ...record }/> ) }
+    { props.records.map( ( record, index ) => <Review key={ index } { ...record }/> ) }
   </React.Fragment>;
 }
 
@@ -53,7 +50,7 @@ function Review( props ) {
     </td><td>
       { session.state.classroom.unit }
     </td><td>
-      { locals.dateFormat( session.document.timestamp ) }
+      { dateFormat( session.document.timestamp ) }
     </td><td>
       <Button href={ session.instance || session.document.uri } target="_blank" bsSize="small"> Review </Button>
     </td>
