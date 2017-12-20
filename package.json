@@ -5,7 +5,7 @@
   "author": "VWF <http://virtual.wf>",
   "scripts": {
     "start": "node ./node-server.js --applicationPath=./public",
-    "debug": "node --debug ./node-server.js --applicationPath=./public",
+    "debug": "node --inspect ./node-server.js --applicationPath=./public",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "directories": {
