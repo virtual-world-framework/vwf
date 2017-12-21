@@ -5,14 +5,14 @@ import _ from "lodash";
 import Scenarios from "./scenarios";
 import Sessions from "./sessions";
 import Review from "./review";
-import * as locals from "./locals";
+import { get } from "./utils";
 
 export default class Layout extends React.Component {
 
   state = {
     version: { title: "ITDG" },
     user: {},
-    manifest: locals.manifest,
+    manifest: {},
   };
 
   render() {
@@ -63,6 +63,7 @@ export default class Layout extends React.Component {
   componentDidMount() {
     this.handleVersion();
     this.handleUser();
+    this.handleManifest();
   }
 
   handleVersion = () => {
@@ -77,6 +78,14 @@ export default class Layout extends React.Component {
     get( "user" ).
       then( user =>
         this.setState( { user: user || {} } ) ).
+      catch( error =>
+        console.log( error.message ) );
+  }
+
+  handleManifest = () => {
+    get( "manifest" ).
+      then( manifest =>
+        this.setState( { manifest: manifest || {} } ) ).
       catch( error =>
         console.log( error.message ) );
   }
