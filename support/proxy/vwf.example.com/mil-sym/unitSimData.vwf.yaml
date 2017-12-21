@@ -1,30 +1,6 @@
 --- 
 extends: http://vwf.example.com/node.vwf
-properties:
-  posture: 
-    set: |
-      if ( this.posture !== value ) {
-        this.posture = value;
-      }
-    value: 'standing'
 
-  formation: 
-    set: |
-      if ( this.formation !== value ) {
-        this.formation = value;
-      }
-    value: 'wedge'
-
-  weaponStatus: 
-    set: |
-      if ( this.weaponStatus !== value ) {
-        this.weaponStatus = value;
-      }
-    value: 'weaponsTight'
-
-  pov: 
-    set: |
-      if ( this.pov !== value ) {
-        this.pov = value;
-      }
-    value: false
+# Support for this component has been removed.
+# It is left in for backward compatibility with scenarios that have a unitSimData object in them.
+# It was used to support SoarTech's TXS simulation, which is no longer supported.
