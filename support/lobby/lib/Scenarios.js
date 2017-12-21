@@ -1,6 +1,7 @@
 import React from "react";
 import { Table, Form, FormControl, Button, ControlLabel } from "react-bootstrap";
-import $ from "jquery";
+
+import { post } from "./utils";
 
 export default function Scenarios( props ) {
   return <Table striped>
@@ -74,9 +75,11 @@ class Application extends React.Component {
     let properties = {
       name: this.name(),
       title: this.state.title };
-    $.post( "scenarios", properties ).
-      done( function() { document.location.reload() } ).
-      fail( function() {} );
+    post( "scenarios", properties ).
+      then( result => {
+        document.location.reload() } ).
+      catch( error => {
+        console.log( error.message ) } );
     event.preventDefault();
   }
 
@@ -86,18 +89,11 @@ class Application extends React.Component {
     if ( file ) {
       let formData = new FormData();
         formData.append( "file", file );
-      $.ajax( {
-        url: "/import-scenarios",
-        type: "POST",
-        processData: false,
-        contentType: false,
-        data: formData,
-        success: function( data, textStatus, jqXHR ) {
-          location.reload() },
-        error: function( jqXHR, textStatus, errorThrown ) {
-          let responseText = jqXHR.responseText || "Are you connected to the server?";
-          alert( "Uh oh ... we were unable to upload that file for import.\n" + responseText ) }
-      } );
+      post( "/import-scenarios", formData ).
+        then( result => {
+          location.reload() } ).
+        catch( error => {
+          alert( "Uh oh ... we were unable to upload that file for import.\n" + error.message ) } );
     }
   }
 
@@ -183,11 +179,12 @@ class Scenario extends React.Component {
       unit: this.state.unit };
     let newTab = window.open( "", "_blank" );
       newTab.document.write( "Loading..." );
-    $.post( "sessions", properties ).
-      done( function( response ) {
-        newTab.location.href = response.document.uri + "/";
+    post( "sessions", properties ).
+      then( result => {
+        newTab.location.href = result.document.uri + "/";
         document.location.reload() } ).
-      fail( function() {} );
+      catch( error => {
+        console.log( error.message ) } );
     event.preventDefault();
   }
 
