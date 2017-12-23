@@ -9,8 +9,8 @@ export default function Scenarios( props ) {
       <Head/>
     </thead>
     <tbody>
-      <Application/>
-      <Scenarioos records={ props.records }/>
+      <Application onServerChange={ props.onServerChange }/>
+      <Scenarioos records={ props.records } onServerChange={ props.onServerChange }/>
     </tbody>
   </Table>;
 }
@@ -77,7 +77,7 @@ class Application extends React.Component {
       title: this.state.title };
     post( "scenarios", properties ).
       then( result => {
-        document.location.reload() } ).
+        this.props.onServerChange && this.props.onServerChange() } ).
       catch( error => {
         console.log( error.message ) } );
     event.preventDefault();
@@ -91,7 +91,7 @@ class Application extends React.Component {
         formData.append( "file", file );
       post( "/import-scenarios", formData ).
         then( result => {
-          location.reload() } ).
+          this.props.onServerChange && this.props.onServerChange() } ).
         catch( error => {
           alert( "Uh oh ... we were unable to upload that file for import.\n" + error.message ) } );
     }
@@ -109,7 +109,7 @@ class Application extends React.Component {
 
 function Scenarioos( props ) {
   return <React.Fragment>
-    { props.records.map( ( record, index ) => <Scenario key={ index } { ...record }/> ) }
+    { props.records.map( ( record, index ) => <Scenario key={ index } { ...record } onServerChange={ props.onServerChange }/> ) }
   </React.Fragment>;
 }
 
@@ -182,7 +182,7 @@ class Scenario extends React.Component {
     post( "sessions", properties ).
       then( result => {
         newTab.location.href = result.document.uri + "/";
-        document.location.reload() } ).
+        this.props.onServerChange && this.props.onServerChange() } ).
       catch( error => {
         console.log( error.message ) } );
     event.preventDefault();

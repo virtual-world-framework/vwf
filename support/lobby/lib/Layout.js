@@ -50,7 +50,7 @@ export default class Layout extends React.Component {
         </Navbar>
         <TabContent animation={ false }>
           { this.state.user.instructor &&
-            <TabPane eventKey="scenarios"><Scenarios records={ this.scenarioRecords() }/></TabPane> }
+            <TabPane eventKey="scenarios"><Scenarios records={ this.scenarioRecords() } onServerChange={ this.handleManifest }/></TabPane> }
           { true &&
             <TabPane eventKey="sessions"><Sessions records={ this.sessionRecords() } instructor={ this.state.user.instructor }/></TabPane> }
           { this.state.user.instructor &&
