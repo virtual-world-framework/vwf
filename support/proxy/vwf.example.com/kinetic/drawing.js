@@ -8,6 +8,7 @@ this.clientJoin = function() {
     // Remove all event handlers from this object
     var clients = this.find( "doc('http://vwf.example.com/clients.vwf')" )[ 0 ];
     clients.children.added = clients.events.flush( this );
+    clients.children.removed = clients.events.flush( this );
 
     //# sourceURL=drawing.clientJoin
 };
@@ -18,5 +19,6 @@ this.clientLeave = function() {
 
     // Remove all event handlers from this object
     var clients = this.find( "doc('http://vwf.example.com/clients.vwf')" )[ 0 ];
+    clients.children.added = clients.events.flush( this );
     clients.children.removed = clients.events.flush( this );
 };
