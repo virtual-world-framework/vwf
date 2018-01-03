@@ -525,7 +525,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 return;
             }
 
-            var objectDriver = getKernel().models.object;
+            var lastKernel = vwf_view;
+            while ( lastKernel.kernel ) {
+                lastKernel = lastKernel.kernel;
+            }
+
+            var objectDriver = lastKernel.models.object;
             var disableScaleAndRotationForSpeed =
                 objectDriver.gettingProperty( childID, "disableScaleAndRotationForSpeed" );
             var prototypeID = objectDriver.prototype( childID );
