@@ -776,15 +776,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                     }
                     break;
 
-                case "textValueUpdated":
-                    if ( isDrawingObject( eventData[ 0 ] ) ) {
-                        var drawingObject = drawing_private.drawingObject;
-                        drawingObject.text( eventData[ 1 ] );
-                        drawObject( drawingObject, true );
-                        propagateNodeToModel( drawing_private );
-                    }
-                    break;
-
                 default:
                     break;
             }
