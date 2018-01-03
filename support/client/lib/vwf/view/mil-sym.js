@@ -133,6 +133,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         rendererReady: rendererReady,
         getUpdatedUnitSymbolID: getUpdatedUnitSymbolID,
         getMissionGraphicDefinition: getMissionGraphicDefinition,
+        renderMissionGraphic: renderMissionGraphic,
 
         on: function( eventName, callback ) {
             eventHandlers[ eventName ] = callback;
@@ -359,7 +360,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         }
     }
 
-    function renderMissionGraphic( symbolID, affiliation, modifierList, controlPoints, bounds, msnGfx, format ) {
+    function renderMissionGraphic( symbolID, affiliation, modifiers, controlPoints, bounds, msnGfx, format ) {
         
         if ( !cws ) {
             self.logger.errorx( "cws is undefined - unable to render unit icon" );
@@ -368,23 +369,37 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
 
         var rendererMP = sec.web.renderer.SECWebRenderer;
         var scale = 100.0;
-        var updatedUnit = $.extend( true, {}, unit );
         var appID = self.kernel.application();
         var renderer = armyc2.c2sd.renderer;
         var msa = renderer.utilities.MilStdAttributes;
         var rs = renderer.utilities.RendererSettings;
         var symUtil = renderer.utilities.SymbolUtilities;
+        var milSymControlPts = convertKonvaToMilSymControlPts( controlPoints );
         
         // Set affiliation in symbol id
         symbolCode = cws.addAffiliationToSymbolId( symbolID, affiliation );
         
-        var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, controlPoints, bounds.width, bounds.height, null, modifiers, format);
+        var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, milSymControlPts, bounds.width, bounds.height, null, modifiers, format);
 
-        if ( !!img && !!img.image ) {  
-            return img.image;
-        }      
+        if ( !!img ) {
+            return img;
+        }    
     
         return;
+    }
+
+    function convertKonvaToMilSymControlPts( konvaControlPts ) {
+        var milSymControlPts = "";
+        // konva-style is composed of an array where even numbered elements are x and odd are y
+        // mil-sym style is a string where pairs of x and y are separated by spaces
+        for ( var i = 0; i < konvaControlPts.length; i=i+2 ) {
+            milSymControlPts = milSymControlPts + konvaControlPts[i] + "," + konvaControlPts[i+1];
+            if ( i < konvaControlPts.length-2 ) {
+                milSymControlPts = milSymControlPts + " ";
+            }
+        }
+
+        return milSymControlPts;
     }
 
     function getMissionGraphicDefinition( category, fullName ) {
