@@ -5387,27 +5387,32 @@ define( function(){
             "TACGRP.CSS.LNE.SPLRUT.MSRUT": {
                   "symbolID": "G*SPLRM---****X",
                   "tag": "MAIN SUPPLY ROUTE",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.CSS.LNE.SPLRUT.ASRUT": {
                   "symbolID": "G*SPLRA---****X",
                   "tag": "ALTERNATE SUPPLY ROUTE",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.CSS.LNE.SPLRUT.1WYTRFF": {
                   "symbolID": "G*SPLRO---****X",
                   "tag": "SUPPLY ROUTE 1 WAY TRAFFIC",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.CSS.LNE.SPLRUT.ATRFF": {
                   "symbolID": "G*SPLRT---****X",
                   "tag": "SUPPLY ROUTE ALTERNATING TRAFFIC",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.CSS.LNE.SPLRUT.2WYTRFF": {
                   "symbolID": "G*SPLRW---****X",
                   "tag": "SUPPLY ROUTE 2 WAY TRAFFIC",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
             }
        },
         
