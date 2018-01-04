@@ -8,6 +8,7 @@ module.exports = {
     path.resolve( __dirname ),
   entry: {
     index: [ "./index.js", "./index.css" ],
+    login: [ "./login.js", "./login.css" ],
   },
   output: {
     path: path.resolve( __dirname ),
