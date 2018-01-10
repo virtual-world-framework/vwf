@@ -123,3 +123,29 @@ function sessionComparator( sessionA, sessionB ) {
   return 0;
 
 }
+
+export let version = {
+  title: ( version => version[ 5 ] ? version[ 5 ][0] + " " + version[ 5 ].slice( 1, 4 ).join( "." ) : "" )
+    ( [ 0, 8, 0, "", "", [ "ITDG", 2, 6, 7 ] ] ) || "ITDG"
+};
+
+export let session = {
+  "vwf": {
+    "client": {
+      "properties": {
+        "last_name": "Last",
+        "first_name": "First",
+        "middle_initial": "MI",
+        "instructor": true
+      }
+    }
+  },
+  "passport": {
+    "user": {
+      "last_name": "Last",
+      "first_name": "First",
+      "middle_initial": "MI",
+      "instructor": "instructor"
+    }
+  }
+};
