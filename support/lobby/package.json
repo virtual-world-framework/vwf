@@ -1,0 +1,29 @@
+{
+  "name": "vwf-lobby",
+  "version": "0.0.0",
+  "description": "Virtual World Framework lobby",
+  "directories": {
+    "doc": "doc",
+    "lib": "lib",
+    "test": "test"
+  },
+  "files": [
+    "index.html",
+    "index.js",
+    "index.css",
+    "doc/",
+    "lib/"
+  ],
+  "scripts": {
+    "prepublish": "npm run build && npm run test",
+    "build": "true",
+    "test": "true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/interactive-tactical-decision-games/vwf.git"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "devDependencies": {}
+}
