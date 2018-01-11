@@ -17,8 +17,9 @@
   "scripts": {
     "prepublish": "npm run build && npm run test",
     "build": "true",
-    "test": "npm run test:eslint",
-    "test:eslint": "eslint ."
+    "test": "npm run test:eslint && npm run test:mocha",
+    "test:eslint": "eslint .",
+    "test:mocha": "mocha"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,8 @@
   "license": "Apache-2.0",
   "dependencies": {},
   "devDependencies": {
-    "eslint": "^4.12.1"
+    "chai": "^4.1.2",
+    "eslint": "^4.12.1",
+    "mocha": "^4.0.1"
   }
 }
