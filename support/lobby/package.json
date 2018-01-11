@@ -30,14 +30,19 @@
     "url": "git+https://github.com/interactive-tactical-decision-games/vwf.git"
   },
   "license": "Apache-2.0",
-  "dependencies": {},
+  "dependencies": {
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
+  },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
     "chai": "^4.1.2",
     "css-loader": "^0.28.7",
     "eslint": "^4.12.1",
+    "eslint-plugin-react": "^7.5.1",
     "extract-text-webpack-plugin": "^3.0.2",
     "jsdoc": "^3.5.5",
     "mocha": "^4.0.1",
