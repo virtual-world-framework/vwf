@@ -10,8 +10,8 @@ import * as locals from "./locals";
 export default class Layout extends React.Component {
 
   state = {
-    version: locals.version,
-    user: locals.session.passport.user,
+    version: { title: "ITDG" },
+    user: {},
     manifest: locals.manifest,
   };
 
@@ -58,6 +58,27 @@ export default class Layout extends React.Component {
         </TabContent>
       </div>
     </TabContainer>;
+  }
+
+  componentDidMount() {
+    this.handleVersion();
+    this.handleUser();
+  }
+
+  handleVersion = () => {
+    get( "version" ).
+      then( version =>
+        this.setState( { version: version || {} } ) ).
+      catch( error =>
+        console.log( error.message ) );
+  }
+
+  handleUser = () => {
+    get( "user" ).
+      then( user =>
+        this.setState( { user: user || {} } ) ).
+      catch( error =>
+        console.log( error.message ) );
   }
 
   scenarioRecords() {
