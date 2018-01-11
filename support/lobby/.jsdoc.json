@@ -1,0 +1,19 @@
+{
+  "source": {
+    "include":
+      ".",
+    "exclude": [
+      "node_modules",
+      "doc",
+      "test"
+    ]
+  },
+  "opts": {
+    "destination": "doc",
+    "recurse": true
+  },
+  "plugins": [
+    "plugins/commentConvert",
+    "plugins/markdown"
+  ]
+}
