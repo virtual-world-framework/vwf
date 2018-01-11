@@ -17,7 +17,9 @@
   "scripts": {
     "prepublish": "npm run build && npm run test",
     "build": "npm run build:webpack && npm run build:jsdoc",
-    "build:webpack": "webpack --config .webpack.js",
+    "build:webpack": "npm run build:webpack:prod && npm run build:webpack:dev",
+    "build:webpack:prod": "webpack --config .webpack.prod.js",
+    "build:webpack:dev": "webpack --config .webpack.dev.js",
     "build:jsdoc": "jsdoc --configure .jsdoc.json",
     "test": "npm run test:eslint && npm run test:mocha",
     "test:eslint": "eslint .",
@@ -37,6 +39,7 @@
     "jsdoc": "^3.5.5",
     "mocha": "^4.0.1",
     "style-loader": "^0.19.0",
-    "webpack": "^3.10.0"
+    "webpack": "^3.10.0",
+    "webpack-merge": "^4.1.1"
   }
 }
