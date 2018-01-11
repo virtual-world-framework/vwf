@@ -450,6 +450,7 @@ define( [ "module",
                         case "rotation":
                         case "controlPts":
                         case "symbolType":
+                        case "bounds":
                             if ( node.nodeType === "missionGfx" && propertyValue !== undefined &  propertyValue !== null ) {
                                 if ( node[ propertyName ] !== propertyValue ) {
                                     node[ propertyName ] = propertyValue;
@@ -461,16 +462,17 @@ define( [ "module",
                         case "attributes":
                             if ( node.nodeType === "missionGfx" && !!propertyValue ) {
                                 var attrs = propertyValue;
-                                var attrsChanged = ( attrs.width !== node.width) || ( attrs.height !== node.height);
-                                if ( attrsChanged ) {
-                                    node.width = attrs.width;
-                                    node.height= attrs.height;
+                                //var attrsChanged = ( attrs.width !== node.width) || ( attrs.height !== node.height);
+                                //if ( attrsChanged ) {
+                                    //node.width = attrs.width;
+                                    //node.height= attrs.height;
                                     var image = renderMsnGfx( node );
+                                    renderImage = basicPropertiesMet( node );
                                     if ( !!image ) {
                                         attrs.image = image.toDataURL();
                                         modelDriver.kernel.setProperty( node.ID, propertyName, attrs );
                                     }
-                                }
+                                //}
                             }
                             break;
                     }
@@ -705,7 +707,7 @@ define( [ "module",
                 symbolCode = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
             }
             
-            var img = rendererMP.RenderSymbol2D(node.ID,node.fullName,node.description, symbolCode, controlPts, node.width, node.height, null, node.modifiers, format);
+            var img = rendererMP.RenderSymbol2D(node.ID,node.fullName,node.description, symbolCode, controlPts, node.bounds[0], node.bounds[1], null, node.modifiers, format);
 
             if ( !!img && !!img.image ) {
                 value = img.image;
@@ -842,10 +844,10 @@ define( [ "module",
                         ( node.symbolID !== undefined ) && 
                         ( node.x !== undefined ) && 
                         ( node.y !== undefined ) && 
-                        ( node.width !== undefined ) && 
-                        ( node.height !== undefined ) && 
-                        ( node.width > 0 ) && 
-                        ( node.height > 0 ) &&
+                        ( node.bounds !== undefined ) && 
+                        ( node.bounds.length === 2 ) &&                         
+                        ( node.bounds[0] > 0 ) && 
+                        ( node.bounds[1] > 0 ) &&
                         (!!node.controlPts && ( node.controlPts.length > 0 ) ) 
                         );
                         break;

@@ -11,6 +11,7 @@ properties:
   scaleOnLoad: false
   disableScaleAndRotationForSpeed: false
   isDraggable: false
+  bounds: []
 
   image:
     set: |

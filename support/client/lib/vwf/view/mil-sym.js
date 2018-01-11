@@ -379,7 +379,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         // Set affiliation in symbol id
         symbolCode = cws.addAffiliationToSymbolId( symbolID, affiliation );
         
-        var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, milSymControlPts, bounds.width, bounds.height, null, modifiers, format);
+        var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, milSymControlPts, bounds[0], bounds[1], null, modifiers, format);
 
         if ( !!img ) {
             return img;
