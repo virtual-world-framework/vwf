@@ -6,7 +6,9 @@
       "node_modules",
       "doc",
       "test"
-    ]
+    ],
+    "excludePattern":
+      "\\.bundle(\\.min)?\\.js"
   },
   "opts": {
     "destination": "doc",

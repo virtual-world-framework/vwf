@@ -16,7 +16,8 @@
   ],
   "scripts": {
     "prepublish": "npm run build && npm run test",
-    "build": "npm run build:jsdoc",
+    "build": "npm run build:webpack && npm run build:jsdoc",
+    "build:webpack": "webpack --config .webpack.js",
     "build:jsdoc": "jsdoc --configure .jsdoc.json",
     "test": "npm run test:eslint && npm run test:mocha",
     "test:eslint": "eslint .",
@@ -32,6 +33,7 @@
     "chai": "^4.1.2",
     "eslint": "^4.12.1",
     "jsdoc": "^3.5.5",
-    "mocha": "^4.0.1"
+    "mocha": "^4.0.1",
+    "webpack": "^3.10.0"
   }
 }
