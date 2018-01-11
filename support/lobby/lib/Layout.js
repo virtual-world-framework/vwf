@@ -1,6 +1,10 @@
 import React from "react";
 import { TabContainer, Navbar, Image, Nav, NavItem, TabContent, TabPane, Button } from "react-bootstrap";
 
+import Scenarios from "./scenarios";
+import Sessions from "./sessions";
+import Review from "./review";
+
 export default function Layout( props ) {
   return <TabContainer generateChildId={ ( key, type ) => type + "-" + key }>
     <div>
@@ -31,9 +35,9 @@ export default function Layout( props ) {
         </Navbar.Collapse>
       </Navbar>
       <TabContent animation={ false }>
-        <TabPane eventKey="scenarios">Scenarios</TabPane>
-        <TabPane eventKey="sessions">Sessions</TabPane>
-        <TabPane eventKey="review">Review</TabPane>
+        <TabPane eventKey="scenarios"><Scenarios/></TabPane>
+        <TabPane eventKey="sessions"><Sessions/></TabPane>
+        <TabPane eventKey="review"><Review/></TabPane>
       </TabContent>
     </div>
   </TabContainer>;
