@@ -1,0 +1,36 @@
+body {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.navbar {
+  margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+}
+
+thead, th {
+	display: table-header-group;
+}
+tbody {
+	display: table-row-group;
+	height: 100%;
+	overflow-y: auto;
+}
+
+tr { display: table-row; }
+td { display: table-cell; }
+
+.logo_img {
+  width: 100%;
+  height: auto;
+}
+
+.logo_img_small {
+  width: 60px;
+  height: auto;
+}
