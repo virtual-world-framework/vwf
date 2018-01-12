@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node ./node-server.js --applicationPath=./public",
     "debug": "node --inspect ./node-server.js --applicationPath=./public",
+    "prepublish": "cd support/lobby && npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "directories": {
