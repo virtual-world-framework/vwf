@@ -465,8 +465,6 @@ define( [ "module",
                                     node.height= attrs.height;
                                     attrs.image = renderMsnGfx( node );
                                     modelDriver.kernel.setProperty( node.ID, propertyName, attrs );
-                                    //renderImage = basicPropertiesMet( node );
-                                    //value = propertyValue;
                                 }
                             }
                             break;
@@ -484,7 +482,16 @@ define( [ "module",
                    
                     // Render image if modifier is valid
                     renderImage = setModifier( unit, propertyName, propertyValue );
-                    
+
+                    // Because rendering the image will set other properties
+                    // (image, height, width, symbolCenter, etc),
+                    // the kernel will interpret modifiers that were set as having been delegated,
+                    // and no satProperty will be issued.
+                    // We force an actual delegation here,
+                    // so the object driver will issue the satProperty.
+                    if ( renderImage ) {
+                        modelDriver.kernel.setProperty( node.ID, propertyName, propertyValue );
+                    }
                 }
             }
 
