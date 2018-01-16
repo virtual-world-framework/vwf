@@ -722,6 +722,7 @@ define( [ "module",
         var modObj = cws.modifierByAlias( modifierAlias );
         var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
         var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
+        var mtg = armyc2.c2sd.renderer.utilities.ModifiersTG;
         var modifierSet = false;
         
         if ( modObj !== undefined ) {
@@ -737,6 +738,10 @@ define( [ "module",
                     modifierActualName = msa[ modObj.modifier ];
                     break;
                     
+                case "ModifiersTG":
+                    modifierActualName = mtg[ modObj.modifier ];
+                    break;
+
                 default:
                     modelDriver.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified." );
                     return modifierSet;
@@ -775,6 +780,7 @@ define( [ "module",
         var modObj = cws.modifierByAlias( modifierAlias );
         var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
         var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
+        var mtg = armyc2.c2sd.renderer.utilities.ModifiersTG;
         var value = undefined;
         
         if ( modObj !== undefined ) {
@@ -790,6 +796,10 @@ define( [ "module",
                     modifierActualName = msa[ modObj.modifier ];
                     break;
                     
+                case "ModifiersTG":
+                    modifierActualName = mtg[ modObj.modifier ];
+                    break;
+
                 default:
                     modelDriver.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
                     return value;
