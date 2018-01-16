@@ -136,7 +136,9 @@ define ( function() {
 
             // Optimize and reduce line segments
             console.info( "Points before simplify: " + ptarray.length );
-            ptarray = this.simplify( ptarray );
+            if ( ptarray.length > 2 ) {
+                ptarray = this.simplify( ptarray );
+            }
             console.info( "Points after simplify:  " + ptarray.length );
 
             // Convert back to x, y list
