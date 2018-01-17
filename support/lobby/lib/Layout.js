@@ -10,54 +10,58 @@ import { get } from "./utils";
 export default class Layout extends React.Component {
 
   state = {
-    version: { title: "ITDG" },
-    user: {},
-    manifest: {},
+    version: null,
+    user: null,
+    manifest: null,
   };
 
   render() {
-    return <TabContainer defaultActiveKey={ this.state.user.instructor ? "scenarios" : "sessions" } generateChildId={ ( key, type ) => type + "-" + key }>
-      <div>
-        <Navbar fluid collapseOnSelect>
-          <Navbar.Header>
-            <Navbar.Toggle
-              data-toggle="collapse" data-target="#navbar"/>
-            <Navbar.Brand>
-              <a href="#">
-                <span><Image className="logo_img_small" src="/ONR_Logo.jpg"/></span>
-                <span>&ensp;</span>
-                <span>{ this.state.version.title }</span>
-              </a>
-            </Navbar.Brand>
-          </Navbar.Header>
-          <Navbar.Collapse id="navbar">
-            <Nav>
-              { this.state.user.instructor && <NavItem eventKey="scenarios">Scenarios</NavItem> }
-              { this.state.user.instructor && <NavItem eventKey="sessions">Sessions</NavItem> }
-              { this.state.user.instructor && <NavItem eventKey="review">Review</NavItem> }
-            </Nav>
-            <Navbar.Form pullRight method="post" action="/logout">
-              <Button type="submit" bsStyle="link"> Logout </Button>
-            </Navbar.Form>
-            <Navbar.Text pullRight>
-              {
-                ( this.state.user.last_name || "" ) + ( this.state.user.last_name && ( this.state.user.first_name || this.state.user.middle_initial ) ? ", " : "" )  +
-                ( this.state.user.first_name || "" ) + ( this.state.user.first_name && this.state.user.middle_initial ? " " : "" )  +
-                ( this.state.user.middle_initial || "" ) + ( this.state.user.middle_initial ? "." : "" )
-              }
-            </Navbar.Text>
-          </Navbar.Collapse>
-        </Navbar>
-        <TabContent animation={ false }>
-          { this.state.user.instructor &&
-            <TabPane eventKey="scenarios"><Scenarios records={ this.scenarioRecords() } onServerChange={ this.handleManifest }/></TabPane> }
-          { true &&
-            <TabPane eventKey="sessions"><Sessions records={ this.sessionRecords() } instructor={ this.state.user.instructor }/></TabPane> }
-          { this.state.user.instructor &&
-            <TabPane eventKey="review"><Review records={ this.reviewRecords() }/></TabPane> }
-        </TabContent>
-      </div>
-    </TabContainer>;
+    if ( this.state.version && this.state.user && this.state.manifest ) {
+      return <TabContainer defaultActiveKey={ this.state.user.instructor ? "scenarios" : "sessions" } generateChildId={ ( key, type ) => type + "-" + key }>
+        <div>
+          <Navbar fluid collapseOnSelect>
+            <Navbar.Header>
+              <Navbar.Toggle
+                data-toggle="collapse" data-target="#navbar"/>
+              <Navbar.Brand>
+                <a href="#">
+                  <span><Image className="logo_img_small" src="/ONR_Logo.jpg"/></span>
+                  <span>&ensp;</span>
+                  <span>{ this.state.version.title }</span>
+                </a>
+              </Navbar.Brand>
+            </Navbar.Header>
+            <Navbar.Collapse id="navbar">
+              <Nav>
+                { this.state.user.instructor && <NavItem eventKey="scenarios">Scenarios</NavItem> }
+                { this.state.user.instructor && <NavItem eventKey="sessions">Sessions</NavItem> }
+                { this.state.user.instructor && <NavItem eventKey="review">Review</NavItem> }
+              </Nav>
+              <Navbar.Form pullRight method="post" action="/logout">
+                <Button type="submit" bsStyle="link"> Logout </Button>
+              </Navbar.Form>
+              <Navbar.Text pullRight>
+                {
+                  ( this.state.user.last_name || "" ) + ( this.state.user.last_name && ( this.state.user.first_name || this.state.user.middle_initial ) ? ", " : "" )  +
+                  ( this.state.user.first_name || "" ) + ( this.state.user.first_name && this.state.user.middle_initial ? " " : "" )  +
+                  ( this.state.user.middle_initial || "" ) + ( this.state.user.middle_initial ? "." : "" )
+                }
+              </Navbar.Text>
+            </Navbar.Collapse>
+          </Navbar>
+          <TabContent animation={ false }>
+            { this.state.user.instructor &&
+              <TabPane eventKey="scenarios"><Scenarios records={ this.scenarioRecords() } onServerChange={ this.handleManifest }/></TabPane> }
+            { true &&
+              <TabPane eventKey="sessions"><Sessions records={ this.sessionRecords() } instructor={ this.state.user.instructor }/></TabPane> }
+            { this.state.user.instructor &&
+              <TabPane eventKey="review"><Review records={ this.reviewRecords() }/></TabPane> }
+          </TabContent>
+        </div>
+      </TabContainer>;
+    } else {
+      return null;
+    }
   }
 
   componentDidMount() {
