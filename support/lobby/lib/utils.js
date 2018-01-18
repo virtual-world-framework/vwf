@@ -15,8 +15,8 @@ function getOptions() {
 }
 
 function postOptions( body ) {
-  let json = typeof body === "object" && body !== null &&
-    body instanceof FormData === false;
+  let json = ( typeof body === "object" ) && ( body !== null ) &&
+    ( body instanceof FormData === false );
   return {
     method: "POST",
     body: json ? JSON.stringify( body ) : body,
