@@ -10,7 +10,7 @@ export default function Scenarios( props ) {
     </thead>
     <tbody>
       <Application onServerChange={ props.onServerChange }/>
-      <Scenarioos records={ props.records } onServerChange={ props.onServerChange }/>
+      <ScenarioRows records={ props.records } onServerChange={ props.onServerChange }/>
     </tbody>
   </Table>;
 }
@@ -107,7 +107,7 @@ class Application extends React.Component {
 
 }
 
-function Scenarioos( props ) {
+function ScenarioRows( props ) {
   return <React.Fragment>
     { props.records.map( ( record, index ) => <Scenario key={ index } { ...record } onServerChange={ props.onServerChange }/> ) }
   </React.Fragment>;

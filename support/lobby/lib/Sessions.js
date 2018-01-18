@@ -7,7 +7,7 @@ export default function Sessions( props ) {
       <Head/>
     </thead>
     <tbody>
-      <Sessioons records={ props.records } instructor={ props.instructor }/>
+      <SessionRows records={ props.records } instructor={ props.instructor }/>
     </tbody>
   </Table>;
 }
@@ -30,7 +30,7 @@ function Head( props ) {
   </tr>;
 }
 
-function Sessioons( props ) {
+function SessionRows( props ) {
   return <React.Fragment>
     { props.records.map( ( record, index ) => <Session key={ index } { ...record } instructor={ props.instructor }/> ) }
   </React.Fragment>;

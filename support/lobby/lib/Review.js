@@ -8,7 +8,7 @@ export default function Reviews( props ) {
       <Head/>
     </thead>
     <tbody>
-      <Reviewws records={ props.records }/>
+      <ReviewRows records={ props.records }/>
     </tbody>
   </Table>;
 }
@@ -31,7 +31,7 @@ function Head( props ) {
   </tr>;
 }
 
-function Reviewws( props ) {
+function ReviewRows( props ) {
   return <React.Fragment>
     { props.records.map( ( record, index ) => <Review key={ index } { ...record }/> ) }
   </React.Fragment>;
