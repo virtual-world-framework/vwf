@@ -37,7 +37,7 @@ export default class Layout extends React.Component {
                 { this.state.user.instructor && <NavItem eventKey="sessions">Sessions</NavItem> }
                 { this.state.user.instructor && <NavItem eventKey="review">Review</NavItem> }
               </Nav>
-              <Navbar.Form pullRight method="post" action="/logout">
+              <Navbar.Form pullRight componentClass="form" method="post" action="/logout">
                 <Button type="submit" bsStyle="link"> Logout </Button>
               </Navbar.Form>
               <Navbar.Text pullRight>
