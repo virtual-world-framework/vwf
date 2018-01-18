@@ -5575,12 +5575,6 @@ define( function(){
                   "tag": "KILL BOX BLUE IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
-            },
-            "TACGRP.FSUPP.ARS.KLBOX.PURPLE.IRR": {
-                  "symbolID": "G*FPAKPI-****X",
-                  "tag": "KILL BOX BLUE IRREGULAR",
-                  "symbolType": "MultiSegmentPolygon",
-                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             }
        },
 
