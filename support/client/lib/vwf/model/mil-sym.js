@@ -452,27 +452,20 @@ define( [ "module",
                         case "symbolType":
                         case "bounds":
                             if ( node.nodeType === "missionGfx" && propertyValue !== undefined &  propertyValue !== null ) {
-                                if ( node[ propertyName ] !== propertyValue ) {
-                                    node[ propertyName ] = propertyValue;
-                                    renderImage = basicPropertiesMet( node );
-                                }
+                                node[ propertyName ] = propertyValue;
+                                renderImage = basicPropertiesMet( node );
                             }
                             break;
 
                         case "attributes":
                             if ( node.nodeType === "missionGfx" && !!propertyValue ) {
                                 var attrs = propertyValue;
-                                //var attrsChanged = ( attrs.width !== node.width) || ( attrs.height !== node.height);
-                                //if ( attrsChanged ) {
-                                    //node.width = attrs.width;
-                                    //node.height= attrs.height;
-                                    var image = renderMsnGfx( node );
-                                    renderImage = basicPropertiesMet( node );
-                                    if ( !!image ) {
-                                        attrs.image = image.toDataURL();
-                                        modelDriver.kernel.setProperty( node.ID, propertyName, attrs );
-                                    }
-                                //}
+                                var image = renderMsnGfx( node );
+                                renderImage = basicPropertiesMet( node );
+                                if ( !!image ) {
+                                    attrs.image = image.toDataURL();
+                                    modelDriver.kernel.setProperty( node.ID, propertyName, attrs );
+                                }
                             }
                             break;
                     }

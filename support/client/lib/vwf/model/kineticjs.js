@@ -2153,8 +2153,11 @@ define( [ "module",
                     kineticObj.scale( { "x": height / imageObj.height ,"y": height / imageObj.height } );
                 }
             } else {
-                kineticObj.width( imageObj.width );
-                kineticObj.height( imageObj.height );
+                var kImg = kineticObj.image();
+                if ( ( kImg.width !== imageObj.width ) || ( kImg.height !== imageObj.height ) ) {
+                    kineticObj.width( imageObj.width );
+                    kineticObj.height( imageObj.height );
+                }
             }
 
             // Redraw the object now that it's image has loaded
