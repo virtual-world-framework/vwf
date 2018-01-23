@@ -381,10 +381,6 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         
         var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, milSymControlPts, bounds[0], bounds[1], null, modifiers, format);
 
-        //if ( !!img ) {
-        //    return img;
-        //}    
-    
         return img;
     }
 

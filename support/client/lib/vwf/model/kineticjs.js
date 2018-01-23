@@ -2154,8 +2154,10 @@ define( [ "module",
                 }
             } else {
                 var kImg = kineticObj.image();
-                if ( ( kImg.width !== imageObj.width ) || ( kImg.height !== imageObj.height ) ) {
+                if ( kImg.width !== imageObj.width ) { 
                     kineticObj.width( imageObj.width );
+                }
+                if ( kImg.height !== imageObj.height ) {
                     kineticObj.height( imageObj.height );
                 }
             }

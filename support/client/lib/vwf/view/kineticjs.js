@@ -1290,7 +1290,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         var ptarray = [];
         // Convert to array of  x, y points
         for ( var i = 0; i < points.length; i = i+2 ) {
-            var point = { x: points[i], y: points[i+1] };
+            var point = { x: points[ i ], y: points[ i+1 ] };
             ptarray.push( point );
         }
 
@@ -1437,7 +1437,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                             posY - privateState.previousPoint[ 1 ] 
                         ];
 
-                        if ( ( Math.abs( dragDiff[0] ) + Math.abs( dragDiff[1] ) ) > 0 ) {
+                        if ( ( Math.abs( dragDiff[ 0 ] ) + Math.abs( dragDiff[ 1 ] ) ) > 0 ) {
                             points.push( posX );
                             points.push( posY );
                             privateState.previousPoint = [ posX, posY ];

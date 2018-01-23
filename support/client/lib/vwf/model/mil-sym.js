@@ -451,7 +451,7 @@ define( [ "module",
                         case "controlPts":
                         case "symbolType":
                         case "bounds":
-                            if ( node.nodeType === "missionGfx" && propertyValue !== undefined &  propertyValue !== null ) {
+                            if ( node.nodeType === "missionGfx" && propertyValue !== undefined && propertyValue !== null ) {
                                 node[ propertyName ] = propertyValue;
                                 renderImage = basicPropertiesMet( node );
                             }
@@ -473,8 +473,6 @@ define( [ "module",
                 } else if ( node.nodeType === "modifier" ) {
                     
                     var unit = this.state.nodes[ node.parentID ];
-                    //var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-                    //var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
 
                     if ( unit === undefined ) {
                         return undefined;
@@ -689,7 +687,6 @@ define( [ "module",
             var rendererMP = sec.web.renderer.SECWebRenderer;
             var scale = 100.0;
             var renderer = armyc2.c2sd.renderer;
-            //var msa = renderer.utilities.MilStdAttributes;
             var rs = renderer.utilities.RendererSettings;
             var symUtil = renderer.utilities.SymbolUtilities;
             var symbolCode = node.symbolID;
