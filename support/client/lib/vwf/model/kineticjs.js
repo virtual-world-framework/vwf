@@ -783,9 +783,12 @@ define( [ "module",
                             break;
 
                         case "scaleOnLoad":
-                            //node.scaleOnLoad = Boolean( propertyValue );
                             break;
                         
+                        case "symbolCenter":
+                            kineticObj.attrs.symbolCenter = propertyValue;
+                            break;
+
                         default:
                             value = undefined;
                             break;
@@ -1370,9 +1373,11 @@ define( [ "module",
                                 break;
 
                             case "scaleOnLoad":
-                                //value = node.scaleOnLoad;
                                 break;
                             
+                            case "symbolCenter":
+                                value = kineticObj.attrs.symbolCenter;
+                                break;
                         }                    
                     }
 
