@@ -374,27 +374,29 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         var msa = renderer.utilities.MilStdAttributes;
         var rs = renderer.utilities.RendererSettings;
         var symUtil = renderer.utilities.SymbolUtilities;
-        var milSymControlPts = convertKonvaToMilSymControlPts( controlPoints );
+        var milSymControlPts = convertXYVertexArrayToMilSymControlPts( controlPoints );
         
         // Set affiliation in symbol id
         symbolCode = cws.addAffiliationToSymbolId( symbolID, affiliation );
         
         var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, milSymControlPts, bounds[0], bounds[1], null, modifiers, format);
 
-        if ( !!img ) {
-            return img;
-        }    
+        //if ( !!img ) {
+        //    return img;
+        //}    
     
-        return;
+        return img;
     }
 
-    function convertKonvaToMilSymControlPts( konvaControlPts ) {
+    // Take an array [x1,y1,xy,y2,...xn,yn] and convert to 
+    // mil-sym control point string "x1,y1 x2,y2 ... xn,yn"
+    function convertXYVertexArrayToMilSymControlPts( xyVertexPts ) {
         var milSymControlPts = "";
-        // konva-style is composed of an array where even numbered elements are x and odd are y
+        // xyVertexPts is an array where even numbered elements are x and odd are y
         // mil-sym style is a string where pairs of x and y are separated by spaces
-        for ( var i = 0; i < konvaControlPts.length; i=i+2 ) {
-            milSymControlPts = milSymControlPts + konvaControlPts[i] + "," + konvaControlPts[i+1];
-            if ( i < konvaControlPts.length-2 ) {
+        for ( var i = 0; i < xyVertexPts.length; i=i+2 ) {
+            milSymControlPts = milSymControlPts + xyVertexPts[i] + "," + xyVertexPts[i+1];
+            if ( i < xyVertexPts.length-2 ) {
                 milSymControlPts = milSymControlPts + " ";
             }
         }

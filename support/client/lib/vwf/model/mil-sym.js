@@ -473,8 +473,8 @@ define( [ "module",
                 } else if ( node.nodeType === "modifier" ) {
                     
                     var unit = this.state.nodes[ node.parentID ];
-                    var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-                    var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
+                    //var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
+                    //var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
 
                     if ( unit === undefined ) {
                         return undefined;
@@ -689,7 +689,7 @@ define( [ "module",
             var rendererMP = sec.web.renderer.SECWebRenderer;
             var scale = 100.0;
             var renderer = armyc2.c2sd.renderer;
-            var msa = renderer.utilities.MilStdAttributes;
+            //var msa = renderer.utilities.MilStdAttributes;
             var rs = renderer.utilities.RendererSettings;
             var symUtil = renderer.utilities.SymbolUtilities;
             var symbolCode = node.symbolID;
@@ -702,7 +702,8 @@ define( [ "module",
             
             var img = rendererMP.RenderSymbol2D(node.ID,node.fullName,node.description, symbolCode, controlPts, node.bounds[0], node.bounds[1], null, node.modifiers, format);
 
-            if ( !!img && !!img.image ) {
+            //if ( !!img && !!img.image ) {
+            if ( ( img || {} ).image ) {
                 value = img.image;
             }
         }
@@ -710,36 +711,42 @@ define( [ "module",
         return value;
     }
 
+    function getModifierActualName( modObj ) {
+        var modifierActualName;
+        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
+        var mu  = armyc2.c2sd.renderer.utilities.ModifiersUnits;
+        var mtg = armyc2.c2sd.renderer.utilities.ModifiersTG;
+
+        switch ( modObj.type ) {
+            case "ModifiersUnits":
+                modifierActualName = mu[ modObj.modifier ];
+                break;
+                
+            case "MilStdAttributes":
+                modifierActualName = msa[ modObj.modifier ];
+                break;
+                
+            case "ModifiersTG":
+                modifierActualName = mtg[ modObj.modifier ];
+                break;
+        }
+
+        return modifierActualName;
+    }
+
     function setModifier( unit, modifierAlias, modifierValue ) {
         
         var modObj = cws.modifierByAlias( modifierAlias );
-        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-        var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
-        var mtg = armyc2.c2sd.renderer.utilities.ModifiersTG;
         var modifierSet = false;
         
         if ( modObj !== undefined ) {
             
-            var modifierActualName;
-            
-            switch ( modObj.type ) {
-                case "ModifiersUnits":
-                    modifierActualName = mu[ modObj.modifier ];
-                    break;
-                    
-                case "MilStdAttributes":
-                    modifierActualName = msa[ modObj.modifier ];
-                    break;
-                    
-                case "ModifiersTG":
-                    modifierActualName = mtg[ modObj.modifier ];
-                    break;
-
-                default:
-                    modelDriver.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified." );
-                    return modifierSet;
+            var modifierActualName = getModifierActualName( modObj );
+            if ( !modifierActualName ) {
+                modelDriver.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified." );
+                return modifierSet;
             }
-            
+
             if ( modifierValue === "" ) {
                 if ( unit.modifiers[ modifierActualName ] !== undefined ) {
                     delete unit.modifiers[ modifierActualName ];
@@ -771,33 +778,16 @@ define( [ "module",
     function getModifier( unit, modifierAlias ) {
  
         var modObj = cws.modifierByAlias( modifierAlias );
-        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-        var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
-        var mtg = armyc2.c2sd.renderer.utilities.ModifiersTG;
         var value = undefined;
         
         if ( modObj !== undefined ) {
             
-            var modifierActualName;
-            
-            switch ( modObj.type ) {
-                case "ModifiersUnits":
-                    modifierActualName = mu[ modObj.modifier ];
-                    break;
-                    
-                case "MilStdAttributes":
-                    modifierActualName = msa[ modObj.modifier ];
-                    break;
-                    
-                case "ModifiersTG":
-                    modifierActualName = mtg[ modObj.modifier ];
-                    break;
-
-                default:
-                    modelDriver.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
-                    return value;
+            var modifierActualName = getModifierActualName( modObj );
+            if ( !modifierActualName ) {
+                modelDriver.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
+                return value;
             }
-
+            
             value = unit.modifiers[ modifierActualName ];            
         }
          
