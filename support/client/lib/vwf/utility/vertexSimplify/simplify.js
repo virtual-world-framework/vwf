@@ -122,62 +122,6 @@ define ( function() {
             points = this.simplifyDouglasPeucker(points, sqTolerance);
 
             return points;
-        },
-
-        // Simplify konva points
-        // Konva points are in an array like [x1,y1,x2,y2,...xn,yn]
-        simplifyKonvaPts: function( points ) {
-            var ptarray = [];
-            // Convert to array of  x, y points
-            for ( var i = 0; i < points.length; i = i+2 ) {
-                var point = { x: points[i], y: points[i+1] };
-                ptarray.push( point );
-            }
-
-            // Optimize and reduce line segments
-            console.info( "Points before simplify: " + ptarray.length );
-            if ( ptarray.length > 2 ) {
-                ptarray = this.simplify( ptarray );
-            }
-            console.info( "Points after simplify:  " + ptarray.length );
-
-            // Convert back to x, y list
-            var simplifiedPts = [];
-            for ( var j = 0; j < ptarray.length; j++ ) {
-                simplifiedPts.push( ptarray[j].x );
-                simplifiedPts.push( ptarray[j].y );
-            }
-
-            return simplifiedPts;
-        },
-
-
-        // Simplify mil-sym-style point string
-        simpilfyMilSymPts: function( pointString ) {
-            // Convert point string to Konva-style array
-            var xyPairs = pointString.split( " " );
-            var konvaPts = [];
-            for ( var i = 0; i < xyPairs.length; i++ ) {
-                var xyPair = xyPairs[i].split(",");
-                if ( xyPair.length === 2 ) {
-                    konvaPts.push( Number(xyPair[0]) );
-                    konvaPts.push( Number(xyPair[1]) );
-                }
-            }
-
-            // Simplify the Konva-style array of points
-            var simplifiedKonvaPts = this.simplifyKonvaPts(konvaPts);
-
-            // Reconvert to mil-sym point string
-            var simplifiedPts = "";
-            for ( var i = 0; i < simplifiedKonvaPts.length; i=i+2 ) {
-                simplifiedPts = simplifiedPts + simplifiedKonvaPts[i] + "," + simplifiedKonvaPts[i+1];
-                if ( i < simplifiedKonvaPts.length-2 ) {
-                    simplifiedPts = simplifiedPts + " ";
-                }
-            }
-
-            return simplifiedPts;
         }
 
     };
