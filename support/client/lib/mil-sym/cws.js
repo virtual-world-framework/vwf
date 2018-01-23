@@ -5103,6 +5103,22 @@ define( function(){
                   "symbolType": "DefinedMissionGraphic", 
                   "defaultControlPts": [ 50,50, 0,50, 0,100, 100,100 ],
                   "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.FLWASS.FLWASS": {
+                  "symbolID": "G*TPA-----****X",
+                  "tag": "FOLLOW AND ASSUME",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,100, 100,0, 0,0 ],
+                  "defaultDimensions": [100, 20],
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.TSK.FLWASS.FLWSUP": {
+                  "symbolID": "G*TPAS----****X",
+                  "tag": "FOLLOW AND SUPPORT",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,100, 100,0, 0,0 ],
+                  "defaultDimensions": [100, 20],
+                  "validModifiers": [ "uniqueDesignation1" ]
             }
        },
 
@@ -5168,10 +5184,447 @@ define( function(){
                   "symbolType": "DefinedMissionGraphic", 
                   "defaultControlPts": [ 100,50, 0,80, 0,20 ],
                   "defaultDimensions": [100, 100]
+            },
+            "TACGRP.C2GM.OFF.LNE.DIRATK.GRD.MANATK": {
+                  "symbolID": "G*GPOLKGM-****X",
+                  "tag": "GROUND MAIN ATTACK",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 100,0, 0,0, 100,100 ],
+                  "defaultDimensions": [100, 20]
+            },
+            "TACGRP.C2GM.OFF.LNE.DIRATK.GRD.UPATK": {
+                  "symbolID": "G*GPOLKGS-****X",
+                  "tag": "GROUND SUPPORTING ATTACK",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 100,0, 0,0, 100,100 ],
+                  "defaultDimensions": [100, 20]
+            },
+            "TACGRP.C2GM.DCPN.DAFF": {
+                  "symbolID": "G*GPPF----****X",
+                  "tag": "DIRECTION OF ATTACK FOR FEINT",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 100,0, 0,0, 100,100 ],
+                  "defaultDimensions": [100, 20]
             }
        },
-        
-        "aliasModifiers": { 
+
+       "lines": {
+            "TACGRP.C2GM.GNL.LNE.PHELNE": {
+                  "symbolID": "G*GPGLP---****X",
+                  "tag": "PHASE LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.GNL.LNE.LITLNE": {
+                  "symbolID": "G*GPGLL---****X",
+                  "tag": "LIGHT LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.OFF.LNE.PLD": {
+                  "symbolID": "G*GPOLP---****X",
+                  "tag": "PROBABLE LINE OF DEPLOYMENT",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.OFF.LNE.LD": {
+                  "symbolID": "G*GPOLT---****X",
+                  "tag": "LINE OF DEPARTURE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.OFF.LNE.LMTADV": {
+                  "symbolID": "G*GPOLL---****X",
+                  "tag": "LIMIT OF ADVANCE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.OFF.LNE.LDLC": {
+                  "symbolID": "G*GPOLC---****X",
+                  "tag": "LINE OF DEPARTURE/LINE OF CONTACT",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.GNL.LNE.LOC": {
+                  "symbolID": "G*GPGLC---****X",
+                  "tag": "LINE OF CONTACT",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.GNL.LNE.FLOT": {
+                  "symbolID": "G*GPGLF---****X",
+                  "tag": "FORWARD LINE OF OWN TROOPS",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.DEF.LNE.FEBA": {
+                  "symbolID": "G*GPDLF---****X",
+                  "tag": "FORWARD EDGE OF BATTLE AREA",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.C2GM.OFF.LNE.FCL": {
+                  "symbolID": "G*GPOLF---****X",
+                  "tag": "FINAL COORDINATION LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.FSUPP.LNE.C2LNE": {
+                  "symbolID": "G*FPLCF---****X",
+                  "tag": "FIRE SUPPORT COORDINATION LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
+            },
+            "TACGRP.FSUPP.LNE.C2LNE.CFL": {
+                  "symbolID": "G*FPLCC---****X",
+                  "tag": "COORDINATED FIRE LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
+            },
+            "TACGRP.FSUPP.LNE.C2LNE.NFL": {
+                  "symbolID": "G*FPLCN---****X",
+                  "tag": "NO-FIRE LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
+            },
+            "TACGRP.FSUPP.LNE.C2LNE.RFL": {
+                  "symbolID": "G*FPLCR---****X",
+                  "tag": "RESTRICTIVE FIRE LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
+            },
+            "TACGRP.MOBSU.SU.FTFDLN": {
+                  "symbolID": "G*MPSL----****X",
+                  "tag": "FORTIFIED LINE",
+                  "symbolType": "MultiSegmentLine"
+            }
+       },
+
+       "wire-fence": {
+            "TACGRP.MOBSU.OBST.WREOBS.USP": {
+                  "symbolID": "G*MPOWU---****X",
+                  "tag": "WIRE OBSTACLE UNSPECIFIED",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.SNGFN": {
+                  "symbolID": "G*MPOWS---****X",
+                  "tag": "SINGLE FENCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.DBLFN": {
+                  "symbolID": "G*MPOWD---****X",
+                  "tag": "DOUBLE FENCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.DAFNC": {
+                  "symbolID": "G*MPOWA---****X",
+                  "tag": "DOUBLE APRON FENCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.LWFN": {
+                  "symbolID": "G*MPOWL---****X",
+                  "tag": "LOW WIRE FENCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.HWFN": {
+                  "symbolID": "G*MPOWH---****X",
+                  "tag": "HIGH WIRE FENCE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.CCTA.S": {
+                  "symbolID": "G*MPOWCS--****X",
+                  "tag": "SINGLE CONCERTINA",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.CCTA.DBLSTD": {
+                  "symbolID": "G*MPOWCD--****X",
+                  "tag": "DOUBLE STRAND CONCERTINA",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.WREOBS.CCTA.TRISTD": {
+                  "symbolID": "G*MPOWCT--****X",
+                  "tag": "TRIPLE STRAND CONCERTINA",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.AVN.OHWIRE": {
+                  "symbolID": "G*MPOHO---****X",
+                  "tag": "OVERHEAD WIRE",
+                  "symbolType": "MultiSegmentLine"
+            }
+       },
+
+       "obstacles": {
+            "TACGRP.MOBSU.OBST.GNL.LNE": {
+                  "symbolID": "G*MPOGL---****X",
+                  "tag": "LINEAR OBSTACLE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.ABS": {
+                  "symbolID": "G*MPOS----****X",
+                  "tag": "ABATIS",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.ATO.ATD.ATDUC": {
+                  "symbolID": "G*MPOADU--****X",
+                  "tag": "ANTITANK DITCH UNDER CONSTRUCTION",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.ATO.ATD.ATDC": {
+                  "symbolID": "G*MPOADC--****X",
+                  "tag": "ANTITANK DITCH COMPLETE",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.ATO.ATD.ATDATM": {
+                  "symbolID": "G*MPOAR---****X",
+                  "tag": "ANTITANK DITCH REINFORCED WITH MINES",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.ATO.ATD.ATW": {
+                  "symbolID": "G*MPOAW---****X",
+                  "tag": "ANTITANK WALL",
+                  "symbolType": "MultiSegmentLine"
+            },
+            "TACGRP.MOBSU.OBST.GNL.BLT": {
+                  "symbolID": "G*MPOGB---****X",
+                  "tag": "OBSTACLE GENERAL BELT",
+                  "symbolType": "MultiSegmentPolygon",
+                   "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
+           },
+            "TACGRP.MOBSU.OBST.GNL.Z": {
+                  "symbolID": "G*MPOGZ---****X",
+                  "tag": "OBSTACLE GENERAL ZONE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.MOBSU.OBST.GNL.OFA": {
+                  "symbolID": "G*MPOGF---****X",
+                  "tag": "OBSTACLE FREE AREA",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.MOBSU.OBST.GNL.ORA": {
+                  "symbolID": "G*MPOGR---****X",
+                  "tag": "OBSTACLE RESTRICTED AREA",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.MOBSU.OBST.MNEFLD.MNDARA": {
+                  "symbolID": "G*MPOFA---****X",
+                  "tag": "MINED AREA",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "hostile" ]
+            },
+            "TACGRP.MOBSU.OBST.UXO": {
+                  "symbolID": "G*MPOU----****X",
+                  "tag": "UNEXPLODED ORDNANCE AREA",
+                  "symbolType": "MultiSegmentPolygon"
+            },
+            "TACGRP.MOBSU.SU.STRGPT": {
+                  "symbolID": "G*MPSP----****X",
+                  "tag": "STRONG POINT",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "echelon" ]
+            }
+       },
+
+       "supply": {
+            "TACGRP.CSS.LNE.SPLRUT.MSRUT": {
+                  "symbolID": "G*SPLRM---****X",
+                  "tag": "MAIN SUPPLY ROUTE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.CSS.LNE.SPLRUT.ASRUT": {
+                  "symbolID": "G*SPLRA---****X",
+                  "tag": "ALTERNATE SUPPLY ROUTE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.CSS.LNE.SPLRUT.1WYTRFF": {
+                  "symbolID": "G*SPLRO---****X",
+                  "tag": "SUPPLY ROUTE 1 WAY TRAFFIC",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.CSS.LNE.SPLRUT.ATRFF": {
+                  "symbolID": "G*SPLRT---****X",
+                  "tag": "SUPPLY ROUTE ALTERNATING TRAFFIC",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.CSS.LNE.SPLRUT.2WYTRFF": {
+                  "symbolID": "G*SPLRW---****X",
+                  "tag": "SUPPLY ROUTE 2 WAY TRAFFIC",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            }
+       },
+
+       "fireSupport": {
+            "TACGRP.FSUPP.ARS.ARATGT": {
+                  "symbolID": "G*FPAT---****X",
+                  "tag": "AREA TARGET",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.FSUPP.ARS.ARATGT.SGTGT": {
+                  "symbolID": "G*FPATG--****X",
+                  "tag": "TARGET SERIES OR GROUP",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.FSUPP.ARS.ARATGT.SMK": {
+                  "symbolID": "G*FPATS--****X",
+                  "tag": "AREA TARGET SMOKE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.ARATGT.BMARA": {
+                  "symbolID": "G*FPATB--****X",
+                  "tag": "BOMB AREA",
+                  "symbolType": "MultiSegmentPolygon"
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.FSA.IRR": {
+                  "symbolID": "G*FPACSI-****X",
+                  "tag": "FIRE SUPPORT AREA IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.ACA.IRR": {
+                  "symbolID": "G*FPACAI-****X",
+                  "tag": "AIRSPACE COORDINATION AREA IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "altitudeDepth", "additionalInfo1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.FFA.IRR": {
+                  "symbolID": "G*FPACFI-****X",
+                  "tag": "FREE FIRE AREA IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.NFA.IRR": {
+                  "symbolID": "G*FPACNI-****X",
+                  "tag": "NO-FIRE AREA IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.RFA.IRR": {
+                  "symbolID": "G*FPACRI-****X",
+                  "tag": "RESTRICTIVE AREA IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.SNSZ.IRR": {
+                  "symbolID": "G*FPACEI-****X",
+                  "tag": "SENSOR ZONE IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.SNSZ.IRR": {
+                  "symbolID": "G*FPACDI-****X",
+                  "tag": "DEAD SPACE AREA IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.ZOR.IRR": {
+                  "symbolID": "G*FPACZI-****X",
+                  "tag": "ZONE OF RESPONSIBILITY IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.TBA.IRR": {
+                  "symbolID": "G*FPACBI-****X",
+                  "tag": "TARGET BUILD-UP AREA IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.TVAR.IRR": {
+                  "symbolID": "G*FPACVI-****X",
+                  "tag": "TARGET VALUE AREA IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.TGMF": {
+                  "symbolID": "G*FPACT--****X",
+                  "tag": "TERMINALLY GUIDED MUNITION FOOTPRINT",
+                  "symbolType": "MultiSegmentPolygon"
+            },
+            "TACGRP.FSUPP.ARS.TGTAQZ.ATIZ.IRR": {
+                  "symbolID": "G*FPAZII-****X",
+                  "tag": "ARTILLERY TARGET INTELLIGENCE ZONE IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.TGTAQZ.CFFZ.IRR": {
+                  "symbolID": "G*FPAZXI-****X",
+                  "tag": "CALL FOR FIRE ZONE IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.TGTAQZ.CNS.IRR": {
+                  "symbolID": "G*FPAZCI-****X",
+                  "tag": "CENSOR ZONE IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.TGTAQZ.CFZ.IRR": {
+                  "symbolID": "G*FPAZFI-****X",
+                  "tag": "CRITICAL FRIENDLY ZONE IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.KLBOX.BLUE.IRR": {
+                  "symbolID": "G*FPAKBI-****X",
+                  "tag": "KILL BOX BLUE IRREGULAR",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            }
+       },
+
+       "combatServiceSupport": {
+            "TACGRP.CSS.ARA.DHA": {
+                  "symbolID": "G*SPAD---****X",
+                  "tag": "DETAINEE HOLDING AREA",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.CSS.ARA.EPWHA": {
+                  "symbolID": "G*SPAE---****X",
+                  "tag": "ENEMY PRISONERS OF WAR HOLDING AREA",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.CSS.ARA.FARP": {
+                  "symbolID": "G*SPAR---****X",
+                  "tag": "FORWARD ARMING AND REFUELING AREA",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.CSS.ARA.RHA": {
+                  "symbolID": "G*SPAH---****X",
+                  "tag": "REFUGEE HOLDING AREA",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.CSS.ARA.BSA": {
+                  "symbolID": "G*SPASB--****X",
+                  "tag": "SUPPORT AREA BRIGADE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.CSS.ARA.DSA": {
+                  "symbolID": "G*SPASD--****X",
+                  "tag": "SUPPORT AREA DIVISION",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.CSS.ARA.RSA": {
+                  "symbolID": "G*SPASR--****X",
+                  "tag": "SUPPORT AREA REGIMENTAL",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+
+       },
+
+       "aliasModifiers": { 
             "echelon":             { modifier:  "B_ECHELON",
                                      type:      "ModifiersUnits",
                                      valueType: "Text" },
@@ -5210,7 +5663,7 @@ define( function(){
                                       valueType: "Text" },
             "location":             { modifier:  "Y_LOCATION",
                                       type:      "ModifiersUnits",
-                                      valueType: "Array" },
+                                      valueType: "Text" },
             "reinforcedReduced":    { modifier:  "F_REINFORCED_REDUCED",
                                       type:      "ModifiersUnits",
                                       valueType: "Text" },
@@ -5252,7 +5705,28 @@ define( function(){
                                       valueType: "Boolean" },
             "symbologyStandard":    { modifier:  "SymbologyStandard",                            
                                       type:      "MilStdAttributes",
-                                      valueType: "Number" }
+                                      valueType: "Number" },
+            "distance":             { modifier:  "AM_DISTANCE",                            
+                                      type:      "ModifiersTG",
+                                      valueType: "Array" },
+            "azimuth":              { modifier:  "AN_AZIMUTH",                            
+                                      type:      "ModifiersTG",
+                                      valueType: "Array" },
+            "length":               { modifier:  "LENGTH",                            
+                                      type:      "ModifiersTG",
+                                      valueType: "Number" },
+            "width":                { modifier:  "WIDTH",                            
+                                      type:      "ModifiersTG",
+                                      valueType: "Number" },
+            "angle":                { modifier:  "ANGLE",                            
+                                      type:      "ModifiersTG",
+                                      valueType: "Number" },
+            "DTG1":                 { modifier:  "W_DTG_1",                            
+                                      type:      "ModifiersTG",
+                                      valueType: "Text" },
+            "DTG2":                 { modifier:  "W1_DTG_2",                            
+                                      type:      "ModifiersTG",
+                                      valueType: "Text" }
          },
         "find": function( section, tag ) {
             var units = {};

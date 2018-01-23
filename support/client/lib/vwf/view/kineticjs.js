@@ -1,7 +1,7 @@
 "use strict";
 
-define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ], 
-    function( module, view, $, utility, color ) {
+define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "vwf/utility/vertexSimplify/simplify" ], 
+    function( module, view, $, utility, color, simplifyJs ) {
 
     var viewDriver;
     var stageContainer;
@@ -901,8 +901,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
             propagateNodeToModel( drawing_private );
         },
 
-        setImage: setImage,
-        refreshLayer: refreshLayer
+        setImage:       setImage,
+        refreshLayer:   refreshLayer,
+        simplifyPoints: simplifyPoints
     } );
 
     // Private helper functions --------------------------------------------------------------------
@@ -1260,6 +1261,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                         default:
                             break;
                     }
+                    if ( ( userState.drawing_mode === "freeDraw" ) || ( userState.drawing_mode === "polygon" ) ) {
+                        // Optimize the number of vertices
+                        if ( simplifyJs ) {
+                            drawingObject.points( simplifyPoints( drawingObject.points() ) );
+                        }
+                    }
+
                     drawAndPropagate = true;
                     break;
 
@@ -1274,6 +1282,33 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                 propagateNodeToModel( drawing_private );
             }
         }    
+    };
+
+    // Simplify konva points
+    // Konva points are in an array like [x1,y1,x2,y2,...xn,yn]
+    function simplifyPoints( points ) {
+        var ptarray = [];
+        // Convert to array of  x, y points
+        for ( var i = 0; i < points.length; i = i+2 ) {
+            var point = { x: points[ i ], y: points[ i+1 ] };
+            ptarray.push( point );
+        }
+
+        // Optimize and reduce line segments
+        console.info( "Points before simplify: " + ptarray.length );
+        if ( ptarray.length > 2 ) {
+            ptarray = simplifyJs.simplify( ptarray );
+        }
+        console.info( "Points after simplify:  " + ptarray.length );
+
+        // Convert back to x, y list
+        var simplifiedPts = [];
+        for ( var j = 0; j < ptarray.length; j++ ) {
+            simplifiedPts.push( ptarray[j].x );
+            simplifiedPts.push( ptarray[j].y );
+        }
+
+        return simplifiedPts;
     };
 
     function drawUpdate( nodeID, eventData, nodeData, upEvent ) {
@@ -1402,7 +1437,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color" ],
                             posY - privateState.previousPoint[ 1 ] 
                         ];
 
-                        if ( ( Math.abs( dragDiff[0] ) + Math.abs( dragDiff[1] ) ) > 0 ) {
+                        if ( ( Math.abs( dragDiff[ 0 ] ) + Math.abs( dragDiff[ 1 ] ) ) > 0 ) {
                             points.push( posX );
                             points.push( posY );
                             privateState.previousPoint = [ posX, posY ];

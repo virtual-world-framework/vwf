@@ -133,6 +133,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         rendererReady: rendererReady,
         getUpdatedUnitSymbolID: getUpdatedUnitSymbolID,
         getMissionGraphicDefinition: getMissionGraphicDefinition,
+        renderMissionGraphic: renderMissionGraphic,
 
         on: function( eventName, callback ) {
             eventHandlers[ eventName ] = callback;
@@ -359,7 +360,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         }
     }
 
-    function renderMissionGraphic( symbolID, affiliation, modifierList, controlPoints, bounds, msnGfx, format ) {
+    function renderMissionGraphic( symbolID, affiliation, modifiers, controlPoints, bounds, msnGfx, format ) {
         
         if ( !cws ) {
             self.logger.errorx( "cws is undefined - unable to render unit icon" );
@@ -368,23 +369,35 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
 
         var rendererMP = sec.web.renderer.SECWebRenderer;
         var scale = 100.0;
-        var updatedUnit = $.extend( true, {}, unit );
         var appID = self.kernel.application();
         var renderer = armyc2.c2sd.renderer;
         var msa = renderer.utilities.MilStdAttributes;
         var rs = renderer.utilities.RendererSettings;
         var symUtil = renderer.utilities.SymbolUtilities;
+        var milSymControlPts = convertXYVertexArrayToMilSymControlPts( controlPoints );
         
         // Set affiliation in symbol id
         symbolCode = cws.addAffiliationToSymbolId( symbolID, affiliation );
         
-        var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, controlPoints, bounds.width, bounds.height, null, modifiers, format);
+        var img = rendererMP.RenderSymbol2D("ID","Name","Description", symbolCode, milSymControlPts, bounds[0], bounds[1], null, modifiers, format);
 
-        if ( !!img && !!img.image ) {  
-            return img.image;
-        }      
-    
-        return;
+        return img;
+    }
+
+    // Take an array [x1,y1,xy,y2,...xn,yn] and convert to 
+    // mil-sym control point string "x1,y1 x2,y2 ... xn,yn"
+    function convertXYVertexArrayToMilSymControlPts( xyVertexPts ) {
+        var milSymControlPts = "";
+        // xyVertexPts is an array where even numbered elements are x and odd are y
+        // mil-sym style is a string where pairs of x and y are separated by spaces
+        for ( var i = 0; i < xyVertexPts.length; i=i+2 ) {
+            milSymControlPts = milSymControlPts + xyVertexPts[i] + "," + xyVertexPts[i+1];
+            if ( i < xyVertexPts.length-2 ) {
+                milSymControlPts = milSymControlPts + " ";
+            }
+        }
+
+        return milSymControlPts;
     }
 
     function getMissionGraphicDefinition( category, fullName ) {

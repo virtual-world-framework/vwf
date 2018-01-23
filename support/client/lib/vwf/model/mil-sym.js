@@ -450,7 +450,8 @@ define( [ "module",
                         case "rotation":
                         case "controlPts":
                         case "symbolType":
-                            if ( node.nodeType === "missionGfx" && !!propertyValue ) {
+                        case "bounds":
+                            if ( node.nodeType === "missionGfx" && propertyValue !== undefined && propertyValue !== null ) {
                                 node[ propertyName ] = propertyValue;
                                 renderImage = basicPropertiesMet( node );
                             }
@@ -459,11 +460,10 @@ define( [ "module",
                         case "attributes":
                             if ( node.nodeType === "missionGfx" && !!propertyValue ) {
                                 var attrs = propertyValue;
-                                var attrsChanged = ( attrs.width !== node.width) || ( attrs.height !== node.height);
-                                if ( attrsChanged ) {
-                                    node.width = attrs.width;
-                                    node.height= attrs.height;
-                                    attrs.image = renderMsnGfx( node );
+                                var image = renderMsnGfx( node );
+                                renderImage = basicPropertiesMet( node );
+                                if ( !!image ) {
+                                    attrs.image = image.toDataURL();
                                     modelDriver.kernel.setProperty( node.ID, propertyName, attrs );
                                 }
                             }
@@ -473,8 +473,6 @@ define( [ "module",
                 } else if ( node.nodeType === "modifier" ) {
                     
                     var unit = this.state.nodes[ node.parentID ];
-                    var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-                    var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
 
                     if ( unit === undefined ) {
                         return undefined;
@@ -673,7 +671,7 @@ define( [ "module",
 
         } else if ( node !== undefined && node.nodeType === "missionGfx" && node.symbolID !== undefined ) {
             if ( value = renderMsnGfx( node ) ) {
-                modelDriver.kernel.setProperty( node.ID, "image", value );
+                modelDriver.kernel.setProperty( node.ID, "image", value.toDataURL() );
             }
         }
 
@@ -689,7 +687,6 @@ define( [ "module",
             var rendererMP = sec.web.renderer.SECWebRenderer;
             var scale = 100.0;
             var renderer = armyc2.c2sd.renderer;
-            var msa = renderer.utilities.MilStdAttributes;
             var rs = renderer.utilities.RendererSettings;
             var symUtil = renderer.utilities.SymbolUtilities;
             var symbolCode = node.symbolID;
@@ -700,41 +697,53 @@ define( [ "module",
                 symbolCode = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
             }
             
-            var img = rendererMP.RenderSymbol2D(node.ID,node.fullName,node.description, symbolCode, controlPts, node.width, node.height, null, node.modifiers, format);
+            var img = rendererMP.RenderSymbol2D(node.ID,node.fullName,node.description, symbolCode, controlPts, node.bounds[0], node.bounds[1], null, node.modifiers, format);
 
-            if ( !!img && !!img.image ) {
-                value = img.image.toDataURL();
+            //if ( !!img && !!img.image ) {
+            if ( ( img || {} ).image ) {
+                value = img.image;
             }
         }
 
         return value;
     }
 
+    function getModifierActualName( modObj ) {
+        var modifierActualName;
+        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
+        var mu  = armyc2.c2sd.renderer.utilities.ModifiersUnits;
+        var mtg = armyc2.c2sd.renderer.utilities.ModifiersTG;
+
+        switch ( modObj.type ) {
+            case "ModifiersUnits":
+                modifierActualName = mu[ modObj.modifier ];
+                break;
+                
+            case "MilStdAttributes":
+                modifierActualName = msa[ modObj.modifier ];
+                break;
+                
+            case "ModifiersTG":
+                modifierActualName = mtg[ modObj.modifier ];
+                break;
+        }
+
+        return modifierActualName;
+    }
+
     function setModifier( unit, modifierAlias, modifierValue ) {
         
         var modObj = cws.modifierByAlias( modifierAlias );
-        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-        var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
         var modifierSet = false;
         
         if ( modObj !== undefined ) {
             
-            var modifierActualName;
-            
-            switch ( modObj.type ) {
-                case "ModifiersUnits":
-                    modifierActualName = mu[ modObj.modifier ];
-                    break;
-                    
-                case "MilStdAttributes":
-                    modifierActualName = msa[ modObj.modifier ];
-                    break;
-                    
-                default:
-                    modelDriver.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified." );
-                    return modifierSet;
+            var modifierActualName = getModifierActualName( modObj );
+            if ( !modifierActualName ) {
+                modelDriver.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified." );
+                return modifierSet;
             }
-            
+
             if ( modifierValue === "" ) {
                 if ( unit.modifiers[ modifierActualName ] !== undefined ) {
                     delete unit.modifiers[ modifierActualName ];
@@ -766,28 +775,16 @@ define( [ "module",
     function getModifier( unit, modifierAlias ) {
  
         var modObj = cws.modifierByAlias( modifierAlias );
-        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-        var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
         var value = undefined;
         
         if ( modObj !== undefined ) {
             
-            var modifierActualName;
-            
-            switch ( modObj.type ) {
-                case "ModifiersUnits":
-                    modifierActualName = mu[ modObj.modifier ];
-                    break;
-                    
-                case "MilStdAttributes":
-                    modifierActualName = msa[ modObj.modifier ];
-                    break;
-                    
-                default:
-                    modelDriver.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
-                    return value;
+            var modifierActualName = getModifierActualName( modObj );
+            if ( !modifierActualName ) {
+                modelDriver.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
+                return value;
             }
-
+            
             value = unit.modifiers[ modifierActualName ];            
         }
          
@@ -837,10 +834,10 @@ define( [ "module",
                         ( node.symbolID !== undefined ) && 
                         ( node.x !== undefined ) && 
                         ( node.y !== undefined ) && 
-                        ( node.width !== undefined ) && 
-                        ( node.height !== undefined ) && 
-                        ( node.width > 0 ) && 
-                        ( node.height > 0 ) &&
+                        ( node.bounds !== undefined ) && 
+                        ( node.bounds.length === 2 ) &&                         
+                        ( node.bounds[0] > 0 ) && 
+                        ( node.bounds[1] > 0 ) &&
                         (!!node.controlPts && ( node.controlPts.length > 0 ) ) 
                         );
                         break;

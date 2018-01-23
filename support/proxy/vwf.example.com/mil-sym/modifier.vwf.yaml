@@ -28,6 +28,11 @@ properties:
   uniqueDesignation2:
   speed:
   validModifiers:
+  distance:
+  azimuth:
+  length:
+  width:
+  angle:
 scripts:
 - |
   this.initialize = function() {
