@@ -329,6 +329,10 @@ define( [ "module",
                             value = undefined;
                             break;
 
+                        case "hitGraphFromCache":
+                            kineticObj.attrs.hitGraphFromCache = propertyValue;
+                            break;
+
                         case "attributes":
                             // Special case for images, don't overwrite a valid image with a bogus object
                             var attrs = propertyValue;
@@ -1261,6 +1265,10 @@ define( [ "module",
                                 value = kineticObj.getAbsoluteZIndex();
                                 break;
 
+                            case "hitGraphFromCache":
+                                value = kineticObj.attrs.hitGraphFromCache;
+                                break;
+
                             case "attributes":
                                 value = kineticObj.getAttrs();
                                 break;
@@ -1622,6 +1630,16 @@ define( [ "module",
                         parent.children.push( node.ID );
                         parent.kineticObj.add( node.kineticObj );    
                     }
+                },
+                "refreshHitGraphFromCache": function( kineticObj ) {
+                    if ( kineticObj.getAttrs().hitGraphFromCache && kineticObj.isVisible() ) {
+                        kineticObj.clearCache();
+                        kineticObj.draw();
+                        kineticObj.cache();
+                        kineticObj.drawHitFromCache();
+                        return true;
+                    }
+                    return false;
                 }
             };
 
@@ -1733,6 +1751,10 @@ define( [ "module",
                 
                 var node = this.state.nodes[ nodeID ];
                 if ( node.kineticObj !== undefined ) {
+                    // Uncache object
+                    if ( node.kineticObj.attrs.hitGraphFromCache ) {
+                        node.kineticObj.clearCache();
+                    }
                     // removes and destroys object
                     node.kineticObj.remove();
                     node.kineticObj.destroy();
@@ -2167,7 +2189,7 @@ define( [ "module",
                 }
             }
 
-            // Redraw the object now that it's image has loaded
+            modelDriver.state.refreshHitGraphFromCache( kineticObj );
             kineticObj.draw();
             
             modelDriver.kernel.fireEvent( nodeID, "imageLoaded", [ url ] );

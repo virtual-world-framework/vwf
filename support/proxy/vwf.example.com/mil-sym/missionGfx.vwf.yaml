@@ -12,6 +12,7 @@ properties:
   disableScaleAndRotationForSpeed: false
   isDraggable: false
   bounds: []
+  hitGraphFromCache: true
 
   image:
     set: |
