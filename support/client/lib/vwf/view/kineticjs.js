@@ -909,55 +909,75 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     // Private helper functions --------------------------------------------------------------------
 
     function update( vwfTime ) {
-        // switch to update, when the tickless branch is merged to development
-        var nodeIDs = Object.keys( viewDriver.state.draggingNodes );
+
         var renderNodes = {};
         var doRenderNodes = false;
         
-        for ( var i = 0; i < nodeIDs.length; i++ ) {
+        for ( var nodeID in viewDriver.state.draggingNodes ) {
         
-            var nodeID = nodeIDs[ i ];
             var node = viewDriver.state.draggingNodes[ nodeID ];
+            var kineticObj = node.kineticObj;
+
+            if ( !kineticObj ) {
+                continue;
+            }
 
             // If users can drag this node and all clients should stay synchronized, we must 
             // pull the new node position out of kinetic and update the model with it
-            var kineticObj = node.kineticObj;
-            if ( kineticObj ) {
-                var draggable = kineticObj.draggable();
+            var draggable = kineticObj.draggable();
 
-                var positionProperty = ( node.model || {} ).position;
-                var modelChangeShouldUpdateView =
-                    ( positionProperty || {} ).modelChangeShouldUpdateView;
+            var positionProperty = ( node.model || {} ).position;
+            var modelChangeShouldUpdateView =
+                ( positionProperty || {} ).modelChangeShouldUpdateView;
 
-                if ( draggable && modelChangeShouldUpdateView )  { 
-                    var kineticX = kineticObj.x();
-                    var kineticY = kineticObj.y();
+            if ( draggable && modelChangeShouldUpdateView )  { 
+                var kineticX = kineticObj.x();
+                var kineticY = kineticObj.y();
 
-                    // If the position of this node has changed since its last model value, set the
-                    // model property with the new value
-                    if ( ( positionProperty.value.x !== kineticX ) || 
-                         ( positionProperty.value.y !== kineticY ) ) {
+                // If the position of this node has changed since its last model value, set the
+                // model property with the new value
+                if ( ( positionProperty.value.x !== kineticX ) || 
+                     ( positionProperty.value.y !== kineticY ) ) {
 
-                        // Fire this event to notify the model that kinetic has already updated the
-                        // view and it doesn't need to (if the model set the value, it would risk 
-                        // having the model set the view back to an old value, which results in 
-                        // jitter while the user is dragging the node)
-                        viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
-                        viewDriver.kernel.callMethod( nodeID, "setMapPositionFromPosition",
-                            [ 
-                                {
-                                    x: kineticX,
-                                    y: kineticY
-                                },
-                                kineticObj.scaleX()
-                            ] );
+                    // Fire this event to notify the model that kinetic has already updated the
+                    // view and it doesn't need to (if the model set the value, it would risk 
+                    // having the model set the view back to an old value, which results in 
+                    // jitter while the user is dragging the node)
+                    viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
 
-                        doRenderNodes = true;
-                        renderNodes[ nodeID ] = kineticObj;
-                    }
+                    // Update the node's mapPosition
+                    // Note: It is usually bad practice to use a potentially out-of-date model value
+                    //       (like symbolCenter) to calculate model state on the view side.
+                    //       Doing so on the model side ensures that all values are up to date.
+                    //       However, for integration with other applications who receive reflector
+                    //       traffic, it is important for them to see the mapPosition property get
+                    //       set.
+                    //    
+                    //       Since the "errors" that might be caused by having an out-of-date
+                    //       symbolCenter would be rare, we do this here.
+                    // 
+                    //       (The error would take the form that the user who dragged the symbol
+                    //       would see the symbol in the view where they dropped it.
+                    //       However, if the symbol had been rerendered between the drop and
+                    //       the model property getting set, the model value would be slightly
+                    //       different, such that all other users would see the unit in a different
+                    //       location.  That would resolve the next time someone moved the unit.)
+                    var iconID = node.children.filter( childID => childID.includes( "icon" ) )[ 0 ];
+                    var icon = viewDriver.state.nodes[ iconID ].kineticObj;
+                    var symbolCenter = icon.attrs.symbolCenter || {
+                        x: 0,
+                        y: 0
+                    };
+                    var scale = kineticObj.scaleX();
+                    viewDriver.kernel.setProperty( nodeID, "mapPosition",  {
+                        x: kineticX + scale * symbolCenter.x,
+                        y: kineticY + scale * symbolCenter.y,
+                    } );
+
+                    doRenderNodes = true;
+                    renderNodes[ nodeID ] = kineticObj;
                 }
             }
-
         }
         
         if ( doRenderNodes ) {
