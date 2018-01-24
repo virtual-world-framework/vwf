@@ -37,6 +37,7 @@ properties:
   supportMouseAndTouchEvents: false
   hasMouseAndTouchEvents: false
   attributes:
+  hitGraphFromCache: false
 methods:
   toggleVisibility:
   toggleListening:

@@ -1728,6 +1728,10 @@ define( [ "module",
                 
                 var node = this.state.nodes[ nodeID ];
                 if ( node.kineticObj !== undefined ) {
+                    // Uncache object
+                    if ( node.model.hitGraphFromCache ) {
+                        node.kineticObj.clearCache();
+                    }
                     // removes and destroys object
                     node.kineticObj.remove();
                     node.kineticObj.destroy();
@@ -1834,6 +1838,10 @@ define( [ "module",
                                         "modelChangeShouldUpdateView": true
                                     };
                                 }
+                                break;
+
+                            case "hitGraphFromCache":
+                                node.model[ propertyName ] = propertyValue;
                                 break;
 
                             default:
@@ -2162,8 +2170,13 @@ define( [ "module",
                 }
             }
 
-            // Redraw the object now that it's image has loaded
-            kineticObj.draw();
+            // Redraw the object now that its image has loaded
+            if ( node.model.hitGraphFromCache ) {
+                kineticObj.clearCache();
+                kineticObj.draw();
+                kineticObj.cache({drawBorder: true});
+                kineticObj.drawHitFromCache();
+            }
             
             modelDriver.kernel.fireEvent( nodeID, "imageLoaded", [ url ] );
         }

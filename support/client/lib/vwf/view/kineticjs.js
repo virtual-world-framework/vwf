@@ -682,6 +682,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                         drawThis = !activelyDrawing;
                     }
                     break;
+                case "rotation":
+                    if ( node.model.rotation !== undefined ) {
+                        kineticObj.rotation( node.model.rotation );
+                        drawThis = !activelyDrawing;
+                    }
+                   break;
 
                 case "activeLayerID":
                     if ( this.kernel.client() === this.kernel.moniker() ) {
@@ -719,11 +725,23 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                     drawThis = false;
                     break;
 
+                //case "attributes":
+                //    kineticObj.setAttrs( propertyValue );
+                //    drawThis = !activelyDrawing;
+                //    break;
+
                 default:
                     drawThis = this.state.pauseRendering ? false : !activelyDrawing;
             }
 
             if ( drawThis ) {
+                // If drawing from cache, set or reset the cached object
+                if ( node.model.hitGraphFromCache ) {
+                    kineticObj.clearCache();
+                    kineticObj.draw();
+                    kineticObj.cache({drawBorder: true});
+                    kineticObj.drawHitFromCache();
+                }
                 drawObject( kineticObj, clearBefore );
             }
 
