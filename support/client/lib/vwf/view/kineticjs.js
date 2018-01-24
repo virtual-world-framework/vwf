@@ -725,23 +725,18 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                     drawThis = false;
                     break;
 
-                //case "attributes":
-                //    kineticObj.setAttrs( propertyValue );
-                //    drawThis = !activelyDrawing;
-                //    break;
+                case "attributes":
+                    drawThis = !activelyDrawing;
+                    break;
 
                 default:
                     drawThis = this.state.pauseRendering ? false : !activelyDrawing;
             }
 
             if ( drawThis ) {
-                // If drawing from cache, set or reset the cached object
-                if ( node.model.hitGraphFromCache ) {
-                    kineticObj.clearCache();
-                    kineticObj.draw();
-                    kineticObj.cache({drawBorder: true});
-                    kineticObj.drawHitFromCache();
-                }
+                // If drawing from cache, refresh the cached object
+                refreshHitGraphFromCache( kineticObj );
+                // Draw the object
                 drawObject( kineticObj, clearBefore );
             }
 
@@ -898,6 +893,28 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                 var child = children[ i ];
                 var childWasRequested = child && ( childNames.indexOf( child.name() ) > -1 );
                 childWasRequested && child.listening( listen );
+            }
+        },
+
+        refreshChildrenHitGraphFromCache: function( nodeID ) {
+            var node = this.state.nodes[ nodeID ];
+
+            var kineticObj = node && node.kineticObj;
+            if ( !kineticObj ) {
+                view.logger.errorx( "refreshChildrenHitGraphFromCache",
+                    "Node '", nodeID, "' is not a konva node" );
+                return;
+            }
+
+            // Recurse through children to refresh the ones using hitgraph from cache
+            var children = kineticObj.children;
+            for ( var i = 0; i < children.length; i++ ) {
+                var child = children[ i ];
+                if ( refreshHitGraphFromCache( child ) ) {
+                    child.draw();
+                } else {
+                    this.refreshChildrenHitGraphFromCache( child.getId() );
+                }
             }
         },
 
@@ -2063,4 +2080,16 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             eventHandler( parameters );
         }
     }
+
+    function refreshHitGraphFromCache( kineticObj ) {
+        if ( kineticObj.getAttrs().hitGraphFromCache && kineticObj.isVisible() ) {
+            kineticObj.clearCache();
+            kineticObj.draw();
+            kineticObj.cache();
+            kineticObj.drawHitFromCache();
+            return true;
+        }
+        return false;
+    }
+
 } );
