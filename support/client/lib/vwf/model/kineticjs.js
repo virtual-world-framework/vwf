@@ -1625,6 +1625,16 @@ define( [ "module",
                         parent.children.push( node.ID );
                         parent.kineticObj.add( node.kineticObj );    
                     }
+                },
+                "refreshHitGraphFromCache": function( kineticObj ) {
+                    if ( kineticObj.getAttrs().hitGraphFromCache && kineticObj.isVisible() ) {
+                        kineticObj.clearCache();
+                        kineticObj.draw();
+                        kineticObj.cache();
+                        kineticObj.drawHitFromCache();
+                        return true;
+                    }
+                    return false;
                 }
             };
 
@@ -2174,13 +2184,7 @@ define( [ "module",
                 }
             }
 
-            // Redraw the object now that its image has loaded
-            if ( kineticObj.attrs.hitGraphFromCache && kineticObj.isVisible() ) {
-                kineticObj.clearCache();
-                kineticObj.draw();
-                kineticObj.cache();
-                kineticObj.drawHitFromCache();
-            }
+            modelDriver.state.refreshHitGraphFromCache( kineticObj );
             kineticObj.draw();
             
             modelDriver.kernel.fireEvent( nodeID, "imageLoaded", [ url ] );

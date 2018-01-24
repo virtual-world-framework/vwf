@@ -687,7 +687,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                         kineticObj.rotation( node.model.rotation );
                         drawThis = !activelyDrawing;
                     }
-                   break;
+                    break;
 
                 case "activeLayerID":
                     if ( this.kernel.client() === this.kernel.moniker() ) {
@@ -735,7 +735,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
             if ( drawThis ) {
                 // If drawing from cache, refresh the cached object
-                refreshHitGraphFromCache( kineticObj );
+                viewDriver.state.refreshHitGraphFromCache( kineticObj );
                 // Draw the object
                 drawObject( kineticObj, clearBefore );
             }
@@ -910,7 +910,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             var children = kineticObj.children;
             for ( var i = 0; i < children.length; i++ ) {
                 var child = children[ i ];
-                if ( refreshHitGraphFromCache( child ) ) {
+                if ( viewDriver.state.refreshHitGraphFromCache( child ) ) {
                     child.draw();
                 } else {
                     this.refreshChildrenHitGraphFromCache( child.getId() );
@@ -2079,17 +2079,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         if ( typeof eventHandler === "function" ) {
             eventHandler( parameters );
         }
-    }
-
-    function refreshHitGraphFromCache( kineticObj ) {
-        if ( kineticObj.getAttrs().hitGraphFromCache && kineticObj.isVisible() ) {
-            kineticObj.clearCache();
-            kineticObj.draw();
-            kineticObj.cache();
-            kineticObj.drawHitFromCache();
-            return true;
-        }
-        return false;
     }
 
 } );
