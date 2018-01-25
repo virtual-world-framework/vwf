@@ -907,15 +907,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             }
 
             // Recurse through children to refresh the ones using hitgraph from cache
-            var children = kineticObj.children;
-            if ( !!children ) {
-                for ( var i = 0; i < children.length; i++ ) {
-                    var child = children[ i ];
-                    if ( viewDriver.state.refreshHitGraphFromCache( child ) ) {
-                        child.draw();
-                    } else {
-                        this.refreshChildrenHitGraphFromCache( child.getId() );
-                    }
+            var children = kineticObj.children || [];
+            for ( var i = 0; i < children.length; i++ ) {
+                var child = children[ i ];
+                if ( viewDriver.state.refreshHitGraphFromCache( child ) ) {
+                    child.draw();
+                } else {
+                    this.refreshChildrenHitGraphFromCache( child.getId() );
                 }
             }
         },
