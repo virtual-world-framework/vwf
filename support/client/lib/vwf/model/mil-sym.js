@@ -25,6 +25,7 @@ define( [ "module",
     function( module, model, utility, Color, cws, $ ) {
 
     var modelDriver;
+    var _pausedRenderNodes = [];
 
     return model.load( module, {
 
@@ -115,6 +116,8 @@ define( [ "module",
             if ( node === undefined ) {
 
                 if ( isUnitNode( protos ) ) {
+
+                    _pausedRenderNodes.push( childID );
 
                     this.state.nodes[ childID ] = node = this.state.createNode( "unit", nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback );
@@ -578,6 +581,9 @@ define( [ "module",
 
             switch( methodName ) {
                 case "render":
+                    if ( _pausedRenderNodes.includes( nodeID ) ) {
+                        _pausedRenderNodes.splice( _pausedRenderNodes.indexOf( nodeID ), 1 );
+                    }
                     value = render( node );
                     break;
             }
@@ -646,6 +652,10 @@ define( [ "module",
     function render( node ) {
 
         if ( node === undefined ) {
+            return;
+        }
+
+        if ( _pausedRenderNodes.includes( node.ID ) ) {
             return;
         }
 
