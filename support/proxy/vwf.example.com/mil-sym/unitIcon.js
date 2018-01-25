@@ -15,6 +15,8 @@ this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
     if ( this.parent !== undefined ) {
         this.parent.handleRender( img, iconSize, symbolCenter, symbolBounds );
     }
+
+    //# sourceURL=unitIcon.handleRender
 }
 
 this.updateIcon = function( img, iconSize, symbolCenter ) {
@@ -30,5 +32,6 @@ this.updateIcon = function( img, iconSize, symbolCenter ) {
     // reset the unit group's "position" (upper left point)
     // to keep its center on "mapPosition" 
     this.parent.setPositionFromMapPosition();
+
+    //# sourceURL=unitIcon.updateIcon
 }
-//# sourceURL=unitIcon.js
