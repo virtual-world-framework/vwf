@@ -1,7 +1,3 @@
-this.initialize = function() {
-    this.future( 0 ).render();
-}
-
 // The driver handles the render method
 // this.render = function() {}
 
