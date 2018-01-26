@@ -168,10 +168,9 @@ define( [ "module",
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName ) {
 
-            if ( this.debug.initializing ) {
-                this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            if ( _pausedRenderNodes.includes( childID ) ) {
+                _pausedRenderNodes.splice( _pausedRenderNodes.indexOf( childID ), 1 );
             } 
-
         },
 
         deletingNode: function( nodeID ) {
@@ -581,9 +580,6 @@ define( [ "module",
 
             switch( methodName ) {
                 case "render":
-                    if ( _pausedRenderNodes.includes( nodeID ) ) {
-                        _pausedRenderNodes.splice( _pausedRenderNodes.indexOf( nodeID ), 1 );
-                    }
                     value = render( node );
                     break;
             }
