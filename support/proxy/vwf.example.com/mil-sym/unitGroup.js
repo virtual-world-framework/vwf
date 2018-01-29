@@ -159,6 +159,8 @@ this.setPositionFromMapPosition = function() {
         x: this.mapPosition.x - this.scaleX * symbolCenter.x,
         y: this.mapPosition.y - this.scaleY * symbolCenter.y
     };
+
+    //# sourceURL=unitGroup.setPositionFromMapPosition
 }
 
 this.setMapPositionFromPosition = function( konvaObjectPosition, scale ) {
