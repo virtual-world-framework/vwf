@@ -5619,6 +5619,14 @@
         "warning": "3.0.0"
       }
     },
+    "react-table": {
+      "version": "6.7.6",
+      "resolved": "https://registry.npmjs.org/react-table/-/react-table-6.7.6.tgz",
+      "integrity": "sha1-P547MIMozrBO+TpHur76uiYZyQU=",
+      "requires": {
+        "classnames": "2.2.5"
+      }
+    },
     "read-pkg": {
       "version": "2.0.0",
       "resolved": "https://registry.npmjs.org/read-pkg/-/read-pkg-2.0.0.tgz",

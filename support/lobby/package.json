@@ -34,7 +34,8 @@
     "bootstrap": "^3.3.7",
     "react": "^16.2.0",
     "react-bootstrap": "^0.31.5",
-    "react-dom": "^16.2.0"
+    "react-dom": "^16.2.0",
+    "react-table": "^6.7.6"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
