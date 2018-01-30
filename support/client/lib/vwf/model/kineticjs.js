@@ -2219,7 +2219,7 @@ define( [ "module",
         }
         imageObj.onerror = function() {
             modelDriver.logger.errorx( "loadImage", "Invalid image url:", url );
-                imageObj.src = oldSrc;
+            imageObj.src = oldSrc;
             modelDriver.kernel.fireEvent( nodeID, "imageLoadError", [ url ] );
         }
 
