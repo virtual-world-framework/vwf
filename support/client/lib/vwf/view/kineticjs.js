@@ -936,6 +936,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             propagateNodeToModel( drawing_private );
         },
 
+        getChildIdByName: function( parentID, childName ) {
+            var parent = viewDriver.state.nodes[ parentID ] || {};
+            if ( parent.kineticObj ) {
+                var children = parent.kineticObj.children || [];
+                for ( var i = 0; i < children.length; i++ ) {
+                    if ( children[ i ].name() === childName ) {
+                        return children[ i ].getId();
+                    }
+                }
+            }
+            return undefined;
+        },
+
         setImage:       setImage,
         refreshLayer:   refreshLayer,
         simplifyPoints: simplifyPoints
