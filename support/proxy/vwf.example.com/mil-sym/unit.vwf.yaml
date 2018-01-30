@@ -61,8 +61,6 @@ properties:
 
 methods:
 
-  render:
-
   handleRender:
 
 events:

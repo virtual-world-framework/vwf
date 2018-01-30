@@ -570,22 +570,11 @@ define( [ "module",
             return value;
         },
 
-
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-            
-            var node = this.state.nodes[ nodeID ]; 
-            var value = undefined;
-
-            switch( methodName ) {
-                case "render":
-                    value = render( node );
-                    break;
-            }
-
-            return value;
-        }
+        // callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
+        //     return undefined;
+        // },
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
 
