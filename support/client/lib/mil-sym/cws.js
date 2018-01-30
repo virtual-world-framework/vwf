@@ -5459,119 +5459,119 @@ define( function(){
 
        "fireSupport": {
             "TACGRP.FSUPP.ARS.ARATGT": {
-                  "symbolID": "G*FPAT---****X",
+                  "symbolID": "G*FPAT----****X",
                   "tag": "AREA TARGET",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.FSUPP.ARS.ARATGT.SGTGT": {
-                  "symbolID": "G*FPATG--****X",
+                  "symbolID": "G*FPATG---****X",
                   "tag": "TARGET SERIES OR GROUP",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.FSUPP.ARS.ARATGT.SMK": {
-                  "symbolID": "G*FPATS--****X",
+                  "symbolID": "G*FPATS---****X",
                   "tag": "AREA TARGET SMOKE",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.ARATGT.BMARA": {
-                  "symbolID": "G*FPATB--****X",
+                  "symbolID": "G*FPATB---****X",
                   "tag": "BOMB AREA",
                   "symbolType": "MultiSegmentPolygon"
             },
             "TACGRP.FSUPP.ARS.C2ARS.FSA.IRR": {
-                  "symbolID": "G*FPACSI-****X",
+                  "symbolID": "G*FPACSI--****X",
                   "tag": "FIRE SUPPORT AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.ACA.IRR": {
-                  "symbolID": "G*FPACAI-****X",
+                  "symbolID": "G*FPACAI--****X",
                   "tag": "AIRSPACE COORDINATION AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "altitudeDepth", "additionalInfo1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.FFA.IRR": {
-                  "symbolID": "G*FPACFI-****X",
+                  "symbolID": "G*FPACFI--****X",
                   "tag": "FREE FIRE AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.NFA.IRR": {
-                  "symbolID": "G*FPACNI-****X",
+                  "symbolID": "G*FPACNI--****X",
                   "tag": "NO-FIRE AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.RFA.IRR": {
-                  "symbolID": "G*FPACRI-****X",
+                  "symbolID": "G*FPACRI--****X",
                   "tag": "RESTRICTIVE AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.SNSZ.IRR": {
-                  "symbolID": "G*FPACEI-****X",
+                  "symbolID": "G*FPACEI--****X",
                   "tag": "SENSOR ZONE IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.SNSZ.IRR": {
-                  "symbolID": "G*FPACDI-****X",
+                  "symbolID": "G*FPACDI--****X",
                   "tag": "DEAD SPACE AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.ZOR.IRR": {
-                  "symbolID": "G*FPACZI-****X",
+                  "symbolID": "G*FPACZI--****X",
                   "tag": "ZONE OF RESPONSIBILITY IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.TBA.IRR": {
-                  "symbolID": "G*FPACBI-****X",
+                  "symbolID": "G*FPACBI--****X",
                   "tag": "TARGET BUILD-UP AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.TVAR.IRR": {
-                  "symbolID": "G*FPACVI-****X",
+                  "symbolID": "G*FPACVI--****X",
                   "tag": "TARGET VALUE AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.TGMF": {
-                  "symbolID": "G*FPACT--****X",
+                  "symbolID": "G*FPACT---****X",
                   "tag": "TERMINALLY GUIDED MUNITION FOOTPRINT",
                   "symbolType": "MultiSegmentPolygon"
             },
             "TACGRP.FSUPP.ARS.TGTAQZ.ATIZ.IRR": {
-                  "symbolID": "G*FPAZII-****X",
+                  "symbolID": "G*FPAZII--****X",
                   "tag": "ARTILLERY TARGET INTELLIGENCE ZONE IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.TGTAQZ.CFFZ.IRR": {
-                  "symbolID": "G*FPAZXI-****X",
+                  "symbolID": "G*FPAZXI--****X",
                   "tag": "CALL FOR FIRE ZONE IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.TGTAQZ.CNS.IRR": {
-                  "symbolID": "G*FPAZCI-****X",
+                  "symbolID": "G*FPAZCI--****X",
                   "tag": "CENSOR ZONE IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.TGTAQZ.CFZ.IRR": {
-                  "symbolID": "G*FPAZFI-****X",
+                  "symbolID": "G*FPAZFI--****X",
                   "tag": "CRITICAL FRIENDLY ZONE IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.KLBOX.BLUE.IRR": {
-                  "symbolID": "G*FPAKBI-****X",
+                  "symbolID": "G*FPAKBI--****X",
                   "tag": "KILL BOX BLUE IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
@@ -5580,43 +5580,43 @@ define( function(){
 
        "combatServiceSupport": {
             "TACGRP.CSS.ARA.DHA": {
-                  "symbolID": "G*SPAD---****X",
+                  "symbolID": "G*SPAD----****X",
                   "tag": "DETAINEE HOLDING AREA",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.CSS.ARA.EPWHA": {
-                  "symbolID": "G*SPAE---****X",
+                  "symbolID": "G*SPAE----****X",
                   "tag": "ENEMY PRISONERS OF WAR HOLDING AREA",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.CSS.ARA.FARP": {
-                  "symbolID": "G*SPAR---****X",
+                  "symbolID": "G*SPAR----****X",
                   "tag": "FORWARD ARMING AND REFUELING AREA",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.CSS.ARA.RHA": {
-                  "symbolID": "G*SPAH---****X",
+                  "symbolID": "G*SPAH----****X",
                   "tag": "REFUGEE HOLDING AREA",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.CSS.ARA.BSA": {
-                  "symbolID": "G*SPASB--****X",
+                  "symbolID": "G*SPASB---****X",
                   "tag": "SUPPORT AREA BRIGADE",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.CSS.ARA.DSA": {
-                  "symbolID": "G*SPASD--****X",
+                  "symbolID": "G*SPASD---****X",
                   "tag": "SUPPORT AREA DIVISION",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.CSS.ARA.RSA": {
-                  "symbolID": "G*SPASR--****X",
+                  "symbolID": "G*SPASR---****X",
                   "tag": "SUPPORT AREA REGIMENTAL",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
