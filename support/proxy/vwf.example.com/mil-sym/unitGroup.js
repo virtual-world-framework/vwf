@@ -41,6 +41,8 @@ this.initialize = function() {
 
     }
 
+    // Now that unitGroup is complete, show it
+    this.visible = "inherit";
 }
 
 this.handleRender = function( img, iconSize, symbolCenter, symbolBounds ){
