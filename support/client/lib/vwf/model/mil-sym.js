@@ -115,9 +115,9 @@ define( [ "module",
 
             if ( node === undefined ) {
 
-                if ( isUnitNode( protos ) ) {
+                _pausedRenderNodes.push( childID );
 
-                    _pausedRenderNodes.push( childID );
+                if ( isUnitNode( protos ) ) {
 
                     this.state.nodes[ childID ] = node = this.state.createNode( "unit", nodeID, childID, childExtendsID, childImplementsIDs,
                                 childSource, childType, childIndex, childName, callback );
@@ -572,9 +572,12 @@ define( [ "module",
 
         // -- callingMethod --------------------------------------------------------------------------
 
-        // callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-        //     return undefined;
-        // },
+        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) {
+            if ( methodName === "render" ) {
+                return render( modelDriver.state.nodes[ nodeID ] );
+            }
+            return;
+        },
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
 
