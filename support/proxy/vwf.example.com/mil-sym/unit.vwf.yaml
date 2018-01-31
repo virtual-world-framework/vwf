@@ -60,25 +60,16 @@ properties:
       } 
 
 methods:
-
   handleRender:
 
 events:
-
   imageRendered:
-
   echelonChanged:
-
   affiliationChanged:
-  
   symbolIDChanged:
-
   unitStatusChanged:
-
   mobilityChanged:
-
   taskForceChanged:
-
   installationChanged:
 
 scripts:
