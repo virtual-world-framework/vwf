@@ -150,6 +150,10 @@ define( [ "module",
                     if ( value === undefined && kineticObj instanceof Konva.Wedge ) {
                         value = this.setWedgeProperty( kineticObj, propertyName, propertyValue );
                     }
+
+                    // Refresh the hit graph from cache after setting property
+                    modelDriver.state.refreshHitGraphFromCache( kineticObj );
+
                     return value;                    
                 },
                 "setNodeProperty": function( kineticObj, propertyName, propertyValue ) {
@@ -2197,7 +2201,6 @@ define( [ "module",
         imageObj.onerror = function() {
             modelDriver.logger.errorx( "loadImage", "Invalid image url:", url );
                 imageObj.src = oldSrc;
-            //modelDriver.kernel.fireEvent( node.ID, "imageLoadError", [ url ] );
             modelDriver.kernel.fireEvent( nodeID, "imageLoadError", [ url ] );
         }
 
