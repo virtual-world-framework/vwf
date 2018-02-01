@@ -383,8 +383,8 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         var actualNameModifiers = {};
         for ( mod in modifiers ) {
             var modObj = cws.modifierByAlias( mod );
-            var modActualName =  this.state.getModifierActualName( modObj );
-            actualNameModifiers[ modActualName ] = this.state.convertModifierValue( modObj, modifiers[ mod ] );
+            var modActualName =  self.state.getModifierActualName( modObj );
+            actualNameModifiers[ modActualName ] = self.state.convertModifierValue( modObj, modifiers[ mod ] );
         }
 
         var img = rendererMP.RenderSymbol2D( "ID", "Name", "Description", symbolCode, milSymControlPts, bounds[0], bounds[1], null, actualNameModifiers, format );

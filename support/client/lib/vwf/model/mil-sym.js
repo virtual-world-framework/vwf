@@ -58,13 +58,8 @@ define( [ "module",
                 },
 
                 // Public functions
-                "isUnitNode":                isUnitNode,
-                "isMissionGfxNode":          isMissionGfxNode,
-                "isModifierNode":            isModifierNode,
                 "getModifierActualName":     getModifierActualName,
-                "convertModifierValue":      convertModifierValue,
-                "computeRelativeControlPts": computeRelativeControlPts,
-                "getMilSymControlPts":       getMilSymControlPts
+                "convertModifierValue":      convertModifierValue
             };
 
             // turns on logger debugger console messages 
