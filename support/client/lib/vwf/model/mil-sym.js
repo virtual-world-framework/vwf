@@ -55,7 +55,16 @@ define( [ "module",
                         "type": childType,
                         "name": childName 
                     };
-                }
+                },
+
+                // Public functions
+                "isUnitNode":                isUnitNode,
+                "isMissionGfxNode":          isMissionGfxNode,
+                "isModifierNode":            isModifierNode,
+                "getModifierActualName":     getModifierActualName,
+                "convertModifierValue":      convertModifierValue,
+                "computeRelativeControlPts": computeRelativeControlPts,
+                "getMilSymControlPts":       getMilSymControlPts
             };
 
             // turns on logger debugger console messages 
@@ -69,7 +78,6 @@ define( [ "module",
                 "getting": false,
                 "prototypes": false
             };
-
         },
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -580,8 +588,7 @@ define( [ "module",
             }
 
             return value;
-        },
-
+        }
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
 
@@ -596,8 +603,6 @@ define( [ "module",
         // ticking: function( vwfTime ) {
             
         // }
-
-
 
     } );
 
@@ -731,6 +736,27 @@ define( [ "module",
         return modifierActualName;
     }
 
+    function convertModifierValue( modObj, modifierValue ) {
+        var retValue;
+        switch ( modObj.valueType ) {
+            case "Boolean":
+                retValue = Boolean( modifierValue );
+                break;
+                
+            case "Number":
+                retValue = Number( modifierValue );
+                break;
+                
+            case "Array":
+            case "Text":
+            default:
+                retValue = modifierValue;
+                break;
+        }
+
+        return retValue;
+    }
+
     function setModifier( unit, modifierAlias, modifierValue ) {
         
         var modObj = cws.modifierByAlias( modifierAlias );
@@ -750,21 +776,7 @@ define( [ "module",
                     modifierSet = true;
                 }
             } else {
-                switch ( modObj.valueType ) {
-                    case "Boolean":
-                        unit.modifiers[ modifierActualName ] = Boolean(modifierValue);
-                        break;
-                        
-                    case "Number":
-                        unit.modifiers[ modifierActualName ] = Number(modifierValue);
-                        break;
-                        
-                    case "Array":
-                    case "Text":
-                    default:
-                        unit.modifiers[ modifierActualName ] = modifierValue;
-                        break;
-                }
+                unit.modifiers[ modifierActualName ] = convertModifierValue( modObj, modifierValue );
                 modifierSet = true;
             }
         }
