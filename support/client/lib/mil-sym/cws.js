@@ -5491,7 +5491,7 @@ define( function(){
                   "symbolID": "G*FPACAI--****X",
                   "tag": "AIRSPACE COORDINATION AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
-                  "validModifiers": [ "uniqueDesignation1", "altitudeDepth", "additionalInfo1", "DTG1", "DTG2" ]
+                  "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "additionalInfo3", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.FFA.IRR": {
                   "symbolID": "G*FPACFI--****X",
@@ -5696,7 +5696,7 @@ define( function(){
                                       valueType: "Text" },
             "lineWidth":            { modifier:  "LineWidth",                            
                                       type:      "MilStdAttributes",
-                                      valueType: "Text" },
+                                      valueType: "Number" },
             "icon":                 { modifier:  "Icon",                            
                                       type:      "MilStdAttributes",
                                       valueType: "Boolean" },
