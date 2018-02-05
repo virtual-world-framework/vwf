@@ -5104,6 +5104,13 @@ define( function(){
                   "defaultControlPts": [ 50,50, 0,50, 0,100, 100,100 ],
                   "defaultDimensions": [100, 100]
             },
+            "TACGRP.C2GM.GNL.ARS.SRHARA": {
+                  "symbolID": "G*GPGAS---****X",
+                  "tag": "RECONNAISSANCE",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 10,40, 100,80, 100,0 ],
+                  "defaultDimensions": [100, 100]
+            },
             "TACGRP.TSK.FLWASS.FLWASS": {
                   "symbolID": "G*TPA-----****X",
                   "tag": "FOLLOW AND ASSUME",
@@ -5119,6 +5126,69 @@ define( function(){
                   "defaultControlPts": [ 0,100, 100,0, 0,0 ],
                   "defaultDimensions": [100, 20],
                   "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.TSK.SZE": {
+                  "symbolID": "G*TPZ-----****X",
+                  "tag": "SEIZE",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 10,50, 100,90, 20,10 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.DLY": {
+                  "symbolID": "G*TPL-----****X",
+                  "tag": "DELAY",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,80, 80,80, 80,0 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.RTM": {
+                  "symbolID": "G*TPM-----****X",
+                  "tag": "RETIREMENT",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,80, 80,80, 80,0 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.WDR": {
+                  "symbolID": "G*TPW-----****X",
+                  "tag": "WITHDRAW",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,80, 80,80, 80,0 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.WDR.WDRUP": {
+                  "symbolID": "G*TPWP----****X",
+                  "tag": "WITHDRAW UNDER PRESSURE",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,80, 80,80, 80,0 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.RIP": {
+                  "symbolID": "G*TPR-----****X",
+                  "tag": "RELIEF IN PLACE",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,80, 80,80, 80,1, 0,1 ],
+                  "defaultDimensions": [100, 100]
+            },
+            "TACGRP.TSK.SEC.SCN": {
+                  "symbolID": "G*TPUS----****X",
+                  "tag": "SCREEN",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,10, 50,0, 50,0, 100,10 ],
+                  "defaultDimensions": [100, 10]
+            },
+            "TACGRP.TSK.SEC.GUD": {
+                  "symbolID": "G*TPUG----****X",
+                  "tag": "GUARD",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,10, 50,0, 50,0, 100,10 ],
+                  "defaultDimensions": [100, 10]
+            },
+            "TACGRP.TSK.SEC.COV": {
+                  "symbolID": "G*TPUC----****X",
+                  "tag": "COVER",
+                  "symbolType": "DefinedMissionGraphic",
+                  "defaultControlPts": [ 0,10, 50,0, 50,0, 100,10 ],
+                  "defaultDimensions": [100, 10]
             }
        },
 
@@ -5199,12 +5269,25 @@ define( function(){
                   "defaultControlPts": [ 100,0, 0,0, 100,100 ],
                   "defaultDimensions": [100, 20]
             },
+            "TACGRP.C2GM.OFF.LNE.DIRATK.GRD.MANATK": {
+                  "symbolID": "G*GPOLKGM-****X",
+                  "tag": "DIRECTION OF MAIN ATTACK",
+                  "symbolType": "SimpleArrow"
+            },
+            "TACGRP.C2GM.OFF.LNE.DIRATK.GRD.SUPATK": {
+                  "symbolID": "G*GPOLKGS-****X",
+                  "tag": "DIRECTION OF SUPPORTING ATTACK",
+                  "symbolType": "SimpleArrow"
+            },
             "TACGRP.C2GM.DCPN.DAFF": {
                   "symbolID": "G*GPPF----****X",
                   "tag": "DIRECTION OF ATTACK FOR FEINT",
-                  "symbolType": "DefinedMissionGraphic",
-                  "defaultControlPts": [ 100,0, 0,0, 100,100 ],
-                  "defaultDimensions": [100, 20]
+                  "symbolType": "SimpleArrow"
+            },
+            "TACGRP.C2GM.OFF.LNE.DIRATK.AVN": {
+                  "symbolID": "G*GPOLKA--****X",
+                  "tag": "DIRECTION OF ATTACK AVIATION",
+                  "symbolType": "SimpleArrow"
             }
        },
 
@@ -5411,6 +5494,24 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "hostile" ]
             },
+            "TACGRP.C2GM.DCPN.DMA": {
+                  "symbolID": "G*GPPM----****X",
+                  "tag": "DECOY MINED AREA",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "hostile" ]
+            },
+            "TACGRP.C2GM.DCPN.DMAF": {
+                  "symbolID": "G*GPPY----****X",
+                  "tag": "DECOY MINED AREA FENCED",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "hostile" ]
+            },
+            "TACGRP.C2GM.DCPN.DMYMD": {
+                  "symbolID": "G*GPPC----****X",
+                  "tag": "DUMMY MINED AREA",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "hostile" ]
+            },
             "TACGRP.MOBSU.OBST.UXO": {
                   "symbolID": "G*MPOU----****X",
                   "tag": "UNEXPLODED ORDNANCE AREA",
@@ -5458,6 +5559,24 @@ define( function(){
        },
 
        "fireSupport": {
+            "TACGRP.FSUPP.LNE.LNRTGT": {
+                  "symbolID": "GHFPLT----****X",
+                  "tag": "LINEAR TARGET",
+                  "symbolType": "SimpleLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.FSUPP.LNE.LNRTGT.LSTGT": {
+                  "symbolID": "G*FPLTS---****X",
+                  "tag": "LINEAR SMOKE TARGET",
+                  "symbolType": "SimpleLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.FSUPP.LNE.LNRTGT.FPF": {
+                  "symbolID": "G*FPLTF---****X",
+                  "tag": "LINEAR TARGET FINAL PROTECTIVE FIRE",
+                  "symbolType": "SimpleLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
             "TACGRP.FSUPP.ARS.ARATGT": {
                   "symbolID": "G*FPAT----****X",
                   "tag": "AREA TARGET",
@@ -5620,8 +5739,52 @@ define( function(){
                   "tag": "SUPPORT AREA REGIMENTAL",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
-            },
+            }
+       },
 
+       "airOperations": {
+            "TACGRP.C2GM.AVN.ARS.ROZ": {
+                  "symbolID": "G*GPAAR---****X",
+                  "tag": "RESTRICTED OPERATIONS ZONE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
+            },
+            "TACGRP.C2GM.AVN.ARS.SHRDEZ": {
+                  "symbolID": "G*GPAAF---****X",
+                  "tag": "SHORT-RANGE AIR DEFENSE ENGAGEMENT ZONE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
+            },
+            "TACGRP.C2GM.AVN.ARS.HIDACZ": {
+                  "symbolID": "G*GPAAH---****X",
+                  "tag": "HIGH DENSITY AIRSPACE CONTROL ZONE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
+            },
+            "TACGRP.C2GM.AVN.ARS.MEZ": {
+                  "symbolID": "G*GPAAM---****X",
+                  "tag": "MISSILE ENGAGEMENT ZONE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
+            },
+            "TACGRP.C2GM.AVN.ARS.MEZ.LAMEZ": {
+                  "symbolID": "G*GPAAML--****X",
+                  "tag": "MISSILE ENGAGEMENT ZONE LOW ALTITUDE ZONE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
+            },
+            "TACGRP.C2GM.AVN.ARS.MEZ.HAMEZ": {
+                  "symbolID": "G*GPAAMH--****X",
+                  "tag": "MISSILE ENGAGEMENT ZONE HIGH ALTITUDE ZONE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
+            },
+            "TACGRP.C2GM.AVN.ARS.WFZ": {
+                  "symbolID": "G*GPAAW---****X",
+                  "tag": "WEAPONS FREE ZONE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
+            }
        },
 
        "aliasModifiers": { 
