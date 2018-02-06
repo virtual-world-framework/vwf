@@ -716,7 +716,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                         drawThis = false;
                     } else {
                         drawThis = !activelyDrawing;
-                        clearBefore = visible ? clearBefore : false;
+                        clearBefore = !visible; // If we're hiding object, we need to clear
                     }
                     break;
 
