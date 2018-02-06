@@ -729,6 +729,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                     drawThis = !activelyDrawing;
                     break;
 
+                case "fill":
+                    drawThis = true;
+                    clearBefore = true;
+
                 default:
                     drawThis = this.state.pauseRendering ? false : !activelyDrawing;
             }
