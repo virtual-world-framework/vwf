@@ -1363,11 +1363,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         }
 
         // Optimize and reduce line segments
-        console.info( "Points before simplify: " + ptarray.length );
         if ( ptarray.length > 2 ) {
             ptarray = simplifyJs.simplify( ptarray );
         }
-        console.info( "Points after simplify:  " + ptarray.length );
 
         // Convert back to x, y list
         var simplifiedPts = [];

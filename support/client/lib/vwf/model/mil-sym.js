@@ -25,6 +25,7 @@ define( [ "module",
     function( module, model, utility, Color, cws, $ ) {
 
     var modelDriver;
+    var _pausedRenderNodes = [];
 
     return model.load( module, {
 
@@ -114,6 +115,8 @@ define( [ "module",
 
             if ( node === undefined ) {
 
+                _pausedRenderNodes.push( childID );
+
                 if ( isUnitNode( protos ) ) {
 
                     this.state.nodes[ childID ] = node = this.state.createNode( "unit", nodeID, childID, childExtendsID, childImplementsIDs,
@@ -165,10 +168,9 @@ define( [ "module",
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName ) {
 
-            if ( this.debug.initializing ) {
-                this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            if ( _pausedRenderNodes.includes( childID ) ) {
+                _pausedRenderNodes.splice( _pausedRenderNodes.indexOf( childID ), 1 );
             } 
-
         },
 
         deletingNode: function( nodeID ) {
@@ -568,22 +570,14 @@ define( [ "module",
             return value;
         },
 
-
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-            
-            var node = this.state.nodes[ nodeID ]; 
-            var value = undefined;
-
-            switch( methodName ) {
-                case "render":
-                    value = render( node );
-                    break;
+        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) {
+            if ( methodName === "render" ) {
+                return render( modelDriver.state.nodes[ nodeID ] );
             }
-
-            return value;
-        }
+            return;
+        },
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
 
@@ -645,34 +639,45 @@ define( [ "module",
 
     function render( node ) {
 
-        if ( node === undefined ) {
+        if ( !( node || {} ).symbolID ) {
+            return;
+        }
+
+        if ( _pausedRenderNodes.includes( node.ID ) ) {
             return;
         }
 
         var value = undefined;
         
-        if ( node !== undefined && node.nodeType === "unit" && node.symbolID !== undefined ) {
-            var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
-            var img = iconRender.Render( node.symbolID, node.modifiers );
-            
-            var centerPt = img.getCenterPoint();
-            var imgSize = img.getImageBounds();
-            var symbolBounds = img.getSymbolBounds();
+        switch( node.nodeType ) {
+            case "unit":
+                var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
+                var img = iconRender.Render( node.symbolID, node.modifiers );
+                
+                var centerPt = img.getCenterPoint();
+                var imgSize = img.getImageBounds();
+                var symbolBounds = img.getSymbolBounds();
 
-            value = node.image = img.toDataUrl();
+                value = node.image = img.toDataUrl();
 
-            // we should really use the event, but we're having troubles
-            // getting the events to replicate, this should be switched
-            // back to the event when the replication is fixed.  handleRender
-            // can then be completely removed
-            //modelDriver.kernel.fireEvent( node.ID, "imageRendered", [ node.image, imgSize, centerPt, symbolBounds ] );
-            
-            modelDriver.kernel.callMethod( node.ID, "handleRender", [ node.image, imgSize, centerPt, symbolBounds ] );
-
-        } else if ( node !== undefined && node.nodeType === "missionGfx" && node.symbolID !== undefined ) {
-            if ( value = renderMsnGfx( node ) ) {
-                modelDriver.kernel.setProperty( node.ID, "image", value.toDataURL() );
-            }
+                // we should really use the event, but we're having troubles
+                // getting the events to replicate, this should be switched
+                // back to the event when the replication is fixed.  handleRender
+                // can then be completely removed
+                //modelDriver.kernel.fireEvent( node.ID, "imageRendered", [ node.image, imgSize, centerPt, symbolBounds ] );
+                
+                modelDriver.kernel.callMethod( node.ID, "handleRender",
+                    [ node.image, imgSize, centerPt, symbolBounds ] );
+                break;
+            case "missionGfx":
+                value = renderMsnGfx( node );
+                if ( value ) {
+                    modelDriver.kernel.setProperty( node.ID, "image", value.toDataURL() );
+                }
+                break;
+            default:
+                console.warn( "render: Cannot render node of type '", node.nodeType, "'" );
+                break;
         }
 
         return value;       

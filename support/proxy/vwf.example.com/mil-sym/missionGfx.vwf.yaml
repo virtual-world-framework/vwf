@@ -21,5 +21,11 @@ properties:
         this.imageChanged( value );
       }
 
+methods:
+  render:
+
 events:
   imageChanged:
+
+scripts:
+- source: "missionGfx.js"

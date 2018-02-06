@@ -1142,143 +1142,140 @@ define( [ "module",
                         return value;
                     }
 
-                    //if ( value === undefined ) {
+                    switch ( propertyName ) {
 
-                        switch ( propertyName ) {
+                        case "x":
+                            value = kineticObj.x() || 0;
+                            break;
 
-                            case "x":
-                                value = kineticObj.x() || 0;
-                                break;
+                        case "y":
+                            value = kineticObj.y() || 0;
+                            break;
 
-                            case "y":
-                                value = kineticObj.y() || 0;
-                                break;
+                        case "width":
+                            value = kineticObj.width();
+                            break;
 
-                            case "width":
-                                value = kineticObj.width();
-                                break;
+                        case "height":
+                            value = kineticObj.height();
+                            break;
 
-                            case "height":
-                                value = kineticObj.height();
-                                break;
+                        case "visible":
+                            value = kineticObj.visible();
+                            break;
 
-                            case "visible":
-                                value = kineticObj.visible();
-                                break;
+                        case "isVisible":
+                            value = kineticObj.isVisible();
+                            break;
 
-                            case "isVisible":
-                                value = kineticObj.isVisible();
-                                break;
+                        case "listening":
+                            value = kineticObj.listening();
+                            break;
+                        
+                        case "isListening":
+                            value = kineticObj.isListening();
+                            break;
+                        
+                        case "opacity":
+                            value = kineticObj.opacity();
+                            break;
 
-                            case "listening":
-                                value = kineticObj.listening();
-                                break;
-                            
-                            case "isListening":
-                                value = kineticObj.isListening();
-                                break;
-                            
-                            case "opacity":
-                                value = kineticObj.opacity();
-                                break;
+                        case "scale":
+                            value = kineticObj.scale();
+                            break;
 
-                            case "scale":
-                                value = kineticObj.scale();
-                                break;
+                        case "scaleX":
+                            value = kineticObj.scaleX();
+                            break;
 
-                            case "scaleX":
-                                value = kineticObj.scaleX();
-                                break;
+                        case "scaleY":
+                            value = kineticObj.scaleY();
+                            break;
 
-                            case "scaleY":
-                                value = kineticObj.scaleY();
-                                break;
+                        case "rotation":
+                            value = kineticObj.rotation();
+                            break;
 
-                            case "rotation":
-                                value = kineticObj.rotation();
-                                break;
+                        // check code, not in docs
+                        case "offset":
+                            value = kineticObj.offset();
+                            break;
 
-                            // check code, not in docs
-                            case "offset":
-                                value = kineticObj.offset();
-                                break;
+                        // check code, not in docs
+                        case "offsetX":
+                            value = kineticObj.offsetX();
+                            break;
 
-                            // check code, not in docs
-                            case "offsetX":
-                                value = kineticObj.offsetX();
-                                break;
+                        case "offsetY":
+                            value = kineticObj.offsetY();
+                            break;
 
-                            case "offsetY":
-                                value = kineticObj.offsetY();
-                                break;
+                        case "draggable":
+                            // Return the model value that we have stored separately, 
+                            // not the value that is directly in the kinetic object 
+                            // because a user's view might have changed that for only 
+                            // that user
+                            value = kineticObj.isDraggable;    
+                            break;
 
-                            case "draggable":
-                                // Return the model value that we have stored separately, 
-                                // not the value that is directly in the kinetic object 
-                                // because a user's view might have changed that for only 
-                                // that user
-                                value = kineticObj.isDraggable;    
-                                break;
+                        // check code, not in docs
+                        case "dragDistance":
+                            value = kineticObj.dragDistance();    
+                            break;
 
-                            // check code, not in docs
-                            case "dragDistance":
-                                value = kineticObj.dragDistance();    
-                                break;
+                        case "zIndex":
+                            value = kineticObj.getZIndex();
+                            break;
 
-                            case "zIndex":
-                                value = kineticObj.getZIndex();
-                                break;
+                        case "dragBoundFunc":
+                            var dragBoundFunc = kineticObj.dragBoundFunc();
+                            value = dragBoundFunc ? dragBoundFunc.toString() : undefined;
+                            break;
 
-                            case "dragBoundFunc":
-                                var dragBoundFunc = kineticObj.dragBoundFunc();
-                                value = dragBoundFunc ? dragBoundFunc.toString() : undefined;
-                                break;
+                        case "id":
+                            value = kineticObj.getId();
+                            break
 
-                            case "id":
-                                value = kineticObj.getId();
-                                break
+                        case "name":
+                            value = kineticObj.getName();
+                            break;
+                        
+                        case "position":
+                            value = {
+                                x: kineticObj.x() || 0,
+                                y: kineticObj.y() || 0
+                            };
+                            break;
 
-                            case "name":
-                                value = kineticObj.getName();
-                                break;
-                            
-                            case "position":
-                                value = {
-                                    x: kineticObj.x() || 0,
-                                    y: kineticObj.y() || 0
-                                };
-                                break;
+                        case "transform":
+                            value = kineticObj.getTransform().m;
+                            break;
 
-                            case "transform":
-                                value = kineticObj.getTransform().m;
-                                break;
+                        case "absolutePosition":
+                                value = kineticObj.getAbsolutePosition();
+                            break;
 
-                            case "absolutePosition":
-                                    value = kineticObj.getAbsolutePosition();
-                                break;
+                        case "absoluteTransform":
+                                value = kineticObj.getAbsoluteTransform();
+                            break;
 
-                            case "absoluteTransform":
-                                    value = kineticObj.getAbsoluteTransform();
-                                break;
+                        case "absoluteOpacity":
+                            value = kineticObj.getAbsoluteOpacity();
+                            break;
 
-                            case "absoluteOpacity":
-                                value = kineticObj.getAbsoluteOpacity();
-                                break;
+                        case "absoluteZIndex":
+                            value = kineticObj.getAbsoluteZIndex();
+                            break;
 
-                            case "absoluteZIndex":
-                                value = kineticObj.getAbsoluteZIndex();
-                                break;
+                        case "hitGraphFromCache":
+                            value = kineticObj.attrs.hitGraphFromCache;
+                            break;
 
-                            case "hitGraphFromCache":
-                                value = kineticObj.attrs.hitGraphFromCache;
-                                break;
+                        case "attributes":
+                            value = kineticObj.getAttrs();
+                            break;
 
-                            case "attributes":
-                                value = kineticObj.getAttrs();
-                                break;
-
-                        }
-                    //}
+                    }
 
                     // this is causing the editor to cause a infinite loop
                     // need to understand why, but no time now
@@ -1460,6 +1457,28 @@ define( [ "module",
                         }
                     }
                     
+                    if ( value === undefined && kineticObj instanceof Konva.Shape ) {
+
+                        switch ( propertyName ) {
+                            
+                            case "stroke":
+                                value = kineticObj.stroke();
+                                break;
+
+                            case "strokeWidth":
+                                value = kineticObj.strokeWidth();
+                                break;
+
+                            case "strokeScaleEnabled":
+                                value = kineticObj.strokeScaleEnabled();
+                                break;
+
+                            case "strokeEnabled":
+                                value = kineticObj.strokeEnabled();
+                                break;
+                        }
+                    }
+
                     if ( value === undefined && kineticObj instanceof Konva.Sprite ) {
                         
                         switch ( propertyName ) {
@@ -2200,7 +2219,7 @@ define( [ "module",
         }
         imageObj.onerror = function() {
             modelDriver.logger.errorx( "loadImage", "Invalid image url:", url );
-                imageObj.src = oldSrc;
+            imageObj.src = oldSrc;
             modelDriver.kernel.fireEvent( nodeID, "imageLoadError", [ url ] );
         }
 
