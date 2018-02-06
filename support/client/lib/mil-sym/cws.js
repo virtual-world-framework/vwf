@@ -5353,25 +5353,24 @@ define( function(){
                   "symbolID": "G*FPLCF---****X",
                   "tag": "FIRE SUPPORT COORDINATION LINE",
                   "symbolType": "MultiSegmentLine",
-                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.FSUPP.LNE.C2LNE.CFL": {
                   "symbolID": "G*FPLCC---****X",
                   "tag": "COORDINATED FIRE LINE",
                   "symbolType": "MultiSegmentLine",
-                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.FSUPP.LNE.C2LNE.NFL": {
                   "symbolID": "G*FPLCN---****X",
                   "tag": "NO-FIRE LINE",
-                  "symbolType": "MultiSegmentLine",
-                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
+                  "symbolType": "MultiSegmentLine"
             },
             "TACGRP.FSUPP.LNE.C2LNE.RFL": {
                   "symbolID": "G*FPLCR---****X",
                   "tag": "RESTRICTIVE FIRE LINE",
                   "symbolType": "MultiSegmentLine",
-                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
+                  "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.MOBSU.SU.FTFDLN": {
                   "symbolID": "G*MPSL----****X",
@@ -5783,7 +5782,7 @@ define( function(){
                   "symbolID": "G*GPAAW---****X",
                   "tag": "WEAPONS FREE ZONE",
                   "symbolType": "MultiSegmentPolygon",
-                  "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             }
        },
 
