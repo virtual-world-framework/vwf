@@ -729,7 +729,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                     drawThis = !activelyDrawing;
                     break;
 
+                case "radius":
                 case "fill":
+                case "opacity":
                     drawThis = true;
                     clearBefore = true;
 
