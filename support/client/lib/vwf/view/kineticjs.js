@@ -758,13 +758,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
             if ( this.kernel.client() === this.kernel.moniker() ) {
                 switch ( methodName ) {
-
-                    case "refreshState":
-                        if ( !this.state.pauseRendering ) {
-                            refreshState();
-                        }
-                        break;
-
                     case "enableLayerHitGraph":
                         var layers = methodParameters[ 0 ];
                         for ( var id in layers ) {
@@ -774,7 +767,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                             }
                         }
                         break;
-
                 }
             }
         },
