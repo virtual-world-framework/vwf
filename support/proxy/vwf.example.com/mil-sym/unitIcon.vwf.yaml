@@ -27,7 +27,12 @@ properties:
 
   strokeEnabled: false
   transformsEnabled: "position"
-  zIndex: 20
+  zIndex: 20,
+  shadowColor: "rgba( 1, 1, 1, 0.5 )"
+  shadowBlur: 10
+  shadowOffsetX: 8
+  shadowOffsetY: 8
+  shadowEnabled: false
 
 methods:
   handleRender:
