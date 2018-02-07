@@ -102,22 +102,8 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
 
         // -- calledMethod -----------------------------------------------------------------------------
 
-        calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
-
-            //console.info( nodeID + " " + methodName );
-            if ( nodeID === this.kernel.application() ) {
-                var clientThatCalledMethod = this.kernel.client();
-                var me = this.kernel.moniker();
-                switch ( methodName ) {
-
-                    case "insertUnits":
-                        if ( clientThatCalledMethod === me ) {
-                            addInsertableUnits( methodParameters[ 0 ] );
-                        }
-                        break;
-                }
-            } 
-        },
+        // calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+        // },
 
         // -- firedEvent -----------------------------------------------------------------------------
 
@@ -131,6 +117,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
 
         renderUnitSymbol: renderUnitSymbol,
         rendererReady: rendererReady,
+        addInsertableUnits: addInsertableUnits,
         getUpdatedUnitSymbolID: getUpdatedUnitSymbolID,
         getMissionGraphicDefinition: getMissionGraphicDefinition,
         renderMissionGraphic: renderMissionGraphic,
