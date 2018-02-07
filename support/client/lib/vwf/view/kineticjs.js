@@ -777,15 +777,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
                 }
             }
-            // for methods that all clients need to execute
-            switch ( methodName ) {
-
-                case "refreshLayer":
-                    refreshLayer( methodParameters );
-                    break;
-
-            }
-
         },
 
         firedEvent: function( nodeID, eventName, eventData ) {
