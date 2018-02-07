@@ -5576,9 +5576,15 @@ define( function(){
                   "symbolType": "SimpleLine",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
+            "TACGRP.FSUPP.ARS.ARATGT.RTGTGT": {
+                  "symbolID": "G*FPATR---****X",
+                  "tag": "RECTANGULAR TARGET",
+                  "symbolType": "RectangleSinglePoint",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
             "TACGRP.FSUPP.ARS.ARATGT": {
                   "symbolID": "G*FPAT----****X",
-                  "tag": "AREA TARGET",
+                  "tag": "AREA TARGET IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
@@ -5598,6 +5604,12 @@ define( function(){
                   "symbolID": "G*FPATB---****X",
                   "tag": "BOMB AREA",
                   "symbolType": "MultiSegmentPolygon"
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.FSA.RTG": {
+                  "symbolID": "G*FPACSI--****X",
+                  "tag": "FIRE SUPPORT AREA RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.FSA.IRR": {
                   "symbolID": "G*FPACSI--****X",
