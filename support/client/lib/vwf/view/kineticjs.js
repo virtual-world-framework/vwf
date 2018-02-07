@@ -721,7 +721,13 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                     break;
 
                 case "pauseRendering":
-                    this.state.pauseRendering = propertyValue;
+                    if ( propertyValue !== this.state.pauseRendering ) {
+                        var wasPaused = this.state.pauseRendering;
+                        this.state.pauseRendering = propertyValue;
+                        if ( wasPaused ) {
+                            refreshState();
+                        }
+                    }
                     drawThis = false;
                     break;
 
