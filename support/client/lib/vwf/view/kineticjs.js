@@ -892,23 +892,25 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         },
 
         refreshChildrenHitGraphFromCache: function( nodeID ) {
-            var node = this.state.nodes[ nodeID ];
+            if ( !!nodeID ) {
+                var node = this.state.nodes[ nodeID ];
 
-            var kineticObj = node && node.kineticObj;
-            if ( !kineticObj ) {
-                view.logger.errorx( "refreshChildrenHitGraphFromCache",
-                    "Node '", nodeID, "' is not a konva node" );
-                return;
-            }
+                var kineticObj = node && node.kineticObj;
+                if ( !kineticObj ) {
+                    view.logger.errorx( "refreshChildrenHitGraphFromCache",
+                        "Node '", nodeID, "' is not a konva node" );
+                    return;
+                }
 
-            // Recurse through children to refresh the ones using hitgraph from cache
-            var children = kineticObj.children || [];
-            for ( var i = 0; i < children.length; i++ ) {
-                var child = children[ i ];
-                if ( viewDriver.state.refreshHitGraphFromCache( child ) ) {
-                    child.draw();
-                } else {
-                    this.refreshChildrenHitGraphFromCache( child.getId() );
+                // Recurse through children to refresh the ones using hitgraph from cache
+                var children = kineticObj.children || [];
+                for ( var i = 0; i < children.length; i++ ) {
+                    var child = children[ i ];
+                    if ( viewDriver.state.refreshHitGraphFromCache( child ) ) {
+                        child.draw();
+                    } else {
+                        this.refreshChildrenHitGraphFromCache( child.getId() );
+                    }
                 }
             }
         },
