@@ -716,18 +716,30 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                         drawThis = false;
                     } else {
                         drawThis = !activelyDrawing;
-                        clearBefore = visible ? clearBefore : false;
+                        clearBefore = !visible; // If we're hiding object, we need to clear
                     }
                     break;
 
                 case "pauseRendering":
-                    this.state.pauseRendering = propertyValue;
+                    if ( propertyValue !== this.state.pauseRendering ) {
+                        var wasPaused = this.state.pauseRendering;
+                        this.state.pauseRendering = propertyValue;
+                        if ( wasPaused ) {
+                            refreshState();
+                        }
+                    }
                     drawThis = false;
                     break;
 
                 case "attributes":
                     drawThis = !activelyDrawing;
                     break;
+
+                case "radius":
+                case "fill":
+                case "opacity":
+                    drawThis = true;
+                    clearBefore = true;
 
                 default:
                     drawThis = this.state.pauseRendering ? false : !activelyDrawing;
@@ -746,13 +758,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
             if ( this.kernel.client() === this.kernel.moniker() ) {
                 switch ( methodName ) {
-
-                    case "refreshState":
-                        if ( !this.state.pauseRendering ) {
-                            refreshState();
-                        }
-                        break;
-
                     case "enableLayerHitGraph":
                         var layers = methodParameters[ 0 ];
                         for ( var id in layers ) {
@@ -762,18 +767,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                             }
                         }
                         break;
-
                 }
             }
-            // for methods that all clients need to execute
-            switch ( methodName ) {
-
-                case "refreshLayer":
-                    refreshLayer( methodParameters );
-                    break;
-
-            }
-
         },
 
         firedEvent: function( nodeID, eventName, eventData ) {
@@ -897,23 +892,25 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         },
 
         refreshChildrenHitGraphFromCache: function( nodeID ) {
-            var node = this.state.nodes[ nodeID ];
+            if ( !!nodeID ) {
+                var node = this.state.nodes[ nodeID ];
 
-            var kineticObj = node && node.kineticObj;
-            if ( !kineticObj ) {
-                view.logger.errorx( "refreshChildrenHitGraphFromCache",
-                    "Node '", nodeID, "' is not a konva node" );
-                return;
-            }
+                var kineticObj = node && node.kineticObj;
+                if ( !kineticObj ) {
+                    view.logger.errorx( "refreshChildrenHitGraphFromCache",
+                        "Node '", nodeID, "' is not a konva node" );
+                    return;
+                }
 
-            // Recurse through children to refresh the ones using hitgraph from cache
-            var children = kineticObj.children || [];
-            for ( var i = 0; i < children.length; i++ ) {
-                var child = children[ i ];
-                if ( viewDriver.state.refreshHitGraphFromCache( child ) ) {
-                    child.draw();
-                } else {
-                    this.refreshChildrenHitGraphFromCache( child.getId() );
+                // Recurse through children to refresh the ones using hitgraph from cache
+                var children = kineticObj.children || [];
+                for ( var i = 0; i < children.length; i++ ) {
+                    var child = children[ i ];
+                    if ( viewDriver.state.refreshHitGraphFromCache( child ) ) {
+                        child.draw();
+                    } else {
+                        this.refreshChildrenHitGraphFromCache( child.getId() );
+                    }
                 }
             }
         },
