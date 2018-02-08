@@ -5379,6 +5379,27 @@ define( function(){
             }
        },
 
+       "defenseAreas": {
+            "TACGRP.C2GM.DEF.ARS.BTLPSN": {
+                  "symbolID": "G*GPDAB---****X",
+                  "tag": "BATTLE POSITION",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "hostile", "echelon" ]
+            },
+            "TACGRP.C2GM.DEF.ARS.BTLPSN.PBNO": {
+                  "symbolID": "G*GPDABP--****X",
+                  "tag": "BATTLE POSITION PREPARED BUT NOT OCCUPIED",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "hostile", "echelon" ]
+            },
+            "TACGRP.C2GM.DEF.ARS.EMTARA": {
+                  "symbolID": "G*GPDAE---****X",
+                  "tag": "ENGAGEMENT AREA",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            }
+       },
+
        "wire-fence": {
             "TACGRP.MOBSU.OBST.WREOBS.USP": {
                   "symbolID": "G*MPOWU---****X",
@@ -5507,9 +5528,9 @@ define( function(){
             },
             "TACGRP.C2GM.DCPN.DMYMD": {
                   "symbolID": "G*GPPC----****X",
-                  "tag": "DUMMY MINED AREA",
+                  "tag": "DUMMY MINEFIELD",
                   "symbolType": "MultiSegmentPolygon",
-                  "validModifiers": [ "hostile" ]
+                  "validModifiers": [ "hostile", "additionalInfo1" ]
             },
             "TACGRP.MOBSU.OBST.UXO": {
                   "symbolID": "G*MPOU----****X",
@@ -5605,6 +5626,11 @@ define( function(){
                   "tag": "BOMB AREA",
                   "symbolType": "MultiSegmentPolygon"
             },
+            "TACGRP.FSUPP.ARS.C2ARS.PAA.RTG": {
+                  "symbolID": "G*FPACPR--****X",
+                  "tag": "POSITION AREA FOR ARTILLERY RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint"
+            },
             "TACGRP.FSUPP.ARS.C2ARS.FSA.RTG": {
                   "symbolID": "G*FPACSI--****X",
                   "tag": "FIRE SUPPORT AREA RECTANGULAR",
@@ -5617,16 +5643,34 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
+            "TACGRP.FSUPP.ARS.C2ARS.ACA.RTG": {
+                  "symbolID": "G*FPACAI--****X",
+                  "tag": "AIRSPACE COORDINATION AREA RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
+                  "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "additionalInfo3", "DTG1", "DTG2" ]
+            },
             "TACGRP.FSUPP.ARS.C2ARS.ACA.IRR": {
                   "symbolID": "G*FPACAI--****X",
                   "tag": "AIRSPACE COORDINATION AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "additionalInfo3", "DTG1", "DTG2" ]
             },
+            "TACGRP.FSUPP.ARS.C2ARS.FFA.RTG": {
+                  "symbolID": "G*FPACFI--****X",
+                  "tag": "FREE FIRE AREA RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
             "TACGRP.FSUPP.ARS.C2ARS.FFA.IRR": {
                   "symbolID": "G*FPACFI--****X",
                   "tag": "FREE FIRE AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.NFA.RTG": {
+                  "symbolID": "G*FPACNI--****X",
+                  "tag": "NO-FIRE AREA RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.NFA.IRR": {
@@ -5635,10 +5679,22 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
+            "TACGRP.FSUPP.ARS.C2ARS.RFA.RTG": {
+                  "symbolID": "G*FPACRI--****X",
+                  "tag": "RESTRICTIVE AREA RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
             "TACGRP.FSUPP.ARS.C2ARS.RFA.IRR": {
                   "symbolID": "G*FPACRI--****X",
                   "tag": "RESTRICTIVE AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.SNSZ.RTG": {
+                  "symbolID": "G*FPACEI--****X",
+                  "tag": "SENSOR ZONE RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.SNSZ.IRR": {
@@ -5647,10 +5703,22 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
+            "TACGRP.FSUPP.ARS.C2ARS.SNSZ.RTG": {
+                  "symbolID": "G*FPACDI--****X",
+                  "tag": "DEAD SPACE AREA RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
             "TACGRP.FSUPP.ARS.C2ARS.SNSZ.IRR": {
                   "symbolID": "G*FPACDI--****X",
                   "tag": "DEAD SPACE AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.ZOR.RTG": {
+                  "symbolID": "G*FPACZI--****X",
+                  "tag": "ZONE OF RESPONSIBILITY RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.ZOR.IRR": {
@@ -5659,10 +5727,22 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
+            "TACGRP.FSUPP.ARS.C2ARS.TBA.RTG": {
+                  "symbolID": "G*FPACBI--****X",
+                  "tag": "TARGET BUILD-UP AREA RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
             "TACGRP.FSUPP.ARS.C2ARS.TBA.IRR": {
                   "symbolID": "G*FPACBI--****X",
                   "tag": "TARGET BUILD-UP AREA IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.TVAR.RTG": {
+                  "symbolID": "G*FPACVI--****X",
+                  "tag": "TARGET VALUE AREA RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.C2ARS.TVAR.IRR": {
@@ -5671,15 +5751,22 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
-            "TACGRP.FSUPP.ARS.C2ARS.TGMF": {
-                  "symbolID": "G*FPACT---****X",
-                  "tag": "TERMINALLY GUIDED MUNITION FOOTPRINT",
-                  "symbolType": "MultiSegmentPolygon"
+            "TACGRP.FSUPP.ARS.TGTAQZ.ATIZ.RTG": {
+                  "symbolID": "G*FPAZII--****X",
+                  "tag": "ARTILLERY TARGET INTELLIGENCE ZONE RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.TGTAQZ.ATIZ.IRR": {
                   "symbolID": "G*FPAZII--****X",
                   "tag": "ARTILLERY TARGET INTELLIGENCE ZONE IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.TGTAQZ.CFFZ.RTG": {
+                  "symbolID": "G*FPAZXI--****X",
+                  "tag": "CALL FOR FIRE ZONE RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.TGTAQZ.CFFZ.IRR": {
@@ -5688,10 +5775,22 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
+            "TACGRP.FSUPP.ARS.TGTAQZ.CNS.RTG": {
+                  "symbolID": "G*FPAZCI--****X",
+                  "tag": "CENSOR ZONE RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
             "TACGRP.FSUPP.ARS.TGTAQZ.CNS.IRR": {
                   "symbolID": "G*FPAZCI--****X",
                   "tag": "CENSOR ZONE IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.TGTAQZ.CFZ.RTG": {
+                  "symbolID": "G*FPAZFI--****X",
+                  "tag": "CRITICAL FRIENDLY ZONE RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.ARS.TGTAQZ.CFZ.IRR": {
@@ -5700,11 +5799,22 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             },
+            "TACGRP.FSUPP.ARS.KLBOX.BLUE.RTG": {
+                  "symbolID": "G*FPAKBI--****X",
+                  "tag": "KILL BOX BLUE RECTANGULAR",
+                  "symbolType": "RectangleMultiPoint",
+                  "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
             "TACGRP.FSUPP.ARS.KLBOX.BLUE.IRR": {
                   "symbolID": "G*FPAKBI--****X",
                   "tag": "KILL BOX BLUE IRREGULAR",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+            },
+            "TACGRP.FSUPP.ARS.C2ARS.TGMF": {
+                  "symbolID": "G*FPACT---****X",
+                  "tag": "TERMINALLY GUIDED MUNITION FOOTPRINT",
+                  "symbolType": "MultiSegmentPolygon"
             }
        },
 
