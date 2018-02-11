@@ -5333,15 +5333,22 @@ define( function(){
                   "tag": "LINE OF CONTACT",
                   "symbolType": "MultiSegmentLine"
             },
+            "TACGRP.C2GM.GNL.LNE.BNDS": {
+                  "symbolID": "G*GPGLB---****X",
+                  "tag": "BOUNDARY LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2", "hostile", "echelon" ]
+            },
             "TACGRP.C2GM.GNL.LNE.FLOT": {
                   "symbolID": "G*GPGLF---****X",
                   "tag": "FORWARD LINE OF OWN TROOPS",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "hostile" ]
             },
             "TACGRP.C2GM.DEF.LNE.FEBA": {
                   "symbolID": "G*GPDLF---****X",
                   "tag": "FORWARD EDGE OF BATTLE AREA",
-                  "symbolType": "MultiSegmentLine"
+                  "symbolType": "SimpleLine"
             },
             "TACGRP.C2GM.OFF.LNE.FCL": {
                   "symbolID": "G*GPOLF---****X",
@@ -5598,9 +5605,9 @@ define( function(){
                   "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.FSUPP.ARS.ARATGT.RTGTGT": {
-                  "symbolID": "G*FPATR---****X",
+                  "symbolID": "G*FPAT----****X",
                   "tag": "RECTANGULAR TARGET",
-                  "symbolType": "RectangleSinglePoint",
+                  "symbolType": "RectangleMultiPoint",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
             "TACGRP.FSUPP.ARS.ARATGT": {
@@ -5626,11 +5633,11 @@ define( function(){
                   "tag": "BOMB AREA",
                   "symbolType": "MultiSegmentPolygon"
             },
-            "TACGRP.FSUPP.ARS.C2ARS.PAA.RTG": {
-                  "symbolID": "G*FPACPR--****X",
-                  "tag": "POSITION AREA FOR ARTILLERY RECTANGULAR",
-                  "symbolType": "RectangleMultiPoint"
-            },
+            // "TACGRP.FSUPP.ARS.C2ARS.PAA.RTG": {
+            //       "symbolID": "G*FPACPR--****X",
+            //       "tag": "POSITION AREA FOR ARTILLERY RECTANGULAR",
+            //       "symbolType": "RectangleMultiPoint"
+            // },
             "TACGRP.FSUPP.ARS.C2ARS.FSA.RTG": {
                   "symbolID": "G*FPACSI--****X",
                   "tag": "FIRE SUPPORT AREA RECTANGULAR",
