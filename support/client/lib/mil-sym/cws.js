@@ -5589,6 +5589,11 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "hostile" ]
             },
+            "TACGRP.MOBSU.OBST.MNE.MCLST": {
+                  "symbolID": "G*MPOMC---****X",
+                  "tag": "MINE CLUSTER",
+                  "symbolType": "SimpleLine"
+            },
             "TACGRP.C2GM.DCPN.DMA": {
                   "symbolID": "G*GPPM----****X",
                   "tag": "DECOY MINED AREA",
