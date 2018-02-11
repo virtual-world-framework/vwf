@@ -5031,9 +5031,9 @@ define( function(){
                 "symbolID": "EUFPM-----H****",
                 "tag": "EMS"     
             }
-       },
+      },
 
-       "tacticalTasks": {
+      "tacticalTasks": {
             "TACGRP.TSK.CNT": {
                   "symbolID": "G*TPJ-----****X",
                   "tag": "CONTAIN",
@@ -5190,9 +5190,9 @@ define( function(){
                   "defaultControlPts": [ 0,10, 50,0, 50,0, 100,10 ],
                   "defaultDimensions": [100, 10]
             }
-       },
+      },
 
-       "obstacleEffects": {
+      "obstacleEffects": {
             "TACGRP.MOBSU.OBST.OBSEFT.BLK": {
                   "symbolID": "G*TPB-----****X",
                   "tag": "BLOCK",
@@ -5214,9 +5214,9 @@ define( function(){
                   "defaultControlPts": [ 100,0, 0,0, 100,100 ],
                   "defaultDimensions": [100, 20]
             }
-       },
+      },
 
-       "obstacleBypass": {
+      "obstacleBypass": {
             "TACGRP.MOBSU.OBSTBP.DFTY.DFT": {
                   "symbolID": "G*MPBDD---****X",
                   "tag": "BYPASS DIFFICULT",
@@ -5231,9 +5231,9 @@ define( function(){
                   "defaultControlPts": [ 100,100, 100,0, 0,50  ],
                   "defaultDimensions": [100, 100]
             }
-       },
+      },
 
-       "maneuvers": {
+      "maneuvers": {
             "TACGRP.C2GM.OFF.ARS.SFP": {
                   "symbolID": "G*GPOAS---****X",
                   "tag": "SUPPORT BY FIRE POSITION",
@@ -5288,10 +5288,34 @@ define( function(){
                   "symbolID": "G*GPOLKA--****X",
                   "tag": "DIRECTION OF ATTACK AVIATION",
                   "symbolType": "SimpleArrow"
-            }
-       },
+            },
+            "TACGRP.C2GM.SPL.ARA.AOO": {
+                  "symbolID": "G*GPSAO---****X",
+                  "tag": "AREA OF OPERATIONS",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.SPL.ARA.AHD": {
+                  "symbolID": "G*GPSAA---****X",
+                  "tag": "AIRHEAD",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.SPL.ARA.ENCMT": {
+                  "symbolID": "G*GPSAE---****X",
+                  "tag": "ENCIRCLEMENT",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "hostile" ]
+            },
+            "TACGRP.C2GM.SPL.ARA.NAI": {
+                  "symbolID": "G*GPSAN---****X",
+                  "tag": "NAMED AREA OF INTEREST",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+      },
 
-       "lines": {
+      "lines": {
             "TACGRP.C2GM.GNL.LNE.PHELNE": {
                   "symbolID": "G*GPGLP---****X",
                   "tag": "PHASE LINE",
@@ -5301,6 +5325,24 @@ define( function(){
             "TACGRP.C2GM.GNL.LNE.LITLNE": {
                   "symbolID": "G*GPGLL---****X",
                   "tag": "LIGHT LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.SPL.LNE.REL": {
+                  "symbolID": "G*GPSLR---****X",
+                  "tag": "RELEASE LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.SPL.LNE.HGL": {
+                  "symbolID": "G*GPSLH---****X",
+                  "tag": "HOLDING LINE",
+                  "symbolType": "MultiSegmentLine",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.SPL.LNE.BRGH": {
+                  "symbolID": "G*GPSLB---****X",
+                  "tag": "BRIDGEHEAD",
                   "symbolType": "MultiSegmentLine",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
@@ -5384,9 +5426,35 @@ define( function(){
                   "tag": "FORTIFIED LINE",
                   "symbolType": "MultiSegmentLine"
             }
-       },
+      },
 
-       "defenseAreas": {
+      "offenseAreas": {
+            "TACGRP.C2GM.OFF.ARS.OBJ": {
+                  "symbolID": "G*GPOAO---****X",
+                  "tag": "OBJECTIVE",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.OFF.ARS.PBX": {
+                  "symbolID": "G*GPOAP---****X",
+                  "tag": "PENETRATION BOX",
+                  "symbolType": "MultiSegmentPolygon"
+            },
+            "TACGRP.C2GM.OFF.ARS.ASTPSN": {
+                  "symbolID": "G*GPOAA---****X",
+                  "tag": "ASSAULT POSITION",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            },
+            "TACGRP.C2GM.OFF.ARS.ATKPSN": {
+                  "symbolID": "G*GPOAK---****X",
+                  "tag": "ATTACK POSITION",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "uniqueDesignation1" ]
+            }
+      },
+
+      "defenseAreas": {
             "TACGRP.C2GM.DEF.ARS.BTLPSN": {
                   "symbolID": "G*GPDAB---****X",
                   "tag": "BATTLE POSITION",
@@ -5405,9 +5473,9 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             }
-       },
+      },
 
-       "wire-fence": {
+      "wire-fence": {
             "TACGRP.MOBSU.OBST.WREOBS.USP": {
                   "symbolID": "G*MPOWU---****X",
                   "tag": "WIRE OBSTACLE UNSPECIFIED",
@@ -5460,7 +5528,7 @@ define( function(){
             }
        },
 
-       "obstacles": {
+      "obstacles": {
             "TACGRP.MOBSU.OBST.GNL.LNE": {
                   "symbolID": "G*MPOGL---****X",
                   "tag": "LINEAR OBSTACLE",
@@ -5552,7 +5620,7 @@ define( function(){
             }
        },
 
-       "supply": {
+      "supply": {
             "TACGRP.CSS.LNE.SPLRUT.MSRUT": {
                   "symbolID": "G*SPLRM---****X",
                   "tag": "MAIN SUPPLY ROUTE",
@@ -5583,9 +5651,9 @@ define( function(){
                   "symbolType": "MultiSegmentLine",
                   "validModifiers": [ "uniqueDesignation1" ]
             }
-       },
+      },
 
-       "fireSupport": {
+      "fireSupport": {
             "TACGRP.FSUPP.LNE.LNRTGT": {
                   "symbolID": "GHFPLT----****X",
                   "tag": "LINEAR TARGET",
@@ -5823,9 +5891,9 @@ define( function(){
                   "tag": "TERMINALLY GUIDED MUNITION FOOTPRINT",
                   "symbolType": "MultiSegmentPolygon"
             }
-       },
+      },
 
-       "combatServiceSupport": {
+      "combatServiceSupport": {
             "TACGRP.CSS.ARA.DHA": {
                   "symbolID": "G*SPAD----****X",
                   "tag": "DETAINEE HOLDING AREA",
@@ -5868,9 +5936,9 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             }
-       },
+      },
 
-       "airOperations": {
+      "airOperations": {
             "TACGRP.C2GM.AVN.ARS.ROZ": {
                   "symbolID": "G*GPAAR---****X",
                   "tag": "RESTRICTED OPERATIONS ZONE",
@@ -5913,9 +5981,9 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
             }
-       },
+      },
 
-       "aliasModifiers": { 
+      "aliasModifiers": { 
             "echelon":             { modifier:  "B_ECHELON",
                                      type:      "ModifiersUnits",
                                      valueType: "Text" },
@@ -6018,7 +6086,7 @@ define( function(){
             "DTG2":                 { modifier:  "W1_DTG_2",                            
                                       type:      "ModifiersTG",
                                       valueType: "Text" }
-         },
+      },
         "find": function( section, tag ) {
             var units = {};
             var sec = undefined;
