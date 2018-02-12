@@ -5189,6 +5189,18 @@ define( function(){
                   "symbolType": "DefinedMissionGraphic",
                   "defaultControlPts": [ 0,10, 50,0, 50,0, 100,10 ],
                   "defaultDimensions": [100, 10]
+            },
+            "TACGRP.TSK.CATK": {
+                  "symbolID": "G*TPK-----****X",
+                  "tag": "COUNTERATTACK",
+                  "symbolType": "MultiSegmentArrow",
+                  "arrowLeafOffset": 40
+            },
+            "TACGRP.TSK.CATKF": {
+                  "symbolID": "G*TPKF----****X",
+                  "tag": "COUNTERATTACK BY FIRE",
+                  "symbolType": "MultiSegmentArrow",
+                  "arrowLeafOffset": 60
             }
       },
 
