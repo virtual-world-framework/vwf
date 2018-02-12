@@ -5242,6 +5242,44 @@ define( function(){
                   "symbolType": "DefinedMissionGraphic", 
                   "defaultControlPts": [ 100,100, 100,0, 0,50  ],
                   "defaultDimensions": [100, 100]
+            },
+            "TACGRP.MOBSU.OBSTBP.CSGSTE.LANE": {
+                  "symbolID": "G*MPBCL---****X",
+                  "tag": "WATER CROSSING LANE",
+                  "symbolType": "SimpleLine"
+            },
+            "TACGRP.MOBSU.OBSTBP.CSGSTE.RFT": {
+                  "symbolID": "G*MPBCR---****X",
+                  "tag": "WATER CROSSING RAFT SITE",
+                  "symbolType": "SimpleLine"
+            },
+            "TACGRP.MOBSU.OBSTBP.CSGSTE.ASTCA": {
+                  "symbolID": "G*MPBCA---****X",
+                  "tag": "WATER CROSSING ASSAULT CROSSING AREA",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 3,
+                  "width": 20
+            },
+            "TACGRP.MOBSU.OBSTBP.CSGSTE.BRG": {
+                  "symbolID": "G*MPBCB---****X",
+                  "tag": "WATER CROSSING BRIDGE OR GAP",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 3,
+                  "width": 20
+            },
+            "TACGRP.MOBSU.OBSTBP.CSGSTE.FRDESY": {
+                  "symbolID": "G*MPBCE---****X",
+                  "tag": "WATER CROSSING FORD EASY",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 3,
+                  "width": 20
+            },
+            "TACGRP.MOBSU.OBSTBP.CSGSTE.FRDDFT": {
+                  "symbolID": "G*MPBCD---****X",
+                  "tag": "WATER CROSSING FORD DIFFICULT",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 3,
+                  "width": 20
             }
       },
 
@@ -5360,6 +5398,14 @@ define( function(){
                   "tag": "AXIS OF ADVANCE FOR FEINT",
                   "symbolType": "MultiSegmentArrow",
                   "arrowLeafOffset": 40
+            },
+            "TACGRP.C2GM.OFF.LNE.INFNLE": {
+                  "symbolID": "G*GPOLI---****X",
+                  "tag": "INFILTRATION LANE",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 3,
+                  "width": 20,
+                  "validModifiers": [ "uniqueDesignation1" ]
             }
       },
 
@@ -5660,6 +5706,14 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "hostile", "additionalInfo1" ]
             },
+            "TACGRP.MOBSU.OBST.MNEFLD.GAP": {
+                  "symbolID": "G*MPOFG---****X",
+                  "tag": "MINEFIELD GAP",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 4,
+                  "width": 40,
+                  "validModifiers": [ "DTG1", "DTG2" ]
+            },
             "TACGRP.MOBSU.OBST.UXO": {
                   "symbolID": "G*MPOU----****X",
                   "tag": "UNEXPLODED ORDNANCE AREA",
@@ -5670,6 +5724,46 @@ define( function(){
                   "tag": "STRONG POINT",
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1", "echelon" ]
+            },
+            "TACGRP.MOBSU.SU.FEWS": {
+                  "symbolID": "G*MPSW----****X",
+                  "tag": "FOXHOLE, EMPLACEMENT OR WEAPON SITE",
+                  "symbolType": "SimpleLine"
+            },
+            "TACGRP.MOBSU.OBST.RCBB.PLND": {
+                  "symbolID": "G*MPORP---****X",
+                  "tag": "BLOWN BRIDGE PLANNED",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 3,
+                  "width": 20
+            },
+            "TACGRP.MOBSU.OBST.RCBB.SAFE": {
+                  "symbolID": "G*MPORS---****X",
+                  "tag": "BLOWN BRIDGE STATE OF READINESS 1 (SAFE)",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 3,
+                  "width": 20
+            },
+            "TACGRP.MOBSU.OBST.RCBB.ABP": {
+                  "symbolID": "G*MPORA---****X",
+                  "tag": "BLOWN BRIDGE STATE OF READINESS 2 (ARMED BUT PASSABLE)",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 3,
+                  "width": 20
+            },
+            "TACGRP.MOBSU.OBST.RCBB.EXCD": {
+                  "symbolID": "G*MPORC---****X",
+                  "tag": "ROADBLOCK COMPLETE (EXECUTED)",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 3,
+                  "width": 20
+            },
+             "TACGRP.MOBSU.OBST.TRIPWR": {
+                  "symbolID": "G*MPOT----****X",
+                  "tag": "TRIPWIRE",
+                  "symbolType": "SimplePath",
+                  "numberPoints": 3,
+                  "width": 20
             }
        },
 
