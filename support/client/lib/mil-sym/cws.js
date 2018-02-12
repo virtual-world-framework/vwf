@@ -5836,6 +5836,8 @@ define( function(){
                   "tag": "BOMB AREA",
                   "symbolType": "MultiSegmentPolygon"
             },
+            // TODO: mil-sym currently does not render this graphic.
+            // Come back to this once mil-sym has corrected this graphic.
             // "TACGRP.FSUPP.ARS.C2ARS.PAA.RTG": {
             //       "symbolID": "G*FPACPR--****X",
             //       "tag": "POSITION AREA FOR ARTILLERY RECTANGULAR",
