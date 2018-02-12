@@ -5258,14 +5258,14 @@ define( function(){
                   "symbolID": "G*MPBCA---****X",
                   "tag": "WATER CROSSING ASSAULT CROSSING AREA",
                   "symbolType": "SimplePath",
-                  "numberPoints": 3,
+                  "numberPoints": 4,
                   "width": 20
             },
             "TACGRP.MOBSU.OBSTBP.CSGSTE.BRG": {
                   "symbolID": "G*MPBCB---****X",
                   "tag": "WATER CROSSING BRIDGE OR GAP",
                   "symbolType": "SimplePath",
-                  "numberPoints": 3,
+                  "numberPoints": 4,
                   "width": 20
             },
             "TACGRP.MOBSU.OBSTBP.CSGSTE.FRDESY": {
@@ -5305,20 +5305,6 @@ define( function(){
                   "symbolType": "DefinedMissionGraphic", 
                   "defaultControlPts": [ 100,50, 0,80, 0,20 ],
                   "defaultDimensions": [100, 100]
-            },
-            "TACGRP.C2GM.OFF.LNE.DIRATK.GRD.MANATK": {
-                  "symbolID": "G*GPOLKGM-****X",
-                  "tag": "GROUND MAIN ATTACK",
-                  "symbolType": "DefinedMissionGraphic",
-                  "defaultControlPts": [ 100,0, 0,0, 100,100 ],
-                  "defaultDimensions": [100, 20]
-            },
-            "TACGRP.C2GM.OFF.LNE.DIRATK.GRD.UPATK": {
-                  "symbolID": "G*GPOLKGS-****X",
-                  "tag": "GROUND SUPPORTING ATTACK",
-                  "symbolType": "DefinedMissionGraphic",
-                  "defaultControlPts": [ 100,0, 0,0, 100,100 ],
-                  "defaultDimensions": [100, 20]
             },
             "TACGRP.C2GM.OFF.LNE.DIRATK.GRD.MANATK": {
                   "symbolID": "G*GPOLKGM-****X",
