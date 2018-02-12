@@ -24,7 +24,6 @@ define( [ "module",
 
             this.state = {
                 "nodes": {},
-                "draggingNodes": {},
                 "stages": {},
                 "prototypes": {},
                 "createLocalNode": function( nodeID, childID, childExtendsID, childImplementsIDs,

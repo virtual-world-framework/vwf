@@ -44,6 +44,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     var mouseDown = false;
     var doRenderScene = false;
     var eventHandlers = {};
+    var _draggingNode;
 
     // Object implements tapHold behavior (kineticJS doesn't have a built-in one)
     var tapHold = { 
@@ -267,7 +268,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
             activelyDrawing = false;
 
-            if ( node.kineticObj.mouseDragging ) {
+            if ( _draggingNode ) {
                 handleDragEnd( node, evt );
             } else {
                 fireViewEvent( "mouseup", {
@@ -305,19 +306,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
         
         node.kineticObj.on( "dragstart", function( evt ) {
-            var eData = processEvent( evt, node, false );
 
-            viewDriver.state.draggingNodes[ node.ID ] = node;
-            node.kineticObj.mouseDragging = true;
-            var prevPos;
-            if (node.kineticObj.attrs) {
-                prevPos = [node.kineticObj.attrs.x, node.kineticObj.attrs.y];
-            }
+            _draggingNode = node;
+
+            // We don't want to receive this event for the node's parents
+            evt.cancelBubble = true;
+
+            // Fire a view-side event
+            var eData = processEvent( evt, node, false );
             fireViewEvent( "dragstart", {
                 nodeID: node.ID,
-                prevPos: prevPos,
                 eventData: eData.eventData[ 0 ]
             } );
+            
             if ( node.dragToTop ) {
                 node.kineticObj.moveToTop();
             }
@@ -334,31 +335,35 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         } );
 
+        // TODO: Test - Is the "dragend" event called in firefox or on tablets?
+        // It isn't on desktop Chrome.  Instead:
+        //  - When the user stops dragging by mouse, "mouseup" is called.
+        //  - When the user stops dragging by touch, "touchend" is called.
         node.kineticObj.on( "dragend", evt => handleDragEnd( node, evt ) );
 
     }
 
     function handleDragEnd( node, evt ) {
-        var eData = processEvent( evt, node, false );
 
-        activelyDrawing = false;
-        node.kineticObj.mouseDragging = false;
-        
         var nodeID = node.ID;
-        var eventParams = {
-            nodeID: nodeID,
-            eventData: eData.eventData[ 0 ]
-        };
-
-        if ( viewDriver.state.draggingNodes[ nodeID ] !== undefined ) {
-
-            // Do final mapPosition update at the end of the drag
-            eventParams.mapPosition = setNewUnitMapPositionOnDrag( nodeID );
-
-            // Remove this node from the list of those being dragged
-            delete viewDriver.state.draggingNodes[ nodeID ]; 
+        if ( nodeID !== _draggingNode.ID ) {
+            return;
         }
 
+        // Calculate and set the final mapPosition at the end of the drag
+        var mapPosition = setNewUnitMapPositionOnDrag();
+
+        // The node is no longer being dragged
+        _draggingNode = undefined;
+        activelyDrawing = false;
+
+        // Fire a view-side event
+        var eData = processEvent( evt, node, false );
+        var eventParams = {
+            nodeID: nodeID,
+            eventData: eData.eventData[ 0 ],
+            mapPosition: mapPosition
+        };
         fireViewEvent( "dragend", eventParams );
     }
 
@@ -392,11 +397,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             if (node.kineticObj.attrs) {
                 prevPos = [node.kineticObj.attrs.x, node.kineticObj.attrs.y];
             }
-            fireViewEvent( "dragstart", {
-                nodeID: node.ID,
-                prevPos: prevPos,
-                eventData: eData.eventData[ 0 ]
-            } );
             swipe.swipedAcross( node, true, eData.eventData );
 
         } );
@@ -430,12 +430,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawUp( node.ID, eData.eventData[0], node, true ); 
-            fireViewEvent( "dragend", {
-                nodeID: node.ID,
-                eventData: eData.eventData[ 0 ]
-            } );
-            activelyDrawing = false;
+            drawUp( node.ID, eData.eventData[0], node, true );
+
+            if ( _draggingNode ) {
+                handleDragEnd( node, evt );
+            }
         } );
 
         node.kineticObj.on( "tap", function( evt ) {
@@ -800,7 +799,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         // firedEvent: function( nodeID, eventName ) { },
 
         ticked: function( vwfTime ) {
-            update( vwfTime );
+            setNewUnitMapPositionOnDrag();
         },
 
         // This is intended to be called directly from the application view
@@ -955,16 +954,14 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
     // Private helper functions --------------------------------------------------------------------
 
-    function update( vwfTime ) {
-        for ( var nodeID in viewDriver.state.draggingNodes ) {
-            setNewUnitMapPositionOnDrag( nodeID );
-        }
-    }
+    function setNewUnitMapPositionOnDrag() {
 
-    function setNewUnitMapPositionOnDrag( nodeID ) {
+        if ( !_draggingNode ) {
+            return;
+        }
+
         var newMapPosition;
-        var node = viewDriver.state.draggingNodes[ nodeID ];
-        var kineticObj = node.kineticObj;
+        var kineticObj = _draggingNode.kineticObj;
 
         if ( !kineticObj ) {
             return;
@@ -974,14 +971,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         // pull the new node position out of kinetic and update the model with it
         var draggable = kineticObj.draggable();
 
-        var positionProperty = ( node.model || {} ).position;
+        var positionProperty = ( _draggingNode.model || {} ).position;
         var modelChangeShouldUpdateView = ( positionProperty || {} ).modelChangeShouldUpdateView;
 
         if ( draggable && modelChangeShouldUpdateView )  { 
             var kineticX = kineticObj.x();
             var kineticY = kineticObj.y();
 
-            var iconID = node.children.filter( childID => childID.includes( "icon" ) )[ 0 ];
+            var iconID =
+                _draggingNode.children.filter( childID => childID.includes( "icon" ) )[ 0 ];
             var icon = viewDriver.state.nodes[ iconID ].kineticObj;
             var symbolCenter = icon.attrs.symbolCenter || {
                 x: 0,
@@ -1002,6 +1000,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                 // view and it doesn't need to (if the model set the value, it would risk 
                 // having the model set the view back to an old value, which results in 
                 // jitter while the user is dragging the node)
+                var nodeID = _draggingNode.ID;
                 viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
 
                 // Update the node's mapPosition
