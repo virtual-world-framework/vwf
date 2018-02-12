@@ -5313,6 +5313,42 @@ define( function(){
                   "symbolType": "MultiSegmentPolygon",
                   "validModifiers": [ "uniqueDesignation1" ]
             },
+            "TACGRP.C2GM.OFF.LNE.AXSADV.AVN": {
+                  "symbolID": "G*GPOLAV--****X",
+                  "tag": "AVIATION AXIS OF ADVANCE",
+                  "symbolType": "MultiSegmentArrow",
+                  "arrowLeafOffset": 40
+            },
+            "TACGRP.C2GM.OFF.LNE.AXSADV.ABN": {
+                  "symbolID": "G*GPOLAA--****X",
+                  "tag": "AIRBORNE AXIS OF ADVANCE",
+                  "symbolType": "MultiSegmentArrow",
+                  "arrowLeafOffset": 40
+            },
+            "TACGRP.C2GM.OFF.LNE.AXSADV.ATK": {
+                  "symbolID": "G*GPOLAR--****X",
+                  "tag": "RWA ATTACK AXIS OF ADVANCE",
+                  "symbolType": "MultiSegmentArrow",
+                  "arrowLeafOffset": 40
+            },
+            "TACGRP.C2GM.OFF.LNE.AXSADV.GRD.MANATK": {
+                  "symbolID": "G*GPOLAGM-****X",
+                  "tag": "GROUND MAIN ATTACK",
+                  "symbolType": "MultiSegmentArrow",
+                  "arrowLeafOffset": 40
+            },
+            "TACGRP.C2GM.OFF.LNE.AXSADV.GRD.SUPATK": {
+                  "symbolID": "G*GPOLAGS-****X",
+                  "tag": "GROUND SUPPORTING ATTACK",
+                  "symbolType": "MultiSegmentArrow",
+                  "arrowLeafOffset": 40
+            },
+            "TACGRP.C2GM.DCPN.AAFF": {
+                  "symbolID": "G*GPPA----****X",
+                  "tag": "AXIS OF ADVANCE FOR FEINT",
+                  "symbolType": "MultiSegmentArrow",
+                  "arrowLeafOffset": 40
+            }
       },
 
       "lines": {
@@ -5402,13 +5438,13 @@ define( function(){
                   "symbolID": "G*FPLCF---****X",
                   "tag": "FIRE SUPPORT COORDINATION LINE",
                   "symbolType": "MultiSegmentLine",
-                  "validModifiers": [ "uniqueDesignation1" ]
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.LNE.C2LNE.CFL": {
                   "symbolID": "G*FPLCC---****X",
                   "tag": "COORDINATED FIRE LINE",
                   "symbolType": "MultiSegmentLine",
-                  "validModifiers": [ "uniqueDesignation1" ]
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2", "DTG1", "DTG2" ]
             },
             "TACGRP.FSUPP.LNE.C2LNE.NFL": {
                   "symbolID": "G*FPLCN---****X",
@@ -5419,7 +5455,7 @@ define( function(){
                   "symbolID": "G*FPLCR---****X",
                   "tag": "RESTRICTIVE FIRE LINE",
                   "symbolType": "MultiSegmentLine",
-                  "validModifiers": [ "uniqueDesignation1" ]
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2", "DTG1", "DTG2" ]
             },
             "TACGRP.MOBSU.SU.FTFDLN": {
                   "symbolID": "G*MPSL----****X",
@@ -5675,7 +5711,7 @@ define( function(){
                   "symbolID": "G*FPLTF---****X",
                   "tag": "LINEAR TARGET FINAL PROTECTIVE FIRE",
                   "symbolType": "SimpleLine",
-                  "validModifiers": [ "uniqueDesignation1" ]
+                  "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
             },
             "TACGRP.FSUPP.ARS.ARATGT.RTGTGT": {
                   "symbolID": "G*FPAT----****X",
@@ -5895,6 +5931,12 @@ define( function(){
                   "symbolID": "G*FPACT---****X",
                   "tag": "TERMINALLY GUIDED MUNITION FOOTPRINT",
                   "symbolType": "MultiSegmentPolygon"
+            },
+            "TACGRP.FSUPP.LNE.C2LNE.MFP": {
+                  "symbolID": "G*FPLCM---****X",
+                  "tag": "MUNITION FLIGHT PATH",
+                  "symbolType": "MultiSegmentPolygon",
+                  "validModifiers": [ "DTG1", "DTG2" ]
             }
       },
 
