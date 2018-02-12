@@ -5200,7 +5200,8 @@ define( function(){
                   "symbolID": "G*TPKF----****X",
                   "tag": "COUNTERATTACK BY FIRE",
                   "symbolType": "MultiSegmentArrow",
-                  "arrowLeafOffset": 60
+                  "arrowLeafAngle": 0,
+                  "arrowLeafOffset": 40
             }
       },
 
@@ -5397,7 +5398,8 @@ define( function(){
                   "symbolID": "G*GPPA----****X",
                   "tag": "AXIS OF ADVANCE FOR FEINT",
                   "symbolType": "MultiSegmentArrow",
-                  "arrowLeafOffset": 40
+                  "arrowLeafAngle": 90,
+                  "arrowLeafOffset": 20
             },
             "TACGRP.C2GM.OFF.LNE.INFNLE": {
                   "symbolID": "G*GPOLI---****X",
