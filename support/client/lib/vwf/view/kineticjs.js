@@ -44,6 +44,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     var mouseDown = false;
     var doRenderScene = false;
     var eventHandlers = {};
+    var _draggingNode;
 
     // Object implements tapHold behavior (kineticJS doesn't have a built-in one)
     var tapHold = { 
@@ -267,16 +268,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
             activelyDrawing = false;
 
-            if ( node.kineticObj.mouseDragging ) {
-                fireViewEvent( "dragend", {
-                    nodeID: node.ID,
-                    eventData: eData.eventData[ 0 ]
-                } );
-                node.kineticObj.mouseDragging = false;
-            
-                if ( viewDriver.state.draggingNodes[ node.ID ] !== undefined ) {
-                    delete viewDriver.state.draggingNodes[ node.ID ]; 
-                }
+            if ( _draggingNode ) {
+                handleDragEnd( node, evt );
             } else {
                 fireViewEvent( "mouseup", {
                     nodeID: node.ID,
@@ -313,19 +306,19 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
         
         node.kineticObj.on( "dragstart", function( evt ) {
-            var eData = processEvent( evt, node, false );
 
-            viewDriver.state.draggingNodes[ node.ID ] = node;
-            node.kineticObj.mouseDragging = true;
-            var prevPos;
-            if (node.kineticObj.attrs) {
-                prevPos = [node.kineticObj.attrs.x, node.kineticObj.attrs.y];
-            }
+            _draggingNode = node;
+
+            // We don't want to receive this event for the node's parents
+            evt.cancelBubble = true;
+
+            // Fire a view-side event
+            var eData = processEvent( evt, node, false );
             fireViewEvent( "dragstart", {
                 nodeID: node.ID,
-                prevPos: prevPos,
                 eventData: eData.eventData[ 0 ]
             } );
+            
             if ( node.dragToTop ) {
                 node.kineticObj.moveToTop();
             }
@@ -342,22 +335,36 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         } );
 
-        node.kineticObj.on( "dragend", function( evt ) {
-            var eData = processEvent( evt, node, false );
+        // TODO: Test - Is the "dragend" event called in firefox or on tablets?
+        // It isn't on desktop Chrome.  Instead:
+        //  - When the user stops dragging by mouse, "mouseup" is called.
+        //  - When the user stops dragging by touch, "touchend" is called.
+        node.kineticObj.on( "dragend", evt => handleDragEnd( node, evt ) );
 
-            activelyDrawing = false;
+    }
 
-            node.kineticObj.mouseDragging = false;
-            fireViewEvent( "dragend", {
-                nodeID: node.ID,
-                eventData: eData.eventData[ 0 ]
-            } );
-            if ( viewDriver.state.draggingNodes[ node.ID ] !== undefined ) {
-                delete viewDriver.state.draggingNodes[ node.ID ]; 
-            }
+    function handleDragEnd( node, evt ) {
 
-        } );
+        var nodeID = node.ID;
+        if ( nodeID !== _draggingNode.ID ) {
+            return;
+        }
 
+        // Calculate and set the final mapPosition at the end of the drag
+        var mapPosition = setNewUnitMapPositionOnDrag();
+
+        // The node is no longer being dragged
+        _draggingNode = undefined;
+        activelyDrawing = false;
+
+        // Fire a view-side event
+        var eData = processEvent( evt, node, false );
+        var eventParams = {
+            nodeID: nodeID,
+            eventData: eData.eventData[ 0 ],
+            mapPosition: mapPosition
+        };
+        fireViewEvent( "dragend", eventParams );
     }
 
     // Attach handlers for touch events
@@ -390,11 +397,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             if (node.kineticObj.attrs) {
                 prevPos = [node.kineticObj.attrs.x, node.kineticObj.attrs.y];
             }
-            fireViewEvent( "dragstart", {
-                nodeID: node.ID,
-                prevPos: prevPos,
-                eventData: eData.eventData[ 0 ]
-            } );
             swipe.swipedAcross( node, true, eData.eventData );
 
         } );
@@ -428,12 +430,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawUp( node.ID, eData.eventData[0], node, true ); 
-            fireViewEvent( "dragend", {
-                nodeID: node.ID,
-                eventData: eData.eventData[ 0 ]
-            } );
-            activelyDrawing = false;
+            drawUp( node.ID, eData.eventData[0], node, true );
+
+            if ( _draggingNode ) {
+                handleDragEnd( node, evt );
+            }
         } );
 
         node.kineticObj.on( "tap", function( evt ) {
@@ -798,7 +799,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         // firedEvent: function( nodeID, eventName ) { },
 
         ticked: function( vwfTime ) {
-            update( vwfTime );
+            setNewUnitMapPositionOnDrag();
         },
 
         // This is intended to be called directly from the application view
@@ -953,83 +954,78 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
     // Private helper functions --------------------------------------------------------------------
 
-    function update( vwfTime ) {
+    function setNewUnitMapPositionOnDrag() {
 
-        var renderNodes = {};
-        var doRenderNodes = false;
-        
-        for ( var nodeID in viewDriver.state.draggingNodes ) {
-        
-            var node = viewDriver.state.draggingNodes[ nodeID ];
-            var kineticObj = node.kineticObj;
+        if ( !_draggingNode ) {
+            return;
+        }
 
-            if ( !kineticObj ) {
-                continue;
+        var newMapPosition;
+        var kineticObj = _draggingNode.kineticObj;
+
+        if ( !kineticObj ) {
+            return;
+        }
+
+        // If users can drag this node and all clients should stay synchronized, we must 
+        // pull the new node position out of kinetic and update the model with it
+        var draggable = kineticObj.draggable();
+
+        var positionProperty = ( _draggingNode.model || {} ).position;
+        var modelChangeShouldUpdateView = ( positionProperty || {} ).modelChangeShouldUpdateView;
+
+        if ( draggable && modelChangeShouldUpdateView )  { 
+            var kineticX = kineticObj.x();
+            var kineticY = kineticObj.y();
+
+            var iconID =
+                _draggingNode.children.filter( childID => childID.includes( "icon" ) )[ 0 ];
+            var icon = viewDriver.state.nodes[ iconID ].kineticObj;
+            var symbolCenter = icon.attrs.symbolCenter || {
+                x: 0,
+                y: 0
+            };
+            var scale = kineticObj.scaleX();
+            newMapPosition = {
+                x: kineticX + scale * symbolCenter.x,
+                y: kineticY + scale * symbolCenter.y,
             }
 
-            // If users can drag this node and all clients should stay synchronized, we must 
-            // pull the new node position out of kinetic and update the model with it
-            var draggable = kineticObj.draggable();
+            // If the position of this node has changed since its last model value, set the
+            // model property with the new value
+            if ( ( positionProperty.value.x !== kineticX ) || 
+                 ( positionProperty.value.y !== kineticY ) ) {
 
-            var positionProperty = ( node.model || {} ).position;
-            var modelChangeShouldUpdateView =
-                ( positionProperty || {} ).modelChangeShouldUpdateView;
+                // Fire this event to notify the model that kinetic has already updated the
+                // view and it doesn't need to (if the model set the value, it would risk 
+                // having the model set the view back to an old value, which results in 
+                // jitter while the user is dragging the node)
+                var nodeID = _draggingNode.ID;
+                viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
 
-            if ( draggable && modelChangeShouldUpdateView )  { 
-                var kineticX = kineticObj.x();
-                var kineticY = kineticObj.y();
+                // Update the node's mapPosition
+                // Note: It is usually bad practice to use a potentially out-of-date model value
+                //       (like symbolCenter) to calculate model state on the view side.
+                //       Doing so on the model side ensures that all values are up to date.
+                //       However, for integration with other applications who receive reflector
+                //       traffic, it is important for them to see the mapPosition property get
+                //       set.
+                //    
+                //       Since the "errors" that might be caused by having an out-of-date
+                //       symbolCenter would be rare, we do this here.
+                // 
+                //       (The error would take the form that the user who dragged the symbol
+                //       would see the symbol in the view where they dropped it.
+                //       However, if the symbol had been rerendered between the drop and
+                //       the model property getting set, the model value would be slightly
+                //       different, such that all other users would see the unit in a different
+                //       location.  That would resolve the next time someone moved the unit.)
+                viewDriver.kernel.setProperty( nodeID, "mapPosition", newMapPosition );
 
-                // If the position of this node has changed since its last model value, set the
-                // model property with the new value
-                if ( ( positionProperty.value.x !== kineticX ) || 
-                     ( positionProperty.value.y !== kineticY ) ) {
-
-                    // Fire this event to notify the model that kinetic has already updated the
-                    // view and it doesn't need to (if the model set the value, it would risk 
-                    // having the model set the view back to an old value, which results in 
-                    // jitter while the user is dragging the node)
-                    viewDriver.kernel.fireEvent( nodeID, "draggingFromView" );
-
-                    // Update the node's mapPosition
-                    // Note: It is usually bad practice to use a potentially out-of-date model value
-                    //       (like symbolCenter) to calculate model state on the view side.
-                    //       Doing so on the model side ensures that all values are up to date.
-                    //       However, for integration with other applications who receive reflector
-                    //       traffic, it is important for them to see the mapPosition property get
-                    //       set.
-                    //    
-                    //       Since the "errors" that might be caused by having an out-of-date
-                    //       symbolCenter would be rare, we do this here.
-                    // 
-                    //       (The error would take the form that the user who dragged the symbol
-                    //       would see the symbol in the view where they dropped it.
-                    //       However, if the symbol had been rerendered between the drop and
-                    //       the model property getting set, the model value would be slightly
-                    //       different, such that all other users would see the unit in a different
-                    //       location.  That would resolve the next time someone moved the unit.)
-                    var iconID = node.children.filter( childID => childID.includes( "icon" ) )[ 0 ];
-                    var icon = viewDriver.state.nodes[ iconID ].kineticObj;
-                    var symbolCenter = icon.attrs.symbolCenter || {
-                        x: 0,
-                        y: 0
-                    };
-                    var scale = kineticObj.scaleX();
-                    viewDriver.kernel.setProperty( nodeID, "mapPosition",  {
-                        x: kineticX + scale * symbolCenter.x,
-                        y: kineticY + scale * symbolCenter.y,
-                    } );
-
-                    doRenderNodes = true;
-                    renderNodes[ nodeID ] = kineticObj;
-                }
+                render( kineticObj, false, true );
             }
         }
-        
-        if ( doRenderNodes ) {
-            for ( var id in renderNodes ) {
-                render( renderNodes[ id ], false, true );
-            }
-        }
+        return newMapPosition;
     }
 
     function renderScene( stage, force, drawHit ) {
