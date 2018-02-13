@@ -5915,13 +5915,13 @@ define( function(){
                         "symbolType": "MultiSegmentPolygon",
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
-                  "TACGRP.FSUPP.ARS.C2ARS.SNSZ.RTG": {
+                  "TACGRP.FSUPP.ARS.C2ARS.DA.RTG": {
                         "symbolID": "G*FPACDI--****X",
                         "tag": "DEAD SPACE AREA RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
-                  "TACGRP.FSUPP.ARS.C2ARS.SNSZ.IRR": {
+                  "TACGRP.FSUPP.ARS.C2ARS.DA.IRR": {
                         "symbolID": "G*FPACDI--****X",
                         "tag": "DEAD SPACE AREA IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
