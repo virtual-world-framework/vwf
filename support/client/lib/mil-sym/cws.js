@@ -4946,6 +4946,14 @@ define( function(){
                   "STBOPS.GRPORG.GANG": {
                       "symbolID": "OUGPF-----*****",
                       "tag": "STBOPS"     
+                  },
+                  "STBOPS.RAPE": {
+                      "symbolID": "OURP------*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.RAPE.ATEMPT": {
+                      "symbolID": "OURPA-----*****",
+                      "tag": "STBOPS"     
                   }
             },
               
