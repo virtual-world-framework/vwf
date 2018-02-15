@@ -4911,48 +4911,568 @@ define( function(){
               
             // Emergency Management Services point graphics
             "ems": {
+                  "EMS.INCDNT.CVDIS": {
+                      "symbolID": "EUIPA-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CVDIS.DEMO": {
+                      "symbolID": "O*O*D-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CVDIS.DISPOP": {
+                      "symbolID": "O*I*AC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CVDIS.CVRIOT": {
+                      "symbolID": "E*I*AC-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT": {
+                      "symbolID": "EUIPB-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.BMTTHT": {
+                      "symbolID": "EUIPBA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.BM": {
+                      "symbolID": "OUVPB-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.EXPLN": {
+                      "symbolID": "EUIPBC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.LOOT": {
+                      "symbolID": "EUIPBD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.PSNG": {
+                      "symbolID": "OUVPP-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.SHTG": {
+                      "symbolID": "EUIPBF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE": {
+                      "symbolID": "EUIPC-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.HTSPT": {
+                      "symbolID": "EUIPCA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.NRES": {
+                      "symbolID": "EUIPCB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.ORGN": {
+                      "symbolID": "EUIPCC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.RES": {
+                      "symbolID": "EUIPCD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.SCH": {
+                      "symbolID": "EUIPCE----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.SMK": {
+                      "symbolID": "EUIPCF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.SN": {
+                      "symbolID": "EUIPCG----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.WLD": {
+                      "symbolID": "EUIPCH----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT": {
+                      "symbolID": "EUIPD-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.CHMAGT": {
+                      "symbolID": "EUIPDA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.CORMTL": {
+                      "symbolID": "EUIPDB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.WHWET": {
+                      "symbolID": "EUIPDC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.EXPLV": {
+                      "symbolID": "EUIPDD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.FLGAS": {
+                      "symbolID": "EUIPDE----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.FLLIQ": {
+                      "symbolID": "EUIPDF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.FLSLD": {
+                      "symbolID": "EUIPDG----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.NFLGAS": {
+                      "symbolID": "EUIPDH----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.ORGPER": {
+                      "symbolID": "EUIPDI----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.OXDZR": {
+                      "symbolID": "EUIPDJ----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.RADMTL": {
+                      "symbolID": "EUIPDK----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.SPCMB": {
+                      "symbolID": "EUIPDL----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.TXGAS": {
+                      "symbolID": "EUIPDM----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.TXINF": {
+                      "symbolID": "EUIPDN----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.UNXORD": {
+                      "symbolID": "EUIPDO----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.AIR": {
+                      "symbolID": "EUIPE-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.AIR.ACDNT": {
+                      "symbolID": "EUIPEA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.AIR.HJKG": {
+                      "symbolID": "OUOPHA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.MRN": {
+                      "symbolID": "EUIPF-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.MRN.ACDNT": {
+                      "symbolID": "EUIPFA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.MRN.HJKNG": {
+                      "symbolID": "OUOPHV----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.RAIL": {
+                      "symbolID": "EUIPG-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.RAIL.ACDNT": {
+                      "symbolID": "EUIPGA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.RAIL.HJKG": {
+                      "symbolID": "EUIPGB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.VEH": {
+                      "symbolID": "EUIPH-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.VEH.ACDNT": {
+                      "symbolID": "EUIPHA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.VEH.HJKG": {
+                      "symbolID": "OUOPHT----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO": {
+                      "symbolID": "EUNPA-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.AFTSHK": {
+                      "symbolID": "EUNPAA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.AVL": {
+                      "symbolID": "EUNPAB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.EQKEPI": {
+                      "symbolID": "EUNPAC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.LNDSLD": {
+                      "symbolID": "EUNPAD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.SBSDNC": {
+                      "symbolID": "EUNPAE----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.VOLERN": {
+                      "symbolID": "WAS-WSVE--P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.VLCTHT": {
+                      "symbolID": "EUNPAG----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET": {
+                      "symbolID": "EUNPB-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.DZ": {
+                      "symbolID": "WAS-WSD-LIP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.DRGHT": {
+                      "symbolID": "EUNPBB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.FLD": {
+                      "symbolID": "EUNPBC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.FG": {
+                      "symbolID": "WAS-WSFGSOP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.HL": {
+                      "symbolID": "WAS-WSGRL-P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.INV": {
+                      "symbolID": "EUNPBF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.RA": {
+                      "symbolID": "WAS-WSR-LIP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.DT/SD": {
+                      "symbolID": "WAS-WSDSLMP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.SN": {
+                      "symbolID": "WAS-WSS-LIP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.TSTRM": {
+                      "symbolID": "WAS-WSTMH-P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.TNDO": {
+                      "symbolID": "WAS-WST-FCP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.TRPCYC": {
+                      "symbolID": "WAS-WSTSS-P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.TSNMI": {
+                      "symbolID": "EUNPBM----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST": {
+                      "symbolID": "EUNPC-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST.BIRD": {
+                      "symbolID": "EUNPCA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST.INSCT": {
+                      "symbolID": "EUNPCB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST.MICROB": {
+                      "symbolID": "EUNPCC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST.REPT": {
+                      "symbolID": "EUNPCD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST.RDNT": {
+                      "symbolID": "EUNPCE----*****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.EMMED": {
                       "symbolID": "EUOPA-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.UNT": {
+                      "symbolID": "EUOPAA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.EQPT": {
+                      "symbolID": "EUOPAB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.INS": {
+                      "symbolID": "EUOPAC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.EMTLOC": {
+                      "symbolID": "EUOPAD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.AMBLNC": {
+                      "symbolID": "EUOPAE----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.MEH": {
+                      "symbolID": "EUOPAF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.HDF": {
+                      "symbolID": "EUOPAG----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.HSP": {
+                      "symbolID": "SUGPIXH---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.HSPSHP": {
+                      "symbolID": "SUSPNM----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.MFOP": {
+                      "symbolID": "EUOPAJ----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.MRG": {
+                      "symbolID": "E*O*AK-----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.RX": {
+                      "symbolID": "EUOPAL----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.TRIAGE": {
+                      "symbolID": "EUOPAM----H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.EMOPN": {
                       "symbolID": "EUOPB-----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.EMOPN.UNT": {
+                      "symbolID": "EUOPBA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EQPT": {
+                      "symbolID": "EUOPBB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.INS": {
+                      "symbolID": "EUOPBC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.ECEP": {
+                      "symbolID": "EUOPBD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EICC": {
+                      "symbolID": "EUOPBE----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EOC": {
+                      "symbolID": "EUOPBF----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EPIC": {
+                      "symbolID": "EUOPBG----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EMSHLT": {
+                      "symbolID": "EUOPBH----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.ESA": {
+                      "symbolID": "EUOPBI----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EMTM": {
+                      "symbolID": "EUOPBJ----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EWDC": {
+                      "symbolID": "EUOPBK----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.FDDIST": {
+                      "symbolID": "EUOPBL----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.FIRFT": {
                       "symbolID": "EUOPC-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.FIRFT.FIRFTU": {
+                      "symbolID": "EUOPCA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.FIRFT.FIRFTE": {
+                      "symbolID": "EUOPCB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.FIRFT.FIRHYD": {
+                      "symbolID": "EUOPCC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.FIRFT.OTHH2O": {
+                      "symbolID": "EUOPCD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.FIRFT.FIRSTN": {
+                      "symbolID": "EUOPCE----H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF": {
                       "symbolID": "EUOPD-----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.LAWENU": {
+                      "symbolID": "EUOPDA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.LAWENE": {
+                      "symbolID": "EUOPDB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.LAWENI": {
+                      "symbolID": "EUOPDC----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.LAWENF.ATF": {
                       "symbolID": "EUOPDD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.ATF.ATFUNT": {
+                      "symbolID": "EUOPDDA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.ATF.ATFEQP": {
+                      "symbolID": "EUOPDDB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.ATF.ATFINS": {
+                      "symbolID": "EUOPDDC---H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF.BDRPT": {
                       "symbolID": "EUOPDE----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.BDRPT.BDRPTU": {
+                      "symbolID": "EUOPDEA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.BDRPT.BDRPTE": {
+                      "symbolID": "EUOPDEB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.BDRPT.BDRPTI": {
+                      "symbolID": "EUOPDEC---H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.LAWENF.CSTM": {
                       "symbolID": "EUOPDF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.CSTM.CSTMUN": {
+                      "symbolID": "EUOPDFA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.CSTM.CSTMEQ": {
+                      "symbolID": "EUOPDFB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.CSTM.CSTMIN": {
+                      "symbolID": "EUOPDFC---H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF.DEA": {
                       "symbolID": "EUOPDG----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.DEA.DEAUNT": {
+                      "symbolID": "EUOPDGA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.DEA.DEAEQP": {
+                      "symbolID": "EUOPDGB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.DEA.DEAINS": {
+                      "symbolID": "EUOPDGC---H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.LAWENF.DOJ": {
                       "symbolID": "EUOPDH----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.DOJ.DOJUNT": {
+                      "symbolID": "EUOPDHA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.DOJ.DOJEQP": {
+                      "symbolID": "EUOPDHB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.DOJ.DOJINS": {
+                      "symbolID": "EUOPDHC---H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF.FBI": {
                       "symbolID": "EUOPDI----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.FBI.FBIUNT": {
+                      "symbolID": "EUOPDIA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.FBI.FBIEQP": {
+                      "symbolID": "EUOPDIB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.FBI.FBIINS": {
+                      "symbolID": "EUOPDIC---H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.LAWENF.POL": {
                       "symbolID": "EUOPDJ----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.POL.POLUNT": {
+                      "symbolID": "EUOPDJA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.POL.POLEQP": {
+                      "symbolID": "EUOPDJB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.POL.POLINS": {
+                      "symbolID": "EUOPDJC---H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF.PRSN": {
@@ -4963,40 +5483,228 @@ define( function(){
                       "symbolID": "EUOPDL----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.SECSR.SECSRU": {
+                      "symbolID": "EUOPDLA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.SECSR.SECSRE": {
+                      "symbolID": "EUOPDLB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.SECSR.SECSRI": {
+                      "symbolID": "EUOPDLC---H****",
+                      "tag": "EMS"     
+                  },
                    "EMS.OPN.LAWENF.TSA": {
                       "symbolID": "EUOPDM----*****",
+                      "tag": "EMS"     
+                  },
+                   "EMS.OPN.LAWENF.TSA.TSAUNT": {
+                      "symbolID": "EUOPDMA---*****",
+                      "tag": "EMS"     
+                  },
+                   "EMS.OPN.LAWENF.TSA.TSAEQP": {
+                      "symbolID": "EUOPDMB---*****",
+                      "tag": "EMS"     
+                  },
+                   "EMS.OPN.LAWENF.TSA.TSAINS": {
+                      "symbolID": "EUOPDMC---H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF.CSTGD": {
                       "symbolID": "EUOPDN----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.CSTGD.CSTGDU": {
+                      "symbolID": "EUOPDNA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.CSTGD.CSTGDE": {
+                      "symbolID": "SUSPXL----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.CSTGD.CSTGDI": {
+                      "symbolID": "EUOPDNC---H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.LAWENF.USMAR": {
                       "symbolID": "EUOPDO----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.USMAR.USMARU": {
+                      "symbolID": "EUOPDOA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.USMAR.USMARE": {
+                      "symbolID": "EUOPDOB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.USMAR.USMARI": {
+                      "symbolID": "EUOPDOC---H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.SNS": {
-                      "symbolID": "EUOPE-----*****",
+                      "symbolID": "SUGPES----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.SNS.BIO": {
+                      "symbolID": "EUOPEA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.SNS.CML": {
+                      "symbolID": "EUOPEB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.SNS.INT": {
+                      "symbolID": "EUOPEC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.SNS.NUC": {
+                      "symbolID": "EUOPED----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.SNS.RAD": {
+                      "symbolID": "EUOPEE----*****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.AGFD": {
                       "symbolID": "EUFPA-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.AGFD.AGLAB": {
+                      "symbolID": "EUFPAA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.AFL": {
+                      "symbolID": "EUFPAB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.CFDC": {
+                      "symbolID": "EUFPAC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.FRMRNC": {
+                      "symbolID": "EUFPAD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.FPC": {
+                      "symbolID": "EUFPAE----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.FDRTL": {
+                      "symbolID": "EUFPAF----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.GRSTR": {
+                      "symbolID": "EUFPAG-----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.BFI": {
                       "symbolID": "EUFPB-----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.ATM": {
+                      "symbolID": "EUFPBA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.BANK": {
+                      "symbolID": "EUFPBB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.BLSTR": {
+                      "symbolID": "EUFPBC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.FRB": {
+                      "symbolID": "EUFPBD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.FINEX": {
+                      "symbolID": "EUFPBE----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.FSO": {
+                      "symbolID": "EUFPBF-----H****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.CMCL": {
                       "symbolID": "EUFPC-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.CMCL.CMPLN": {
+                      "symbolID": "EUFPCA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.FIRMAN": {
+                      "symbolID": "EUFPCB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.FIRRET": {
+                      "symbolID": "EUFPCC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.HZMTPR": {
+                      "symbolID": "EUFPCD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.HZMTST": {
+                      "symbolID": "EUFPCE----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.INDSTE": {
+                      "symbolID": "EUFPCF----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.LNDFL": {
+                      "symbolID": "EUFPCG----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.RXMFG": {
+                      "symbolID": "EUFPCH----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.CHWS": {
+                      "symbolID": "EUFPCI----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.TXRLIN": {
+                      "symbolID": "EUFPCJ----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.EDFAC": {
                       "symbolID": "EUFPD-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.EDFAC.COLLUNI": {
+                      "symbolID": "EUFPDA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.EDFAC.SCHOOL": {
+                      "symbolID": "EUFPDB----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.ENGFAC": {
-                      "symbolID": "EUFPE-----H****",
+                      "symbolID": "SUGPIUE---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.ENGFAC.GENSTA": {
+                      "symbolID": "EUFPEA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.ENGFAC.NTLGAS": {
+                      "symbolID": "EUFPEB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.ENGFAC.NUCFAC": {
+                      "symbolID": "SUGPIUEN--H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.ENGFAC.PETFAC": {
+                      "symbolID": "SUGPIRP---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.ENGFAC.PROPNE": {
+                      "symbolID": "EUFPEE----H****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.GVTSTE": {
@@ -5007,28 +5715,180 @@ define( function(){
                       "symbolID": "EUFPG-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.MIL.ARMORY": {
+                      "symbolID": "EUFPGA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.MIL.MILBF": {
+                      "symbolID": "SUGPIB----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.PSTSRV": {
                       "symbolID": "EUFPH-----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.PSTSRV.PDC": {
+                      "symbolID": "EUFPHA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.PSTSRV.PO": {
+                      "symbolID": "EUFPHB----H****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.PUBVEN": {
                       "symbolID": "EUFPI-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.PUBVEN.ENCFAC": {
+                      "symbolID": "EUFPIA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.PUBVEN.OPNFAC": {
+                      "symbolID": "EUFPIB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.PUBVEN.RECARE": {
+                      "symbolID": "EUFPIC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.PUBVEN.RELIG": {
+                      "symbolID": "EUFPID----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.SPCNDS": {
                       "symbolID": "EUFPJ-----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.SPCNDS.ADLTDC": {
+                      "symbolID": "EUFPJA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.SPCNDS.CHLDDC": {
+                      "symbolID": "EUFPJB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.SPCNDS.ELDERC": {
+                      "symbolID": "EUFPJC----H****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.TELCOM": {
                       "symbolID": "EUFPK-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.TELCOM.TCF": {
+                      "symbolID": "SUGPIUT---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TELCOM.TCTWR": {
+                      "symbolID": "EUFPKB----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.TSP": {
                       "symbolID": "EUFPL-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.TSP.ATCF": {
+                      "symbolID": "EUFPLA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.AIRPT": {
+                      "symbolID": "SUGPIBA---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.BRG": {
+                      "symbolID": "G*M*BCB---H***X",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.BSTN": {
+                      "symbolID": "EUFPLD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.FRYTRM": {
+                      "symbolID": "EUFPLE----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.HLS": {
+                      "symbolID": "EUFPLF----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.LCK": {
+                      "symbolID": "WOS-ML----P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.MAINTF": {
+                      "symbolID": "EUFPLH----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.SP": {
+                      "symbolID": "SUGPIBN---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.RLSTN": {
+                      "symbolID": "EUFPLJ----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.RSTSTP": {
+                      "symbolID": "EUFPLI----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.ANCRG": {
+                      "symbolID": "WOS-HPBA--P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.TOLLF": {
+                      "symbolID": "EUFPLM----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.TCP": {
+                      "symbolID": "GUSPPO----H***X",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.TIF": {
+                      "symbolID": "EUFPLO----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.TNL": {
+                      "symbolID": "EUFPLP----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.WS": {
-                      "symbolID": "EUFPM-----H****",
+                      "symbolID": "SUGPIUP---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.CV": {
+                      "symbolID": "EUFPMA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.DAM": {
+                      "symbolID": "EUFPMB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.DO": {
+                      "symbolID": "EUFPMC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.GWWELL": {
+                      "symbolID": "EUFPMD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.PMPSTN": {
+                      "symbolID": "EUFPME----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.RSVR": {
+                      "symbolID": "EUFPMF----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.STRTWR": {
+                      "symbolID": "EUFPMG----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.SWI": {
+                      "symbolID": "EUFPMH----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.WH2OTF": {
+                      "symbolID": "EUFPMI----H****",
                       "tag": "EMS"     
                   }
             },
@@ -6477,18 +7337,32 @@ define( function(){
                           break;
                   }
                   return retStr;
-            },    
+            }, 
+            "symbolCanAcceptAffiliation": function( symbolID ) {
+                  var canAccept = false;
+                  switch ( symbolID.charAt(0) ) {
+                        case 'S':
+                        case 'E':
+                        case 'G':
+                        case 'O':
+                              canAccept = true;
+                              break;
+                        default:
+                              break;
+                  }
+                  return canAccept;
+            },
             "unknown": function( symbolID ) {
-                  return symbolID.substr( 0, 1 ) + "U" + symbolID.substr( 2 );
+                  return ( this.symbolCanAcceptAffiliation( symbolID ) ? symbolID.substr( 0, 1 ) + "U" + symbolID.substr( 2 ) : symbolID );
             },
             "friendly": function( symbolID ) {
-                  return symbolID.substr( 0, 1 ) + "F" + symbolID.substr( 2 );
+                  return ( this.symbolCanAcceptAffiliation( symbolID ) ? symbolID.substr( 0, 1 ) + "F" + symbolID.substr( 2 ) : symbolID );
             },
             "neutral": function( symbolID ) {
-                  return symbolID.substr( 0, 1 ) + "N" + symbolID.substr( 2 );
+                  return ( this.symbolCanAcceptAffiliation( symbolID ) ? symbolID.substr( 0, 1 ) + "N" + symbolID.substr( 2 ) : symbolID );
             },
             "hostile": function( symbolID ) {
-                  return symbolID.substr( 0, 1 ) + "H" + symbolID.substr( 2 );
+                  return ( this.symbolCanAcceptAffiliation( symbolID ) ? symbolID.substr( 0, 1 ) + "H" + symbolID.substr( 2 ) : symbolID );
             },  
             "addUnitStatusToSymbolId": function( symbolID, value ) {
                   var retStr = symbolID;
