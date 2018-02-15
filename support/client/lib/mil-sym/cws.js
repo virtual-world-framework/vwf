@@ -4783,12 +4783,36 @@ define( function(){
                       "symbolID": "OUOPP-----*****",
                       "tag": "STBOPS"     
                   },
+                  "STBOPS.OPN.RECMT.WLG": {
+                      "symbolID": "OUOPRW----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.RECMT.CRCD": {
+                      "symbolID": "OUOPRC----*****",
+                      "tag": "STBOPS"     
+                  },
                   "STBOPS.OPN.DEMO": {
                       "symbolID": "OUOPD-----*****",
                       "tag": "STBOPS"     
                   },
                   "STBOPS.OPN.ML": {
                       "symbolID": "OUOPM-----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.PSYOP": {
+                      "symbolID": "OUOPY-----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.PSYOP.TARP": {
+                      "symbolID": "OUOPYT----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.PSYOP.WP": {
+                      "symbolID": "OUOPYW----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.PSYOP.HTHP": {
+                      "symbolID": "OUOPYH----*****",
                       "tag": "STBOPS"     
                   },
                   "STBOPS.OPN.FRGSRH": {
@@ -4824,7 +4848,7 @@ define( function(){
                       "tag": "STBOPS"     
                   },
                   "STBOPS.OPN.KDNG.ATEMPT": {
-                      "symbolID": "OUOPK-----*****",
+                      "symbolID": "OUOPKA----*****",
                       "tag": "STBOPS"     
                   },
                   "STBOPS.OPN.ARR": {
@@ -4833,6 +4857,22 @@ define( function(){
                   },
                   "STBOPS.OPN.DGOPN": {
                       "symbolID": "OUOPU-----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.CMPLSS": {
+                      "symbolID": "OUOPC-----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.CMPLSS.COMBAT": {
+                      "symbolID": "OUOPCA----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.CMPLSS.ACCDNT": {
+                      "symbolID": "OUOPCB----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.CMPLSS.OTHER": {
+                      "symbolID": "OUOPCC----*****",
                       "tag": "STBOPS"     
                   },
                   "STBOPS.ITM.RFG": {
@@ -7343,6 +7383,7 @@ define( function(){
                   switch ( symbolID.charAt(0) ) {
                         case 'S':
                         case 'E':
+                        case 'I':
                         case 'G':
                         case 'O':
                               canAccept = true;
