@@ -3550,18 +3550,6 @@ define( function(){
                       "symbolID": "SUGPEVEAA-*****",  
                       "tag": "ENGVEH"   
                   },
-                  // "WAR.GRDTRK.EQT.GRDVEH.ENGVEH.MLVEH.TRKMV": {
-                  //     "symbolID": "SUGPEVEML-*****",
-                  //     "tag": "ENGVEH"     
-                  // },
-                  // "WAR.GRDTRK.EQT.GRDVEH.ENGVEH.MCVEH": {
-                  //     "symbolID": "SUGPEVEA--*****",  
-                  //     "tag": "GRDVEH"   
-                  // },
-                  // "WAR.GRDTRK.EQT.GRDVEH.ENGVEH.MCVEH.ARMVM": {
-                  //     "symbolID": "SUGPEVEAA-*****",
-                  //     "tag": "ENGVEH"     
-                  // },
                   "WAR.GRDTRK.EQT.GRDVEH.ENGVEH.MCVEH.TM": {
                       "symbolID": "SUGPEVEAT-*****",
                       "tag": "ENGVEH"     
@@ -3602,24 +3590,112 @@ define( function(){
                       "symbolID": "SUGPEVCA--*****",  
                       "tag": "EQT"   
                   },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.AUT.CPCT": {
+                      "symbolID": "SUGPEVCAL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.AUT.MDSZ": {
+                      "symbolID": "SUGPEVCAM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.AUT.SDN": {
+                      "symbolID": "SUGPEVCAH-*****",  
+                      "tag": "EQT"   
+                  },
                   "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.OBTRK": {
                       "symbolID": "SUGPEVCO--*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.OBTRK.PU": {
+                      "symbolID": "SUGPEVCOL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.OBTRK.SMAL": {
+                      "symbolID": "SUGPEVCOM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.OBTRK.LRG": {
+                      "symbolID": "SUGPEVCOH-*****",  
                       "tag": "EQT"   
                   },
                   "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.MPV": {
                       "symbolID": "SUGPEVCM--*****",  
                       "tag": "EQT"   
                   },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.MPV.VAN": {
+                      "symbolID": "SUGPEVCML-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.MPV.SBUS": {
+                      "symbolID": "SUGPEVCMM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.MPV.LBUS": {
+                      "symbolID": "SUGPEVCMH-*****",  
+                      "tag": "EQT"   
+                  },
                   "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.UTYVEH": {
                       "symbolID": "SUGPEVCU--*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.UTYVEH.SUV": {
+                      "symbolID": "SUGPEVCUL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.UTYVEH.SBOX": {
+                      "symbolID": "SUGPEVCUM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.UTYVEH.LBOX": {
+                      "symbolID": "SUGPEVCUH-*****",  
                       "tag": "EQT"   
                   },
                   "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.JP": {
                       "symbolID": "SUGPEVCJ--*****",  
                       "tag": "EQT"   
                   },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.JP.SMAL": {
+                      "symbolID": "SUGPEVCJL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.JP.MDM": {
+                      "symbolID": "SUGPEVCJM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.JP.LRG": {
+                      "symbolID": "SUGPEVCJH-*****",  
+                      "tag": "EQT"   
+                  },
                   "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRL": {
                       "symbolID": "SUGPEVCT--*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRL.SMAL": {
+                      "symbolID": "SUGPEVCTL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRL.MDM": {
+                      "symbolID": "SUGPEVCTM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRL.LRG": {
+                      "symbolID": "SUGPEVCTL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRLF": {
+                      "symbolID": "SUGPEVCF--*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRLF.SMAL": {
+                      "symbolID": "SUGPEVCFL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRLF.MDM": {
+                      "symbolID": "SUGPEVCFM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRLF.LRG": {
+                      "symbolID": "SUGPEVCFL-*****",  
                       "tag": "EQT"   
                   },
                   "WAR.GRDTRK.EQT.GRDVEH.PKAN": {
@@ -3628,6 +3704,26 @@ define( function(){
                   },
                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT": {
                       "symbolID": "SUGPEVS---*****",
+                      "tag": "EQT"     
+                  },
+                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT.TLDR": {
+                      "symbolID": "SUGPEVST--*****",
+                      "tag": "EQT"     
+                  },
+                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT.TPTR": {
+                      "symbolID": "SUGPEVSR--*****",
+                      "tag": "EQT"     
+                  },
+                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT.CRN": {
+                      "symbolID": "SUGPEVSC--*****",
+                      "tag": "EQT"     
+                  },
+                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT.PLNT": {
+                      "symbolID": "SUGPEVSP--*****",
+                      "tag": "EQT"     
+                  },
+                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT.WH": {
+                      "symbolID": "SUGPEVSW--*****",
                       "tag": "EQT"     
                   },
                   "WAR.GRDTRK.EQT.SNS": {
@@ -4061,6 +4157,18 @@ define( function(){
                       "symbolID": "SUSPXH----*****",  
                       "tag": "SSUF"   
                   },
+                  "WAR.SSUF.NMIL.FSTREC": {
+                      "symbolID": "SUSPXA----*****",  
+                      "tag": "SSUF"   
+                  },
+                  "WAR.SSUF.NMIL.FSTREC.RHIB": {
+                      "symbolID": "SUSPXAR---*****",  
+                      "tag": "SSUF"   
+                  },
+                  "WAR.SSUF.NMIL.FSTREC.SPDBT": {
+                      "symbolID": "SUSPXAS---*****",  
+                      "tag": "SSUF"   
+                  },
                   "WAR.SSUF.OWN": {
                       "symbolID": "SUSPO-----*****",
                       "tag": "WAR"     
@@ -4076,8 +4184,28 @@ define( function(){
                       "symbolID": "SUUPS-----*****",
                       "tag": "WAR"     
                   },
+                  "WAR.SBSUF.SUB.SURF": {
+                      "symbolID": "SUUPSF----*****",
+                      "tag": "WAR"     
+                  },
+                  "WAR.SBSUF.SUB.BOTTMD": {
+                      "symbolID": "SUUPSB----*****",
+                      "tag": "WAR"     
+                  },
+                  "WAR.SBSUF.SUB.CRT": {
+                      "symbolID": "SUUPSR----*****",
+                      "tag": "WAR"     
+                  },
+                  "WAR.SBSUF.SUB.NONSUB": {
+                      "symbolID": "SUUPSX----*****",
+                      "tag": "WAR"     
+                  },
                   "WAR.SBSUF.SUB.NPRN": {
                       "symbolID": "SUUPSN----*****",  
+                      "tag": "SBSUF"   
+                  },
+                  "WAR.SBSUF.SUB.NPRN.SURF": {
+                      "symbolID": "SUUPSNF---*****",  
                       "tag": "SBSUF"   
                   },
                   "WAR.SBSUF.SUB.NPRN.ATK": {
@@ -4092,6 +4220,30 @@ define( function(){
                       "symbolID": "SUUPSNG---*****",
                       "tag": "SUB"     
                   },
+                  "WAR.SBSUF.SUB.NPRN.BLST": {
+                      "symbolID": "SUUPSNB---*****",
+                      "tag": "SUB"     
+                  },
+                  "WAR.SBSUF.SUB.CNVPRN": {
+                      "symbolID": "SUUPSC----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.CNVPRN.SURF": {
+                      "symbolID": "SUUPSCF---*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.CNVPRN.ATK": {
+                      "symbolID": "SUUPSCA---*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.CNVPRN.MSL": {
+                      "symbolID": "SUUPSCM---*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.CNVPRN.GDD": {
+                      "symbolID": "SUUPSCG---*****",  
+                      "tag": "SUB"   
+                  },
                   "WAR.SBSUF.SUB.CNVPRN.BLST": {
                       "symbolID": "SUUPSCB---*****",  
                       "tag": "SUB"   
@@ -4100,16 +4252,48 @@ define( function(){
                       "symbolID": "SUUPSO----*****",
                       "tag": "SBSUF"     
                   },
-                  "WAR.SBSUF.SUB.OTH.UUV": {
+                  "WAR.SBSUF.SUB.OTH.SURF": {
+                      "symbolID": "SUUPSOF---*****",
+                      "tag": "SBSUF"     
+                  },
+                  "WAR.SBSUF.SUB.UUV": {
                       "symbolID": "SUUPSU----*****",  
                       "tag": "SUB"   
                   },
-                  "WAR.SBSUF.SUB.STN": {
-                      "symbolID": "SUUPSS----*****",
-                      "tag": "SBSUF"     
+                  "WAR.SBSUF.SUB.UUV.MNEW": {
+                      "symbolID": "SUUPSUM---*****",  
+                      "tag": "SUB"   
                   },
-                  "WAR.SBSUF.SUB.STN.ASWSUB": {
-                      "symbolID": "SUUPSSA---*****",  
+                  "WAR.SBSUF.SUB.UUV.ASBW": {
+                      "symbolID": "SUUPSUS---*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.UUV.ASUW": {
+                      "symbolID": "SUUPSUN---*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.POSS1": {
+                      "symbolID": "SUUPS1-----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.POSS2": {
+                      "symbolID": "SUUPS2-----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.POSS3": {
+                      "symbolID": "SUUPS3-----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.POSS4": {
+                      "symbolID": "SUUPS4-----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.PRBSUB": {
+                      "symbolID": "SUUPSL-----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.SNORKL": {
+                      "symbolID": "SUUPSK-----*****",  
                       "tag": "SUB"   
                   },
                   "WAR.SBSUF.UH2WPN": {
@@ -4124,7 +4308,7 @@ define( function(){
                       "symbolID": "SUUPWM----*****",
                       "tag": "SBSUF"     
                   },
-                  "WAR.SBSUF.UH2WPN.SMNE.DLT": {
+                  "WAR.SBSUF.UH2WPN.SMNE.NTRLZD": {
                       "symbolID": "SUUPWMD---*****",  
                       "tag": "UH2WPN"   
                   },
@@ -4132,7 +4316,27 @@ define( function(){
                       "symbolID": "SUUPWMG---*****",
                       "tag": "UH2WPN"     
                   },
-                  "WAR.SBSUF.UH2WPN.SMNE.SMG.DLT": {
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.NTRLZD": {
+                      "symbolID": "SUUPWMGD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.EXER": {
+                      "symbolID": "SUUPWMGX--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.MILEC": {
+                      "symbolID": "SUUPWMGE--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.MILCO": {
+                      "symbolID": "SUUPWMGD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.NRGEAC": {
+                      "symbolID": "SUUPWMGD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.NMMLCO": {
                       "symbolID": "SUUPWMGD--*****",  
                       "tag": "SMNE"   
                   },
@@ -4140,7 +4344,27 @@ define( function(){
                       "symbolID": "SUUPWMM---*****",
                       "tag": "UH2WPN"     
                   },
-                  "WAR.SBSUF.UH2WPN.SMNE.SMM.DLT": {
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.NTRLZD": {
+                      "symbolID": "SUUPWMMD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.EXER": {
+                      "symbolID": "SUUPWMMX--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.MILEC": {
+                      "symbolID": "SUUPWMME--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.MILCO": {
+                      "symbolID": "SUUPWMMD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.NRGEAC": {
+                      "symbolID": "SUUPWMMD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.NMMLCO": {
                       "symbolID": "SUUPWMMD--*****",  
                       "tag": "SMNE"   
                   },
@@ -4148,7 +4372,27 @@ define( function(){
                       "symbolID": "SUUPWMF---*****",
                       "tag": "UH2WPN"     
                   },
-                  "WAR.SBSUF.UH2WPN.SMNE.SMF.DLT": {
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.NTRLZD": {
+                      "symbolID": "SUUPWMFD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.EXER": {
+                      "symbolID": "SUUPWMFX--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.MILEC": {
+                      "symbolID": "SUUPWMFE--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.MILCO": {
+                      "symbolID": "SUUPWMFD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.NRGEAC": {
+                      "symbolID": "SUUPWMFD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.NMMLCO": {
                       "symbolID": "SUUPWMFD--*****",  
                       "tag": "SMNE"   
                   },
@@ -4156,8 +4400,52 @@ define( function(){
                       "symbolID": "SUUPWMO---*****",
                       "tag": "UH2WPN"     
                   },
-                  "WAR.SBSUF.UH2WPN.SMNE.SMOP.DLT": {
+                  "WAR.SBSUF.UH2WPN.SMNE.SMOP.NTRLZD": {
                       "symbolID": "SUUPWMOD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.EXER": {
+                      "symbolID": "SUUPWMF---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.MILEC": {
+                      "symbolID": "SUUPWME---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.ANCHOR": {
+                      "symbolID": "SUUPWMA---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.MILCO": {
+                      "symbolID": "SUUPWMD---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.NRGEAC": {
+                      "symbolID": "SUUPWMD---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.OBSTRC": {
+                      "symbolID": "SUUPWMB---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.OBSTRC.NTRLZD": {
+                      "symbolID": "SUUPWMBD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.NMMLCO": {
+                      "symbolID": "SUUPWMD---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.RISING": {
+                      "symbolID": "SUUPWMS---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.RISING.EXER": {
+                      "symbolID": "SUUPWMSX--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.RISING.NTRLZD": {
+                      "symbolID": "SUUPWMSD--*****",  
                       "tag": "SMNE"   
                   },
                   "WAR.SBSUF.UH2DCY": {
@@ -4168,6 +4456,14 @@ define( function(){
                       "symbolID": "SUUPWDM---*****",  
                       "tag": "SBSUF"   
                   },
+                  "WAR.SBSUF.UH2DCY.SMDCY.GRND": {
+                      "symbolID": "SUUPWDMG--*****",  
+                      "tag": "SBSUF"   
+                  },
+                  "WAR.SBSUF.UH2DCY.SMDCY.MOORED": {
+                      "symbolID": "SUUPWDMM--*****",  
+                      "tag": "SBSUF"   
+                  },
                   "WAR.SBSUF.NSUB": {
                       "symbolID": "N/A",
                       "tag": "WAR"     
@@ -4176,6 +4472,18 @@ define( function(){
                       "symbolID": "SUUPND----*****",  
                       "tag": "SBSUF"   
                   },
+                  "WAR.SBSUF.ERL": {
+                      "symbolID": "SUUPE------*****",
+                      "tag": "WAR"     
+                  },
+                  "WAR.SBSUF.DRL": {
+                      "symbolID": "SUUPV------*****",
+                      "tag": "WAR"     
+                  },
+                  "WAR.SBSUF.UXO": {
+                      "symbolID": "SUUPX------*****",
+                      "tag": "WAR"     
+                  }
             },
 
             "sof": {
