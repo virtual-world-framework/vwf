@@ -4089,10 +4089,6 @@ define( function(){
                       "symbolID": "SUSPNNR---*****",
                       "tag": "NCBTT"     
                   },
-                  "WAR.SSUF.NMIL": {
-                      "symbolID": "N/A",  
-                      "tag": "WAR"   
-                  },
                   "WAR.SSUF.NMIL.MCT": {
                       "symbolID": "SUSPXM----*****",
                       "tag": "SSUF"     
@@ -4169,10 +4165,14 @@ define( function(){
                       "symbolID": "SUSPXAS---*****",  
                       "tag": "SSUF"   
                   },
+                  "WAR.SSUF.NMIL.PWC": {
+                      "symbolID": "SUSPXP----*****",  
+                      "tag": "SSUF"   
+                  },
                   "WAR.SSUF.OWN": {
                       "symbolID": "SUSPO-----*****",
                       "tag": "WAR"     
-                  },
+                  }
             },
 
             "subsurface": {
