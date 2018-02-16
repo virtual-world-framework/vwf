@@ -2,9 +2,9 @@ import React from "react";
 import { TabContainer, Navbar, Image, Nav, NavItem, TabContent, TabPane, Button } from "react-bootstrap";
 import _ from "lodash";
 
-import Scenarios from "./scenarios";
-import Sessions from "./sessions";
-import Review from "./review";
+import Scenarios from "./Scenarios";
+import Sessions from "./Sessions";
+import Review from "./Review";
 import { get } from "./utils";
 
 export default class Layout extends React.Component {
