@@ -6031,7 +6031,7 @@ define( function(){
                   "TACGRP.FSUPP.LNE.C2LNE.MFP": {
                         "symbolID": "G*FPLCM---****X",
                         "tag": "MUNITION FLIGHT PATH",
-                        "symbolType": "MultiSegmentPolygon",
+                        "symbolType": "MultiSegmentLine",
                         "validModifiers": [ "DTG1", "DTG2" ]
                   }
             },
