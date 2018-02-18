@@ -5384,8 +5384,8 @@ define( function(){
                         "symbolID": "G*GPPA----****X",
                         "tag": "AXIS OF ADVANCE FOR FEINT",
                         "symbolType": "MultiSegmentArrow",
-                        "arrowLeafAngle": 90,
-                        "arrowLeafOffset": 20
+                        "arrowLeafAngle": 40,
+                        "arrowLeafOffset": 40
                   },
                   "TACGRP.C2GM.OFF.LNE.INFNLE": {
                         "symbolID": "G*GPOLI---****X",
