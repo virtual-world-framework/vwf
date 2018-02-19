@@ -52,7 +52,8 @@ function Review( props ) {
     </td><td>
       { dateFormat( session.document.timestamp ) }
     </td><td>
-      <Button href={ session.instance || session.document.uri } target="_blank" bsSize="small"> Review </Button>
+      <Button href={ session.instance || session.document.uri } target="_blank"
+        bsSize="small" bsStyle="link"> Review </Button>
     </td>
   </tr>;
 }

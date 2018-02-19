@@ -146,12 +146,13 @@ class Scenario extends React.Component {
           <FormControl name="name" type="hidden" value={ scenario.state.scenarioName }/>
         </td><td>
           <Button href={ scenario.instance || scenario.document.uri } target="_blank"
-            bsSize="small" className={ this.filled() && "hidden" }> Edit </Button>
+            bsSize="small" bsStyle="link" className={ this.filled() && "hidden" }> Edit </Button>
           <Button type="submit" disabled={ !this.filled() }
             bsSize="small" className={ !this.filled() && "hidden" }
             onClick={ this.handleSubmit }> Start </Button>
         </td><td>
-          <Button href={ "/export-scenarios?scenarioName=" + scenario.state.scenarioName } bsSize="small"> Export </Button>
+          <Button href={ "/export-scenarios?scenarioName=" + scenario.state.scenarioName }
+            bsSize="small" bsStyle="link"> Export </Button>
         </td>
       </tr>;
     } else {

@@ -54,7 +54,8 @@ function Session( props ) {
       </td><td>
         &nbsp;
       </td><td>
-        <Button href={ session.instance || session.document.uri } target="_blank" bsSize="small">{ session.instance ? "Join" : "Start" }</Button>
+        <Button href={ session.instance || session.document.uri } target="_blank"
+          bsSize="small" bsStyle="link">{ session.instance ? "Join" : "Start" }</Button>
       </td><td>
         &nbsp;
       </td>
