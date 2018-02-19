@@ -24,6 +24,10 @@ const columns = [ {
     "session",
   Cell:
     function Cell( props ) { return <ScenarioCell { ...props }/> },
+  filterMethod: ( filter, row, column ) => {
+    return row[ filter.id ] !== undefined ?
+      String( row[ filter.id ].state.scenarioTitle ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true
+    },
 }, {
   Header:
     "Company",
