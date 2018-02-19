@@ -46,7 +46,6 @@ class Application extends React.Component {
 
   render() {
     return <tr>
-      <Form onSubmit={ this.handleSubmit }>
       <td>
         <FormControl name="title" type="text" placeholder={ Application.TITLE_PLACEHOLDER } bsSize="small"
           value={ this.state.title } onChange={ this.handleTitle }/>
@@ -56,14 +55,14 @@ class Application extends React.Component {
       </td><td>
         &nbsp;
       </td><td>
-        <Button type="submit" disabled={ !this.filled() } bsSize="small"> Create </Button>
+        <Button type="submit" disabled={ !this.filled() } bsSize="small"
+          onClick={ this.handleSubmit }> Create </Button>
       </td><td>
         <ControlLabel className="btn" bsSize="small">
           Import <FormControl type="file" accept=".zip" style={ { display: "none" } }
             onChange={ this.handleImport }/>
         </ControlLabel>
       </td>
-      </Form>
     </tr>;
   }
 
@@ -132,7 +131,6 @@ class Scenario extends React.Component {
       session = this.props.session;
     if ( !session ) {
       return <tr>
-        <Form onSubmit={ this.handleSubmit }>
         <td>
           { scenario.state.scenarioTitle }
         </td><td>
@@ -147,12 +145,14 @@ class Scenario extends React.Component {
         </td><td>
           <FormControl name="name" type="hidden" value={ scenario.state.scenarioName }/>
         </td><td>
-          <Button href={ scenario.instance || scenario.document.uri } target="_blank" bsSize="small" className={ this.filled() && "hidden" }> Edit </Button>
-          <Button type="submit" disabled={ !this.filled() } bsSize="small" className={ !this.filled() && "hidden" }> Start </Button>
+          <Button href={ scenario.instance || scenario.document.uri } target="_blank"
+            bsSize="small" className={ this.filled() && "hidden" }> Edit </Button>
+          <Button type="submit" disabled={ !this.filled() }
+            bsSize="small" className={ !this.filled() && "hidden" }
+            onClick={ this.handleSubmit }> Start </Button>
         </td><td>
           <Button href={ "/export-scenarios?scenarioName=" + scenario.state.scenarioName } bsSize="small"> Export </Button>
         </td>
-        </Form>
       </tr>;
     } else {
       return null;
