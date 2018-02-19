@@ -468,7 +468,7 @@ define( [ "module",
                                 var image = renderMsnGfx( node );
                                 renderImage = basicPropertiesMet( node );
                                 if ( !!image ) {
-                                    attrs.image = image.toDataURL();
+                                    attrs.image = image;
                                     modelDriver.kernel.setProperty( node.ID, propertyName, attrs );
                                 }
                             }

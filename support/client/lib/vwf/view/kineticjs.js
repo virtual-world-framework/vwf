@@ -1325,7 +1325,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                     if ( ( userState.drawing_mode === "freeDraw" ) || ( userState.drawing_mode === "polygon" ) ) {
                         // Optimize the number of vertices
                         if ( simplifyJs ) {
-                            drawingObject.points( simplifyPoints( drawingObject.points() ) );
+                            drawingObject.points( simplifyPoints( drawingObject.points(), 1 ) );
                         }
                     }
 
@@ -1347,7 +1347,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
     // Simplify konva points
     // Konva points are in an array like [x1,y1,x2,y2,...xn,yn]
-    function simplifyPoints( points ) {
+    function simplifyPoints( points, tolerance, highestQuality ) {
         var ptarray = [];
         // Convert to array of  x, y points
         for ( var i = 0; i < points.length; i = i+2 ) {
@@ -1357,7 +1357,9 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         // Optimize and reduce line segments
         if ( ptarray.length > 2 ) {
-            ptarray = simplifyJs.simplify( ptarray );
+            if ( tolerance !== undefined ) {
+                ptarray = simplifyJs.simplify( ptarray, tolerance, highestQuality );
+            }
         }
 
         // Convert back to x, y list

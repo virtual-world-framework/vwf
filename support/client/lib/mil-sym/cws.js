@@ -5384,8 +5384,8 @@ define( function(){
                         "symbolID": "G*GPPA----****X",
                         "tag": "AXIS OF ADVANCE FOR FEINT",
                         "symbolType": "MultiSegmentArrow",
-                        "arrowLeafAngle": 90,
-                        "arrowLeafOffset": 20
+                        "arrowLeafAngle": 40,
+                        "arrowLeafOffset": 40
                   },
                   "TACGRP.C2GM.OFF.LNE.INFNLE": {
                         "symbolID": "G*GPOLI---****X",
@@ -5847,180 +5847,246 @@ define( function(){
                         "symbolID": "G*FPACSI--****X",
                         "tag": "FIRE SUPPORT AREA RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.FSA.IRR": {
                         "symbolID": "G*FPACSI--****X",
                         "tag": "FIRE SUPPORT AREA IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.ACA.RTG": {
                         "symbolID": "G*FPACAI--****X",
                         "tag": "AIRSPACE COORDINATION AREA RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "additionalInfo1": "Min Alt", 
+                                            "additionalInfo2": "Max Alt", 
+                                            "additionalInfo3": "Grids", 
+                                            "DTG1":            "Eff Start", 
+                                            "DTG2":            "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "additionalInfo3", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.ACA.IRR": {
                         "symbolID": "G*FPACAI--****X",
                         "tag": "AIRSPACE COORDINATION AREA IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "additionalInfo1": "Min Alt", 
+                                            "additionalInfo2": "Max Alt", 
+                                            "additionalInfo3": "Grids", 
+                                            "DTG1":            "Eff Start", 
+                                            "DTG2":            "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "additionalInfo3", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.FFA.RTG": {
                         "symbolID": "G*FPACFI--****X",
                         "tag": "FREE FIRE AREA RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.FFA.IRR": {
                         "symbolID": "G*FPACFI--****X",
                         "tag": "FREE FIRE AREA IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.NFA.RTG": {
                         "symbolID": "G*FPACNI--****X",
                         "tag": "NO-FIRE AREA RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.NFA.IRR": {
                         "symbolID": "G*FPACNI--****X",
                         "tag": "NO-FIRE AREA IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.RFA.RTG": {
                         "symbolID": "G*FPACRI--****X",
                         "tag": "RESTRICTIVE AREA RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.RFA.IRR": {
                         "symbolID": "G*FPACRI--****X",
                         "tag": "RESTRICTIVE AREA IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.SNSZ.RTG": {
                         "symbolID": "G*FPACEI--****X",
                         "tag": "SENSOR ZONE RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.SNSZ.IRR": {
                         "symbolID": "G*FPACEI--****X",
                         "tag": "SENSOR ZONE IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.DA.RTG": {
                         "symbolID": "G*FPACDI--****X",
                         "tag": "DEAD SPACE AREA RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.DA.IRR": {
                         "symbolID": "G*FPACDI--****X",
                         "tag": "DEAD SPACE AREA IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.ZOR.RTG": {
                         "symbolID": "G*FPACZI--****X",
                         "tag": "ZONE OF RESPONSIBILITY RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.ZOR.IRR": {
                         "symbolID": "G*FPACZI--****X",
                         "tag": "ZONE OF RESPONSIBILITY IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TBA.RTG": {
                         "symbolID": "G*FPACBI--****X",
                         "tag": "TARGET BUILD-UP AREA RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TBA.IRR": {
                         "symbolID": "G*FPACBI--****X",
                         "tag": "TARGET BUILD-UP AREA IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TVAR.RTG": {
                         "symbolID": "G*FPACVI--****X",
                         "tag": "TARGET VALUE AREA RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TVAR.IRR": {
                         "symbolID": "G*FPACVI--****X",
                         "tag": "TARGET VALUE AREA IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.ATIZ.RTG": {
                         "symbolID": "G*FPAZII--****X",
                         "tag": "ARTILLERY TARGET INTELLIGENCE ZONE RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.ATIZ.IRR": {
                         "symbolID": "G*FPAZII--****X",
                         "tag": "ARTILLERY TARGET INTELLIGENCE ZONE IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CFFZ.RTG": {
                         "symbolID": "G*FPAZXI--****X",
                         "tag": "CALL FOR FIRE ZONE RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CFFZ.IRR": {
                         "symbolID": "G*FPAZXI--****X",
                         "tag": "CALL FOR FIRE ZONE IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CNS.RTG": {
                         "symbolID": "G*FPAZCI--****X",
                         "tag": "CENSOR ZONE RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CNS.IRR": {
                         "symbolID": "G*FPAZCI--****X",
                         "tag": "CENSOR ZONE IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CFZ.RTG": {
                         "symbolID": "G*FPAZFI--****X",
                         "tag": "CRITICAL FRIENDLY ZONE RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CFZ.IRR": {
                         "symbolID": "G*FPAZFI--****X",
                         "tag": "CRITICAL FRIENDLY ZONE IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.KLBOX.BLUE.RTG": {
                         "symbolID": "G*FPAKBI--****X",
                         "tag": "KILL BOX BLUE RECTANGULAR",
                         "symbolType": "RectangleMultiPoint",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.KLBOX.BLUE.IRR": {
                         "symbolID": "G*FPAKBI--****X",
                         "tag": "KILL BOX BLUE IRREGULAR",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TGMF": {
@@ -6031,7 +6097,9 @@ define( function(){
                   "TACGRP.FSUPP.LNE.C2LNE.MFP": {
                         "symbolID": "G*FPLCM---****X",
                         "tag": "MUNITION FLIGHT PATH",
-                        "symbolType": "MultiSegmentPolygon",
+                        "symbolType": "MultiSegmentLine",
+                        "modifierLabels": { "DTG1": "Eff Start", 
+                                            "DTG2": "Eff End" },
                         "validModifiers": [ "DTG1", "DTG2" ]
                   }
             },
@@ -6086,42 +6154,68 @@ define( function(){
                         "symbolID": "G*GPAAR---****X",
                         "tag": "RESTRICTED OPERATIONS ZONE",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "additionalInfo1": "Min Alt", 
+                                            "additionalInfo2": "Max Alt", 
+                                            "DTG1":            "Time From", 
+                                            "DTG2":            "Time To" },
                         "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
                   },
                   "TACGRP.C2GM.AVN.ARS.SHRDEZ": {
                         "symbolID": "G*GPAAF---****X",
                         "tag": "SHORT-RANGE AIR DEFENSE ENGAGEMENT ZONE",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "additionalInfo1": "Min Alt", 
+                                            "additionalInfo2": "Max Alt", 
+                                            "DTG1":            "Time From", 
+                                            "DTG2":            "Time To" },
                         "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
                   },
                   "TACGRP.C2GM.AVN.ARS.HIDACZ": {
                         "symbolID": "G*GPAAH---****X",
                         "tag": "HIGH DENSITY AIRSPACE CONTROL ZONE",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "additionalInfo1": "Min Alt", 
+                                            "additionalInfo2": "Max Alt", 
+                                            "DTG1":            "Time From", 
+                                            "DTG2":            "Time To" },
                         "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
                   },
                   "TACGRP.C2GM.AVN.ARS.MEZ": {
                         "symbolID": "G*GPAAM---****X",
                         "tag": "MISSILE ENGAGEMENT ZONE",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "additionalInfo1": "Min Alt", 
+                                            "additionalInfo2": "Max Alt", 
+                                            "DTG1":            "Time From", 
+                                            "DTG2":            "Time To" },
                         "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
                   },
                   "TACGRP.C2GM.AVN.ARS.MEZ.LAMEZ": {
                         "symbolID": "G*GPAAML--****X",
                         "tag": "MISSILE ENGAGEMENT ZONE LOW ALTITUDE ZONE",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "additionalInfo1": "Min Alt", 
+                                            "additionalInfo2": "Max Alt", 
+                                            "DTG1":            "Time From", 
+                                            "DTG2":            "Time To" },
                         "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
                   },
                   "TACGRP.C2GM.AVN.ARS.MEZ.HAMEZ": {
                         "symbolID": "G*GPAAMH--****X",
                         "tag": "MISSILE ENGAGEMENT ZONE HIGH ALTITUDE ZONE",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "additionalInfo1": "Min Alt", 
+                                            "additionalInfo2": "Max Alt", 
+                                            "DTG1":            "Time From", 
+                                            "DTG2":            "Time To" },
                         "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "DTG1", "DTG2" ]
                   },
                   "TACGRP.C2GM.AVN.ARS.WFZ": {
                         "symbolID": "G*GPAAW---****X",
                         "tag": "WEAPONS FREE ZONE",
                         "symbolType": "MultiSegmentPolygon",
+                        "modifierLabels": { "DTG1":            "Time From", 
+                                            "DTG2":            "Time To" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
                   }
             },
