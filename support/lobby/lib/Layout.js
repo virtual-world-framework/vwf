@@ -2,6 +2,7 @@ import React from "react";
 import { TabContainer, Navbar, Image, Nav, NavItem, TabContent, TabPane, Button } from "react-bootstrap";
 import _ from "lodash";
 
+import "./LobbyTR";
 import Scenarios from "./Scenarios";
 import Sessions from "./Sessions";
 import Review from "./Review";
