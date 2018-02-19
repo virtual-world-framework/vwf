@@ -324,7 +324,8 @@ define( function(){
                   "DRFT": "DRIFTER", 
                   "DRG": "DREDGE", 
                   "DRN": "DRONE (RPV/UAV)", 
-                  "DRPPNT": "DROP POINT", 
+                  "DRPE": "DROP POINT", 
+                  "DRPPNT": "DISPLACED PERSONS, REFUGEES, AND EVACUEES", 
                   "DRPZ": "DROP ZONE", 
                   "DRT": "DISRUPT", 
                   "DSA": "DIVISION (DSA)", 
@@ -3134,10 +3135,6 @@ define( function(){
                       "symbolID": "SUGPEWMAS-*****",
                       "tag": "MSLL"     
                   },
-                  "WAR.GRDTRK.EQT.WPN.MSLL.ADFAD.SHTR.TLAR": {
-                      "symbolID": "SUGPEWMASR*****",  
-                      "tag": "ADFAD"   
-                  },
                   "WAR.GRDTRK.EQT.WPN.MSLL.ADFAD.SHTR.TELAR": {
                       "symbolID": "SUGPEWMASE*****",
                       "tag": "ADFAD"     
@@ -5275,14 +5272,6 @@ define( function(){
                       "symbolID": "O*O*D-----*****",
                       "tag": "EMS"     
                   },
-                  "EMS.INCDNT.CVDIS.DISPOP": {
-                      "symbolID": "O*I*AC----*****",
-                      "tag": "EMS"     
-                  },
-                  "EMS.INCDNT.CVDIS.CVRIOT": {
-                      "symbolID": "E*I*AC-----*****",
-                      "tag": "EMS"     
-                  },
                   "EMS.INCDNT.CRMACT": {
                       "symbolID": "EUIPB-----*****",
                       "tag": "EMS"     
@@ -5459,10 +5448,6 @@ define( function(){
                       "symbolID": "OUOPHT----*****",
                       "tag": "EMS"     
                   },
-                  "EMS.NATEVT.GEO": {
-                      "symbolID": "EUNPA-----*****",
-                      "tag": "EMS"     
-                  },
                   "EMS.NATEVT.GEO.AFTSHK": {
                       "symbolID": "EUNPAA----*****",
                       "tag": "EMS"     
@@ -5489,10 +5474,6 @@ define( function(){
                   },
                   "EMS.NATEVT.GEO.VLCTHT": {
                       "symbolID": "EUNPAG----*****",
-                      "tag": "EMS"     
-                  },
-                  "EMS.NATEVT.HYDMET": {
-                      "symbolID": "EUNPB-----*****",
                       "tag": "EMS"     
                   },
                   "EMS.NATEVT.HYDMET.DZ": {
@@ -5545,10 +5526,6 @@ define( function(){
                   },
                   "EMS.NATEVT.HYDMET.TSNMI": {
                       "symbolID": "EUNPBM----*****",
-                      "tag": "EMS"     
-                  },
-                  "EMS.NATEVT.INFST": {
-                      "symbolID": "EUNPC-----*****",
                       "tag": "EMS"     
                   },
                   "EMS.NATEVT.INFST.BIRD": {
@@ -5613,10 +5590,6 @@ define( function(){
                   },
                   "EMS.OPN.EMMED.MFOP": {
                       "symbolID": "EUOPAJ----H****",
-                      "tag": "EMS"     
-                  },
-                  "EMS.OPN.EMMED.MRG": {
-                      "symbolID": "E*O*AK-----H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.EMMED.RX": {
@@ -5819,10 +5792,6 @@ define( function(){
                       "symbolID": "EUOPDJ----*****",
                       "tag": "EMS"     
                   },
-                  "EMS.OPN.LAWENF.POL.POLUNT": {
-                      "symbolID": "EUOPDJA---*****",
-                      "tag": "EMS"     
-                  },
                   "EMS.OPN.LAWENF.POL.POLEQP": {
                       "symbolID": "EUOPDJB---*****",
                       "tag": "EMS"     
@@ -5951,10 +5920,6 @@ define( function(){
                       "symbolID": "EUFPAF----H****",
                       "tag": "EMS"     
                   },
-                  "EMS.INFSTR.AGFD.GRSTR": {
-                      "symbolID": "EUFPAG-----H****",
-                      "tag": "EMS"     
-                  },
                   "EMS.INFSTR.BFI": {
                       "symbolID": "EUFPB-----H****",
                       "tag": "EMS"     
@@ -5977,10 +5942,6 @@ define( function(){
                   },
                   "EMS.INFSTR.BFI.FINEX": {
                       "symbolID": "EUFPBE----H****",
-                      "tag": "EMS"     
-                  },
-                  "EMS.INFSTR.BFI.FSO": {
-                      "symbolID": "EUFPBF-----H****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.CMCL": {
@@ -6246,6 +6207,341 @@ define( function(){
                   "EMS.INFSTR.WS.WH2OTF": {
                       "symbolID": "EUFPMI----H****",
                       "tag": "EMS"     
+                  }
+            },
+
+            "sigint": {
+                  "SIGINT.SPC.SIGINC.COMM.SATDL": {
+                      "symbolID": "IUPPSCD-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.ERHSVL": {
+                      "symbolID": "IUPPSRE-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.IFF": {
+                      "symbolID": "IUPPSRI-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.MFN": {
+                      "symbolID": "IUPPSRM-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.TGTAQ": {
+                      "symbolID": "IUPPSRT-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.SPC": {
+                      "symbolID": "IUPPSRS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.UNK": {
+                      "symbolID": "IUPPSRU-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.COMM.CELL": {
+                      "symbolID": "IUAPSCC-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.COMM.OLOS": {
+                      "symbolID": "IUAPSCO-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.COMM.PIPLOS": {
+                      "symbolID": "IUAPSCP-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.COMM.SATUL": {
+                      "symbolID": "IUAPSCS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.ABNINC": {
+                      "symbolID": "IUAPSRAI----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.ABNSB": {
+                      "symbolID": "IUAPSRAS----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.CTDINC": {
+                      "symbolID": "IUAPSRC-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.DATTMN": {
+                      "symbolID": "IUAPSRD-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.EW": {
+                      "symbolID": "IUAPSRE-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.FIRCTL": {
+                      "symbolID": "IUAPSRF-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.IFF": {
+                      "symbolID": "IUAPSRI-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.MSLAQ": {
+                      "symbolID": "IUAPSRMA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.MSLDL": {
+                      "symbolID": "IUAPSRMD----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.MSLGDN": {
+                      "symbolID": "IUAPSRMG----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.MSLTRK": {
+                      "symbolID": "IUAPSRMT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.MFN": {
+                      "symbolID": "IUAPSRMF----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.TGTILL": {
+                      "symbolID": "IUAPSRTI----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.TGTAQ": {
+                      "symbolID": "IUAPSRTA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.TGTTRK": {
+                      "symbolID": "IUAPSRTT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.UNK": {
+                      "symbolID": "IUAPSRU-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.COMM.CELL": {
+                      "symbolID": "IUGPSCC-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.COMM.OLOS": {
+                      "symbolID": "IUGPSCO-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.COMM.PTPLOS": {
+                      "symbolID": "IUGPSCP-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.COMM.SATUL": {
+                      "symbolID": "IUGPSCS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.COMM.TPSSCT": {
+                      "symbolID": "IUGPSCT-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.ATCTL": {
+                      "symbolID": "IUGPSRAT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.AA/C": {
+                      "symbolID": "IUGPSRAA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.BTFSVL": {
+                      "symbolID": "IUGPSRB-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.CSTSVL": {
+                      "symbolID": "IUGPSRCS----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.CTDAPP": {
+                      "symbolID": "IUGPSRCA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.DATTMN": {
+                      "symbolID": "IUGPSRD-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.EW": {
+                      "symbolID": "IUGPSRE-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.FIRCTL": {
+                      "symbolID": "IUGPSRF-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.HGTFDG": {
+                      "symbolID": "IUGPSRH-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.IDIFF": {
+                      "symbolID": "IUGPSRI-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.METO": {
+                      "symbolID": "IUGPSRMM----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.MSLAQ": {
+                      "symbolID": "IUGPSRMA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.MSLGDN": {
+                      "symbolID": "IUGPSRMG----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.MSLTRK": {
+                      "symbolID": "IUGPSRMT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.MFN": {
+                      "symbolID": "IUGPSRMF----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.SHETKG": {
+                      "symbolID": "IUGPSRS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.TGTAQ": {
+                      "symbolID": "IUGPSRTA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.TGTILL": {
+                      "symbolID": "IUGPSRTI----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.TGTTRK": {
+                      "symbolID": "IUGPSRTT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.UNK": {
+                      "symbolID": "IUGPSRU-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.COMM.CELL": {
+                      "symbolID": "IUSPSCC-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.COMM.OLOS": {
+                      "symbolID": "IUSPSCO-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.COMM.PTPLOS": {
+                      "symbolID": "IUSPSCP-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.COMM.SATUL": {
+                      "symbolID": "IUSPSCS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.ATCTL": {
+                      "symbolID": "IUSPSRAT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.AA/C": {
+                      "symbolID": "IUSPSRAA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.CTDAPP": {
+                      "symbolID": "IUSPSRCA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.DATTMN": {
+                      "symbolID": "IUSPSRD-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.EW": {
+                      "symbolID": "IUSPSRE-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.FIRCTL": {
+                      "symbolID": "IUSPSRF-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.HGTFDG": {
+                      "symbolID": "IUSPSRH-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.IDIFF": {
+                      "symbolID": "IUSPSRI-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.METO": {
+                      "symbolID": "IUSPSRMM----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.MSLAQ": {
+                      "symbolID": "IUSPSRMA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.MSLGDN": {
+                      "symbolID": "IUSPSRMG----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.MSLTRK": {
+                      "symbolID": "IUSPSRMT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.MFN": {
+                      "symbolID": "IUSPSRMF----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.SUFSRH": {
+                      "symbolID": "IUSPSRS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.TGTAQ": {
+                      "symbolID": "IUSPSRTA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.TGTILL": {
+                      "symbolID": "IUSPSRTI----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.TGTTRK": {
+                      "symbolID": "IUSPSRTT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.UNK": {
+                      "symbolID": "IUSPSRU-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.COMM.OLOS": {
+                      "symbolID": "IUUPSCO-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.COMM.PTPLOS": {
+                      "symbolID": "IUUPSCP-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.COMM.SATUL": {
+                      "symbolID": "IUUPSCS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.DATTMN": {
+                      "symbolID": "IUUPSRD-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.EW": {
+                      "symbolID": "IUUPSRE-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.MFN": {
+                      "symbolID": "IUUPSRM-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.SUFSRH": {
+                      "symbolID": "IUUPSRS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.TGTAQ": {
+                      "symbolID": "IUUPSRT-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.UNK": {
+                      "symbolID": "IUUPSRU-----***",
+                      "tag": "SIGINC"     
                   }
             },
 
@@ -7590,6 +7886,22 @@ define( function(){
                   }
 
                   return retStr;
+            },
+            "descriptionFromSymbolId": function( symbolId ) {
+                  var symUtils      = armyc2.c2sd.renderer.utilities.SymbolUtilities;
+                  var unitDef       = armyc2.c2sd.renderer.utilities.UnitDefTable;
+                  var symDef        = armyc2.c2sd.renderer.utilities.SymbolDefTable;
+                  var basicSymbolId = symUtils.getBasicSymbolID( symbolId );
+                  var description   = null;
+
+                  // Either this is a unit or a symbol, check units, then symbols
+                  if ( unitDef.hasUnitDef( basicSymbolId ) ) {
+                        description = unitDef.getUnitDef( basicSymbolId ).description;
+                  } else if ( symDef.hasSymbolDef( basicSymbolId ) ) {
+                        description = symDef.getSymbolDef( basicSymbolId ).description;
+                  }
+
+                  return description;
             },
             "preTag": function( name, tag ) {
                   var retStr = "";
