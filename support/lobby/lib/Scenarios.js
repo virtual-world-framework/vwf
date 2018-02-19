@@ -141,6 +141,8 @@ const columns = [ {
     "scenario.state.scenarioName",
   Cell:
     function Cell( props ) { return <FormControl name="name" type="hidden" value={ props.value }/> },
+  sortable:
+    false,
   filterable:
     false,
 }, {
@@ -152,6 +154,8 @@ const columns = [ {
     "scenario",
   Cell:
     function Cell( props ) { return <ActionCell { ...props }/> },
+  sortable:
+    false,
   filterable:
     false,
 }, {
@@ -163,6 +167,8 @@ const columns = [ {
     "scenario",
   Cell:
     function Cell( props ) { return <ExportCell { ...props }/> },
+  sortable:
+    false,
   filterable:
     false,
 } ];

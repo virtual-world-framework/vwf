@@ -41,6 +41,8 @@ const columns = [ {
     "blank",
   accessor:
     d => "",
+  sortable:
+    false,
   filterable:
     false,
 }, {
@@ -52,6 +54,8 @@ const columns = [ {
     "session",
   Cell:
     function Cell( props ) { return <ActionCell { ...props }/> },
+  sortable:
+    false,
   filterable:
     false,
 } ];
