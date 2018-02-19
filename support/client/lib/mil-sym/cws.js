@@ -324,7 +324,8 @@ define( function(){
                   "DRFT": "DRIFTER", 
                   "DRG": "DREDGE", 
                   "DRN": "DRONE (RPV/UAV)", 
-                  "DRPPNT": "DROP POINT", 
+                  "DRPE": "DROP POINT", 
+                  "DRPPNT": "DISPLACED PERSONS, REFUGEES, AND EVACUEES", 
                   "DRPZ": "DROP ZONE", 
                   "DRT": "DISRUPT", 
                   "DSA": "DIVISION (DSA)", 
@@ -2127,7 +2128,7 @@ define( function(){
                       "tag": "MORT"     
                   },
                   "WAR.GRDTRK.UNT.CBT.FLDART.MORT.TOW.ARC": {
-                      "symbolID": "",  
+                      "symbolID": "SUGPUCFMTC*****",  
                       "tag": "MORT"   
                   },
                   "WAR.GRDTRK.UNT.CBT.FLDART.MORT.TOW.MNT": {
@@ -3135,8 +3136,8 @@ define( function(){
                       "tag": "MSLL"     
                   },
                   "WAR.GRDTRK.EQT.WPN.MSLL.ADFAD.SHTR.TLAR": {
-                      "symbolID": "SUGPEWMASR*****",  
-                      "tag": "ADFAD"   
+                      "symbolID": "SUGPEWMASR*****",
+                      "tag": "ADFAD"     
                   },
                   "WAR.GRDTRK.EQT.WPN.MSLL.ADFAD.SHTR.TELAR": {
                       "symbolID": "SUGPEWMASE*****",
@@ -3171,8 +3172,8 @@ define( function(){
                       "tag": "MSLL"     
                   },
                   "WAR.GRDTRK.EQT.WPN.MSLL.ADFAD.THT.TLAR": {
-                      "symbolID": "",
-                      "tag": "ADFAD"     
+                      "symbolID": "SUGPEWMATR*****",  
+                      "tag": "ADFAD"   
                   },
                   "WAR.GRDTRK.EQT.WPN.MSLL.ADFAD.THT.TELAR": {
                       "symbolID": "SUGPEWMATE*****",  
@@ -3550,18 +3551,6 @@ define( function(){
                       "symbolID": "SUGPEVEAA-*****",  
                       "tag": "ENGVEH"   
                   },
-                  // "WAR.GRDTRK.EQT.GRDVEH.ENGVEH.MLVEH.TRKMV": {
-                  //     "symbolID": "SUGPEVEML-*****",
-                  //     "tag": "ENGVEH"     
-                  // },
-                  // "WAR.GRDTRK.EQT.GRDVEH.ENGVEH.MCVEH": {
-                  //     "symbolID": "SUGPEVEA--*****",  
-                  //     "tag": "GRDVEH"   
-                  // },
-                  // "WAR.GRDTRK.EQT.GRDVEH.ENGVEH.MCVEH.ARMVM": {
-                  //     "symbolID": "SUGPEVEAA-*****",
-                  //     "tag": "ENGVEH"     
-                  // },
                   "WAR.GRDTRK.EQT.GRDVEH.ENGVEH.MCVEH.TM": {
                       "symbolID": "SUGPEVEAT-*****",
                       "tag": "ENGVEH"     
@@ -3602,24 +3591,112 @@ define( function(){
                       "symbolID": "SUGPEVCA--*****",  
                       "tag": "EQT"   
                   },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.AUT.CPCT": {
+                      "symbolID": "SUGPEVCAL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.AUT.MDSZ": {
+                      "symbolID": "SUGPEVCAM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.AUT.SDN": {
+                      "symbolID": "SUGPEVCAH-*****",  
+                      "tag": "EQT"   
+                  },
                   "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.OBTRK": {
                       "symbolID": "SUGPEVCO--*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.OBTRK.PU": {
+                      "symbolID": "SUGPEVCOL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.OBTRK.SMAL": {
+                      "symbolID": "SUGPEVCOM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.OBTRK.LRG": {
+                      "symbolID": "SUGPEVCOH-*****",  
                       "tag": "EQT"   
                   },
                   "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.MPV": {
                       "symbolID": "SUGPEVCM--*****",  
                       "tag": "EQT"   
                   },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.MPV.VAN": {
+                      "symbolID": "SUGPEVCML-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.MPV.SBUS": {
+                      "symbolID": "SUGPEVCMM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.MPV.LBUS": {
+                      "symbolID": "SUGPEVCMH-*****",  
+                      "tag": "EQT"   
+                  },
                   "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.UTYVEH": {
                       "symbolID": "SUGPEVCU--*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.UTYVEH.SUV": {
+                      "symbolID": "SUGPEVCUL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.UTYVEH.SBOX": {
+                      "symbolID": "SUGPEVCUM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.UTYVEH.LBOX": {
+                      "symbolID": "SUGPEVCUH-*****",  
                       "tag": "EQT"   
                   },
                   "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.JP": {
                       "symbolID": "SUGPEVCJ--*****",  
                       "tag": "EQT"   
                   },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.JP.SMAL": {
+                      "symbolID": "SUGPEVCJL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.JP.MDM": {
+                      "symbolID": "SUGPEVCJM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.JP.LRG": {
+                      "symbolID": "SUGPEVCJH-*****",  
+                      "tag": "EQT"   
+                  },
                   "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRL": {
                       "symbolID": "SUGPEVCT--*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRL.SMAL": {
+                      "symbolID": "SUGPEVCTL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRL.MDM": {
+                      "symbolID": "SUGPEVCTM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRL.LRG": {
+                      "symbolID": "SUGPEVCTL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRLF": {
+                      "symbolID": "SUGPEVCF--*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRLF.SMAL": {
+                      "symbolID": "SUGPEVCFL-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRLF.MDM": {
+                      "symbolID": "SUGPEVCFM-*****",  
+                      "tag": "EQT"   
+                  },
+                  "WAR.GRDTRK.EQT.GRDVEH.CVLVEH.TRTRLF.LRG": {
+                      "symbolID": "SUGPEVCFL-*****",  
                       "tag": "EQT"   
                   },
                   "WAR.GRDTRK.EQT.GRDVEH.PKAN": {
@@ -3628,6 +3705,26 @@ define( function(){
                   },
                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT": {
                       "symbolID": "SUGPEVS---*****",
+                      "tag": "EQT"     
+                  },
+                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT.TLDR": {
+                      "symbolID": "SUGPEVST--*****",
+                      "tag": "EQT"     
+                  },
+                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT.TPTR": {
+                      "symbolID": "SUGPEVSR--*****",
+                      "tag": "EQT"     
+                  },
+                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT.CRN": {
+                      "symbolID": "SUGPEVSC--*****",
+                      "tag": "EQT"     
+                  },
+                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT.PLNT": {
+                      "symbolID": "SUGPEVSP--*****",
+                      "tag": "EQT"     
+                  },
+                   "WAR.GRDTRK.EQT.GRDVEH.MSLSPT.WH": {
+                      "symbolID": "SUGPEVSW--*****",
                       "tag": "EQT"     
                   },
                   "WAR.GRDTRK.EQT.SNS": {
@@ -3993,10 +4090,6 @@ define( function(){
                       "symbolID": "SUSPNNR---*****",
                       "tag": "NCBTT"     
                   },
-                  "WAR.SSUF.NMIL": {
-                      "symbolID": "N/A",  
-                      "tag": "WAR"   
-                  },
                   "WAR.SSUF.NMIL.MCT": {
                       "symbolID": "SUSPXM----*****",
                       "tag": "SSUF"     
@@ -4061,10 +4154,26 @@ define( function(){
                       "symbolID": "SUSPXH----*****",  
                       "tag": "SSUF"   
                   },
+                  "WAR.SSUF.NMIL.FSTREC": {
+                      "symbolID": "SUSPXA----*****",  
+                      "tag": "SSUF"   
+                  },
+                  "WAR.SSUF.NMIL.FSTREC.RHIB": {
+                      "symbolID": "SUSPXAR---*****",  
+                      "tag": "SSUF"   
+                  },
+                  "WAR.SSUF.NMIL.FSTREC.SPDBT": {
+                      "symbolID": "SUSPXAS---*****",  
+                      "tag": "SSUF"   
+                  },
+                  "WAR.SSUF.NMIL.PWC": {
+                      "symbolID": "SUSPXP----*****",  
+                      "tag": "SSUF"   
+                  },
                   "WAR.SSUF.OWN": {
                       "symbolID": "SUSPO-----*****",
                       "tag": "WAR"     
-                  },
+                  }
             },
 
             "subsurface": {
@@ -4076,8 +4185,28 @@ define( function(){
                       "symbolID": "SUUPS-----*****",
                       "tag": "WAR"     
                   },
+                  "WAR.SBSUF.SUB.SURF": {
+                      "symbolID": "SUUPSF----*****",
+                      "tag": "WAR"     
+                  },
+                  "WAR.SBSUF.SUB.BOTTMD": {
+                      "symbolID": "SUUPSB----*****",
+                      "tag": "WAR"     
+                  },
+                  "WAR.SBSUF.SUB.CRT": {
+                      "symbolID": "SUUPSR----*****",
+                      "tag": "WAR"     
+                  },
+                  "WAR.SBSUF.SUB.NONSUB": {
+                      "symbolID": "SUUPSX----*****",
+                      "tag": "WAR"     
+                  },
                   "WAR.SBSUF.SUB.NPRN": {
                       "symbolID": "SUUPSN----*****",  
+                      "tag": "SBSUF"   
+                  },
+                  "WAR.SBSUF.SUB.NPRN.SURF": {
+                      "symbolID": "SUUPSNF---*****",  
                       "tag": "SBSUF"   
                   },
                   "WAR.SBSUF.SUB.NPRN.ATK": {
@@ -4092,6 +4221,30 @@ define( function(){
                       "symbolID": "SUUPSNG---*****",
                       "tag": "SUB"     
                   },
+                  "WAR.SBSUF.SUB.NPRN.BLST": {
+                      "symbolID": "SUUPSNB---*****",
+                      "tag": "SUB"     
+                  },
+                  "WAR.SBSUF.SUB.CNVPRN": {
+                      "symbolID": "SUUPSC----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.CNVPRN.SURF": {
+                      "symbolID": "SUUPSCF---*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.CNVPRN.ATK": {
+                      "symbolID": "SUUPSCA---*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.CNVPRN.MSL": {
+                      "symbolID": "SUUPSCM---*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.CNVPRN.GDD": {
+                      "symbolID": "SUUPSCG---*****",  
+                      "tag": "SUB"   
+                  },
                   "WAR.SBSUF.SUB.CNVPRN.BLST": {
                       "symbolID": "SUUPSCB---*****",  
                       "tag": "SUB"   
@@ -4100,16 +4253,48 @@ define( function(){
                       "symbolID": "SUUPSO----*****",
                       "tag": "SBSUF"     
                   },
-                  "WAR.SBSUF.SUB.OTH.UUV": {
+                  "WAR.SBSUF.SUB.OTH.SURF": {
+                      "symbolID": "SUUPSOF---*****",
+                      "tag": "SBSUF"     
+                  },
+                  "WAR.SBSUF.SUB.UUV": {
                       "symbolID": "SUUPSU----*****",  
                       "tag": "SUB"   
                   },
-                  "WAR.SBSUF.SUB.STN": {
-                      "symbolID": "SUUPSS----*****",
-                      "tag": "SBSUF"     
+                  "WAR.SBSUF.SUB.UUV.MNEW": {
+                      "symbolID": "SUUPSUM---*****",  
+                      "tag": "SUB"   
                   },
-                  "WAR.SBSUF.SUB.STN.ASWSUB": {
-                      "symbolID": "SUUPSSA---*****",  
+                  "WAR.SBSUF.SUB.UUV.ASBW": {
+                      "symbolID": "SUUPSUS---*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.UUV.ASUW": {
+                      "symbolID": "SUUPSUN---*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.POSS1": {
+                      "symbolID": "SUUPS1-----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.POSS2": {
+                      "symbolID": "SUUPS2-----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.POSS3": {
+                      "symbolID": "SUUPS3-----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.POSS4": {
+                      "symbolID": "SUUPS4-----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.PRBSUB": {
+                      "symbolID": "SUUPSL-----*****",  
+                      "tag": "SUB"   
+                  },
+                  "WAR.SBSUF.SUB.SNORKL": {
+                      "symbolID": "SUUPSK-----*****",  
                       "tag": "SUB"   
                   },
                   "WAR.SBSUF.UH2WPN": {
@@ -4124,7 +4309,7 @@ define( function(){
                       "symbolID": "SUUPWM----*****",
                       "tag": "SBSUF"     
                   },
-                  "WAR.SBSUF.UH2WPN.SMNE.DLT": {
+                  "WAR.SBSUF.UH2WPN.SMNE.NTRLZD": {
                       "symbolID": "SUUPWMD---*****",  
                       "tag": "UH2WPN"   
                   },
@@ -4132,7 +4317,27 @@ define( function(){
                       "symbolID": "SUUPWMG---*****",
                       "tag": "UH2WPN"     
                   },
-                  "WAR.SBSUF.UH2WPN.SMNE.SMG.DLT": {
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.NTRLZD": {
+                      "symbolID": "SUUPWMGD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.EXER": {
+                      "symbolID": "SUUPWMGX--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.MILEC": {
+                      "symbolID": "SUUPWMGE--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.MILCO": {
+                      "symbolID": "SUUPWMGD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.NRGEAC": {
+                      "symbolID": "SUUPWMGD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMG.NMMLCO": {
                       "symbolID": "SUUPWMGD--*****",  
                       "tag": "SMNE"   
                   },
@@ -4140,7 +4345,27 @@ define( function(){
                       "symbolID": "SUUPWMM---*****",
                       "tag": "UH2WPN"     
                   },
-                  "WAR.SBSUF.UH2WPN.SMNE.SMM.DLT": {
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.NTRLZD": {
+                      "symbolID": "SUUPWMMD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.EXER": {
+                      "symbolID": "SUUPWMMX--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.MILEC": {
+                      "symbolID": "SUUPWMME--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.MILCO": {
+                      "symbolID": "SUUPWMMD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.NRGEAC": {
+                      "symbolID": "SUUPWMMD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMM.NMMLCO": {
                       "symbolID": "SUUPWMMD--*****",  
                       "tag": "SMNE"   
                   },
@@ -4148,7 +4373,27 @@ define( function(){
                       "symbolID": "SUUPWMF---*****",
                       "tag": "UH2WPN"     
                   },
-                  "WAR.SBSUF.UH2WPN.SMNE.SMF.DLT": {
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.NTRLZD": {
+                      "symbolID": "SUUPWMFD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.EXER": {
+                      "symbolID": "SUUPWMFX--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.MILEC": {
+                      "symbolID": "SUUPWMFE--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.MILCO": {
+                      "symbolID": "SUUPWMFD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.NRGEAC": {
+                      "symbolID": "SUUPWMFD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.SMF.NMMLCO": {
                       "symbolID": "SUUPWMFD--*****",  
                       "tag": "SMNE"   
                   },
@@ -4156,8 +4401,52 @@ define( function(){
                       "symbolID": "SUUPWMO---*****",
                       "tag": "UH2WPN"     
                   },
-                  "WAR.SBSUF.UH2WPN.SMNE.SMOP.DLT": {
+                  "WAR.SBSUF.UH2WPN.SMNE.SMOP.NTRLZD": {
                       "symbolID": "SUUPWMOD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.EXER": {
+                      "symbolID": "SUUPWMF---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.MILEC": {
+                      "symbolID": "SUUPWME---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.ANCHOR": {
+                      "symbolID": "SUUPWMA---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.MILCO": {
+                      "symbolID": "SUUPWMD---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.NRGEAC": {
+                      "symbolID": "SUUPWMD---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.OBSTRC": {
+                      "symbolID": "SUUPWMB---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.OBSTRC.NTRLZD": {
+                      "symbolID": "SUUPWMBD--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.NMMLCO": {
+                      "symbolID": "SUUPWMD---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.RISING": {
+                      "symbolID": "SUUPWMS---*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.RISING.EXER": {
+                      "symbolID": "SUUPWMSX--*****",  
+                      "tag": "SMNE"   
+                  },
+                  "WAR.SBSUF.UH2WPN.SMNE.RISING.NTRLZD": {
+                      "symbolID": "SUUPWMSD--*****",  
                       "tag": "SMNE"   
                   },
                   "WAR.SBSUF.UH2DCY": {
@@ -4168,6 +4457,14 @@ define( function(){
                       "symbolID": "SUUPWDM---*****",  
                       "tag": "SBSUF"   
                   },
+                  "WAR.SBSUF.UH2DCY.SMDCY.GRND": {
+                      "symbolID": "SUUPWDMG--*****",  
+                      "tag": "SBSUF"   
+                  },
+                  "WAR.SBSUF.UH2DCY.SMDCY.MOORED": {
+                      "symbolID": "SUUPWDMM--*****",  
+                      "tag": "SBSUF"   
+                  },
                   "WAR.SBSUF.NSUB": {
                       "symbolID": "N/A",
                       "tag": "WAR"     
@@ -4176,6 +4473,18 @@ define( function(){
                       "symbolID": "SUUPND----*****",  
                       "tag": "SBSUF"   
                   },
+                  "WAR.SBSUF.ERL": {
+                      "symbolID": "SUUPE------*****",
+                      "tag": "WAR"     
+                  },
+                  "WAR.SBSUF.DRL": {
+                      "symbolID": "SUUPV------*****",
+                      "tag": "WAR"     
+                  },
+                  "WAR.SBSUF.UXO": {
+                      "symbolID": "SUUPX------*****",
+                      "tag": "WAR"     
+                  }
             },
 
             "sof": {
@@ -4783,12 +5092,36 @@ define( function(){
                       "symbolID": "OUOPP-----*****",
                       "tag": "STBOPS"     
                   },
+                  "STBOPS.OPN.RECMT.WLG": {
+                      "symbolID": "OUOPRW----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.RECMT.CRCD": {
+                      "symbolID": "OUOPRC----*****",
+                      "tag": "STBOPS"     
+                  },
                   "STBOPS.OPN.DEMO": {
                       "symbolID": "OUOPD-----*****",
                       "tag": "STBOPS"     
                   },
                   "STBOPS.OPN.ML": {
                       "symbolID": "OUOPM-----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.PSYOP": {
+                      "symbolID": "OUOPY-----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.PSYOP.TARP": {
+                      "symbolID": "OUOPYT----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.PSYOP.WP": {
+                      "symbolID": "OUOPYW----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.PSYOP.HTHP": {
+                      "symbolID": "OUOPYH----*****",
                       "tag": "STBOPS"     
                   },
                   "STBOPS.OPN.FRGSRH": {
@@ -4824,7 +5157,7 @@ define( function(){
                       "tag": "STBOPS"     
                   },
                   "STBOPS.OPN.KDNG.ATEMPT": {
-                      "symbolID": "OUOPK-----*****",
+                      "symbolID": "OUOPKA----*****",
                       "tag": "STBOPS"     
                   },
                   "STBOPS.OPN.ARR": {
@@ -4833,6 +5166,22 @@ define( function(){
                   },
                   "STBOPS.OPN.DGOPN": {
                       "symbolID": "OUOPU-----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.CMPLSS": {
+                      "symbolID": "OUOPC-----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.CMPLSS.COMBAT": {
+                      "symbolID": "OUOPCA----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.CMPLSS.ACCDNT": {
+                      "symbolID": "OUOPCB----*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.OPN.CMPLSS.OTHER": {
+                      "symbolID": "OUOPCC----*****",
                       "tag": "STBOPS"     
                   },
                   "STBOPS.ITM.RFG": {
@@ -4906,53 +5255,553 @@ define( function(){
                   "STBOPS.GRPORG.GANG": {
                       "symbolID": "OUGPF-----*****",
                       "tag": "STBOPS"     
+                  },
+                  "STBOPS.RAPE": {
+                      "symbolID": "OURP------*****",
+                      "tag": "STBOPS"     
+                  },
+                  "STBOPS.RAPE.ATEMPT": {
+                      "symbolID": "OURPA-----*****",
+                      "tag": "STBOPS"     
                   }
             },
               
             // Emergency Management Services point graphics
             "ems": {
+                  "EMS.INCDNT.CVDIS": {
+                      "symbolID": "EUIPA-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CVDIS.DEMO": {
+                      "symbolID": "O*O*D-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT": {
+                      "symbolID": "EUIPB-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.BMTTHT": {
+                      "symbolID": "EUIPBA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.BM": {
+                      "symbolID": "OUVPB-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.EXPLN": {
+                      "symbolID": "EUIPBC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.LOOT": {
+                      "symbolID": "EUIPBD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.PSNG": {
+                      "symbolID": "OUVPP-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.CRMACT.SHTG": {
+                      "symbolID": "EUIPBF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE": {
+                      "symbolID": "EUIPC-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.HTSPT": {
+                      "symbolID": "EUIPCA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.NRES": {
+                      "symbolID": "EUIPCB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.ORGN": {
+                      "symbolID": "EUIPCC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.RES": {
+                      "symbolID": "EUIPCD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.SCH": {
+                      "symbolID": "EUIPCE----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.SMK": {
+                      "symbolID": "EUIPCF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.SN": {
+                      "symbolID": "EUIPCG----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.FIRE.WLD": {
+                      "symbolID": "EUIPCH----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT": {
+                      "symbolID": "EUIPD-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.CHMAGT": {
+                      "symbolID": "EUIPDA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.CORMTL": {
+                      "symbolID": "EUIPDB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.WHWET": {
+                      "symbolID": "EUIPDC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.EXPLV": {
+                      "symbolID": "EUIPDD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.FLGAS": {
+                      "symbolID": "EUIPDE----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.FLLIQ": {
+                      "symbolID": "EUIPDF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.FLSLD": {
+                      "symbolID": "EUIPDG----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.NFLGAS": {
+                      "symbolID": "EUIPDH----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.ORGPER": {
+                      "symbolID": "EUIPDI----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.OXDZR": {
+                      "symbolID": "EUIPDJ----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.RADMTL": {
+                      "symbolID": "EUIPDK----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.SPCMB": {
+                      "symbolID": "EUIPDL----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.TXGAS": {
+                      "symbolID": "EUIPDM----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.TXINF": {
+                      "symbolID": "EUIPDN----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.HAZMAT.UNXORD": {
+                      "symbolID": "EUIPDO----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.AIR": {
+                      "symbolID": "EUIPE-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.AIR.ACDNT": {
+                      "symbolID": "EUIPEA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.AIR.HJKG": {
+                      "symbolID": "OUOPHA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.MRN": {
+                      "symbolID": "EUIPF-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.MRN.ACDNT": {
+                      "symbolID": "EUIPFA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.MRN.HJKNG": {
+                      "symbolID": "OUOPHV----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.RAIL": {
+                      "symbolID": "EUIPG-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.RAIL.ACDNT": {
+                      "symbolID": "EUIPGA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.RAIL.HJKG": {
+                      "symbolID": "EUIPGB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.VEH": {
+                      "symbolID": "EUIPH-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.VEH.ACDNT": {
+                      "symbolID": "EUIPHA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INCDNT.VEH.HJKG": {
+                      "symbolID": "OUOPHT----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.AFTSHK": {
+                      "symbolID": "EUNPAA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.AVL": {
+                      "symbolID": "EUNPAB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.EQKEPI": {
+                      "symbolID": "EUNPAC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.LNDSLD": {
+                      "symbolID": "EUNPAD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.SBSDNC": {
+                      "symbolID": "EUNPAE----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.VOLERN": {
+                      "symbolID": "WAS-WSVE--P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.GEO.VLCTHT": {
+                      "symbolID": "EUNPAG----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.DZ": {
+                      "symbolID": "WAS-WSD-LIP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.DRGHT": {
+                      "symbolID": "EUNPBB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.FLD": {
+                      "symbolID": "EUNPBC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.FG": {
+                      "symbolID": "WAS-WSFGSOP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.HL": {
+                      "symbolID": "WAS-WSGRL-P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.INV": {
+                      "symbolID": "EUNPBF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.RA": {
+                      "symbolID": "WAS-WSR-LIP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.DT/SD": {
+                      "symbolID": "WAS-WSDSLMP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.SN": {
+                      "symbolID": "WAS-WSS-LIP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.TSTRM": {
+                      "symbolID": "WAS-WSTMH-P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.TNDO": {
+                      "symbolID": "WAS-WST-FCP----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.TRPCYC": {
+                      "symbolID": "WAS-WSTSS-P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.HYDMET.TSNMI": {
+                      "symbolID": "EUNPBM----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST.BIRD": {
+                      "symbolID": "EUNPCA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST.INSCT": {
+                      "symbolID": "EUNPCB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST.MICROB": {
+                      "symbolID": "EUNPCC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST.REPT": {
+                      "symbolID": "EUNPCD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.NATEVT.INFST.RDNT": {
+                      "symbolID": "EUNPCE----*****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.EMMED": {
                       "symbolID": "EUOPA-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.UNT": {
+                      "symbolID": "EUOPAA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.EQPT": {
+                      "symbolID": "EUOPAB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.INS": {
+                      "symbolID": "EUOPAC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.EMTLOC": {
+                      "symbolID": "EUOPAD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.AMBLNC": {
+                      "symbolID": "EUOPAE----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.MEH": {
+                      "symbolID": "EUOPAF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.HDF": {
+                      "symbolID": "EUOPAG----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.HSP": {
+                      "symbolID": "SUGPIXH---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.HSPSHP": {
+                      "symbolID": "SUSPNM----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.MFOP": {
+                      "symbolID": "EUOPAJ----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.RX": {
+                      "symbolID": "EUOPAL----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMMED.TRIAGE": {
+                      "symbolID": "EUOPAM----H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.EMOPN": {
                       "symbolID": "EUOPB-----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.EMOPN.UNT": {
+                      "symbolID": "EUOPBA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EQPT": {
+                      "symbolID": "EUOPBB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.INS": {
+                      "symbolID": "EUOPBC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.ECEP": {
+                      "symbolID": "EUOPBD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EICC": {
+                      "symbolID": "EUOPBE----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EOC": {
+                      "symbolID": "EUOPBF----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EPIC": {
+                      "symbolID": "EUOPBG----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EMSHLT": {
+                      "symbolID": "EUOPBH----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.ESA": {
+                      "symbolID": "EUOPBI----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EMTM": {
+                      "symbolID": "EUOPBJ----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.EWDC": {
+                      "symbolID": "EUOPBK----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.EMOPN.FDDIST": {
+                      "symbolID": "EUOPBL----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.FIRFT": {
                       "symbolID": "EUOPC-----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.FIRFT.FIRFTU": {
+                      "symbolID": "EUOPCA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.FIRFT.FIRFTE": {
+                      "symbolID": "EUOPCB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.FIRFT.FIRHYD": {
+                      "symbolID": "EUOPCC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.FIRFT.OTHH2O": {
+                      "symbolID": "EUOPCD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.FIRFT.FIRSTN": {
+                      "symbolID": "EUOPCE----H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF": {
                       "symbolID": "EUOPD-----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.LAWENU": {
+                      "symbolID": "EUOPDA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.LAWENE": {
+                      "symbolID": "EUOPDB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.LAWENI": {
+                      "symbolID": "EUOPDC----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.LAWENF.ATF": {
                       "symbolID": "EUOPDD----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.ATF.ATFUNT": {
+                      "symbolID": "EUOPDDA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.ATF.ATFEQP": {
+                      "symbolID": "EUOPDDB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.ATF.ATFINS": {
+                      "symbolID": "EUOPDDC---H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF.BDRPT": {
                       "symbolID": "EUOPDE----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.BDRPT.BDRPTU": {
+                      "symbolID": "EUOPDEA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.BDRPT.BDRPTE": {
+                      "symbolID": "EUOPDEB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.BDRPT.BDRPTI": {
+                      "symbolID": "EUOPDEC---H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.LAWENF.CSTM": {
                       "symbolID": "EUOPDF----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.CSTM.CSTMUN": {
+                      "symbolID": "EUOPDFA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.CSTM.CSTMEQ": {
+                      "symbolID": "EUOPDFB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.CSTM.CSTMIN": {
+                      "symbolID": "EUOPDFC---H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF.DEA": {
                       "symbolID": "EUOPDG----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.DEA.DEAUNT": {
+                      "symbolID": "EUOPDGA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.DEA.DEAEQP": {
+                      "symbolID": "EUOPDGB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.DEA.DEAINS": {
+                      "symbolID": "EUOPDGC---H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.LAWENF.DOJ": {
                       "symbolID": "EUOPDH----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.DOJ.DOJUNT": {
+                      "symbolID": "EUOPDHA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.DOJ.DOJEQP": {
+                      "symbolID": "EUOPDHB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.DOJ.DOJINS": {
+                      "symbolID": "EUOPDHC---H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF.FBI": {
                       "symbolID": "EUOPDI----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.FBI.FBIUNT": {
+                      "symbolID": "EUOPDIA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.FBI.FBIEQP": {
+                      "symbolID": "EUOPDIB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.FBI.FBIINS": {
+                      "symbolID": "EUOPDIC---H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.LAWENF.POL": {
                       "symbolID": "EUOPDJ----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.POL.POLEQP": {
+                      "symbolID": "EUOPDJB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.POL.POLINS": {
+                      "symbolID": "EUOPDJC---H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF.PRSN": {
@@ -4963,40 +5812,220 @@ define( function(){
                       "symbolID": "EUOPDL----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.SECSR.SECSRU": {
+                      "symbolID": "EUOPDLA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.SECSR.SECSRE": {
+                      "symbolID": "EUOPDLB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.SECSR.SECSRI": {
+                      "symbolID": "EUOPDLC---H****",
+                      "tag": "EMS"     
+                  },
                    "EMS.OPN.LAWENF.TSA": {
                       "symbolID": "EUOPDM----*****",
+                      "tag": "EMS"     
+                  },
+                   "EMS.OPN.LAWENF.TSA.TSAUNT": {
+                      "symbolID": "EUOPDMA---*****",
+                      "tag": "EMS"     
+                  },
+                   "EMS.OPN.LAWENF.TSA.TSAEQP": {
+                      "symbolID": "EUOPDMB---*****",
+                      "tag": "EMS"     
+                  },
+                   "EMS.OPN.LAWENF.TSA.TSAINS": {
+                      "symbolID": "EUOPDMC---H****",
                       "tag": "EMS"     
                   },
                   "EMS.OPN.LAWENF.CSTGD": {
                       "symbolID": "EUOPDN----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.CSTGD.CSTGDU": {
+                      "symbolID": "EUOPDNA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.CSTGD.CSTGDE": {
+                      "symbolID": "SUSPXL----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.CSTGD.CSTGDI": {
+                      "symbolID": "EUOPDNC---H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.LAWENF.USMAR": {
                       "symbolID": "EUOPDO----*****",
                       "tag": "EMS"     
                   },
+                  "EMS.OPN.LAWENF.USMAR.USMARU": {
+                      "symbolID": "EUOPDOA---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.USMAR.USMARE": {
+                      "symbolID": "EUOPDOB---*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.LAWENF.USMAR.USMARI": {
+                      "symbolID": "EUOPDOC---H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.OPN.SNS": {
-                      "symbolID": "EUOPE-----*****",
+                      "symbolID": "SUGPES----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.SNS.BIO": {
+                      "symbolID": "EUOPEA----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.SNS.CML": {
+                      "symbolID": "EUOPEB----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.SNS.INT": {
+                      "symbolID": "EUOPEC----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.SNS.NUC": {
+                      "symbolID": "EUOPED----*****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.OPN.SNS.RAD": {
+                      "symbolID": "EUOPEE----*****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.AGFD": {
                       "symbolID": "EUFPA-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.AGFD.AGLAB": {
+                      "symbolID": "EUFPAA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.AFL": {
+                      "symbolID": "EUFPAB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.CFDC": {
+                      "symbolID": "EUFPAC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.FRMRNC": {
+                      "symbolID": "EUFPAD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.FPC": {
+                      "symbolID": "EUFPAE----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.AGFD.FDRTL": {
+                      "symbolID": "EUFPAF----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.BFI": {
                       "symbolID": "EUFPB-----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.ATM": {
+                      "symbolID": "EUFPBA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.BANK": {
+                      "symbolID": "EUFPBB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.BLSTR": {
+                      "symbolID": "EUFPBC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.FRB": {
+                      "symbolID": "EUFPBD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.BFI.FINEX": {
+                      "symbolID": "EUFPBE----H****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.CMCL": {
                       "symbolID": "EUFPC-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.CMCL.CMPLN": {
+                      "symbolID": "EUFPCA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.FIRMAN": {
+                      "symbolID": "EUFPCB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.FIRRET": {
+                      "symbolID": "EUFPCC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.HZMTPR": {
+                      "symbolID": "EUFPCD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.HZMTST": {
+                      "symbolID": "EUFPCE----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.INDSTE": {
+                      "symbolID": "EUFPCF----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.LNDFL": {
+                      "symbolID": "EUFPCG----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.RXMFG": {
+                      "symbolID": "EUFPCH----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.CHWS": {
+                      "symbolID": "EUFPCI----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.CMCL.TXRLIN": {
+                      "symbolID": "EUFPCJ----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.EDFAC": {
                       "symbolID": "EUFPD-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.EDFAC.COLLUNI": {
+                      "symbolID": "EUFPDA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.EDFAC.SCHOOL": {
+                      "symbolID": "EUFPDB----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.ENGFAC": {
-                      "symbolID": "EUFPE-----H****",
+                      "symbolID": "SUGPIUE---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.ENGFAC.GENSTA": {
+                      "symbolID": "EUFPEA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.ENGFAC.NTLGAS": {
+                      "symbolID": "EUFPEB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.ENGFAC.NUCFAC": {
+                      "symbolID": "SUGPIUEN--H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.ENGFAC.PETFAC": {
+                      "symbolID": "SUGPIRP---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.ENGFAC.PROPNE": {
+                      "symbolID": "EUFPEE----H****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.GVTSTE": {
@@ -5007,29 +6036,516 @@ define( function(){
                       "symbolID": "EUFPG-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.MIL.ARMORY": {
+                      "symbolID": "EUFPGA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.MIL.MILBF": {
+                      "symbolID": "SUGPIB----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.PSTSRV": {
                       "symbolID": "EUFPH-----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.PSTSRV.PDC": {
+                      "symbolID": "EUFPHA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.PSTSRV.PO": {
+                      "symbolID": "EUFPHB----H****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.PUBVEN": {
                       "symbolID": "EUFPI-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.PUBVEN.ENCFAC": {
+                      "symbolID": "EUFPIA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.PUBVEN.OPNFAC": {
+                      "symbolID": "EUFPIB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.PUBVEN.RECARE": {
+                      "symbolID": "EUFPIC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.PUBVEN.RELIG": {
+                      "symbolID": "EUFPID----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.SPCNDS": {
                       "symbolID": "EUFPJ-----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.SPCNDS.ADLTDC": {
+                      "symbolID": "EUFPJA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.SPCNDS.CHLDDC": {
+                      "symbolID": "EUFPJB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.SPCNDS.ELDERC": {
+                      "symbolID": "EUFPJC----H****",
                       "tag": "EMS"     
                   },
                   "EMS.INFSTR.TELCOM": {
                       "symbolID": "EUFPK-----H****",
                       "tag": "EMS"     
                   },
+                  "EMS.INFSTR.TELCOM.TCF": {
+                      "symbolID": "SUGPIUT---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TELCOM.TCTWR": {
+                      "symbolID": "EUFPKB----H****",
+                      "tag": "EMS"     
+                  },
                   "EMS.INFSTR.TSP": {
                       "symbolID": "EUFPL-----H****",
                       "tag": "EMS"     
                   },
-                  "EMS.INFSTR.WS": {
-                      "symbolID": "EUFPM-----H****",
+                  "EMS.INFSTR.TSP.ATCF": {
+                      "symbolID": "EUFPLA----H****",
                       "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.AIRPT": {
+                      "symbolID": "SUGPIBA---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.BRG": {
+                      "symbolID": "G*M*BCB---H***X",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.BSTN": {
+                      "symbolID": "EUFPLD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.FRYTRM": {
+                      "symbolID": "EUFPLE----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.HLS": {
+                      "symbolID": "EUFPLF----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.LCK": {
+                      "symbolID": "WOS-ML----P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.MAINTF": {
+                      "symbolID": "EUFPLH----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.SP": {
+                      "symbolID": "SUGPIBN---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.RLSTN": {
+                      "symbolID": "EUFPLJ----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.RSTSTP": {
+                      "symbolID": "EUFPLI----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.ANCRG": {
+                      "symbolID": "WOS-HPBA--P----",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.TOLLF": {
+                      "symbolID": "EUFPLM----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.TCP": {
+                      "symbolID": "GUSPPO----H***X",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.TIF": {
+                      "symbolID": "EUFPLO----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.TSP.TNL": {
+                      "symbolID": "EUFPLP----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS": {
+                      "symbolID": "SUGPIUP---H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.CV": {
+                      "symbolID": "EUFPMA----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.DAM": {
+                      "symbolID": "EUFPMB----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.DO": {
+                      "symbolID": "EUFPMC----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.GWWELL": {
+                      "symbolID": "EUFPMD----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.PMPSTN": {
+                      "symbolID": "EUFPME----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.RSVR": {
+                      "symbolID": "EUFPMF----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.STRTWR": {
+                      "symbolID": "EUFPMG----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.SWI": {
+                      "symbolID": "EUFPMH----H****",
+                      "tag": "EMS"     
+                  },
+                  "EMS.INFSTR.WS.WH2OTF": {
+                      "symbolID": "EUFPMI----H****",
+                      "tag": "EMS"     
+                  }
+            },
+
+            "sigint": {
+                  "SIGINT.SPC.SIGINC.COMM.SATDL": {
+                      "symbolID": "IUPPSCD-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.ERHSVL": {
+                      "symbolID": "IUPPSRE-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.IFF": {
+                      "symbolID": "IUPPSRI-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.MFN": {
+                      "symbolID": "IUPPSRM-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.TGTAQ": {
+                      "symbolID": "IUPPSRT-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.SPC": {
+                      "symbolID": "IUPPSRS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SPC.SIGINC.RAD.UNK": {
+                      "symbolID": "IUPPSRU-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.COMM.CELL": {
+                      "symbolID": "IUAPSCC-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.COMM.OLOS": {
+                      "symbolID": "IUAPSCO-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.COMM.PIPLOS": {
+                      "symbolID": "IUAPSCP-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.COMM.SATUL": {
+                      "symbolID": "IUAPSCS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.ABNINC": {
+                      "symbolID": "IUAPSRAI----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.ABNSB": {
+                      "symbolID": "IUAPSRAS----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.CTDINC": {
+                      "symbolID": "IUAPSRC-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.DATTMN": {
+                      "symbolID": "IUAPSRD-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.EW": {
+                      "symbolID": "IUAPSRE-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.FIRCTL": {
+                      "symbolID": "IUAPSRF-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.IFF": {
+                      "symbolID": "IUAPSRI-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.MSLAQ": {
+                      "symbolID": "IUAPSRMA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.MSLDL": {
+                      "symbolID": "IUAPSRMD----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.MSLGDN": {
+                      "symbolID": "IUAPSRMG----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.MSLTRK": {
+                      "symbolID": "IUAPSRMT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.MFN": {
+                      "symbolID": "IUAPSRMF----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.TGTILL": {
+                      "symbolID": "IUAPSRTI----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.TGTAQ": {
+                      "symbolID": "IUAPSRTA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.TGTTRK": {
+                      "symbolID": "IUAPSRTT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.AIRTRK.SIGINC.RAD.UNK": {
+                      "symbolID": "IUAPSRU-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.COMM.CELL": {
+                      "symbolID": "IUGPSCC-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.COMM.OLOS": {
+                      "symbolID": "IUGPSCO-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.COMM.PTPLOS": {
+                      "symbolID": "IUGPSCP-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.COMM.SATUL": {
+                      "symbolID": "IUGPSCS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.COMM.TPSSCT": {
+                      "symbolID": "IUGPSCT-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.ATCTL": {
+                      "symbolID": "IUGPSRAT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.AA/C": {
+                      "symbolID": "IUGPSRAA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.BTFSVL": {
+                      "symbolID": "IUGPSRB-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.CSTSVL": {
+                      "symbolID": "IUGPSRCS----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.CTDAPP": {
+                      "symbolID": "IUGPSRCA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.DATTMN": {
+                      "symbolID": "IUGPSRD-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.EW": {
+                      "symbolID": "IUGPSRE-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.FIRCTL": {
+                      "symbolID": "IUGPSRF-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.HGTFDG": {
+                      "symbolID": "IUGPSRH-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.IDIFF": {
+                      "symbolID": "IUGPSRI-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.METO": {
+                      "symbolID": "IUGPSRMM----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.MSLAQ": {
+                      "symbolID": "IUGPSRMA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.MSLGDN": {
+                      "symbolID": "IUGPSRMG----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.MSLTRK": {
+                      "symbolID": "IUGPSRMT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.MFN": {
+                      "symbolID": "IUGPSRMF----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.SHETKG": {
+                      "symbolID": "IUGPSRS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.TGTAQ": {
+                      "symbolID": "IUGPSRTA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.TGTILL": {
+                      "symbolID": "IUGPSRTI----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.TGTTRK": {
+                      "symbolID": "IUGPSRTT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.GRDTRK.SIGINC.RAD.UNK": {
+                      "symbolID": "IUGPSRU-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.COMM.CELL": {
+                      "symbolID": "IUSPSCC-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.COMM.OLOS": {
+                      "symbolID": "IUSPSCO-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.COMM.PTPLOS": {
+                      "symbolID": "IUSPSCP-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.COMM.SATUL": {
+                      "symbolID": "IUSPSCS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.ATCTL": {
+                      "symbolID": "IUSPSRAT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.AA/C": {
+                      "symbolID": "IUSPSRAA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.CTDAPP": {
+                      "symbolID": "IUSPSRCA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.DATTMN": {
+                      "symbolID": "IUSPSRD-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.EW": {
+                      "symbolID": "IUSPSRE-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.FIRCTL": {
+                      "symbolID": "IUSPSRF-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.HGTFDG": {
+                      "symbolID": "IUSPSRH-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.IDIFF": {
+                      "symbolID": "IUSPSRI-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.METO": {
+                      "symbolID": "IUSPSRMM----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.MSLAQ": {
+                      "symbolID": "IUSPSRMA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.MSLGDN": {
+                      "symbolID": "IUSPSRMG----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.MSLTRK": {
+                      "symbolID": "IUSPSRMT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.MFN": {
+                      "symbolID": "IUSPSRMF----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.SUFSRH": {
+                      "symbolID": "IUSPSRS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.TGTAQ": {
+                      "symbolID": "IUSPSRTA----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.TGTILL": {
+                      "symbolID": "IUSPSRTI----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.TGTTRK": {
+                      "symbolID": "IUSPSRTT----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SSUF.SIGINC.RAD.UNK": {
+                      "symbolID": "IUSPSRU-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.COMM.OLOS": {
+                      "symbolID": "IUUPSCO-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.COMM.PTPLOS": {
+                      "symbolID": "IUUPSCP-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.COMM.SATUL": {
+                      "symbolID": "IUUPSCS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.DATTMN": {
+                      "symbolID": "IUUPSRD-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.EW": {
+                      "symbolID": "IUUPSRE-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.MFN": {
+                      "symbolID": "IUUPSRM-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.SUFSRH": {
+                      "symbolID": "IUUPSRS-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.TGTAQ": {
+                      "symbolID": "IUUPSRT-----***",
+                      "tag": "SIGINC"     
+                  },
+                  "SIGINT.SBSUF.SIGINC.RAD.UNK": {
+                      "symbolID": "IUUPSRU-----***",
+                      "tag": "SIGINC"     
                   }
             },
 
@@ -6375,6 +7891,22 @@ define( function(){
 
                   return retStr;
             },
+            "descriptionFromSymbolId": function( symbolId ) {
+                  var symUtils      = armyc2.c2sd.renderer.utilities.SymbolUtilities;
+                  var unitDef       = armyc2.c2sd.renderer.utilities.UnitDefTable;
+                  var symDef        = armyc2.c2sd.renderer.utilities.SymbolDefTable;
+                  var basicSymbolId = symUtils.getBasicSymbolID( symbolId );
+                  var description   = null;
+
+                  // Either this is a unit or a symbol, check units, then symbols
+                  if ( unitDef.hasUnitDef( basicSymbolId ) ) {
+                        description = unitDef.getUnitDef( basicSymbolId ).description;
+                  } else if ( symDef.hasSymbolDef( basicSymbolId ) ) {
+                        description = symDef.getSymbolDef( basicSymbolId ).description;
+                  }
+
+                  return description;
+            },
             "preTag": function( name, tag ) {
                   var retStr = "";
                   var index = name.indexOf( tag );
@@ -6477,18 +8009,33 @@ define( function(){
                           break;
                   }
                   return retStr;
-            },    
+            }, 
+            "symbolCanAcceptAffiliation": function( symbolID ) {
+                  var canAccept = false;
+                  switch ( symbolID.charAt(0) ) {
+                        case 'S':
+                        case 'E':
+                        case 'I':
+                        case 'G':
+                        case 'O':
+                              canAccept = true;
+                              break;
+                        default:
+                              break;
+                  }
+                  return canAccept;
+            },
             "unknown": function( symbolID ) {
-                  return symbolID.substr( 0, 1 ) + "U" + symbolID.substr( 2 );
+                  return ( this.symbolCanAcceptAffiliation( symbolID ) ? symbolID.substr( 0, 1 ) + "U" + symbolID.substr( 2 ) : symbolID );
             },
             "friendly": function( symbolID ) {
-                  return symbolID.substr( 0, 1 ) + "F" + symbolID.substr( 2 );
+                  return ( this.symbolCanAcceptAffiliation( symbolID ) ? symbolID.substr( 0, 1 ) + "F" + symbolID.substr( 2 ) : symbolID );
             },
             "neutral": function( symbolID ) {
-                  return symbolID.substr( 0, 1 ) + "N" + symbolID.substr( 2 );
+                  return ( this.symbolCanAcceptAffiliation( symbolID ) ? symbolID.substr( 0, 1 ) + "N" + symbolID.substr( 2 ) : symbolID );
             },
             "hostile": function( symbolID ) {
-                  return symbolID.substr( 0, 1 ) + "H" + symbolID.substr( 2 );
+                  return ( this.symbolCanAcceptAffiliation( symbolID ) ? symbolID.substr( 0, 1 ) + "H" + symbolID.substr( 2 ) : symbolID );
             },  
             "addUnitStatusToSymbolId": function( symbolID, value ) {
                   var retStr = symbolID;

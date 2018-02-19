@@ -185,7 +185,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
                             };
 
                             description = cws.description( fullName, unit.tag );
-                            actualName = cws.decode( cws.postTag( fullName, unit.tag ) ).replace( ".", " " );
+                            actualName = cws.descriptionFromSymbolId( unit.symbolID ) || cws.decode( cws.postTag( fullName, unit.tag ) ).replace( ".", " " );
 
                             unitDef = {
                                 "fullName": fullName,
