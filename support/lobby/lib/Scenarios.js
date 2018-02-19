@@ -1,183 +1,132 @@
 import React from "react";
 import { Table, Form, FormControl, Button, ControlLabel } from "react-bootstrap";
+import ReactTable from "react-table";
+import PropTypes from "prop-types";
 
 import { post } from "./utils";
 
+let COMPANY_LENGTH = 8;
+let PLATOON_MIN = 1;
+let PLATOON_MAX = 9;
+let UNIT_MIN = 1;
+let UNIT_MAX = 9;
+
 export default function Scenarios( props ) {
-  return <Table striped>
-    <thead>
-      <Head/>
-    </thead>
-    <tbody>
-      <Application onServerChange={ props.onServerChange }/>
-      <ScenarioRows records={ props.records } onServerChange={ props.onServerChange }/>
-    </tbody>
-  </Table>;
+  return <ReactTable data={ scenarioRecords( props.records ) } columns={ columns } className="-striped"
+    getTrProps={ () => ( {
+      fields:
+        [ "company", "platoon", "unit" ],
+      readers: {
+        filled:
+          values => values.company.length > 0 && values.platoon.length > 0 && values.unit.length > 0 },
+      writers: {
+        company:
+          event => ( { company: event.target.value } ),
+        platoon:
+          event => ( { platoon: event.target.value } ),
+        unit:
+          event => ( { unit: event.target.value } ) },
+    } ) }
+  />;
 }
 
-function Head( props ) {
-  return <tr>
-    <th className="col-sm-5">
-      Scenario
-    </th><th className="col-sm-1">
-      Company
-    </th><th className="col-sm-1">
-      Platoon
-    </th><th className="col-sm-1">
-      Unit
-    </th><th className="col-sm-2">
-      &nbsp;
-    </th><th className="col-sm-1">
-      &nbsp;
-    </th><th className="col-sm-1">
-      &nbsp;
-    </th>
-  </tr>;
+function scenarioRecords( records ) {
+  return records.filter( record => !record.session );
 }
 
-class Application extends React.Component {
+const columns = [ {
+  Header:
+    "Scenario",
+  accessor:
+    "scenario.state.scenarioTitle",
+}, {
+  Header:
+    "Company",
+  Cell:
+    function Cell( props ) { return <CompanyCell { ...props }/> },
+}, {
+  Header:
+    "Platoon",
+  Cell:
+    function Cell( props ) { return <PlatoonCell { ...props }/> },
+}, {
+  Header:
+    "Unit",
+  Cell:
+    function Cell( props ) { return <UnitCell { ...props }/> },
+}, {
+  Header:
+    "",
+  accessor:
+    "scenario.state.scenarioName",
+  Cell:
+    function Cell( props ) { return <FormControl name="name" type="hidden" value={ props.value }/> },
+}, {
+  Header:
+    "",
+  accessor:
+    "scenario",
+  Cell:
+    function Cell( props ) { return <ActionCell { ...props }/> },
+}, {
+  Header:
+    "",
+  accessor:
+    "scenario",
+  Cell:
+    function Cell( props ) { return <ExportCell { ...props }/> },
+} ];
 
-  static TITLE_PLACEHOLDER = "New Scenario Title";
-  static NAME_PLACEHOLDER = "Scenario Name";
-
-  state = {
-    title: ""
+class LobbyCell  extends React.Component {
+  static contextTypes = {
+    values:
+      PropTypes.objectOf( PropTypes.string ).isRequired,
+    readers:
+      PropTypes.objectOf( PropTypes.func ).isRequired,
+    writers:
+      PropTypes.objectOf( PropTypes.func ).isRequired,
   };
+}
+
+class CompanyCell extends LobbyCell {
+  render() {
+    return <FormControl name="company" type="text" maxLength={ COMPANY_LENGTH } bsSize="small"
+      value={ this.context.values.company } onChange={ this.context.writers.company }/>;
+  }
+}
+
+class PlatoonCell extends LobbyCell {
+  render() {
+    return <FormControl name="platoon" type="number" min={ PLATOON_MIN } max={ PLATOON_MAX } step="1" bsSize="small"
+      value={ this.context.values.platoon } onChange={ this.context.writers.platoon }/>;
+  }
+}
+
+class UnitCell extends LobbyCell {
+  render() {
+    return <FormControl name="unit" type="number" min={ UNIT_MIN } max={ UNIT_MAX } step="1" bsSize="small"
+      value={ this.context.values.unit } onChange={ this.context.writers.unit }/>;
+  }
+}
+
+class ActionCell extends LobbyCell {
 
   render() {
-    return <tr>
-      <td>
-        <FormControl name="title" type="text" placeholder={ Application.TITLE_PLACEHOLDER } bsSize="small"
-          value={ this.state.title } onChange={ this.handleTitle }/>
-      </td><td colSpan="3">
-        <FormControl name="name" type="text" placeholder={ Application.NAME_PLACEHOLDER } bsSize="small" className="hidden"
-          value={ this.name() } />
-      </td><td>
-        &nbsp;
-      </td><td>
-        <Button type="submit" disabled={ !this.filled() } bsSize="small"
-          onClick={ this.handleSubmit }> Create </Button>
-      </td><td>
-        <ControlLabel className="btn" bsSize="small">
-          Import <FormControl type="file" accept=".zip" style={ { display: "none" } }
-            onChange={ this.handleImport }/>
-        </ControlLabel>
-      </td>
-    </tr>;
-  }
-
-  handleTitle = event => {
-    this.setState( { title: event.target.value } );
+    return <React.Fragment>
+      <Button href={ this.props.value.instance || this.props.value.document.uri } target="_blank"
+        bsSize="small" bsStyle="link" className={ this.context.readers.filled() && "hidden" }> Edit </Button>
+      <Button type="submit" disabled={ !this.context.readers.filled() }
+        bsSize="small" className={ !this.context.readers.filled() && "hidden" }
+        onClick={ this.handleSubmit }> Start </Button>
+    </React.Fragment>;
   }
 
   handleSubmit = event => {
     let properties = {
-      name: this.name(),
-      title: this.state.title };
-    post( "scenarios", properties ).
-      then( result => {
-        this.props.onServerChange && this.props.onServerChange() } ).
-      catch( error => {
-        console.log( error.message ) } );
-    event.preventDefault();
-  }
-
-  handleImport = event => {
-    let file = event.target.files &&
-      event.target.files[0];
-    if ( file ) {
-      let formData = new FormData();
-        formData.append( "file", file );
-      post( "/import-scenarios", formData ).
-        then( result => {
-          this.props.onServerChange && this.props.onServerChange() } ).
-        catch( error => {
-          alert( "Uh oh ... we were unable to upload that file for import.\n" + error.message ) } );
-    }
-  }
-
-  name() {
-    return this.state.title.trim().replace( /[^0-9A-Za-z]+/g, "-" );
-  }
-
-  filled() {
-    return this.state.title.length > 0;
-  }
-
-}
-
-function ScenarioRows( props ) {
-  return <React.Fragment>
-    { props.records.map( ( record, index ) => <Scenario key={ index } { ...record } onServerChange={ props.onServerChange }/> ) }
-  </React.Fragment>;
-}
-
-class Scenario extends React.Component {
-
-  static COMPANY_LENGTH = 8;
-  static PLATOON_MIN = 1;
-  static PLATOON_MAX = 9;
-  static UNIT_MIN = 1;
-  static UNIT_MAX = 9;
-
-  state = {
-    company: "",
-    platoon: "",
-    unit: "",
-  };
-
-  render() {
-    const scenario = this.props.scenario,
-      session = this.props.session;
-    if ( !session ) {
-      return <tr>
-        <td>
-          { scenario.state.scenarioTitle }
-        </td><td>
-          <FormControl name="company" type="text" maxLength={ Scenario.COMPANY_LENGTH } bsSize="small"
-            value={ this.state.company } onChange={ this.handleCompany }/>
-        </td><td>
-          <FormControl name="platoon" type="number" min={ Scenario.PLATOON_MIN } max={ Scenario.PLATOON_MAX } step="1" bsSize="small"
-            value={ this.state.platoon } onChange={ this.handlePlatoon }/>
-        </td><td>
-          <FormControl name="unit" type="number" min={ Scenario.UNIT_MIN } max={ Scenario.UNIT_MAX } step="1" bsSize="small"
-            value={ this.state.unit } onChange={ this.handleUnit }/>
-        </td><td>
-          <FormControl name="name" type="hidden" value={ scenario.state.scenarioName }/>
-        </td><td>
-          <Button href={ scenario.instance || scenario.document.uri } target="_blank"
-            bsSize="small" bsStyle="link" className={ this.filled() && "hidden" }> Edit </Button>
-          <Button type="submit" disabled={ !this.filled() }
-            bsSize="small" className={ !this.filled() && "hidden" }
-            onClick={ this.handleSubmit }> Start </Button>
-        </td><td>
-          <Button href={ "/export-scenarios?scenarioName=" + scenario.state.scenarioName }
-            bsSize="small" bsStyle="link"> Export </Button>
-        </td>
-      </tr>;
-    } else {
-      return null;
-    }
-  }
-
-  handleCompany = event => {
-    this.setState( { company: event.target.value } );
-  }
-
-  handlePlatoon = event => {
-    this.setState( { platoon: event.target.value } );
-  }
-
-  handleUnit = event => {
-    this.setState( { unit: event.target.value } );
-  }
-
-  handleSubmit = event => {
-    let properties = {
-      name: this.props.scenario.state.scenarioName,
-      company: this.state.company,
-      platoon: this.state.platoon,
-      unit: this.state.unit };
+      name: this.props.value.state.scenarioName,
+      company: this.context.values.company,
+      platoon: this.context.values.platoon,
+      unit: this.context.values.unit };
     let newTab = window.open( "", "_blank" );
       newTab.document.write( "Loading..." );
     post( "sessions", properties ).
@@ -189,10 +138,11 @@ class Scenario extends React.Component {
     event.preventDefault();
   }
 
-  filled() {
-    return this.state.company.length > 0 &&
-      this.state.platoon.length > 0 &&
-      this.state.unit.length > 0;
-  }
+}
 
+class ExportCell extends React.Component {
+  render() {
+    return <Button href={ "/export-scenarios?scenarioName=" + this.props.value.state.scenarioName }
+      bsSize="small" bsStyle="link"> Export </Button>;
+  }
 }
