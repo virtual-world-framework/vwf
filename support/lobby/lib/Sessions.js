@@ -1,5 +1,5 @@
 import React from "react";
-import { Table, Button } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import ReactTable from "react-table";
 
 export default function Sessions( props ) {

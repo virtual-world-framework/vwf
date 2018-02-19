@@ -1,5 +1,5 @@
 import React from "react";
-import { Table, Form, FormControl, Button, ControlLabel } from "react-bootstrap";
+import { Table, FormControl, Button, ControlLabel } from "react-bootstrap";
 import ReactTable from "react-table";
 import PropTypes from "prop-types";
 
