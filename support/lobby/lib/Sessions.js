@@ -1,67 +1,67 @@
 import React from "react";
 import { Table, Button } from "react-bootstrap";
+import ReactTable from "react-table";
 
 export default function Sessions( props ) {
-  return <Table striped>
-    <thead>
-      <Head/>
-    </thead>
-    <tbody>
-      <SessionRows records={ props.records } instructor={ props.instructor }/>
-    </tbody>
-  </Table>;
+  return <ReactTable data={ sessionRecords( props.records, props.instructor ) } columns={ columns } className="-striped"/>;
 }
 
-function Head( props ) {
-  return <tr>
-    <th className="col-sm-5">
-      Scenario
-    </th><th className="col-sm-1">
-      Company
-    </th><th className="col-sm-1">
-      Platoon
-    </th><th className="col-sm-1">
-      Unit
-    </th><th className="col-sm-3">
-      &nbsp;
-    </th><th className="col-sm-1">
-      &nbsp;
-    </th>
-  </tr>;
+function sessionRecords( records, instructor ) {
+  return records.filter( record => record.session && ( record.session.instance || instructor ) );
 }
 
-function SessionRows( props ) {
-  return <React.Fragment>
-    { props.records.map( ( record, index ) => <Session key={ index } { ...record } instructor={ props.instructor }/> ) }
-  </React.Fragment>;
+const columns = [ {
+  Header:
+    "Scenario",
+  accessor:
+    "session",
+  Cell:
+    function Cell( props ) { return <ScenarioCell { ...props }/> },
+}, {
+  Header:
+    "Company",
+  accessor:
+    "session.state.classroom.company",
+}, {
+  Header:
+    "Platoon",
+  accessor:
+    "session.state.classroom.platoon",
+}, {
+  Header:
+    "Unit",
+  accessor:
+    "session.state.classroom.unit",
+}, {
+  Header:
+    "",
+  id:
+    "blank",
+  accessor:
+    d => "",
+}, {
+  Header:
+    "",
+  accessor:
+    "session",
+  Cell:
+    function Cell( props ) { return <ActionCell { ...props }/> },
+} ];
+
+class ScenarioCell extends React.Component {
+  render() {
+    return <React.Fragment>
+      { this.props.value.state.scenarioTitle }
+      <br/>
+      <span className="small">{ instructorStudentsLabel( this.props.value ) }</span>
+    </React.Fragment>;
+  }
 }
 
-function Session( props ) {
-  const scenario = props.scenario,
-    session = props.session;
-  if ( session && ( session.instance || props.instructor ) ) {
-    return <tr>
-      <td>
-        { session.state.scenarioTitle }
-        <br/>
-        <span className="small">{ instructorStudentsLabel( session ) }</span>
-      </td><td>
-        { session.state.classroom.company }
-      </td><td>
-        { session.state.classroom.platoon }
-      </td><td>
-        { session.state.classroom.unit }
-      </td><td>
-        &nbsp;
-      </td><td>
-        <Button href={ session.instance || session.document.uri } target="_blank"
-          bsSize="small" bsStyle="link">{ session.instance ? "Join" : "Start" }</Button>
-      </td><td>
-        &nbsp;
-      </td>
-    </tr>;
-  } else {
-    return null;
+class ActionCell extends React.Component {
+  render() {
+    return <Button href={ this.props.value.instance || this.props.value.document.uri } target="_blank"
+      bsSize="small" bsStyle="link"> { this.props.value.instance ? "Join" : "Start" } </Button>;
   }
 }
 
