@@ -2128,7 +2128,7 @@ define( function(){
                       "tag": "MORT"     
                   },
                   "WAR.GRDTRK.UNT.CBT.FLDART.MORT.TOW.ARC": {
-                      "symbolID": "",  
+                      "symbolID": "SUGPUCFMTC*****",  
                       "tag": "MORT"   
                   },
                   "WAR.GRDTRK.UNT.CBT.FLDART.MORT.TOW.MNT": {
@@ -3135,6 +3135,10 @@ define( function(){
                       "symbolID": "SUGPEWMAS-*****",
                       "tag": "MSLL"     
                   },
+                  "WAR.GRDTRK.EQT.WPN.MSLL.ADFAD.SHTR.TLAR": {
+                      "symbolID": "SUGPEWMASR*****",
+                      "tag": "ADFAD"     
+                  },
                   "WAR.GRDTRK.EQT.WPN.MSLL.ADFAD.SHTR.TELAR": {
                       "symbolID": "SUGPEWMASE*****",
                       "tag": "ADFAD"     
@@ -3168,8 +3172,8 @@ define( function(){
                       "tag": "MSLL"     
                   },
                   "WAR.GRDTRK.EQT.WPN.MSLL.ADFAD.THT.TLAR": {
-                      "symbolID": "",
-                      "tag": "ADFAD"     
+                      "symbolID": "SUGPEWMATR*****",  
+                      "tag": "ADFAD"   
                   },
                   "WAR.GRDTRK.EQT.WPN.MSLL.ADFAD.THT.TELAR": {
                       "symbolID": "SUGPEWMATE*****",  
