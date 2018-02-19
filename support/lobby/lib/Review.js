@@ -4,7 +4,12 @@ import ReactTable from "react-table";
 import dateFormat from "dateformat";
 
 export default function Reviews( props ) {
-  return <ReactTable data={ props.records } columns={ columns } filterable className="-striped"/>;
+  return <ReactTable data={ props.records } columns={ columns } filterable className="-striped"
+    defaultFilterMethod={ ( filter, row, column ) => {
+      return row[ filter.id ] !== undefined ?
+        String( row[ filter.id ] ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true
+    } }
+  />;
 }
 
 const columns = [ {

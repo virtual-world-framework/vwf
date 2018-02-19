@@ -33,6 +33,10 @@ export default function Scenarios( props ) {
           unit:
             event => ( { unit: event.target.value } ) },
       } ) }
+      defaultFilterMethod={ ( filter, row, column ) => {
+        return row[ filter.id ] !== undefined ?
+          String( row[ filter.id ] ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true
+      } }
     />
   </React.Fragment>;
 }
