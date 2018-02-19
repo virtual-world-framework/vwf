@@ -4,7 +4,7 @@ import ReactTable from "react-table";
 import dateFormat from "dateformat";
 
 export default function Reviews( props ) {
-  return <ReactTable data={ props.records } columns={ columns } className="-striped"/>;
+  return <ReactTable data={ props.records } columns={ columns } filterable className="-striped"/>;
 }
 
 const columns = [ {
@@ -34,6 +34,8 @@ const columns = [ {
     "session.document.timestamp",
   Cell:
     function Cell( props ) { return <DateCell { ...props }/> },
+  filterable:
+    false,
 }, {
   Header:
     "",
@@ -43,6 +45,8 @@ const columns = [ {
     "session",
   Cell:
     function Cell( props ) { return <ActionCell { ...props }/> },
+  filterable:
+    false,
 } ];
 
 class DateCell extends React.Component {

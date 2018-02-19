@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import ReactTable from "react-table";
 
 export default function Sessions( props ) {
-  return <ReactTable data={ sessionRecords( props.records, props.instructor ) } columns={ columns } className="-striped"/>;
+  return <ReactTable data={ sessionRecords( props.records, props.instructor ) } columns={ columns } filterable className="-striped"/>;
 }
 
 function sessionRecords( records, instructor ) {
@@ -41,6 +41,8 @@ const columns = [ {
     "blank",
   accessor:
     d => "",
+  filterable:
+    false,
 }, {
   Header:
     "",
@@ -50,6 +52,8 @@ const columns = [ {
     "session",
   Cell:
     function Cell( props ) { return <ActionCell { ...props }/> },
+  filterable:
+    false,
 } ];
 
 class ScenarioCell extends React.Component {

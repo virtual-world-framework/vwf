@@ -18,7 +18,7 @@ export default function Scenarios( props ) {
         <Application onServerChange={ props.onServerChange }/>
       </tbody>
     </Table>
-    <ReactTable data={ scenarioRecords( props.records ) } columns={ columns } className="-striped"
+    <ReactTable data={ scenarioRecords( props.records ) } columns={ columns } filterable className="-striped"
       getTrProps={ () => ( {
         fields:
           [ "company", "platoon", "unit" ],
@@ -141,6 +141,8 @@ const columns = [ {
     "scenario.state.scenarioName",
   Cell:
     function Cell( props ) { return <FormControl name="name" type="hidden" value={ props.value }/> },
+  filterable:
+    false,
 }, {
   Header:
     "",
@@ -150,6 +152,8 @@ const columns = [ {
     "scenario",
   Cell:
     function Cell( props ) { return <ActionCell { ...props }/> },
+  filterable:
+    false,
 }, {
   Header:
     "",
@@ -159,6 +163,8 @@ const columns = [ {
     "scenario",
   Cell:
     function Cell( props ) { return <ExportCell { ...props }/> },
+  filterable:
+    false,
 } ];
 
 class LobbyCell  extends React.Component {
