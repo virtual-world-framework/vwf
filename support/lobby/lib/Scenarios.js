@@ -12,26 +12,100 @@ let UNIT_MIN = 1;
 let UNIT_MAX = 9;
 
 export default function Scenarios( props ) {
-  return <ReactTable data={ scenarioRecords( props.records ) } columns={ columns } className="-striped"
-    getTrProps={ () => ( {
-      fields:
-        [ "company", "platoon", "unit" ],
-      readers: {
-        filled:
-          values => values.company.length > 0 && values.platoon.length > 0 && values.unit.length > 0 },
-      writers: {
-        company:
-          event => ( { company: event.target.value } ),
-        platoon:
-          event => ( { platoon: event.target.value } ),
-        unit:
-          event => ( { unit: event.target.value } ) },
-    } ) }
-  />;
+  return <React.Fragment>
+    <Table striped>
+      <tbody>
+        <Application onServerChange={ props.onServerChange }/>
+      </tbody>
+    </Table>
+    <ReactTable data={ scenarioRecords( props.records ) } columns={ columns } className="-striped"
+      getTrProps={ () => ( {
+        fields:
+          [ "company", "platoon", "unit" ],
+        readers: {
+          filled:
+            values => values.company.length > 0 && values.platoon.length > 0 && values.unit.length > 0 },
+        writers: {
+          company:
+            event => ( { company: event.target.value } ),
+          platoon:
+            event => ( { platoon: event.target.value } ),
+          unit:
+            event => ( { unit: event.target.value } ) },
+      } ) }
+    />
+  </React.Fragment>;
 }
 
 function scenarioRecords( records ) {
   return records.filter( record => !record.session );
+}
+
+class Application extends React.Component {
+
+  static TITLE_PLACEHOLDER = "New Scenario Title";
+
+  state = {
+    title: ""
+  };
+
+  render() {
+    return <tr>
+      <td className="col-sm-8">
+        <FormControl name="title" type="text" placeholder={ Application.TITLE_PLACEHOLDER } bsSize="small"
+          value={ this.state.title } onChange={ this.handleTitle }/>
+      </td><td className="col-sm-2">
+        &nbsp;
+      </td><td className="col-sm-1">
+        <Button type="submit" disabled={ !this.filled() } bsSize="small"
+          onClick={ this.handleSubmit }> Create </Button>
+      </td><td className="col-sm-1">
+        <ControlLabel className="btn" bsSize="small">
+          Import <FormControl type="file" accept=".zip" style={ { display: "none" } }
+            onChange={ this.handleImport }/>
+        </ControlLabel>
+      </td>
+    </tr>;
+  }
+
+  handleTitle = event => {
+    this.setState( { title: event.target.value } );
+  }
+
+  handleSubmit = event => {
+    let properties = {
+      name: this.name(),
+      title: this.state.title };
+    post( "scenarios", properties ).
+      then( result => {
+        this.props.onServerChange && this.props.onServerChange() } ).
+      catch( error => {
+        console.log( error.message ) } );
+    event.preventDefault();
+  }
+
+  handleImport = event => {
+    let file = event.target.files &&
+      event.target.files[0];
+    if ( file ) {
+      let formData = new FormData();
+        formData.append( "file", file );
+      post( "/import-scenarios", formData ).
+        then( result => {
+          this.props.onServerChange && this.props.onServerChange() } ).
+        catch( error => {
+          alert( "Uh oh ... we were unable to upload that file for import.\n" + error.message ) } );
+    }
+  }
+
+  name() {
+    return this.state.title.trim().replace( /[^0-9A-Za-z]+/g, "-" );
+  }
+
+  filled() {
+    return this.state.title.length > 0;
+  }
+
 }
 
 const columns = [ {
