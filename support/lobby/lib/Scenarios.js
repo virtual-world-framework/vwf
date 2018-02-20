@@ -64,7 +64,7 @@ class Application extends React.Component {
         <Button type="submit" disabled={ !this.filled() } bsSize="small"
           onClick={ this.handleSubmit }> Create </Button>
       </td><td className="col-sm-1">
-        <ControlLabel className="btn" bsSize="small">
+        <ControlLabel bsClass="btn" bsStyle="default" bsSize="small">
           Import <FormControl type="file" accept=".zip" style={ { display: "none" } }
             onChange={ this.handleImport }/>
         </ControlLabel>
