@@ -21,7 +21,7 @@
   ],
   "rules": {
     "no-console": "warn",
-    "no-unused-vars": "warn",
+    "no-unused-vars": [ "warn", { "args": "none" } ],
     "react/prop-types": "warn"
   }
 }
