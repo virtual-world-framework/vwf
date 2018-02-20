@@ -67,7 +67,7 @@ function Session( props ) {
 
 // Generate the Instructor/Students annotation for a session.
 
-export function instructorStudentsLabel( session ) {
+function instructorStudentsLabel( session ) {
 
   var instanceCounts = session.completion.instance || { instructors: 0, students: 0 },
     label = "";
