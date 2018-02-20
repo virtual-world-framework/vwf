@@ -243,6 +243,6 @@ class ActionCell extends LobbyCell {
 class ExportCell extends React.Component {
   render() {
     return <Button href={ "/export-scenarios?scenarioName=" + this.props.value.state.scenarioName }
-      bsSize="small" bsStyle="link"> Export </Button>;
+      bsSize="small"> Export </Button>;
   }
 }
