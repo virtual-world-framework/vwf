@@ -37,6 +37,8 @@ const columns = [ {
 }, {
   Header:
     "",
+  id:
+    "action",
   accessor:
     "session",
   Cell:

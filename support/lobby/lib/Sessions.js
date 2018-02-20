@@ -13,6 +13,8 @@ function sessionRecords( records, instructor ) {
 const columns = [ {
   Header:
     "Scenario",
+  id:
+    "session.state.scenarioTitle",
   accessor:
     "session",
   Cell:
@@ -42,6 +44,8 @@ const columns = [ {
 }, {
   Header:
     "",
+  id:
+    "action",
   accessor:
     "session",
   Cell:

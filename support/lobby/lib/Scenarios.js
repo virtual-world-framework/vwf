@@ -116,16 +116,22 @@ const columns = [ {
 }, {
   Header:
     "Company",
+  id:
+    "company",
   Cell:
     function Cell( props ) { return <CompanyCell { ...props }/> },
 }, {
   Header:
     "Platoon",
+  id:
+    "platoon",
   Cell:
     function Cell( props ) { return <PlatoonCell { ...props }/> },
 }, {
   Header:
     "Unit",
+  id:
+    "unit",
   Cell:
     function Cell( props ) { return <UnitCell { ...props }/> },
 }, {
@@ -138,6 +144,8 @@ const columns = [ {
 }, {
   Header:
     "",
+  id:
+    "action",
   accessor:
     "scenario",
   Cell:
@@ -145,6 +153,8 @@ const columns = [ {
 }, {
   Header:
     "",
+  id:
+    "export",
   accessor:
     "scenario",
   Cell:
