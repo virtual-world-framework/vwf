@@ -33,6 +33,9 @@ export default function Scenarios( props ) {
           unit:
             event => ( { unit: event.target.value } ) },
       } ) }
+      getTdProps={ () => ( {
+        onServerChange: props.onServerChange
+      } ) }
       defaultFilterMethod={ ( filter, row, column ) => {
         return row[ filter.id ] !== undefined ?
           String( row[ filter.id ] ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true
@@ -232,7 +235,7 @@ class ActionCell extends LobbyCell {
     post( "sessions", properties ).
       then( result => {
         newTab.location.href = result.document.uri + "/";
-        this.props.onServerChange && this.props.onServerChange() } ).
+        this.props.tdProps.rest.onServerChange && this.props.tdProps.rest.onServerChange() } ).
       catch( error => {
         console.log( error.message ) } );
     event.preventDefault();
