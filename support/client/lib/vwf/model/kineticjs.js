@@ -2175,6 +2175,11 @@ define( [ "module",
 
     function loadImage( kineticObj, url ) {
         
+        // Ensure that the url is valid
+        var onePixelTransparentImage =
+            "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+        var url = url || onePixelTransparentImage;
+
         var imageObj = kineticObj.image();
         var validImage = ( imageObj && ( imageObj !== undefined ) && ( imageObj instanceof Image ) ); 
         var width = kineticObj.width();
@@ -2191,6 +2196,14 @@ define( [ "module",
         }
 
         imageObj.onload = function() {
+
+            // If the image was set to the one pixel transparent image,
+            // then the intent was to null it out -
+            // Do not do the rest of the work
+            if ( url === onePixelTransparentImage ) {
+                return;
+            }
+
             if ( !validImage ) {
                 kineticObj.image( imageObj );
             }
