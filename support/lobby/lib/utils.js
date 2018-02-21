@@ -20,7 +20,7 @@ function postOptions( body ) {
   return {
     method: "POST",
     body: json ? JSON.stringify( body ) : body,
-    headers: json ? { "Content-Type": "application/json" } : null,
+    headers: json ? { "Content-Type": "application/json" } : undefined,
     credentials: "same-origin",
   };
 }
