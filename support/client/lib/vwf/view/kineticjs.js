@@ -201,13 +201,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         } );
 
-        node.kineticObj.on( "mouseout", function( evt ) {
-            var eData = processEvent( evt, node, false );
-            if ( mouseDown || ( evt.evt.buttons ) ) {
-                swipe.swipedAcross( node );
-            }
-        } );
-
         node.kineticObj.on( "mouseenter", function( evt ) {
             // Correct `mouseDown` if the button changed outside any node with an active "on mouseup"
             mouseDown = !!( evt.evt.buttons & 1 );
@@ -335,11 +328,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         } );
 
-        // TODO: Test - Is the "dragend" event called in firefox or on tablets?
-        // It isn't on desktop Chrome.  Instead:
-        //  - When the user stops dragging by mouse, "mouseup" is called.
-        //  - When the user stops dragging by touch, "touchend" is called.
-        node.kineticObj.on( "dragend", evt => handleDragEnd( node, evt ) );
+        node.kineticObj.on( "dragend", evt => {
+            handleDragEnd( node, evt );
+            evt.cancelBubble = true;
+        } );
 
     }
 
