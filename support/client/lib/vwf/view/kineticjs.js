@@ -338,7 +338,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     function handleDragEnd( node, evt ) {
 
         var nodeID = node.ID;
-        if ( nodeID !== _draggingNode.ID ) {
+        if ( nodeID !== ( _draggingNode || {} ).ID ) {
             return;
         }
 
@@ -1053,7 +1053,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         if ( !propagate ) {
             // For the "dragend" event, kinetic sometimes sends us an event object that doesn't
             // have all the expected functions and properties attached
-            e.evt.stopPropagation && e.evt.stopPropagation();
+            // e.evt.stopPropagation && e.evt.stopPropagation();
         }
 
         var isTouchEvent = !!e.evt.touches;
