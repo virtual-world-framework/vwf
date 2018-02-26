@@ -1357,9 +1357,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         // Optimize and reduce line segments
         if ( ptarray.length > 2 ) {
-            if ( tolerance !== undefined ) {
-                ptarray = simplifyJs.simplify( ptarray, tolerance, highestQuality );
-            }
+            ptarray = simplifyJs.simplify( ptarray, tolerance, highestQuality );
         }
 
         // Convert back to x, y list
