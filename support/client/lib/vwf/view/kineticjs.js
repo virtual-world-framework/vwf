@@ -1349,6 +1349,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     // Konva points are in an array like [x1,y1,x2,y2,...xn,yn]
     function simplifyPoints( points, tolerance, highestQuality ) {
         var ptarray = [];
+        var pixelTolerance = ( !!tolerance ? tolerance : 1 );
         // Convert to array of  x, y points
         for ( var i = 0; i < points.length; i = i+2 ) {
             var point = { x: points[ i ], y: points[ i+1 ] };
@@ -1357,9 +1358,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         // Optimize and reduce line segments
         if ( ptarray.length > 2 ) {
-            if ( tolerance !== undefined ) {
-                ptarray = simplifyJs.simplify( ptarray, tolerance, highestQuality );
-            }
+            ptarray = simplifyJs.simplify( ptarray, pixelTolerance, highestQuality );
         }
 
         // Convert back to x, y list
