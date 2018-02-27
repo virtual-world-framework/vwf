@@ -3516,8 +3516,8 @@ define( function(){
                       "tag": "UTYVEH"     
                   },
                   "WAR.GRDTRK.EQT.GRDVEH.ENGVEH": {
-                      "symbolID": "EQT",  
-                      "tag": "SUGPEVE---*****"   
+                      "symbolID": "SUGPEVE---*****",  
+                      "tag": "GRDVEH"     
                   },
                   "WAR.GRDTRK.EQT.GRDVEH.ENGVEH.BRG": {
                       "symbolID": "SUGPEVEB--*****",
