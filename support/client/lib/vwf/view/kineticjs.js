@@ -212,6 +212,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             }
         } );
 
+        // Note: We do not get this event if we are dragging something
         node.kineticObj.on( "mouseleave", function( evt ) {
             var eData = processEvent( evt, node );
 
@@ -250,6 +251,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         } );
 
+        // Note: We only get this event if the mouse is let go on the canvas
         node.kineticObj.on( "mouseup", function( evt ) {
             var eData = processEvent( evt, node );
             mouseDown = false;
@@ -416,6 +418,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             swipe.swipedAcross( node );
         } );
 
+        // Note: We only get this if the touchend occurs on the canvas
         node.kineticObj.on( "touchend", function( evt ) {
             var eData = processEvent( evt, node );
 
