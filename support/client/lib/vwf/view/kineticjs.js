@@ -14,7 +14,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         "drawingChildName": "",
         "initialDownPoint": [ -1, -1 ],
         "previousPoint": [ -1, -1 ],
-        "mouseDown": false,
         "imageDataURL": null
     };
     var drawing_client = {  
@@ -41,7 +40,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     var clearBeforeDraw = false;
     var lastRenderTime = 0;     // last time whole scene was rendered
     var renderTimeout = 1000;    // ms between renders
-    var mouseDown = false;
     var doRenderScene = false;
     var eventHandlers = {};
     var _draggingNode;
@@ -202,23 +200,15 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "mouseenter", function( evt ) {
-            // Correct `mouseDown` if the button changed outside any node with an active "on mouseup"
-            mouseDown = !!( evt.evt.buttons & 1 );
-
-            var eData = processEvent( evt, node );
-
-            if ( mouseDown || ( evt.evt.buttons ) ) {
+            if ( evt.evt.buttons ) {
                 swipe.swipedAcross( node );
             }
         } );
 
         // Note: We do not get this event if we are dragging something
         node.kineticObj.on( "mouseleave", function( evt ) {
-            var eData = processEvent( evt, node );
-
             drawUp();
-
-            if ( mouseDown || ( evt.evt.buttons ) ) {
+            if ( evt.evt.buttons ) {
                 swipe.swipedAcross( node );
             }
         } );
@@ -228,9 +218,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
-
-            // Track mouseDown so we know we're holding the button during a move/drag
-            mouseDown = true;
 
             // Process drawing (if actively drawing)
             drawDown( eData.eventData[0], node ); 
@@ -255,7 +242,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         // Note: We only get this event if the mouse is let go on the canvas
         node.kineticObj.on( "mouseup", function( evt ) {
             var eData = processEvent( evt, node );
-            mouseDown = false;
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
