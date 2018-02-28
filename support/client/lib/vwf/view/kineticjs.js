@@ -316,7 +316,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             evt.cancelBubble = true;
 
             var nodeID = node.ID;
-            if ( nodeID !== ( _draggingNode || {} ).ID ) {
+            if ( nodeID !== _draggingNode.ID ) {
                 return;
             }
 
