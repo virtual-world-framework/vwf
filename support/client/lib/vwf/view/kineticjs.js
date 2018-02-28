@@ -263,15 +263,10 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
             activelyDrawing = false;
 
-            if ( _draggingNode ) {
-                handleDragEnd( node, evt );
-            } else {
-                fireViewEvent( "mouseup", {
-                    nodeID: node.ID,
-                    eventData: eData.eventData[ 0 ]
-                } );
-            }
-
+            fireViewEvent( "mouseup", {
+                nodeID: node.ID,
+                eventData: eData.eventData[ 0 ]
+            } );
         } );
 
         node.kineticObj.on( "click", function( evt ) {
@@ -331,34 +326,30 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "dragend", evt => {
-            handleDragEnd( node, evt );
             evt.cancelBubble = true;
+
+            var nodeID = node.ID;
+            if ( nodeID !== ( _draggingNode || {} ).ID ) {
+                return;
+            }
+
+            // Calculate and set the final mapPosition at the end of the drag
+            var mapPosition = setNewUnitMapPositionOnDrag();
+
+            // The node is no longer being dragged
+            _draggingNode = undefined;
+            activelyDrawing = false;
+
+            // Fire a view-side event
+            var eData = processEvent( evt, node );
+            var eventParams = {
+                nodeID: nodeID,
+                eventData: eData.eventData[ 0 ],
+                mapPosition: mapPosition
+            };
+            fireViewEvent( "dragend", eventParams );
         } );
 
-    }
-
-    function handleDragEnd( node, evt ) {
-
-        var nodeID = node.ID;
-        if ( nodeID !== ( _draggingNode || {} ).ID ) {
-            return;
-        }
-
-        // Calculate and set the final mapPosition at the end of the drag
-        var mapPosition = setNewUnitMapPositionOnDrag();
-
-        // The node is no longer being dragged
-        _draggingNode = undefined;
-        activelyDrawing = false;
-
-        // Fire a view-side event
-        var eData = processEvent( evt, node );
-        var eventParams = {
-            nodeID: nodeID,
-            eventData: eData.eventData[ 0 ],
-            mapPosition: mapPosition
-        };
-        fireViewEvent( "dragend", eventParams );
     }
 
     // Attach handlers for touch events
@@ -426,10 +417,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             tapHold.cancel();
 
             drawUp( node.ID, eData.eventData[0], node, true );
-
-            if ( _draggingNode ) {
-                handleDragEnd( node, evt );
-            }
         } );
 
         node.kineticObj.on( "tap", function( evt ) {
