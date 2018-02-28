@@ -182,7 +182,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawMove( node.ID, eData.eventData[0], node, false ); 
+            drawMove( node.ID, eData.eventData[0], node ); 
 
             var userState = drawing_client;
 
@@ -216,10 +216,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         node.kineticObj.on( "mouseleave", function( evt ) {
             var eData = processEvent( evt, node );
 
+            drawUp( node.ID, eData.eventData[ 0 ], node );
+
             if ( mouseDown || ( evt.evt.buttons ) ) {
                 swipe.swipedAcross( node );
             }
-
         } );
 
         node.kineticObj.on( "mousedown", function( evt ) { 
@@ -232,7 +233,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             mouseDown = true;
 
             // Process drawing (if actively drawing)
-            drawDown( node.ID, eData.eventData[0], node, false ); 
+            drawDown( node.ID, eData.eventData[0], node ); 
             var userState = drawing_client;
             if ( !!userState[ "drawing_mode" ] ) {
                 switch ( userState[ "drawing_mode" ] ) {
@@ -259,7 +260,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawUp( node.ID, eData.eventData[0], node, true ); 
+            drawUp( node.ID, eData.eventData[0], node ); 
 
             activelyDrawing = false;
 
@@ -363,7 +364,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Start tapHold
             tapHold.start( node, eData.eventData[0].touches[0] );
 
-            drawDown( node.ID, eData.eventData[0], node, false ); 
+            drawDown( node.ID, eData.eventData[0], node ); 
 
             var userState = drawing_client;
             if ( !!userState[ "drawing_mode" ] ) {
@@ -392,7 +393,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // If tapHold started, check that we haven't moved too much
             tapHold.moved( node, eData.eventData[0].touches[0] );
 
-            drawMove( node.ID, eData.eventData[0], node, false ); 
+            drawMove( node.ID, eData.eventData[0], node ); 
 
             var userState = drawing_client;
             if ( userState[ "drawing_mode" ] ) {           
@@ -416,7 +417,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawUp( node.ID, eData.eventData[0], node, true );
+            drawUp( node.ID, eData.eventData[0], node );
         } );
 
         node.kineticObj.on( "tap", function( evt ) {
@@ -1021,11 +1022,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     }
 
     // When the user begins a new part of a drawing,
-    // check to see if this is is for an existing drawing or the beginning of a new drawing.
+    // check to see if this is for an existing drawing or the beginning of a new drawing.
     // If it is the beginning of a new drawing, populate the drawing_private object with
     // a new konva object and a VWF descriptor that will be used to create a model object
     // when the user is done drawing
-    function drawDown( nodeID, eventData, nodeData, touch ) {
+    function drawDown( nodeID, eventData, nodeData ) {
 
         var userState = drawing_client;
         var privateState = drawing_private;
@@ -1112,7 +1113,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         }
     };
 
-    function drawMove( nodeID, eventData, nodeData, touch ) {
+    function drawMove( nodeID, eventData, nodeData ) {
 
         var node = viewDriver.state.nodes[ nodeID ];
 
@@ -1126,7 +1127,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         }
     };
 
-    function drawUp( nodeID, eventData, nodeData, touch ) {
+    function drawUp( nodeID, eventData, nodeData ) {
 
         var node = viewDriver.state.nodes[ nodeID ];
         var appID = viewDriver.kernel.application();
