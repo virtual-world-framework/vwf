@@ -177,7 +177,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     function attachMouseEvents( node ) {
 
         node.kineticObj.on( "mousemove", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -205,7 +205,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Correct `mouseDown` if the button changed outside any node with an active "on mouseup"
             mouseDown = !!( evt.evt.buttons & 1 );
 
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             if ( mouseDown || ( evt.evt.buttons ) ) {
                 swipe.swipedAcross( node );
@@ -213,7 +213,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "mouseleave", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             if ( mouseDown || ( evt.evt.buttons ) ) {
                 swipe.swipedAcross( node );
@@ -222,7 +222,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "mousedown", function( evt ) { 
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -251,7 +251,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "mouseup", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
             mouseDown = false;
 
             // Cancel tapHold event (if any)
@@ -273,7 +273,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "click", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -286,7 +286,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "dblclick", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -306,7 +306,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             evt.cancelBubble = true;
 
             // Fire a view-side event
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
             fireViewEvent( "dragstart", {
                 nodeID: node.ID,
                 eventData: eData.eventData[ 0 ]
@@ -321,7 +321,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "dragmove", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             tapHold.moved( node, eData.eventData[0] );
             activelyDrawing = false;
@@ -350,7 +350,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         activelyDrawing = false;
 
         // Fire a view-side event
-        var eData = processEvent( evt, node, false );
+        var eData = processEvent( evt, node );
         var eventParams = {
             nodeID: nodeID,
             eventData: eData.eventData[ 0 ],
@@ -365,7 +365,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         var TOUCH_EVENT = true;
 
         node.kineticObj.on( "touchstart", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Start tapHold
             tapHold.start( node, eData.eventData[0].touches[0] );
@@ -394,7 +394,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "touchmove", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // If tapHold started, check that we haven't moved too much
             tapHold.moved( node, eData.eventData[0].touches[0] );
@@ -417,7 +417,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "touchend", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -430,7 +430,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "tap", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -444,7 +444,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "dbltap", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -579,73 +579,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                         attachMouseEvents( node );
                         attachTouchEvents( node );
                         node.hasMouseAndTouchEvents = true;
-                    }
-                    break;
-                    
-                case "enableEvents":
-                    var mouseDown = false;
-                    var touch = false;
-                    var mouseDownTime = null;
-                    var mouseDownId = undefined;
-                    var touchId = undefined;
-                    var timer = new Date();
-
-                    var protos = node.prototypes;
-                    if ( viewDriver.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
-
-                        var stage = kineticObj;
-                        var TOUCH_EVENT = true;
-
-                        // these are the events for the global space, ie the stage
-                        // we did originally implement the mouse events this way
-                        // but then we added the events for the individual objects
-                        // which appeared to work better.  We were getting duplicate events
-                        // which is why I moved these events down inside a property
-                        // just in case they were needed for another application that
-                        // is set up differently
-
-                        if ( Boolean( propertyValue ) ) {
-
-                            // defined handlers
-                            stage.on( 'contentMousedown', function( evt ) {
-                                var node = evt.targetNode;
-                                mouseDownId = ( node !== undefined ) ? node.getId() : stage.getId();
-                                mouseDown = true;
-                                mouseDownTime = timer.getTime();
-                                var eData = processEvent( evt, viewDriver.state.nodes[ mouseDownId ], true );  // false might be more corret here
-
-                                viewDriver.kernel.dispatchEvent( mouseDownId, 'pointerDown', eData.eventData, eData.eventNodeData );
-                            });
-
-                            stage.on( 'contentMousemove', function( evt ) {
-                                var node = evt.targetNode;
-                                
-                                var eData = processEvent( evt, viewDriver.state.nodes[ mouseDownId ], true );  // false might be more corret here
-
-                                viewDriver.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerMove', eData.eventData, eData.eventNodeData ); 
-                            });
-
-                            stage.on( 'contentMouseup', function( evt ) {
-                                var node = evt.targetNode;
-                                mouseDown = false;
-
-                                var eData = processEvent( evt, viewDriver.state.nodes[ mouseDownId ], true );  // false might be more corret here
-                                if ( timer.getTime() - mouseDownTime < 700.0 ) {
-                                    viewDriver.kernel.dispatchEvent( mouseDownId, 'pointerClick', eData.eventData, eData.eventNodeData );
-                                }
-                                viewDriver.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerUp', eData.eventData, eData.eventNodeData );
-
-                                mouseDownTime = null;
-                                mouseDownId = null;
-                            } );
-                            
-                        } else {
-
-                            // remove handlers
-                            stage.off( 'contentMousedown' );
-                            stage.off( 'contentMousemove' );
-                            stage.off( 'contentMouseup' );
-                        }
                     }
                     break;
                 case "position":
@@ -1047,14 +980,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         }
     }
 
-    function processEvent( e, node, propagate ) {
+    function processEvent( e, node ) {
         var returnData = { eventData: undefined, eventNodeData: undefined };
-
-        if ( !propagate ) {
-            // For the "dragend" event, kinetic sometimes sends us an event object that doesn't
-            // have all the expected functions and properties attached
-            // e.evt.stopPropagation && e.evt.stopPropagation();
-        }
 
         var isTouchEvent = !!e.evt.touches;
         var eventPosition = isTouchEvent ? e.evt.changedTouches[ 0 ] : e.evt;
@@ -1076,31 +1003,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                 returnData.eventData[ 0 ].touches[ i ] =
                     convertBrowserEventDataToVwf( e.evt.touches[ i ], stage );
             }    
-        }
-
-        if ( propagate ) {
-
-            var stageId = stage && stage.getId();
-            var pointerPickID = e.targetNode ? e.targetNode.getId() : stageId;
-
-            returnData.eventNodeData = { "": [ {
-                pickID: pointerPickID,
-            } ] };
-
-            if ( viewDriver && viewDriver.state.nodes[ pointerPickID ] ) {
-                var childID = pointerPickID;
-                var child = viewDriver.state.nodes[ childID ];
-                while ( child ) {
-
-                    returnData.eventNodeData[ childID ] = [ {
-                        pickID: pointerPickID,
-                    } ];
-
-                    // Line up the next "child" up the hierarchy
-                    childID = child.parentID;
-                    child = viewDriver.state.nodes[ childID ];
-                }
-            }
         }
 
         return returnData;
