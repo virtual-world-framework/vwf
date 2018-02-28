@@ -182,7 +182,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawMove( node.ID, eData.eventData[0], node ); 
+            drawMove( eData.eventData[ 0 ], node ); 
 
             var userState = drawing_client;
 
@@ -216,7 +216,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         node.kineticObj.on( "mouseleave", function( evt ) {
             var eData = processEvent( evt, node );
 
-            drawUp( node.ID, eData.eventData[ 0 ], node );
+            drawUp();
 
             if ( mouseDown || ( evt.evt.buttons ) ) {
                 swipe.swipedAcross( node );
@@ -233,7 +233,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             mouseDown = true;
 
             // Process drawing (if actively drawing)
-            drawDown( node.ID, eData.eventData[0], node ); 
+            drawDown( eData.eventData[0], node ); 
             var userState = drawing_client;
             if ( !!userState[ "drawing_mode" ] ) {
                 switch ( userState[ "drawing_mode" ] ) {
@@ -260,7 +260,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawUp( node.ID, eData.eventData[0], node ); 
+            drawUp(); 
 
             activelyDrawing = false;
 
@@ -364,7 +364,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Start tapHold
             tapHold.start( node, eData.eventData[0].touches[0] );
 
-            drawDown( node.ID, eData.eventData[0], node ); 
+            drawDown( eData.eventData[0], node ); 
 
             var userState = drawing_client;
             if ( !!userState[ "drawing_mode" ] ) {
@@ -393,7 +393,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // If tapHold started, check that we haven't moved too much
             tapHold.moved( node, eData.eventData[0].touches[0] );
 
-            drawMove( node.ID, eData.eventData[0], node ); 
+            drawMove( eData.eventData[ 0 ], node ); 
 
             var userState = drawing_client;
             if ( userState[ "drawing_mode" ] ) {           
@@ -417,7 +417,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawUp( node.ID, eData.eventData[0], node );
+            drawUp();
         } );
 
         node.kineticObj.on( "tap", function( evt ) {
@@ -755,6 +755,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         },
 
         setDrawingState: function ( stateObj ) {
+
+            // Whenever the drawing state changes, ensure that the previous drawing is finished
+            // This is necessary for drawings that are be underway when the mode is changed
+            // Example: If the user draws off the side of the page and then changes the mode to Move
+            drawUp();
+            
             if ( stateObj !== undefined ) {
                 var userState = drawing_client;
                 for ( var property in stateObj ) {
@@ -1026,7 +1032,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     // If it is the beginning of a new drawing, populate the drawing_private object with
     // a new konva object and a VWF descriptor that will be used to create a model object
     // when the user is done drawing
-    function drawDown( nodeID, eventData, nodeData ) {
+    function drawDown( eventData, nodeData ) {
 
         var userState = drawing_client;
         var privateState = drawing_private;
@@ -1102,7 +1108,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             drawing_private.drawingParentID = parentID;
             drawing_private.drawingChildName = name;
 
-            drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
+            drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData );
 
         }
 
@@ -1113,9 +1119,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         }
     };
 
-    function drawMove( nodeID, eventData, nodeData ) {
-
-        var node = viewDriver.state.nodes[ nodeID ];
+    function drawMove( eventData, nodeData ) {
 
         var userState = drawing_client;
         if ( ( userState.drawing_mode === 'none' ) || ( userState.drawing_mode === 'edit' ) ) {
@@ -1123,111 +1127,93 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         }
 
         if ( drawing_private.drawingObject ) {
-           drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
+           drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData );
         }
     };
 
-    function drawUp( nodeID, eventData, nodeData ) {
+    function drawUp() {
 
-        var node = viewDriver.state.nodes[ nodeID ];
-        var appID = viewDriver.kernel.application();
-        var drawAndPropagate = false;
-        var debugOn = false;
-
-        if ( debugOn ) {
-            console.info( ' ' );
-            console.info( ' === Nodes listening and visibility states ===' );
-            for(var key in viewDriver.state.nodes) {
-                var kNode = viewDriver.state.nodes[ key ];
-                var listening = ( kNode.kineticObj.isListening instanceof Function ? kNode.kineticObj.isListening() : undefined );
-                var visible = ( kNode.kineticObj.isVisible instanceof Function ? kNode.kineticObj.isVisible() : undefined );
-                console.info( '     Node: ' + kNode.kineticObj.id() + ', listening: ' + listening + ', visibility: ' + visible );
-            }
-            console.info( ' === End ===' );
-            console.info( ' ' );
+        var drawingObject = ( drawing_private || {} ).drawingObject;
+        if ( !drawingObject ) {
+            return;
         }
+  
+        fireViewEvent( "drawingObjectCreated", {
+            nodeID: drawingObject.id()
+        } );
 
-        if ( drawing_private !== undefined && 
-             drawing_private.drawingObject ) {
-            var drawingObject = drawing_private.drawingObject;
-            drawUpdate( drawingObject.ID, eventData, nodeData, true );
+        var drawAndPropagate = false;
+
+        var userState = drawing_client;
+        drawingObject.setZIndex( userState.zIndex );
+
+        switch( userState.drawing_mode ) {
             
-            fireViewEvent( "drawingObjectCreated", {
-                nodeID: drawingObject.id()
-            } );
+            case "text":
+                fireViewEvent( "textCreated", {
+                    nodeID: drawingObject.id()
+                } );
+                break;
 
-            var userState = drawing_client;
-            drawingObject.setZIndex( userState.zIndex );
-
-            switch( userState.drawing_mode ) {
-                
-                case "text":
-                    fireViewEvent( "textCreated", {
+            case "sprite":
+            case "image":
+                var stroke = drawingObject.stroke();
+                if ( stroke ) {
+                    fireViewEvent( "imageLocationSelected", {
                         nodeID: drawingObject.id()
                     } );
-                    break;
+                }
 
-                case "sprite":
-                case "image":
-                    var stroke = drawingObject.stroke();
-                    if ( stroke ) {
-                        fireViewEvent( "imageLocationSelected", {
-                            nodeID: drawingObject.id()
-                        } );
-                        drawAndPropagate = false;
+                break;
+
+            case "line":
+                drawAndPropagate = true;
+                break;
+
+            case "freeDraw":
+            case "polygon":
+            case "circle":
+            case "ellipse":
+            case "rect":
+            case "arrow":
+            case "thickArrow":
+                drawingObject.dash( userState.dashLineStyle );
+                switch ( userState.fillStyle ) {
+                    case 'noFill':
+                        drawingObject.fill( null );
+                        break;
+
+                    case 'solidFill':
+                    case 'transparentFill':
+                        var colorRGB = Konva.Util.getRGB( userState.drawing_color );
+                        var alpha = ( userState.fillStyle === 'transparentFill' ? 0.5 : 1.0 );
+                        var rgbaText = 'rgba( ' + colorRGB.r + ', ' + colorRGB.g + ', ' + colorRGB.b + ', ' + alpha + ' )';
+                        drawingObject.fill( rgbaText );
+                        break;
+
+                    default:
+                        break;
+                }
+                if ( ( userState.drawing_mode === "freeDraw" ) || ( userState.drawing_mode === "polygon" ) ) {
+                    // Optimize the number of vertices
+                    if ( simplifyJs ) {
+                        drawingObject.points( simplifyPoints( drawingObject.points(), 1 ) );
                     }
+                }
 
-                    break;
+                drawAndPropagate = true;
+                break;
 
-                case "line":
-                    drawAndPropagate = true;
-                    break;
+            default:
+                break;
+        } 
 
-                case "freeDraw":
-                case "polygon":
-                case "circle":
-                case "ellipse":
-                case "rect":
-                case "arrow":
-                case "thickArrow":
-                    drawingObject.dash( userState.dashLineStyle );
-                    switch ( userState.fillStyle ) {
-                        case 'noFill':
-                            drawingObject.fill( null );
-                            break;
+        if ( drawAndPropagate ) {
+            drawObject( drawingObject, true );
 
-                        case 'solidFill':
-                        case 'transparentFill':
-                            var colorRGB = Konva.Util.getRGB( userState.drawing_color );
-                            var alpha = ( userState.fillStyle === 'transparentFill' ? 0.5 : 1.0 );
-                            var rgbaText = 'rgba( ' + colorRGB.r + ', ' + colorRGB.g + ', ' + colorRGB.b + ', ' + alpha + ' )';
-                            drawingObject.fill( rgbaText );
-                            break;
-
-                        default:
-                            break;
-                    }
-                    if ( ( userState.drawing_mode === "freeDraw" ) || ( userState.drawing_mode === "polygon" ) ) {
-                        // Optimize the number of vertices
-                        if ( simplifyJs ) {
-                            drawingObject.points( simplifyPoints( drawingObject.points(), 1 ) );
-                        }
-                    }
-
-                    drawAndPropagate = true;
-                    break;
-
-                default:
-                    break;
-            } 
-
-            if ( drawAndPropagate ) {
-                drawObject( drawingObject, true );
-
-                // Create a node in the model so it gets replicated on all clients
-                propagateNodeToModel( drawing_private );
-            }
-        }    
+            // Create a node in the model so it gets replicated on all clients
+            propagateNodeToModel( drawing_private );
+        }
     };
 
     // Simplify konva points
@@ -1255,7 +1241,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         return simplifiedPts;
     };
 
-    function drawUpdate( nodeID, eventData, nodeData, upEvent ) {
+    function drawUpdate( nodeID, eventData, nodeData ) {
 
         var node = viewDriver.state.nodes[ nodeID ];
 
@@ -1264,7 +1250,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             return;
         }
 
-        if ( drawing_private.drawingObject && !upEvent ) {
+        if ( drawing_private.drawingObject ) {
             
             var eventPoint = eventData.stageRelative;
             var userState = drawing_client;        
