@@ -398,7 +398,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         // Note: We only get this if the touchend occurs on the canvas
         node.kineticObj.on( "touchend", function( evt ) {
-            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
