@@ -14,7 +14,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         "drawingChildName": "",
         "initialDownPoint": [ -1, -1 ],
         "previousPoint": [ -1, -1 ],
-        "mouseDown": false,
         "imageDataURL": null
     };
     var drawing_client = {  
@@ -41,7 +40,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     var clearBeforeDraw = false;
     var lastRenderTime = 0;     // last time whole scene was rendered
     var renderTimeout = 1000;    // ms between renders
-    var mouseDown = false;
     var doRenderScene = false;
     var eventHandlers = {};
     var _draggingNode;
@@ -177,12 +175,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     function attachMouseEvents( node ) {
 
         node.kineticObj.on( "mousemove", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawMove( node.ID, eData.eventData[0], node, false ); 
+            drawMove( eData.eventData[ 0 ], node ); 
 
             var userState = drawing_client;
 
@@ -201,44 +199,28 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         } );
 
-        node.kineticObj.on( "mouseout", function( evt ) {
-            var eData = processEvent( evt, node, false );
-            if ( mouseDown || ( evt.evt.buttons ) ) {
-                swipe.swipedAcross( node );
-            }
-        } );
-
         node.kineticObj.on( "mouseenter", function( evt ) {
-            // Correct `mouseDown` if the button changed outside any node with an active "on mouseup"
-            mouseDown = !!( evt.evt.buttons & 1 );
-
-            var eData = processEvent( evt, node, false );
-
-            if ( mouseDown || ( evt.evt.buttons ) ) {
+            if ( evt.evt.buttons ) {
                 swipe.swipedAcross( node );
             }
         } );
 
+        // Note: We do not get this event if we are dragging something
         node.kineticObj.on( "mouseleave", function( evt ) {
-            var eData = processEvent( evt, node, false );
-
-            if ( mouseDown || ( evt.evt.buttons ) ) {
+            drawUp();
+            if ( evt.evt.buttons ) {
                 swipe.swipedAcross( node );
             }
-
         } );
 
         node.kineticObj.on( "mousedown", function( evt ) { 
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            // Track mouseDown so we know we're holding the button during a move/drag
-            mouseDown = true;
-
             // Process drawing (if actively drawing)
-            drawDown( node.ID, eData.eventData[0], node, false ); 
+            drawDown( eData.eventData[0], node ); 
             var userState = drawing_client;
             if ( !!userState[ "drawing_mode" ] ) {
                 switch ( userState[ "drawing_mode" ] ) {
@@ -257,30 +239,25 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
 
         } );
 
+        // Note: We only get this event if the mouse is let go on the canvas
         node.kineticObj.on( "mouseup", function( evt ) {
-            var eData = processEvent( evt, node, false );
-            mouseDown = false;
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawUp( node.ID, eData.eventData[0], node, true ); 
+            drawUp(); 
 
             activelyDrawing = false;
 
-            if ( _draggingNode ) {
-                handleDragEnd( node, evt );
-            } else {
-                fireViewEvent( "mouseup", {
-                    nodeID: node.ID,
-                    eventData: eData.eventData[ 0 ]
-                } );
-            }
-
+            fireViewEvent( "mouseup", {
+                nodeID: node.ID,
+                eventData: eData.eventData[ 0 ]
+            } );
         } );
 
         node.kineticObj.on( "click", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -293,7 +270,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "dblclick", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -313,7 +290,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             evt.cancelBubble = true;
 
             // Fire a view-side event
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
             fireViewEvent( "dragstart", {
                 nodeID: node.ID,
                 eventData: eData.eventData[ 0 ]
@@ -328,43 +305,38 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "dragmove", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             tapHold.moved( node, eData.eventData[0] );
             activelyDrawing = false;
 
         } );
 
-        // TODO: Test - Is the "dragend" event called in firefox or on tablets?
-        // It isn't on desktop Chrome.  Instead:
-        //  - When the user stops dragging by mouse, "mouseup" is called.
-        //  - When the user stops dragging by touch, "touchend" is called.
-        node.kineticObj.on( "dragend", evt => handleDragEnd( node, evt ) );
+        node.kineticObj.on( "dragend", evt => {
+            evt.cancelBubble = true;
 
-    }
+            var nodeID = node.ID;
+            if ( nodeID !== _draggingNode.ID ) {
+                return;
+            }
 
-    function handleDragEnd( node, evt ) {
+            // Calculate and set the final mapPosition at the end of the drag
+            var mapPosition = setNewUnitMapPositionOnDrag();
 
-        var nodeID = node.ID;
-        if ( nodeID !== _draggingNode.ID ) {
-            return;
-        }
+            // The node is no longer being dragged
+            _draggingNode = undefined;
+            activelyDrawing = false;
 
-        // Calculate and set the final mapPosition at the end of the drag
-        var mapPosition = setNewUnitMapPositionOnDrag();
+            // Fire a view-side event
+            var eData = processEvent( evt, node );
+            var eventParams = {
+                nodeID: nodeID,
+                eventData: eData.eventData[ 0 ],
+                mapPosition: mapPosition
+            };
+            fireViewEvent( "dragend", eventParams );
+        } );
 
-        // The node is no longer being dragged
-        _draggingNode = undefined;
-        activelyDrawing = false;
-
-        // Fire a view-side event
-        var eData = processEvent( evt, node, false );
-        var eventParams = {
-            nodeID: nodeID,
-            eventData: eData.eventData[ 0 ],
-            mapPosition: mapPosition
-        };
-        fireViewEvent( "dragend", eventParams );
     }
 
     // Attach handlers for touch events
@@ -373,12 +345,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         var TOUCH_EVENT = true;
 
         node.kineticObj.on( "touchstart", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Start tapHold
             tapHold.start( node, eData.eventData[0].touches[0] );
 
-            drawDown( node.ID, eData.eventData[0], node, false ); 
+            drawDown( eData.eventData[0], node ); 
 
             var userState = drawing_client;
             if ( !!userState[ "drawing_mode" ] ) {
@@ -402,12 +374,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "touchmove", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // If tapHold started, check that we haven't moved too much
             tapHold.moved( node, eData.eventData[0].touches[0] );
 
-            drawMove( node.ID, eData.eventData[0], node, false ); 
+            drawMove( eData.eventData[ 0 ], node ); 
 
             var userState = drawing_client;
             if ( userState[ "drawing_mode" ] ) {           
@@ -424,21 +396,17 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             swipe.swipedAcross( node );
         } );
 
+        // Note: We only get this if the touchend occurs on the canvas
         node.kineticObj.on( "touchend", function( evt ) {
-            var eData = processEvent( evt, node, false );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
 
-            drawUp( node.ID, eData.eventData[0], node, true );
-
-            if ( _draggingNode ) {
-                handleDragEnd( node, evt );
-            }
+            drawUp();
         } );
 
         node.kineticObj.on( "tap", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -452,7 +420,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         } );
 
         node.kineticObj.on( "dbltap", function( evt ) {
-            var eData = processEvent( evt, node, false );
+            var eData = processEvent( evt, node );
 
             // Cancel tapHold event (if any)
             tapHold.cancel();
@@ -587,73 +555,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                         attachMouseEvents( node );
                         attachTouchEvents( node );
                         node.hasMouseAndTouchEvents = true;
-                    }
-                    break;
-                    
-                case "enableEvents":
-                    var mouseDown = false;
-                    var touch = false;
-                    var mouseDownTime = null;
-                    var mouseDownId = undefined;
-                    var touchId = undefined;
-                    var timer = new Date();
-
-                    var protos = node.prototypes;
-                    if ( viewDriver.state.isKineticClass( protos, [ "kinetic", "stage", "vwf" ] ) ) {
-
-                        var stage = kineticObj;
-                        var TOUCH_EVENT = true;
-
-                        // these are the events for the global space, ie the stage
-                        // we did originally implement the mouse events this way
-                        // but then we added the events for the individual objects
-                        // which appeared to work better.  We were getting duplicate events
-                        // which is why I moved these events down inside a property
-                        // just in case they were needed for another application that
-                        // is set up differently
-
-                        if ( Boolean( propertyValue ) ) {
-
-                            // defined handlers
-                            stage.on( 'contentMousedown', function( evt ) {
-                                var node = evt.targetNode;
-                                mouseDownId = ( node !== undefined ) ? node.getId() : stage.getId();
-                                mouseDown = true;
-                                mouseDownTime = timer.getTime();
-                                var eData = processEvent( evt, viewDriver.state.nodes[ mouseDownId ], true );  // false might be more corret here
-
-                                viewDriver.kernel.dispatchEvent( mouseDownId, 'pointerDown', eData.eventData, eData.eventNodeData );
-                            });
-
-                            stage.on( 'contentMousemove', function( evt ) {
-                                var node = evt.targetNode;
-                                
-                                var eData = processEvent( evt, viewDriver.state.nodes[ mouseDownId ], true );  // false might be more corret here
-
-                                viewDriver.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerMove', eData.eventData, eData.eventNodeData ); 
-                            });
-
-                            stage.on( 'contentMouseup', function( evt ) {
-                                var node = evt.targetNode;
-                                mouseDown = false;
-
-                                var eData = processEvent( evt, viewDriver.state.nodes[ mouseDownId ], true );  // false might be more corret here
-                                if ( timer.getTime() - mouseDownTime < 700.0 ) {
-                                    viewDriver.kernel.dispatchEvent( mouseDownId, 'pointerClick', eData.eventData, eData.eventNodeData );
-                                }
-                                viewDriver.kernel.dispatchEvent( mouseDownId ? mouseDownId : stage.getId(), 'pointerUp', eData.eventData, eData.eventNodeData );
-
-                                mouseDownTime = null;
-                                mouseDownId = null;
-                            } );
-                            
-                        } else {
-
-                            // remove handlers
-                            stage.off( 'contentMousedown' );
-                            stage.off( 'contentMousemove' );
-                            stage.off( 'contentMouseup' );
-                        }
                     }
                     break;
                 case "position":
@@ -839,6 +740,12 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         },
 
         setDrawingState: function ( stateObj ) {
+
+            // Whenever the drawing state changes, ensure that the previous drawing is finished
+            // This is necessary for drawings that are be underway when the mode is changed
+            // Example: If the user draws off the side of the page and then changes the mode to Move
+            drawUp();
+            
             if ( stateObj !== undefined ) {
                 var userState = drawing_client;
                 for ( var property in stateObj ) {
@@ -1055,14 +962,8 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         }
     }
 
-    function processEvent( e, node, propagate ) {
+    function processEvent( e, node ) {
         var returnData = { eventData: undefined, eventNodeData: undefined };
-
-        if ( !propagate ) {
-            // For the "dragend" event, kinetic sometimes sends us an event object that doesn't
-            // have all the expected functions and properties attached
-            e.evt.stopPropagation && e.evt.stopPropagation();
-        }
 
         var isTouchEvent = !!e.evt.touches;
         var eventPosition = isTouchEvent ? e.evt.changedTouches[ 0 ] : e.evt;
@@ -1084,31 +985,6 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
                 returnData.eventData[ 0 ].touches[ i ] =
                     convertBrowserEventDataToVwf( e.evt.touches[ i ], stage );
             }    
-        }
-
-        if ( propagate ) {
-
-            var stageId = stage && stage.getId();
-            var pointerPickID = e.targetNode ? e.targetNode.getId() : stageId;
-
-            returnData.eventNodeData = { "": [ {
-                pickID: pointerPickID,
-            } ] };
-
-            if ( viewDriver && viewDriver.state.nodes[ pointerPickID ] ) {
-                var childID = pointerPickID;
-                var child = viewDriver.state.nodes[ childID ];
-                while ( child ) {
-
-                    returnData.eventNodeData[ childID ] = [ {
-                        pickID: pointerPickID,
-                    } ];
-
-                    // Line up the next "child" up the hierarchy
-                    childID = child.parentID;
-                    child = viewDriver.state.nodes[ childID ];
-                }
-            }
         }
 
         return returnData;
@@ -1137,11 +1013,11 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
     }
 
     // When the user begins a new part of a drawing,
-    // check to see if this is is for an existing drawing or the beginning of a new drawing.
+    // check to see if this is for an existing drawing or the beginning of a new drawing.
     // If it is the beginning of a new drawing, populate the drawing_private object with
     // a new konva object and a VWF descriptor that will be used to create a model object
     // when the user is done drawing
-    function drawDown( nodeID, eventData, nodeData, touch ) {
+    function drawDown( eventData, nodeData ) {
 
         var userState = drawing_client;
         var privateState = drawing_private;
@@ -1217,7 +1093,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             drawing_private.drawingParentID = parentID;
             drawing_private.drawingChildName = name;
 
-            drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
+            drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData );
 
         }
 
@@ -1228,9 +1104,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         }
     };
 
-    function drawMove( nodeID, eventData, nodeData, touch ) {
-
-        var node = viewDriver.state.nodes[ nodeID ];
+    function drawMove( eventData, nodeData ) {
 
         var userState = drawing_client;
         if ( ( userState.drawing_mode === 'none' ) || ( userState.drawing_mode === 'edit' ) ) {
@@ -1238,111 +1112,93 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         }
 
         if ( drawing_private.drawingObject ) {
-           drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData, false );
+           drawUpdate( drawing_private.drawingObject.ID, eventData, nodeData );
         }
     };
 
-    function drawUp( nodeID, eventData, nodeData, touch ) {
+    function drawUp() {
 
-        var node = viewDriver.state.nodes[ nodeID ];
-        var appID = viewDriver.kernel.application();
-        var drawAndPropagate = false;
-        var debugOn = false;
-
-        if ( debugOn ) {
-            console.info( ' ' );
-            console.info( ' === Nodes listening and visibility states ===' );
-            for(var key in viewDriver.state.nodes) {
-                var kNode = viewDriver.state.nodes[ key ];
-                var listening = ( kNode.kineticObj.isListening instanceof Function ? kNode.kineticObj.isListening() : undefined );
-                var visible = ( kNode.kineticObj.isVisible instanceof Function ? kNode.kineticObj.isVisible() : undefined );
-                console.info( '     Node: ' + kNode.kineticObj.id() + ', listening: ' + listening + ', visibility: ' + visible );
-            }
-            console.info( ' === End ===' );
-            console.info( ' ' );
+        var drawingObject = ( drawing_private || {} ).drawingObject;
+        if ( !drawingObject ) {
+            return;
         }
+  
+        fireViewEvent( "drawingObjectCreated", {
+            nodeID: drawingObject.id()
+        } );
 
-        if ( drawing_private !== undefined && 
-             drawing_private.drawingObject ) {
-            var drawingObject = drawing_private.drawingObject;
-            drawUpdate( drawingObject.ID, eventData, nodeData, true );
+        var drawAndPropagate = false;
+
+        var userState = drawing_client;
+        drawingObject.setZIndex( userState.zIndex );
+
+        switch( userState.drawing_mode ) {
             
-            fireViewEvent( "drawingObjectCreated", {
-                nodeID: drawingObject.id()
-            } );
+            case "text":
+                fireViewEvent( "textCreated", {
+                    nodeID: drawingObject.id()
+                } );
+                break;
 
-            var userState = drawing_client;
-            drawingObject.setZIndex( userState.zIndex );
-
-            switch( userState.drawing_mode ) {
-                
-                case "text":
-                    fireViewEvent( "textCreated", {
+            case "sprite":
+            case "image":
+                var stroke = drawingObject.stroke();
+                if ( stroke ) {
+                    fireViewEvent( "imageLocationSelected", {
                         nodeID: drawingObject.id()
                     } );
-                    break;
+                }
 
-                case "sprite":
-                case "image":
-                    var stroke = drawingObject.stroke();
-                    if ( stroke ) {
-                        fireViewEvent( "imageLocationSelected", {
-                            nodeID: drawingObject.id()
-                        } );
-                        drawAndPropagate = false;
+                break;
+
+            case "line":
+                drawAndPropagate = true;
+                break;
+
+            case "freeDraw":
+            case "polygon":
+            case "circle":
+            case "ellipse":
+            case "rect":
+            case "arrow":
+            case "thickArrow":
+                drawingObject.dash( userState.dashLineStyle );
+                switch ( userState.fillStyle ) {
+                    case 'noFill':
+                        drawingObject.fill( null );
+                        break;
+
+                    case 'solidFill':
+                    case 'transparentFill':
+                        var colorRGB = Konva.Util.getRGB( userState.drawing_color );
+                        var alpha = ( userState.fillStyle === 'transparentFill' ? 0.5 : 1.0 );
+                        var rgbaText = 'rgba( ' + colorRGB.r + ', ' + colorRGB.g + ', ' + colorRGB.b + ', ' + alpha + ' )';
+                        drawingObject.fill( rgbaText );
+                        break;
+
+                    default:
+                        break;
+                }
+                if ( ( userState.drawing_mode === "freeDraw" ) || ( userState.drawing_mode === "polygon" ) ) {
+                    // Optimize the number of vertices
+                    if ( simplifyJs ) {
+                        drawingObject.points( simplifyPoints( drawingObject.points(), 1 ) );
                     }
+                }
 
-                    break;
+                drawAndPropagate = true;
+                break;
 
-                case "line":
-                    drawAndPropagate = true;
-                    break;
+            default:
+                break;
+        } 
 
-                case "freeDraw":
-                case "polygon":
-                case "circle":
-                case "ellipse":
-                case "rect":
-                case "arrow":
-                case "thickArrow":
-                    drawingObject.dash( userState.dashLineStyle );
-                    switch ( userState.fillStyle ) {
-                        case 'noFill':
-                            drawingObject.fill( null );
-                            break;
+        if ( drawAndPropagate ) {
+            drawObject( drawingObject, true );
 
-                        case 'solidFill':
-                        case 'transparentFill':
-                            var colorRGB = Konva.Util.getRGB( userState.drawing_color );
-                            var alpha = ( userState.fillStyle === 'transparentFill' ? 0.5 : 1.0 );
-                            var rgbaText = 'rgba( ' + colorRGB.r + ', ' + colorRGB.g + ', ' + colorRGB.b + ', ' + alpha + ' )';
-                            drawingObject.fill( rgbaText );
-                            break;
-
-                        default:
-                            break;
-                    }
-                    if ( ( userState.drawing_mode === "freeDraw" ) || ( userState.drawing_mode === "polygon" ) ) {
-                        // Optimize the number of vertices
-                        if ( simplifyJs ) {
-                            drawingObject.points( simplifyPoints( drawingObject.points(), 1 ) );
-                        }
-                    }
-
-                    drawAndPropagate = true;
-                    break;
-
-                default:
-                    break;
-            } 
-
-            if ( drawAndPropagate ) {
-                drawObject( drawingObject, true );
-
-                // Create a node in the model so it gets replicated on all clients
-                propagateNodeToModel( drawing_private );
-            }
-        }    
+            // Create a node in the model so it gets replicated on all clients
+            propagateNodeToModel( drawing_private );
+        }
     };
 
     // Simplify konva points
@@ -1370,7 +1226,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
         return simplifiedPts;
     };
 
-    function drawUpdate( nodeID, eventData, nodeData, upEvent ) {
+    function drawUpdate( nodeID, eventData, nodeData ) {
 
         var node = viewDriver.state.nodes[ nodeID ];
 
@@ -1379,7 +1235,7 @@ define( [ "module", "vwf/view", "jquery", "vwf/utility", "vwf/utility/color", "v
             return;
         }
 
-        if ( drawing_private.drawingObject && !upEvent ) {
+        if ( drawing_private.drawingObject ) {
             
             var eventPoint = eventData.stageRelative;
             var userState = drawing_client;        
