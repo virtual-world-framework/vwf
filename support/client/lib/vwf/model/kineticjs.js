@@ -336,6 +336,10 @@ define( [ "module",
                             kineticObj.attrs.hitGraphFromCache = propertyValue;
                             break;
 
+                        case "minCachePixelSizeThreshold":
+                            kineticObj.attrs.minCachePixelSizeThreshold = propertyValue;
+                            break;
+
                         case "attributes":
                             // Special case for images, don't overwrite a valid image with a bogus object
                             var attrs = propertyValue;
@@ -1270,6 +1274,10 @@ define( [ "module",
                             value = kineticObj.attrs.hitGraphFromCache;
                             break;
 
+                        case "minCachePixelSizeThreshold":
+                            value = kineticObj.attrs.minCachePixelSizeThreshold;
+                            break;
+
                         case "attributes":
                             value = kineticObj.getAttrs();
                             break;
@@ -1657,8 +1665,11 @@ define( [ "module",
                     if ( kineticObj.getAttrs().hitGraphFromCache && kineticObj.isVisible() ) {
                         kineticObj.clearCache();
                         kineticObj.draw();
-                        kineticObj.cache();
-                        kineticObj.drawHitFromCache();
+                        if ( ( kineticObj.width() > kineticObj.getAttrs().minCachePixelSizeThreshold ) && 
+                             ( kineticObj.height() > kineticObj.getAttrs().minCachePixelSizeThreshold ) ) {
+                            kineticObj.cache();
+                            kineticObj.drawHitFromCache();
+                        }
                         return true;
                     }
                     return false;
