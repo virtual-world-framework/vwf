@@ -7892,11 +7892,13 @@ define( function(){
                   return retStr;
             },
             "descriptionFromSymbolId": function( symbolId ) {
-                  var symUtils      = armyc2.c2sd.renderer.utilities.SymbolUtilities;
-                  var unitDef       = armyc2.c2sd.renderer.utilities.UnitDefTable;
-                  var symDef        = armyc2.c2sd.renderer.utilities.SymbolDefTable;
-                  var basicSymbolId = symUtils.getBasicSymbolID( symbolId );
-                  var description   = null;
+                  const rendererUtilities = armyc2.c2sd.renderer.utilities;
+                  const unitDef = rendererUtilities.UnitDefTable;
+                  const symDef = rendererUtilities.SymbolDefTable;
+                  const basicSymbolId =
+                        rendererUtilities.SymbolUtilities.getBasicSymbolID( symbolId,
+                              rendererUtilities.RendererSettings.Symbology_2525C );
+                  let description = null;
 
                   // Either this is a unit or a symbol, check units, then symbols
                   if ( unitDef.hasUnitDef( basicSymbolId ) ) {
