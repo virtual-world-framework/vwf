@@ -1669,7 +1669,6 @@ define( [ "module",
                              ( kineticObj.height() > kineticObj.getAttrs().minCachePixelSizeThreshold ) ) {
                             kineticObj.cache();
                             kineticObj.drawHitFromCache();
-                            kineticObj.draw();
                         }
                         return true;
                     }
