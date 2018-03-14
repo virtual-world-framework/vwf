@@ -13,6 +13,7 @@ properties:
   isDraggable: false
   bounds: []
   hitGraphFromCache: true
+  minCachePixelSizeThreshold: 60
 
   image:
     set: |

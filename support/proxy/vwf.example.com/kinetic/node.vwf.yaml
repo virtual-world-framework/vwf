@@ -38,6 +38,7 @@ properties:
   hasMouseAndTouchEvents: false
   attributes:
   hitGraphFromCache: false
+  minCachePixelSizeThreshold: 0
 methods:
   toggleVisibility:
   toggleListening:
