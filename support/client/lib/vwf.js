@@ -374,7 +374,7 @@
                     active: false 
                 },
                 { library: "vwf/model/mil-sym", 
-                    linkedLibraries: [ "vwf/model/mil-sym/sm-bc.min" ], 
+                    linkedLibraries: [ "vwf/model/mil-sym/sm-c.min" ], 
                     active: false 
                 },
                 { library: "vwf/model/heightmap", active: false },
@@ -433,7 +433,7 @@
                 { library: "vwf/view/google-earth", active: false },
                 { library: "vwf/model/cesium/Cesium", active: false },
                 { library: "vwf/model/blockly/JS-Interpreter/interpreter.js", active: false },
-                { library: "vwf/model/mil-sym/sm-bc.min", active: false }, 
+                { library: "vwf/model/mil-sym/sm-c.min", active: false }, 
                 { library: "vwf/model/kinetic/konva.min", active: false },                
                 { library: "vwf/model/buzz/buzz.min", active: false }, 
                 { library: "vwf/model/jPlayer.2.7.1/jquery.jplayer.min", active: false },
