@@ -121,6 +121,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         getUpdatedUnitSymbolID: getUpdatedUnitSymbolID,
         getMissionGraphicDefinition: getMissionGraphicDefinition,
         renderMissionGraphic: renderMissionGraphic,
+        getDefaultSymbolFillColor: getDefaultSymbolFillColor,
 
         on: function( eventName, callback ) {
             eventHandlers[ eventName ] = callback;
@@ -234,7 +235,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         }
         
         // Define the list of valid modifiers
-        updatedUnit.validModifiers = [ "pixelSize", "iconcolor", "linecolor", "fillcolor" ];
+        updatedUnit.validModifiers = [ "pixelSize", "iconcolor", "lineColor", "fillColor" ];
         var aliases = Object.keys( cws.aliasModifiers );
         for ( var i = 0; i < aliases.length; i++ ) {
 
@@ -260,10 +261,10 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
                     case "pixelsize":
                         modifiers[ msa.PixelSize ] = modifierList[ prop ];
                         break;
-                    case "linecolor":
+                    case "linecolor": 
                         modifiers[ msa.LineColor ] = modifierList[ prop ];
                         break;
-                    case "fillcolor":
+                    case "fillcolor": 
                         modifiers[ msa.FillColor ] = modifierList[ prop ];
                         break;
                     case "iconcolor":
@@ -432,6 +433,20 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
 
     function rendererReady() {
         return _rendererReady;
+    }
+
+    function getDefaultSymbolFillColor( symbolID, affiliation ) {
+          var color = '000000';                  
+
+          /* TODO: handle different color sets depending upon symbol type */
+
+          var colors = { friendly: '80E0FF',
+                         hostile:  'FF8080',
+                         neutral:  'AAFFAA',
+                         unknown:  'FFFF80' };
+          color = colors[ affiliation ];
+
+          return color;
     }
 
 } );
