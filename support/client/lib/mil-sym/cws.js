@@ -7185,55 +7185,55 @@ define( function(){
                   },
                   "TACGRP.C2GM.GNL.ARS.GENARA": {
                         "symbolID": "G*GPGAG---****X",
-                        "tag": "General Area",
+                        "tag": "GENERAL AREA",
                         "symbolType": "MultiSegmentPolygon",
                         "validModifiers": [ "uniqueDesignation1", "hostile" ]
                   },
                   "TACGRP.C2GM.GNL.ARS.ABYARA": {
                         "symbolID": "G*GPGAA---****X",
-                        "tag": "Assembly Area",
+                        "tag": "ASSEMBLY AREA",
                         "symbolType": "MultiSegmentPolygon",
                         "validModifiers": [ "uniqueDesignation1", "hostile" ]
                   },
                   "TACGRP.C2GM.GNL.ARS.EMTARA": {
                         "symbolID": "G*GPGAE---****X",
-                        "tag": "Engagement Area",
+                        "tag": "ENGAGEMENT AREA",
                         "symbolType": "MultiSegmentPolygon",
                         "validModifiers": [ "uniqueDesignation1", "hostile" ]
                   },
                   "TACGRP.C2GM.GNL.ARS.FTFARA": {
                         "symbolID": "G*GPGAF---****X",
-                        "tag": "Fortified Area",
+                        "tag": "FORTIFIED AREA",
                         "symbolType": "MultiSegmentPolygon",
                         "validModifiers": [ "hostile" ]
                   },
                   "TACGRP.C2GM.GNL.ARS.DRPZ": {
                         "symbolID": "G*GPGAD---****X",
-                        "tag": "Drop Zone",
+                        "tag": "DROP ZONE",
                         "symbolType": "MultiSegmentPolygon",
                         "validModifiers": [ "uniqueDesignation1", "hostile" ]
                   },
                   "TACGRP.C2GM.GNL.ARS.EZ": {
                         "symbolID": "G*GPGAX---****X",
-                        "tag": "Extraction Zone",
+                        "tag": "EXTRACTION ZONE",
                         "symbolType": "MultiSegmentPolygon",
                         "validModifiers": [ "uniqueDesignation1", "hostile" ]
                   },
                   "TACGRP.C2GM.GNL.ARS.LZ": {
                         "symbolID": "G*GPGAL---****X",
-                        "tag": "Landing Zone",
+                        "tag": "LANDING ZONE",
                         "symbolType": "MultiSegmentPolygon",
                         "validModifiers": [ "uniqueDesignation1", "hostile" ]
                   },
                   "TACGRP.C2GM.GNL.ARS.PZ": {
                         "symbolID": "G*GPGAP---****X",
-                        "tag": "Pickup Zone",
+                        "tag": "PICKUP ZONE",
                         "symbolType": "MultiSegmentPolygon",
                         "validModifiers": [ "uniqueDesignation1", "hostile" ]
                   },
                   "TACGRP.C2GM.GNL.ARS.AIRFZ": {
                         "symbolID": "G*GPGAZ---****X",
-                        "tag": "Airfield Zone",
+                        "tag": "AIRFIELD ZONE",
                         "symbolType": "MultiSegmentPolygon",
                         "validModifiers": [ "hostile" ]
                   }
