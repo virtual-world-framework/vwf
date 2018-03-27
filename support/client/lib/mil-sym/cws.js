@@ -4814,15 +4814,18 @@ define( function(){
                   },
                   "TACGRP.C2GM.AVN.PNT.ACP": {
                       "symbolID": "GUGPAPP---****X",
-                      "tag": "TACGRP"
+                      "tag": "TACGRP",
+                      "specialModifiers": [ "altitudeDepth", "routeName", "routeSequenceNum" ]
                   },
                   "TACGRP.C2GM.AVN.PNT.COMMCP": {
                       "symbolID": "GUGPAPC---****X",
-                      "tag": "TACGRP"
+                      "tag": "TACGRP",
+                      "specialModifiers": [ "altitudeDepth", "routeName", "routeSequenceNum" ]
                   },
                   "TACGRP.C2GM.AVN.PNT.PUP": {
                       "symbolID": "GUGPAPU---****X",
-                      "tag": "TACGRP"
+                      "tag": "TACGRP",
+                      "specialModifiers": [ "altitudeDepth", "routeName", "routeSequenceNum" ]
                   },
                   "TACGRP.C2GM.AVN.PNT.DAPP": {
                       "symbolID": "GUGPAPD---****X",

@@ -196,7 +196,8 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
                                 "description": description,
                                 "tag": unit.tag,
                                 "symbolID": unit.symbolID,
-                                "image": image    
+                                "image": image,
+                                "specialModifiers": unit.specialModifiers
                             };
 
                             fireViewEvent( "insertableUnitAdded", {
@@ -243,6 +244,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
             var modObj = cws.aliasModifiers[ alias ];
             
             var modifier = renderer.utilities.ModifiersUnits[ modObj.modifier ];
+            // Query mil-sym to see if this symbol has this modifier
             if ( symUtil.hasModifier( updatedUnit.symbolID, 
                                       modifier,
                                       rs.getSymbologyStandard() ) ) {
@@ -250,6 +252,11 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
                 updatedUnit.validModifiers.push( alias );
             }
 
+        }
+        // If there is a special modifier defined for this symbol, 
+        // add it as a valid modifier
+        for ( var j = 0; j < ( updatedUnit.specialModifiers || [] ).length; j++ ) {
+            updatedUnit.validModifiers.push( updatedUnit.specialModifiers[ j ] );
         }
         
         // Gather the modifiers that will be passed into the render function
