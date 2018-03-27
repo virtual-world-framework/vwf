@@ -4811,6 +4811,278 @@ define( function(){
                   "TACGRP.C2GM.OFF.PNT.PNTD": {
                       "symbolID": "GUGPOPP---****X",
                       "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.AVN.PNT.ACP": {
+                      "symbolID": "GUGPAPP---****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.AVN.PNT.COMMCP": {
+                      "symbolID": "GUGPAPC---****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.AVN.PNT.PUP": {
+                      "symbolID": "GUGPAPU---****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.AVN.PNT.DAPP": {
+                      "symbolID": "GUGPAPD---****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.UH2.DTM": {
+                      "symbolID": "GUGPGPUUD-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.UH2.BCON": {
+                      "symbolID": "GUGPGPUUB-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.UH2.LCON": {
+                      "symbolID": "GUGPGPUUL-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.UH2.DTM": {
+                      "symbolID": "GUGPGPUUD-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.UH2.SNK": {
+                      "symbolID": "GUGPGPUUS-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY": {
+                      "symbolID": "GUGPGPUY--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.PTNCTR": {
+                      "symbolID": "GUGPGPUYP-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.DIFAR": {
+                      "symbolID": "GUGPGPUYD-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.LOFAR": {
+                      "symbolID": "GUGPGPUYL-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.CASS": {
+                      "symbolID": "GUGPGPUYC-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.DICASS": {
+                      "symbolID": "GUGPGPUYS-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.BT": {
+                      "symbolID": "GUGPGPUYB-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.ANM": {
+                      "symbolID": "GUGPGPUYA-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.VLAD": {
+                      "symbolID": "GUGPGPUYV-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.ATAC": {
+                      "symbolID": "GUGPGPUYT-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.RO": {
+                      "symbolID": "GUGPGPUYR-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.KGP": {
+                      "symbolID": "GUGPGPUYK-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SNBY.EXP": {
+                      "symbolID": "GUGPGPUYX-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SRH": {
+                      "symbolID": "GUGPGPUS--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SRH.ARA": {
+                      "symbolID": "GUGPGPUSA-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SRH.DIPPSN": {
+                      "symbolID": "GUGPGPUSD-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.USW.SRH.CTR": {
+                      "symbolID": "GUGPGPUSC-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL": {
+                      "symbolID": "GUGPGPA---****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.CAP": {
+                      "symbolID": "GUGPGPAP--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.ABNEW": {
+                      "symbolID": "GUGPGPAW--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.TAK": {
+                      "symbolID": "GUGPGPAK--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.ASBWF": {
+                      "symbolID": "GUGPGPAA--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.ASBWR": {
+                      "symbolID": "GUGPGPAH--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.SUWF": {
+                      "symbolID": "GUGPGPAB--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.SUWR": {
+                      "symbolID": "GUGPGPAC--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.MIWF": {
+                      "symbolID": "GUGPGPAD--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.MIWR": {
+                      "symbolID": "GUGPGPAE--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.SKEIP": {
+                      "symbolID": "GUGPGPAS--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.TCN": {
+                      "symbolID": "GUGPGPAT--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.TMC": {
+                      "symbolID": "GUGPGPAO--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.RSC": {
+                      "symbolID": "GUGPGPAR--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.RPH": {
+                      "symbolID": "GUGPGPAL--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.UA": {
+                      "symbolID": "GUGPGPAF--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.VTUA": {
+                      "symbolID": "GUGPGPAG--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.ORB": {
+                      "symbolID": "GUGPGPAI--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.ORBF8": {
+                      "symbolID": "GUGPGPAJ--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.ORBRT": {
+                      "symbolID": "GUGPGPAM--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.ACTL.ORBRD": {
+                      "symbolID": "GUGPGPAN--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL": {
+                      "symbolID": "GUGPGPC---****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.USV": {
+                      "symbolID": "GUGPGPCU--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.USV.RMV": {
+                      "symbolID": "GUGPGPCUR-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.USV.ASW": {
+                      "symbolID": "GUGPGPCUA-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.USV.SUW": {
+                      "symbolID": "GUGPGPCUS-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.USV.MIW": {
+                      "symbolID": "GUGPGPCUM-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.ASW": {
+                      "symbolID": "GUGPGPCA--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.SUW": {
+                      "symbolID": "GUGPGPCS--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.MIW": {
+                      "symbolID": "GUGPGPCM--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.PKT": {
+                      "symbolID": "GUGPGPCP--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.RDV": {
+                      "symbolID": "GUGPGPCR--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.RSC": {
+                      "symbolID": "GUGPGPCC--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.REP": {
+                      "symbolID": "GUGPGPCE--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.SCTL.NCBTT": {
+                      "symbolID": "GUGPGPCN--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.UCTL": {
+                      "symbolID": "GUGPGPB---****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.UCTL.UUV": {
+                      "symbolID": "GUGPGPBU--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.UCTL.UUV.ASW": {
+                      "symbolID": "GUGPGPBUA-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.UCTL.UUV.SUW": {
+                      "symbolID": "GUGPGPBUS-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.UCTL.UUV.MIW": {
+                      "symbolID": "GUGPGPBUM-****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.UCTL.SBSTN": {
+                      "symbolID": "GUGPGPBS--****X",
+                      "tag": "TACGRP"
+                  },
+                  "TACGRP.C2GM.GNL.PNT.UCTL.SBSTN.ASW": {
+                      "symbolID": "GUGPGPBSA-****X",
+                      "tag": "TACGRP"
                   }
             },
               
@@ -6910,6 +7182,60 @@ define( function(){
                         "numberPoints": 3,
                         "width": 20,
                         "validModifiers": [ "uniqueDesignation1" ]
+                  },
+                  "TACGRP.C2GM.GNL.ARS.GENARA": {
+                        "symbolID": "G*GPGAG---****X",
+                        "tag": "GENERAL AREA",
+                        "symbolType": "MultiSegmentPolygon",
+                        "validModifiers": [ "uniqueDesignation1", "hostile" ]
+                  },
+                  "TACGRP.C2GM.GNL.ARS.ABYARA": {
+                        "symbolID": "G*GPGAA---****X",
+                        "tag": "ASSEMBLY AREA",
+                        "symbolType": "MultiSegmentPolygon",
+                        "validModifiers": [ "uniqueDesignation1", "hostile" ]
+                  },
+                  "TACGRP.C2GM.GNL.ARS.EMTARA": {
+                        "symbolID": "G*GPGAE---****X",
+                        "tag": "ENGAGEMENT AREA",
+                        "symbolType": "MultiSegmentPolygon",
+                        "validModifiers": [ "uniqueDesignation1", "hostile" ]
+                  },
+                  "TACGRP.C2GM.GNL.ARS.FTFARA": {
+                        "symbolID": "G*GPGAF---****X",
+                        "tag": "FORTIFIED AREA",
+                        "symbolType": "MultiSegmentPolygon",
+                        "validModifiers": [ "hostile" ]
+                  },
+                  "TACGRP.C2GM.GNL.ARS.DRPZ": {
+                        "symbolID": "G*GPGAD---****X",
+                        "tag": "DROP ZONE",
+                        "symbolType": "MultiSegmentPolygon",
+                        "validModifiers": [ "uniqueDesignation1", "hostile" ]
+                  },
+                  "TACGRP.C2GM.GNL.ARS.EZ": {
+                        "symbolID": "G*GPGAX---****X",
+                        "tag": "EXTRACTION ZONE",
+                        "symbolType": "MultiSegmentPolygon",
+                        "validModifiers": [ "uniqueDesignation1", "hostile" ]
+                  },
+                  "TACGRP.C2GM.GNL.ARS.LZ": {
+                        "symbolID": "G*GPGAL---****X",
+                        "tag": "LANDING ZONE",
+                        "symbolType": "MultiSegmentPolygon",
+                        "validModifiers": [ "uniqueDesignation1", "hostile" ]
+                  },
+                  "TACGRP.C2GM.GNL.ARS.PZ": {
+                        "symbolID": "G*GPGAP---****X",
+                        "tag": "PICKUP ZONE",
+                        "symbolType": "MultiSegmentPolygon",
+                        "validModifiers": [ "uniqueDesignation1", "hostile" ]
+                  },
+                  "TACGRP.C2GM.GNL.ARS.AIRFZ": {
+                        "symbolID": "G*GPGAZ---****X",
+                        "tag": "AIRFIELD ZONE",
+                        "symbolType": "MultiSegmentPolygon",
+                        "validModifiers": [ "hostile" ]
                   }
             },
 
