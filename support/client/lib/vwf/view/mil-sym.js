@@ -122,6 +122,7 @@ define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, vie
         getMissionGraphicDefinition: getMissionGraphicDefinition,
         renderMissionGraphic: renderMissionGraphic,
         getDefaultSymbolFillColor: getDefaultSymbolFillColor,
+        getUnitImage: getUnitImage,
 
         on: function( eventName, callback ) {
             eventHandlers[ eventName ] = callback;
