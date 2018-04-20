@@ -34,9 +34,9 @@ export default class Layout extends React.Component {
             </Navbar.Header>
             <Navbar.Collapse id="navbar">
               <Nav>
-                { this.state.user.instructor && <NavItem eventKey="scenarios">Scenarios</NavItem> }
-                { this.state.user.instructor && <NavItem eventKey="sessions">Sessions</NavItem> }
-                { this.state.user.instructor && <NavItem eventKey="review">Review</NavItem> }
+                { this.state.user.instructor && <NavItem eventKey="scenarios">Scenario Templates</NavItem> }
+                { this.state.user.instructor && <NavItem eventKey="sessions">Active Sessions</NavItem> }
+                { this.state.user.instructor && <NavItem eventKey="review">Previous Sessions</NavItem> }
               </Nav>
               <Navbar.Form pullRight componentClass="form" method="post" action="/logout">
                 <Button type="submit" bsStyle="link"> Logout </Button>
