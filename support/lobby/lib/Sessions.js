@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import ReactTable from "react-table";
 
 export default function Sessions( props ) {
-  return <ReactTable data={ sessionRecords( props.records, props.instructor ) } columns={ columns } filterable className="-striped"
+  return <ReactTable data={ sessionRecords( props.records ) } columns={ columns } filterable className="-striped"
     defaultFilterMethod={ ( filter, row, column ) => {
       return row[ filter.id ] !== undefined ?
         String( row[ filter.id ] ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true
@@ -11,8 +11,8 @@ export default function Sessions( props ) {
   />;
 }
 
-function sessionRecords( records, instructor ) {
-  return records.filter( record => record.session && ( record.session.instance || instructor ) );
+function sessionRecords( records ) {
+  return records.filter( record => ( record.session || {} ).instance );
 }
 
 const columns = [ {
