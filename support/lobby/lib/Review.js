@@ -41,6 +41,8 @@ const columns = [ {
     function Cell( props ) { return <DateCell { ...props }/> },
   filterable:
     false,
+  width:
+    190,
 }, {
   Header:
     "",
