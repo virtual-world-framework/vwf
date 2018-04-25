@@ -157,13 +157,7 @@ function sessionScenarioSessions( scenarios ) {
 /// it has been saved and once the last student leaves.
 
 function sessionCompleted( session ) {
-
-  var documentCounts = session.completion.document || { instructors: 0, students: 0 };
-  var instanceCounts = session.completion.instance || { instructors: 0, students: 0 };
-
-  return documentCounts.students > 0 && instanceCounts.students === 0 &&
-    +new Date() - session.document.timestamp > 60*60*1000;
-
+  return !session.completion.instance;
 }
 
 /// `Array#sort` comparison function to sort sessions by company, then platoon, then unit.

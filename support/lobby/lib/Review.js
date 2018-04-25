@@ -49,7 +49,20 @@ const columns = [ {
   accessor:
     "session",
   Cell:
-    function Cell( props ) { return <ActionCell { ...props }/> },
+    function Cell( props ) { return <ReviewCell { ...props }/> },
+  sortable:
+    false,
+  filterable:
+    false,
+}, {
+  Header:
+    "",
+  id:
+    "action",
+  accessor:
+    "session",
+  Cell:
+    function Cell( props ) { return <ResumeCell { ...props }/> },
   sortable:
     false,
   filterable:
@@ -62,9 +75,16 @@ class DateCell extends React.Component {
   }
 }
 
-class ActionCell extends React.Component {
+class ReviewCell extends React.Component {
+  render() {
+    const url = ( this.props.value.instance || this.props.value.document.uri ) + "?isReview=true";
+    return <Button href={ url } target="_blank" bsSize="small" bsStyle="link"> Review </Button>;
+  }
+}
+
+class ResumeCell extends React.Component {
   render() {
     return <Button href={ this.props.value.instance || this.props.value.document.uri } target="_blank"
-      bsSize="small" bsStyle="link"> Review </Button>;
+      bsSize="small" bsStyle="link"> Resume </Button>;
   }
 }

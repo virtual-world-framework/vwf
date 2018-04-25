@@ -12,7 +12,10 @@ export default function Sessions( props ) {
 }
 
 function sessionRecords( records ) {
-  return records.filter( record => ( record.session || {} ).instance );
+  return records.filter( record => {
+    const session = ( record.session || {} );
+    return session.instance && !session.completion.instance.isReview;
+  } );
 }
 
 const columns = [ {
