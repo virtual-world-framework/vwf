@@ -80,13 +80,29 @@ class DateCell extends React.Component {
 class ReviewCell extends React.Component {
   render() {
     const url = ( this.props.value.instance || this.props.value.document.uri ) + "?isReview=true";
-    return <Button href={ url } target="_blank" bsSize="small" bsStyle="link"> Review </Button>;
+    return (
+      <div style={{ width: "100%", textAlign: "center"}}>
+        <Button href={ url } target="_blank" bsSize="small" bsStyle="link">
+          Review
+        </Button>
+      </div>
+    );
   }
 }
 
 class ResumeCell extends React.Component {
   render() {
-    return <Button href={ this.props.value.instance || this.props.value.document.uri } target="_blank"
-      bsSize="small" bsStyle="link"> Resume </Button>;
+    return (
+      <div style={{ width: "100%", textAlign: "center"}}>
+        <Button
+          href={ this.props.value.instance || this.props.value.document.uri }
+          target="_blank"
+          bsSize="small"
+          bsStyle="link"
+        >
+          Resume
+        </Button>
+      </div>
+    );
   }
 }
