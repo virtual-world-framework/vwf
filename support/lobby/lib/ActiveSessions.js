@@ -2,16 +2,21 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import ReactTable from "react-table";
 
-export default function Sessions( props ) {
-  return <ReactTable data={ sessionRecords( props.records ) } columns={ columns } filterable className="-striped"
-    defaultFilterMethod={ ( filter, row, column ) => {
-      return row[ filter.id ] !== undefined ?
-        String( row[ filter.id ] ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true
-    } }
-  />;
+export default function ActiveSessions( props ) {
+  return (
+    <ReactTable
+      data={ activeSessionRecords( props.records ) }
+      columns={ columns }
+      filterable
+      className="-striped"
+      defaultFilterMethod={ ( filter, row, column ) => {
+        return row[ filter.id ] !== undefined ?
+          String( row[ filter.id ] ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true
+      } } />
+  );
 }
 
-function sessionRecords( records ) {
+function activeSessionRecords( records ) {
   return records.filter( record => {
     const session = ( record.session || {} );
     return session.instance && !session.completion.instance.isReview;

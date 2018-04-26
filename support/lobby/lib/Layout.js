@@ -4,8 +4,8 @@ import _ from "lodash";
 
 import "./LobbyTR";
 import Scenarios from "./Scenarios";
-import Sessions from "./Sessions";
-import Review from "./Review";
+import ActiveSessions from "./ActiveSessions";
+import PreviousSessions from "./PreviousSessions";
 import { get } from "./utils";
 
 export default class Layout extends React.Component {
@@ -35,8 +35,8 @@ export default class Layout extends React.Component {
             <Navbar.Collapse id="navbar">
               <Nav>
                 { this.state.user.instructor && <NavItem eventKey="scenarios">Scenario Templates</NavItem> }
-                { this.state.user.instructor && <NavItem eventKey="sessions">Active Sessions</NavItem> }
-                { this.state.user.instructor && <NavItem eventKey="review">Previous Sessions</NavItem> }
+                { this.state.user.instructor && <NavItem eventKey="activeSessions">Active Sessions</NavItem> }
+                { this.state.user.instructor && <NavItem eventKey="previousSessions">Previous Sessions</NavItem> }
               </Nav>
               <Navbar.Form pullRight componentClass="form" method="post" action="/logout">
                 <Button type="submit" bsStyle="link"> Logout </Button>
@@ -54,9 +54,9 @@ export default class Layout extends React.Component {
             { this.state.user.instructor &&
               <TabPane eventKey="scenarios"><Scenarios records={ this.scenarioRecords() } onServerChange={ this.handleManifest }/></TabPane> }
             { true &&
-              <TabPane eventKey="sessions"><Sessions records={ this.sessionRecords() } /></TabPane> }
+              <TabPane eventKey="activeSessions"><ActiveSessions records={ this.activeSessionRecords() } /></TabPane> }
             { this.state.user.instructor &&
-              <TabPane eventKey="review"><Review records={ this.reviewRecords() }/></TabPane> }
+              <TabPane eventKey="previousSessions"><PreviousSessions records={ this.previousSessionRecords() }/></TabPane> }
           </TabContent>
         </div>
       </TabContainer>;
@@ -99,11 +99,11 @@ export default class Layout extends React.Component {
     return scenarioScenarioSessions( this.state.manifest[ "/ITDG/index.vwf" ] || {} );
   }
 
-  sessionRecords() {
+  activeSessionRecords() {
     return scenarioScenarioSessions( this.state.manifest[ "/ITDG/index.vwf" ] || {} );
   }
 
-  reviewRecords() {
+  previousSessionRecords() {
     return sessionScenarioSessions( this.state.manifest[ "/ITDG/index.vwf" ] || {} );
   }
 

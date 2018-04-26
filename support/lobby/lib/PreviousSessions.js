@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import ReactTable from "react-table";
 import dateFormat from "dateformat";
 
-export default function Reviews( props ) {
+export default function PreviousSessions( props ) {
   return <ReactTable data={ props.records } columns={ columns } filterable className="-striped"
     defaultFilterMethod={ ( filter, row, column ) => {
       return row[ filter.id ] !== undefined ?
