@@ -18,7 +18,7 @@ export default function Scenarios( props ) {
         <Application onServerChange={ props.onServerChange }/>
       </tbody>
     </Table>
-    <ReactTable data={ scenarioRecords( props.records ) } columns={ columns } filterable className="-striped"
+    <ReactTable data={ props.records } columns={ columns } filterable className="-striped"
       getTrProps={ () => ( {
         fields:
           [ "company", "platoon", "unit" ],
@@ -42,10 +42,6 @@ export default function Scenarios( props ) {
       } }
     />
   </React.Fragment>;
-}
-
-function scenarioRecords( records ) {
-  return records.filter( record => !record.session );
 }
 
 class Application extends React.Component {

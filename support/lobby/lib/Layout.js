@@ -96,68 +96,36 @@ export default class Layout extends React.Component {
   }
 
   scenarioRecords() {
-    return scenarioScenarioSessions( this.state.manifest[ "/ITDG/index.vwf" ] || {} );
+    const scenarios = this.state.manifest[ "/ITDG/index.vwf" ] || {};
+    const sortedScenariosArray =
+      _.map( _.sortBy( _.toPairs( scenarios ), function( [ name, scenario ] ) {
+        return name.toLowerCase();
+      } ), 1 );
+    return sortedScenariosArray.filter( function( scenario ) {
+      return scenario.scenario.document;
+    } );
   }
 
   activeSessionRecords() {
-    return scenarioScenarioSessions( this.state.manifest[ "/ITDG/index.vwf" ] || {} );
+    return this.scenarioRecords().reduce( function( allActiveSessions, scenario ) {
+      var activeSessions = ( scenario.sessions || [] ).filter( function( session ) {
+        return session.instance && !session.completion.instance.isReview;;
+      } ).sort( sessionComparator );
+      return allActiveSessions.concat( activeSessions );
+    }, [] );
   }
 
   previousSessionRecords() {
-    return sessionScenarioSessions( this.state.manifest[ "/ITDG/index.vwf" ] || {} );
+    return this.scenarioRecords().reduce( function( allPreviousSessions, scenario ) {
+      var previousSessions = ( scenario.sessions || [] ).filter( function( session ) {
+        return !session.instance;
+      } );
+      return allPreviousSessions.concat( previousSessions );
+    }, [] ).sort( function( a, b ) {
+      return b.document.timestamp - a.document.timestamp;
+    } );
   }
 
-}
-
-/// Generate the scenarios/sessions list for the Scenarios tab.
-/// 
-/// Left join each scenario with its sessions. Select only launchable scenarios (with documents) and
-/// joinable sessions (not completed).
-
-function scenarioScenarioSessions( scenarios ) {
-
-  return _.map( _.sortBy( _.toPairs( scenarios ), function( [ name, scenario ] ) {
-    return name.toLowerCase();
-  } ), 1 ).filter( function( scenario ) {
-    return scenario.scenario.document;
-  } ).reduce( function( scenario_sessions, scenario ) {
-    var sessions = ( scenario.sessions || [] ).filter( function( session ) {
-      return ! sessionCompleted( session );
-    } ).sort( sessionComparator );
-    return scenario_sessions.concat( sessions.map( function( session ) {
-      return { scenario: scenario.scenario, session: session };
-    } ) ).concat( { scenario: scenario.scenario, session: undefined } );
-  }, [] );
-
-}
-
-/// Generate the scenarios/sessions list for the Sessions tab.
-/// 
-/// Join each scenario with its sessions. Select only completed sessions.
-
-function sessionScenarioSessions( scenarios ) {
-
-  return _.map( _.sortBy( _.toPairs( scenarios ), function( [ name, scenario ] ) {
-    return name.toLowerCase();
-  } ), 1 ).reduce( function( scenario_sessions, scenario ) {
-    var sessions = ( scenario.sessions || [] ).filter( function( session ) {
-      return sessionCompleted( session );
-    } );
-    return scenario_sessions.concat( sessions.map( function( session ) {
-      return { scenario: scenario.scenario, session: session };
-    } ) );
-  }, [] ).sort( function( a, b ) {
-    return b.session.document.timestamp - a.session.document.timestamp;
-  } );
-
-}
-
-/// Determine if a session is completed. Completed sessions are those saved in a document containing
-/// student content and having no student instances. A session will become completed an hour after
-/// it has been saved and once the last student leaves.
-
-function sessionCompleted( session ) {
-  return !session.completion.instance;
 }
 
 /// `Array#sort` comparison function to sort sessions by company, then platoon, then unit.

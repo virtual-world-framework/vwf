@@ -16,35 +16,35 @@ const columns = [ {
   Header:
     "Scenario",
   accessor:
-    "session.state.scenarioTitle",
+    "state.scenarioTitle",
   Cell:
     props => <TextCell { ...props }/>,
 }, {
   Header:
     "Company",
   accessor:
-    "session.state.classroom.company",
+    "state.classroom.company",
   Cell:
     props => <TextCell { ...props }/>,
 }, {
   Header:
     "Platoon",
   accessor:
-    "session.state.classroom.platoon",
+    "state.classroom.platoon",
   Cell:
     props => <TextCell { ...props }/>,
 }, {
   Header:
     "Unit",
   accessor:
-    "session.state.classroom.unit",
+    "state.classroom.unit",
   Cell:
     props => <TextCell { ...props }/>,
 }, {
   Header:
     "Date",
   accessor:
-    "session.document.timestamp",
+    "document.timestamp",
   Cell:
     props => <DateCell { ...props }/>,
   filterable:
@@ -57,7 +57,7 @@ const columns = [ {
   id:
     "action",
   accessor:
-    "session",
+    session => session,
   Cell:
     props => <ReviewCell { ...props }/>,
   sortable:
@@ -70,7 +70,7 @@ const columns = [ {
   id:
     "action",
   accessor:
-    "session",
+    session => session,
   Cell:
     props => <ResumeCell { ...props }/>,
   sortable:

@@ -5,7 +5,7 @@ import ReactTable from "react-table";
 export default function ActiveSessions( props ) {
   return (
     <ReactTable
-      data={ activeSessionRecords( props.records ) }
+      data={ props.records }
       columns={ columns }
       filterable
       className="-striped"
@@ -16,20 +16,13 @@ export default function ActiveSessions( props ) {
   );
 }
 
-function activeSessionRecords( records ) {
-  return records.filter( record => {
-    const session = ( record.session || {} );
-    return session.instance && !session.completion.instance.isReview;
-  } );
-}
-
 const columns = [ {
   Header:
     "Scenario",
   id:
     "session.state.scenarioTitle",
   accessor:
-    "session",
+    session => session,
   Cell:
     function Cell( props ) { return <ScenarioCell { ...props }/> },
   filterMethod: ( filter, row, column ) => {
@@ -40,24 +33,24 @@ const columns = [ {
   Header:
     "Company",
   accessor:
-    "session.state.classroom.company",
+    "state.classroom.company",
 }, {
   Header:
     "Platoon",
   accessor:
-    "session.state.classroom.platoon",
+    "state.classroom.platoon",
 }, {
   Header:
     "Unit",
   accessor:
-    "session.state.classroom.unit",
+    "state.classroom.unit",
 }, {
   Header:
     "",
   id:
     "blank",
   accessor:
-    d => "",
+    session => "",
   sortable:
     false,
   filterable:
@@ -68,7 +61,7 @@ const columns = [ {
   id:
     "action",
   accessor:
-    "session",
+    session => session,
   Cell:
     function Cell( props ) { return <ActionCell { ...props }/> },
   sortable:
