@@ -18,7 +18,7 @@ export default function Scenarios( props ) {
         <Application onServerChange={ props.onServerChange }/>
       </tbody>
     </Table>
-    <ReactTable data={ props.records } columns={ columns } filterable className="-striped"
+    <ReactTable data={ props.records } columns={ columns } filterable={ !!props.records.length } className="-striped"
       getTrProps={ () => ( {
         fields:
           [ "company", "platoon", "unit" ],
