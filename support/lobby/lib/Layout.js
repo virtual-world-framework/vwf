@@ -54,7 +54,13 @@ export default class Layout extends React.Component {
             { this.state.user.instructor &&
               <TabPane eventKey="scenarios"><Scenarios records={ this.scenarioRecords() } onServerChange={ this.handleManifest }/></TabPane> }
             { true &&
-              <TabPane eventKey="activeSessions"><ActiveSessions records={ this.activeSessionRecords() } /></TabPane> }
+              <TabPane
+                eventKey="activeSessions"
+                style={ this.state.user.instructor ? {} : { display: "block" } }
+              >
+                <ActiveSessions records={ this.activeSessionRecords() } />
+              </TabPane>
+            }
             { this.state.user.instructor &&
               <TabPane eventKey="previousSessions"><PreviousSessions records={ this.previousSessionRecords() }/></TabPane> }
           </TabContent>
