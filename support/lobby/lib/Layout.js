@@ -18,7 +18,10 @@ export default class Layout extends React.Component {
 
   render() {
     if ( this.state.version && this.state.user && this.state.manifest ) {
-      return <TabContainer defaultActiveKey={ this.state.user.instructor ? "scenarios" : "sessions" } generateChildId={ ( key, type ) => type + "-" + key }>
+      return <TabContainer
+        defaultActiveKey={ this.state.user.instructor ? "scenarios" : "activeSessions" }
+        generateChildId={ ( key, type ) => type + "-" + key }
+      >
         <div>
           <Navbar fluid collapseOnSelect>
             <Navbar.Header>
@@ -54,10 +57,7 @@ export default class Layout extends React.Component {
             { this.state.user.instructor &&
               <TabPane eventKey="scenarios"><Scenarios records={ this.scenarioRecords() } onServerChange={ this.handleManifest }/></TabPane> }
             { true &&
-              <TabPane
-                eventKey="activeSessions"
-                style={ this.state.user.instructor ? {} : { display: "block" } }
-              >
+              <TabPane eventKey="activeSessions">
                 <ActiveSessions records={ this.activeSessionRecords() } />
               </TabPane>
             }
