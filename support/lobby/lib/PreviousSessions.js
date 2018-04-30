@@ -18,35 +18,35 @@ const columns = [ {
   accessor:
     "state.scenarioTitle",
   Cell:
-    props => <TextCell { ...props }/>,
+    function Cell( props ) { return <TextCell { ...props }/> },
 }, {
   Header:
     "Company",
   accessor:
     "state.classroom.company",
   Cell:
-    props => <TextCell { ...props }/>,
+    function Cell( props ) { return <TextCell { ...props }/> },
 }, {
   Header:
     "Platoon",
   accessor:
     "state.classroom.platoon",
   Cell:
-    props => <TextCell { ...props }/>,
+    function Cell( props ) { return <TextCell { ...props }/> },
 }, {
   Header:
     "Unit",
   accessor:
     "state.classroom.unit",
   Cell:
-    props => <TextCell { ...props }/>,
+    function Cell( props ) { return <TextCell { ...props }/> },
 }, {
   Header:
     "Date",
   accessor:
     "document.timestamp",
   Cell:
-    props => <DateCell { ...props }/>,
+    function Cell( props ) { return <DateCell { ...props }/> },
   filterable:
     false,
   width:
@@ -59,7 +59,7 @@ const columns = [ {
   accessor:
     session => session,
   Cell:
-    props => <ReviewCell { ...props }/>,
+    function Cell( props ) { return <ReviewCell { ...props }/> },
   sortable:
     false,
   filterable:
@@ -72,7 +72,7 @@ const columns = [ {
   accessor:
     session => session,
   Cell:
-    props => <ResumeCell { ...props }/>,
+    function Cell( props ) { return <ResumeCell { ...props }/> },
   sortable:
     false,
   filterable:
