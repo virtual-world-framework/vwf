@@ -88,6 +88,7 @@ class Application extends React.Component {
         this.props.onServerChange && this.props.onServerChange() } ).
       catch( error => {
         console.log( error.message ) } );
+    this.setState( { title: "" } );
     event.preventDefault();
   }
 
@@ -120,6 +121,13 @@ const columns = [ {
     "Scenario",
   accessor:
     "scenario.state.scenarioTitle",
+  Filter: ( {filter, onChange} ) => (
+    <input
+      type="text"
+      placeholder="Search"
+      value={ filter ? filter.value : "" }
+      onChange={ event => onChange( event.target.value ) } />
+  ),
 }, {
   Header:
     "Company",

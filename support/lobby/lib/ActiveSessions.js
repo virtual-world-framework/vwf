@@ -29,6 +29,13 @@ const columns = [ {
     return row[ filter.id ] !== undefined ?
       String( row[ filter.id ].state.scenarioTitle ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true
     },
+  Filter: ( {filter, onChange} ) => (
+    <input
+      type="text"
+      placeholder="Search"
+      value={ filter ? filter.value : "" }
+      onChange={ event => onChange( event.target.value ) } />
+  ),
 }, {
   Header:
     "Company",
