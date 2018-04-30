@@ -115,7 +115,7 @@ export default class Layout extends React.Component {
   activeSessionRecords() {
     return this.scenarioRecords().reduce( function( allActiveSessions, scenario ) {
       var activeSessions = ( scenario.sessions || [] ).filter( function( session ) {
-        return session.instance && !session.completion.instance.isReview;;
+        return session.instance && !session.completion.instance.isReview;
       } ).sort( sessionComparator );
       return allActiveSessions.concat( activeSessions );
     }, [] );
