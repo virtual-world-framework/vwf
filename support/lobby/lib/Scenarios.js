@@ -59,8 +59,14 @@ class Application extends React.Component {
   render() {
     return <tr>
       <td className="col-sm-8">
-        <FormControl name="title" type="text" placeholder={ Application.TITLE_PLACEHOLDER } bsSize="small"
-          value={ this.state.title } onChange={ this.handleTitle }/>
+        <FormControl
+          name="title"
+          type="text"
+          placeholder={ Application.TITLE_PLACEHOLDER }
+          bsSize="small"
+          value={ this.state.title }
+          onChange={ this.handleTitle }
+          onKeyPress={ this.handleKeyPress } />
       </td><td className="col-sm-2">
         &nbsp;
       </td><td className="col-sm-1">
@@ -90,6 +96,12 @@ class Application extends React.Component {
         console.log( error.message ) } );
     this.setState( { title: "" } );
     event.preventDefault();
+  }
+
+  handleKeyPress = event => {
+    if ( event.key === "Enter" ) {
+      this.handleSubmit( event );
+    }
   }
 
   handleImport = event => {
