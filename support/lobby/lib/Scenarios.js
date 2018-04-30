@@ -88,6 +88,7 @@ class Application extends React.Component {
         this.props.onServerChange && this.props.onServerChange() } ).
       catch( error => {
         console.log( error.message ) } );
+    this.setState( { title: "" } );
     event.preventDefault();
   }
 
