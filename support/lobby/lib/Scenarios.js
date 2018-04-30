@@ -120,6 +120,13 @@ const columns = [ {
     "Scenario",
   accessor:
     "scenario.state.scenarioTitle",
+  Filter: ( {filter, onChange} ) => (
+    <input
+      type="text"
+      placeholder="Search"
+      value={ filter ? filter.value : "" }
+      onChange={ event => onChange( event.target.value ) } />
+  ),
 }, {
   Header:
     "Company",
