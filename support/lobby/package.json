@@ -1,0 +1,59 @@
+{
+  "name": "vwf-lobby",
+  "version": "0.0.0",
+  "description": "Virtual World Framework lobby",
+  "directories": {
+    "doc": "doc",
+    "lib": "lib",
+    "test": "test"
+  },
+  "files": [
+    "index.html",
+    "index.js",
+    "index.css",
+    "doc/",
+    "lib/"
+  ],
+  "scripts": {
+    "prepublish": "npm run build && npm run test",
+    "build": "npm run build:webpack && npm run build:jsdoc",
+    "build:webpack": "npm run build:webpack:prod && npm run build:webpack:dev",
+    "build:webpack:prod": "webpack --config .webpack.prod.js",
+    "build:webpack:dev": "webpack --config .webpack.dev.js",
+    "build:jsdoc": "jsdoc --configure .jsdoc.json",
+    "test": "npm run test:eslint && npm run test:mocha",
+    "test:eslint": "eslint .",
+    "test:mocha": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/interactive-tactical-decision-games/vwf.git"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "prop-types": "^15.6.0",
+    "react": "^16.2.0",
+    "react-bootstrap": "^0.31.5",
+    "react-dom": "^16.2.0",
+    "react-table": "^6.7.6"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.1",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "chai": "^4.1.2",
+    "css-loader": "^0.28.7",
+    "eslint": "^4.12.1",
+    "eslint-plugin-react": "^7.5.1",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "jsdoc": "^3.5.5",
+    "mocha": "^4.0.1",
+    "style-loader": "^0.19.0",
+    "webpack": "^3.10.0",
+    "webpack-merge": "^4.1.1"
+  }
+}

@@ -13,13 +13,13 @@ table {
     table-layout: fixed;
 }
 
-thead, th { 
+thead, th {
 	display: table-header-group;
 }
-tbody { 
+tbody {
 	display: table-row-group;
 	height: 100%;
-	overflow-y: auto; 
+	overflow-y: auto;
 }
 
 tr { display: table-row; }
