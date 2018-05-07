@@ -1,0 +1,5 @@
+"title","index","type","setLayerOwned","defaultValue","options"
+"Student Orders","0","Long Text","undefined","","null"
+"Instructor Rating","1","Range","undefined","","[0,10,1,{'0':'N/A','1':'Unsat','2':'Unsat','3':'Marginal','4':'Marginal','5':'Acceptable','6':'Acceptable','7':'Capable','8':'Capable','9':'Outstanding','10':'Outstanding'}]"
+"Instructor Grade","2","Text","undefined","","null"
+"Instructor Observations","3","Long Text","undefined","","null"
