@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Button } from "react-bootstrap";
 import ReactTable from "react-table";
 
@@ -15,6 +16,11 @@ export default function ActiveSessions( props ) {
       } } />
   );
 }
+
+ActiveSessions.propTypes = {
+  records:
+    PropTypes.arrayOf( PropTypes.object ).isRequired,
+};
 
 const columns = [ {
   Header:
@@ -80,6 +86,12 @@ const columns = [ {
 } ];
 
 class ScenarioCell extends React.Component {
+
+  static propTypes = {
+    value:
+      PropTypes.object.isRequired,
+  };
+
   render() {
     return <React.Fragment>
       { this.props.value.state.scenarioTitle }
@@ -87,13 +99,21 @@ class ScenarioCell extends React.Component {
       <span className="small">{ instructorStudentsLabel( this.props.value ) }</span>
     </React.Fragment>;
   }
+
 }
 
 class ActionCell extends React.Component {
+
+  static propTypes = {
+    value:
+      PropTypes.object.isRequired,
+  };
+
   render() {
     return <Button href={ this.props.value.instance || this.props.value.document.uri } target="_blank"
       bsSize="small" bsStyle="link"> { this.props.value.instance ? "Join" : "Start" } </Button>;
   }
+
 }
 
 // Generate the Instructor/Students annotation for a session.

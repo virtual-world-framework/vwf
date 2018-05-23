@@ -1,9 +1,15 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Modal, Form, FormGroup, FormControl, Checkbox, ControlLabel, Button, Image, Row, Fade, Alert } from "react-bootstrap";
 
 import { get } from "./utils";
 
 export default class Login extends React.Component {
+
+  static propTypes = {
+    flash:
+      PropTypes.arrayOf( PropTypes.object ).isRequired,
+  };
 
   static defaultProps = {
     flash: []

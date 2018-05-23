@@ -1,7 +1,7 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Table, FormControl, Button, ControlLabel } from "react-bootstrap";
 import ReactTable from "react-table";
-import PropTypes from "prop-types";
 
 import { post } from "./utils";
 
@@ -48,9 +48,21 @@ export default function Scenarios( props ) {
   </React.Fragment>;
 }
 
+Scenarios.propTypes = {
+  records:
+    PropTypes.arrayOf( PropTypes.object ).isRequired,
+  onServerChange:
+    PropTypes.func,
+};
+
 class Application extends React.Component {
 
   static TITLE_PLACEHOLDER = "New Scenario Title";
+
+  static propTypes = {
+    onServerChange:
+      PropTypes.func,
+  };
 
   state = {
     title: ""
@@ -235,6 +247,11 @@ class UnitCell extends LobbyCell {
 
 class ActionCell extends LobbyCell {
 
+  static propTypes = {
+    value:
+      PropTypes.object.isRequired,
+  };
+
   render() {
     return <React.Fragment>
       <Button href={ this.props.value.instance || this.props.value.document.uri } target="_blank"
@@ -265,8 +282,15 @@ class ActionCell extends LobbyCell {
 }
 
 class ExportCell extends React.Component {
+
+  static propTypes = {
+    value:
+      PropTypes.object.isRequired,
+  };
+
   render() {
     return <Button href={ "/export-scenarios?scenarioName=" + this.props.value.state.scenarioName }
       bsSize="small"> Export </Button>;
   }
+
 }
