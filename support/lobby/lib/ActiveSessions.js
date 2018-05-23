@@ -25,17 +25,19 @@ const columns = [ {
     session => session,
   Cell:
     function Cell( props ) { return <ScenarioCell { ...props }/> },
-  filterMethod: ( filter, row, column ) => {
-    return row[ filter.id ] !== undefined ?
-      String( row[ filter.id ].state.scenarioTitle ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true
+  filterMethod:
+    function( filter, row, column ) {
+      return row[ filter.id ] !== undefined ?
+        String( row[ filter.id ].state.scenarioTitle ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true;
     },
-  Filter: ( {filter, onChange} ) => (
-    <input
-      type="text"
-      placeholder="Search"
-      value={ filter ? filter.value : "" }
-      onChange={ event => onChange( event.target.value ) } />
-  ),
+  Filter:
+    function Filter( { filter, onChange } ) {
+      return <input
+        type="text"
+        placeholder="Search"
+        value={ filter ? filter.value : "" }
+        onChange={ event => onChange( event.target.value ) } />;
+    },
 }, {
   Header:
     "Company",

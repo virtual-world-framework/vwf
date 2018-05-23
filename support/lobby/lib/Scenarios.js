@@ -133,13 +133,14 @@ const columns = [ {
     "Scenario",
   accessor:
     "scenario.state.scenarioTitle",
-  Filter: ( {filter, onChange} ) => (
-    <input
-      type="text"
-      placeholder="Search"
-      value={ filter ? filter.value : "" }
-      onChange={ event => onChange( event.target.value ) } />
-  ),
+  Filter:
+    function Filter( { filter, onChange } ) {
+      return <input
+        type="text"
+        placeholder="Search"
+        value={ filter ? filter.value : "" }
+        onChange={ event => onChange( event.target.value ) } />;
+    },
 }, {
   Header:
     "Company",
