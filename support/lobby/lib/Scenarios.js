@@ -105,7 +105,7 @@ class Application extends React.Component {
       then( result => {
         this.props.onServerChange && this.props.onServerChange() } ).
       catch( error => {
-        console.log( error.message ) } );
+        console.log( error.message ) } );  /* eslint no-console: "off" */
     this.setState( { title: "" } );
     event.preventDefault();
   }
@@ -275,7 +275,7 @@ class ActionCell extends LobbyCell {
         newTab.location.href = result.document.uri + "/";
         this.props.tdProps.rest.onServerChange && this.props.tdProps.rest.onServerChange() } ).
       catch( error => {
-        console.log( error.message ) } );
+        console.log( error.message ) } );  /* eslint no-console: "off" */
     event.preventDefault();
   }
 

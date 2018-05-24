@@ -82,7 +82,7 @@ export default class Layout extends React.Component {
       then( version =>
         this.setState( { version: version || {} } ) ).
       catch( error =>
-        console.log( error.message ) );
+        console.log( error.message ) );  /* eslint no-console: "off" */
   }
 
   handleUser = () => {
@@ -90,7 +90,7 @@ export default class Layout extends React.Component {
       then( user =>
         this.setState( { user: user || {} } ) ).
       catch( error =>
-        console.log( error.message ) );
+        console.log( error.message ) );  /* eslint no-console: "off" */
   }
 
   handleManifest = () => {
@@ -98,7 +98,7 @@ export default class Layout extends React.Component {
       then( manifest =>
         this.setState( { manifest: manifest || {} } ) ).
       catch( error =>
-        console.log( error.message ) );
+        console.log( error.message ) );  /* eslint no-console: "off" */
   }
 
   scenarioRecords() {

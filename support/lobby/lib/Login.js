@@ -110,7 +110,7 @@ export default class Login extends React.Component {
       then( version =>
         this.setState( { version: version || {} } ) ).
       catch( error =>
-        console.log( error.message ) );
+        console.log( error.message ) );  /* eslint no-console: "off" */
   }
 
 }
