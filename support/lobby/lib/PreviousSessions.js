@@ -26,13 +26,7 @@ const columns = [ {
   Cell:
     function Cell( props ) { return <TextCell { ...props }/> },
   Filter:
-    function Filter( { filter, onChange } ) {
-      return <input
-        type="text"
-        placeholder="Search"
-        value={ filter ? filter.value : "" }
-        onChange={ event => onChange( event.target.value ) } />;
-    },
+    function Filter( props ) { return <ScenarioFilter { ...props }/> },
 }, {
   Header:
     "Company",
@@ -96,6 +90,25 @@ const columns = [ {
 const buttonContainerStyle = {
   width: "100%",
   textAlign: "center"
+}
+
+class ScenarioFilter extends React.Component {
+
+  static propTypes = {
+    filter:
+      PropTypes.object,
+    onChange:
+      PropTypes.func.isRequired,
+  };
+
+  render() {
+    return <input
+      type="text"
+      placeholder="Search"
+      value={ this.props.filter ? this.props.filter.value : "" }
+      onChange={ event => this.props.onChange( event.target.value ) } />;
+  }
+
 }
 
 class TextCell extends React.Component {

@@ -146,13 +146,7 @@ const columns = [ {
   accessor:
     "scenario.state.scenarioTitle",
   Filter:
-    function Filter( { filter, onChange } ) {
-      return <input
-        type="text"
-        placeholder="Search"
-        value={ filter ? filter.value : "" }
-        onChange={ event => onChange( event.target.value ) } />;
-    },
+    function Filter( props ) { return <ScenarioFilter { ...props }/> },
 }, {
   Header:
     "Company",
@@ -180,7 +174,7 @@ const columns = [ {
   accessor:
     "scenario.state.scenarioName",
   Cell:
-    function Cell( props ) { return <FormControl name="name" type="hidden" value={ props.value }/> },
+    function Cell( props ) { return <HiddenCell { ...props }/> },
   sortable:
     false,
   filterable:
@@ -212,6 +206,25 @@ const columns = [ {
   filterable:
     false,
 } ];
+
+class ScenarioFilter extends React.Component {
+
+  static propTypes = {
+    filter:
+      PropTypes.object,
+    onChange:
+      PropTypes.func.isRequired,
+  };
+
+  render() {
+    return <input
+      type="text"
+      placeholder="Search"
+      value={ this.props.filter ? this.props.filter.value : "" }
+      onChange={ event => this.props.onChange( event.target.value ) } />;
+  }
+
+}
 
 class LobbyCell  extends React.Component {
   static contextTypes = {
@@ -277,6 +290,19 @@ class ActionCell extends LobbyCell {
       catch( error => {
         console.log( error.message ) } );  /* eslint no-console: "off" */
     event.preventDefault();
+  }
+
+}
+
+class HiddenCell extends React.Component {
+
+  static propTypes = {
+    value:
+      PropTypes.string.isRequired,
+  };
+
+  render() {
+    return <FormControl name="name" type="hidden" value={ this.props.value }/>;
   }
 
 }

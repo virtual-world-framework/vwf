@@ -37,13 +37,7 @@ const columns = [ {
         String( row[ filter.id ].state.scenarioTitle ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true;
     },
   Filter:
-    function Filter( { filter, onChange } ) {
-      return <input
-        type="text"
-        placeholder="Search"
-        value={ filter ? filter.value : "" }
-        onChange={ event => onChange( event.target.value ) } />;
-    },
+    function Filter( props ) { return <ScenarioFilter { ...props }/> },
 }, {
   Header:
     "Company",
@@ -84,6 +78,25 @@ const columns = [ {
   filterable:
     false,
 } ];
+
+class ScenarioFilter extends React.Component {
+
+  static propTypes = {
+    filter:
+      PropTypes.object,
+    onChange:
+      PropTypes.func.isRequired,
+  };
+
+  render() {
+    return <input
+      type="text"
+      placeholder="Search"
+      value={ this.props.filter ? this.props.filter.value : "" }
+      onChange={ event => this.props.onChange( event.target.value ) } />;
+  }
+
+}
 
 class ScenarioCell extends React.Component {
 
