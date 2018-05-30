@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Button } from "react-bootstrap";
 import ReactTable from "react-table";
 
@@ -16,6 +17,11 @@ export default function ActiveSessions( props ) {
   );
 }
 
+ActiveSessions.propTypes = {
+  records:
+    PropTypes.arrayOf( PropTypes.object ).isRequired,
+};
+
 const columns = [ {
   Header:
     "Scenario",
@@ -25,17 +31,13 @@ const columns = [ {
     session => session,
   Cell:
     function Cell( props ) { return <ScenarioCell { ...props }/> },
-  filterMethod: ( filter, row, column ) => {
-    return row[ filter.id ] !== undefined ?
-      String( row[ filter.id ].state.scenarioTitle ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true
+  filterMethod:
+    function( filter, row, column ) {
+      return row[ filter.id ] !== undefined ?
+        String( row[ filter.id ].state.scenarioTitle ).toLowerCase().indexOf( filter.value.toLowerCase() ) >= 0 : true;
     },
-  Filter: ( {filter, onChange} ) => (
-    <input
-      type="text"
-      placeholder="Search"
-      value={ filter ? filter.value : "" }
-      onChange={ event => onChange( event.target.value ) } />
-  ),
+  Filter:
+    function Filter( props ) { return <ScenarioFilter { ...props }/> },
 }, {
   Header:
     "Company",
@@ -77,7 +79,32 @@ const columns = [ {
     false,
 } ];
 
+class ScenarioFilter extends React.Component {
+
+  static propTypes = {
+    filter:
+      PropTypes.object,
+    onChange:
+      PropTypes.func.isRequired,
+  };
+
+  render() {
+    return <input
+      type="text"
+      placeholder="Search"
+      value={ this.props.filter ? this.props.filter.value : "" }
+      onChange={ event => this.props.onChange( event.target.value ) } />;
+  }
+
+}
+
 class ScenarioCell extends React.Component {
+
+  static propTypes = {
+    value:
+      PropTypes.object.isRequired,
+  };
+
   render() {
     return <React.Fragment>
       { this.props.value.state.scenarioTitle }
@@ -85,13 +112,21 @@ class ScenarioCell extends React.Component {
       <span className="small">{ instructorStudentsLabel( this.props.value ) }</span>
     </React.Fragment>;
   }
+
 }
 
 class ActionCell extends React.Component {
+
+  static propTypes = {
+    value:
+      PropTypes.object.isRequired,
+  };
+
   render() {
     return <Button href={ this.props.value.instance || this.props.value.document.uri } target="_blank"
       bsSize="small" bsStyle="link"> { this.props.value.instance ? "Join" : "Start" } </Button>;
   }
+
 }
 
 // Generate the Instructor/Students annotation for a session.

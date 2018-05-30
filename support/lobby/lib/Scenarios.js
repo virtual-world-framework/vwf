@@ -1,7 +1,7 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Table, FormControl, Button, ControlLabel } from "react-bootstrap";
 import ReactTable from "react-table";
-import PropTypes from "prop-types";
 
 import { post } from "./utils";
 
@@ -48,9 +48,21 @@ export default function Scenarios( props ) {
   </React.Fragment>;
 }
 
+Scenarios.propTypes = {
+  records:
+    PropTypes.arrayOf( PropTypes.object ).isRequired,
+  onServerChange:
+    PropTypes.func,
+};
+
 class Application extends React.Component {
 
   static TITLE_PLACEHOLDER = "New Scenario Title";
+
+  static propTypes = {
+    onServerChange:
+      PropTypes.func,
+  };
 
   state = {
     title: ""
@@ -93,7 +105,7 @@ class Application extends React.Component {
       then( result => {
         this.props.onServerChange && this.props.onServerChange() } ).
       catch( error => {
-        console.log( error.message ) } );
+        console.log( error.message ) } );  /* eslint no-console: "off" */
     this.setState( { title: "" } );
     event.preventDefault();
   }
@@ -133,13 +145,8 @@ const columns = [ {
     "Scenario",
   accessor:
     "scenario.state.scenarioTitle",
-  Filter: ( {filter, onChange} ) => (
-    <input
-      type="text"
-      placeholder="Search"
-      value={ filter ? filter.value : "" }
-      onChange={ event => onChange( event.target.value ) } />
-  ),
+  Filter:
+    function Filter( props ) { return <ScenarioFilter { ...props }/> },
 }, {
   Header:
     "Company",
@@ -167,7 +174,7 @@ const columns = [ {
   accessor:
     "scenario.state.scenarioName",
   Cell:
-    function Cell( props ) { return <FormControl name="name" type="hidden" value={ props.value }/> },
+    function Cell( props ) { return <HiddenCell { ...props }/> },
   sortable:
     false,
   filterable:
@@ -199,6 +206,25 @@ const columns = [ {
   filterable:
     false,
 } ];
+
+class ScenarioFilter extends React.Component {
+
+  static propTypes = {
+    filter:
+      PropTypes.object,
+    onChange:
+      PropTypes.func.isRequired,
+  };
+
+  render() {
+    return <input
+      type="text"
+      placeholder="Search"
+      value={ this.props.filter ? this.props.filter.value : "" }
+      onChange={ event => this.props.onChange( event.target.value ) } />;
+  }
+
+}
 
 class LobbyCell  extends React.Component {
   static contextTypes = {
@@ -234,6 +260,11 @@ class UnitCell extends LobbyCell {
 
 class ActionCell extends LobbyCell {
 
+  static propTypes = {
+    value:
+      PropTypes.object.isRequired,
+  };
+
   render() {
     return <React.Fragment>
       <Button href={ this.props.value.instance || this.props.value.document.uri } target="_blank"
@@ -257,15 +288,35 @@ class ActionCell extends LobbyCell {
         newTab.location.href = result.document.uri + "/";
         this.props.tdProps.rest.onServerChange && this.props.tdProps.rest.onServerChange() } ).
       catch( error => {
-        console.log( error.message ) } );
+        console.log( error.message ) } );  /* eslint no-console: "off" */
     event.preventDefault();
   }
 
 }
 
+class HiddenCell extends React.Component {
+
+  static propTypes = {
+    value:
+      PropTypes.string.isRequired,
+  };
+
+  render() {
+    return <FormControl name="name" type="hidden" value={ this.props.value }/>;
+  }
+
+}
+
 class ExportCell extends React.Component {
+
+  static propTypes = {
+    value:
+      PropTypes.object.isRequired,
+  };
+
   render() {
     return <Button href={ "/export-scenarios?scenarioName=" + this.props.value.state.scenarioName }
       bsSize="small"> Export </Button>;
   }
+
 }
