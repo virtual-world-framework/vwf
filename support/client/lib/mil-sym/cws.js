@@ -7670,6 +7670,12 @@ define( function(){
                         "symbolType": "SimpleLine",
                         "validModifiers": [ "uniqueDesignation1", "uniqueDesignation2" ]
                   },
+                  "TACGRP.FSUPP.ARS.ARATGT.CIRTGT": {
+                        "symbolID": "G*FPATC---****X",
+                        "tag": "AREA TARGET CIRCULAR",
+                        "symbolType": "SimpleCircle",
+                        "validModifiers": [ "uniqueDesignation1" ]
+                  },
                   "TACGRP.FSUPP.ARS.ARATGT.RTGTGT": {
                         "symbolID": "G*FPAT----****X",
                         "tag": "RECTANGULAR TARGET",
