@@ -84,6 +84,8 @@ export default class Login extends React.Component {
       return null;
     }
   }
+}
+}
 
   componentDidMount() {
     this.handleVersion();
