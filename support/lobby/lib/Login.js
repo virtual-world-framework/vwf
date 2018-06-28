@@ -71,7 +71,14 @@ export default class Login extends React.Component {
             </Row>
             <Row>
               <FormGroup className="col-sm-12" bsSize="small">
-                { this.props.flash.map( ( message, index ) => <Alert key={ index } bsStyle={ bsStyle( message.type ) }>{ message.message }</Alert> ) }
+                { 
+                  this.props.flash.map( 
+                        ( message, index ) =>
+                            <Alert key={ index } bsStyle={ bsStyle( message.type ) }> 
+                            { message.message }
+                            </Alert> 
+                    ) 
+                }
               </FormGroup>
             </Row>
           </Modal.Body>
@@ -80,11 +87,12 @@ export default class Login extends React.Component {
           </Modal.Footer>
         </Form>
       </Modal.Dialog>;
-    } else {
+    
+  
+    }else {
       return null;
     }
-  }
-}
+
 }
 
   componentDidMount() {
