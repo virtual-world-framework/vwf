@@ -5,6 +5,19 @@ import { Modal, Form, FormGroup, FormControl, Checkbox, ControlLabel, Button, Im
 import { get } from "./utils";
 
 export default class Login extends React.Component {
+    
+  constructor(props) {
+    super(props);
+    this.state = {
+        lastName: "",
+        firstName: "",
+        middleInitial: "",
+        instructor: false,
+        version: null,
+        instructorBtn:false,
+        studentBtn: false,
+    };
+  }
 
   static propTypes = {
     flash:
@@ -15,13 +28,38 @@ export default class Login extends React.Component {
     flash: []
   };
 
-  state = {
-    lastName: "",
-    firstName: "",
-    middleInitial: "",
-    instructor: false,
-    version: null,
-  };
+
+
+ instructorClick(){
+     console.log("clicked");
+     this.setInstructor(true);
+ }
+
+
+setInstructor(isInstructor){
+    if(isInstructor){
+        this.setState({studentBtn: false});
+        this.setState({instructorBtn: true});
+    }
+    
+}
+
+
+ studentClick(){
+     console.log("clicked");
+     this.setStudent(true);
+ }
+
+
+setStudent(isStudent){
+    if(isStudent){
+        this.setState({instructorBtn: false});
+        this.setState({studentBtn: true});
+    }
+    
+}
+
+
 
   render() {
     if ( this.state.version ) {
@@ -38,7 +76,24 @@ export default class Login extends React.Component {
             </Row>
           </Modal.Header>
           <Modal.Body>
-            <Row>
+                    
+            <Row>  {/*Row 1*/}
+                    
+                    {/*Instructor*/}
+  
+           <Button bsStyle="primary"  onClick = {this.instructorClick.bind(this)} className="instructor"> Instructor </Button>
+    
+                    {/*Student*/}
+     
+             <Button bsStyle="primary" onClick = {this.studentClick.bind(this)} className= "student"> Student </Button>
+    
+             </Row>
+        
+            <Row> {/*Row 2*/}
+            
+        <Fade in = {this.state.studentBtn }>
+        <Fade in = {this.state.instructorBtn}>
+                <div>
               <FormGroup controlId="last-name" className="col-sm-5">
                 <ControlLabel> Last name </ControlLabel>
                 <FormControl name="last_name" type="text" value={ this.state.lastName } onChange={ this.handleLastName }/>
@@ -51,8 +106,25 @@ export default class Login extends React.Component {
                 <ControlLabel> M. I. </ControlLabel>
                 <FormControl name="middle_initial" type="text" value={ this.state.middleInitial } onChange={ this.handleMiddleInitial }/>
               </FormGroup>
-            </Row>
-            <Row>
+                </div>
+        </Fade>
+        </Fade>
+        
+        </Row>
+        
+        
+            <Row> {/*Row 3*/}
+        
+        
+         <Fade in={ this.state.instructorBtn }>
+            <FormGroup controlId="password" className="col-sm-7">
+            <style scoped>{ ".form-group { transition: height 0.1s }" }</style>
+            <ControlLabel> Password </ControlLabel>
+            <FormControl name="password" type="password"/>
+            </FormGroup>
+         </Fade> 
+     
+        
               <FormGroup className="col-sm-5">
                 <ControlLabel>
                   &nbsp;
@@ -61,14 +133,11 @@ export default class Login extends React.Component {
                   Instructor
                 </Checkbox>
               </FormGroup>
-              <Fade in={ this.state.instructor }>
-                <FormGroup controlId="password" className="col-sm-7">
-                  <style scoped>{ ".form-group { transition: height 0.1s }" }</style>
-                  <ControlLabel> Password </ControlLabel>
-                  <FormControl name="password" type="password"/>
-                </FormGroup>
-              </Fade>
+        
+
+
             </Row>
+        
             <Row>
               <FormGroup className="col-sm-12" bsSize="small">
                 { 
@@ -84,6 +153,7 @@ export default class Login extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button type="submit" bsStyle="primary"> Login </Button>
+         
           </Modal.Footer>
         </Form>
       </Modal.Dialog>;
