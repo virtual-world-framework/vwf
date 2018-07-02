@@ -40,6 +40,7 @@ setInstructor(isInstructor){
     if(isInstructor){
         this.setState({studentBtn: false});
         this.setState({instructorBtn: true});
+        this.setState( { instructor: true} );
     }
     
 }
@@ -54,9 +55,9 @@ setInstructor(isInstructor){
 setStudent(isStudent){
     if(isStudent){
         this.setState({instructorBtn: false});
+        this.setState({instructor: false});
         this.setState({studentBtn: true});
     }
-    
 }
 
 
@@ -81,7 +82,7 @@ setStudent(isStudent){
                     
                     {/*Instructor*/}
   
-           <Button bsStyle="primary"  onClick = {this.instructorClick.bind(this)} className="instructor"> Instructor </Button>
+           <Button bsStyle="primary"  onClick = {this.instructorClick.bind(this)} className="instructor" > Instructor </Button>
     
                     {/*Student*/}
      
@@ -120,20 +121,21 @@ setStudent(isStudent){
             <FormGroup controlId="password" className="col-sm-7">
             <style scoped>{ ".form-group { transition: height 0.1s }" }</style>
             <ControlLabel> Password </ControlLabel>
-            <FormControl name="password" type="password"/>
+            <FormControl name="password" type="password" onChange= {this.handlePasswordCorrect}/>
             </FormGroup>
          </Fade> 
      
         
+        <Fade in = {false}>
               <FormGroup className="col-sm-5">
                 <ControlLabel>
                   &nbsp;
                 </ControlLabel>
-                <Checkbox id="instructor" name="instructor" value="instructor" checked={ this.state.instructor } onChange={ this.handleInstructor }>
+                <Checkbox id="instructor" name="instructor" value="instructor" checked={ this.state.instructorBtn } onChange={ this.handleInstructor }>
                   Instructor
                 </Checkbox>
               </FormGroup>
-        
+        </Fade>
 
 
             </Row>
@@ -152,8 +154,11 @@ setStudent(isStudent){
             </Row>
           </Modal.Body>
           <Modal.Footer>
-            <Button type="submit" bsStyle="primary"> Login </Button>
-         
+         <Fade in = {this.state.studentBtn }>
+        <Fade in = {this.state.instructorBtn}>
+            <Button bsStyle="primary"  type = "submit"  > Login </Button>
+         </Fade>
+      </Fade>
           </Modal.Footer>
         </Form>
       </Modal.Dialog>;
@@ -182,7 +187,7 @@ setStudent(isStudent){
   }
 
   handleInstructor = event => {
-    this.setState( { instructor: event.target.checked } );
+    this.setState( { instructor: true} );
   }
 
   handleVersion = () => {
