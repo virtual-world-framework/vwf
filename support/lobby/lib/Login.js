@@ -4,6 +4,9 @@ import { Modal, Form, FormGroup, FormControl, Checkbox, ControlLabel, Button, Im
 
 import { get } from "./utils";
 
+const navy = '#000080';
+const medBlue = '#0000CD';
+
 export default class Login extends React.Component {
     
   constructor(props) {
@@ -16,7 +19,11 @@ export default class Login extends React.Component {
         version: null,
         instructorBtn:false,
         studentBtn: false,
+        password: false,
+        firstColor: navy,
+        secondColor: navy,
     };
+      this.changeColor = this.changeColor.bind(this);
   }
 
   static propTypes = {
@@ -28,11 +35,23 @@ export default class Login extends React.Component {
     flash: []
   };
 
-
+changeColor(isStudent){
+    if(isStudent){
+        console.log("student true");
+        this.setState({secondColor: medBlue});
+        this.setState({firstColor: navy});
+    }
+    else{
+        console.log("instruct true");
+        this.setState({secondColor: navy});
+        this.setState({firstColor: medBlue});
+    }
+}
 
  instructorClick(){
-     console.log("clicked");
+          
      this.setInstructor(true);
+     this.changeColor(false);
  }
 
 
@@ -41,14 +60,16 @@ setInstructor(isInstructor){
         this.setState({studentBtn: false});
         this.setState({instructorBtn: true});
         this.setState( { instructor: true} );
+   
+        
     }
     
 }
 
 
  studentClick(){
-     console.log("clicked");
      this.setStudent(true);
+    this.changeColor(true);
  }
 
 
@@ -57,6 +78,7 @@ setStudent(isStudent){
         this.setState({instructorBtn: false});
         this.setState({instructor: false});
         this.setState({studentBtn: true});
+        
     }
 }
 
@@ -82,11 +104,11 @@ setStudent(isStudent){
                     
                     {/*Instructor*/}
   
-           <Button bsStyle="primary"  onClick = {this.instructorClick.bind(this)} className="instructor" > Instructor </Button>
+           <button type="button" bsStyle="primary"  onClick = {this.instructorClick.bind(this)} className="instructor" style={{background: this.state.firstColor}}> Instructor </button>
     
                     {/*Student*/}
      
-             <Button bsStyle="primary" onClick = {this.studentClick.bind(this)} className= "student"> Student </Button>
+             <button type = "button" bsStyle="primary" onClick = {this.studentClick.bind(this)} className= "student" style={{background: this.state.secondColor}}> Student </button>
     
              </Row>
         
@@ -121,7 +143,7 @@ setStudent(isStudent){
             <FormGroup controlId="password" className="col-sm-7">
             <style scoped>{ ".form-group { transition: height 0.1s }" }</style>
             <ControlLabel> Password </ControlLabel>
-            <FormControl name="password" type="password" onChange= {this.handlePasswordCorrect}/>
+            <FormControl name="password" type="password"/>
             </FormGroup>
          </Fade> 
      
@@ -137,12 +159,11 @@ setStudent(isStudent){
               </FormGroup>
         </Fade>
 
-
             </Row>
         
             <Row>
               <FormGroup className="col-sm-12" bsSize="small">
-                { 
+                {
                   this.props.flash.map( 
                         ( message, index ) =>
                             <Alert key={ index } bsStyle={ bsStyle( message.type ) }> 
@@ -156,7 +177,7 @@ setStudent(isStudent){
           <Modal.Footer>
          <Fade in = {this.state.studentBtn }>
         <Fade in = {this.state.instructorBtn}>
-            <Button bsStyle="primary"  type = "submit"  > Login </Button>
+            <button className = "login" bsStyle="primary"  type = "submit"  > Login </button>
          </Fade>
       </Fade>
           </Modal.Footer>
@@ -189,6 +210,7 @@ setStudent(isStudent){
   handleInstructor = event => {
     this.setState( { instructor: true} );
   }
+  
 
   handleVersion = () => {
     get( "version" ).
