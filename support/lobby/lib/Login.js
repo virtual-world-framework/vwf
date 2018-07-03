@@ -35,14 +35,14 @@ export default class Login extends React.Component {
     flash: []
   };
 
+//Changes the color of the button 
+
 changeColor(isStudent){
     if(isStudent){
-        console.log("student true");
         this.setState({secondColor: medBlue});
         this.setState({firstColor: navy});
     }
     else{
-        console.log("instruct true");
         this.setState({secondColor: navy});
         this.setState({firstColor: medBlue});
     }
@@ -104,16 +104,18 @@ setStudent(isStudent){
                     
                     {/*Instructor*/}
   
-           <button type="button" bsStyle="primary"  onClick = {this.instructorClick.bind(this)} className="instructor" style={{background: this.state.firstColor}}> Instructor </button>
+           <button type="button" bsstyle="primary"  onClick = {this.instructorClick.bind(this)} className="instructor" style={{background: this.state.firstColor}}> Instructor </button>
     
                     {/*Student*/}
      
-             <button type = "button" bsStyle="primary" onClick = {this.studentClick.bind(this)} className= "student" style={{background: this.state.secondColor}}> Student </button>
+             <button type = "button" bsstyle="primary" onClick = {this.studentClick.bind(this)} className= "student" style={{background: this.state.secondColor}}> Student </button>
     
              </Row>
         
             <Row> {/*Row 2*/}
             
+
+         {/*Textfield appears when either instructor or student btn is clicked*/}
         <Fade in = {this.state.studentBtn }>
         <Fade in = {this.state.instructorBtn}>
                 <div>
@@ -138,7 +140,7 @@ setStudent(isStudent){
         
             <Row> {/*Row 3*/}
         
-        
+          {/*Password textfield appears once instructor btn is clicked*/}
          <Fade in={ this.state.instructorBtn }>
             <FormGroup controlId="password" className="col-sm-7">
             <style scoped>{ ".form-group { transition: height 0.1s }" }</style>
@@ -166,7 +168,7 @@ setStudent(isStudent){
                 {
                   this.props.flash.map( 
                         ( message, index ) =>
-                            <Alert key={ index } bsStyle={ bsStyle( message.type ) }> 
+                            <Alert key={ index } bsstyle={ bsstyle( message.type ) }> 
                             { message.message }
                             </Alert> 
                     ) 
@@ -177,7 +179,7 @@ setStudent(isStudent){
           <Modal.Footer>
          <Fade in = {this.state.studentBtn }>
         <Fade in = {this.state.instructorBtn}>
-            <button className = "login" bsStyle="primary"  type = "submit"  > Login </button>
+            <button className = "login" bsstyle="primary"  type = "submit"  > Login </button>
          </Fade>
       </Fade>
           </Modal.Footer>
@@ -190,6 +192,7 @@ setStudent(isStudent){
     }
 
 }
+ //Checks the value in the textfields
 
   componentDidMount() {
     this.handleVersion();
@@ -224,7 +227,7 @@ setStudent(isStudent){
 
 /// Convert an Express flash `type` to a Bootstrap alert style.
 
-function bsStyle( flashType ) {
+function bsstyle( flashType ) {
   switch ( flashType ) {
     case "success":
       return "success";

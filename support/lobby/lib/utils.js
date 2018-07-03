@@ -17,7 +17,7 @@ function getOptions() {
 function postOptions( body ) {
   let json = ( typeof body === "object" ) && ( body !== null ) &&
     ( body instanceof FormData === false );
-    console.log("post options");
+
   return {
     method: "POST",
     body: json ? JSON.stringify( body ) : body,
@@ -27,13 +27,12 @@ function postOptions( body ) {
 }
 
 function responseBody( response ) {
-  console.log(response);
+
     if ( !response.ok ){
-    throw console.log("response not ok");
-   // throw Error( response.statusText );
+    throw Error( response.statusText );
   }
   let contentType = response.headers.get( "Content-Type" ) || "",
     json = contentType.includes( "application/json" );
-    console.log("json");
+
   return json ? response.json() : response.text();
 }
