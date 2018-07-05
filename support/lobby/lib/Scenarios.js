@@ -65,13 +65,30 @@ class Application extends React.Component {
   };
 
   state = {
-    title: ""
+    title: "",
+    isClicked : false,
+    buttonOn: true,
   };
+ 
+  createScenario(){
+      this.isCreating(true);
+  }
+
+  isCreating(value){
+      if(value){
+        this.setState({isClicked: true});
+        this.setState({buttonOn: false});
+      }
+  }
+  
 
   render() {
-    return <tr>
-      <td className="col-sm-8">
-        <FormControl
+    return  <React.Fragment>
+       <tr>
+        <td><Button bsStyle="primary" onClick={this.createScenario.bind(this)} style={{display: this.state.buttonOn ? 'block' : 'none' }}> Create Scenario + </Button></td>
+      
+       <td className="col-sm-8">
+        <FormControl disabled = {!this.state.isClicked} style={{display: this.state.isClicked ? 'block' : 'none' }}
           name="title"
           type="text"
           placeholder={ Application.TITLE_PLACEHOLDER }
@@ -79,18 +96,23 @@ class Application extends React.Component {
           value={ this.state.title }
           onChange={ this.handleTitle }
           onKeyPress={ this.handleKeyPress } />
-      </td><td className="col-sm-2">
+      </td>
+      <td className="col-sm-2">
         &nbsp;
       </td><td className="col-sm-1">
-        <Button type="submit" disabled={ !this.filled() } bsSize="small"
-          onClick={ this.handleSubmit }> Create </Button>
+
+        <Button type="submit"  bsSize="small" disabled = {!this.filled() }
+          onClick={ this.handleSubmit } style={{display: this.state.isClicked ? 'block' : 'none' }}> Create </Button>
+
       </td><td className="col-sm-1">
         <ControlLabel bsClass="btn" bsStyle="default" bsSize="small">
-          Import <FormControl type="file" accept=".zip" style={ { display: "none" } }
+          Import <FormControl type="file" accept=".zip"
             onChange={ this.handleImport }/>
         </ControlLabel>
-      </td>
-    </tr>;
+            </td>
+    </tr>
+ </React.Fragment>;
+
   }
 
   handleTitle = event => {
