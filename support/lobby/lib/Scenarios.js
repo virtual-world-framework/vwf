@@ -97,18 +97,21 @@ class Application extends React.Component {
           onChange={ this.handleTitle }
           onKeyPress={ this.handleKeyPress } />
       </td>
-      <td className="col-sm-2">
-        &nbsp;
-      </td><td className="col-sm-1">
+      <td className="col-sm-1">
 
-        <Button type="submit"  bsSize="small" disabled = {!this.filled() }
-          onClick={ this.handleSubmit } style={{display: this.state.isClicked ? 'block' : 'none' }}> Create </Button>
+        <Button type="submit"  disabled = {!this.filled() }
+          onClick={ this.handleSubmit} style={{display: this.state.isClicked ? 'block' : 'none' }}> Create </Button>
 
-      </td><td className="col-sm-1">
-        <ControlLabel bsClass="btn" bsStyle="default" bsSize="small">
-          Import <FormControl type="file" accept=".zip"
+      </td>
+    <td className="col-sm-1">
+        <ControlLabel bsClass="btn"style={{display: this.state.isClicked ? 'block' : 'none' }}>
+          Import <FormControl type="file" accept=".zip" style={ { display: "none" } }
             onChange={ this.handleImport }/>
         </ControlLabel>
+      </td>
+    <td> 
+        <Button
+          onClick={ this.removeScenario.bind(this)} style={{display: this.state.isClicked ? 'block' : 'none' }}> Cancel </Button>           
             </td>
     </tr>
  </React.Fragment>;
@@ -120,6 +123,8 @@ class Application extends React.Component {
   }
 
   handleSubmit = event => {
+    this.setState({isClicked: false});
+    this.setState({buttonOn: true});
     let properties = {
       name: this.name(),
       title: this.state.title };
@@ -130,7 +135,23 @@ class Application extends React.Component {
         console.log( error.message ) } );  /* eslint no-console: "off" */
     this.setState( { title: "" } );
     event.preventDefault();
+    
   }
+  
+  
+   removeScenario(){
+      this.handleSubmit;
+      this.notCreating(true);
+  }
+
+  notCreating(value){
+      if(value){
+        this.setState({isClicked: false});
+        this.setState({buttonOn: true});
+      }
+  }
+  
+  
 
   handleKeyPress = event => {
     if ( event.key === "Enter" ) {
