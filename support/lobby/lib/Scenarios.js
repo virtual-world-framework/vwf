@@ -70,6 +70,7 @@ class Application extends React.Component {
     buttonOn: true,
   };
  
+ //Function called when Create Scenario button is clicked
   createScenario(){
       this.isCreating(true);
   }
@@ -85,8 +86,11 @@ class Application extends React.Component {
   render() {
     return  <React.Fragment>
        <tr>
+        {/*Click on button to make create info pop up*/}
         <td><Button bsStyle="primary" onClick={this.createScenario.bind(this)} style={{display: this.state.buttonOn ? 'block' : 'none' }}> Create Scenario + </Button></td>
       
+            
+         {/*will not appear until create button is clicked*/}    
        <td className="col-sm-8" style = {{width: 'auto'}}>
         <FormControl disabled = {!this.state.isClicked} style={{display: this.state.isClicked ? 'block' : 'none', width: 'auto'}}
           name="title"
@@ -112,6 +116,8 @@ class Application extends React.Component {
             onChange={ this.handleImport }/>
         </ControlLabel>
       </td>
+
+ {/*X out button to cancel out if you do not want to create scenario*/}
     <td className = "col-sm-1"> 
         <Button 
           onClick={ this.removeScenario.bind(this)} style={{display: this.state.isClicked ? 'block' : 'none' }}> X </Button>           
@@ -125,6 +131,7 @@ class Application extends React.Component {
     this.setState( { title: event.target.value } );
   }
 
+   //closes create info upon clicking 'create' button
   handleSubmit = event => {
     this.setState({isClicked: false});
     this.setState({buttonOn: true});
@@ -141,9 +148,7 @@ class Application extends React.Component {
     
   }
   
-  
    removeScenario(){
-      this.handleSubmit;
       this.notCreating(true);
   }
 
