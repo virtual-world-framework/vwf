@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Modal, Form, FormGroup, FormControl, Checkbox, ControlLabel, Button, Image, Row, Fade, Alert } from "react-bootstrap";
+import { Modal, Form, FormGroup, FormControl, Checkbox, ControlLabel, Image, Row, Fade, Alert } from "react-bootstrap";
 
 import { get } from "./utils";
 

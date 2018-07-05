@@ -10,20 +10,23 @@ body {
 table {
     width: 100%;
     max-width: 100%;
-    table-layout: fixed;
+    table-layout: auto;
 }
 
-thead, th {
-	display: table-header-group;
+
+.fixed_header thread tr{
+    display: auto;
 }
+
 tbody {
 	display: table-row-group;
 	height: 100%;
 	overflow-y: auto;
+    table-layout: auto;
 }
 
-tr { display: table-row; }
-td { display: table-cell; }
+tr { display: table-row; table-layout: auto;}
+td { display: table-cell; padding: 6px;}
 
 .logo_img {
   width: 100%;
@@ -34,3 +37,4 @@ td { display: table-cell; }
   width: 60px;
   height: auto;
 }
+
