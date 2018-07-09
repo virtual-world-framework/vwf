@@ -162,19 +162,7 @@ setStudent(isStudent){
         </Fade>
 
             </Row>
-        
-            <Row>
-              <FormGroup className="col-sm-12" bsSize="small">
-                {
-                  this.props.flash.map( 
-                        ( message, index ) =>
-                            <Alert key={ index } bsstyle={ bsstyle( message.type ) }> 
-                            { message.message }
-                            </Alert> 
-                    ) 
-                }
-              </FormGroup>
-            </Row>
+       
           </Modal.Body>
           <Modal.Footer>
          <Fade in = {this.state.studentBtn }>
@@ -220,23 +208,10 @@ setStudent(isStudent){
       then( version =>
         this.setState( { version: version || {} } ) ).
       catch( error =>
-        console.log( error.message ) );  /* eslint no-console: "off" */
+        console.log( "Not working" ) );  /* eslint no-console: "off" */
   }
 
 }
 
 /// Convert an Express flash `type` to a Bootstrap alert style.
 
-function bsstyle( flashType ) {
-  switch ( flashType ) {
-    case "success":
-      return "success";
-    // case "warning":
-    // case "warn":
-    //   return "warning";
-    case "error":
-      return "danger";
-    default:
-      return "info";
-  }
-}

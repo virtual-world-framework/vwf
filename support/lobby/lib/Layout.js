@@ -37,9 +37,12 @@ export default class Layout extends React.Component {
             </Navbar.Header>
             <Navbar.Collapse id="navbar">
               <Nav>
-                { this.state.user.instructor && <NavItem eventKey="scenarios">Scenario Templates</NavItem> }
-                { this.state.user.instructor && <NavItem eventKey="activeSessions">Active Sessions</NavItem> }
-                { this.state.user.instructor && <NavItem eventKey="previousSessions">Previous Sessions</NavItem> }
+                { this.state.user.instructor && <NavItem eventKey="scenarios">Scenario Templates</NavItem> 
+                }
+                { this.state.user.instructor && <NavItem eventKey="activeSessions">Active Sessions</NavItem> 
+                }
+                { this.state.user.instructor && <NavItem eventKey="previousSessions">Previous Sessions</NavItem>
+                }
               </Nav>
               <Navbar.Form pullRight componentClass="form" method="post" action="/logout">
                 <Button type="submit" bsStyle="link"> Logout </Button>
@@ -55,14 +58,16 @@ export default class Layout extends React.Component {
           </Navbar>
           <TabContent animation={ false }>
             { this.state.user.instructor &&
-              <TabPane eventKey="scenarios"><Scenarios records={ this.scenarioRecords() } onServerChange={ this.handleManifest }/></TabPane> }
+              <TabPane eventKey="scenarios"><Scenarios records={ this.scenarioRecords() } onServerChange={ this.handleManifest }/></TabPane> 
+    }
             { true &&
               <TabPane eventKey="activeSessions">
                 <ActiveSessions records={ this.activeSessionRecords() } />
               </TabPane>
             }
             { this.state.user.instructor &&
-              <TabPane eventKey="previousSessions"><PreviousSessions records={ this.previousSessionRecords() }/></TabPane> }
+              <TabPane eventKey="previousSessions"><PreviousSessions records={ this.previousSessionRecords() }/></TabPane> 
+            }
           </TabContent>
         </div>
       </TabContainer>;
@@ -70,6 +75,7 @@ export default class Layout extends React.Component {
       return null;
     }
   }
+  
 
   componentDidMount() {
     this.handleVersion();

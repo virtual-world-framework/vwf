@@ -14,10 +14,6 @@ table {
 }
 
 
-.fixed_header thread tr{
-    display: auto;
-}
-
 tbody {
 	display: table-row-group;
 	height: 100%;
@@ -26,7 +22,7 @@ tbody {
 }
 
 tr { display: table-row; table-layout: auto;}
-td { display: table-cell; padding: 6px;}
+td { display: table-cell;}
 
 .logo_img {
   width: 100%;
