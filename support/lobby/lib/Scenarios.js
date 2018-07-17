@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Table, FormControl, Button, ControlLabel } from "react-bootstrap";
+import { Table, FormControl, Button, ControlLabel, Checkbox } from "react-bootstrap";
 import ReactTable from "react-table";
 
 import { post } from "./utils";
@@ -134,6 +134,7 @@ class Application extends React.Component {
 
    //closes create info upon clicking 'create' button and leads to new page
   handleSubmit = event => {
+     
     this.setState({isClicked: false});
     this.setState({buttonOn: true});
     let properties = {
@@ -162,6 +163,7 @@ class Application extends React.Component {
         this.setState({isClicked: false});
         this.setState({buttonOn: true});
         this.setState({title: ""});
+           
       }
   }
   
@@ -262,7 +264,7 @@ const columns = [
     false,
   filterable:
     false,
-}, {
+},{
   Header:
     "",
   id:
@@ -345,6 +347,7 @@ class ActionCell extends LobbyCell {
       <Button type="submit" disabled={ !this.context.readers.filled() }
         bsSize="small" className={ !this.context.readers.filled() && "hidden" }
         onClick={ this.handleSubmit }> Start </Button>
+     
     </React.Fragment>;
   }
 
@@ -366,6 +369,35 @@ class ActionCell extends LobbyCell {
   }
 
 }
+
+//class DeleteCell extends React.Component{
+//
+// static propTypes = {
+//    value:
+//      PropTypes.object.isRequired,
+//  };
+// state = {
+//     check: false,
+// }
+//
+//  render() {
+//    return <React.Fragment>
+//      <Checkbox href={this.props.value.instance || this.props.value.document.uri} 
+//        onChange={ this.handleChange } checked = {this.state.check}>  </Checkbox>
+//     
+//    </React.Fragment>;
+//  }
+//
+//  handleChange = event => {
+//   this.setState({check: event.target.checked});
+//  }
+//  
+//
+//}
+
+
+ 
+
 
 class HiddenCell extends React.Component {
 
