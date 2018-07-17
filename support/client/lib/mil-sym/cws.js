@@ -7727,7 +7727,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance"  ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.ACA.RTG": {
                         "symbolID": "G*FPACAI--****X",
@@ -7760,7 +7760,7 @@ define( function(){
                                             "additionalInfo3": "Grids", 
                                             "DTG1":            "Eff Start", 
                                             "DTG2":            "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "additionalInfo3", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "additionalInfo3", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.FFA.RTG": {
                         "symbolID": "G*FPACFI--****X",
@@ -7784,7 +7784,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.NFA.RTG": {
                         "symbolID": "G*FPACNI--****X",
@@ -7808,7 +7808,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.RFA.RTG": {
                         "symbolID": "G*FPACRI--****X",
@@ -7832,7 +7832,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   // TODO: mil-sym currently does not render this graphic.
                   // Come back to this once mil-sym has corrected this graphic.
@@ -7847,7 +7847,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.SNSZ.RTG": {
                         "symbolID": "G*FPACEI--****X",
@@ -7871,7 +7871,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.DA.RTG": {
                         "symbolID": "G*FPACDI--****X",
@@ -7895,7 +7895,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.ZOR.RTG": {
                         "symbolID": "G*FPACZI--****X",
@@ -7919,7 +7919,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TBA.RTG": {
                         "symbolID": "G*FPACBI--****X",
@@ -7943,7 +7943,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TVAR.RTG": {
                         "symbolID": "G*FPACVI--****X",
@@ -7967,7 +7967,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.ATIZ.RTG": {
                         "symbolID": "G*FPAZII--****X",
@@ -7991,7 +7991,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CFFZ.RTG": {
                         "symbolID": "G*FPAZXI--****X",
@@ -8015,7 +8015,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CNS.RTG": {
                         "symbolID": "G*FPAZCI--****X",
@@ -8039,7 +8039,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CFZ.RTG": {
                         "symbolID": "G*FPAZFI--****X",
@@ -8063,7 +8063,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.KLBOX.BLUE.RTG": {
                         "symbolID": "G*FPAKBI--****X",
@@ -8087,7 +8087,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.KLBOX.PURPLE.RTG": {
                         "symbolID": "G*FPAKPI--****X",
@@ -8111,7 +8111,7 @@ define( function(){
                         "symbolType": "SimpleCircle",
                         "modifierLabels": { "DTG1": "Eff Start", 
                                             "DTG2": "Eff End" },
-                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2" ]
+                        "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TGMF": {
                         "symbolID": "G*FPACT---****X",
