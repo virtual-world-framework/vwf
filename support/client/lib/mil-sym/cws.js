@@ -7674,6 +7674,7 @@ define( function(){
                         "symbolID": "G*FPATC---****X",
                         "tag": "AREA TARGET CIRCULAR",
                         "symbolType": "SimpleCircle",
+                        "modifierLabels": { "distance": "Radius (m)" }, 
                         "validModifiers": [ "uniqueDesignation1", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.ARATGT.RTGTGT": {
@@ -7725,8 +7726,9 @@ define( function(){
                         "symbolID": "G*FPACSC--****X",
                         "tag": "FIRE SUPPORT AREA (FSA) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance"  ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.ACA.RTG": {
@@ -7759,7 +7761,8 @@ define( function(){
                                             "additionalInfo2": "Max Alt", 
                                             "additionalInfo3": "Grids", 
                                             "DTG1":            "Eff Start", 
-                                            "DTG2":            "Eff End" },
+                                            "DTG2":            "Eff End",
+                                            "distance":        "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "additionalInfo1", "additionalInfo2", "additionalInfo3", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.FFA.RTG": {
@@ -7782,8 +7785,9 @@ define( function(){
                         "symbolID": "G*FPACFC--****X",
                         "tag": "FREE FIRE AREA (FFA) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.NFA.RTG": {
@@ -7806,8 +7810,9 @@ define( function(){
                         "symbolID": "G*FPACNC--****X",
                         "tag": "NO-FIRE AREA (NFA) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.RFA.RTG": {
@@ -7830,8 +7835,9 @@ define( function(){
                         "symbolID": "G*FPACRC--****X",
                         "tag": "RESTRICTIVE FIRE AREA (RFA) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   // TODO: mil-sym currently does not render this graphic.
@@ -7845,8 +7851,9 @@ define( function(){
                         "symbolID": "G*FPACPC--****X",
                         "tag": "POSITION AREA FOR ARTILLERY (PAA) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.SNSZ.RTG": {
@@ -7869,8 +7876,9 @@ define( function(){
                         "symbolID": "G*FPACEI--****X",
                         "tag": "SENSOR ZONE CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.DA.RTG": {
@@ -7893,8 +7901,9 @@ define( function(){
                         "symbolID": "G*FPACDC--****X",
                         "tag": "DEAD SPACE AREA (DA) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.ZOR.RTG": {
@@ -7917,8 +7926,9 @@ define( function(){
                         "symbolID": "G*FPACZC--****X",
                         "tag": "ZONE OF RESPONSIBILITY (ZOR) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TBA.RTG": {
@@ -7941,8 +7951,9 @@ define( function(){
                         "symbolID": "G*FPACBC--****X",
                         "tag": "TARGET BUILD-UP AREA (TBA) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TVAR.RTG": {
@@ -7965,8 +7976,9 @@ define( function(){
                         "symbolID": "G*FPACVC--****X",
                         "tag": "TARGET VALUE AREA (TVAR) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.ATIZ.RTG": {
@@ -7989,8 +8001,9 @@ define( function(){
                         "symbolID": "G*FPAZIC--****X",
                         "tag": "ARTILLERY TARGET INTELLIGENCE (ATI) ZONE CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CFFZ.RTG": {
@@ -8013,8 +8026,9 @@ define( function(){
                         "symbolID": "G*FPAZXC--****X",
                         "tag": "CALL FOR FIRE ZONE (CFFZ) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CNS.RTG": {
@@ -8037,8 +8051,9 @@ define( function(){
                         "symbolID": "G*FPAZCC--****X",
                         "tag": "CENSOR ZONE CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.TGTAQZ.CFZ.RTG": {
@@ -8061,8 +8076,9 @@ define( function(){
                         "symbolID": "G*FPAZFC--****X",
                         "tag": "CRITICAL FRIENDLY ZONE (CFZ) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.KLBOX.BLUE.RTG": {
@@ -8085,8 +8101,9 @@ define( function(){
                         "symbolID": "G*FPAKBC--****X",
                         "tag": "KILL BOX BLUE (BKB) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.KLBOX.PURPLE.RTG": {
@@ -8109,8 +8126,9 @@ define( function(){
                         "symbolID": "G*FPAKPC--****X",
                         "tag": "KILL BOX PURPLE (PKB) CIRCULAR",
                         "symbolType": "SimpleCircle",
-                        "modifierLabels": { "DTG1": "Eff Start", 
-                                            "DTG2": "Eff End" },
+                        "modifierLabels": { "DTG1":     "Eff Start", 
+                                            "DTG2":     "Eff End",
+                                            "distance": "Radius (m)" },
                         "validModifiers": [ "uniqueDesignation1", "DTG1", "DTG2", "distance" ]
                   },
                   "TACGRP.FSUPP.ARS.C2ARS.TGMF": {
