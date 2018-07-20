@@ -24,7 +24,8 @@ define( [ "module",
           "jquery" ], 
     function( module, model, utility, Color, cws, $ ) {
 
-    var self;
+    var modelDriver;
+    var _pausedRenderNodes = [];
 
     return model.load( module, {
 
@@ -34,7 +35,7 @@ define( [ "module",
 
         initialize: function( options ) {
             
-            self = this;
+            modelDriver = this;
 
             this.arguments = Array.prototype.slice.call( arguments );
 
@@ -55,9 +56,12 @@ define( [ "module",
                         "type": childType,
                         "name": childName 
                     };
-                }
-            };
+                },
 
+                // Public functions
+                "getModifierActualName":     getModifierActualName,
+                "convertModifierValue":      convertModifierValue
+            };
 
             // turns on logger debugger console messages 
             this.debug = {
@@ -70,7 +74,6 @@ define( [ "module",
                 "getting": false,
                 "prototypes": false
             };
-
         },
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -102,14 +105,17 @@ define( [ "module",
                     source: childSource, 
                     type: childType,
                     uri: childURI,
-                    name: childName,
+                    name: childName
                 };
                 return;                
             }
 
             var protos = getPrototypes( childExtendsID );
             var node = this.state.nodes[ childID ];
+
             if ( node === undefined ) {
+
+                _pausedRenderNodes.push( childID );
 
                 if ( isUnitNode( protos ) ) {
 
@@ -125,6 +131,29 @@ define( [ "module",
                     node.fullName = undefined;
                     node.echelon = undefined;
                     node.affiliation = undefined;
+                    node.unitStatus = undefined;
+                    node.mobility = undefined;
+                    node.taskForce = undefined;
+                    node.installation = undefined;
+
+                } else if ( isMissionGfxNode( protos ) ) {
+
+                    this.state.nodes[ childID ] = node = this.state.createNode( "missionGfx", nodeID, childID, childExtendsID, childImplementsIDs,
+                                childSource, childType, childIndex, childName, callback );
+                    
+                    // additional members for the missionGfx components
+                    node.symbolID = undefined;
+                    node.symbolType = undefined;
+                    node.modifiers = {};
+                    node.description = undefined;
+                    node.tagName = undefined;
+                    node.fullName = undefined;
+                    node.affiliation = undefined;
+                    node.controlPts = [];
+                    node.x = undefined;
+                    node.y = undefined;
+                    node.width = undefined;
+                    node.height = undefined;
 
                 } else if ( isModifierNode( protos ) ) {
 
@@ -139,10 +168,9 @@ define( [ "module",
         initializingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childIndex, childName ) {
 
-            if ( this.debug.initializing ) {
-                this.logger.infox( "initializingNode", nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childName );
+            if ( _pausedRenderNodes.includes( childID ) ) {
+                _pausedRenderNodes.splice( _pausedRenderNodes.indexOf( childID ), 1 );
             } 
-
         },
 
         deletingNode: function( nodeID ) {
@@ -207,7 +235,7 @@ define( [ "module",
             var renderImage = false;
 
             if ( node !== undefined && ( utility.validObject( propertyValue ) ) ) {
-                if ( node.nodeType === "unit" ) {
+                if ( ( node.nodeType === "unit" ) || ( node.nodeType === "missionGfx" ) ) {
                     
                     switch ( propertyName ) {
 
@@ -219,11 +247,25 @@ define( [ "module",
                             if ( node.affiliation !== undefined ) {
                                 node.symbolID = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
                             }
+                            if ( node.unitStatus !== undefined ) {
+                                node.symbolID = cws.addUnitStatusToSymbolId( node.symbolID, node.unitStatus );                                
+                            }
+                            if ( node.mobility !== undefined ) {
+                                node.symbolID = cws.addMobilityToSymbolId( node.symbolID, node.mobility );                                
+                            }
+                            if ( node.taskForce !== undefined ) {
+                                node.symbolID = cws.addTaskForceToSymbolId( node.symbolID, node.taskForce );                                
+                            }
+                            if ( node.installation !== undefined ) {
+                                node.symbolID = cws.addInstallationToSymbolId( node.symbolID, node.installation );                                
+                            }
                             renderImage = true;
                             break;
 
                         case "image":
-                            value = node.image = propertyValue;
+                            if ( node.nodeType === "unit" ) {
+                                value = node.image = propertyValue;
+                            }
                             break;
 
                         case "description":
@@ -269,6 +311,9 @@ define( [ "module",
                                             node.symbolID = cws.addEchelonToSymbolId( node.symbolID, propertyValue );
                                         }
                                         node.echelon = propertyValue;
+                                        if ( !!node.installation ) {
+                                            node.installation = "none";
+                                        }
                                         renderImage = true;
                                         break;
 
@@ -300,13 +345,139 @@ define( [ "module",
                             }
                             break;
 
+                        case "unitStatus":
+                            if ( node.unitStatus !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    case "anticipated":
+                                    case "present":
+                                    case "capable":
+                                    case "damaged":
+                                    case "destroyed":
+                                    case "full":
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addUnitStatusToSymbolId( node.symbolID, propertyValue );
+                                        }
+                                        node.unitStatus = propertyValue;
+                                        renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect unitStatus property value: " + propertyValue );
+                                        break;
+                                }
+                            }
+                            break;
+
+                        case "mobility":
+                            if ( node.mobility !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    case "none":
+                                    case "wheeled limited cross-country":
+                                    case "cross-country":
+                                    case "tracked":
+                                    case "wheeled and tracked":
+                                    case "towed":
+                                    case "rail":
+                                    case "over snow":
+                                    case "sled":
+                                    case "pack animals":
+                                    case "barge":
+                                    case "amphibious":
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addMobilityToSymbolId( node.symbolID, propertyValue );
+                                        }
+                                        node.mobility = propertyValue;
+                                        node.installation = "none";
+                                        renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect mobility property value: " + propertyValue );
+                                        break;
+                                }
+                            }
+                            break;
+
+                        case "taskForce":
+                            if ( node.taskForce !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    case "none":
+                                    case "HQ":
+                                    case "TF HQ":
+                                    case "FD HQ":
+                                    case "FD-TF HQ":
+                                    case "TF":
+                                    case "FD":
+                                    case "FD-TF":
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addTaskForceToSymbolId( node.symbolID, propertyValue );
+                                        }
+                                        node.taskForce = propertyValue;
+                                        node.installation = "none";
+
+                                        renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect taskForce property value: " + propertyValue );
+                                        break;
+                                }
+                            }
+                            break;
+
+                        case "installation":
+                            if ( node.installation !== propertyValue ) {
+                                switch( propertyValue ) {
+                                    case "none":
+                                    case "installation":
+                                    case "feint-dummy":
+                                        if ( node.symbolID !== undefined ) {
+                                            node.symbolID = cws.addInstallationToSymbolId( node.symbolID, propertyValue );
+                                        }
+                                        node.installation = propertyValue;
+                                        node.taskForce = "none";
+                                        node.echelon = "none";
+                                        node.mobility = "none";
+                                        renderImage = true;
+                                        break;
+
+                                    default:
+                                        this.logger.warnx( "incorrect installation property value: " + propertyValue );
+                                        break;
+                                }
+                            }
+                            break;
+
+                        case "x":
+                        case "y":
+                        case "width":
+                        case "height":
+                        case "rotation":
+                        case "controlPts":
+                        case "symbolType":
+                        case "bounds":
+                            if ( node.nodeType === "missionGfx" && propertyValue !== undefined && propertyValue !== null ) {
+                                node[ propertyName ] = propertyValue;
+                                renderImage = basicPropertiesMet( node );
+                            }
+                            break;
+
+                        case "attributes":
+                            if ( node.nodeType === "missionGfx" && !!propertyValue ) {
+                                var attrs = propertyValue;
+                                var image = renderMsnGfx( node );
+                                renderImage = basicPropertiesMet( node );
+                                if ( !!image ) {
+                                    attrs.image = image;
+                                    modelDriver.kernel.setProperty( node.ID, propertyName, attrs );
+                                }
+                            }
+                            break;
                     }
 
                 } else if ( node.nodeType === "modifier" ) {
                     
                     var unit = this.state.nodes[ node.parentID ];
-                    var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-                    var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
 
                     if ( unit === undefined ) {
                         return undefined;
@@ -314,7 +485,16 @@ define( [ "module",
                    
                     // Render image if modifier is valid
                     renderImage = setModifier( unit, propertyName, propertyValue );
-                    
+
+                    // Because rendering the image will set other properties
+                    // (image, height, width, symbolCenter, etc),
+                    // the kernel will interpret modifiers that were set as having been delegated,
+                    // and no satProperty will be issued.
+                    // We force an actual delegation here,
+                    // so the object driver will issue the satProperty.
+                    if ( renderImage ) {
+                        modelDriver.kernel.setProperty( node.ID, propertyName, propertyValue );
+                    }
                 }
             }
 
@@ -344,37 +524,39 @@ define( [ "module",
             //this driver has no representation of this node, so there is nothing to do.
             if( node === undefined ) return value;
 
-            if ( node.nodeType === "unit" ) {
+            if ( ( node.nodeType === "unit" ) || ( node.nodeType === "missionGfx" ) ) {
                 
                 switch ( propertyName ) {
 
-                    case "symbolID":
-                        value = node.symbolID;
-                        break;
-
                     case "image":
-                        value = node.image;
+                        if ( node.nodeType === "unit" ) {
+                            value = node[ propertyName ];
+                        }
                         break;
 
+                    case "symbolID":
                     case "description":
-                        value = node.description;
-                        break;
-
                     case "fullName":
-                        value = node.fullName;
-                        break;
-
                     case "tagName":
-                        value = node.tagName;
+                    case "echelon":
+                    case "affiliation":
+                    case "unitStatus":
+                    case "mobility":
+                    case "taskForce":
+                    case "installation":
+                    case "x":
+                    case "y":
+                    case "width":
+                    case "height":
+                    case "controlPts":
+                    case "symbolType":
+                        value = node[ propertyName ];
                         break;
-
                 }
 
             } else if ( node.nodeType === "modifier" ) {
                 
                 var unit = this.state.nodes[ node.parentID ];
-                var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-                var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
 
                 if ( unit === undefined ) {
                     return undefined;
@@ -388,23 +570,14 @@ define( [ "module",
             return value;
         },
 
-
         // -- callingMethod --------------------------------------------------------------------------
 
-        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) { // TODO: parameters
-            
-            var node = this.state.nodes[ nodeID ]; 
-            var value = undefined;
-
-            switch( methodName ) {
-                case "render":
-                    value = render( node );
-                    break;
+        callingMethod: function( nodeID, methodName /* [, parameter1, parameter2, ... ] */ ) {
+            if ( methodName === "render" ) {
+                return render( modelDriver.state.nodes[ nodeID ] );
             }
-
-            return value;
+            return;
         },
-
 
         // TODO: creatingEvent, deltetingEvent, firingEvent
 
@@ -420,8 +593,6 @@ define( [ "module",
             
         // }
 
-
-
     } );
 
     function getPrototypes( extendsID ) {
@@ -430,7 +601,7 @@ define( [ "module",
 
         while ( id !== undefined ) {
             prototypes.push( id );
-            id = self.kernel.prototype( id );
+            id = modelDriver.kernel.prototype( id );
         }
                 
         return prototypes;
@@ -440,7 +611,17 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "unit.vwf" );
+                found = ( prototypes[i] == "http://vwf.example.com/mil-sym/unit.vwf" );
+            }
+        }
+       return found;
+    } 
+
+    function isMissionGfxNode( prototypes ) {
+        var found = false;
+        if ( prototypes ) {
+            for ( var i = 0; i < prototypes.length && !found; i++ ) {
+                found = ( prototypes[i] == "http://vwf.example.com/mil-sym/missionGfx.vwf" );
             }
         }
        return found;
@@ -450,86 +631,152 @@ define( [ "module",
         var found = false;
         if ( prototypes ) {
             for ( var i = 0; i < prototypes.length && !found; i++ ) {
-                found = ( prototypes[i] == "modifier.vwf" );
+                found = ( prototypes[i] == "http://vwf.example.com/mil-sym/modifier.vwf" );
             }
         }
        return found;
     } 
 
-
-
     function render( node ) {
+
+        if ( !( node || {} ).symbolID ) {
+            return;
+        }
+
+        if ( _pausedRenderNodes.includes( node.ID ) ) {
+            return;
+        }
+
         var value = undefined;
         
-        if ( node !== undefined && node.nodeType === "unit" && node.symbolID !== undefined ) {
-            var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
-            var img = iconRender.Render( node.symbolID, node.modifiers );
-            
-            var centerPt = img.getCenterPoint();
-            var imgSize = img.getImageBounds();
-            var symbolBounds = img.getSymbolBounds();
+        switch( node.nodeType ) {
+            case "unit":
+                var iconRender = armyc2.c2sd.renderer.MilStdIconRenderer;
+                var img = iconRender.Render( node.symbolID, node.modifiers );
+                
+                var centerPt = img.getCenterPoint();
+                var imgSize = img.getImageBounds();
+                var symbolBounds = img.getSymbolBounds();
 
-            value = node.image = img.toDataUrl();
+                value = node.image = img.toDataUrl();
 
-            // we should really use the event, but we're having troubles
-            // getting the events to replicate, this should be switched
-            // back to the event when the replication is fixed.  handleRender
-            // can then be completely removed
-            //self.kernel.fireEvent( node.ID, "imageRendered", [ node.image, imgSize, centerPt, symbolBounds ] );
-            
-            self.kernel.callMethod( node.ID, "handleRender", [ node.image, imgSize, centerPt, symbolBounds ] );
-
-        } 
+                // we should really use the event, but we're having troubles
+                // getting the events to replicate, this should be switched
+                // back to the event when the replication is fixed.  handleRender
+                // can then be completely removed
+                //modelDriver.kernel.fireEvent( node.ID, "imageRendered", [ node.image, imgSize, centerPt, symbolBounds ] );
+                
+                modelDriver.kernel.callMethod( node.ID, "handleRender",
+                    [ node.image, imgSize, centerPt, symbolBounds ] );
+                break;
+            case "missionGfx":
+                value = renderMsnGfx( node );
+                if ( value ) {
+                    modelDriver.kernel.setProperty( node.ID, "image", value.toDataURL() );
+                }
+                break;
+            default:
+                console.warn( "render: Cannot render node of type '", node.nodeType, "'" );
+                break;
+        }
 
         return value;       
+    }
+
+    function renderMsnGfx( node ) {
+        var value = undefined;
+
+        if ( basicPropertiesMet( node ) ) {
+            // Convert control points from Konva style array to mil-sym string
+            var controlPts = getMilSymControlPts( node.controlPts ); 
+            var rendererMP = sec.web.renderer.SECWebRenderer;
+            var scale = 100.0;
+            var renderer = armyc2.c2sd.renderer;
+            var rs = renderer.utilities.RendererSettings;
+            var symUtil = renderer.utilities.SymbolUtilities;
+            var symbolCode = node.symbolID;
+            var format = 3; // GeoCanvas
+            
+            // Set affiliation in symbol id
+            if ( !!node.affiliation ) {
+                symbolCode = cws.addAffiliationToSymbolId( node.symbolID, node.affiliation );
+            }
+            
+            var img = rendererMP.RenderSymbol2D(node.ID,node.fullName,node.description, symbolCode, controlPts, node.bounds[0], node.bounds[1], null, node.modifiers, format);
+
+            //if ( !!img && !!img.image ) {
+            if ( ( img || {} ).image ) {
+                value = img.image;
+            }
+        }
+
+        return value;
+    }
+
+    function getModifierActualName( modObj ) {
+        var modifierActualName;
+        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
+        var mu  = armyc2.c2sd.renderer.utilities.ModifiersUnits;
+        var mtg = armyc2.c2sd.renderer.utilities.ModifiersTG;
+
+        switch ( modObj.type ) {
+            case "ModifiersUnits":
+                modifierActualName = mu[ modObj.modifier ];
+                break;
+                
+            case "MilStdAttributes":
+                modifierActualName = msa[ modObj.modifier ];
+                break;
+                
+            case "ModifiersTG":
+                modifierActualName = mtg[ modObj.modifier ];
+                break;
+        }
+
+        return modifierActualName;
+    }
+
+    function convertModifierValue( modObj, modifierValue ) {
+        var retValue;
+        switch ( modObj.valueType ) {
+            case "Boolean":
+                retValue = Boolean( modifierValue );
+                break;
+                
+            case "Number":
+                retValue = Number( modifierValue );
+                break;
+                
+            case "Array":
+            case "Text":
+            default:
+                retValue = modifierValue;
+                break;
+        }
+
+        return retValue;
     }
 
     function setModifier( unit, modifierAlias, modifierValue ) {
         
         var modObj = cws.modifierByAlias( modifierAlias );
-        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-        var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
         var modifierSet = false;
         
         if ( modObj !== undefined ) {
             
-            var modifierActualName;
-            
-            switch ( modObj.type ) {
-                case "ModifiersUnits":
-                    modifierActualName = mu[ modObj.modifier ];
-                    break;
-                    
-                case "MilStdAttributes":
-                    modifierActualName = msa[ modObj.modifier ];
-                    break;
-                    
-                default:
-                    self.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified." );
-                    return modifierSet;
+            var modifierActualName = getModifierActualName( modObj );
+            if ( !modifierActualName ) {
+                modelDriver.logger.errorx( "setModifier", "Unknown type (", modObj.type, ") specified." );
+                return modifierSet;
             }
-            
+
             if ( modifierValue === "" ) {
                 if ( unit.modifiers[ modifierActualName ] !== undefined ) {
                     delete unit.modifiers[ modifierActualName ];
                     modifierSet = true;
                 }
             } else {
-                switch ( modObj.valueType ) {
-                    case "Boolean":
-                        unit.modifiers[ modifierActualName ] = Boolean(modifierValue);
-                        break;
-                        
-                    case "Number":
-                        unit.modifiers[ modifierActualName ] = Number(modifierValue);
-                        break;
-                        
-                    case "Array":
-                    case "Text":
-                    default:
-                        unit.modifiers[ modifierActualName ] = modifierValue;
-                        break;
-                }
+                unit.modifiers[ modifierActualName ] = convertModifierValue( modObj, modifierValue );
                 modifierSet = true;
             }
         }
@@ -540,32 +787,76 @@ define( [ "module",
     function getModifier( unit, modifierAlias ) {
  
         var modObj = cws.modifierByAlias( modifierAlias );
-        var msa = armyc2.c2sd.renderer.utilities.MilStdAttributes;
-        var mu = armyc2.c2sd.renderer.utilities.ModifiersUnits;
         var value = undefined;
         
         if ( modObj !== undefined ) {
             
-            var modifierActualName;
-            
-            switch ( modObj.type ) {
-                case "ModifiersUnits":
-                    modifierActualName = mu[ modObj.modifier ];
-                    break;
-                    
-                case "MilStdAttributes":
-                    modifierActualName = msa[ modObj.modifier ];
-                    break;
-                    
-                default:
-                    self.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
-                    return value;
+            var modifierActualName = getModifierActualName( modObj );
+            if ( !modifierActualName ) {
+                modelDriver.logger.errorx( "getModifier", "Unknown type (", modObj.type, ") specified." );
+                return value;
             }
-
+            
             value = unit.modifiers[ modifierActualName ];            
         }
          
         return value;
+    }
+
+    function computeRelativeControlPts( controlPts, width, height ) {
+        var newControlPts = [];
+
+        if ( ( !!width && !!height ) && ( width > 0 ) && ( height > 0 ) ) {
+            // Some control points are computed relative to the width and height of the containing object
+            // Compute and return the adjusted control points in this instance
+            for ( var i = 0; i < controlPts.length; i+2 ) {
+                var x = konvaControlPts[i] * width;
+                var y = konvaControlPts[i+1] * height;
+                newControlPts.push( x );
+                newControlPts.push( y );
+            }
+        }
+
+        return newControlPts;
+    }
+
+    function getMilSymControlPts( konvaControlPts ) {
+        var milSymControlPts = "";
+        // konva-style is composed of an array where even numbered elements are x and odd are y
+        // mil-sym style is a string where pairs of x and y are separated by spaces
+        for ( var i = 0; i < konvaControlPts.length; i=i+2 ) {
+            milSymControlPts = milSymControlPts + konvaControlPts[i] + "," + konvaControlPts[i+1];
+            if ( i < konvaControlPts.length-2 ) {
+                milSymControlPts = milSymControlPts + " ";
+            }
+        }
+
+        return milSymControlPts;
+    }
+
+    function basicPropertiesMet( node ) {
+        var basicsMet = false;
+
+        if ( node !== undefined ) {
+            switch (node.nodeType) {
+                case "unit":
+                    break;
+                case "missionGfx":
+                    basicsMet = ( 
+                        ( node.symbolID !== undefined ) && 
+                        ( node.x !== undefined ) && 
+                        ( node.y !== undefined ) && 
+                        ( node.bounds !== undefined ) && 
+                        ( node.bounds.length === 2 ) &&                         
+                        ( node.bounds[0] > 0 ) && 
+                        ( node.bounds[1] > 0 ) &&
+                        (!!node.controlPts && ( node.controlPts.length > 0 ) ) 
+                        );
+                        break;
+            }
+        }
+
+        return basicsMet;
     }
     
 } );

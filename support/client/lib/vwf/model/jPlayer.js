@@ -397,6 +397,18 @@ define( [
                         mediaObject = {
                             wav: url
                         };
+                    } else if ( url.search( "data:audio/mp4" ) === 0 ) {
+                        mediaObject = {
+                            m4a: url
+                        };
+                    } else if ( url.search( "data:audio/ogg" ) === 0 ) {
+                        mediaObject = {
+                            oga: url
+                        };
+                    } else if ( url.search( "data:audio/webm" ) === 0 ) {
+                        mediaObject = {
+                            webma: url
+                        };
                     } else {
                         modelDriver.logger.errorx( "setUrl", 
                             "Unsupported sound type for '", url, "'" );
@@ -406,6 +418,16 @@ define( [
                     if ( url.search( "data:video/mp4" ) === 0 ) {
                         mediaObject = {
                             m4v: url,
+                            poster: node.posterImageUrl
+                        };
+                    } else if ( url.search( "data:video/ogg" ) === 0 ) {
+                        mediaObject = {
+                            ogv: url,
+                            poster: node.posterImageUrl
+                        };
+                    } else if ( url.search( "data:video/webm" ) === 0 ) {
+                        mediaObject = {
+                            webmv: url,
                             poster: node.posterImageUrl
                         };
                     } else {

@@ -10,9 +10,11 @@ properties:
   visible:
   isVisible:
   listening:
+  isListening:
   id:
   name:
   opacity:
+  disableScaleAndRotationForSpeed: true
   scale:
   scaleX:
   scaleY:
@@ -30,26 +32,22 @@ properties:
   absoluteTransform:
   absoluteOpacity:
   absoluteZIndex:
-  uniqueInView:
-  dragProperty: "position"
+  modelX:
+  modelY:
+  supportMouseAndTouchEvents: false
+  hasMouseAndTouchEvents: false
+  attributes:
+  hitGraphFromCache: false
+  minCachePixelSizeThreshold: 0
 methods:
   toggleVisibility:
+  toggleListening:
 events:
   pointerMove:
-  pointerOut:
-  pointerEnter:
-  pointerLeave:
   pointerDown:
   pointerUp:
   pointerClick:
-  pointerDoubleClick:
-  touchStart:
-  touchMove:
-  touchEnd:
-  tap:
   doubleTap:
-  dragStart:
-  dragMove:
   dragEnd:
   draggingFromView:
 scripts:

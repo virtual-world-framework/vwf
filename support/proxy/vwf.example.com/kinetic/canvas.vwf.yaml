@@ -5,4 +5,4 @@ extends: http://vwf.example.com/node.vwf
 properties:
   width:
   height:
-  pixelRatio:
+  pixelRatio: 1.0

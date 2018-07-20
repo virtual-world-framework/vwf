@@ -1,0 +1,6 @@
+--- 
+extends: http://vwf.example.com/node.vwf
+
+# Support for this component has been removed.
+# It is left in for backward compatibility with scenarios that have a unitSimData object in them.
+# It was used to support SoarTech's TXS simulation, which is no longer supported.

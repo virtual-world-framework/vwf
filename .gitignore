@@ -5,3 +5,5 @@
 # Node.js
 node_modules
 /npm-debug.log
+/log/xapi-statements.json
+/public/ITDG

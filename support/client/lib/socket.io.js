@@ -1516,7 +1516,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
       , document: 'document' in global ? document : false
       , resource: 'socket.io'
       , transports: io.transports
-      , 'connect timeout': 10000
+      , 'connect timeout': 30000
       , 'try multiple transports': true
       , 'reconnect': true
       , 'reconnection delay': 500

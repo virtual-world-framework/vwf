@@ -1,31 +1,9 @@
 ---
-extends:
-  http://vwf.example.com/kinetic/stage.vwf
-properties:
-  drawing_clients:
-  drawing_index: 1
+# Deprecated: This component has been left only for backward compatibility.
+#             It was deprecated in v2.6.5
+extends: http://vwf.example.com/node.vwf
 methods:
-  update:
-  down:
-  move:
-  up:  
-  clientWatch:
   clientJoin:
   clientLeave:
-  setUpPrivate:
-  setClientUIState:
-  isValid:
-  getStageRelativePoint:
-events:
-  pointerDown:
-  pointerMove:
-  pointerUp:
-  touchStart:
-  touchMove:
-  touchEnd:
-  drawingObjectCreated:
-  textCreated:
-  imageCreated:
-  findChild:
 scripts:
-- source: "http://vwf.example.com/kinetic/drawing.js"
+- source: http://vwf.example.com/kinetic/drawing.js

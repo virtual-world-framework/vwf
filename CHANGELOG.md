@@ -2,6 +2,16 @@ VIRTUAL WORLD FRAMEWORK CHANGE LOG
 ==================================
 
 ----------------------------------
+0.8.0
+----------------------------------------------------------------------------------------------------
+Note: (*) indicates an API change. 
+
+- CHG*: Handle reflector actions as they arrive, without waiting for a tick. 
+- CHG*: Don't record ticks in the queue. Don't tick nodes and model drivers. 
+- CHG*: Remove ticking function from model drivers. 
+
+
+----------------------------------
 0.7.0
 ----------------------------------------------------------------------------------------------------
 Note: (*) indicates an API change. 

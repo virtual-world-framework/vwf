@@ -1,0 +1,21 @@
+{
+  "source": {
+    "include":
+      ".",
+    "exclude": [
+      "node_modules",
+      "doc",
+      "test"
+    ],
+    "excludePattern":
+      "\\.bundle(\\.min)?\\.js"
+  },
+  "opts": {
+    "destination": "doc",
+    "recurse": true
+  },
+  "plugins": [
+    "plugins/commentConvert",
+    "plugins/markdown"
+  ]
+}

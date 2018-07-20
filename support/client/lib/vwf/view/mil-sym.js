@@ -14,9 +14,15 @@
 /// @module vwf/view/test
 /// @requires vwf/view
 
-define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
+define( [ "module", "vwf/view", "mil-sym/cws", "jquery" ], function( module, view, cws, $ ) {
 
     var self;
+    var eventHandlers = {};
+    var _rendererReady = false;
+    var _graphicFormats = { "KML": 0,
+                            "GeoJSON": 2,
+                            "GeoCanvas": 3,
+                            "GeoSVG": 6};
     
     return view.load( module, {
 
@@ -45,6 +51,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
             rs.setSymbologyStandard( rs.Symbology_2525C ); 
             rs.setTextOutlineWidth( 1 );
 
+            pollForFontsLoaded();
         },
 
         // createdNode: function( nodeID, childID, childExtendsID, childImplementsIDs,
@@ -95,24 +102,8 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
 
         // -- calledMethod -----------------------------------------------------------------------------
 
-        calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
-            if ( nodeID === this.kernel.application() ) {
-                var clientThatCalledMethod = this.kernel.client();
-                var me = this.kernel.moniker();
-                switch ( methodName ) {
-                    case "insertUnits":
-                        if ( clientThatCalledMethod === me ) {
-                            addInsertableUnits( methodParameters[ 0 ] );
-                        }
-                        break;
-                    case "getUnitSymbol":
-                        if ( clientThatCalledMethod === me ) {
-                            getUnitSymbol( methodParameters[ 0 ], methodParameters[ 1 ], methodParameters[ 2 ], methodParameters[ 3 ], methodParameters[ 4 ], methodParameters[ 5 ] );
-                        }
-                        break;
-                }
-            } 
-        },
+        // calledMethod: function( nodeID, methodName, methodParameters, methodValue ) {
+        // },
 
         // -- firedEvent -----------------------------------------------------------------------------
 
@@ -124,7 +115,18 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         // ticked: function() {
         // },
 
+        renderUnitSymbol: renderUnitSymbol,
+        rendererReady: rendererReady,
+        addInsertableUnits: addInsertableUnits,
+        getUpdatedUnitSymbolID: getUpdatedUnitSymbolID,
+        getMissionGraphicDefinition: getMissionGraphicDefinition,
+        renderMissionGraphic: renderMissionGraphic,
+        getDefaultSymbolFillColor: getDefaultSymbolFillColor,
+        getUnitImage: getUnitImage,
 
+        on: function( eventName, callback ) {
+            eventHandlers[ eventName ] = callback;
+        }
     } );
 
     function addInsertableUnits( units ) {
@@ -185,7 +187,7 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                             };
 
                             description = cws.description( fullName, unit.tag );
-                            actualName = cws.decode( cws.postTag( fullName, unit.tag ) ).replace( ".", " " );
+                            actualName = cws.descriptionFromSymbolId( unit.symbolID ) || cws.decode( cws.postTag( fullName, unit.tag ) ).replace( ".", " " );
 
                             unitDef = {
                                 "fullName": fullName,
@@ -195,129 +197,147 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
                                 "description": description,
                                 "tag": unit.tag,
                                 "symbolID": unit.symbolID,
-                                "image": image    
+                                "image": image,
+                                "specialModifiers": unit.specialModifiers
                             };
 
-                            self.kernel.fireEvent( appID, "insertableUnitAdded", [ unitDef ] );
+                            fireViewEvent( "insertableUnitAdded", {
+                                unit: unitDef
+                            } );
                         }
                     } else {
                         self.logger.warnx( "Unable to find: " + unitsToAdd[ i ] + " in " + battleDivision );
                     }
                 }
             }
-
-            self.kernel.fireEvent( appID, "unitLoadingComplete", [ true ] );
+            fireViewEvent( "unitLoadingComplete" );
         }    
     }
 
-    function getUnitSymbol( symbolID, affiliation, echelonID, modifierList, unit, options ) {
-        var updatedUnit = {};
+    function renderUnitSymbol( symbolID, affiliation, echelonID, modifierList, unit ) {
+        
+        if ( !cws ) {
+            self.logger.errorx( "cws is undefined - unable to render unit icon" );
+            return;
+        }
+
+        var updatedUnit = $.extend( true, {}, unit );
         var appID = self.kernel.application();
         var renderer = armyc2.c2sd.renderer;
         var msa = renderer.utilities.MilStdAttributes;
         var rs = renderer.utilities.RendererSettings;
         var symUtil = renderer.utilities.SymbolUtilities;
+        
+        // Set affiliation in unit symbol id
+        updatedUnit.symbolID = cws.addAffiliationToSymbolId( symbolID, affiliation );
+        
+        // Add echelon
+        if ( echelonID != undefined ) {          
+            updatedUnit.symbolID = cws.addEchelonToSymbolId( updatedUnit.symbolID, echelonID );
+        }
+        
+        // Define the list of valid modifiers
+        updatedUnit.validModifiers = [ "pixelSize", "iconcolor", "lineColor", "fillColor" ];
+        var aliases = Object.keys( cws.aliasModifiers );
+        for ( var i = 0; i < aliases.length; i++ ) {
+
+            var alias = aliases[ i ];
+            var modObj = cws.aliasModifiers[ alias ];
+            
+            var modifier = renderer.utilities.ModifiersUnits[ modObj.modifier ];
+            // Query mil-sym to see if this symbol has this modifier
+            if ( symUtil.hasModifier( updatedUnit.symbolID, 
+                                      modifier,
+                                      rs.getSymbologyStandard() ) ) {
+                // Add to the array of valid modifiers
+                updatedUnit.validModifiers.push( alias );
+            }
+
+        }
+        // If there is a special modifier defined for this symbol, 
+        // add it as a valid modifier
+        for ( var j = 0; j < ( updatedUnit.specialModifiers || [] ).length; j++ ) {
+            updatedUnit.validModifiers.push( updatedUnit.specialModifiers[ j ] );
+        }
+        
+        // Gather the modifiers that will be passed into the render function
         var modifiers = {};
-
-        self.logger.info(" Mil-SymJS  SymbolID before echelon and affiliation: " + symbolID );
-    
-        if ( cws ) {
-            updatedUnit = unit;
-            
-            // Set affiliation in unit symbol id
-            updatedUnit.symbolID = cws.addAffiliationToSymbolId( symbolID, affiliation );
-            
-            // Add echelon
-            if ( echelonID != undefined ) {
-                self.logger.info(" Mil-SymJS Adding Echelon: " + echelonID );            
-                updatedUnit.symbolID = cws.addEchelonToSymbolId( updatedUnit.symbolID, echelonID );
-                self.logger.info(" Mil-SymJS  SymbolID after echelon and affiliation: " + updatedUnit.symbolID );
-            }
-            
-            // Add modifiers
-            modifiers[ msa.PixelSize ] = "60";
-            for ( var prop in modifierList ) {
-                if (modifierList[prop] != undefined) {
-                    switch ( prop ) {
-                        case "pixelSize":
-                        case "PixelSize":
-                            modifiers[ msa.PixelSize ] = modifierList[ prop ];
-                            break;
-                        case "icon":
-                        case "Icon":
-                            modifiers[ msa.Icon ] = modifierList[ prop ];
-                            break;
-                        default:
-                            modifiers[ prop ] = modifierList[ prop ];
-                            break;
-                    }
-                }
-            }
-            
-            // Define the list of valid modifiers
-            updatedUnit.validModifiers = [];
-            
-            updatedUnit.validModifiers.push( "pixelSize" );
-            var aliases = Object.keys( cws.aliasModifiers );
-            for ( var i = 0; i < aliases.length; i++ ) {
-
-                var alias = aliases[ i ];
-                var modObj = cws.aliasModifiers[ alias ];
-                
-                var modifier = renderer.utilities.ModifiersUnits[ modObj.modifier ];
-                if ( symUtil.hasModifier( updatedUnit.symbolID, 
-                                          modifier,
-                                          rs.getSymbologyStandard() ) ) {
-                    // Add to the array of valid modifiers
-                    updatedUnit.validModifiers.push( alias );
-                }
-
-            }
-            
-            // Render the unit image
-            
-            // if icon == true then you'll get no modifiers
-            modifiers[ msa.Icon ] = false;
-            
-            modifiers[ msa.SymbologyStandard ] = rs.Symbology_2525C;
-            var img = renderer.MilStdIconRenderer.Render( updatedUnit.symbolID, modifiers );
-            if ( img ) {
-                var imgBounds = img.getImageBounds();
-                updatedUnit.image["selected"] = {
-                    "url": img.toDataUrl(),
-                    "width": imgBounds.width,
-                    "height": imgBounds.height
+        modifiers[ msa.PixelSize ] = "60"; // default
+        for ( var prop in modifierList ) {
+            if (modifierList[prop] != undefined) {
+                switch ( prop.toLowerCase() ) {
+                    case "pixelsize":
+                        modifiers[ msa.PixelSize ] = modifierList[ prop ];
+                        break;
+                    case "linecolor": 
+                        modifiers[ msa.LineColor ] = modifierList[ prop ];
+                        break;
+                    case "fillcolor": 
+                        modifiers[ msa.FillColor ] = modifierList[ prop ];
+                        break;
+                    case "iconcolor":
+                        modifiers[ msa.IconColor ] = modifierList[ prop ];
+                        break;
+                    case "icon":
+                        // We ignore this value - it must be "false" or we'll get no modifiers
+                        break;
+                    default:
+                        modifiers[ prop ] = modifierList[ prop ];
+                        break;
                 }
             }
         }
+        modifiers[ msa.Icon ] = false; // Override whatever value might have been passed in
+        modifiers[ msa.SymbologyStandard ] = rs.Symbology_2525C;
 
-        var unitEvent = "selectedUnitSymbolRendered";
-        if ( (options.request) && (options.unitID) ) {
-            switch ( options.request ) {
-                case "addQuickUnit":
-                    unitEvent = "quickUnitAdded";
-                    self.kernel.fireEvent( appID, unitEvent, [ options.unitID, updatedUnit ] );
-                    break;
-                case "addFavoriteUnit":
-                    unitEvent = "favoriteUnitAdded";
-                    self.kernel.fireEvent( appID, unitEvent, [ options.unitID, updatedUnit ] );
-                    break;
-                case "addRecentUnit":
-                    var unitEvent = "recentUnitAdded";
-                    self.kernel.fireEvent( appID, unitEvent, [ options.unitID, updatedUnit ] );
-                    break;
-                case "renderSelectedUnit":
-                default:
-                    // If nothing else, make this the selected unit
-                    self.kernel.fireEvent( appID, unitEvent, [ updatedUnit ] );
-                    break;
+        // Render the image
+        var img = renderer.MilStdIconRenderer.Render( updatedUnit.symbolID, modifiers );
+        if ( img ) {
+            updatedUnit.image = updatedUnit.image || {};
+            var imgBounds = img.getImageBounds();
+            updatedUnit.image.selected = {
+                "url": img.toDataUrl(),
+                "width": imgBounds.width,
+                "height": imgBounds.height,
+                "center": img.getCenterPoint()
             }
         }
-        else {
-            self.kernel.fireEvent( appID, unitEvent, [ updatedUnit ] );
-        }
+
+        return updatedUnit;
     }
     
+    function getUpdatedUnitSymbolID( symbolID, affiliation, echelonID, status, mobility ) {
+
+        if ( !cws ) {
+            self.logger.errorx( "cws is undefined - unable to render unit icon" );
+            return;
+        }
+
+        var updatedUnitSymbolID = symbolID;
+        
+        // Set affiliation in unit symbol id
+        if ( !!affiliation ) {
+            updatedUnitSymbolID = cws.addAffiliationToSymbolId( symbolID, affiliation );
+        }
+        
+        // Add echelon
+        if ( !!echelonID ) {          
+            updatedUnitSymbolID = cws.addEchelonToSymbolId( updatedUnitSymbolID, echelonID );
+        }
+
+        // Add status
+        if ( !!status ) {
+            updatedUnitSymbolID = cws.addUnitStatusToSymbolId( updatedUnitSymbolID, status );
+        }
+
+        // Add mobility
+        if ( !!mobility ) {
+            updatedUnitSymbolID = cws.addMobilityToSymbolId( updatedUnitSymbolID, mobility );
+        }
+
+        return updatedUnitSymbolID;
+    } 
+
     function getUnitImage( symbolID ) {
         var renderer = armyc2.c2sd.renderer;
         var msa = renderer.utilities.MilStdAttributes;
@@ -334,6 +354,107 @@ define( [ "module", "vwf/view", "mil-sym/cws" ], function( module, view, cws ) {
         } else {
             return "";
         }
+    }
+
+    function renderMissionGraphic( symbolID, affiliation, modifiers, controlPoints, bounds, msnGfx, format ) {
+        
+        if ( !cws ) {
+            self.logger.errorx( "cws is undefined - unable to render unit icon" );
+            return;
+        }
+
+        var rendererMP = sec.web.renderer.SECWebRenderer;
+        var scale = 100.0;
+        var appID = self.kernel.application();
+        var renderer = armyc2.c2sd.renderer;
+        var msa = renderer.utilities.MilStdAttributes;
+        var rs = renderer.utilities.RendererSettings;
+        var symUtil = renderer.utilities.SymbolUtilities;
+        var milSymControlPts = convertXYVertexArrayToMilSymControlPts( controlPoints );
+        
+        // Set affiliation in symbol id
+        symbolCode = cws.addAffiliationToSymbolId( symbolID, affiliation );
+        
+        // Convert modifiers to actual names and types
+        var actualNameModifiers = {};
+        for ( mod in modifiers ) {
+            var modObj = cws.modifierByAlias( mod );
+            var modActualName =  self.state.getModifierActualName( modObj );
+            actualNameModifiers[ modActualName ] = self.state.convertModifierValue( modObj, modifiers[ mod ] );
+        }
+
+        var img = rendererMP.RenderSymbol2D( "ID", "Name", "Description", symbolCode, milSymControlPts, bounds[0], bounds[1], null, actualNameModifiers, format );
+
+        return img;
+    }
+
+    // Take an array [x1,y1,xy,y2,...xn,yn] and convert to 
+    // mil-sym control point string "x1,y1 x2,y2 ... xn,yn"
+    function convertXYVertexArrayToMilSymControlPts( xyVertexPts ) {
+        var milSymControlPts = "";
+        // xyVertexPts is an array where even numbered elements are x and odd are y
+        // mil-sym style is a string where pairs of x and y are separated by spaces
+        for ( var i = 0; i < xyVertexPts.length; i=i+2 ) {
+            milSymControlPts = milSymControlPts + xyVertexPts[i] + "," + xyVertexPts[i+1];
+            if ( i < xyVertexPts.length-2 ) {
+                milSymControlPts = milSymControlPts + " ";
+            }
+        }
+
+        return milSymControlPts;
+    }
+
+    function getMissionGraphicDefinition( category, fullName ) {
+        var missionGraphicDef = {};
+
+        if ( !cws ) {
+            self.logger.errorx( "cws is undefined - unable to retrieve object" );
+            return;
+        }
+
+        if ( !!category && !!cws[category] ) {
+            if ( !!fullName && !!cws[category][fullName] ) {
+                missionGraphicDef = cws[category][fullName];
+            } else {
+                missionGraphicDef = cws[category];
+            }
+        }
+
+        return missionGraphicDef;
+    }
+
+    function fireViewEvent( eventName, parameters ) {
+        var eventHandler = eventHandlers[ eventName ];
+        if ( typeof eventHandler === "function" ) {
+            eventHandler( parameters );
+        }
+    }
+
+    function pollForFontsLoaded() {
+        if ( armyc2.c2sd.renderer.utilities.RendererUtilities.fontsLoaded() ) {
+            _rendererReady = true;
+            fireViewEvent( "milSymRendererReady" );
+        } else {
+            setTimeout( pollForFontsLoaded, 500 );
+        }
+    }
+
+    function rendererReady() {
+        return _rendererReady;
+    }
+
+    function getDefaultSymbolFillColor( symbolID, affiliation ) {
+          var color = '000000';                  
+
+          /* TODO: handle different color sets depending upon symbol type */
+
+          var colors = { friendly: '80E0FF',
+                         hostile:  'FF8080',
+                         neutral:  'AAFFAA',
+                         unknown:  'FFFF80' };
+          color = colors[ affiliation ];
+
+          return color;
     }
 
 } );

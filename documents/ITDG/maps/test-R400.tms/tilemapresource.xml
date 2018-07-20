@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <TileMap version="1.0.0" tilemapservice="http://tms.osgeo.org/1.0.0">
+      <Title>R400_imagery_wgs84_clipped_noalpha.tif</Title>
+      <Abstract></Abstract>
+      <SRS>EPSG:4326</SRS>
+      <BoundingBox minx="34.30000293136028" miny="-115.98798356199879" maxx="34.31708185985235" maxy="-115.97085609083929"/>
+      <Origin x="34.30000293136028" y="-115.98798356199879"/>
+      <TileFormat width="256" height="256" mime-type="image/png" extension="png"/>
+      <TileSets profile="geodetic">
+        <TileSet href="10" units-per-pixel="0.00068664550781" order="10"/>
+        <TileSet href="11" units-per-pixel="0.00034332275391" order="11"/>
+        <TileSet href="12" units-per-pixel="0.00017166137695" order="12"/>
+        <TileSet href="13" units-per-pixel="0.00008583068848" order="13"/>
+        <TileSet href="14" units-per-pixel="0.00004291534424" order="14"/>
+        <TileSet href="15" units-per-pixel="0.00002145767212" order="15"/>
+        <TileSet href="16" units-per-pixel="0.00001072883606" order="16"/>
+        <TileSet href="17" units-per-pixel="0.00000536441803" order="17"/>
+        <TileSet href="18" units-per-pixel="0.00000268220901" order="18"/>
+        <TileSet href="19" units-per-pixel="0.00000134110451" order="19"/>
+        <TileSet href="20" units-per-pixel="0.00000067055225" order="20"/>
+      </TileSets>
+    </TileMap>
+    
